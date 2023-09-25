@@ -5,6 +5,8 @@ import { HiUsers } from 'react-icons/hi'
 import { RiMessage2Fill } from 'react-icons/ri'
 import { BsCalendarEvent } from 'react-icons/bs'
 import { MdLocalPharmacy } from 'react-icons/md'
+import { FaWheelchair } from "react-icons/fa";
+import { FaClockRotateLeft, FaCodePullRequest } from "react-icons/fa6";
 
 
 export const menus = [
@@ -45,23 +47,18 @@ export const menus = [
 
 export const dashboardData = [
   {
-    label: 'Projects',
+    label: 'Patients waiting',
     number: 12,
-    // icon: <HomeIcon className="w-6 h-8" />
+    icon: <FaWheelchair className="text-xl" />
   },
   {
-    label: 'Clients',
+    label: 'Doctors on duty',
     number: 44,
-    // icon: <HomeIcon className="w-6 h-8" />
+    icon: <FaClockRotateLeft className="text-left" />
   },
   {
-    label: 'Tasks',
+    label: 'Test Requests',
     number: 37,
-    // icon: <HomeIcon className="w-6 h-8" />
+    icon: <FaCodePullRequest className="text-xl" />
   },
-  {
-    label: 'Employees',
-    number: 218,
-    // icon: <HomeIcon className="w-6 h-8" />
-  }
 ]
