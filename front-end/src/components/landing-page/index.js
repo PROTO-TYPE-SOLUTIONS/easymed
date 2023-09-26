@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "./navbar";
+import { AiFillPlayCircle } from "react-icons/ai";
 
 const LandingPage = () => {
   return (
@@ -24,8 +25,8 @@ const LandingPage = () => {
             </button>
           </div>
         </div>
-        <div className="w-5/12">
-            <p className="text-center text-white">Add Play Icon</p>
+        <div className="w-5/12 flex items-center justify-center">
+          <AiFillPlayCircle className="text-7xl" />
         </div>
       </section>
     </section>
