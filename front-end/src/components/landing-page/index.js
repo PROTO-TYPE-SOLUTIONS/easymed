@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "./navbar";
-import { AiFillPlayCircle } from "react-icons/ai";
+import LandingVideo from "./landing-video";
 
 const LandingPage = () => {
   return (
@@ -17,16 +17,16 @@ const LandingPage = () => {
             laudantium accusantium!
           </p>
           <div className="flex items-center gap-4">
-            <button className="bg-[#FF5E20] text-white px-3 py-2 rounded">
+            <button className="bg-[#FF5E20] text-white px-4 py-3">
               View Services
             </button>
-            <button className="border border-[#FF5E20] text-white px-3 py-2 rounded">
+            <button className="border border-[#FF5E20] text-white px-4 py-3">
               Book Appointment
             </button>
           </div>
         </div>
         <div className="w-5/12 flex items-center justify-center">
-          <AiFillPlayCircle className="text-7xl" />
+          <LandingVideo />
         </div>
       </section>
     </section>

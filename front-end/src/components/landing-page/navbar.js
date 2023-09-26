@@ -16,7 +16,7 @@ const Navbar = () => {
             </ul>
         </div>
         <div>
-            <button className='bg-[#FF5E20] px-3 py-2 rounded text-white'>Contact Us</button>
+            <button className='bg-[#FF5E20] px-3 py-2 text-white'>Contact Us</button>
         </div>
     </section>
   )
