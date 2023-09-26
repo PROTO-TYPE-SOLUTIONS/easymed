@@ -1,0 +1,16 @@
+asgiref==3.7.2
+attrs==23.1.0
+Django==4.2.5
+djangorestframework==3.14.0
+drf-spectacular==0.26.5
+inflection==0.5.1
+jsonschema==4.19.1
+jsonschema-specifications==2023.7.1
+pytz==2023.3.post1
+PyYAML==6.0.1
+referencing==0.30.2
+rpds-py==0.10.3
+sqlparse==0.4.4
+typing_extensions==4.8.0
+tzdata==2023.3
+uritemplate==4.1.1
