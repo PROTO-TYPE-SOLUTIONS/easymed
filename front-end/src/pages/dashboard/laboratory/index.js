@@ -1,9 +1,12 @@
 import React from 'react'
 import DashboardLayout from '@/components/layout/dashboard-layout'
+import { Container } from '@mui/material'
 
 const Laboratory = () => {
   return (
-    <div>Laboratory</div>
+    <Container maxWidth="xl">
+      <h1>Laboratory</h1>
+    </Container>
   )
 }
 

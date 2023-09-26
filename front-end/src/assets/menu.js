@@ -22,7 +22,7 @@ export const menus = [
   },
   {
     label: "Patients",
-    href: "/dashboard/patients",
+    href: "/dashboard/patient",
     icon: <HiUsers className="text-xl" />,
     permission: 'ACCESS_CLIENTS'
   },
