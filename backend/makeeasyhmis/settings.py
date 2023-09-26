@@ -30,10 +30,13 @@ INSTALLED_APPS = [
     #third party apps
     'rest_framework',
     'drf_spectacular',
+    # 'guardian',
 
     # user apps
     'patient',
     'pharmacy',
+    'customusers',
+
 ]
 
 MIDDLEWARE = [
