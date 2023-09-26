@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "./navbar";
 import LandingVideo from "./landing-video";
+import Link from "next/link";
 
 const LandingPage = () => {
   return (
@@ -20,9 +21,11 @@ const LandingPage = () => {
             <button className="bg-[#FF5E20] text-white px-4 py-3">
               View Services
             </button>
-            <button className="border border-[#FF5E20] text-white px-4 py-3">
-              Book Appointment
-            </button>
+            <Link href="/authentication/register">
+              <button className="border border-[#FF5E20] text-white px-4 py-3 transition duration-500 hover:scale-105">
+                Book Appointment
+              </button>
+            </Link>
           </div>
         </div>
         <section className="w-5/12 md:block hidden">
