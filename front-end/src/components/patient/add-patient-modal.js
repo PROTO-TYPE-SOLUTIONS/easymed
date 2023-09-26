@@ -315,20 +315,20 @@ const AddPatientModal = () => {
               </Grid>
               <Divider />
               <div>
-                  <div className="flex justify-end gap-2">
-                    <button
-                      type="submit"
-                      className="bg-[#02273D] px-4 py-2 w-full rounded text-white"
-                    >
-                      Save Patient
-                    </button>
-                    <button
-                      type="submit"
-                      className="border border-[#02273D] px-4 py-2 w-full rounded text-[#02273D]"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <button
+                    type="submit"
+                    className="bg-[#02273D] px-4 py-2 rounded text-white"
+                  >
+                    Save Patient
+                  </button>
+                  <button
+                    type="submit"
+                    className="border border-[#02273D] px-4 py-2 rounded text-[#02273D]"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </section>
           </form>
