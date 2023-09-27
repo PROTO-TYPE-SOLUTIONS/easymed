@@ -1,7 +1,7 @@
 import { Container } from "@mui/material";
 import React, { useState } from "react";
 import TopSection from "./rightbar/top-section";
-import AddPatientModal from "../patient/add-patient-modal";
+import AddPatientModal from "../dashboard/patient/add-patient-modal";
 import { AiOutlineMenu } from "react-icons/ai";
 import { Drawer } from "@/assets/drawer";
 
@@ -10,7 +10,7 @@ const Header = () => {
 
   return (
     <>
-      <section className="sticky top-0 z-50 p-2 bg-white md:bg-opacity-30 md:backdrop-filter mb-4 md:backdrop-blur-lg">
+      <section className="sticky top-0 z-50 p-2 bg-white md:bg-opacity-30 md:backdrop-filter mb-4 md:backdrop-blur-lg mb-12">
         <Container maxWidth="xl">
           <section className="flex items-center justify-between gap-4">
             <div className="md:hidden block">
