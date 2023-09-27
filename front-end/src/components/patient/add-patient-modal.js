@@ -157,7 +157,7 @@ const AddPatientModal = () => {
                 <Grid item md={4} xs={12}>
                   <DatePicker
                     size="small"
-                    label="To Date"
+                    label="Date of Birth"
                     value={formik.values.date_of_birth}
                     onChange={(date) =>
                       formik.setFieldValue("date_of_birth", date)

@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
-import { ThemeProvider } from "@mui/material";
 import { theme } from "@/styles/theme";
+import { ThemeProvider } from "@emotion/react";
 import "devextreme/dist/css/dx.material.blue.light.css";
 import "../styles/devextreme.css";
 import { LocalizationProvider } from "@mui/x-date-pickers";
