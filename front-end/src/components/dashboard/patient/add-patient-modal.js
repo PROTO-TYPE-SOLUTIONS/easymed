@@ -34,7 +34,9 @@ const AddPatientModal = () => {
     first_name: Yup.string().required("This field is required!"),
     second_name: Yup.string().required("This field is required!"),
     last_name: Yup.string().required("This field is required!"),
-    date_of_birth: Yup.date().required("This field is required!"),
+    date_of_birth: Yup.date()
+    .required("Date of Birth is required")
+    .max(new Date(), "Date of Birth cannot be in the future"),
     genderId: Yup.string().required("This field is required!"),
     telephone: Yup.string().required("This field is required!"),
     email: Yup.string().required("This field is required!"),
@@ -186,6 +188,14 @@ const AddPatientModal = () => {
                         {...params}
                         label="Gender"
                         name="genderId"
+                        onBlur={formik.handleBlur}
+                        error={
+                          formik.touched.genderId &&
+                          Boolean(formik.errors.genderId)
+                        }
+                        helperText={
+                          formik.touched.genderId && formik.errors.genderId
+                        }
                       />
                     )}
                   />
@@ -318,13 +328,14 @@ const AddPatientModal = () => {
                 <div className="flex justify-end gap-2 mt-4">
                   <button
                     type="submit"
-                    className="bg-[#02273D] px-4 py-2 rounded text-white"
+                    className="bg-[#02273D] px-4 py-2 rounded-3xl text-white"
                   >
                     Save Patient
                   </button>
                   <button
                     type="submit"
-                    className="border border-[#02273D] px-4 py-2 rounded text-[#02273D]"
+                    onClick={handleClose}
+                    className="border border-[#02273D] px-4 py-2 rounded-3xl text-[#02273D]"
                   >
                     Cancel
                   </button>
