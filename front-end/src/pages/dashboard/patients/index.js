@@ -1,4 +1,4 @@
-import PatientDataGrid from '@/components/patient/patient-data-grid'
+import PatientDataGrid from '@/components/dashboard/patient/patient-data-grid'
 import { Container } from '@mui/material'
 import React from 'react'
 import DashboardLayout from '@/components/layout/dashboard-layout'

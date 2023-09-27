@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Grid } from "@mui/material";
 import DashboardLayout from "@/components/layout/dashboard-layout";
-import PatientsDataGrid from "@/components/patient/patient-data-grid";
+import PatientsDataGrid from "@/components/dashboard/patient/patient-data-grid";
 import { dashboardData } from "@/assets/menu";
 
 const Dashboard = () => {
