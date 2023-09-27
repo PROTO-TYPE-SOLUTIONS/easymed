@@ -97,7 +97,6 @@ const PatientsDataGrid = () => {
           className="border rounded border-gray-400 py-3 px-2 focus:outline-none"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
-          fullWidth
           placeholder="Search..."
         />
       </div>

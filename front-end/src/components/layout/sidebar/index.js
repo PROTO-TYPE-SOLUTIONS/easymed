@@ -3,12 +3,10 @@ import { AiFillLock, AiOutlineQuestionCircle } from "react-icons/ai";
 import { BsFillExclamationCircleFill } from "react-icons/bs";
 import { IoMdSettings } from "react-icons/io";
 import { menus } from "@/assets/menu";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import MenuChild  from "./menu-children";
 
 const Sidebar = () => {
-  const router = useRouter();
-  const currentPath = router.pathname;
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <>
@@ -16,27 +14,11 @@ const Sidebar = () => {
         <header className="h-[10vh] shadow flex items-center justify-center font-bold">
           <h1>Logo</h1>
         </header>
-        <section className="my-4 p-4 h-[84vh] flex flex-col justify-between">
-          <div>
-            <ul className="space-y-4 mb-4 overflow-y-auto">
+        <section className="p-4 h-[84vh] flex flex-col justify-between">
+          <div className="h-3/14 overflow-x-auto">
+            <ul className="space-y-4 my-4 ">
               {menus.map((menu, index) => (
-                <li key={index}>
-                  <>
-                    <Link
-                      href={menu.href}
-                      className={`flex items-center text-sm justify-between py-2 px-2 cursor-pointer ${
-                        currentPath === menu.href
-                          ? "text-[#02787B] font-semibold"
-                          : ""
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-6">{menu.icon}</span>{" "}
-                        <span>{menu.label}</span>
-                      </div>
-                    </Link>
-                  </>
-                </li>
+                <MenuChild key={index} {...{ index, menu, collapsed }} />
               ))}
             </ul>
           </div>

@@ -78,7 +78,7 @@ const LaboratoryDataGrid = () => {
               Search by Month
             </option>
             {months.map((month, index) => (
-              <option value="">{month.name}</option>
+              <option key={index} value="">{month.name}</option>
             ))}
           </select>
         </Grid>
