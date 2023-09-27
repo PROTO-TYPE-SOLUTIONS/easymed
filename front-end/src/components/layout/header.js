@@ -4,6 +4,7 @@ import TopSection from "./rightbar/top-section";
 import AddPatientModal from "../dashboard/patient/add-patient-modal";
 import { AiOutlineMenu } from "react-icons/ai";
 import { Drawer } from "@/assets/drawer";
+import ReferPatientModal from "../dashboard/patient/refer-patient-modal";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,9 +25,7 @@ const Header = () => {
               <div className="md:block hidden">
                 <AddPatientModal />
               </div>
-              <button className="md:block hidden border-2 border-gray-300 rounded px-2 py-2 text-sm">
-                Refer Patient
-              </button>
+              <ReferPatientModal />
               <button className="md:block hidden border-2 border-gray-300 rounded px-2 py-2 text-sm">
                 View Referrals
               </button>
