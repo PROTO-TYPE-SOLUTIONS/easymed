@@ -121,7 +121,7 @@ const LaboratoryDataGrid = () => {
         />
         <Column dataField="number" caption="NO" width={80} />
         <Column dataField="id_number" caption="ID" width={140} />
-        <Column dataField="name" caption="Name" width={200} />
+        <Column dataField="name" caption="Name" width={140} />
         <Column
           dataField="age"
           caption="Age"
