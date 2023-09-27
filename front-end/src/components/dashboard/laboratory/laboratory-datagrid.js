@@ -1,22 +1,60 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
-import { labData } from "@/assets/dummy-data/laboratory";
+import { labData, months } from "@/assets/dummy-data/laboratory";
 import { Grid } from "@mui/material";
+import { LuMoreHorizontal } from "react-icons/lu";
+import { AiFillDelete,AiOutlineDownload,AiFillPrinter } from 'react-icons/ai';
+import CmtDropdownMenu from "@/assets/DropdownMenu";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const getActions = () => {
+  let actions = [{ action: "download", label: "Download", icon: <AiOutlineDownload className="text-blue-400 text-xl" /> }];
+
+  actions.push({ action: "print", label: "Print", icon: <AiFillPrinter className="text-xl" /> });
+
+  actions.push({ action: "delete", label: "Delete", icon: <AiFillDelete className="text-red-700 text-xl" /> });
+  return actions;
+};
+
+
 const LaboratoryDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const userActions = getActions();
 
-  //   filter users based on search query
+  //   FILTER PATIENTS BASED ON SEARCH QUERY
   const filteredData = labData.filter((patient) => {
     return patient?.name
       ?.toLocaleLowerCase()
       .includes(searchQuery.toLowerCase());
   });
+
+
+  const onMenuClick = async (menu, data) => {
+   if (menu.action === "delete") {
+    //   delete api call
+    }else if(menu.action === 'download'){
+        // download function
+    }else if(menu.action === 'print'){
+        // print function
+    }
+  };
+
+  const actionsFunc = ({ data }) => {
+    return (
+      <>
+        <CmtDropdownMenu
+        sx={{ cursor: "pointer" }}
+        items={userActions}
+        onItemClick={(menu) => onMenuClick(menu, data)}
+        TriggerComponent={<LuMoreHorizontal className="cursor-pointer text-xl" />}
+      />
+      </>
+    );
+  };
 
   return (
     <>
@@ -39,18 +77,9 @@ const LaboratoryDataGrid = () => {
             <option value="" selected>
               Search by Month
             </option>
-            <option value="">January</option>
-            <option value="">February</option>
-            <option value="">March</option>
-            <option value="">April</option>
-            <option value="">May</option>
-            <option value="">June</option>
-            <option value="">July</option>
-            <option value="">August</option>
-            <option value="">September</option>
-            <option value="">October</option>
-            <option value="">November</option>
-            <option value="">December</option>
+            {months.map((month, index) => (
+              <option value="">{month.name}</option>
+            ))}
           </select>
         </Grid>
         <Grid item md={4} xs={12}>
@@ -67,6 +96,8 @@ const LaboratoryDataGrid = () => {
           </div>
         </Grid>
       </Grid>
+
+      {/* DATAGRID STARTS HERE */}
       <DataGrid
         dataSource={filteredData}
         allowColumnReordering={true}
@@ -100,7 +131,12 @@ const LaboratoryDataGrid = () => {
         />
         <Column dataField="test" caption="Test" width={140} />
         <Column dataField="gender" caption="Gender" width={100} />
-        <Column dataField="number" caption="Action" width={80} />
+        <Column
+          dataField="number"
+          caption="Action"
+          width={80}
+          cellRender={actionsFunc}
+        />
       </DataGrid>
     </>
   );
