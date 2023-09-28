@@ -25,6 +25,6 @@ python manage.py runserver
 
 API Endpoints:
 ```
-api/v1/schema/redoc/
-api/v1/schema/swagger-ui/
+api/v1/docs/
+api/v1/docs/swagger/
 ```
