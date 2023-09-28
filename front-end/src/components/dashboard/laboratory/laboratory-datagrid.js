@@ -84,13 +84,13 @@ const LaboratoryDataGrid = () => {
         </Grid>
         <Grid item md={4} xs={12}>
           <div className="flex">
-            <button className="border border-primary py-2 px-4 rounded-l-xl w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 rounded-l-xl w-full">
               Date
             </button>
-            <button className="border border-primary py-2 px-4 w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 w-full">
               Week
             </button>
-            <button className="border border-primary py-2 px-4 rounded-r-xl w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 rounded-r-xl w-full">
               Month
             </button>
           </div>
