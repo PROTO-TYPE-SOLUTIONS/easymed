@@ -10,7 +10,7 @@ const Dashboard = () => {
       <Grid container spacing={1} className="my-8">
         {dashboardData.map((data, index) => (
           <Grid key={index} item md={4} xs={12}>
-            <section className="border-2 border-gray-300 rounded-xl px-4 py-3 h-20 flex items-center justify-center gap-4">
+            <section className=" bg-white shadow-xl border-primary rounded-xl px-4 py-3 h-20 flex items-center justify-center gap-4">
               <div>
                 {data?.icon}
               </div>

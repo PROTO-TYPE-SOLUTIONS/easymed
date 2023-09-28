@@ -36,7 +36,7 @@ const MenuChild = ({ collapsed, menu, index }) => {
       ) : (
         <>
           <Link
-            className={`${currentPath === menu.href ? 'text-[#02787B] font-semibold' : ''} flex text-sm items-center gap-2 hover:bg-yellow hover:text-black rounded py-2 px-2`}
+            className={`${currentPath === menu.href ? 'text-primary font-semibold' : ''} flex text-sm items-center gap-2 hover:bg-yellow hover:text-black rounded py-2 px-2`}
             href={menu.href}
           >
             <span className="w-6">{menu.icon}</span>{" "}
@@ -49,7 +49,7 @@ const MenuChild = ({ collapsed, menu, index }) => {
           {menu?.children?.map((child, index) => (
             <li key={index} className="px-8 text-sm">
               <Link
-                className={`${currentPath === child.href ? 'text-[#02787B] font-semibold py-2' : 'py-2'} flex items-center gap-2`}
+                className={`${currentPath === child.href ? 'text-primary font-semibold py-2' : 'py-2'} flex items-center gap-2`}
                 href={child.href}
               >
                 <span className="text-sm">{child.icon}</span>{" "}
