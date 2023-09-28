@@ -94,7 +94,7 @@ const PatientsDataGrid = () => {
       <div className="flex items-center justify-between mb-2">
         <h1 className="uppercase font-semibold">Patients</h1>
         <input
-          className="border rounded border-gray-400 py-3 px-2 focus:outline-none"
+          className="rounded border-primary py-3 px-2 focus:outline-none"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
           placeholder="Search..."
@@ -110,7 +110,8 @@ const PatientsDataGrid = () => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
-        // height={"60vh"}
+        className="shadow-xl"
+        height={"70vh"}
       >
         <Pager
           visible={true}

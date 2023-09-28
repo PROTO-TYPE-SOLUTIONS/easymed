@@ -61,7 +61,7 @@ const LaboratoryDataGrid = () => {
       <Grid container spacing={2} className="my-2">
         <Grid item md={4} xs={12}>
           <input
-            className="border rounded border-gray-400 py-2 w-full px-2 focus:outline-none placeholder-font font-thin text-sm"
+            className="rounded py-3 w-full px-2 focus:outline-none placeholder-font font-thin text-sm"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
@@ -70,7 +70,7 @@ const LaboratoryDataGrid = () => {
         </Grid>
         <Grid item md={4} xs={12}>
           <select
-            className="border border-gray-400 rounded px-4 w-full py-2 focus:outline-none"
+            className="rounded px-4 w-full py-3 focus:outline-none"
             name=""
             id=""
           >
@@ -84,13 +84,13 @@ const LaboratoryDataGrid = () => {
         </Grid>
         <Grid item md={4} xs={12}>
           <div className="flex">
-            <button className="border border-gray-400 py-2 px-4 rounded-l w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 rounded-l-xl w-full">
               Date
             </button>
-            <button className="border border-gray-400 py-2 px-4 w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 w-full">
               Week
             </button>
-            <button className="border border-gray-400 py-2 px-4 rounded-r w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 rounded-r-xl w-full">
               Month
             </button>
           </div>

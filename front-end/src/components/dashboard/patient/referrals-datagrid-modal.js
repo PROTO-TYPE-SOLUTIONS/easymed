@@ -99,7 +99,7 @@ const ReferralsDataGridModal = () => {
     <section>
       <button
         onClick={handleClickOpen}
-        className="md:block hidden border-2 border-gray-300 rounded px-2 py-2 text-sm"
+        className="md:block hidden border border-primary rounded px-2 py-2 text-sm"
       >
         View Referrals
       </button>

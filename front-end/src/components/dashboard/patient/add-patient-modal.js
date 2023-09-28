@@ -80,7 +80,7 @@ const AddPatientModal = () => {
     <section>
       <button
         onClick={handleClickOpen}
-        className="bg-[#02273D] text-white rounded px-2 py-2 text-sm shadow-2xl"
+        className="bg-primary text-white rounded px-2 py-2 text-sm"
       >
         Add Patient
       </button>
