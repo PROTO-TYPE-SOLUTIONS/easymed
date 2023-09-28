@@ -17,8 +17,6 @@ class Purchase(models.Model):
     quantity = models.PositiveIntegerField()
 
 class Sale(models.Model):
-    # circular import error
-    # patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     sale_date = models.DateField()
     item = models.ForeignKey('Item', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()

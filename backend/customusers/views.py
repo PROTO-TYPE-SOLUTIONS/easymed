@@ -5,43 +5,30 @@ from django.urls import reverse
 from .models import *
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-
-from .serializers import *
-
-from rest_framework import generics, status
+from rest_framework import generics, permissions
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomUserSerializer, CustomUserRegistrationSerializer, CustomUserLoginSerializer
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-class CustomUserList(generics.ListCreateAPIView):
+class RegistrationAPIView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = CustomUserRegistrationSerializer
 
+class LoginAPIView(TokenObtainPairView):
+    serializer_class = CustomUserLoginSerializer
 
-class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
 
-class DoctorProfileList(generics.ListCreateAPIView):
-    queryset = DoctorProfile.objects.all()
-    serializer_class = DoctorProfileSerializer
-    permission_classes = [IsAuthenticated]
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)    
 
-class DoctorProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = DoctorProfile.objects.all()
-    serializer_class = DoctorProfileSerializer
-    permission_classes = [IsAuthenticated]
-
-# Create similar views for NurseProfile, SysadminProfile, and LabTechProfile
-
-# @permission_required('customusers.can_create_user', raise_exception=True)
-class CreateUser(generics.CreateAPIView):
-    serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
-
-    def create(self, request, *args, **kwargs):
-        # Check if the user has 'sysadmin' permission
-        if not request.user.has_perm('auth.add_user'):
-            return Response({'detail': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-
-        return super().create(request, *args, **kwargs)

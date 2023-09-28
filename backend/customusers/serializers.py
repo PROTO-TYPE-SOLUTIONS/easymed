@@ -1,28 +1,45 @@
-# serializers.py
 from rest_framework import serializers
-from .models import CustomUser, DoctorProfile, NurseProfile, SysadminProfile, LabTechProfile
+from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
+from .models import CustomUser
+
+User = get_user_model()
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined')
+        fields = ('id', 'email', 'first_name', 'last_name', 'role')
 
-class DoctorProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DoctorProfile
-        fields = '__all__'
+class CustomUserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
 
-class NurseProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = NurseProfile
-        fields = '__all__'
+        model = CustomUser
+        fields = ('email', 'password', 'first_name', 'last_name', 'role')
 
-class SysadminProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SysadminProfile
-        fields = '__all__'
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            role=validated_data['role']
+        )
+        return user
 
-class LabTechProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LabTechProfile
-        fields = '__all__'
+class CustomUserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        user = authenticate(request=self.context.get('request'), email=email, password=password)
+
+        if not user:
+            raise serializers.ValidationError("Invalid email or password.")
+
+        return {
+            'user': user
+        }
