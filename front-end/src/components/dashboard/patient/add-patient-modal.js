@@ -8,6 +8,7 @@ import { TextField, Autocomplete, Grid } from "@mui/material";
 import { getAutoCompleteValue } from "@/assets/file-helper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
+
 const AddPatientModal = () => {
   const [open, setOpen] = React.useState(false);
 
@@ -80,7 +81,7 @@ const AddPatientModal = () => {
     <section>
       <button
         onClick={handleClickOpen}
-        className="bg-primary text-white rounded px-2 py-2 text-sm"
+        className="bg-primary text-white text-sm rounded px-3 py-2 flex items-center gap-4"
       >
         Add Patient
       </button>

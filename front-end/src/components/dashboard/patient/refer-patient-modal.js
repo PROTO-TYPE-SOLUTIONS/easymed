@@ -75,7 +75,7 @@ const ReferPatientModal = () => {
     <section>
       <button
         onClick={handleClickOpen}
-        className="md:block hidden border border-primary rounded px-2 py-2 text-sm"
+        className="md:block hidden border bg-primary text-white rounded px-4 py-2 text-sm mb-2"
       >
         Refer Patient
       </button>

@@ -3,7 +3,7 @@ import Sidebar from "./sidebar";
 import Header from "./header";
 
 
-const ReferralLayout = ({ children }) => {
+const CustomizedLayout = ({ children }) => {
   return (
     <div className="md:flex gap-2 h-screen overflow-hidden sm:p-4 bg-background">
       <div className="w-52 bg-white shadow-xl rounded-xl md:block hidden">
@@ -18,4 +18,4 @@ const ReferralLayout = ({ children }) => {
   );
 };
 
-export default ReferralLayout;
+export default CustomizedLayout;

@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import ReferralLayout from '@/components/layout/referral-layout'
+import ReferralLayout from '@/components/layout/customized-layout'
 import { Container } from '@mui/material'
 import AllReferralsDataGrid from '@/components/dashboard/patient/all-referrals-datagrid'
 import ReferredReferralsDatagrid from '@/components/dashboard/patient/referred-referrals-datagrid'
 import ViewedReferralsDatagrid from '@/components/dashboard/patient/viewed-referrals-datagrid'
 import CompletedReferralsDatagrid from '@/components/dashboard/patient/completed-referrals-datagrid'
+import ReferPatientModal from '@/components/dashboard/patient/refer-patient-modal'
 
 
 const Referrals = () => {
@@ -26,6 +27,9 @@ const Referrals = () => {
           <button className={`${currentTab === 3 ? 'bg-primary text-white' : 'bg-white'} rounded-3xl shadow-2xl py-2 px-8`} onClick={() => setCurrentTab(3)}>Completed</button>
         </div>
       </section>
+      <div>
+        <ReferPatientModal />
+      </div>
       {currentTab === 0 && <AllReferralsDataGrid /> }
       {currentTab === 1 && <ReferredReferralsDatagrid /> }
       {currentTab === 2 && <ViewedReferralsDatagrid /> }

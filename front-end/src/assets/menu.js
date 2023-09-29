@@ -7,6 +7,8 @@ import { BsCalendarEvent } from "react-icons/bs";
 import { MdLocalPharmacy } from "react-icons/md";
 import { FaWheelchair } from "react-icons/fa";
 import { FaClockRotateLeft, FaCodePullRequest } from "react-icons/fa6";
+import { GrAdd } from 'react-icons/gr'
+import { BsEyeFill } from 'react-icons/bs'
 
 export const menus = [
   {
@@ -25,14 +27,14 @@ export const menus = [
     icon: <HiUsers className="text-xl" />,
     children: [
       {
-        label: "View Referrals",
-        href: "/dashboard/patients/referrals",
-        icon: <HiUsers className="" />,
+        label: "Add Patient",
+        href: "/dashboard/patients",
+        icon: <GrAdd className="" />,
       },
       {
-        label: "Add Referral",
+        label: "Refer Patient",
         href: "/dashboard/patients/referrals",
-        icon: <HiUsers className="" />,
+        icon: <FaWheelchair className="" />,
       },
     ],
   },

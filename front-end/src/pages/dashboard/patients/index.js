@@ -1,7 +1,7 @@
 import PatientDataGrid from '@/components/dashboard/patient/patient-data-grid'
 import { Container } from '@mui/material'
 import React from 'react'
-import DashboardLayout from '@/components/layout/dashboard-layout'
+import CustomizedLayout from '@/components/layout/customized-layout'
 
 const Patient = () => {
   return (
@@ -12,7 +12,7 @@ const Patient = () => {
 }
 
 Patient.getLayout = (page) => (
-  <DashboardLayout>{page}</DashboardLayout>
+  <CustomizedLayout>{page}</CustomizedLayout>
 )
 
 export default Patient
