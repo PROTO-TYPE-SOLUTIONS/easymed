@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchUserPermissions } from "../../services/auth";
+import { fetchUserPermissions } from "@/redux/service/auth";
 
 
 const initialState = {
