@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import { authContext } from "@/components/use-context";
 
 const Login = () => {
+  const { loginUser } = useContext(authContext)
   const initialValues = {
     email: "",
     password: "",
@@ -22,14 +24,15 @@ const Login = () => {
       .required("Password is required!"),
   });
 
-  const handleLogin = async (formValue, helpers) => {
+  const handleLogin = async (formValue,helpers) => {
     try {
-      //   await CreateEmployee(formValue).then(() => {
-      //     helpers.resetForm();
-      //     toast.success("Employee created successfully");
-      //   });
+      setLoading(true);
+      await loginUser(formValue.email, formValue.password).then(() => {
+        helpers.resetForm();
+        setLoading(false);
+      });
     } catch (err) {
-      console.log("EMPLOYEE_ERROR ", err);
+      console.log("LOGIN_ERROR ", err);
     }
   };
 
