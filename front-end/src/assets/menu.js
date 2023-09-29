@@ -25,7 +25,12 @@ export const menus = [
     icon: <HiUsers className="text-xl" />,
     children: [
       {
-        label: "Referrals",
+        label: "View Referrals",
+        href: "/dashboard/patients/referrals",
+        icon: <HiUsers className="" />,
+      },
+      {
+        label: "Add Referral",
         href: "/dashboard/patients/referrals",
         icon: <HiUsers className="" />,
       },

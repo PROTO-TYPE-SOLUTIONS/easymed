@@ -2,7 +2,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
-import { Grid } from "@mui/material";
+import { Grid,Chip } from "@mui/material";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { AiFillDelete,AiOutlineDownload,AiFillPrinter } from 'react-icons/ai';
 import CmtDropdownMenu from "@/assets/DropdownMenu";
@@ -55,6 +55,21 @@ const LaboratoryDataGrid = () => {
       </>
     );
   };
+
+
+  const priorityFunc = ({ data }) => {
+    if (data?.priority === "Priority") {
+      return (
+        <div className="flex items-center gap-2">
+          <p>{data?.name}</p>
+          <Chip variant="contained" size="small" style={{ backgroundColor: "#FC4B1B",color:'white' }} label={data?.priority} />
+        </div>
+      );
+    }else{
+        return <p>{data?.name}</p>
+    }
+  };
+
 
   return (
     <>
@@ -121,7 +136,7 @@ const LaboratoryDataGrid = () => {
         />
         <Column dataField="number" caption="NO" width={80} />
         <Column dataField="id_number" caption="ID" width={140} />
-        <Column dataField="name" caption="Name" width={140} />
+        <Column dataField="name" caption="Name" width={140} cellRender={priorityFunc} />
         <Column
           dataField="age"
           caption="Age"
