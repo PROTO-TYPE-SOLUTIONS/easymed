@@ -91,11 +91,6 @@ const Login = () => {
             </div>
           </div>
         </section>
-        {/* <img
-          className="h-[90vh] w-9/12 object-cover rounded-3xl"
-          src="/images/dart.jpg"
-          alt=""
-        /> */}
       </div>
     </section>
   );
