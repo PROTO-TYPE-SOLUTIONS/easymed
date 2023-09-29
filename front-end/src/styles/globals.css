@@ -50,3 +50,25 @@
   mix-blend-mode: multiply;
   z-index: -1;
 }
+
+.loginPage {
+  background: url("/images/dart.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
+  height: 90vh;
+}
+.loginPage::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background-color: black; */
+  /* opacity: 0.3; */
+  z-index: -1;
+  border-radius: '20px'
+}
