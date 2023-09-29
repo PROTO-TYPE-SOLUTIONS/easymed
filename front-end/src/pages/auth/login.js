@@ -82,9 +82,9 @@ const Login = () => {
       <div className="w-1/2">
         <section className="loginPage rounded-3xl w-9/12 flex items-center justify-center h-[90vh] p-4">
           <div className="bg-white text-white rounded p-4 md:bg-opacity-0 md:backdrop-filter md:backdrop-blur-lg">
-            <div className="space-y-8">
-              <h1 className="text-2xl font-bold">Welcome Back</h1>
-              <p className="text-sm">
+            <div className="space-y-4">
+              <h1 className="text-2xl text-center">Welcome Back</h1>
+              <p className="text-sm text-center">
                 If you forgot your password, please contact your system
                 administrator for a password reset
               </p>
