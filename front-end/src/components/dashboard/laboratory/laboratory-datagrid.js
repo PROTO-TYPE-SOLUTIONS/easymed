@@ -62,7 +62,7 @@ const LaboratoryDataGrid = () => {
       return (
         <div className="flex items-center gap-2">
           <p>{data?.name}</p>
-          <Chip variant="contained" size="small" style={{ backgroundColor: "#FC4B1B",color:'white' }} label={data?.priority} />
+          <Chip variant="outlined" size="small" style={{ borderColor: "#FC4B1B" }} label={data?.priority} />
         </div>
       );
     }else{
@@ -136,7 +136,7 @@ const LaboratoryDataGrid = () => {
         />
         <Column dataField="number" caption="NO" width={80} />
         <Column dataField="id_number" caption="ID" width={140} />
-        <Column dataField="name" caption="Name" width={140} cellRender={priorityFunc} />
+        <Column dataField="name" caption="Name" width={200} cellRender={priorityFunc} />
         <Column
           dataField="age"
           caption="Age"
