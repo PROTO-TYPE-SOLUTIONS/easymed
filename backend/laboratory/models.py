@@ -1,7 +1,8 @@
 from django.db import models
-from inventory.models import Sale
+from inventory.models import Sale_Order
 from patient.models import Patient
 from django.conf import settings
+from customusers.models import CustomUser
 
 class LabReagent(models.Model):
     name = models.CharField(max_length=255)
@@ -9,7 +10,7 @@ class LabReagent(models.Model):
     cas_number = models.CharField(max_length=255)
     molecular_weight = models.DecimalField(max_digits=10, decimal_places=2)
     purity = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_id =  models.ForeignKey(Sale, on_delete=models.CASCADE)
+    sale_id =  models.ForeignKey(Sale_Order, on_delete=models.CASCADE)
     
 
     def __str__(self):
@@ -17,10 +18,8 @@ class LabReagent(models.Model):
     
 
 class PatientIdentifier(models.Model):
-    idpatient_identifier = models.AutoField(primary_key=True)
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     lab_number = models.CharField(max_length=45)
-    cost = models.CharField(max_length=45)
 
     def __str__(self):
         return f"Patient Identifier #{self.idpatient_identifier}"    
@@ -41,18 +40,19 @@ class LabTest(models.Model):
     test_element = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        CustomUser,
         on_delete=models.SET_NULL,
         null=True,
         editable=False
     )
     cost = models.CharField(max_length=45)
-    sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE)
+    sale_id = models.ForeignKey(Sale_Order, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"LabResult {self.id}: {self.title} - {self.patient_name}" 
 
 class LabTestCategory(models.Model):
-    name = models.CharField(max_length=45)
+    category = models.CharField(max_length=45)
+
     def __str__(self):
         return f"LabResult {self.id}: {self.title} - {self.patient_name}"          

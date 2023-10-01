@@ -1,10 +1,24 @@
-from django.urls import path
-from .views import *
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import (
+    InsuranceCompanyViewSet,
+    ContactDetailsViewSet,
+    PatientViewSet,
+    NextOfKinViewSet,
+    AppointmentViewSet,
+    PrescriptionViewSet,
+    PrescribedDrugViewSet,
+)
 
+router = DefaultRouter()
+router.register(r'insurance-companies', InsuranceCompanyViewSet)
+router.register(r'contact-details', ContactDetailsViewSet)
+router.register(r'patients', PatientViewSet)
+router.register(r'next-of-kin', NextOfKinViewSet)
+router.register(r'appointments', AppointmentViewSet)
+router.register(r'prescriptions', PrescriptionViewSet)
+router.register(r'prescribed-drugs', PrescribedDrugViewSet)
 
 urlpatterns = [
-    path('patients/', PatientsList.as_view(), name='patients-list'),
-    path('appointments/', AppointmentListCreateView.as_view(), name='appointment-list-create'),
-    path('appointments/<int:pk>/', AppointmentRetrieveUpdateView.as_view(), name='appointment-detail'),
-    # path('drugs/<str:pk>/', DrugDetailView.as_view(), name='drugs-detail'),
+    path('', include(router.urls)),
 ]

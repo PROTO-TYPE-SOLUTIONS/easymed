@@ -44,8 +44,8 @@ static/
 *.pyc
 __pycache__/
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
+# db.sqlite3
+# db.sqlite3-journal
 # media
 organizers
 .vscode

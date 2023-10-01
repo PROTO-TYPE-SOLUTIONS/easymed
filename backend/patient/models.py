@@ -4,6 +4,9 @@ from pharmacy.models import Drug
 
 class InsuranceCompany(models.Model):
     name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.name
     
 class ContactDetails(models.Model):
     tel_no = models.IntegerField()
@@ -16,11 +19,14 @@ class Patient(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    firts_name = models.CharField(max_length=40)
+    first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     insurance = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.first_name
 
 
 class NextOfKin(models.Model):
@@ -37,22 +43,18 @@ class Appointment(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
     )
-    appointment_date = models.DateTimeField()
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    assigned_doctor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
-    idappointment = models.AutoField(primary_key=True)
-    user_id = models.CharField(max_length=45)
-    doctor_id = models.CharField(max_length=45)
+
     appointment_date_time = models.DateTimeField()
+    patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
+    assigned_doctor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    reason = models.CharField(max_length=45)
-    date_created = models.CharField(max_length=45)
-    date_changed = models.CharField(max_length=45)
-    changed_by = models.CharField(max_length=45)
+    reason = models.TextField(max_length=300)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_changed = models.DateTimeField(auto_now=True)
+    # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"Appointment #{self.idappointment}"
-
+        return f"Appointment #{self.pk}"
 
 class Prescription(models.Model):
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)

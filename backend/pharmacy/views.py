@@ -1,14 +1,7 @@
-from django.shortcuts import render
-from rest_framework import generics, permissions
-from .models import *
-from .serializers import DrugsListSerializer
+from rest_framework import viewsets
+from .models import Drug
+from .serializers import DrugSerializer
 
-
-class DrugsList(generics.ListCreateAPIView):
+class DrugViewSet(viewsets.ModelViewSet):
     queryset = Drug.objects.all()
-    serializer_class = DrugsListSerializer
-    
-
-# class DrugDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Drug.objects.all()
-#     serializer_class = DrugDetailsSerializer
+    serializer_class = DrugSerializer
