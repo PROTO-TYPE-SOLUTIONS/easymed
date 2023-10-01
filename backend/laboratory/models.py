@@ -1,5 +1,5 @@
 from django.db import models
-from inventory.models import Sale
+from inventory.models import Sale_Order
 from patient.models import Patient
 from django.conf import settings
 from customusers.models import CustomUser
@@ -10,7 +10,7 @@ class LabReagent(models.Model):
     cas_number = models.CharField(max_length=255)
     molecular_weight = models.DecimalField(max_digits=10, decimal_places=2)
     purity = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_id =  models.ForeignKey(Sale, on_delete=models.CASCADE)
+    sale_id =  models.ForeignKey(Sale_Order, on_delete=models.CASCADE)
     
 
     def __str__(self):
@@ -46,7 +46,7 @@ class LabTest(models.Model):
         editable=False
     )
     cost = models.CharField(max_length=45)
-    sale_id = models.ForeignKey(Sale, on_delete=models.CASCADE)
+    sale_id = models.ForeignKey(Sale_Order, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"LabResult {self.id}: {self.title} - {self.patient_name}" 
