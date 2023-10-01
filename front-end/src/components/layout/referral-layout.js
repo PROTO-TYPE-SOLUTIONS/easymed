@@ -5,8 +5,8 @@ import Header from "./header";
 
 const ReferralLayout = ({ children }) => {
   return (
-    <div className="md:flex gap-4 h-screen overflow-hidden sm:p-4">
-      <div className="w-52 border-2 border-gray-400 rounded-xl md:block hidden">
+    <div className="md:flex gap-2 h-screen overflow-hidden sm:p-4 bg-background">
+      <div className="w-52 bg-white shadow-xl rounded-xl md:block hidden">
         <Sidebar />
       </div>
 
