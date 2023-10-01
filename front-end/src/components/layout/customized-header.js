@@ -7,7 +7,7 @@ import { Drawer } from "@/assets/drawer";
 import ReferPatientModal from "../dashboard/patient/refer-patient-modal";
 import Link from "next/link";
 
-const Header = () => {
+const CustomizedHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -37,6 +37,9 @@ const Header = () => {
                 </Link>
               </div>
             </div>
+            <div className="md:block hidden">
+              <TopSection />
+            </div>
             <div className="md:hidden block">
               <TopSection />
             </div>
@@ -47,4 +50,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default CustomizedHeader;

@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import { authContext } from "@/components/use-context";
 
 const Login = () => {
+  const { loginUser } = useContext(authContext)
   const initialValues = {
     email: "",
     password: "",
@@ -22,14 +24,15 @@ const Login = () => {
       .required("Password is required!"),
   });
 
-  const handleLogin = async (formValue, helpers) => {
+  const handleLogin = async (formValue,helpers) => {
     try {
-      //   await CreateEmployee(formValue).then(() => {
-      //     helpers.resetForm();
-      //     toast.success("Employee created successfully");
-      //   });
+      setLoading(true);
+      await loginUser(formValue.email, formValue.password).then(() => {
+        helpers.resetForm();
+        setLoading(false);
+      });
     } catch (err) {
-      console.log("EMPLOYEE_ERROR ", err);
+      console.log("LOGIN_ERROR ", err);
     }
   };
 
@@ -82,20 +85,15 @@ const Login = () => {
       <div className="w-1/2">
         <section className="loginPage rounded-3xl w-9/12 flex items-center justify-center h-[90vh] p-4">
           <div className="bg-white text-white rounded p-4 md:bg-opacity-0 md:backdrop-filter md:backdrop-blur-lg">
-            <div className="space-y-8">
-              <h1 className="text-2xl font-bold">Welcome Back</h1>
-              <p className="text-sm">
+            <div className="space-y-4">
+              <h1 className="text-2xl text-center">Welcome Back</h1>
+              <p className="text-sm text-center">
                 If you forgot your password, please contact your system
                 administrator for a password reset
               </p>
             </div>
           </div>
         </section>
-        {/* <img
-          className="h-[90vh] w-9/12 object-cover rounded-3xl"
-          src="/images/dart.jpg"
-          alt=""
-        /> */}
       </div>
     </section>
   );
