@@ -26,7 +26,7 @@ class Drug(models.Model):
     quantity_in_stock = models.PositiveIntegerField()
     expiration_date = models.DateField()
 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if not self.created_by_id:
