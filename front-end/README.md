@@ -4,8 +4,8 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 #### First, create a .env.local file in the same directory as the src folder then add the following:
 
-NEXT_PUBLIC_BASE_URL=""
-NEXT_PUBLIC_ENCRYPTION_KEY="c2FubGFta2VueWFAZ21haWwuY29t"
+* NEXT_PUBLIC_BASE_URL=""
+* NEXT_PUBLIC_ENCRYPTION_KEY="c2FubGFta2VueWFAZ21haWwuY29t"
 
 ###### Include your base_url in the field above then use the above encryption key
 
