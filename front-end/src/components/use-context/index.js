@@ -5,7 +5,7 @@ import axios from "axios";
 import jwtDecode from "jwt-decode";
 import SimpleCrypto from "simple-crypto-js";
 import { useDispatch } from "react-redux";
-import { getAllUserPermissions } from "@/redux/service/auth";
+import { getAllUserPermissions } from "@/redux/features/auth";
 
 export const authContext = createContext();
 
