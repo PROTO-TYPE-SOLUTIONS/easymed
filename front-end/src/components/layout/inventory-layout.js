@@ -1,7 +1,7 @@
-import React, { useState, ReactNode } from "react";
+import React from "react";
 import Sidebar from "./sidebar";
-import RightBar from "./rightbar";
 import Header from "./header";
+import InventoryRightBar from "./rightbar/inventory-rightbar";
 
 
 const InventoryLayout = ({ children }) => {
@@ -16,7 +16,7 @@ const InventoryLayout = ({ children }) => {
         <div className="">{children}</div>
       </div>
       <div className="w-72 md:block hidden">
-        <RightBar />
+        <InventoryRightBar />
       </div>
     </div>
   );
