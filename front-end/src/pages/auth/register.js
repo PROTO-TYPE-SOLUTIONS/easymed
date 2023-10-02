@@ -115,7 +115,7 @@ const SignUp = () => {
                 />
               </div>
               <button type="submit" className="bg-primary rounded-xl w-full px-8 py-3 text-white">
-                Login
+                SignUp
               </button>
             </section>
           </Form>
