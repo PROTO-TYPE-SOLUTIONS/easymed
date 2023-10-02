@@ -3,10 +3,24 @@ import { Container, Grid } from "@mui/material";
 import React from "react";
 import { inventoryData } from "@/assets/menu";
 import InventoryDataGrid from "@/components/dashboard/inventory";
+import Link from "next/link";
 
 const Inventory = () => {
   return (
     <Container maxWidth="xl">
+      <div className="flex items-center gap-4 mb-8">
+        <Link href="/dashboard/inventory/add-inventory">
+          <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
+            Add Item
+          </button>
+        </Link>
+        <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
+          Sale Order
+        </button>
+        <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
+          View Items
+        </button>
+      </div>
       <h1 className="mb-2 font-semibold">Sales Summary</h1>
       <Grid container spacing={1}>
         {inventoryData.map((data, index) => (

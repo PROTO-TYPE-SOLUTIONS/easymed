@@ -12,7 +12,7 @@ const InventoryLayout = ({ children }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto hideMiddleSectionScrollbar">
-        <Header />
+        {/* <Header /> */}
         <div className="">{children}</div>
       </div>
       <div className="w-72 md:block hidden">
