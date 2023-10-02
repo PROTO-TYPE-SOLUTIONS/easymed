@@ -58,8 +58,8 @@ class Appointment(models.Model):
 
 class Prescription(models.Model):
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    date_created = models.CharField(max_length=45)
-    start_date = models.CharField(max_length=45)
+    date_created = models.DateTimeField(auto_now_add=True)
+    start_date = models.DateField()
     created_by = models.CharField(max_length=45)
     
     STATUS_CHOICES = (
@@ -69,7 +69,7 @@ class Prescription(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return f"Prescription #{self.idprescription}"    
+        return f"Prescription #{self.patient_id}"    
     
 
 class PrescribedDrug(models.Model):
@@ -81,5 +81,5 @@ class PrescribedDrug(models.Model):
     notes = models.TextField()  # Use TextField for potentially longer notes
 
     def __str__(self):
-        return f"Prescribed Drug #{self.idprescribed_drug}"    
+        return f"Prescribed Drug #{self.drug_id}"    
         
