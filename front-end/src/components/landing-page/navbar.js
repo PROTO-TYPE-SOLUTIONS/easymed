@@ -21,7 +21,7 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="md:block hidden">
-        <button className="bg-[#FF5E20] px-3 py-2 text-white">
+        <button className="bg-primary rounded-3xl px-4 py-2 text-white">
           Contact Us
         </button>
       </div>
