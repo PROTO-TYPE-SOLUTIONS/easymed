@@ -1,5 +1,6 @@
 # views.py
 from rest_framework import viewsets
+from .permissions import IsDoctorRequestingLabResult  # Import the custom permission
 from .models import LabReagent, PatientIdentifier, LabResult, LabTest, LabTestCategory
 from .serializers import (
     LabReagentSerializer,
@@ -20,6 +21,8 @@ class PatientIdentifierViewSet(viewsets.ModelViewSet):
 class LabResultViewSet(viewsets.ModelViewSet):
     queryset = LabResult.objects.all()
     serializer_class = LabResultSerializer
+    permission_classes = [IsDoctorRequestingLabResult]  # Apply the custom permission
+
 
 class LabTestViewSet(viewsets.ModelViewSet):
     queryset = LabTest.objects.all()

@@ -30,6 +30,7 @@ class LabResult(models.Model):
     test_element =  models.CharField(max_length=45)
     value = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
+    lab_test = models.ForeignKey('LabTest', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"LabResult {self.id}: {self.title} - {self.patient_name}"
