@@ -8,7 +8,10 @@ import { MdLocalPharmacy } from "react-icons/md";
 import { FaWheelchair } from "react-icons/fa";
 import { FaClockRotateLeft, FaCodePullRequest } from "react-icons/fa6";
 import { GrAdd } from 'react-icons/gr'
-import { BsEyeFill } from 'react-icons/bs'
+import { MdInventory2 } from 'react-icons/md'
+import { BiSolidPurchaseTagAlt } from 'react-icons/bi'
+import { FaMoneyBillAlt } from 'react-icons/fa'
+import { FaProductHunt } from 'react-icons/fa'
 
 export const menus = [
   {
@@ -51,7 +54,19 @@ export const menus = [
   {
     label: "Phamarcy",
     href: "/dashboard/phamarcy",
-    icon: <MdLocalPharmacy className="text-2xl" />,
+    icon: <MdLocalPharmacy className="text-xl" />,
+  },
+  {
+    label: "Inventory",
+    href: "/dashboard/inventory",
+    icon: <MdInventory2 className="text-xl" />,
+    children: [
+      {
+        label: "Add Inventory",
+        href: "/dashboard/inventory/add-inventory",
+        icon: <GrAdd className="" />,
+      },
+    ],
   },
 ];
 
@@ -70,5 +85,23 @@ export const dashboardData = [
     label: "Test Requests",
     number: 37,
     icon: <FaCodePullRequest className="text-xl" />,
+  },
+];
+
+export const inventoryData = [
+  {
+    label: "Today's Sales",
+    number: 320,
+    icon: <FaMoneyBillAlt className="" />,
+  },
+  {
+    label: "Purchases",
+    number: 28,
+    icon: <BiSolidPurchaseTagAlt className="" />,
+  },
+  {
+    label: "Total Products",
+    number: 3222,
+    icon: <FaProductHunt className="" />,
   },
 ];
