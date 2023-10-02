@@ -34,14 +34,14 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
-class Purchase_Order(models.Model):
+class PurchaseOrder(models.Model):
     supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     order_date = models.DateField()
     item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     Total_Cost = models.CharField(max_length=255)
 
-class Sale_Order(models.Model):
+class SaleOrder(models.Model):
     # patient_ID =  models.ForeignKey(Patient, on_delete=models.CASCADE)
     sale_date = models.DateField()
     item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)

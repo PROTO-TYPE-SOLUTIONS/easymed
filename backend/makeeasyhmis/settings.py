@@ -34,9 +34,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
     # user apps
+    'customusers',
     'patient',
     'pharmacy',
-    'customusers',
     'inventory',
     'laboratory',
 

@@ -1,11 +1,9 @@
-# views.py
 from rest_framework import viewsets
-from .models import LabReagent, PatientIdentifier, LabResult, LabTest, LabTestCategory
+from .models import LabReagent, LabTestResult, LabTestRequest, LabTestCategory
 from .serializers import (
     LabReagentSerializer,
-    PatientIdentifierSerializer,
-    LabResultSerializer,
-    LabTestSerializer,
+    LabTestResultSerializer,
+    LabTestRequestSerializer,
     LabTestCategorySerializer,
 )
 
@@ -13,17 +11,13 @@ class LabReagentViewSet(viewsets.ModelViewSet):
     queryset = LabReagent.objects.all()
     serializer_class = LabReagentSerializer
 
-class PatientIdentifierViewSet(viewsets.ModelViewSet):
-    queryset = PatientIdentifier.objects.all()
-    serializer_class = PatientIdentifierSerializer
+class LabTestResultViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResult.objects.all()
+    serializer_class = LabTestResultSerializer
 
-class LabResultViewSet(viewsets.ModelViewSet):
-    queryset = LabResult.objects.all()
-    serializer_class = LabResultSerializer
-
-class LabTestViewSet(viewsets.ModelViewSet):
-    queryset = LabTest.objects.all()
-    serializer_class = LabTestSerializer
+class LabTestRequestViewSet(viewsets.ModelViewSet):
+    queryset = LabTestRequest.objects.all()
+    serializer_class = LabTestRequestSerializer
 
 class LabTestCategoryViewSet(viewsets.ModelViewSet):
     queryset = LabTestCategory.objects.all()

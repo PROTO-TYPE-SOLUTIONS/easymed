@@ -1,25 +1,19 @@
-# serializers.py
 from rest_framework import serializers
-from .models import LabReagent, PatientIdentifier, LabResult, LabTest, LabTestCategory
+from .models import LabReagent, LabTestResult, LabTestRequest, LabTestCategory
 
 class LabReagentSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabReagent
         fields = '__all__'
 
-class PatientIdentifierSerializer(serializers.ModelSerializer):
+class LabTestResultSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PatientIdentifier
+        model = LabTestResult
         fields = '__all__'
 
-class LabResultSerializer(serializers.ModelSerializer):
+class LabTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LabResult
-        fields = '__all__'
-
-class LabTestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LabTest
+        model = LabTestRequest
         fields = '__all__'
 
 class LabTestCategorySerializer(serializers.ModelSerializer):
