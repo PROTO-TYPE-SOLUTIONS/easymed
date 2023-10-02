@@ -12,7 +12,7 @@ const Header = () => {
 
   return (
     <>
-      <section className="sticky top-0 z-50 py-2 bg-white shadow-xl rounded mb-12">
+      <section className="sticky top-0 py-2 bg-white shadow-xl rounded mb-12">
         <Container maxWidth="xl">
           <section className="flex items-center justify-between gap-4">
             <div className="md:hidden block">
