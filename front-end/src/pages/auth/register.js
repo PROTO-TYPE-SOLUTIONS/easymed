@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { authContext } from "@/components/use-context";
 
-const Login = () => {
+const SignUp = () => {
   const { loginUser } = useContext(authContext)
   const initialValues = {
     email: "",
@@ -40,7 +40,7 @@ const Login = () => {
     <section className="flex items-center gap-8 h-screen overflow-hidden">
       <div className="md:w-1/2 w-full space-y-8 px-4">
         <div className="w-7/12 mx-auto">
-          <h1 className="text-2xl font-bold text-center">Login</h1>
+          <h1 className="text-2xl text-center">Create Account</h1>
         </div>
         <Formik
           initialValues={initialValues}
@@ -48,7 +48,46 @@ const Login = () => {
           onSubmit={handleLogin}
         >
           <Form className="md:w-9/12 w-full mx-auto">
-            <section className="flex flex-col items-center justify-center space-y-8">
+            <section className="flex flex-col items-center justify-center space-y-4">
+              <div className="w-full">
+                <Field
+                  className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+                  type="email"
+                  placeholder="First Name"
+                  name="email"
+                />
+                <ErrorMessage
+                  name="email"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
+              <div className="w-full">
+                <Field
+                  className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+                  type="email"
+                  placeholder="Middle Name"
+                  name="email"
+                />
+                <ErrorMessage
+                  name="email"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
+              <div className="w-full">
+                <Field
+                  className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+                  type="email"
+                  placeholder="Last Name"
+                  name="email"
+                />
+                <ErrorMessage
+                  name="email"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
               <div className="w-full">
                 <Field
                   className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
@@ -76,21 +115,19 @@ const Login = () => {
                 />
               </div>
               <button type="submit" className="bg-primary rounded-xl w-full px-8 py-3 text-white">
-                Login
+                SignUp
               </button>
             </section>
           </Form>
         </Formik>
       </div>
       <div className="md:block hidden w-1/2">
-        <section className="loginPage rounded-3xl flex items-center h-[90vh] p-4">
-          <div className="">
+        <section className="loginPage rounded-2xl flex items-center justify-center p-4">
+          <div className="text-white">
             <div className="space-y-4">
-              <h1 className="text-2xl text-white uppercase">Welcome to</h1>
-              <h1 className="uppercase text-white text-2xl border-b py-4 border-white">Make - Easy HMIS</h1>
-              <p className="text-sm text-white">
-                If you forgot your password, please contact your system
-                administrator for a password reset
+              <h1 className="text-2xl text-center">Welcome to Make Easy-HMIS</h1>
+              <p className="text-sm text-center">
+                We make Easy-HMIS
               </p>
             </div>
           </div>
@@ -100,4 +137,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;

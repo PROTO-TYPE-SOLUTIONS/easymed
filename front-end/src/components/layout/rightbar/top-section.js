@@ -34,9 +34,9 @@ const TopSection = () => {
 
   return (
     <>
-        <section className="flex items-center gap-4 sticky top-0 bg-white md:bg-opacity-30 md:backdrop-filter md:backdrop-blur-lg p-2 relative">
-          <span style={{fontSize: '8px'}} className="absolute top-0 left-0">22 Sept 2023</span>
-          <div className="flex items-center gap-4 border-r-2 border-black">
+        <section className="flex items-center gap-4 sticky top-0 bg-white md:bg-opacity-30 md:backdrop-filter md:backdrop-blur-lg p-2">
+          {/* <span style={{fontSize: '8px'}} className="absolute top-0 left-0">22 Sept 2023</span> */}
+          <div className="flex items-center gap-4 border-r-2 border-primary">
             <AiOutlineSearch
               onClick={handleClick2}
               className="text-2xl cursor-pointer"

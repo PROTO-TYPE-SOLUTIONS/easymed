@@ -78,7 +78,7 @@ const ViewedReferralsDatagrid = () => {
       return (
         <div className="flex items-center gap-2">
           <p>{data?.name}</p>
-          <Chip variant="contained" size="small" style={{ backgroundColor: "#FC4B1B",color:'white' }} label={data?.priority} />
+          <Chip variant="outlined" size="small" style={{ borderColor: "#FC4B1B" }} label={data?.priority} />
         </div>
       );
     }else{

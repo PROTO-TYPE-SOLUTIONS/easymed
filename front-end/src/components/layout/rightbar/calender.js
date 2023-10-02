@@ -40,7 +40,7 @@ const CalenderDate = () => {
             key={day}
             onClick={() => handleDateClick(day)}
             className={`text-xs h-6 w-6 m-1 cursor-pointer ${
-              isToday(day) ? "border rounded-full p-1 bg-orange-600 text-center text-white" : ""
+              isToday(day) ? "border rounded-full p-1 bg-primary text-center text-white" : ""
             } ${isSameDay(day, selectedDate) ? "border rounded-full p-1 bg-blue-500 text-center text-white" : ""}`}
           >
             {format(day, "d")}

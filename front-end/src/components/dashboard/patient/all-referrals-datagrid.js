@@ -78,7 +78,7 @@ const AllReferralsDataGrid = () => {
       return (
         <div className="flex items-center gap-2">
           <p>{data?.name}</p>
-          <Chip variant="contained" size="small" style={{ backgroundColor: "#FC4B1B",color:'white' }} label={data?.priority} />
+          <Chip variant="outlined" size="small" style={{ borderColor: "#FC4B1B" }} label={data?.priority} />
         </div>
       );
     }else{
@@ -124,7 +124,7 @@ const AllReferralsDataGrid = () => {
           allowSearch={true}
           cellRender={priorityFunc}
         />
-        <Column dataField="from" caption="From" width={200} cellRender={fromFunc} />
+        <Column dataField="from" caption="From" width={240} cellRender={fromFunc} />
         <Column dataField="notes" caption="Notes" width={200} />
         <Column dataField="last_modified" caption="Last Modified" width={200} />
       </DataGrid>
