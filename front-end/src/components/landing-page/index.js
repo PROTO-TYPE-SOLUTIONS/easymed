@@ -21,7 +21,7 @@ const LandingPage = () => {
             <button className="bg-[#FF5E20] text-white px-4 py-3">
               View Services
             </button>
-            <Link href="/authentication/register">
+            <Link href="/auth/register">
               <button className="border border-[#FF5E20] text-white px-4 py-3 transition duration-500 hover:scale-105">
                 Book Appointment
               </button>
