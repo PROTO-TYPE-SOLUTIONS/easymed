@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from .models import Item, PurchaseOrder, SaleOrder, Inventory, Supplier
+from .models import Item, PurchaseOrder, OrderBill, Inventory, Supplier
 from .serializers import (
     ItemSerializer,
     PurchaseSerializer,
@@ -17,7 +17,7 @@ class PurchaseViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseSerializer
 
 class SaleViewSet(viewsets.ModelViewSet):
-    queryset = SaleOrder.objects.all()
+    queryset = OrderBill.objects.all()
     serializer_class = SaleSerializer
 
 class InventoryViewSet(viewsets.ModelViewSet):

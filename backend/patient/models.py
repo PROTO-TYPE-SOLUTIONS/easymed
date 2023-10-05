@@ -1,6 +1,7 @@
 from django.db import models
 from customusers.models import CustomUser
 from pharmacy.models import Drug
+from inventory.models import Item, OrderBill
 
 class InsuranceCompany(models.Model):
     name = models.CharField(max_length=30)
@@ -43,7 +44,6 @@ class Appointment(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
     )
-
     appointment_date_time = models.DateTimeField()
     patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
     assigned_doctor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
@@ -51,21 +51,25 @@ class Appointment(models.Model):
     reason = models.TextField(max_length=300)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
+    fee =  models.CharField(max_length=40)
+
+    order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
+
     # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Appointment #{self.pk}"
 
 class Prescription(models.Model):
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateField()
-    created_by = models.CharField(max_length=45)
-    
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('dispensed', 'Dispensed'),
     )
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    start_date = models.DateField()
+    created_by = models.CharField(max_length=45)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
@@ -79,6 +83,8 @@ class PrescribedDrug(models.Model):
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     notes = models.TextField()  # Use TextField for potentially longer notes
+
+    order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Prescribed Drug #{self.drug_id}"    
