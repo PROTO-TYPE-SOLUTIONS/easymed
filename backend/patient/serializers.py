@@ -7,6 +7,7 @@ from .models import (
     Appointment,
     Prescription,
     PrescribedDrug,
+    PublicAppointment,
 )
 
 class InsuranceCompanySerializer(serializers.ModelSerializer):
@@ -33,6 +34,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
+
+class PublicAppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PublicAppointment
+        fields = '__all__'
+
 
 class PrescriptionSerializer(serializers.ModelSerializer):
     class Meta:

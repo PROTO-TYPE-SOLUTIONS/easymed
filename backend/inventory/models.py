@@ -50,13 +50,5 @@ class OrderBill (models.Model):
     payment_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unpaid')
     patient_ID =  models.ForeignKey('patient.Patient', on_delete=models.CASCADE)
     bill_date = models.DateTimeField(auto_now_add=True)
-    total_Cost = models.CharField(max_length=255)
-
-
-
-# class OrderBill(models.Model):
-#     # patient_ID =  models.ForeignKey(Patient, on_delete=models.CASCADE)
-#     sale_date = models.DateField()
-#     # item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
-#     quantity_sold = models.PositiveIntegerField()
-#     Total_Cost = models.CharField(max_length=255)
+    total_Cost = models.CharField(max_length=255, null=True, blank=True)
+    

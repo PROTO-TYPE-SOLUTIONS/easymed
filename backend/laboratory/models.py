@@ -37,7 +37,7 @@ class LabTestRequest(models.Model):
     order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.patient_ID   
+        return str(self.test_profile_ID)
 
 class LabTestResult(models.Model):
     lab_test_request_ID = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
