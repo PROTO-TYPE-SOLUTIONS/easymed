@@ -8,6 +8,7 @@ from .models import (
     Prescription,
     PrescribedDrug,
     PublicAppointment,
+    Service,
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -18,11 +19,16 @@ from .serializers import (
     PrescriptionSerializer,
     PrescribedDrugSerializer,
     PublicAppointmentSerializer ,
+    ServiceSerializer  ,
 )
 
 class InsuranceCompanyViewSet(viewsets.ModelViewSet):
     queryset = InsuranceCompany.objects.all()
     serializer_class = InsuranceCompanySerializer
+
+class ServiceViewSet(viewsets.ModelViewSet):
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer  
 
 class ContactDetailsViewSet(viewsets.ModelViewSet):
     queryset = ContactDetails.objects.all()

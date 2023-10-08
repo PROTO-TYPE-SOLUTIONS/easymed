@@ -1,5 +1,5 @@
 from django.db import models
-from customusers.models import CustomUser
+from customuser.models import CustomUser
 from pharmacy.models import Drug
 from inventory.models import Item, OrderBill
 
@@ -42,7 +42,6 @@ class Patient(models.Model):
 # post_save.connect(order_bill_created, sender=Patient)
     
 
-
 class NextOfKin(models.Model):
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     firts_name = models.CharField(max_length=40)
@@ -50,7 +49,7 @@ class NextOfKin(models.Model):
     relationship = models.CharField(max_length=40)
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
-class Services(models.Model):
+class Service(models.Model):
     name = models.TextField(max_length=300)
 
     def __str__(self):
@@ -78,7 +77,7 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"Appointment #{self.patient.first_name}"
-    
+
 # appointments from landing page, with no user or patient registration
 # will provide option to register as patient
 class PublicAppointment(models.Model):
@@ -92,7 +91,7 @@ class PublicAppointment(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    service = models.ForeignKey(Services, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
@@ -105,6 +104,31 @@ class PublicAppointment(models.Model):
 
     def __str__(self):
         return f"Appointment #{self.first_name}"    
+    
+
+class Triage(models.Model):
+    created_by = models.CharField(max_length=45)
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    temperature = models.DecimalField(max_digits=5, decimal_places=2)
+    height = models.DecimalField(max_digits=5, decimal_places=2)
+    weight = models.IntegerField()
+    pulse = models.PositiveIntegerField()
+
+
+class Consultation(models.Model):
+    DISPOSITION_CHOICES = (
+        ('admitted', 'Admitted'),
+        ('referred', 'Referred'),
+        ('discharged', 'Discharged'),
+        ('lab', 'Lab'),
+    )
+    doctor_ID = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    note = models.TextField(null=True, blank=True)
+    complaint = models.TextField(null=True, blank=True)
+    disposition = models.CharField(max_length=10, choices=DISPOSITION_CHOICES, default="")
 
 class Prescription(models.Model):
     STATUS_CHOICES = (
@@ -114,7 +138,7 @@ class Prescription(models.Model):
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
-    created_by = models.CharField(max_length=45)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
@@ -127,8 +151,7 @@ class PrescribedDrug(models.Model):
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
-    notes = models.TextField()  # Use TextField for potentially longer notes
-
+    note = models.TextField(null=True, blank=True)
     order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
 
     def __str__(self):

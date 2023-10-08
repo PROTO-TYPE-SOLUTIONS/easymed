@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from inventory.models import Item
-from customusers.models import CustomUser
+from customuser.models import CustomUser
 
 
 class Drug(models.Model):
