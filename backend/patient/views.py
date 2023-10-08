@@ -7,6 +7,7 @@ from .models import (
     Appointment,
     Prescription,
     PrescribedDrug,
+    PublicAppointment,
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -16,6 +17,7 @@ from .serializers import (
     AppointmentSerializer,
     PrescriptionSerializer,
     PrescribedDrugSerializer,
+    PublicAppointmentSerializer ,
 )
 
 class InsuranceCompanyViewSet(viewsets.ModelViewSet):
@@ -37,6 +39,11 @@ class NextOfKinViewSet(viewsets.ModelViewSet):
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
+
+
+class PublicAppointmentViewSet(viewsets.ModelViewSet):
+    queryset = PublicAppointment.objects.all()
+    serializer_class = PublicAppointmentSerializer    
 
 class PrescriptionViewSet(viewsets.ModelViewSet):
     queryset = Prescription.objects.all()

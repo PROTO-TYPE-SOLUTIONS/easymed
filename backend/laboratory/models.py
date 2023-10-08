@@ -2,14 +2,14 @@ from django.db import models
 from patient.models import Patient
 from django.conf import settings
 from customusers.models import CustomUser
-from inventory.models import Item, SaleOrder
+from inventory.models import Item, OrderBill
 
 class LabReagent(models.Model):
     name = models.CharField(max_length=255)
     cas_number = models.CharField(max_length=255)
     molecular_weight = models.DecimalField(max_digits=10, decimal_places=2)
     purity = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_id =  models.ForeignKey(SaleOrder, on_delete=models.CASCADE)
+    item_number = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -33,11 +33,11 @@ class LabTestPanel(models.Model):
 class LabTestRequest(models.Model):
     patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
-    sale_order_ID = models.ForeignKey(SaleOrder, on_delete=models.CASCADE)
     note = models.TextField()
+    order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.patient_ID   
+        return str(self.test_profile_ID)
 
 class LabTestResult(models.Model):
     lab_test_request_ID = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)

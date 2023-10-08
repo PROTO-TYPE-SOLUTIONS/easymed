@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Item, PurchaseOrder, SaleOrder, Inventory, Supplier
+from .models import Item, PurchaseOrder, OrderBill, Inventory, Supplier
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,7 +13,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
 class SaleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SaleOrder
+        model = OrderBill
         fields = '__all__'
 
 class InventorySerializer(serializers.ModelSerializer):
