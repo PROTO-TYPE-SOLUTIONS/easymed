@@ -9,7 +9,7 @@ import { getAllUserPermissions } from "@/redux/features/auth";
 
 export const authContext = createContext();
 
-const secretKey = new SimpleCrypto(process.env.NEXT_PUBLIC_ENCRYPTION_KEY);
+const secretKey = new SimpleCrypto("c2FubGFta2VueWFAZ21haWwuY29t");
 
 export const AuthProvider = ({ children }) => {
   const dispatch = useDispatch();

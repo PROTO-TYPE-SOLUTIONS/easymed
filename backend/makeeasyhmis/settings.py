@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
     # user apps
-    'customusers',
+    'customuser',
     'patient',
     'pharmacy',
     'inventory',
@@ -131,7 +131,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
         ],
     "DEFAULT_AUTHENTICATION_CLASSES": [  
-        "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
         # "rest_framework.authentication.TokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
@@ -139,7 +139,7 @@ REST_FRAMEWORK = {
 }
 
 SESSION_COOKIE_AGE = 1209600
-AUTH_USER_MODEL = 'customusers.CustomUser'
+AUTH_USER_MODEL = 'customuser.CustomUser'
 
 
 SPECTACULAR_SETTINGS = {

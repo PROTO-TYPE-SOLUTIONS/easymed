@@ -1,7 +1,7 @@
 from django.db import models
 from patient.models import Patient
 from django.conf import settings
-from customusers.models import CustomUser
+from customuser.models import CustomUser
 from inventory.models import Item, OrderBill
 
 class LabReagent(models.Model):
