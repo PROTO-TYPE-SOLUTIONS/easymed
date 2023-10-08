@@ -49,7 +49,7 @@ class NextOfKin(models.Model):
     relationship = models.CharField(max_length=40)
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
-class Services(models.Model):
+class Service(models.Model):
     name = models.TextField(max_length=300)
 
     def __str__(self):
@@ -77,7 +77,7 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"Appointment #{self.patient.first_name}"
-    
+
 # appointments from landing page, with no user or patient registration
 # will provide option to register as patient
 class PublicAppointment(models.Model):
@@ -91,7 +91,7 @@ class PublicAppointment(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    service = models.ForeignKey(Services, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
@@ -105,7 +105,6 @@ class PublicAppointment(models.Model):
     def __str__(self):
         return f"Appointment #{self.first_name}"    
     
-
 
 class Triage(models.Model):
     created_by = models.CharField(max_length=45)

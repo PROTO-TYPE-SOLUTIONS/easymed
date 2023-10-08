@@ -8,12 +8,20 @@ from .models import (
     Prescription,
     PrescribedDrug,
     PublicAppointment,
+    Service,
 )
 
 class InsuranceCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = InsuranceCompany
         fields = '__all__'
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
+
 
 class ContactDetailsSerializer(serializers.ModelSerializer):
     class Meta:
