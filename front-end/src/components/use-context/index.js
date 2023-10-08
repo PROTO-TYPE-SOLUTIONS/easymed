@@ -14,16 +14,7 @@ const secretKey = new SimpleCrypto(process.env.NEXT_PUBLIC_ENCRYPTION_KEY);
 export const AuthProvider = ({ children }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [authToken, setAuthToken] = useState(() =>
-    typeof window !== "undefined" && localStorage.getItem("token")
-      ? JSON.parse(localStorage.getItem("token"))
-      : null
-  );
-  const [user, setUser] = useState(() =>
-    typeof window !== "undefined" && localStorage.getItem("token")
-      ? localStorage.getItem("token")
-      : null
-  );
+  const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
 
   // login User
@@ -36,13 +27,14 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post(APP_API_URL.LOGIN, encryptedData);
       if (response.status === 200) {
         const data = secretKey.decrypt(response.data);
-        setAuthToken(data);
+        // setAuthToken(data);
         const decodedUser = jwtDecode(data.access);
-        setUser(decodedUser);
+        setUser({...decodedUser, token: data.access});
         try {
           await dispatch(getAllUserPermissions(decodedUser?.user_id));
           router.push("/dashboard");
-          localStorage.setItem("token", JSON.stringify(data));
+          localStorage.setItem("token", JSON.stringify(data.access));
+          localStorage.setItem("refresh", JSON.stringify(data.refresh));
         } catch (error) {
         }
       }
@@ -53,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   // logout User
   const logoutUser = () => {
-    setAuthToken(null);
+    // setAuthToken(null);
     setUser(null);
     localStorage.removeItem("token");
     router.push("/");
@@ -68,11 +60,12 @@ export const AuthProvider = ({ children }) => {
 
   // decode the token and set the user when a component mounts
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    const storedToken =  localStorage.getItem("token");
     let decodedToken;
     if (storedToken) {
       decodedToken = jwtDecode(storedToken);
-      setUser(decodedToken);
+
+      setUser({...decodedToken, token: storedToken});
     }
     const fetchPermissions = async () => {
       if (decodedToken) {
