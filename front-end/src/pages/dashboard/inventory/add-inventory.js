@@ -7,7 +7,7 @@ import { GrLinkPrevious } from "react-icons/gr";
 
 const AddInventory = () => {
   return (
-    <Container maxWidth="xl" className="space-y-4">
+    <Container maxWidth="xl" className="space-y-6 py-4">
       <div className="flex items-center gap-4 mb-4">
         <Link href="/dashboard/inventory/add-inventory">
           <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
@@ -21,7 +21,7 @@ const AddInventory = () => {
           View Items
         </button>
       </div>
-      <section className="bg-white p-4 rounded shadow-2xl">
+      <section className="bg-white p-8 rounded shadow">
         <button className="font-semibold mb-4">
           <Link href="/dashboard/inventory" className="flex items-center gap-2">
             <GrLinkPrevious />
