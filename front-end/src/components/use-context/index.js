@@ -18,28 +18,22 @@ export const AuthProvider = ({ children }) => {
   const [message, setMessage] = useState("");
 
   // login User
-  const loginUser = async (username, password) => {
-    // encrypt login payload
-    const encryptedData = {
-      data: secretKey.encrypt({ username, password }),
-    };
+  const loginUser = async (email, password) => {
     try {
-      const response = await axios.post(APP_API_URL.LOGIN, encryptedData);
+      const response = await axios.post(APP_API_URL.LOGIN, {email: email,password:password});
       if (response.status === 200) {
-        const data = secretKey.decrypt(response.data);
-        // setAuthToken(data);
-        const decodedUser = jwtDecode(data.access);
-        setUser({...decodedUser, token: data.access});
+        const decodedUser = jwtDecode(response.data.access);
+        setUser({...decodedUser, token: response.data.access});
         try {
-          await dispatch(getAllUserPermissions(decodedUser?.user_id));
-          router.push("/dashboard");
-          localStorage.setItem("token", JSON.stringify(data.access));
-          localStorage.setItem("refresh", JSON.stringify(data.refresh));
+          // await dispatch(getAllUserPermissions(decodedUser?.user_id));
+          // router.push("/dashboard");
+          localStorage.setItem("token", JSON.stringify(response.data.access));
+          localStorage.setItem("refresh", JSON.stringify(response.data.refresh));
         } catch (error) {
         }
       }
     } catch (error) {
-      setMessage(error.response.data.detail);
+      setMessage(error);
     }
   };
 
@@ -67,12 +61,12 @@ export const AuthProvider = ({ children }) => {
 
       setUser({...decodedToken, token: storedToken});
     }
-    const fetchPermissions = async () => {
-      if (decodedToken) {
-        await dispatch(getAllUserPermissions(decodedToken.user_id));
-      }
-    };
-    fetchPermissions();
+    // const fetchPermissions = async () => {
+    //   if (decodedToken) {
+    //     await dispatch(getAllUserPermissions(decodedToken.user_id));
+    //   }
+    // };
+    // fetchPermissions();
   }, []);
 
   return (

@@ -21,13 +21,15 @@ const AddInventory = () => {
           View Items
         </button>
       </div>
-      <button className="font-semibold">
-        <Link href="/dashboard/inventory" className="flex items-center gap-2">
-          <GrLinkPrevious />
-          <h1>Back</h1>
-        </Link>
-      </button>
-      <AddInventoryForm />
+      <section className="bg-white p-4 rounded shadow-2xl">
+        <button className="font-semibold mb-4">
+          <Link href="/dashboard/inventory" className="flex items-center gap-2">
+            <GrLinkPrevious />
+            <h1>Back</h1>
+          </Link>
+        </button>
+        <AddInventoryForm />
+      </section>
     </Container>
   );
 };

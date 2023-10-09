@@ -13,3 +13,27 @@ export const addInventory = (payload) =>{
             })
     })
 }
+
+export const fetchItems = () =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_ITEMS}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchSuppliers = () =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_SUPPLIERS}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

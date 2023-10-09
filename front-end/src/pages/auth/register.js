@@ -1,16 +1,25 @@
-import React, { useContext } from "react";
+import React, { useState } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { authContext } from "@/components/use-context";
+import { registerUser } from "@/redux/service/auth";
+import { useRouter } from "next/router";
 
 const SignUp = () => {
-  const { loginUser } = useContext(authContext)
+  const [loading,setLoading] = useState(false);
+  const router = useRouter();
   const initialValues = {
     email: "",
     password: "",
+    first_name: "",
+    last_name: "",
+    role: "",
   };
 
   const validationSchema = Yup.object().shape({
+    first_name: Yup.string()
+      .required("First Name is required!"),
+    last_name: Yup.string()
+      .required("Last Name is required!"),
     email: Yup.string()
       .email("This is not a valid email")
       .required("Email is required!"),
@@ -22,17 +31,20 @@ const SignUp = () => {
           !val || (val.toString().length >= 6 && val.toString().length <= 40)
       )
       .required("Password is required!"),
+      role: Yup.string()
+      .required("Role is required!"),
   });
 
-  const handleLogin = async (formValue,helpers) => {
+  const handleRegister = async (formValue,helpers) => {
     try {
       setLoading(true);
-      await loginUser(formValue.email, formValue.password).then(() => {
+      await registerUser(formValue).then(() => {
         helpers.resetForm();
         setLoading(false);
+        router.push('/auth/login');
       });
     } catch (err) {
-      console.log("LOGIN_ERROR ", err);
+      console.log("SIGNUP_ERROR ", err);
     }
   };
 
@@ -45,19 +57,19 @@ const SignUp = () => {
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={handleLogin}
+          onSubmit={handleRegister}
         >
           <Form className="md:w-9/12 w-full mx-auto">
             <section className="flex flex-col items-center justify-center space-y-4">
               <div className="w-full">
                 <Field
                   className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
-                  type="email"
+                  type="text"
                   placeholder="First Name"
-                  name="email"
+                  name="first_name"
                 />
                 <ErrorMessage
-                  name="email"
+                  name="first_name"
                   component="div"
                   className="text-warning text-xs"
                 />
@@ -65,25 +77,12 @@ const SignUp = () => {
               <div className="w-full">
                 <Field
                   className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
-                  type="email"
-                  placeholder="Middle Name"
-                  name="email"
-                />
-                <ErrorMessage
-                  name="email"
-                  component="div"
-                  className="text-warning text-xs"
-                />
-              </div>
-              <div className="w-full">
-                <Field
-                  className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
-                  type="email"
+                  type="text"
                   placeholder="Last Name"
-                  name="email"
+                  name="last_name"
                 />
                 <ErrorMessage
-                  name="email"
+                  name="last_name"
                   component="div"
                   className="text-warning text-xs"
                 />
@@ -110,6 +109,19 @@ const SignUp = () => {
                 />
                 <ErrorMessage
                   name="password"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
+              <div className="w-full">
+                <Field
+                  className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+                  type="text"
+                  placeholder="Role"
+                  name="role"
+                />
+                <ErrorMessage
+                  name="role"
                   component="div"
                   className="text-warning text-xs"
                 />

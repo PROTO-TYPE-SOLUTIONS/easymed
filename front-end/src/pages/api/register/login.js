@@ -45,7 +45,9 @@ export default async function handler(req, res) {
             // };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.ADD_INVENTORY}`,body)
+            console.log("LOGIN_BODY ",body);
+
+            await backendAxiosInstance.post(`${API_URL.LOGIN}`,body)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

@@ -1,10 +1,13 @@
-import React, { useContext } from "react";
+import React, { useContext,useState } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { authContext } from "@/components/use-context";
+import { useRouter } from "next/router";
 
 const Login = () => {
+  const [loading,setLoading] = useState(false);
   const { loginUser } = useContext(authContext)
+  const router = useRouter();
   const initialValues = {
     email: "",
     password: "",
@@ -30,6 +33,7 @@ const Login = () => {
       await loginUser(formValue.email, formValue.password).then(() => {
         helpers.resetForm();
         setLoading(false);
+        // router.push('/dashboard')
       });
     } catch (err) {
       console.log("LOGIN_ERROR ", err);

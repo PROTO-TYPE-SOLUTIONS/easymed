@@ -6,10 +6,12 @@ import Grid from "@mui/material/Grid";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllServices } from "@/redux/features/patients";
 import { toast } from 'react-toastify'
+import { useRouter } from "next/router";
 
 const BookAppointment = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
   const { services } = useSelector(({ patient }) => patient);
 
 
@@ -45,6 +47,7 @@ const BookAppointment = () => {
         helpers.resetForm();
         toast.success('Appointment Booked Successfully!')
         setLoading(false);
+        router.push('/')
       });
     } catch (err) {
       toast.error(err)

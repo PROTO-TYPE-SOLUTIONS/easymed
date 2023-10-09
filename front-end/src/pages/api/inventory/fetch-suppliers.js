@@ -11,17 +11,17 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === API_METHODS.GET) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
-            const config = {
-                headers: {
-                    'Authorization': req.headers.authorization,
-                }
-            };
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
+            // const config = {
+            //     headers: {
+            //         'Authorization': req.headers.authorization,
+            //     }
+            // };
     
 
-            await backendAxiosInstance.get(`${API_URL.GET_COUNTIES}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_SUPPLIERS}`).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -35,14 +35,14 @@ export default async function handler(req, res) {
     }
     else if (req.method === API_METHODS.POST) {
         try {
-            // if (!req.headers?.authorization){
-            //     res.status(401).send('Unauthorized');
-            // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
             const body = req.body;
 
             await backendAxiosInstance.post(`${API_URL.ADD_INVENTORY}`,body)

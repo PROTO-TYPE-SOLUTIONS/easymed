@@ -1,203 +1,185 @@
-import { Grid, TextField, Autocomplete } from "@mui/material";
-import React from "react";
+import React, { useEffect,useState } from "react";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Grid } from "@mui/material";
 import * as Yup from "yup";
-import { useFormik } from "formik";
-import { getAutoCompleteValue } from "@/assets/file-helper";
+import { addInventory } from "@/redux/service/inventory";
+import { useSelector, useDispatch } from "react-redux";
+import { getAllItems, getAllSuppliers } from "@/redux/features/inventory";
+import { toast } from "react-toastify";
 
 const AddInventoryForm = () => {
-  const gender = [
-    {
-      id: 1,
-      name: "Male",
-    },
-    {
-      id: 2,
-      name: "Female",
-    },
-  ];
+  const [loading,setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { items, suppliers } = useSelector(({ inventory }) => inventory);
+
+  const initialValues = {
+    quantity: "",
+    location: "",
+    expiry_date: "",
+    purchase_price: "",
+    sale_price: "",
+    item_ID: null,
+    supplier_ID: null,
+  };
 
   const validationSchema = Yup.object().shape({
-    first_name: Yup.string().required("This field is required!"),
-    second_name: Yup.string().required("This field is required!"),
-    last_name: Yup.string().required("This field is required!"),
-    date_of_birth: Yup.date()
-      .required("Date of Birth is required")
-      .max(new Date(), "Date of Birth cannot be in the future"),
-    genderId: Yup.string().required("This field is required!"),
-    telephone: Yup.string().required("This field is required!"),
-    email: Yup.string().required("This field is required!"),
-    residence: Yup.string().required("This field is required!"),
-    provider: Yup.string().required("This field is required!"),
-    card_number: Yup.string().required("This field is required!"),
-    package: Yup.string().required("This field is required!"),
+    quantity: Yup.string().required("This field is required!"),
+    location: Yup.string().required("This field is required!"),
+    expiry_date: Yup.string().required("This field is required!"),
+    purchase_price: Yup.string().required("This field is required!"),
+    sale_price: Yup.string().required("This field is required!"),
+    item_ID: Yup.string().required("This field is required!"),
+    supplier_ID: Yup.string().required("This field is required!"),
   });
 
-  const formik = useFormik({
-    initialValues: {
-      first_name: "",
-      second_name: "",
-      last_name: "",
-      date_of_birth: "",
-      genderId: null,
-      telephone: "",
-      email: "",
-      residence: "",
-      provider: "",
-      card_number: "",
-      package: "",
-    },
-    validationSchema: validationSchema,
-    onSubmit: async (values) => {
-      console.log("FORMIK_VALUES ", values);
-      // await dispatch(createSponsorUser(authUser, values));
-    },
-  });
-
-  const handleOnGenderId = (event, value) => {
-    console.log(value);
-    if (value !== null) {
-      formik.setFieldValue("genderId", value.id);
-    } else {
-      formik.setFieldValue("genderId", null);
+  const handleAddInventory = async (formValue, helpers) => {
+    console.log(formValue);
+    try {
+      const formData = {
+        ...formValue,
+        item_ID: parseInt(formValue.item_ID),
+        supplier_ID: parseInt(formValue.supplier_ID),
+      };
+      setLoading(true);
+      await addInventory(formData).then(() => {
+        helpers.resetForm();
+        toast.success("Inventory Added Successfully!");
+        setLoading(false);
+      });
+    } catch (err) {
+      toast.error(err);
+      console.log("INVENTORY_ERROR ", err);
     }
   };
 
+  useEffect(() => {
+    dispatch(getAllSuppliers());
+    dispatch(getAllItems());
+  }, []);
+
   return (
-    <form onSubmit={formik.handleSubmit} className="">
-      <Grid container spacing={2}>
-        <Grid item md={4} xs={12}>
-          <TextField
-            fullWidth
-            maxWidth="sm"
-            label="Product Name"
-            name="first_name"
-            value={formik.values.first_name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.first_name && Boolean(formik.errors.first_name)
-            }
-            helperText={formik.touched.first_name && formik.errors.first_name}
-          />
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <Autocomplete
-            options={gender}
-            value={getAutoCompleteValue(gender, formik.values.genderId)}
-            getOptionLabel={(option) => option.name}
-            onChange={handleOnGenderId}
-            renderInput={(params) => (
-              <TextField
-                size="small"
-                fullWidth
-                {...params}
-                label="Category"
-                name="genderId"
-                onBlur={formik.handleBlur}
-                error={
-                  formik.touched.genderId && Boolean(formik.errors.genderId)
-                }
-                helperText={formik.touched.genderId && formik.errors.genderId}
-              />
-            )}
-          />
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <TextField
-            fullWidth
-            maxWidth="sm"
-            label="Price"
-            name="first_name"
-            value={formik.values.first_name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.first_name && Boolean(formik.errors.first_name)
-            }
-            helperText={formik.touched.first_name && formik.errors.first_name}
-          />
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <TextField
-            fullWidth
-            maxWidth="sm"
-            label="Quantity"
-            name="first_name"
-            value={formik.values.first_name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.first_name && Boolean(formik.errors.first_name)
-            }
-            helperText={formik.touched.first_name && formik.errors.first_name}
-          />
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <Autocomplete
-            options={gender}
-            value={getAutoCompleteValue(gender, formik.values.genderId)}
-            getOptionLabel={(option) => option.name}
-            onChange={handleOnGenderId}
-            renderInput={(params) => (
-              <TextField
-                size="small"
-                fullWidth
-                {...params}
-                label="Unit Price"
-                name="genderId"
-                onBlur={formik.handleBlur}
-                error={
-                  formik.touched.genderId && Boolean(formik.errors.genderId)
-                }
-                helperText={formik.touched.genderId && formik.errors.genderId}
-              />
-            )}
-          />
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <TextField
-            fullWidth
-            maxWidth="sm"
-            label=" Buying Price"
-            name="first_name"
-            value={formik.values.first_name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.first_name && Boolean(formik.errors.first_name)
-            }
-            helperText={formik.touched.first_name && formik.errors.first_name}
-          />
-        </Grid>
-        <Grid item md={12} xs={12}>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            maxWidth="sm"
-            label="Description"
-            name="first_name"
-            value={formik.values.first_name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.first_name && Boolean(formik.errors.first_name)
-            }
-            helperText={formik.touched.first_name && formik.errors.first_name}
-          />
-        </Grid>
-        <Grid item md={12} xs={12}>
-          <div className="flex items-center justify-end">
-            <button
-              type="submit"
-              className="bg-primary px-8 py-2 rounded text-white"
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleAddInventory}
+    >
+      <Form className="">
+        <Grid container spacing={2}>
+          <Grid item md={4} xs={12}>
+            <Field
+              className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+              maxWidth="sm"
+              placeholder="Quantity"
+              name="quantity"
+            />
+            <ErrorMessage
+              name="quantity"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </Grid>
+          <Grid item md={4} xs={12}>
+            <Field
+              className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+              maxWidth="sm"
+              placeholder="Location"
+              name="location"
+            />
+            <ErrorMessage
+              name="location"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </Grid>
+          <Grid item md={4} xs={12}>
+            <Field
+              className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+              maxWidth="sm"
+              type="date"
+              placeholder="Expiry Date"
+              name="expiry_date"
+            />
+            <ErrorMessage
+              name="expiry_date"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </Grid>
+          <Grid item md={4} xs={12}>
+            <Field
+              className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+              maxWidth="sm"
+              placeholder="Purchase Price"
+              name="purchase_price"
+            />
+            <ErrorMessage
+              name="purchase_price"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </Grid>
+          <Grid item md={4} xs={12}>
+            <Field
+              className="block border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+              maxWidth="sm"
+              placeholder="Sale Price"
+              name="sale_price"
+            />
+            <ErrorMessage
+              name="sale_price"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </Grid>
+          <Grid item md={4} xs={12}>
+            <Field
+              as="select"
+              className="block pr-9 border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+              name="item_ID"
             >
-              Save
-            </button>
-          </div>
+              <option value="">Select Item</option>
+              {items?.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </Field>
+            <ErrorMessage
+              name="item_ID"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </Grid>
+          <Grid item md={12} xs={12}>
+            <Field
+              as="select"
+              className="block pr-9 border border-primary rounded-xl py-3 px-4 focus:outline-none w-full"
+              name="supplier_ID"
+            >
+              <option value="">Select Supplier</option>
+              {suppliers?.map((supplier) => (
+                <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+              ))}
+            </Field>
+            <ErrorMessage
+              name="supplier_ID"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </Grid>
+          <Grid item md={12} xs={12}>
+            <div className="flex items-center justify-end">
+              <button
+                type="submit"
+                className="bg-primary px-8 py-2 rounded-3xl text-white"
+              >
+                Add Inventory
+              </button>
+            </div>
+          </Grid>
         </Grid>
-      </Grid>
-    </form>
+      </Form>
+    </Formik>
   );
 };
 
