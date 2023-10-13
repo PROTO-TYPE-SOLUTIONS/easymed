@@ -1,13 +1,30 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import EditPatientDetails from "./edit-patient-details-modal";
+import CmtDropdownMenu from "@/assets/DropdownMenu";
+import { AiFillDelete } from "react-icons/ai";
+import { BiEdit } from 'react-icons/bi';
+import { LuMoreHorizontal } from "react-icons/lu";
+
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const getActions = () => {
+  let actions = [{ action: "delete", label: "Delete", icon: <AiFillDelete className="text-warning text-xl mx-2" /> },
+  { action: "edit", label: "Edit", icon: <BiEdit className="text-xl text-success  mx-2" /> }
+];
+
+  return actions;
+};
+
 const AdminPatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const userActions = getActions();
+  const [open, setOpen] = React.useState(false);
+  const [selectedRowData,setSelectedRowData] = React.useState({});
 
   const users = [
     {
@@ -84,6 +101,29 @@ const AdminPatientsDataGrid = () => {
     },
   ];
 
+
+  const onMenuClick = async (menu, data) => {
+    if (menu.action === "delete") {
+     //   add delete api function
+     }else if(menu.action === 'edit'){
+         setSelectedRowData(data)
+         setOpen(true)
+     }
+   };
+
+  const actionsFunc = ({ data }) => {
+    return (
+      <>
+        <CmtDropdownMenu
+        sx={{ cursor: "pointer" }}
+        items={userActions}
+        onItemClick={(menu) => onMenuClick(menu, data)}
+        TriggerComponent={<LuMoreHorizontal className="cursor-pointer text-xl" />}
+      />
+      </>
+    );
+  };
+
   //   filter users based on search query
   const filteredUser = users.filter((user) => {
     return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
@@ -130,8 +170,11 @@ const AdminPatientsDataGrid = () => {
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
-        <Column dataField="country" caption="Other" width={200} />
+        <Column dataField="country" caption="Action" width={140}
+        cellRender={actionsFunc}
+         />
       </DataGrid>
+      <EditPatientDetails {...{open,setOpen,selectedRowData}} />
     </section>
   );
 };

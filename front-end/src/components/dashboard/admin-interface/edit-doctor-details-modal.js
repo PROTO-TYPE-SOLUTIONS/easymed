@@ -96,7 +96,7 @@ const EditDoctorDetailsModal = ({ open,setOpen,selectedRowData }) => {
         <DialogContent>
           <form onSubmit={formik.handleSubmit}>
             <section className="space-y-2">
-              <p>Demographic</p>
+              <h1 className="font-bold text-xl">Edit Doctor's Details</h1>
               <Grid container spacing={2}>
                 <Grid item md={4} xs={12}>
                   <TextField

@@ -5,7 +5,7 @@ import { LuMoreHorizontal } from "react-icons/lu";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from 'react-icons/bi';
-import EditDoctorDetailsModal from "./edit-doctor-details";
+import EditDoctorDetailsModal from "./edit-doctor-details-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -15,8 +15,6 @@ const getActions = () => {
   let actions = [{ action: "delete", label: "Delete", icon: <AiFillDelete className="text-warning text-xl mx-2" /> },
   { action: "edit", label: "Edit", icon: <BiEdit className="text-xl text-success  mx-2" /> }
 ];
-
-  // actions.push({ action: "edit", label: "Edit", icon: <BiEdit className="text-xl text-success  mx-2" /> });
 
   return actions;
 };
@@ -172,7 +170,6 @@ const AdminDoctorsDataGrid = () => {
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
-        <Column dataField="country" caption="Other" width={140} />
         <Column dataField="country" caption="Action" width={140} 
           cellRender={actionsFunc}
          />
