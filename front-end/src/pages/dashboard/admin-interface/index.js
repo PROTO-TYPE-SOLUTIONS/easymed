@@ -47,22 +47,22 @@ const Admin = () => {
       </Grid>
       <section className="mt-8">
         <div className="flex items-center gap-4">
-        <div>
-          <h1 className={`${currentTab === 0 ? 'bg-primary cursor-pointer text-white' : 'bg-white cursor-pointer'} rounded-3xl shadow-2xl py-1 sm:px-8 px-4`} onClick={() => setCurrentTab(0)}>Users</h1>
+          <div>
+            <h1 className={`${currentTab === 0 ? 'bg-primary cursor-pointer text-white' : 'bg-white cursor-pointer'} rounded-3xl shadow-2xl py-1 sm:px-8 px-4`} onClick={() => setCurrentTab(0)}>Users</h1>
+          </div>
+          <div>
+            <h1 className={`${currentTab === 1 ? 'bg-primary text-white cursor-pointer' : 'bg-white cursor-pointer'} rounded-3xl shadow-2xl py-1 sm:px-8 px-4`} onClick={() => setCurrentTab(1)}>Patients</h1>
+          </div>
+          <div>
+            <h1 className={`${currentTab === 2 ? 'bg-primary text-white cursor-pointer' : 'bg-white cursor-pointer'} rounded-3xl shadow-2xl py-1 sm:px-8 px-4`} onClick={() => setCurrentTab(2)}>Doctors</h1>
+          </div>
         </div>
-        <div>
-          <h1 className={`${currentTab === 1 ? 'bg-primary text-white cursor-pointer' : 'bg-white cursor-pointer'} rounded-3xl shadow-2xl py-1 sm:px-8 px-4`} onClick={() => setCurrentTab(1)}>Patients</h1>
-        </div>
-        <div>
-          <h1 className={`${currentTab === 2 ? 'bg-primary text-white cursor-pointer' : 'bg-white cursor-pointer'} rounded-3xl shadow-2xl py-1 sm:px-8 px-4`} onClick={() => setCurrentTab(2)}>Doctors</h1>
-        </div>
-        </div>
+      </section>
         <div className="">
              {currentTab === 0 && <AdminUsersDataGrid /> }
              {currentTab === 1 && <AdminPatientsDataGrid /> }
              {currentTab === 2 && <AdminDoctorsDataGrid /> }
         </div>
-      </section>
     </Container>
   );
 };
