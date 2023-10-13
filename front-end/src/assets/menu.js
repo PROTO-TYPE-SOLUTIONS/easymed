@@ -87,6 +87,32 @@ export const dashboardData = [
     icon: <FaCodePullRequest className="text-xl" />,
   },
 ];
+export const adminData = [
+  {
+    label: "No. of Patients",
+    number: 37,
+    waiting: 17,
+    status: 'Patients waiting',
+    condition: 'Patients Discharged',
+    condition_number: 13
+  },
+  {
+    label: "No. of Doctors",
+    number: 44,
+    waiting: 3,
+    status: 'Doctors On leave',
+    condition: 'Doctors On Duty',
+    condition_number: 41
+  },
+  {
+    label: "Test Requests",
+    number: 23,
+    waiting: 12,
+    status: 'Tests Approved',
+    condition: 'Test Requests Pending',
+    condition_number: 4
+  },
+];
 
 export const inventoryData = [
   {
