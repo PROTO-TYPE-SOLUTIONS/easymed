@@ -20,6 +20,16 @@ export const menus = [
     icon: <BiSolidDashboard className="text-xl" />,
   },
   {
+    label: "Admin Dashboard",
+    href: "/dashboard/admin-interface",
+    icon: <BiSolidDashboard className="text-xl" />,
+  },
+  {
+    label: "Reception Dashboard",
+    href: "/dashboard/reception-interface",
+    icon: <BiSolidDashboard className="text-xl" />,
+  },
+  {
     label: "Laboratory",
     href: "/dashboard/laboratory",
     icon: <HiUsers className="text-xl" />,

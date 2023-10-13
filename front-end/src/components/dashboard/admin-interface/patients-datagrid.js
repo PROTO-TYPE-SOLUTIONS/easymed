@@ -131,7 +131,7 @@ const AdminPatientsDataGrid = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-center mb-3 mt-4 w-5/12 mx-auto">
+      <div className="flex items-center justify-start mb-3 mt-4 w-5/12">
         <input
           className="rounded-3xl shadow-xl py-3 px-4 focus:outline-none w-full"
           onChange={(e) => setSearchQuery(e.target.value)}

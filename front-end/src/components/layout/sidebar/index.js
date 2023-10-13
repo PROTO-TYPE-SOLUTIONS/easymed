@@ -15,14 +15,14 @@ const Sidebar = () => {
           <h1>Logo</h1>
         </header>
         <section className="px-3 h-[84vh] flex flex-col justify-between">
-          <div className="h-3/14 overflow-x-auto">
+          <div className="overflow-x-auto">
             <ul className="space-y-3 my-4 ">
               {menus.map((menu, index) => (
                 <MenuChild key={index} {...{ index, menu, collapsed }} />
               ))}
             </ul>
           </div>
-          <div style={{ fontSize: "10px" }} className="space-y-2 mb-4">
+          {/* <div style={{ fontSize: "10px" }} className="space-y-2 mb-4">
             <div className="flex items-center gap-2">
               <AiFillLock className="" />
               <p>Logout</p>
@@ -39,7 +39,7 @@ const Sidebar = () => {
               <BsFillExclamationCircleFill className="" />
               <p>Make - Easy HMIS v1.0</p>
             </div>
-          </div>
+          </div> */}
         </section>
       </section>
     </>

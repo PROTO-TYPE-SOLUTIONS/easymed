@@ -7,7 +7,7 @@ import Header from "./header";
 const DashboardLayout = ({ children }) => {
   return (
     <div className="md:flex h-screen overflow-hidden bg-background">
-      <div className="w-52 bg-white shadow-xl border-primary md:block hidden">
+      <div className="w-64 bg-white shadow-xl border-primary md:block hidden">
         <Sidebar />
       </div>
 
