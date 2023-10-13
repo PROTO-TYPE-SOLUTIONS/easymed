@@ -91,9 +91,9 @@ const AdminUsersDataGrid = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-end mb-2">
+      <div className="flex items-center justify-center mb-3 mt-4 w-5/12 mx-auto">
         <input
-          className="rounded shadow py-3 px-2 focus:outline-none"
+          className="rounded-3xl shadow-xl py-3 px-4 focus:outline-none w-full"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
           placeholder="Search..."
