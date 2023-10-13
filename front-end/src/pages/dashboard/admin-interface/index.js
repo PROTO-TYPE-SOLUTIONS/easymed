@@ -9,6 +9,7 @@ import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { FiChevronDown } from 'react-icons/fi';
+import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -103,7 +104,7 @@ const Admin = () => {
         <div>
           <button
             onClick={handleClick}
-            className="bg-primary text-white rounded px-4 py-2 flex items-center gap-2"
+            className="bg-primary text-white rounded shadow-xl px-4 py-2 flex items-center gap-2"
           >
             Actions
             <FiChevronDown />
