@@ -79,12 +79,6 @@ const EditPatientDetails = ({ open,setOpen,selectedRowData }) => {
 
   return (
     <section>
-      <div
-        onClick={handleClickOpen}
-        className="flex items-center gap-2"
-      >
-        <BiEdit onClick={handleClickOpen} className="text-success text-xl mx-2" />
-      </div>
       <Dialog
         fullWidth
         maxWidth="sm"

@@ -65,7 +65,7 @@ const Admin = () => {
       <section className="mt-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div>
-            <h1
+            <button
               className={`${
                 currentTab === 0
                   ? "bg-primary cursor-pointer text-white"
@@ -74,10 +74,10 @@ const Admin = () => {
               onClick={() => setCurrentTab(0)}
             >
               Users
-            </h1>
+            </button>
           </div>
           <div>
-            <h1
+            <button
               className={`${
                 currentTab === 1
                   ? "bg-primary text-white cursor-pointer"
@@ -86,10 +86,10 @@ const Admin = () => {
               onClick={() => setCurrentTab(1)}
             >
               Patients
-            </h1>
+            </button>
           </div>
           <div>
-            <h1
+            <button
               className={`${
                 currentTab === 2
                   ? "bg-primary text-white cursor-pointer"
@@ -98,38 +98,11 @@ const Admin = () => {
               onClick={() => setCurrentTab(2)}
             >
               Doctors
-            </h1>
+            </button>
           </div>
         </div>
         <div>
-          <button
-            onClick={handleClick}
-            className="bg-primary text-white rounded shadow-xl px-4 py-2 flex items-center gap-2"
-          >
-            Actions
-            <FiChevronDown />
-          </button>
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            MenuListProps={{
-              "aria-labelledby": "basic-button",
-            }}
-          >
-            <MenuItem onClick={handleClose}>Add User</MenuItem>
-            <MenuItem onClick={handleClose}>Add Patient</MenuItem>
-            <MenuItem onClick={handleClose}>Add Doctor</MenuItem>
-          </Menu>
+          <AddPatientModal />
         </div>
       </section>
       <div className="">
