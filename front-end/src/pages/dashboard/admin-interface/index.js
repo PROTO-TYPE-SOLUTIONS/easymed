@@ -6,9 +6,6 @@ import { AiOutlineRight } from "react-icons/ai";
 import AdminUsersDataGrid from "@/components/dashboard/admin-interface/users-datagrid";
 import AdminPatientsDataGrid from "@/components/dashboard/admin-interface/patients-datagrid";
 import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors-datagrid";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { FiChevronDown } from 'react-icons/fi';
 import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
 
 const Admin = () => {
