@@ -7,10 +7,10 @@ import { Divider } from "@mui/material";
 import { TextField, Autocomplete, Grid } from "@mui/material";
 import { getAutoCompleteValue } from "@/assets/file-helper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { BiEdit } from 'react-icons/bi';
 
-
-const AddPatientModal = () => {
-  const [open, setOpen] = React.useState(false);
+const EditUserDetailsModal = ({ open,setOpen,selectedRowData }) => {
+    console.log("ROW_DATA ",selectedRowData);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -79,12 +79,6 @@ const AddPatientModal = () => {
 
   return (
     <section>
-      <button
-        onClick={handleClickOpen}
-        className="bg-primary text-white rounded px-4 py-2 flex items-center gap-4"
-      >
-        Add Patient
-      </button>
       <Dialog
         fullWidth
         maxWidth="sm"
@@ -96,7 +90,7 @@ const AddPatientModal = () => {
         <DialogContent>
           <form onSubmit={formik.handleSubmit}>
             <section className="space-y-2">
-              <p>Demographic</p>
+              <h1 className="text-xl font-bold">Edit User Details</h1>
               <Grid container spacing={2}>
                 <Grid item md={4} xs={12}>
                   <TextField
@@ -350,4 +344,4 @@ const AddPatientModal = () => {
   );
 };
 
-export default AddPatientModal;
+export default EditUserDetailsModal;
