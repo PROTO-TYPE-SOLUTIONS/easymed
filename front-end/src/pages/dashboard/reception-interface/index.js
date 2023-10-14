@@ -1,9 +1,9 @@
 import React from 'react'
 import CustomizedLayout from '@/components/layout/customized-layout'
 import { Container,Grid } from '@mui/material'
-import ReceptionPatientsDataGrid from '@/components/dashboard/reception-interface/reception-patient-datagrid'
 import { adminData } from '@/assets/menu'
 import { AiOutlineRight } from "react-icons/ai";
+import ReceptionPatientsDataGrid from '@/components/dashboard/reception-interface/reception-patient-datagrid';
 
 
 const ReceptionInterface = () => {
