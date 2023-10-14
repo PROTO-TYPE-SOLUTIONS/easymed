@@ -9,7 +9,6 @@ import { toast } from 'react-toastify'
 export default function AssignDoctorModal({ selectedRecords }) {
   const [open, setOpen] = React.useState(false);
 
-  console.log("MODAL_RECORDS ", selectedRecords);
 
   const handleClickOpen = () => {
     setOpen(true);
