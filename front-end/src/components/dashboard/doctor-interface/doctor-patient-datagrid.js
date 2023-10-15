@@ -1,23 +1,16 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
-import AddPatientModal from "../patient/add-patient-modal";
-import AssignDoctorModal from './assign-doctor-modal'
-import DischargePatientModal from "./discharge-patient-modal";
-
+import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-
-
-const ReceptionPatientsDataGrid = () => {
+const DoctorPatientDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [open, setOpen] = useState(false);
-
-
 
   const users = [
     {
@@ -72,18 +65,10 @@ const ReceptionPatientsDataGrid = () => {
     setSelectedRecords(selectedRowKeys);
   };
 
- 
-
-  
-
   return (
     <section>
-      <div className="flex items-center gap-2 justify-between">
-        <div>
-          <AddPatientModal />
-        </div>
+      <div className="flex items-center gap-2 justify-end">
         <div className="flex items-center gap-2">
-          {selectedRecords.length > 0 && <DischargePatientModal {...{selectedRecords}} /> }
           {selectedRecords.length > 0 && <AssignDoctorModal {...{selectedRecords}} /> }
           <input
             className="rounded shadow-xl py-3 px-2 focus:outline-none mb-2"
@@ -135,4 +120,4 @@ const ReceptionPatientsDataGrid = () => {
   );
 };
 
-export default ReceptionPatientsDataGrid;
+export default DoctorPatientDataGrid;

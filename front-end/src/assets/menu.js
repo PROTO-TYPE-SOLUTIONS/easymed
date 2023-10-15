@@ -25,6 +25,11 @@ export const menus = [
     icon: <BiSolidDashboard className="text-xl" />,
   },
   {
+    label: "Doctor Dashboard",
+    href: "/dashboard/doctor-interface",
+    icon: <BiSolidDashboard className="text-xl" />,
+  },
+  {
     label: "Reception Dashboard",
     href: "/dashboard/reception-interface",
     icon: <BiSolidDashboard className="text-xl" />,
