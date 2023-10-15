@@ -3,14 +3,25 @@ import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AddPatientModal from "../patient/add-patient-modal";
 import AssignDoctorModal from './assign-doctor-modal'
+import { AiFillDelete } from "react-icons/ai";
+import { TbWheelchairOff } from 'react-icons/tb';
+import CmtDropdownMenu from "@/assets/DropdownMenu";
+import { LuMoreHorizontal } from "react-icons/lu";
+import DischargePatientModal from "./discharge-patient-modal";
+
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+
+
 const ReceptionPatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRecords, setSelectedRecords] = useState([]);
+  const [open, setOpen] = useState(false);
+
+
 
   const users = [
     {
@@ -65,6 +76,10 @@ const ReceptionPatientsDataGrid = () => {
     setSelectedRecords(selectedRowKeys);
   };
 
+ 
+
+  
+
   return (
     <section>
       <div className="flex items-center justify-between">
@@ -72,6 +87,7 @@ const ReceptionPatientsDataGrid = () => {
           <AddPatientModal />
         </div>
         <div className="flex items-center gap-2">
+          {selectedRecords.length > 0 && <DischargePatientModal {...{selectedRecords}} /> }
           {selectedRecords.length > 0 && <AssignDoctorModal {...{selectedRecords}} /> }
           <input
             className="rounded shadow-xl py-3 px-2 focus:outline-none mb-2"
@@ -118,8 +134,8 @@ const ReceptionPatientsDataGrid = () => {
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
-        <Column dataField="country" caption="Other" width={200} />
       </DataGrid>
+      <DischargePatientModal {...{open,setOpen,selectedRecords}} />
     </section>
   );
 };
