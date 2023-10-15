@@ -102,7 +102,7 @@ const Admin = () => {
           <AddPatientModal />
         </div>
       </section>
-      <div className="">
+      <div className="mt-2">
         {currentTab === 0 && <AdminUsersDataGrid />}
         {currentTab === 1 && <AdminPatientsDataGrid />}
         {currentTab === 2 && <AdminDoctorsDataGrid />}

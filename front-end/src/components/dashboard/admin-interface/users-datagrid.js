@@ -130,14 +130,14 @@ const AdminUsersDataGrid = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-start mb-3 mt-4 w-5/12">
+      {/* <div className="flex items-center justify-start mb-3 mt-4 w-5/12">
         <input
           className="rounded-3xl shadow-xl py-3 px-4 focus:outline-none w-full"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
           placeholder="Search..."
         />
-      </div>
+      </div> */}
       <DataGrid
         dataSource={filteredUser}
         allowColumnReordering={true}
