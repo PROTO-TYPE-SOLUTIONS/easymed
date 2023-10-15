@@ -82,7 +82,7 @@ const ReceptionPatientsDataGrid = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2 justify-between">
         <div>
           <AddPatientModal />
         </div>
@@ -109,7 +109,7 @@ const ReceptionPatientsDataGrid = () => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
-        className="shadow-xl"
+        className="shadow-xl w-full"
         height={"70vh"}
       >
         <Selection
@@ -135,7 +135,6 @@ const ReceptionPatientsDataGrid = () => {
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
       </DataGrid>
-      <DischargePatientModal {...{open,setOpen,selectedRecords}} />
     </section>
   );
 };
