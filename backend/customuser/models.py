@@ -35,6 +35,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     RECEPTIONIST = 'receptionist'
     SYS_ADMIN = 'sysadmin'
 
+    BASE_ROLE = PATIENT
+
     ROLE_CHOICES = (
         (PATIENT, 'Patient'),
         (DOCTOR, 'Doctor'),
@@ -51,7 +53,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=PATIENT)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=BASE_ROLE)
 
     user_permissions = models.ManyToManyField(
         Permission,
@@ -68,6 +70,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.role = self.PATIENT
+            return super().save(*args, **kwargs)
 
 class DoctorProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
@@ -84,9 +91,6 @@ class SysadminProfile(models.Model):
 class LabTechProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     # Add lab-tech-specific fields here
-
-class ReceptionistProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     
 
 # proxy models
