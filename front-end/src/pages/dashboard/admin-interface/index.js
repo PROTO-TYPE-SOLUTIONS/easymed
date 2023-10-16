@@ -60,8 +60,8 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 0
-                  ? "cursor-pointer border-b-2 py-1 border-primary"
-                  : "cursor-pointer"
+                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
+                  : "cursor-pointer font-bold"
               } `}
               onClick={() => setCurrentTab(0)}
             >
@@ -72,8 +72,8 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 1
-                  ? "cursor-pointer border-b-2 py-1 border-primary"
-                  : "cursor-pointer"
+                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
+                  : "cursor-pointer font-bold"
               }`}
               onClick={() => setCurrentTab(1)}
             >
@@ -84,8 +84,8 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 2
-                  ? "cursor-pointer border-b-2 py-1 border-primary"
-                  : "cursor-pointer"
+                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
+                  : "cursor-pointer font-bold"
               }`}
               onClick={() => setCurrentTab(2)}
             >
