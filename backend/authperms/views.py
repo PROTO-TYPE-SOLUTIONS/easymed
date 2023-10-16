@@ -18,11 +18,14 @@ from rest_framework.views import APIView
 from .serializers import (
     GroupsSerializer,
     AddGroupSerializer,
+    EditGroupNameSerializer,
     AddUserToGroupsSerializer,
+    RemoveUserFromGroupSerializer,
     GroupSerializer,
     PermissionsSerializer,
     PermissionSerializer,
-    AddPermissionSerializer
+    AddPermissionSerializer,
+    RemovePermissionsFromUserSerializer
 
 )
 
@@ -44,7 +47,6 @@ from customuser.models import (
 
 class GroupsAPIView(APIView):
     permission_classes = (IsAdminUser,)
-
     @extend_schema(
         responses=GroupsSerializer,
     )
@@ -57,7 +59,6 @@ class GroupsAPIView(APIView):
 
 class GroupAPIView(APIView):
     permission_classes = (IsAdminUser,)
-
     def get_object(self, id: int):
         try:
             return Group.objects.get(id=id)
@@ -81,7 +82,6 @@ class GroupAPIView(APIView):
 
 class AddGroupAPIView(APIView):
     permission_classes = (IsAdminUser,)
-
     @extend_schema(
         request=AddGroupSerializer,
         responses=AddGroupSerializer,
@@ -96,24 +96,71 @@ class AddGroupAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class EditGroupAPIView(APIView):
-    def put(self, request: Request, *args, **kwargs: dict):
-        pass
+class EditGroupNameAPIView(APIView):
+    permission_classes = (IsAdminUser,)
+    def get_object(self, name: str):
+        try:
+            return Group.objects.get_by_natural_key(name)
+        except Group.DoesNotExist:
+            return None
+
+    @extend_schema(
+        request=EditGroupNameSerializer,
+        responses=EditGroupNameSerializer,
+    )
+    def put(self, request: Request, group_name: str = None, *args, **kwargs: dict):
+        data = request.data
+        instance = self.get_object(group_name)
+        if instance is None:
+            return Response({"error_message": f"Group {group_name} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = EditGroupNameSerializer(instance, data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class DeleteGroupAPIView(APIView):
-    def delete(self, request: Request, *args, **kwargs: dict):
-        pass
+    permission_classes = (IsAdminUser,)
+    def get_object(self, group_name: str):
+        try:
+            return Group.objects.get_by_natural_key(group_name)
+        except Group.DoesNotExist:
+            return None
+
+    @extend_schema()
+    def delete(self, request: Request, group_name: str = None, *args, **kwargs: dict):
+        instance = self.get_object(group_name)
+        if instance is None:
+            return Response({"error_message": f"Group {group_name} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserGroups(APIView):
-    def get(self, request: Request, *args, **kwargs: dict):
-        pass
+class UserGroupsAPIView(APIView):
+    permission_classes = (IsAdminUser,)
+    def get_object(self, user_id: str):
+        try:
+            return CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return None
+
+    @extend_schema(
+        responses=GroupsSerializer,
+    )
+    def get(self, request: Request, user_id: str = None, *args, **kwargs: dict):
+        user = self.get_object(user_id)
+        if user is None:
+            return Response({"error_message": f"user id {user_id} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        groups = user.groups.all()
+        serializer = GroupsSerializer(groups, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AddUserToGroupAPIView(APIView):
     permission_classes = (IsAdminUser,)
-
     def get_object(self, id: int):
         try:
             return CustomUser.objects.get(id=id)
@@ -143,14 +190,41 @@ class AddUserToGroupAPIView(APIView):
 
 
 class RemoveUserFromGroupAPIView(APIView):
-    def put(self, request: Request, *args, **kwargs: dict):
-        pass
+    permission_classes = (IsAdminUser,)
+    def get_object(self, user_id: str):
+        try:
+            return CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return None
 
+    @extend_schema(
+        request=RemoveUserFromGroupSerializer,
+    )
+    def post(self, request: Request, user_id: str = None, *args, **kwargs: dict):
+        data = request.data
+        user = self.get_object(user_id)
+        if user is None:
+            return Response({"error_message": "provide the user id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = RemoveUserFromGroupSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        group_names: list[str] = serializer.validated_data.get("group_name")
+        for group_name in group_names:
+            group = Group.objects.get_by_natural_key(group_name)
+            user.groups.remove(group)
+
+        return Response({"message": "user successfully removed from group(s)"}, status=status.HTTP_200_OK)
 
 # permissions
+
+
 class PermissionsAPIView(APIView):
     permission_classes = (IsAdminUser,)
 
+    @extend_schema(
+        responses=PermissionsSerializer,
+    )
     def get(self, request: Request, *args, **kwargs: dict):
         permissions = Permission.objects.all()
         serializer = PermissionsSerializer(permissions, many=True)
@@ -159,7 +233,6 @@ class PermissionsAPIView(APIView):
 
 class PermissionAPIView(APIView):
     permission_classes = (IsAdminUser,)
-
     def get_object(self, id: int):
         try:
             return Permission.objects.get(id=id)
@@ -183,7 +256,6 @@ class PermissionAPIView(APIView):
 
 class AddPermissionAPIView(APIView):
     permission_classes = (IsAdminUser,)
-
     @extend_schema(
         request=AddPermissionSerializer,
         responses=AddPermissionSerializer,
@@ -199,25 +271,64 @@ class AddPermissionAPIView(APIView):
 
 
 class EditPermissionAPIView(APIView):
+    permission_classes = (IsAdminUser,)
     def put(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class DeletePermissionAPIView(APIView):
-    def delete(self, request: Request, *args, **kwargs: dict):
-        pass
+    permission_classes = (IsAdminUser,)
+    def get_object(self, permission_id: int):
+        try:
+            return Permission.objects.get(id=permission_id)
+        except Permission.DoesNotExist:
+            return None
+
+    @extend_schema()
+    def delete(self, request: Request, permission_id: str = None, *args, **kwargs: dict):
+        permission = self.get_object(permission_id)
+        if permission is None:
+            return Response({"error_message": f"Permission id {permission_id} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
+        permission.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserPermissionsAPIView(APIView):
+    permission_classes = (IsAdminUser,)
     def get(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class AddPermissionsToUserAPIView(APIView):
-    def put(self, request: Request, *args, **kwargs: dict):
+    permission_classes = (IsAdminUser,)
+    def post(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class RemovePermissionsFromUserAPIView(APIView):
-    def put(self, request: Request, *args, **kwargs: dict):
-        pass
+    permission_classes = (IsAdminUser,)
+
+    def get_object(self, user_id: str):
+        try:
+            return CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return None
+        
+    @extend_schema(
+        request=RemovePermissionsFromUserSerializer,
+    )
+    def post(self, request: Request, user_id:str=None, *args, **kwargs: dict):
+        data = request.data
+        user = self.get_object(user_id)
+        if user is None:
+            return Response({"error_message": "provide the user id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = RemovePermissionsFromUserSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        permissions: list[str] = serializer.validated_data.get("group_name")
+        for permission_id in permissions:
+            group = Permission.objects.get(id=permission_id)
+            user.user_permissions.remove(group)
+
+        return Response({"message": "permissions successfully removed"}, status=status.HTTP_200_OK)
