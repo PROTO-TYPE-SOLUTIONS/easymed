@@ -1,6 +1,5 @@
 import React from "react";
 import Sidebar from "./sidebar";
-import Header from "./header";
 import CustomizedHeader from "./customized-header";
 
 

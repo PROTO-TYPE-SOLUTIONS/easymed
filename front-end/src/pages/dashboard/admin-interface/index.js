@@ -60,49 +60,49 @@ const Admin = () => {
         ))}
       </Grid>
       <section className="mt-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-8 uppercase border-b border-primary text-primary text-center">
           <div>
-            <button
+            <p
               className={`${
                 currentTab === 0
-                  ? "bg-primary cursor-pointer text-white"
-                  : "bg-white cursor-pointer"
-              } rounded shadow-2xl py-2 sm:px-8 px-4`}
+                  ? "cursor-pointer border-b-2 py-1 border-primary"
+                  : "cursor-pointer"
+              } `}
               onClick={() => setCurrentTab(0)}
             >
               Users
-            </button>
+            </p>
           </div>
           <div>
-            <button
+            <p
               className={`${
                 currentTab === 1
-                  ? "bg-primary text-white cursor-pointer"
-                  : "bg-white cursor-pointer"
-              } rounded shadow-2xl py-2 sm:px-8 px-4`}
+                  ? "cursor-pointer border-b-2 py-1 border-primary"
+                  : "cursor-pointer"
+              }`}
               onClick={() => setCurrentTab(1)}
             >
               Patients
-            </button>
+            </p>
           </div>
           <div>
-            <button
+            <p
               className={`${
                 currentTab === 2
-                  ? "bg-primary text-white cursor-pointer"
-                  : "bg-white cursor-pointer"
-              } rounded shadow-2xl py-2 sm:px-8 px-4`}
+                  ? "cursor-pointer border-b-2 py-1 border-primary"
+                  : "cursor-pointer"
+              }`}
               onClick={() => setCurrentTab(2)}
             >
               Doctors
-            </button>
+            </p>
           </div>
         </div>
         <div>
           <AddPatientModal />
         </div>
       </section>
-      <div className="mt-2">
+      <div className="mt-8">
         {currentTab === 0 && <AdminUsersDataGrid />}
         {currentTab === 1 && <AdminPatientsDataGrid />}
         {currentTab === 2 && <AdminDoctorsDataGrid />}
