@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from .models import (
     CustomUser,
 )
-from receptionists.models import ReceptionistProfile
+from receptions.models import ReceptionistProfile
 
 
 @receiver(post_save, sender=CustomUser)
