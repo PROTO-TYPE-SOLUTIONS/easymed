@@ -1,0 +1,116 @@
+import React, { useState } from "react";
+import CustomizedLayout from "@/components/layout/customized-layout";
+import { Container, Grid } from "@mui/material";
+import { adminData } from "@/assets/menu";
+import { AiOutlineRight } from "react-icons/ai";
+import AdminUsersDataGrid from "@/components/dashboard/admin-interface/users-datagrid";
+import AdminPatientsDataGrid from "@/components/dashboard/admin-interface/patients-datagrid";
+import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors-datagrid";
+import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
+
+const Admin = () => {
+  const [currentTab, setCurrentTab] = useState(0);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <Container maxWidth="xl" className="py-6">
+      <Grid container spacing={2}>
+        {adminData.map((data, index) => (
+          <Grid key={index} item md={4} xs={12}>
+            <section
+              className={`${
+                index === 1
+                  ? "bg-white shadow-xl"
+                  : "bg-card shadow-xl text-white "
+              } rounded h-[20vh]`}
+            >
+              <div className="p-2 h-[14vh] space-y-4">
+                <p className="text-sm">{data.label}</p>
+                <div className="flex items-center justify-between">
+                  <h1 className="font-semibold text-xl">{data.number}</h1>
+                  <div className="flex items-center">
+                    <p className="text-xs font-thin underline">
+                      {data?.waiting} {data?.status}
+                    </p>
+                    <AiOutlineRight />
+                  </div>
+                </div>
+              </div>
+              <div
+                className={`${
+                  index === 1 ? "bg-background" : "bg-cardSecondary "
+                } rounded-br rounded-bl h-[6vh] p-2 flex items-center justify-between text-xs font-thin`}
+              >
+                <p>{data.condition}</p>
+                <p>{data.condition_number}</p>
+              </div>
+            </section>
+          </Grid>
+        ))}
+      </Grid>
+      <section className="mt-8 flex items-center justify-between">
+        <div className="flex items-center gap-8 uppercase border-b border-primary text-primary text-center">
+          <div>
+            <p
+              className={`${
+                currentTab === 0
+                  ? "cursor-pointer border-b-2 py-1 border-primary"
+                  : "cursor-pointer"
+              } `}
+              onClick={() => setCurrentTab(0)}
+            >
+              Users
+            </p>
+          </div>
+          <div>
+            <p
+              className={`${
+                currentTab === 1
+                  ? "cursor-pointer border-b-2 py-1 border-primary"
+                  : "cursor-pointer"
+              }`}
+              onClick={() => setCurrentTab(1)}
+            >
+              Patients
+            </p>
+          </div>
+          <div>
+            <p
+              className={`${
+                currentTab === 2
+                  ? "cursor-pointer border-b-2 py-1 border-primary"
+                  : "cursor-pointer"
+              }`}
+              onClick={() => setCurrentTab(2)}
+            >
+              Doctors
+            </p>
+          </div>
+        </div>
+        <div>
+          <AddPatientModal />
+        </div>
+      </section>
+      <div className="mt-8">
+        {currentTab === 0 && <AdminUsersDataGrid />}
+        {currentTab === 1 && <AdminPatientsDataGrid />}
+        {currentTab === 2 && <AdminDoctorsDataGrid />}
+      </div>
+    </Container>
+  );
+};
+
+Admin.getLayout = (page) => <CustomizedLayout>{page}</CustomizedLayout>;
+
+export default Admin;

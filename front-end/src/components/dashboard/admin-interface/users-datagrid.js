@@ -1,14 +1,29 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
-import AddPatientModal from "./add-patient-modal";
+import CmtDropdownMenu from "@/assets/DropdownMenu";
+import { AiFillDelete } from "react-icons/ai";
+import { BiEdit } from 'react-icons/bi';
+import { LuMoreHorizontal } from "react-icons/lu";
+import EditUserDetailsModal from "./edit-user-details-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-const PatientsDataGrid = () => {
+const getActions = () => {
+  let actions = [{ action: "delete", label: "Delete", icon: <AiFillDelete className="text-warning text-xl mx-2" /> },
+  { action: "edit", label: "Edit", icon: <BiEdit className="text-xl text-success  mx-2" /> }
+];
+
+  return actions;
+};
+
+const AdminUsersDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const userActions = getActions();
+  const [open, setOpen] = React.useState(false);
+  const [selectedRowData,setSelectedRowData] = React.useState({});
 
   const users = [
     {
@@ -85,6 +100,29 @@ const PatientsDataGrid = () => {
     },
   ];
 
+
+  const onMenuClick = async (menu, data) => {
+    if (menu.action === "delete") {
+     //   add delete api function
+     }else if(menu.action === 'edit'){
+         setSelectedRowData(data)
+         setOpen(true)
+     }
+   };
+
+  const actionsFunc = ({ data }) => {
+    return (
+      <>
+        <CmtDropdownMenu
+        sx={{ cursor: "pointer" }}
+        items={userActions}
+        onItemClick={(menu) => onMenuClick(menu, data)}
+        TriggerComponent={<LuMoreHorizontal className="cursor-pointer text-xl" />}
+      />
+      </>
+    );
+  };
+
   //   filter users based on search query
   const filteredUser = users.filter((user) => {
     return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
@@ -92,15 +130,14 @@ const PatientsDataGrid = () => {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-2">
-        <AddPatientModal />
+      {/* <div className="flex items-center justify-start mb-3 mt-4 w-5/12">
         <input
-          className="shadow py-3 px-2 focus:outline-none"
+          className="rounded-3xl shadow-xl py-3 px-4 focus:outline-none w-full"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
           placeholder="Search..."
         />
-      </div>
+      </div> */}
       <DataGrid
         dataSource={filteredUser}
         allowColumnReordering={true}
@@ -132,10 +169,13 @@ const PatientsDataGrid = () => {
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
-        <Column dataField="country" caption="Other" width={200} />
+        <Column dataField="country" caption="Action" width={200}
+        cellRender={actionsFunc}
+         />
       </DataGrid>
+      <EditUserDetailsModal {...{open,setOpen,selectedRowData}} />
     </section>
   );
 };
 
-export default PatientsDataGrid;
+export default AdminUsersDataGrid;

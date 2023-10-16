@@ -34,11 +34,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
     # user apps
-    'customuser',
-    'patient',
-    'pharmacy',
-    'inventory',
-    'laboratory',
+    'authperms.apps.AuthpermsConfig',
+    'customuser.apps.CustomuserConfig',
+    'patient.apps.PatientConfig',
+    'pharmacy.apps.PharmacyConfig',
+    'inventory.apps.InventoryConfig',
+    'laboratory.apps.LaboratoryConfig',
 
 ]
 
@@ -131,8 +132,6 @@ REST_FRAMEWORK = {
         # "rest_framework.permissions.IsAuthenticated",
         ],
     "DEFAULT_AUTHENTICATION_CLASSES": [  
-        # "rest_framework.authentication.SessionAuthentication",
-        # "rest_framework.authentication.TokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

@@ -7,11 +7,10 @@ import { Divider } from "@mui/material";
 import { TextField, Autocomplete, Grid } from "@mui/material";
 import { getAutoCompleteValue } from "@/assets/file-helper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { IoMdAdd } from 'react-icons/io'
+import { BiEdit } from 'react-icons/bi';
 
-
-const AddPatientModal = () => {
-  const [open, setOpen] = React.useState(false);
+const EditUserDetailsModal = ({ open,setOpen,selectedRowData }) => {
+    console.log("ROW_DATA ",selectedRowData);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -80,12 +79,6 @@ const AddPatientModal = () => {
 
   return (
     <section>
-      <button
-        onClick={handleClickOpen}
-        className="bg-primary text-white px-4 py-3 text-sm flex items-center gap-1"
-      >
-        <IoMdAdd /> Create Patient
-      </button>
       <Dialog
         fullWidth
         maxWidth="sm"
@@ -97,7 +90,7 @@ const AddPatientModal = () => {
         <DialogContent>
           <form onSubmit={formik.handleSubmit}>
             <section className="space-y-2">
-              <p>Demographic</p>
+              <h1 className="text-xl font-bold">Edit User Details</h1>
               <Grid container spacing={2}>
                 <Grid item md={4} xs={12}>
                   <TextField
@@ -330,7 +323,7 @@ const AddPatientModal = () => {
                 <div className="flex justify-end gap-2 mt-4">
                   <button
                     type="submit"
-                    className="bg-primary px-4 py-2 text-white"
+                    className="bg-[#02273D] px-4 py-2 text-white"
                   >
                     Save Patient
                   </button>
@@ -351,4 +344,4 @@ const AddPatientModal = () => {
   );
 };
 
-export default AddPatientModal;
+export default EditUserDetailsModal;
