@@ -32,6 +32,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     DOCTOR = 'doctor'
     NURSE = 'nurse'
     LAB_TECH = 'labtech'
+    RECEPTIONIST = 'receptionist'
     SYS_ADMIN = 'sysadmin'
 
     ROLE_CHOICES = (
@@ -39,6 +40,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         (DOCTOR, 'Doctor'),
         (NURSE, 'Nurse'),
         (LAB_TECH, 'Lab Technician'),
+        (RECEPTIONIST, 'Receptionist'),
         (SYS_ADMIN, 'Sysadmin'),
         
     )
@@ -82,3 +84,9 @@ class SysadminProfile(models.Model):
 class LabTechProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     # Add lab-tech-specific fields here
+
+class ReceptionistProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    
+
+# proxy models
