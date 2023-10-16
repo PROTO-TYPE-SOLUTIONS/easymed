@@ -33,6 +33,18 @@ export const menus = [
     label: "Reception Dashboard",
     href: "/dashboard/reception-interface",
     icon: <BiSolidDashboard className="text-xl" />,
+    children: [
+      {
+        label: "Create Patient",
+        href: "/dashboard/reception-interface",
+        icon: <GrAdd className="" />,
+      },
+      {
+        label: "Booked Appointments",
+        href: "/dashboard/reception-interface/booked-appointments",
+        icon: <FaWheelchair className="" />,
+      },
+    ],
   },
   {
     label: "Laboratory",

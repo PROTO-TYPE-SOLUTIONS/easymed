@@ -45,14 +45,14 @@ const MenuChild = ({ collapsed, menu, index }) => {
         </>
       )}
       {showChild && (
-        <ul className={`bg-[#F2F2F6] rounded mx-2 ${childMenuClasses}`}>
+        <ul className={`bg-[#F2F2F6] py-1 rounded mx-2 ${childMenuClasses}`}>
           {menu?.children?.map((child, index) => (
             <li key={index} className="px-4 text-sm">
               <Link
                 className={`${currentPath === child.href ? 'bg-primary text-white rounded p-2' : 'py-2'} flex items-center gap-2`}
                 href={child.href}
               >
-                <span className="text-sm">{child.icon}</span>{" "}
+                {/* <span className="text-sm text-white">{child.icon}</span>{" "} */}
                 <span>{!collapsed && child.label}</span>
               </Link>
             </li>
