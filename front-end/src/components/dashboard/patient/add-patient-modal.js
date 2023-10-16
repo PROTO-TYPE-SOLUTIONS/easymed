@@ -7,6 +7,7 @@ import { Divider } from "@mui/material";
 import { TextField, Autocomplete, Grid } from "@mui/material";
 import { getAutoCompleteValue } from "@/assets/file-helper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { IoMdAdd } from 'react-icons/io'
 
 
 const AddPatientModal = () => {
@@ -81,9 +82,9 @@ const AddPatientModal = () => {
     <section>
       <button
         onClick={handleClickOpen}
-        className="bg-primary text-white rounded px-4 py-2 flex items-center gap-4"
+        className="bg-primary text-white px-4 py-3 text-sm flex items-center gap-1"
       >
-        Add Patient
+        <IoMdAdd /> Create Patient
       </button>
       <Dialog
         fullWidth
@@ -329,14 +330,14 @@ const AddPatientModal = () => {
                 <div className="flex justify-end gap-2 mt-4">
                   <button
                     type="submit"
-                    className="bg-[#02273D] px-4 py-2 rounded-3xl text-white"
+                    className="bg-primary px-4 py-2 text-white"
                   >
                     Save Patient
                   </button>
                   <button
                     type="submit"
                     onClick={handleClose}
-                    className="border border-[#02273D] px-4 py-2 rounded-3xl text-[#02273D]"
+                    className="border border-warning px-4 py-2 text-[#02273D]"
                   >
                     Cancel
                   </button>
