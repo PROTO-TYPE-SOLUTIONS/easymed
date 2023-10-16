@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from django.db.models.query import QuerySet
 
@@ -20,6 +21,7 @@ class Receptionist(CustomUser):
 
 
 class ReceptionistProfile(models.Model):
+    id = models.UUIDField(default=uuid4, editable=False, unique=True)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     
     
