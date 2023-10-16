@@ -13,17 +13,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Inventory',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.CharField(max_length=255)),
-                ('location', models.CharField(choices=[('mainst', 'Mainst'), ('laboratory', 'Laboratory'), ('radiology', 'Radiology'), ('pharmacy', 'Pharmacy'), ('reception', 'Reception')], default='mainst', max_length=10)),
-                ('expiry_date', models.DateField()),
-                ('purchase_price', models.CharField(max_length=255)),
-                ('sale_price', models.CharField(max_length=255)),
-            ],
-        ),
-        migrations.CreateModel(
             name='Item',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -57,6 +46,19 @@ class Migration(migrations.Migration):
                 ('order_date', models.DateField()),
                 ('quantity', models.PositiveIntegerField()),
                 ('Total_Cost', models.CharField(max_length=255)),
+                ('item_ID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.item')),
+                ('supplier_ID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.supplier')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Inventory',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('quantity', models.CharField(max_length=255)),
+                ('location', models.CharField(choices=[('mainst', 'Mainst'), ('laboratory', 'Laboratory'), ('radiology', 'Radiology'), ('pharmacy', 'Pharmacy'), ('reception', 'Reception')], default='mainst', max_length=10)),
+                ('expiry_date', models.DateField()),
+                ('purchase_price', models.CharField(max_length=255)),
+                ('sale_price', models.CharField(max_length=255)),
                 ('item_ID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.item')),
                 ('supplier_ID', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.supplier')),
             ],

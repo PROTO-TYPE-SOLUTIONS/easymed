@@ -48,7 +48,7 @@ class OrderBill (models.Model):
         ('paid', 'Paid'),
     )
     payment_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unpaid')
-    patient_ID =  models.ForeignKey('patient.Patient', on_delete=models.CASCADE)
+    # patient_ID =  models.ForeignKey(Patient, on_delete=models.CASCADE)
     bill_date = models.DateTimeField(auto_now_add=True)
     total_Cost = models.CharField(max_length=255, null=True, blank=True)
     
