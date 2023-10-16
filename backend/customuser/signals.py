@@ -18,3 +18,5 @@ def create_user_profile(sender: CustomUser, instance: CustomUser, created: bool,
         except Exception as e:
             return
     
+
+    
