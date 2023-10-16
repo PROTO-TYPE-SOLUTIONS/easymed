@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.utils import timezone
@@ -93,4 +94,25 @@ class LabTechProfile(models.Model):
     # Add lab-tech-specific fields here
     
 
-# proxy models
+class ReceptionistProfile(models.Model):
+    id = models.UUIDField(default=uuid4, editable=False, unique=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
+
+# proxy model
+
+class ReceptionistManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.RECEPTIONIST)
+
+class Receptionist(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = ReceptionistManager()
+    BASE_ROLE = CustomUser.RECEPTIONIST
+
+
+  
+    
