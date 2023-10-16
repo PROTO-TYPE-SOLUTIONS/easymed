@@ -24,7 +24,7 @@ export default function DischargePatientModal({selectedRecords,}) {
     <div>
         <button
         onClick={handleClickOpen}
-        className="border border-success px-3 py-2 rounded"
+        className="bg-primary text-white px-3 py-3 text-sm"
       >
         Discharge Patient
       </button>

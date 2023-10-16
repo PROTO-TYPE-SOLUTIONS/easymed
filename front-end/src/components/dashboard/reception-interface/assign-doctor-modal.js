@@ -67,7 +67,7 @@ export default function AssignDoctorModal({ selectedRecords }) {
     <div>
       <button
         onClick={handleClickOpen}
-        className="border border-primary px-3 py-2 rounded"
+        className="border border-primary px-3 py-3 text-sm"
       >
         Assign Doctor
       </button>

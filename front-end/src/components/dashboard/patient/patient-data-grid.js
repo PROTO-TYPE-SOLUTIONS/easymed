@@ -93,10 +93,9 @@ const PatientsDataGrid = () => {
   return (
     <section>
       <div className="flex items-center justify-between mb-2">
-        {/* <h1 className="uppercase font-semibold">Patients</h1> */}
         <AddPatientModal />
         <input
-          className="rounded shadow py-3 px-2 focus:outline-none"
+          className="shadow py-3 px-2 focus:outline-none"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
           placeholder="Search..."

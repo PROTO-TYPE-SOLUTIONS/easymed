@@ -71,7 +71,7 @@ const DoctorPatientDataGrid = () => {
         <div className="flex items-center gap-2">
           {selectedRecords.length > 0 && <AssignDoctorModal {...{selectedRecords}} /> }
           <input
-            className="rounded shadow-xl py-3 px-2 focus:outline-none mb-2"
+            className="shadow-xl py-3 px-2 focus:outline-none mb-2"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             placeholder="Search..."
