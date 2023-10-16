@@ -77,6 +77,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             self.role = self.PATIENT
             return super().save(*args, **kwargs)
 
+class PatientProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 class DoctorProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     # Add doctor-specific fields here
@@ -156,3 +158,15 @@ class LabTech(CustomUser):
     BASE_ROLE = CustomUser.LAB_TECH
 
     
+class PatientManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.PATIENT)
+    
+
+class Patient(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = PatientManager()
+    BASE_ROLE = CustomUser.PATIENT
