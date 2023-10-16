@@ -115,4 +115,44 @@ class Receptionist(CustomUser):
 
 
   
+class DoctorManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.DOCTOR)
+    
+class Doctor(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = DoctorManager()
+    BASE_ROLE = CustomUser.DOCTOR
+
+
+class NurseManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.NURSE)
+    
+
+class Nurse(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = NurseManager()
+    BASE_ROLE = CustomUser.NURSE
+
+
+class LabTechManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.LAB_TECH)
+    
+
+class LabTech(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = LabTechManager()
+    BASE_ROLE = CustomUser.LAB_TECH
+
     
