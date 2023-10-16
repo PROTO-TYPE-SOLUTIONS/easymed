@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
+import { MdHourglassEmpty } from 'react-icons/md';
+import { Chip } from "@mui/material";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -16,6 +18,7 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "1234821",
       name: "Marcos Ochieng",
+      progress: "In Progress",
       country: "Kenya",
       gender: "Male",
       age: "34",
@@ -25,6 +28,7 @@ const DoctorPatientDataGrid = () => {
       id_number: "70081234",
       name: "Derrick Kimani",
       country: "Uganda",
+      progress: "Progress",
       gender: "Male",
       age: "23",
       status: "Active",
@@ -32,6 +36,7 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "1234821",
       name: "Jane Munyua",
+      progress: "In Progress",
       country: "Tanzania",
       gender: "Female",
       age: "70",
@@ -40,6 +45,7 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "70081234",
       name: "Ann Kibet",
+      progress: "Progress",
       country: "Burundi",
       gender: "Male",
       age: "49",
@@ -49,6 +55,7 @@ const DoctorPatientDataGrid = () => {
       id_number: "1234221",
       name: "Ann Ochieng",
       country: "Rwanda",
+      progress: "In Progress",
       gender: "Female",
       age: "88",
       status: "Active",
@@ -63,6 +70,24 @@ const DoctorPatientDataGrid = () => {
   const onSelectionChanged = (props) => {
     const { selectedRowKeys, selectedRowsData } = props;
     setSelectedRecords(selectedRowKeys);
+  };
+
+  const nameFunc = ({ data }) => {
+    if (data?.progress === "In Progress") {
+      return (
+        <div className="flex items-center gap-2">
+          <Chip variant="contained" size="small" className="bg-card text-white" label={data?.progress} />
+          <p>{data?.name}</p>
+        </div>
+      );
+    }else if(data?.progress === "Progress"){
+        return (
+          <div className="flex items-center gap-2">
+          <Chip variant="contained" size="small" className="bg-success text-white" label={data?.progress} />
+          <p>{data?.name}</p>
+          </div>
+        )
+    }
   };
 
   return (
@@ -108,9 +133,10 @@ const DoctorPatientDataGrid = () => {
         <Column
           dataField="name"
           caption="Name"
-          width={200}
+          width={240}
           allowFiltering={true}
           allowSearch={true}
+          cellRender={nameFunc}
         />
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />

@@ -1,13 +1,7 @@
 import React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import * as Yup from "yup";
-import { useFormik } from "formik";
-import { Divider } from "@mui/material";
-import { TextField, Autocomplete, Grid } from "@mui/material";
-import { getAutoCompleteValue } from "@/assets/file-helper";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { BiEdit } from "react-icons/bi";
+
 
 const DeletePatientModal = ({ deleteOpen, setDeleteOpen, selectedRowData }) => {
 

@@ -7,21 +7,16 @@ import AdminUsersDataGrid from "@/components/dashboard/admin-interface/users-dat
 import AdminPatientsDataGrid from "@/components/dashboard/admin-interface/patients-datagrid";
 import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors-datagrid";
 import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
+import AdminCreateUserModal from "@/components/dashboard/admin-interface/admin-add-user-modal";
+import AdminCreateDoctor from "@/components/dashboard/admin-interface/admin-add-doctor";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   return (
     <Container maxWidth="xl" className="py-6">
@@ -98,8 +93,10 @@ const Admin = () => {
             </p>
           </div>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
           <AddPatientModal />
+          <AdminCreateUserModal />
+          <AdminCreateDoctor />
         </div>
       </section>
       <div className="mt-8">
