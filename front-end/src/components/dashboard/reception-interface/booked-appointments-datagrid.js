@@ -4,7 +4,8 @@ import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import CreateAppointmentModal from "./create-appointment-modal";
-import { AiFillDelete } from 'react-icons/ai';
+import { FaWheelchair } from "react-icons/fa";
+
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -14,8 +15,8 @@ const getActions = () => {
   let actions = [
     {
       action: "create",
-      label: "Create",
-      icon: <AiFillDelete className="text-warning text-xl mx-2" />,
+      label: "Create Patient",
+      icon: <FaWheelchair className="text-success text-xl mx-2" />,
     },
   ];
 
@@ -150,7 +151,7 @@ const BookedAppointmentsDataGrid = () => {
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
-        <Column dataField="gender" caption="Action" width={200} cellRender={actionsFunc} />
+        <Column dataField="gender" caption="Action" width={140} cellRender={actionsFunc} />
       </DataGrid>
       <CreateAppointmentModal {...{open,setOpen,selectedRowData}} />
     </section>
