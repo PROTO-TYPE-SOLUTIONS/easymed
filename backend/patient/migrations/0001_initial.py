@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Services',
+            name='Service',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.TextField(max_length=300)),
@@ -77,7 +77,7 @@ class Migration(migrations.Migration):
                 ('reason', models.TextField(max_length=300)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('date_changed', models.DateTimeField(auto_now=True)),
-                ('service', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='patient.services')),
+                ('service', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='patient.service')),
             ],
         ),
         migrations.CreateModel(
