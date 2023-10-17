@@ -4,7 +4,6 @@ import React from "react";
 const Doctors = () => {
   return (
     <section className="space-y-1">
-      <h1 className="uppercase text-xs font-semibold">Doctors</h1>
       {doctorData.map((doc, index) => (
         <div key={index} className="flex items-center justify-between bg-white shadow-xl rounded-xl px-2 py-1">
           <div className="flex gap-2 items-center">

@@ -3,10 +3,7 @@ import { Container, Grid } from "@mui/material";
 import PatientsDataGrid from "@/components/dashboard/patient/patient-data-grid";
 import { AiOutlineRight } from "react-icons/ai";
 import { adminData } from "@/assets/menu";
-import CustomizedLayout from "@/components/layout/customized-layout";
-import Doctors from "../../components/layout/rightbar/doctors";
-import BookedSessions from "../../components/layout/rightbar/booked-sessions";
-import CalenderDate from "@/components/layout/rightbar/calender";
+import DashboardLayout from "@/components/layout/dashboard-layout";
 
 const Dashboard = () => {
   return (
@@ -47,26 +44,26 @@ const Dashboard = () => {
           ))}
         </Grid>
       </Grid>
-      <Grid container spacing={2}>
-        <Grid item md={8} xs={12}>
           <PatientsDataGrid />
+      {/* <Grid container spacing={2}>
+        <Grid item md={8} xs={12}>
         </Grid>
         <Grid item md={4} xs={12} className="space-y-4">
           <Doctors />
         </Grid>
-      </Grid>
-      <Grid container spacing={2}>
+      </Grid> */}
+      {/* <Grid container spacing={2}>
         <Grid item md={8} xs={12}>
           <CalenderDate />
         </Grid>
         <Grid item md={4} xs={12} className="space-y-4">
           <BookedSessions />
         </Grid>
-      </Grid>
+      </Grid> */}
     </Container>
   );
 };
 
-Dashboard.getLayout = (page) => <CustomizedLayout>{page}</CustomizedLayout>;
+Dashboard.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Dashboard;
