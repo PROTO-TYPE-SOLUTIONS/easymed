@@ -18,30 +18,25 @@ export const menus = [
     label: "Dashboard",
     href: "/dashboard",
     icon: <BiSolidDashboard className="text-xl" />,
-  },
-  {
-    label: "Admin Dashboard",
-    href: "/dashboard/admin-interface",
-    icon: <BiSolidDashboard className="text-xl" />,
-  },
-  {
-    label: "Doctor Dashboard",
-    href: "/dashboard/doctor-interface",
-    icon: <BiSolidDashboard className="text-xl" />,
-  },
-  {
-    label: "Reception Dashboard",
-    href: "/dashboard/reception-interface",
-    icon: <BiSolidDashboard className="text-xl" />,
     children: [
       {
-        label: "Create Patient",
-        href: "/dashboard/reception-interface",
+        label: "General Dashboard",
+        href: "/dashboard",
         icon: <GrAdd className="" />,
       },
       {
-        label: "Booked Appointments",
-        href: "/dashboard/reception-interface/booked-appointments",
+        label: "Admin Dashboard",
+        href: "/dashboard/admin-interface",
+        icon: <GrAdd className="" />,
+      },
+      {
+        label: "Doctor Dashboard",
+        href: "/dashboard/doctor-interface",
+        icon: <FaWheelchair className="" />,
+      },
+      {
+        label: "Reception Dashboard",
+        href: "/dashboard/reception-interface",
         icon: <FaWheelchair className="" />,
       },
     ],
@@ -138,6 +133,52 @@ export const adminData = [
     status: 'Tests Approved',
     condition: 'Test Requests Pending',
     condition_number: 4
+  },
+];
+
+export const doctorData = [
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Surgeon',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Optician',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+];
+
+export const bookedData = [
+  {
+    name: "Joseph Mmbone",
+    date: '12th July 2024',
+  },
+  {
+    name: "Mary Moraa",
+    date: '12th July 2024',
+  },
+  {
+    name: "Derrick Kimani",
+    date: '12th July 2024',
+  },
+  {
+    name: "Annete Mwihaki",
+    date: '12th July 2024',
   },
 ];
 
