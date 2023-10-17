@@ -4,17 +4,27 @@ import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import { LuMoreHorizontal } from "react-icons/lu";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { AiFillDelete } from "react-icons/ai";
-import { BiEdit } from 'react-icons/bi';
+import { BiEdit } from "react-icons/bi";
 import EditDoctorDetailsModal from "./edit-doctor-details-modal";
+import DeleteDoctorModal from "./delete-doctor-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
-  
+
 const getActions = () => {
-  let actions = [{ action: "delete", label: "Delete", icon: <AiFillDelete className="text-warning text-xl mx-2" /> },
-  { action: "edit", label: "Edit", icon: <BiEdit className="text-xl text-success  mx-2" /> }
-];
+  let actions = [
+    {
+      action: "delete",
+      label: "Delete",
+      icon: <AiFillDelete className="text-warning text-xl mx-2" />,
+    },
+    {
+      action: "edit",
+      label: "Edit",
+      icon: <BiEdit className="text-xl text-success  mx-2" />,
+    },
+  ];
 
   return actions;
 };
@@ -23,9 +33,8 @@ const AdminDoctorsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const [open, setOpen] = React.useState(false);
-  const [selectedRowData,setSelectedRowData] = React.useState({});
-
-
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [selectedRowData, setSelectedRowData] = React.useState({});
 
   const users = [
     {
@@ -109,22 +118,25 @@ const AdminDoctorsDataGrid = () => {
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "delete") {
-     //   add delete api function
-     }else if(menu.action === 'edit'){
-         setSelectedRowData(data)
-         setOpen(true)
-     }
-   };
+      setSelectedRowData(data);
+      setDeleteOpen(true);
+    } else if (menu.action === "edit") {
+      setSelectedRowData(data);
+      setOpen(true);
+    }
+  };
 
   const actionsFunc = ({ data }) => {
     return (
       <>
         <CmtDropdownMenu
-        sx={{ cursor: "pointer" }}
-        items={userActions}
-        onItemClick={(menu) => onMenuClick(menu, data)}
-        TriggerComponent={<LuMoreHorizontal className="cursor-pointer text-xl" />}
-      />
+          sx={{ cursor: "pointer" }}
+          items={userActions}
+          onItemClick={(menu) => onMenuClick(menu, data)}
+          TriggerComponent={
+            <LuMoreHorizontal className="cursor-pointer text-xl" />
+          }
+        />
       </>
     );
   };
@@ -170,11 +182,15 @@ const AdminDoctorsDataGrid = () => {
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
-        <Column dataField="country" caption="Action" width={140} 
+        <Column
+          dataField="country"
+          caption="Action"
+          width={140}
           cellRender={actionsFunc}
-         />
+        />
       </DataGrid>
-      <EditDoctorDetailsModal {...{open,setOpen,selectedRowData}} />
+      <EditDoctorDetailsModal {...{ open, setOpen, selectedRowData }} />
+      <DeleteDoctorModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} />
     </section>
   );
 };

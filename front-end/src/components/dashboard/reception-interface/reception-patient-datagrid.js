@@ -20,8 +20,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "1234821",
       name: "Marcos Ochieng",
-      country: "Kenya",
-      progress: "In Progress",
+      assigned_doctor: "Dr. Patrick",
+      progress_status: "Discharged",
       gender: "Male",
       age: "34",
       status: "Active",
@@ -29,8 +29,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "70081234",
       name: "Derrick Kimani",
-      progress: "Progress",
-      country: "Uganda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Moses",
       gender: "Male",
       age: "23",
       status: "Active",
@@ -38,8 +38,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "1234821",
       name: "Jane Munyua",
-      progress: "In Progress",
-      country: "Tanzania",
+      progress_status: "New Patient",
+      assigned_doctor: "Dr. Melanie",
       gender: "Female",
       age: "70",
       status: "Active",
@@ -47,8 +47,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "70081234",
       name: "Ann Kibet",
-      progress: "Progress",
-      country: "Burundi",
+      progress_status: "Discharged",
+      assigned_doctor: "Dr. Brenda",
       gender: "Male",
       age: "49",
       status: "Active",
@@ -56,8 +56,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "1234221",
       name: "Ann Ochieng",
-      progress: "In Progress",
-      country: "Rwanda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Patrick",
       gender: "Female",
       age: "88",
       status: "Active",
@@ -74,31 +74,25 @@ const ReceptionPatientsDataGrid = () => {
     setSelectedRecords(selectedRowKeys);
   };
 
-  const nameFunc = ({ data }) => {
+  const statusFunc = ({ data }) => {
     console.log("DATA_DATA ", data);
-    if (data?.progress === "In Progress") {
+    if (data?.progress_status === "In Treatment") {
       return (
-        <div className="flex items-center gap-2">
-          <Chip
-            variant="contained"
-            size="small"
-            className="bg-card text-white"
-            label={data?.progress}
-          />
-          <p>{data?.name}</p>
-        </div>
+        <button className="bg-primary px-2 py-1 text-white">
+          {data.progress_status}
+        </button>
       );
-    } else if (data?.progress === "Progress") {
+    } else if (data?.progress_status === "Discharged") {
       return (
-        <div className="flex items-center gap-2">
-          <Chip
-            variant="contained"
-            size="small"
-            className="bg-success text-white"
-            label={data?.progress}
-          />
-          <p>{data?.name}</p>
-        </div>
+        <button className="bg-success text-white px-2 py-1">
+          {data.progress_status}
+        </button>
+      );
+    } else if (data?.progress_status === "New Patient") {
+      return (
+        <button className="bg-card text-white px-2 py-1">
+          {data.progress_status}
+        </button>
       );
     }
   };
@@ -126,7 +120,7 @@ const ReceptionPatientsDataGrid = () => {
             <AssignDoctorModal {...{ selectedRecords }} />
           )}
           <input
-            className="shadow-xl py-3 px-2 focus:outline-none mb-2"
+            className="shadow-xl py-3 px-4 focus:outline-none mb-2"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             placeholder="Search..."
@@ -166,11 +160,16 @@ const ReceptionPatientsDataGrid = () => {
           width={240}
           allowFiltering={true}
           allowSearch={true}
-          cellRender={nameFunc}
         />
         <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
+        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
+        <Column dataField="gender" caption="Gender" width={140} />
+        <Column
+          dataField="gender"
+          caption="Status"
+          width={140}
+          cellRender={statusFunc}
+        />
       </DataGrid>
     </section>
   );
