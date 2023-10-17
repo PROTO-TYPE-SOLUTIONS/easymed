@@ -6,7 +6,6 @@ import { LuMoreHorizontal } from "react-icons/lu";
 import CreateAppointmentModal from "./create-appointment-modal";
 import { FaWheelchair } from "react-icons/fa";
 
-
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
@@ -109,16 +108,18 @@ const BookedAppointmentsDataGrid = () => {
 
   return (
     <section>
-      <div className="flex items-center gap-2 justify-between">
-        <h1 className="text-xl font-semibold text-primary uppercase">Booked Appointments</h1>
-        <div className="flex items-center gap-2">
-          <input
-            className="shadow-xl py-3 px-2 focus:outline-none mb-2"
-            onChange={(e) => setSearchQuery(e.target.value)}
-            value={searchQuery}
-            placeholder="Search..."
-          />
-        </div>
+      <div className="flex items-center justify-end">
+        <input
+          className="shadow-2xl py-3 px-8 focus:outline-none mb-2 w-1/2 rounded-3xl"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchQuery}
+          placeholder="Search..."
+        />
+      </div>
+      <div className="mb-2">
+        <h1 className="text-xl text-primary uppercase">
+          Booked Appointments
+        </h1>
       </div>
       <DataGrid
         dataSource={filteredUser}
@@ -133,7 +134,6 @@ const BookedAppointmentsDataGrid = () => {
         className="shadow-xl w-full"
         height={"70vh"}
       >
-        
         <Pager
           visible={true}
           // allowedPageSizes={allowedPageSizes}
@@ -151,9 +151,14 @@ const BookedAppointmentsDataGrid = () => {
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
-        <Column dataField="gender" caption="Action" width={140} cellRender={actionsFunc} />
+        <Column
+          dataField="gender"
+          caption="Action"
+          width={140}
+          cellRender={actionsFunc}
+        />
       </DataGrid>
-      <CreateAppointmentModal {...{open,setOpen,selectedRowData}} />
+      <CreateAppointmentModal {...{ open, setOpen, selectedRowData }} />
     </section>
   );
 };
