@@ -156,6 +156,36 @@ export const doctorData = [
     status: 'On duty',
   },
   {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
     name: "Dr. Jairus",
     specialisation: 'Dentist',
     image: "./images/doc.jpg",

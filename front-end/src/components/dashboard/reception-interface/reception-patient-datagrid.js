@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AddPatientModal from "../patient/add-patient-modal";
-import AssignDoctorModal from './assign-doctor-modal'
+import AssignDoctorModal from "./assign-doctor-modal";
 import DischargePatientModal from "./discharge-patient-modal";
 import { Chip } from "@mui/material";
-
+import Link from "next/link";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
-
-
 
 const ReceptionPatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -77,33 +75,56 @@ const ReceptionPatientsDataGrid = () => {
   };
 
   const nameFunc = ({ data }) => {
-    console.log("DATA_DATA ",data);
+    console.log("DATA_DATA ", data);
     if (data?.progress === "In Progress") {
       return (
         <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-card text-white" label={data?.progress} />
+          <Chip
+            variant="contained"
+            size="small"
+            className="bg-card text-white"
+            label={data?.progress}
+          />
           <p>{data?.name}</p>
         </div>
       );
-    }else if(data?.progress === "Progress"){
-        return (
-          <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-success text-white" label={data?.progress} />
+    } else if (data?.progress === "Progress") {
+      return (
+        <div className="flex items-center gap-2">
+          <Chip
+            variant="contained"
+            size="small"
+            className="bg-success text-white"
+            label={data?.progress}
+          />
           <p>{data?.name}</p>
-          </div>
-        )
+        </div>
+      );
     }
   };
 
   return (
     <section>
       <div className="flex items-center gap-2 justify-between">
-        <div>
-          <AddPatientModal />
-        </div>
+        <section className="flex items-center gap-2">
+          <div>
+            <AddPatientModal />
+          </div>
+          <div>
+            <Link href="/dashboard/reception-interface/booked-appointments">
+              <button className="border border-success px-4 py-3 text-sm">
+                Booked Appointments
+              </button>
+            </Link>
+          </div>
+        </section>
         <div className="flex items-center gap-2">
-          {selectedRecords.length > 0 && <DischargePatientModal {...{selectedRecords}} /> }
-          {selectedRecords.length > 0 && <AssignDoctorModal {...{selectedRecords}} /> }
+          {selectedRecords.length > 0 && (
+            <DischargePatientModal {...{ selectedRecords }} />
+          )}
+          {selectedRecords.length > 0 && (
+            <AssignDoctorModal {...{ selectedRecords }} />
+          )}
           <input
             className="shadow-xl py-3 px-2 focus:outline-none mb-2"
             onChange={(e) => setSearchQuery(e.target.value)}

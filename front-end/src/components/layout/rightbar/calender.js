@@ -26,7 +26,7 @@ const CalenderDate = () => {
   };
 
   return (
-    <div className="text-center mt-6">
+    <div className="text-center mt-6 bg-white p-4 shadow-xl">
       <div className="grid grid-cols-7 gap-1">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div key={day} className="text-gray-400 text-sm">
