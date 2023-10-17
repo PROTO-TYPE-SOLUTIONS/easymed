@@ -15,8 +15,6 @@ const RightBar = () => {
               <h1 className="text-sm">See All</h1>
             </div>
             <Doctors />
-            <Doctors />
-            <Doctors />
           </section>
           <section className="my-3 space-y-1">
             <div className="flex items-center justify-between">
@@ -25,7 +23,6 @@ const RightBar = () => {
               </h1>
               <h1 className="text-sm">See All</h1>
             </div>
-            <BookedSessions />
             <BookedSessions />
           </section>
         <div className="">

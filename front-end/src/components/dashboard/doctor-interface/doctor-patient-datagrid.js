@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
-import { MdHourglassEmpty } from 'react-icons/md';
+import { MdHourglassEmpty } from "react-icons/md";
 import { Chip } from "@mui/material";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -18,8 +18,8 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "1234821",
       name: "Marcos Ochieng",
-      progress: "In Progress",
-      country: "Kenya",
+      assigned_doctor: "Dr. Patrick",
+      progress_status: "Discharged",
       gender: "Male",
       age: "34",
       status: "Active",
@@ -27,8 +27,8 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "70081234",
       name: "Derrick Kimani",
-      country: "Uganda",
-      progress: "Progress",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Moses",
       gender: "Male",
       age: "23",
       status: "Active",
@@ -36,8 +36,8 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "1234821",
       name: "Jane Munyua",
-      progress: "In Progress",
-      country: "Tanzania",
+      progress_status: "New Patient",
+      assigned_doctor: "Dr. Melanie",
       gender: "Female",
       age: "70",
       status: "Active",
@@ -45,8 +45,8 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "70081234",
       name: "Ann Kibet",
-      progress: "Progress",
-      country: "Burundi",
+      progress_status: "Discharged",
+      assigned_doctor: "Dr. Brenda",
       gender: "Male",
       age: "49",
       status: "Active",
@@ -54,8 +54,8 @@ const DoctorPatientDataGrid = () => {
     {
       id_number: "1234221",
       name: "Ann Ochieng",
-      country: "Rwanda",
-      progress: "In Progress",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Patrick",
       gender: "Female",
       age: "88",
       status: "Active",
@@ -72,21 +72,26 @@ const DoctorPatientDataGrid = () => {
     setSelectedRecords(selectedRowKeys);
   };
 
-  const nameFunc = ({ data }) => {
-    if (data?.progress === "In Progress") {
+  const statusFunc = ({ data }) => {
+    console.log("DATA_DATA ", data);
+    if (data?.progress_status === "In Treatment") {
       return (
-        <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-card text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-        </div>
+        <button className="bg-primary px-2 py-1 text-white">
+          {data.progress_status}
+        </button>
       );
-    }else if(data?.progress === "Progress"){
-        return (
-          <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-success text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-          </div>
-        )
+    } else if (data?.progress_status === "Discharged") {
+      return (
+        <button className="bg-success text-white px-2 py-1">
+          {data.progress_status}
+        </button>
+      );
+    } else if (data?.progress_status === "New Patient") {
+      return (
+        <button className="bg-card text-white px-2 py-1">
+          {data.progress_status}
+        </button>
+      );
     }
   };
 
@@ -94,7 +99,9 @@ const DoctorPatientDataGrid = () => {
     <section>
       <div className="flex items-center gap-2 justify-end">
         <div className="flex items-center gap-2">
-          {selectedRecords.length > 0 && <AssignDoctorModal {...{selectedRecords}} /> }
+          {selectedRecords.length > 0 && (
+            <AssignDoctorModal {...{ selectedRecords }} />
+          )}
           <input
             className="shadow-xl py-3 px-2 focus:outline-none mb-2"
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -136,11 +143,20 @@ const DoctorPatientDataGrid = () => {
           width={240}
           allowFiltering={true}
           allowSearch={true}
-          cellRender={nameFunc}
         />
         <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
+        <Column
+          dataField="gender"
+          caption="Status"
+          width={140}
+          cellRender={statusFunc}
+        />
+        <Column
+          dataField="assigned_doctor"
+          caption="Assigned Doctor"
+          width={200}
+        />
+        <Column dataField="gender" caption="Gender" width={140} />
       </DataGrid>
     </section>
   );

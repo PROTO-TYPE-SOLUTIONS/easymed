@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import CustomizedLayout from "@/components/layout/customized-layout";
-import { Container, Grid } from "@mui/material";
-import { adminData } from "@/assets/menu";
-import { AiOutlineRight } from "react-icons/ai";
+import { Container } from "@mui/material";
 import AdminUsersDataGrid from "@/components/dashboard/admin-interface/users-datagrid";
 import AdminPatientsDataGrid from "@/components/dashboard/admin-interface/patients-datagrid";
 import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors-datagrid";
 import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
 import AdminCreateUserModal from "@/components/dashboard/admin-interface/admin-add-user-modal";
 import AdminCreateDoctor from "@/components/dashboard/admin-interface/admin-add-doctor";
+import DashboardCards from "@/components/dashboard/dashboard-cards";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -20,7 +19,8 @@ const Admin = () => {
 
   return (
     <Container maxWidth="xl" className="py-6">
-      <Grid container spacing={2}>
+      <DashboardCards />
+      {/* <Grid container spacing={2}>
         {adminData.map((data, index) => (
           <Grid key={index} item md={4} xs={12}>
             <section
@@ -53,7 +53,7 @@ const Admin = () => {
             </section>
           </Grid>
         ))}
-      </Grid>
+      </Grid> */}
       <section className="mt-8 flex items-center justify-between">
         <div className="flex items-center gap-8 uppercase border-b border-primary text-primary text-center">
           <div>

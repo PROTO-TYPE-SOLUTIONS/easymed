@@ -52,15 +52,15 @@ export const menus = [
     icon: <HiUsers className="text-xl" />,
     children: [
       {
-        label: "Add Patient",
+        label: "View Patients",
         href: "/dashboard/patients",
         icon: <GrAdd className="" />,
       },
-      {
-        label: "Refer Patient",
-        href: "/dashboard/patients/referrals",
-        icon: <FaWheelchair className="" />,
-      },
+      // {
+      //   label: "Refer Patient",
+      //   href: "/dashboard/patients/referrals",
+      //   icon: <FaWheelchair className="" />,
+      // },
     ],
   },
   {
@@ -152,6 +152,36 @@ export const doctorData = [
   {
     name: "Dr. Patrick",
     specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
     image: "./images/doc.jpg",
     status: 'On duty',
   },

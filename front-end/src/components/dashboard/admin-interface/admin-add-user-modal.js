@@ -62,7 +62,7 @@ const AdminCreateUserModal = () => {
     <>
       <button
         onClick={handleClickOpen}
-        className="border border-primary text-primary px-4 py-3 text-sm flex items-center gap-1"
+        className="border border-card text-card font-semibold px-4 py-3 text-sm flex items-center gap-1"
       >
         <IoMdAdd /> Create User
       </button>
@@ -77,7 +77,7 @@ const AdminCreateUserModal = () => {
         <DialogContent>
           <section className="flex items-center justify-center gap-8 overflow-hidden">
             <div className="w-full space-y-8 px-4">
-                <h1 className="text-2xl text-center">Create User</h1>
+                <h1 className="text-xl text-center">Create User</h1>
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -87,7 +87,7 @@ const AdminCreateUserModal = () => {
                   <section className="flex flex-col items-center justify-center space-y-4">
                     <div className="w-full">
                       <Field
-                        className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="First Name"
                         name="first_name"
@@ -100,7 +100,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="Last Name"
                         name="last_name"
@@ -113,7 +113,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
                         type="email"
                         placeholder="Email"
                         name="email"
@@ -126,7 +126,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
                         type="password"
                         placeholder="Password"
                         name="password"
@@ -139,7 +139,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="Role"
                         name="role"
@@ -152,7 +152,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <button
                       type="submit"
-                      className="bg-primary rounded w-full px-8 py-3 text-white"
+                      className="bg-primary w-full px-8 py-3 text-white"
                     >
                       {loading && (
                         <svg

@@ -40,83 +40,48 @@ const AdminPatientsDataGrid = () => {
 
   const users = [
     {
-      number: "1",
       id_number: "1234821",
       name: "Marcos Ochieng",
-      progress: "In Progress",
-      country: "Kenya",
+      assigned_doctor: "Dr. Patrick",
+      progress_status: "Discharged",
       gender: "Male",
       age: "34",
       status: "Active",
     },
     {
-      number: "2",
       id_number: "70081234",
       name: "Derrick Kimani",
-      progress: "Progress",
-      country: "Uganda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Moses",
       gender: "Male",
       age: "23",
       status: "Active",
     },
     {
-      number: "3",
       id_number: "1234821",
       name: "Jane Munyua",
-      progress: "In Progress",
-      country: "Tanzania",
+      progress_status: "New Patient",
+      assigned_doctor: "Dr. Melanie",
       gender: "Female",
       age: "70",
       status: "Active",
     },
     {
-      number: "3",
       id_number: "70081234",
-      progress: "In Progress",
       name: "Ann Kibet",
-      country: "Burundi",
+      progress_status: "Discharged",
+      assigned_doctor: "Dr. Brenda",
       gender: "Male",
       age: "49",
       status: "Active",
     },
     {
-      number: "4",
-      id_number: "1234821",
+      id_number: "1234221",
       name: "Ann Ochieng",
-      progress: "Progress",
-      country: "Rwanda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Patrick",
       gender: "Female",
       age: "88",
-      status: "Active",
-    },
-    {
-      number: "5",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      progress: "In Progress",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "6",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      progress: "Progress",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "7",
-      id_number: "1234821",
-      progress: "In Progress",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
       status: "Active",
     },
   ];
@@ -146,21 +111,26 @@ const AdminPatientsDataGrid = () => {
     );
   };
 
-  const nameFunc = ({ data }) => {
-    if (data?.progress === "In Progress") {
+  const statusFunc = ({ data }) => {
+    console.log("DATA_DATA ", data);
+    if (data?.progress_status === "In Treatment") {
       return (
-        <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-card text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-        </div>
+        <button className="bg-primary px-2 py-1 text-white">
+          {data.progress_status}
+        </button>
       );
-    }else if(data?.progress === "Progress"){
-        return (
-          <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-success text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-          </div>
-        )
+    } else if (data?.progress_status === "Discharged") {
+      return (
+        <button className="bg-success text-white px-2 py-1">
+          {data.progress_status}
+        </button>
+      );
+    } else if (data?.progress_status === "New Patient") {
+      return (
+        <button className="bg-card text-white px-2 py-1">
+          {data.progress_status}
+        </button>
+      );
     }
   };
 
@@ -198,7 +168,6 @@ const AdminPatientsDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="number" caption="NO" width={80} />
         <Column dataField="id_number" caption="ID" width={140} />
         <Column
           dataField="name"
@@ -206,11 +175,16 @@ const AdminPatientsDataGrid = () => {
           width={240}
           allowFiltering={true}
           allowSearch={true}
-          cellRender={nameFunc}
         />
         <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
+        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
+        <Column dataField="gender" caption="Gender" width={140} />
+        <Column
+          dataField=""
+          caption="Status"
+          width={140}
+          cellRender={statusFunc}
+        />
         <Column
           dataField="country"
           caption="Action"

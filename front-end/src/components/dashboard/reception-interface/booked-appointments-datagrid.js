@@ -14,7 +14,7 @@ const getActions = () => {
   let actions = [
     {
       action: "create",
-      label: "Create Patient",
+      label: "Convert to Patient",
       icon: <FaWheelchair className="text-success text-xl mx-2" />,
     },
   ];
