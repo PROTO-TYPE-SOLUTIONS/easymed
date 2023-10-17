@@ -106,7 +106,7 @@ const ReceptionPatientsDataGrid = () => {
           </div>
           <div>
             <Link href="/dashboard/reception-interface/booked-appointments">
-              <button className="border border-success px-4 py-3 text-sm">
+              <button className="border border-card text-card font-semibold px-4 py-3 text-sm">
                 Booked Appointments
               </button>
             </Link>

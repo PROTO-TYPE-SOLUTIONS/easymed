@@ -67,7 +67,7 @@ export default function AssignDoctorModal({ selectedRecords }) {
     <div>
       <button
         onClick={handleClickOpen}
-        className="border border-primary px-3 py-3 text-sm"
+        className="border border-card text-card font-semibold px-3 py-3 text-sm"
       >
         Assign Doctor
       </button>
@@ -104,12 +104,12 @@ export default function AssignDoctorModal({ selectedRecords }) {
               <div className="flex items-center gap-2 justify-end mt-3">
                 <button
                   type="submit"
-                  className="bg-success rounded px-3 py-2 text-white"
+                  className="bg-success px-3 py-2 text-white"
                 >
                   Proceed
                 </button>
                 <button
-                  className="border border-warning rounded px-3 py-2"
+                  className="border border-warning px-3 py-2"
                   onClick={handleClose}
                 >
                   Cancel
