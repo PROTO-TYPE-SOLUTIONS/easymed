@@ -11,9 +11,9 @@ module.exports = {
       white: '#ffffff',
       background: '#F2F2F6',
       warning: '#FF3333',
-      success: '#008800',
+      success: '#2E7D32',
       card: '#146EB4',
-      cardSecondary: '#0E4F82'
+      cardSecondary: '#0E4F82',
     }
   },
   plugins: [],

@@ -1,21 +1,31 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
-import AddPatientModal from "../patient/add-patient-modal";
-import AssignDoctorModal from './assign-doctor-modal'
-import DischargePatientModal from "./discharge-patient-modal";
-import { Chip } from "@mui/material";
-
+import CmtDropdownMenu from "@/assets/DropdownMenu";
+import { LuMoreHorizontal } from "react-icons/lu";
+import CreateAppointmentModal from "./create-appointment-modal";
+import { FaWheelchair } from "react-icons/fa";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const getActions = () => {
+  let actions = [
+    {
+      action: "create",
+      label: "Create Patient",
+      icon: <FaWheelchair className="text-success text-xl mx-2" />,
+    },
+  ];
 
+  return actions;
+};
 
-const ReceptionPatientsDataGrid = () => {
+const BookedAppointmentsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedRecords, setSelectedRecords] = useState([]);
+  const [selectedRowData, setSelectedRowData] = useState({});
+  const userActions = getActions();
   const [open, setOpen] = useState(false);
 
   const users = [
@@ -71,53 +81,50 @@ const ReceptionPatientsDataGrid = () => {
     return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const onSelectionChanged = (props) => {
-    const { selectedRowKeys, selectedRowsData } = props;
-    setSelectedRecords(selectedRowKeys);
+  const onMenuClick = async (menu, data) => {
+    if (menu.action === "create") {
+      setSelectedRowData(data);
+      setOpen(true);
+    } else if (menu.action === "edit") {
+      // setSelectedRowData(data);
+      // setOpen(true);
+    }
   };
 
-  const nameFunc = ({ data }) => {
-    console.log("DATA_DATA ",data);
-    if (data?.progress === "In Progress") {
-      return (
-        <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-card text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-        </div>
-      );
-    }else if(data?.progress === "Progress"){
-        return (
-          <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-success text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-          </div>
-        )
-    }
+  const actionsFunc = ({ data }) => {
+    return (
+      <>
+        <CmtDropdownMenu
+          sx={{ cursor: "pointer" }}
+          items={userActions}
+          onItemClick={(menu) => onMenuClick(menu, data)}
+          TriggerComponent={
+            <LuMoreHorizontal className="cursor-pointer text-xl" />
+          }
+        />
+      </>
+    );
   };
 
   return (
     <section>
-      <div className="flex items-center gap-2 justify-between">
-        <div>
-          <AddPatientModal />
-        </div>
-        <div className="flex items-center gap-2">
-          {selectedRecords.length > 0 && <DischargePatientModal {...{selectedRecords}} /> }
-          {selectedRecords.length > 0 && <AssignDoctorModal {...{selectedRecords}} /> }
-          <input
-            className="shadow-xl py-3 px-2 focus:outline-none mb-2"
-            onChange={(e) => setSearchQuery(e.target.value)}
-            value={searchQuery}
-            placeholder="Search..."
-          />
-        </div>
+      <div className="flex items-center justify-end">
+        <input
+          className="shadow-2xl py-3 px-8 focus:outline-none mb-2 w-1/2 rounded-3xl"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchQuery}
+          placeholder="Search..."
+        />
+      </div>
+      <div className="mb-2">
+        <h1 className="text-xl text-primary uppercase">
+          Booked Appointments
+        </h1>
       </div>
       <DataGrid
         dataSource={filteredUser}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
-        onSelectionChanged={onSelectionChanged}
-        selectedRowKeys={selectedRecords}
         showBorders={true}
         remoteOperations={true}
         showColumnLines={true}
@@ -127,11 +134,6 @@ const ReceptionPatientsDataGrid = () => {
         className="shadow-xl w-full"
         height={"70vh"}
       >
-        <Selection
-          mode="multiple"
-          selectAllMode={"allMode"}
-          //showCheckBoxesMode={checkBoxesMode}
-        />
         <Pager
           visible={true}
           // allowedPageSizes={allowedPageSizes}
@@ -145,14 +147,20 @@ const ReceptionPatientsDataGrid = () => {
           width={240}
           allowFiltering={true}
           allowSearch={true}
-          cellRender={nameFunc}
         />
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />
         <Column dataField="gender" caption="Gender" width={200} />
+        <Column
+          dataField="gender"
+          caption="Action"
+          width={140}
+          cellRender={actionsFunc}
+        />
       </DataGrid>
+      <CreateAppointmentModal {...{ open, setOpen, selectedRowData }} />
     </section>
   );
 };
 
-export default ReceptionPatientsDataGrid;
+export default BookedAppointmentsDataGrid;

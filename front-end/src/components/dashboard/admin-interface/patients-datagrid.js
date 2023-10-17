@@ -7,6 +7,8 @@ import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
 import DeletePatientModal from "./delete-patient-modal";
+import { Chip } from "@mui/material";
+
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -41,6 +43,7 @@ const AdminPatientsDataGrid = () => {
       number: "1",
       id_number: "1234821",
       name: "Marcos Ochieng",
+      progress: "In Progress",
       country: "Kenya",
       gender: "Male",
       age: "34",
@@ -50,6 +53,7 @@ const AdminPatientsDataGrid = () => {
       number: "2",
       id_number: "70081234",
       name: "Derrick Kimani",
+      progress: "Progress",
       country: "Uganda",
       gender: "Male",
       age: "23",
@@ -59,6 +63,7 @@ const AdminPatientsDataGrid = () => {
       number: "3",
       id_number: "1234821",
       name: "Jane Munyua",
+      progress: "In Progress",
       country: "Tanzania",
       gender: "Female",
       age: "70",
@@ -67,6 +72,7 @@ const AdminPatientsDataGrid = () => {
     {
       number: "3",
       id_number: "70081234",
+      progress: "In Progress",
       name: "Ann Kibet",
       country: "Burundi",
       gender: "Male",
@@ -77,6 +83,7 @@ const AdminPatientsDataGrid = () => {
       number: "4",
       id_number: "1234821",
       name: "Ann Ochieng",
+      progress: "Progress",
       country: "Rwanda",
       gender: "Female",
       age: "88",
@@ -86,6 +93,7 @@ const AdminPatientsDataGrid = () => {
       number: "5",
       id_number: "1234821",
       name: "Marcos Ochieng",
+      progress: "In Progress",
       country: "Kenya",
       gender: "Male",
       age: "34",
@@ -95,6 +103,7 @@ const AdminPatientsDataGrid = () => {
       number: "6",
       id_number: "70081234",
       name: "Derrick Kimani",
+      progress: "Progress",
       country: "Uganda",
       gender: "Male",
       age: "23",
@@ -103,6 +112,7 @@ const AdminPatientsDataGrid = () => {
     {
       number: "7",
       id_number: "1234821",
+      progress: "In Progress",
       name: "Jane Munyua",
       country: "Tanzania",
       gender: "Female",
@@ -134,6 +144,24 @@ const AdminPatientsDataGrid = () => {
         />
       </>
     );
+  };
+
+  const nameFunc = ({ data }) => {
+    if (data?.progress === "In Progress") {
+      return (
+        <div className="flex items-center gap-2">
+          <Chip variant="contained" size="small" className="bg-card text-white" label={data?.progress} />
+          <p>{data?.name}</p>
+        </div>
+      );
+    }else if(data?.progress === "Progress"){
+        return (
+          <div className="flex items-center gap-2">
+          <Chip variant="contained" size="small" className="bg-success text-white" label={data?.progress} />
+          <p>{data?.name}</p>
+          </div>
+        )
+    }
   };
 
   //   filter users based on search query
@@ -175,9 +203,10 @@ const AdminPatientsDataGrid = () => {
         <Column
           dataField="name"
           caption="Name"
-          width={200}
+          width={240}
           allowFiltering={true}
           allowSearch={true}
+          cellRender={nameFunc}
         />
         <Column dataField="age" caption="Age" width={140} />
         <Column dataField="country" caption="Country" width={200} />

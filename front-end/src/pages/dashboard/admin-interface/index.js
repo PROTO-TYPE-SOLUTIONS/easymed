@@ -7,21 +7,16 @@ import AdminUsersDataGrid from "@/components/dashboard/admin-interface/users-dat
 import AdminPatientsDataGrid from "@/components/dashboard/admin-interface/patients-datagrid";
 import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors-datagrid";
 import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
+import AdminCreateUserModal from "@/components/dashboard/admin-interface/admin-add-user-modal";
+import AdminCreateDoctor from "@/components/dashboard/admin-interface/admin-add-doctor";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   return (
     <Container maxWidth="xl" className="py-6">
@@ -65,8 +60,8 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 0
-                  ? "cursor-pointer border-b-2 py-1 border-primary"
-                  : "cursor-pointer"
+                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
+                  : "cursor-pointer font-bold"
               } `}
               onClick={() => setCurrentTab(0)}
             >
@@ -77,8 +72,8 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 1
-                  ? "cursor-pointer border-b-2 py-1 border-primary"
-                  : "cursor-pointer"
+                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
+                  : "cursor-pointer font-bold"
               }`}
               onClick={() => setCurrentTab(1)}
             >
@@ -89,8 +84,8 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 2
-                  ? "cursor-pointer border-b-2 py-1 border-primary"
-                  : "cursor-pointer"
+                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
+                  : "cursor-pointer font-bold"
               }`}
               onClick={() => setCurrentTab(2)}
             >
@@ -98,8 +93,10 @@ const Admin = () => {
             </p>
           </div>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
           <AddPatientModal />
+          <AdminCreateUserModal />
+          <AdminCreateDoctor />
         </div>
       </section>
       <div className="mt-8">
