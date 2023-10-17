@@ -111,24 +111,6 @@ const AdminPatientsDataGrid = () => {
     );
   };
 
-  const nameFunc = ({ data }) => {
-    if (data?.progress === "In Progress") {
-      return (
-        <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-card text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-        </div>
-      );
-    }else if(data?.progress === "Progress"){
-        return (
-          <div className="flex items-center gap-2">
-          <Chip variant="contained" size="small" className="bg-success text-white" label={data?.progress} />
-          <p>{data?.name}</p>
-          </div>
-        )
-    }
-  };
-
   const statusFunc = ({ data }) => {
     console.log("DATA_DATA ", data);
     if (data?.progress_status === "In Treatment") {

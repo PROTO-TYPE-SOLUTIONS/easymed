@@ -12,11 +12,11 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 });
 
 const getActions = () => {
-  let actions = [{ action: "download", label: "Download", icon: <AiOutlineDownload className="text-blue-400 text-xl" /> }];
+  let actions = [{ action: "download", label: "Download", icon: <AiOutlineDownload className="text-card text-xl" /> }];
 
-  actions.push({ action: "print", label: "Print", icon: <AiFillPrinter className="text-xl" /> });
+  actions.push({ action: "print", label: "Print", icon: <AiFillPrinter className="text-success" /> });
 
-  actions.push({ action: "delete", label: "Delete", icon: <AiFillDelete className="text-red-700 text-xl" /> });
+  actions.push({ action: "delete", label: "Delete", icon: <AiFillDelete className="text-warning text-xl" /> });
   return actions;
 };
 
@@ -76,7 +76,7 @@ const LaboratoryDataGrid = () => {
       <Grid container spacing={2} className="my-2">
         <Grid item md={4} xs={12}>
           <input
-            className="rounded py-3 w-full px-2 focus:outline-none placeholder-font font-thin text-sm"
+            className="py-3 w-full px-4 focus:outline-none placeholder-font font-thin text-sm"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
@@ -85,7 +85,7 @@ const LaboratoryDataGrid = () => {
         </Grid>
         <Grid item md={4} xs={12}>
           <select
-            className="rounded px-4 w-full py-3 focus:outline-none"
+            className="px-4 w-full py-3 focus:outline-none"
             name=""
             id=""
           >
@@ -99,13 +99,13 @@ const LaboratoryDataGrid = () => {
         </Grid>
         <Grid item md={4} xs={12}>
           <div className="flex">
-            <button className="bg-white shadow border-primary py-3 px-4 rounded-l-xl w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 w-full">
               Date
             </button>
             <button className="bg-white shadow border-primary py-3 px-4 w-full">
               Week
             </button>
-            <button className="bg-white shadow border-primary py-3 px-4 rounded-r-xl w-full">
+            <button className="bg-white shadow border-primary py-3 px-4 w-full">
               Month
             </button>
           </div>
@@ -144,8 +144,8 @@ const LaboratoryDataGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="test" caption="Test" width={140} />
-        <Column dataField="gender" caption="Gender" width={100} />
+        <Column dataField="test" caption="Test" width={240} />
+        <Column dataField="gender" caption="Gender" width={140} />
         <Column
           dataField="number"
           caption="Action"

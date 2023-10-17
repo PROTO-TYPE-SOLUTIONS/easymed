@@ -8,8 +8,7 @@ import { TextField, Autocomplete, Grid } from "@mui/material";
 import { getAutoCompleteValue } from "@/assets/file-helper";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
-const ReferPatientModal = () => {
-  const [open, setOpen] = React.useState(false);
+const ReferPatientModal = ({ selectedRowData,open,setOpen}) => {
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -73,12 +72,6 @@ const ReferPatientModal = () => {
 
   return (
     <section>
-      <button
-        onClick={handleClickOpen}
-        className="md:block hidden border bg-primary text-white rounded px-4 py-2 text-sm mb-2"
-      >
-        Refer Patient
-      </button>
       <Dialog
         fullWidth
         maxWidth="sm"
@@ -235,14 +228,14 @@ const ReferPatientModal = () => {
                 <div className="flex justify-end gap-2 mt-4">
                   <button
                     type="submit"
-                    className="bg-[#02273D] px-4 py-2 rounded-3xl text-white"
+                    className="bg-[#02273D] px-4 py-2 text-white"
                   >
                     Refer Patient
                   </button>
                   <button
                     type="submit"
                     onClick={handleClose}
-                    className="border border-[#02273D] px-4 py-2 rounded-3xl text-[#02273D]"
+                    className="border border-[#02273D] px-4 py-2 text-[#02273D]"
                   >
                     Cancel
                   </button>

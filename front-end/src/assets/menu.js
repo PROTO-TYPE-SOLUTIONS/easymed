@@ -52,15 +52,15 @@ export const menus = [
     icon: <HiUsers className="text-xl" />,
     children: [
       {
-        label: "Add Patient",
+        label: "View Patients",
         href: "/dashboard/patients",
         icon: <GrAdd className="" />,
       },
-      {
-        label: "Refer Patient",
-        href: "/dashboard/patients/referrals",
-        icon: <FaWheelchair className="" />,
-      },
+      // {
+      //   label: "Refer Patient",
+      //   href: "/dashboard/patients/referrals",
+      //   icon: <FaWheelchair className="" />,
+      // },
     ],
   },
   {
