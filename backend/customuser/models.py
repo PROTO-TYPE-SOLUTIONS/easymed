@@ -97,7 +97,7 @@ class LabTechProfile(models.Model):
     
 
 class ReceptionistProfile(models.Model):
-    id = models.UUIDField(default=uuid4, editable=False, unique=True)
+    id = models.UUIDField(default=uuid4, editable=False, unique=True, primary_key=True)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
 
