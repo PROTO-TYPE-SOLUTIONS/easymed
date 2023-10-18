@@ -49,7 +49,7 @@ const SignUp = () => {
     <section className="flex items-center gap-8 h-screen overflow-hidden">
       <div className="md:w-1/2 w-full space-y-8 px-4">
         <div className="w-7/12 mx-auto">
-          <h1 className="text-2xl text-center">Create Account</h1>
+          <h1 className="text-xl text-center">Create Account</h1>
         </div>
         <Formik
           initialValues={initialValues}
@@ -60,7 +60,7 @@ const SignUp = () => {
             <section className="flex flex-col items-center justify-center space-y-4">
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="First Name"
                   name="first_name"
@@ -73,7 +73,7 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="Last Name"
                   name="last_name"
@@ -86,7 +86,7 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="email"
                   placeholder="Email"
                   name="email"
@@ -99,7 +99,7 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="password"
                   placeholder="Password"
                   name="password"
@@ -112,7 +112,7 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="Role"
                   name="role"
@@ -125,7 +125,7 @@ const SignUp = () => {
               </div>
               <button
                 type="submit"
-                className="bg-primary rounded w-full px-8 py-3 text-white"
+                className="bg-primary w-full px-8 py-3 text-white"
               >
                 {loading && (
                   <svg

@@ -75,7 +75,7 @@ const BookAppointment = () => {
               <Grid item md={6} xs={12} className="space-y-4">
                 <div className="w-full">
                   <Field
-                    className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                    className="block border border-gray py-3 px-4 focus:outline-none w-full"
                     type="text"
                     placeholder="First Name"
                     name="first_name"
@@ -89,7 +89,7 @@ const BookAppointment = () => {
                 <div className="w-full">
                   <Field
                     as="select"
-                    className="block pr-9 border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                    className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
                     name="gender"
                   >
                     <option value="">Select Gender</option>
@@ -105,7 +105,7 @@ const BookAppointment = () => {
                 </div>
                 <div className="w-full">
                   <Field
-                    className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                    className="block border border-gray py-3 px-4 focus:outline-none w-full"
                     type="date"
                     placeholder="Date of birth"
                     name="date_of_birth"
@@ -120,7 +120,7 @@ const BookAppointment = () => {
               <Grid item md={6} xs={12} className="space-y-4">
                 <div className="w-full">
                   <Field
-                    className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                    className="block border border-gray  py-3 px-4 focus:outline-none w-full"
                     type="text"
                     placeholder="Second Name"
                     name="second_name"
@@ -134,7 +134,7 @@ const BookAppointment = () => {
 
                 <div className="w-full">
                   <Field
-                    className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                    className="block border border-gray  py-3 px-4 focus:outline-none w-full"
                     type="date"
                     placeholder="Appointment Date"
                     name="appointment_date_time"
@@ -149,7 +149,7 @@ const BookAppointment = () => {
                 <div className="w-full">
                   <Field
                     as="select"
-                    className="block pr-9 border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                    className="block pr-9 border border-gray  py-3 px-4 focus:outline-none w-full"
                     name="service"
                   >
                     <option value="">Select Service</option>
@@ -167,7 +167,7 @@ const BookAppointment = () => {
             </Grid>
             <div className="w-full my-4">
               <Field
-                className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                className="block border border-gray  py-3 px-4 focus:outline-none w-full"
                 as="textarea"
                 placeholder="Reason"
                 name="reason"
@@ -180,7 +180,7 @@ const BookAppointment = () => {
             </div>
             <button
               type="submit"
-              className="bg-primary rounded w-full px-8 py-3 text-white"
+              className="bg-primary  w-full px-8 py-3 text-white"
             >
               Book Appointment
             </button>
@@ -188,7 +188,7 @@ const BookAppointment = () => {
         </Formik>
       </div>
       <div className="md:block hidden w-1/2">
-        <section className="loginPage rounded-2xl flex items-center justify-center p-4">
+        <section className="loginPage -2xl flex items-center justify-center p-4">
           <div className="text-white">
             <div className="space-y-4">
               <h1 className="text-2xl text-center">

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
-import { MdHourglassEmpty } from "react-icons/md";
 import { Chip } from "@mui/material";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -73,24 +72,17 @@ const DoctorPatientDataGrid = () => {
   };
 
   const statusFunc = ({ data }) => {
-    console.log("DATA_DATA ", data);
     if (data?.progress_status === "In Treatment") {
       return (
-        <button className="bg-primary px-2 py-1 text-white">
-          {data.progress_status}
-        </button>
+        <Chip variant="contained" size="small" label={data.progress_status} className="bg-primary text-white" />
       );
     } else if (data?.progress_status === "Discharged") {
       return (
-        <button className="bg-success text-white px-2 py-1">
-          {data.progress_status}
-        </button>
+        <Chip variant="contained" size="small" label={data.progress_status} className="bg-success text-white" />
       );
     } else if (data?.progress_status === "New Patient") {
       return (
-        <button className="bg-card text-white px-2 py-1">
-          {data.progress_status}
-        </button>
+        <Chip variant="contained" size="small" label={data.progress_status} className="bg-card text-white" />
       );
     }
   };
