@@ -87,7 +87,7 @@ export default function AssignDoctorModal({ selectedRecords }) {
             <Form>
               <Field
                 as="select"
-                className="block pr-9 mt-4 border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray py-3 px-4 focus:outline-none w-full"
                 name="doctorId"
               >
                 <option value="">Select a Doctor</option>

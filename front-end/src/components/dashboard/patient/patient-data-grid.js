@@ -6,6 +6,7 @@ import { BiTransferAlt } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
 import ReferPatientModal from "./refer-patient-modal";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
+import { Chip } from "@mui/material";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -108,21 +109,15 @@ const PatientsDataGrid = () => {
   const statusFunc = ({ data }) => {
     if (data?.progress_status === "In Treatment") {
       return (
-        <button className="bg-primary px-2 py-1 text-white">
-          {data.progress_status}
-        </button>
+        <Chip variant="contained" size="small" className="bg-primary text-white" label={data.progress_status} />
       );
     } else if (data?.progress_status === "Discharged") {
       return (
-        <button className="bg-success text-white px-2 py-1">
-          {data.progress_status}
-        </button>
+        <Chip variant="contained" size="small" className="bg-success text-white" label={data.progress_status} />
       );
     } else if (data?.progress_status === "New Patient") {
       return (
-        <button className="bg-card text-white px-2 py-1">
-          {data.progress_status}
-        </button>
+        <Chip variant="contained" size="small" className="bg-card text-white" label={data.progress_status} />
       );
     }
   };

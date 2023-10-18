@@ -55,7 +55,7 @@ const Login = () => {
             <section className="flex flex-col items-center justify-center space-y-8">
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="email"
                   placeholder="Email"
                   name="email"
@@ -68,7 +68,7 @@ const Login = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="password"
                   placeholder="Password"
                   name="password"
