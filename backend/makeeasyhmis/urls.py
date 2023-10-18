@@ -23,7 +23,7 @@ urlpatterns = [
     # authperms
     path("api/v1/authperms/", include("authperms.urls")),
     # receptions
-    path("api/v1/receptions/", include("receptions.url")),
+    path("api/v1/receptions/", include("receptions.urls")),
     # swagger view
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularRedocView.as_view(url_name="schema"), name="redoc",),  
