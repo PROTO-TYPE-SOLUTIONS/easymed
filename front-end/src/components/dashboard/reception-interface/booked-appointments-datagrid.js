@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
-import AddPatientModal from "./add-patient-modal";
-import { BiTransferAlt } from "react-icons/bi";
-import { LuMoreHorizontal } from "react-icons/lu";
-import ReferPatientModal from "./refer-patient-modal";
+import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
-import { Chip } from "@mui/material";
+import { LuMoreHorizontal } from "react-icons/lu";
+import CreateAppointmentModal from "./create-appointment-modal";
+import { FaWheelchair } from "react-icons/fa";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -15,28 +13,27 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 const getActions = () => {
   let actions = [
     {
-      action: "refer",
-      label: "Refer Patient",
-      icon: <BiTransferAlt className="text-card text-xl mx-2" />,
+      action: "create",
+      label: "Convert to Patient",
+      icon: <FaWheelchair className="text-success text-xl mx-2" />,
     },
   ];
 
   return actions;
 };
 
-const PatientsDataGrid = () => {
+const BookedAppointmentsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedRowData, setSelectedRowData] = React.useState({});
-  const [open, setOpen] = React.useState(false);
+  const [selectedRowData, setSelectedRowData] = useState({});
   const userActions = getActions();
-
+  const [open, setOpen] = useState(false);
 
   const users = [
     {
       id_number: "1234821",
       name: "Marcos Ochieng",
-      assigned_doctor: "Dr. Patrick",
-      progress_status: "Discharged",
+      country: "Kenya",
+      progress: "In Progress",
       gender: "Male",
       age: "34",
       status: "Active",
@@ -44,8 +41,8 @@ const PatientsDataGrid = () => {
     {
       id_number: "70081234",
       name: "Derrick Kimani",
-      progress_status: "In Treatment",
-      assigned_doctor: "Dr. Moses",
+      progress: "Progress",
+      country: "Uganda",
       gender: "Male",
       age: "23",
       status: "Active",
@@ -53,8 +50,8 @@ const PatientsDataGrid = () => {
     {
       id_number: "1234821",
       name: "Jane Munyua",
-      progress_status: "New Patient",
-      assigned_doctor: "Dr. Melanie",
+      progress: "In Progress",
+      country: "Tanzania",
       gender: "Female",
       age: "70",
       status: "Active",
@@ -62,8 +59,8 @@ const PatientsDataGrid = () => {
     {
       id_number: "70081234",
       name: "Ann Kibet",
-      progress_status: "Discharged",
-      assigned_doctor: "Dr. Brenda",
+      progress: "Progress",
+      country: "Burundi",
       gender: "Male",
       age: "49",
       status: "Active",
@@ -71,17 +68,21 @@ const PatientsDataGrid = () => {
     {
       id_number: "1234221",
       name: "Ann Ochieng",
-      progress_status: "In Treatment",
-      assigned_doctor: "Dr. Patrick",
+      progress: "In Progress",
+      country: "Rwanda",
       gender: "Female",
       age: "88",
       status: "Active",
     },
   ];
 
+  //   filter users based on search query
+  const filteredUser = users.filter((user) => {
+    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   const onMenuClick = async (menu, data) => {
-    if (menu.action === "refer") {
+    if (menu.action === "create") {
       setSelectedRowData(data);
       setOpen(true);
     } else if (menu.action === "edit") {
@@ -89,7 +90,6 @@ const PatientsDataGrid = () => {
       // setOpen(true);
     }
   };
-
 
   const actionsFunc = ({ data }) => {
     return (
@@ -106,37 +106,20 @@ const PatientsDataGrid = () => {
     );
   };
 
-  const statusFunc = ({ data }) => {
-    if (data?.progress_status === "In Treatment") {
-      return (
-        <Chip variant="contained" size="small" className="bg-primary text-white" label={data.progress_status} />
-      );
-    } else if (data?.progress_status === "Discharged") {
-      return (
-        <Chip variant="contained" size="small" className="bg-success text-white" label={data.progress_status} />
-      );
-    } else if (data?.progress_status === "New Patient") {
-      return (
-        <Chip variant="contained" size="small" className="bg-card text-white" label={data.progress_status} />
-      );
-    }
-  };
-
-  //   filter users based on search query
-  const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
-  });
-
   return (
-    <section className="mt-8">
-      <div className="flex items-center justify-between mb-2">
-        <AddPatientModal />
+    <section>
+      <div className="flex items-center justify-end">
         <input
-          className="shadow py-3 px-2 focus:outline-none"
+          className="shadow-2xl py-3 px-8 focus:outline-none mb-2 w-1/2 rounded-3xl"
           onChange={(e) => setSearchQuery(e.target.value)}
           value={searchQuery}
           placeholder="Search..."
         />
+      </div>
+      <div className="mb-2">
+        <h1 className="text-xl text-primary uppercase">
+          Booked Appointments
+        </h1>
       </div>
       <DataGrid
         dataSource={filteredUser}
@@ -148,7 +131,7 @@ const PatientsDataGrid = () => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
-        className="shadow-xl"
+        className="shadow-xl w-full"
         height={"70vh"}
       >
         <Pager
@@ -161,33 +144,23 @@ const PatientsDataGrid = () => {
         <Column
           dataField="name"
           caption="Name"
-          width={200}
+          width={240}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column dataField="age" caption="Age" width={140} />
+        <Column dataField="country" caption="Country" width={200} />
+        <Column dataField="gender" caption="Gender" width={200} />
         <Column
-          dataField="assigned_doctor"
-          caption="Assigned Doctor"
-          width={200}
-        />
-        <Column dataField="gender" caption="Gender" width={140} />
-        <Column
-          dataField=""
-          caption="Status"
-          width={140}
-          cellRender={statusFunc}
-        />
-        <Column
-          dataField="country"
+          dataField="gender"
           caption="Action"
           width={140}
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <ReferPatientModal {...{open,setOpen,selectedRowData}} />
+      <CreateAppointmentModal {...{ open, setOpen, selectedRowData }} />
     </section>
   );
 };
 
-export default PatientsDataGrid;
+export default BookedAppointmentsDataGrid;

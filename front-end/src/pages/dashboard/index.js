@@ -1,28 +1,29 @@
 import React from "react";
-import { Container, Grid } from "@mui/material";
-import DashboardLayout from "@/components/layout/dashboard-layout";
+import { Container } from "@mui/material";
 import PatientsDataGrid from "@/components/dashboard/patient/patient-data-grid";
-import { dashboardData } from "@/assets/menu";
+import DashboardLayout from "@/components/layout/dashboard-layout";
+import DashboardCards from "@/components/dashboard/dashboard-cards";
 
 const Dashboard = () => {
   return (
     <Container maxWidth="xl">
-      <Grid container spacing={1} className="my-8">
-        {dashboardData.map((data, index) => (
-          <Grid key={index} item md={4} xs={12}>
-            <section className=" bg-white shadow-xl border-primary rounded-xl px-4 py-3 h-20 flex items-center justify-center gap-4">
-              <div>
-                {data?.icon}
-              </div>
-              <div className="text-center text-sm">
-                <p>{data?.label}</p>
-                <p className="text-[#02273D]">{data?.number}</p>
-              </div>
-            </section>
-          </Grid>
-        ))}
-      </Grid>
-      <PatientsDataGrid />
+      <DashboardCards />
+          <PatientsDataGrid />
+      {/* <Grid container spacing={2}>
+        <Grid item md={8} xs={12}>
+        </Grid>
+        <Grid item md={4} xs={12} className="space-y-4">
+          <Doctors />
+        </Grid>
+      </Grid> */}
+      {/* <Grid container spacing={2}>
+        <Grid item md={8} xs={12}>
+          <CalenderDate />
+        </Grid>
+        <Grid item md={4} xs={12} className="space-y-4">
+          <BookedSessions />
+        </Grid>
+      </Grid> */}
     </Container>
   );
 };

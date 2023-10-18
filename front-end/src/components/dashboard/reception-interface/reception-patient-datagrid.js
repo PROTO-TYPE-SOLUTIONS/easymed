@@ -2,28 +2,26 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AddPatientModal from "../patient/add-patient-modal";
-import AssignDoctorModal from './assign-doctor-modal'
+import AssignDoctorModal from "./assign-doctor-modal";
 import DischargePatientModal from "./discharge-patient-modal";
-
+import { Chip } from "@mui/material";
+import Link from "next/link";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
-
-
 
 const ReceptionPatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [open, setOpen] = useState(false);
 
-
-
   const users = [
     {
       id_number: "1234821",
       name: "Marcos Ochieng",
-      country: "Kenya",
+      assigned_doctor: "Dr. Patrick",
+      progress_status: "Discharged",
       gender: "Male",
       age: "34",
       status: "Active",
@@ -31,7 +29,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "70081234",
       name: "Derrick Kimani",
-      country: "Uganda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Moses",
       gender: "Male",
       age: "23",
       status: "Active",
@@ -39,7 +38,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "1234821",
       name: "Jane Munyua",
-      country: "Tanzania",
+      progress_status: "New Patient",
+      assigned_doctor: "Dr. Melanie",
       gender: "Female",
       age: "70",
       status: "Active",
@@ -47,7 +47,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "70081234",
       name: "Ann Kibet",
-      country: "Burundi",
+      progress_status: "Discharged",
+      assigned_doctor: "Dr. Brenda",
       gender: "Male",
       age: "49",
       status: "Active",
@@ -55,7 +56,8 @@ const ReceptionPatientsDataGrid = () => {
     {
       id_number: "1234221",
       name: "Ann Ochieng",
-      country: "Rwanda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Patrick",
       gender: "Female",
       age: "88",
       status: "Active",
@@ -72,21 +74,53 @@ const ReceptionPatientsDataGrid = () => {
     setSelectedRecords(selectedRowKeys);
   };
 
- 
-
-  
+  const statusFunc = ({ data }) => {
+    console.log("DATA_DATA ", data);
+    if (data?.progress_status === "In Treatment") {
+      return (
+        <button className="bg-primary px-2 py-1 text-white">
+          {data.progress_status}
+        </button>
+      );
+    } else if (data?.progress_status === "Discharged") {
+      return (
+        <button className="bg-success text-white px-2 py-1">
+          {data.progress_status}
+        </button>
+      );
+    } else if (data?.progress_status === "New Patient") {
+      return (
+        <button className="bg-card text-white px-2 py-1">
+          {data.progress_status}
+        </button>
+      );
+    }
+  };
 
   return (
     <section>
       <div className="flex items-center gap-2 justify-between">
-        <div>
-          <AddPatientModal />
-        </div>
+        <section className="flex items-center gap-2">
+          <div>
+            <AddPatientModal />
+          </div>
+          <div>
+            <Link href="/dashboard/reception-interface/booked-appointments">
+              <button className="border border-card text-card font-semibold px-4 py-3 text-sm">
+                Booked Appointments
+              </button>
+            </Link>
+          </div>
+        </section>
         <div className="flex items-center gap-2">
-          {selectedRecords.length > 0 && <DischargePatientModal {...{selectedRecords}} /> }
-          {selectedRecords.length > 0 && <AssignDoctorModal {...{selectedRecords}} /> }
+          {selectedRecords.length > 0 && (
+            <DischargePatientModal {...{ selectedRecords }} />
+          )}
+          {selectedRecords.length > 0 && (
+            <AssignDoctorModal {...{ selectedRecords }} />
+          )}
           <input
-            className="shadow-xl py-3 px-2 focus:outline-none mb-2"
+            className="shadow-xl py-3 px-4 focus:outline-none mb-2"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             placeholder="Search..."
@@ -123,13 +157,19 @@ const ReceptionPatientsDataGrid = () => {
         <Column
           dataField="name"
           caption="Name"
-          width={200}
+          width={240}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
+        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
+        <Column dataField="gender" caption="Gender" width={140} />
+        <Column
+          dataField="gender"
+          caption="Status"
+          width={140}
+          cellRender={statusFunc}
+        />
       </DataGrid>
     </section>
   );

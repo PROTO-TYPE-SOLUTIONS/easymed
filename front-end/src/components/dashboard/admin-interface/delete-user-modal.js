@@ -3,11 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 
 
-const DeletePatientModal = ({ deleteOpen, setDeleteOpen, selectedRowData }) => {
-
-  const handleClickOpen = () => {
-    setDeleteOpen;(true);
-  };
+const DeleteUserModal = ({ deleteOpen, setDeleteOpen, selectedRowData }) => {
 
   const handleClose = () => {
     setDeleteOpen(false);
@@ -24,7 +20,7 @@ const DeletePatientModal = ({ deleteOpen, setDeleteOpen, selectedRowData }) => {
         aria-describedby="alert-dialog-description"
       >
         <DialogContent>
-          <h1 className="text-center">Are you sure you want to delete the selected Patient?</h1>
+          <h1 className="text-center">Are you sure you want to delete the selected User?</h1>
           <div className="flex items-center gap-4 justify-center mt-4">
             <button type="submit" className="bg-success px-4 py-2 text-white">
               Yes Proceed
@@ -43,4 +39,4 @@ const DeletePatientModal = ({ deleteOpen, setDeleteOpen, selectedRowData }) => {
   );
 };
 
-export default DeletePatientModal;
+export default DeleteUserModal;

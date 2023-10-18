@@ -12,32 +12,40 @@ import { MdInventory2 } from 'react-icons/md'
 import { BiSolidPurchaseTagAlt } from 'react-icons/bi'
 import { FaMoneyBillAlt } from 'react-icons/fa'
 import { FaProductHunt } from 'react-icons/fa'
+import { TbBrandBandlab } from 'react-icons/tb'
 
 export const menus = [
   {
     label: "Dashboard",
     href: "/dashboard",
     icon: <BiSolidDashboard className="text-xl" />,
-  },
-  {
-    label: "Admin Dashboard",
-    href: "/dashboard/admin-interface",
-    icon: <BiSolidDashboard className="text-xl" />,
-  },
-  {
-    label: "Doctor Dashboard",
-    href: "/dashboard/doctor-interface",
-    icon: <BiSolidDashboard className="text-xl" />,
-  },
-  {
-    label: "Reception Dashboard",
-    href: "/dashboard/reception-interface",
-    icon: <BiSolidDashboard className="text-xl" />,
+    children: [
+      {
+        label: "General Dashboard",
+        href: "/dashboard",
+        icon: <GrAdd className="" />,
+      },
+      {
+        label: "Admin Dashboard",
+        href: "/dashboard/admin-interface",
+        icon: <GrAdd className="" />,
+      },
+      {
+        label: "Doctor Dashboard",
+        href: "/dashboard/doctor-interface",
+        icon: <FaWheelchair className="" />,
+      },
+      {
+        label: "Reception Dashboard",
+        href: "/dashboard/reception-interface",
+        icon: <FaWheelchair className="" />,
+      },
+    ],
   },
   {
     label: "Laboratory",
     href: "/dashboard/laboratory",
-    icon: <HiUsers className="text-xl" />,
+    icon: <TbBrandBandlab className="text-xl" />,
   },
   {
     label: "Patients",
@@ -45,15 +53,15 @@ export const menus = [
     icon: <HiUsers className="text-xl" />,
     children: [
       {
-        label: "Add Patient",
+        label: "View Patients",
         href: "/dashboard/patients",
         icon: <GrAdd className="" />,
       },
-      {
-        label: "Refer Patient",
-        href: "/dashboard/patients/referrals",
-        icon: <FaWheelchair className="" />,
-      },
+      // {
+      //   label: "Refer Patient",
+      //   href: "/dashboard/patients/referrals",
+      //   icon: <FaWheelchair className="" />,
+      // },
     ],
   },
   {
@@ -126,6 +134,82 @@ export const adminData = [
     status: 'Tests Approved',
     condition: 'Test Requests Pending',
     condition_number: 4
+  },
+];
+
+export const doctorData = [
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Surgeon',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Optician',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Patrick",
+    specialisation: 'Psychiatry',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+  {
+    name: "Dr. Jairus",
+    specialisation: 'Dentist',
+    image: "./images/doc.jpg",
+    status: 'On duty',
+  },
+];
+
+export const bookedData = [
+  {
+    name: "Joseph Mmbone",
+    date: '12th July 2024',
+  },
+  {
+    name: "Mary Moraa",
+    date: '12th July 2024',
+  },
+  {
+    name: "Derrick Kimani",
+    date: '12th July 2024',
+  },
+  {
+    name: "Annete Mwihaki",
+    date: '12th July 2024',
   },
 ];
 

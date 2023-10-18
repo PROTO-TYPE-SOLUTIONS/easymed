@@ -84,7 +84,7 @@ const AddInventoryForm = () => {
         <Grid container spacing={2}>
           <Grid item md={4} xs={12}>
             <Field
-              className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray py-3 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Quantity"
               name="quantity"
@@ -98,7 +98,7 @@ const AddInventoryForm = () => {
           <Grid item md={4} xs={12}>
             <Field
               as="select"
-              className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray py-3 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Location"
               name="location"
@@ -118,7 +118,7 @@ const AddInventoryForm = () => {
           </Grid>
           <Grid item md={4} xs={12}>
             <Field
-              className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray py-3 px-4 focus:outline-card w-full"
               maxWidth="sm"
               type="date"
               placeholder="Expiry Date"
@@ -132,7 +132,7 @@ const AddInventoryForm = () => {
           </Grid>
           <Grid item md={4} xs={12}>
             <Field
-              className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray py-3 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Purchase Price"
               name="purchase_price"
@@ -145,7 +145,7 @@ const AddInventoryForm = () => {
           </Grid>
           <Grid item md={4} xs={12}>
             <Field
-              className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray py-3 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Sale Price"
               name="sale_price"
@@ -159,7 +159,7 @@ const AddInventoryForm = () => {
           <Grid item md={4} xs={12}>
             <Field
               as="select"
-              className="block pr-9 border border-primary rounded py-3 px-4 focus:outline-none w-full"
+              className="block pr-9 border border-gray py-3 px-4 focus:outline-card w-full"
               name="item_ID"
             >
               <option value="">Select Item</option>
@@ -178,7 +178,7 @@ const AddInventoryForm = () => {
           <Grid item md={12} xs={12}>
             <Field
               as="select"
-              className="block pr-9 border border-primary rounded py-3 px-4 focus:outline-none w-full"
+              className="block pr-9 border border-gray py-3 px-4 focus:outline-card w-full"
               name="supplier_ID"
             >
               <option value="">Select Supplier</option>
@@ -198,7 +198,7 @@ const AddInventoryForm = () => {
             <div className="flex items-center justify-end">
               <button
                 type="submit"
-                className="bg-primary px-8 py-2 rounded text-white"
+                className="bg-primary px-8 py-2 text-white"
               >
                 {loading && (
                   <svg

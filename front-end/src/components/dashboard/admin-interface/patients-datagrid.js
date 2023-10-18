@@ -7,6 +7,8 @@ import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
 import DeletePatientModal from "./delete-patient-modal";
+import { Chip } from "@mui/material";
+
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -38,75 +40,48 @@ const AdminPatientsDataGrid = () => {
 
   const users = [
     {
-      number: "1",
       id_number: "1234821",
       name: "Marcos Ochieng",
-      country: "Kenya",
+      assigned_doctor: "Dr. Patrick",
+      progress_status: "Discharged",
       gender: "Male",
       age: "34",
       status: "Active",
     },
     {
-      number: "2",
       id_number: "70081234",
       name: "Derrick Kimani",
-      country: "Uganda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Moses",
       gender: "Male",
       age: "23",
       status: "Active",
     },
     {
-      number: "3",
       id_number: "1234821",
       name: "Jane Munyua",
-      country: "Tanzania",
+      progress_status: "New Patient",
+      assigned_doctor: "Dr. Melanie",
       gender: "Female",
       age: "70",
       status: "Active",
     },
     {
-      number: "3",
       id_number: "70081234",
       name: "Ann Kibet",
-      country: "Burundi",
+      progress_status: "Discharged",
+      assigned_doctor: "Dr. Brenda",
       gender: "Male",
       age: "49",
       status: "Active",
     },
     {
-      number: "4",
-      id_number: "1234821",
+      id_number: "1234221",
       name: "Ann Ochieng",
-      country: "Rwanda",
+      progress_status: "In Treatment",
+      assigned_doctor: "Dr. Patrick",
       gender: "Female",
       age: "88",
-      status: "Active",
-    },
-    {
-      number: "5",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "6",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "7",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
       status: "Active",
     },
   ];
@@ -134,6 +109,23 @@ const AdminPatientsDataGrid = () => {
         />
       </>
     );
+  };
+
+  const statusFunc = ({ data }) => {
+    console.log("DATA_DATA ", data);
+    if (data?.progress_status === "In Treatment") {
+      return (
+        <Chip variant="contained" size="small" label={data.progress_status} className="bg-primary text-white" />
+      );
+    } else if (data?.progress_status === "Discharged") {
+      return (
+        <Chip variant="contained" size="small" label={data.progress_status} className="bg-success text-white" />
+      );
+    } else if (data?.progress_status === "New Patient") {
+      return (
+        <Chip variant="contained" size="small" label={data.progress_status} className="bg-card text-white" />
+      );
+    }
   };
 
   //   filter users based on search query
@@ -170,18 +162,23 @@ const AdminPatientsDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="number" caption="NO" width={80} />
         <Column dataField="id_number" caption="ID" width={140} />
         <Column
           dataField="name"
           caption="Name"
-          width={200}
+          width={240}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
+        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
+        <Column dataField="gender" caption="Gender" width={140} />
+        <Column
+          dataField=""
+          caption="Status"
+          width={140}
+          cellRender={statusFunc}
+        />
         <Column
           dataField="country"
           caption="Action"
