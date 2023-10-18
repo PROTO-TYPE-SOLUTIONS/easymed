@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.utils import timezone
@@ -32,13 +33,17 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     DOCTOR = 'doctor'
     NURSE = 'nurse'
     LAB_TECH = 'labtech'
+    RECEPTIONIST = 'receptionist'
     SYS_ADMIN = 'sysadmin'
+
+    BASE_ROLE = PATIENT
 
     ROLE_CHOICES = (
         (PATIENT, 'Patient'),
         (DOCTOR, 'Doctor'),
         (NURSE, 'Nurse'),
         (LAB_TECH, 'Lab Technician'),
+        (RECEPTIONIST, 'Receptionist'),
         (SYS_ADMIN, 'Sysadmin'),
         
     )
@@ -49,7 +54,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=PATIENT)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=BASE_ROLE)
 
     user_permissions = models.ManyToManyField(
         Permission,
@@ -66,7 +71,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.role = self.PATIENT
+            return super().save(*args, **kwargs)
 
+class PatientProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 class DoctorProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     # Add doctor-specific fields here
@@ -82,3 +94,79 @@ class SysadminProfile(models.Model):
 class LabTechProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     # Add lab-tech-specific fields here
+    
+
+class ReceptionistProfile(models.Model):
+    id = models.UUIDField(default=uuid4, editable=False, unique=True, primary_key=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
+
+# proxy model
+
+class ReceptionistManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.RECEPTIONIST)
+
+class Receptionist(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = ReceptionistManager()
+    BASE_ROLE = CustomUser.RECEPTIONIST
+
+
+  
+class DoctorManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.DOCTOR)
+    
+class Doctor(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = DoctorManager()
+    BASE_ROLE = CustomUser.DOCTOR
+
+
+class NurseManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.NURSE)
+    
+
+class Nurse(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = NurseManager()
+    BASE_ROLE = CustomUser.NURSE
+
+
+class LabTechManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.LAB_TECH)
+    
+
+class LabTech(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = LabTechManager()
+    BASE_ROLE = CustomUser.LAB_TECH
+
+    
+class PatientManager(BaseUserManager):
+    def get_queryset(self, *args, **kwargs):
+        users = super().get_queryset(*args, **kwargs)
+        return users.filter(role=CustomUser.PATIENT)
+    
+
+class Patient(CustomUser):
+    class Meta:
+        proxy = True
+
+    objects = PatientManager()
+    BASE_ROLE = CustomUser.PATIENT
