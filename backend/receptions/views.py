@@ -13,7 +13,7 @@ from rest_framework.permissions import (
 # models
 from customuser.models import Doctor
 from patient.models import (
-    Appointment,
+    PublicAppointment,
 )
 
 # serializers
