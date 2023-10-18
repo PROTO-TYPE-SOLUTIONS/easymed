@@ -1,9 +1,51 @@
 from django.contrib import admin
 from django.contrib import admin
-from .models import *
+from .models import (
+    CustomUser,
+    DoctorProfile,
+    NurseProfile,
+    SysadminProfile,
+    LabTechProfile,
+    ReceptionistProfile,
+)
 
-admin.site.register(CustomUser)
-admin.site.register(DoctorProfile)
-admin.site.register(NurseProfile)
-admin.site.register(SysadminProfile)
+
+class CustomUserAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(CustomUser, CustomUserAdmin)
+
+
+class DoctorProfileAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(DoctorProfile, DoctorProfileAdmin)
+
+
+class NurseProfileAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(NurseProfile, NurseProfileAdmin)
+
+
+class SysAdminProfileAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(SysadminProfile, SysAdminProfileAdmin)
+
+
+class LabTechProfileAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(LabTechProfile)
+
+
+class ReceptionistProfileAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(ReceptionistProfile, ReceptionistProfileAdmin)
