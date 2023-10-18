@@ -10,6 +10,12 @@ from rest_framework.permissions import (
     IsAdminUser,
 )
 
+# swagger
+from drf_spectacular.utils import (
+    extend_schema,
+)
+
+
 # models
 from customuser.models import Doctor
 from patient.models import (
@@ -23,6 +29,10 @@ from .serializers import (
 
 
 class AssignPatientToDoctorAPIView(APIView):
+
+    @extend_schema(
+        request =AssignPatientToDoctorSerializer,
+    )
     def post(self, request: Request, *args, **kwargs):
         data: dict = request.data
         serializer = AssignPatientToDoctorSerializer(data=data)
