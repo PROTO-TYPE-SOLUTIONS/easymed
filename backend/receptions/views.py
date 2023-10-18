@@ -10,21 +10,30 @@ from rest_framework.permissions import (
     IsAdminUser,
 )
 
-# serializers
-
 # models
-from .models import (
-    Receptionist,
-    ReceptionistProfile,
+from customuser.models import Doctor
+from patient.models import (
+    Appointment,
+)
+
+# serializers
+from .serializers import (
+    AssignPatientToDoctorSerializer,
 )
 
 
 class AssignPatientToDoctorAPIView(APIView):
     def post(self, request: Request, *args, **kwargs):
-        pass
+        data: dict = request.data
+        serializer = AssignPatientToDoctorSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        message = serializer.assign_doctor()
+        return Response({"message": message}, status=status.HTTP_200_OK)
 
 
 class RegisterWalkInPatientsAPIView(APIView):
+    permission_classes = ()
+
     def post(self, request: Request, *args, **kwargs):
         pass
 
@@ -32,6 +41,7 @@ class RegisterWalkInPatientsAPIView(APIView):
 class ConvertAppointmentBookingToPatientAPIView(APIView):
     def post(self, request: Request, *args, **kwargs):
         pass
+
 
 class DischargePatientsAPIView(APIView):
     def post(self, request: Request, *args, **kwargs):
@@ -41,6 +51,7 @@ class DischargePatientsAPIView(APIView):
 class PrintInvoiceAPIView(APIView):
     def post(self, request: Request, *args, **kwargs):
         pass
+
 
 class PrintReceiptAPIView(APIView):
     def post(self, request: Request, *args, **kwargs):
