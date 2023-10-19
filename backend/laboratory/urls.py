@@ -10,8 +10,8 @@ from .views import (
 
 router = DefaultRouter()
 router.register(r'lab-reagents', LabReagentViewSet)
-router.register(r'lab-results', LabTestResultViewSet)
-router.register(r'lab-tests', LabTestRequestViewSet)
+router.register(r'lab-test-results', LabTestResultViewSet)
+router.register(r'lab-test-requests', LabTestRequestViewSet)
 router.register(r'lab-test-categories', LabTestCategoryViewSet)
 
 urlpatterns = [
