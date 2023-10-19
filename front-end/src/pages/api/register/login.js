@@ -38,16 +38,16 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
             const body = req.body;
 
             console.log("LOGIN_BODY ",body);
 
-            await backendAxiosInstance.post(`${API_URL.LOGIN}`,body)
+            await backendAxiosInstance.post(`${API_URL.LOGIN}`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

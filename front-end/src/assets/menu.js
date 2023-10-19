@@ -12,6 +12,7 @@ import { MdInventory2 } from 'react-icons/md'
 import { BiSolidPurchaseTagAlt } from 'react-icons/bi'
 import { FaMoneyBillAlt } from 'react-icons/fa'
 import { FaProductHunt } from 'react-icons/fa'
+import { TbBrandBandlab } from 'react-icons/tb'
 
 export const menus = [
   {
@@ -44,24 +45,12 @@ export const menus = [
   {
     label: "Laboratory",
     href: "/dashboard/laboratory",
-    icon: <HiUsers className="text-xl" />,
+    icon: <TbBrandBandlab className="text-xl" />,
   },
   {
     label: "Patients",
     href: "/dashboard/patients",
     icon: <HiUsers className="text-xl" />,
-    children: [
-      {
-        label: "View Patients",
-        href: "/dashboard/patients",
-        icon: <GrAdd className="" />,
-      },
-      // {
-      //   label: "Refer Patient",
-      //   href: "/dashboard/patients/referrals",
-      //   icon: <FaWheelchair className="" />,
-      // },
-    ],
   },
   {
     label: "Messages",

@@ -33,7 +33,6 @@ const Login = () => {
       await loginUser(formValue.email, formValue.password).then(() => {
         helpers.resetForm();
         setLoading(false);
-        router.push("/dashboard");
       });
     } catch (err) {
       console.log("LOGIN_ERROR ", err);
@@ -55,7 +54,7 @@ const Login = () => {
             <section className="flex flex-col items-center justify-center space-y-8">
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="email"
                   placeholder="Email"
                   name="email"
@@ -68,7 +67,7 @@ const Login = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-primary rounded py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="password"
                   placeholder="Password"
                   name="password"
@@ -81,7 +80,7 @@ const Login = () => {
               </div>
               <button
                 type="submit"
-                className="bg-primary rounded w-full px-8 py-3 text-white"
+                className="bg-primary w-full px-8 py-3 text-white"
               >
                 {loading && (
                   <svg

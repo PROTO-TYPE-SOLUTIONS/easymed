@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'pharmacy.apps.PharmacyConfig',
     'inventory.apps.InventoryConfig',
     'laboratory.apps.LaboratoryConfig',
+    'receptions.apps.ReceptionsConfig',
 
 ]
 

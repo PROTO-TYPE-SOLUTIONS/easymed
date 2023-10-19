@@ -18,11 +18,11 @@ const LandingPage = () => {
             laudantium accusantium!
           </p>
           <div className="flex items-center gap-4">
-            <button className="border border-white rounded-3xl text-white px-4 py-3">
+            <button className="border border-white text-white px-4 py-3">
               View Services
             </button>
             <Link href="/book-appointment">
-              <button className="border border-white hover:bg-primary hover:text-white hover:border-none rounded-3xl text-white px-4 py-3 transition duration-500 hover:scale-105">
+              <button className="border border-white hover:bg-primary hover:text-white hover:border-none text-white px-4 py-3 transition duration-500 hover:scale-105">
                 Book Appointment
               </button>
             </Link>

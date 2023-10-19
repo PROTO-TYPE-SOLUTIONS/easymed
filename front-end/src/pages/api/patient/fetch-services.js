@@ -15,13 +15,12 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
-    
-            await backendAxiosInstance.get(`${API_URL.FETCH_SERVICES}`).then(response => {
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
+            await backendAxiosInstance.get(`${API_URL.FETCH_SERVICES}`,config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {

@@ -87,7 +87,7 @@ const AdminCreateUserModal = () => {
                   <section className="flex flex-col items-center justify-center space-y-4">
                     <div className="w-full">
                       <Field
-                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="First Name"
                         name="first_name"
@@ -100,7 +100,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="Last Name"
                         name="last_name"
@@ -113,7 +113,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
                         type="email"
                         placeholder="Email"
                         name="email"
@@ -126,7 +126,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
                         type="password"
                         placeholder="Password"
                         name="password"
@@ -139,7 +139,7 @@ const AdminCreateUserModal = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-primary py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="Role"
                         name="role"
