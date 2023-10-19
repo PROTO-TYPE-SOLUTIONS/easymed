@@ -10,8 +10,14 @@ export const API_URL = {
 
 
     /***************** PATIENT APIS **********************/
+    CREATE_PATIENT: '/patients/patients/',
     BOOK_APPOINTMENT: '/patients/publicappointments/',
     FETCH_SERVICES: '/patients/services/',
+
+
+    /***************** DOCTOR APIS **********************/
+    CREATE_DOCTOR: '/accounts/register/',
+
 
     /***************** INVENTORY APIS **********************/
     ADD_INVENTORY: '/inventory/inventories/',
@@ -32,8 +38,12 @@ export const APP_API_URL = {
    
 
     /***************** PATIENT APIS **********************/
+    CREATE_PATIENT: '/api/patient',
     BOOK_APPOINTMENT: '/api/appointment',
     FETCH_SERVICES: '/api/patient/fetch-services',
+
+    /***************** DOCTOR APIS **********************/
+    CREATE_DOCTOR: '/api/doctor/create-doctor',
 
 
     /***************** INVENTORY APIS **********************/

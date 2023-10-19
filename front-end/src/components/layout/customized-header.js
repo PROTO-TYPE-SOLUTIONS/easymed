@@ -27,7 +27,7 @@ const CustomizedHeader = () => {
           <section className="flex items-center md:justify-end justify-between gap-4">
             <div className="md:hidden block">
               <AiOutlineMenu
-                className="text-2xl cursor-pointer"
+                className="text-2xl cursor-pointer text-white"
                 onClick={() => setIsOpen(true)}
               />
               <Drawer {...{ isOpen, setIsOpen }} />

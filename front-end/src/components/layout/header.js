@@ -16,7 +16,7 @@ const Header = () => {
           <section className="flex items-center justify-between gap-4">
             <div className="md:hidden block">
               <AiOutlineMenu
-                className="text-2xl cursor-pointer"
+                className="text-2xl text-white cursor-pointer"
                 onClick={() => setIsOpen(true)}
               />
               <Drawer {...{ isOpen, setIsOpen }} />
