@@ -51,18 +51,6 @@ export const menus = [
     label: "Patients",
     href: "/dashboard/patients",
     icon: <HiUsers className="text-xl" />,
-    children: [
-      {
-        label: "View Patients",
-        href: "/dashboard/patients",
-        icon: <GrAdd className="" />,
-      },
-      // {
-      //   label: "Refer Patient",
-      //   href: "/dashboard/patients/referrals",
-      //   icon: <FaWheelchair className="" />,
-      // },
-    ],
   },
   {
     label: "Messages",
