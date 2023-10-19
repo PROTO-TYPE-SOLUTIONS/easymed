@@ -16,6 +16,10 @@ urlpatterns = [
     path('patients/', include('patient.urls')),
     # lab
     path('lab/', include('laboratory.urls')),
+
+    # inventory
+    path('inventory/', include('inventory.urls')),
+    
     # users
     path('users/', include('customuser.urls')),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

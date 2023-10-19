@@ -6,10 +6,12 @@ from .views import (
     LabTestResultViewSet,
     LabTestRequestViewSet,
     LabTestCategoryViewSet,
+    LabTestProfileViewSet,
 )
 
 router = DefaultRouter()
 router.register(r'lab-reagents', LabReagentViewSet)
+router.register(r'lab-test-profile', LabTestProfileViewSet)
 router.register(r'lab-test-results', LabTestResultViewSet)
 router.register(r'lab-test-requests', LabTestRequestViewSet)
 router.register(r'lab-test-categories', LabTestCategoryViewSet)
