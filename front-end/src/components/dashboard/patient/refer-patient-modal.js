@@ -4,8 +4,7 @@ import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Divider } from "@mui/material";
-import { TextField, Autocomplete, Grid } from "@mui/material";
-import { getAutoCompleteValue } from "@/assets/file-helper";
+import { Grid } from "@mui/material";
 
 const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
   const [loading, setLoading] = React.useState(false);
@@ -85,7 +84,7 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
           >
             <Form>
               <section className="space-y-2">
-                <p>Patient</p>
+                <h1 className="text-xl text-center">Refer Patient</h1>
                 <Grid container spacing={2}>
                   <Grid item md={6} xs={12}>
                     <Field

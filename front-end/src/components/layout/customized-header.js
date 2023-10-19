@@ -1,14 +1,16 @@
 import { Container } from "@mui/material";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { Drawer } from "@/assets/drawer";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { BsChevronDown } from "react-icons/bs";
+import { authContext } from "../use-context";
 
 const CustomizedHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const { logoutUser } = useContext(authContext);
 
   const open = Boolean(anchorEl);
 
@@ -59,7 +61,7 @@ const CustomizedHeader = () => {
               }}
             >
               <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>Logout</MenuItem>
+              <MenuItem onClick={logoutUser}>Logout</MenuItem>
             </Menu>
           </section>
         </Container>
