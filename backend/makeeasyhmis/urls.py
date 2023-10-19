@@ -19,7 +19,10 @@ urlpatterns = [
 
     # inventory
     path('inventory/', include('inventory.urls')),
-    
+
+    # authperms/sysadmin
+    path('authperms/', include('authperms.urls')),
+
     # users
     path('users/', include('customuser.urls')),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
