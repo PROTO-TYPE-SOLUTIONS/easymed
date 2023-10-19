@@ -43,7 +43,7 @@ export const Drawer = ({ isOpen, setIsOpen }) => {
       >
         <section
           className={
-            "right-0 md:w-3/12 w-3/4 absolute bg-[#02273D] opacity-100 px-8 py-4 h-screen shadow-xl delay-400 duration-500 ease-in-out transition-all transform  " +
+            "right-0 md:w-3/12 w-3/4 absolute bg-primary opacity-100 px-8 py-4 h-screen shadow-xl delay-400 duration-500 ease-in-out transition-all transform  " +
             (isOpen ? " translate-x-0 z-50 " : " translate-x-full ")
           }
         >
