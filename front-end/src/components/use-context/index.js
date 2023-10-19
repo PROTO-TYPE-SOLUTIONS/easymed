@@ -20,16 +20,24 @@ export const AuthProvider = ({ children }) => {
   // login User
   const loginUser = async (email, password) => {
     try {
-      const response = await axios.post(APP_API_URL.LOGIN, {email: email,password:password});
+      const response = await axios.post(APP_API_URL.LOGIN, {
+        email: email,
+        password: password,
+      });
       if (response.status === 200) {
         const decodedUser = jwtDecode(response.data.access);
-        setUser({...decodedUser, token: response.data.access});
+        setUser({ ...decodedUser, token: response.data.access });
         try {
           // await dispatch(getAllUserPermissions(decodedUser?.user_id));
           // router.push("/dashboard");
           localStorage.setItem("token", JSON.stringify(response.data.access));
-          localStorage.setItem("refresh", JSON.stringify(response.data.refresh));
+          localStorage.setItem(
+            "refresh",
+            JSON.stringify(response.data.refresh)
+          );
+          router.push("/dashboard");
         } catch (error) {
+          throw error;
         }
       }
     } catch (error) {
@@ -54,12 +62,12 @@ export const AuthProvider = ({ children }) => {
 
   // decode the token and set the user when a component mounts
   useEffect(() => {
-    const storedToken =  localStorage.getItem("token");
+    const storedToken = localStorage.getItem("token");
     let decodedToken;
     if (storedToken) {
       decodedToken = jwtDecode(storedToken);
 
-      setUser({...decodedToken, token: storedToken});
+      setUser({ ...decodedToken, token: storedToken });
     }
     // const fetchPermissions = async () => {
     //   if (decodedToken) {
