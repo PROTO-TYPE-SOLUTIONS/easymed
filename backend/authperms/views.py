@@ -51,7 +51,7 @@ from customuser.models import (
 # Group Endpoint
 
 class GroupsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (AllowAny,)
     @extend_schema(
         responses=GroupsSerializer,
     )

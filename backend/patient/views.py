@@ -1,4 +1,16 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+from rest_framework.permissions import AllowAny
+
+from rest_framework.views import APIView
+
+from drf_spectacular.utils import extend_schema
+
+
+# models
 from .models import (
     InsuranceCompany,
     ContactDetails,
@@ -10,6 +22,7 @@ from .models import (
     PublicAppointment,
     Service,
 )
+# serializers
 from .serializers import (
     InsuranceCompanySerializer,
     ContactDetailsSerializer,
@@ -20,6 +33,7 @@ from .serializers import (
     PrescribedDrugSerializer,
     PublicAppointmentSerializer ,
     ServiceSerializer  ,
+    CreatePatientSerializer
 )
 
 class InsuranceCompanyViewSet(viewsets.ModelViewSet):
@@ -58,3 +72,22 @@ class PrescriptionViewSet(viewsets.ModelViewSet):
 class PrescribedDrugViewSet(viewsets.ModelViewSet):
     queryset = PrescribedDrug.objects.all()
     serializer_class = PrescribedDrugSerializer
+
+# 
+class CreatePublicAppointmentAPIView(APIView):
+    def post(self, request: Request, *args, **kwargs):
+        pass
+
+
+class CreatePatientAPIView(APIView):
+    permission_classes = (AllowAny,)
+    @extend_schema(
+        request =CreatePatientSerializer,
+    )
+    def post(self, request: Request, *args, **kwargs):
+        data = request.data
+        serializer = CreatePatientSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        message = serializer.create_patient()
+        return Response(message, status=status.HTTP_201_CREATED)
+    

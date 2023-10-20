@@ -1,59 +1,123 @@
+from uuid import uuid4
+from django.contrib.auth.models import BaseUserManager
 from django.db import models
-from customuser.models import CustomUser
+from django.utils import timezone
+
+# models
+from customuser.models import (
+    CustomUser,
+)
 from pharmacy.models import Drug
 from inventory.models import Item, OrderBill
+
+from django.utils.translation import gettext_lazy as _
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
 class InsuranceCompany(models.Model):
+    id = models.UUIDField(_("company id"), default=uuid4, unique=True, editable=False, primary_key=True)
     name = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
     
+
 class ContactDetails(models.Model):
-    tel_no = models.IntegerField()
+    id = models.UUIDField(_("contact details id"), default=uuid4, unique=True, editable=False, primary_key=True)
     email_address = models.EmailField()
     residence = models.CharField(max_length=30)
 
-class Patient(models.Model):
-    GENDER_CHOICES = (
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('O', 'Other'),
-    )
-    first_name = models.CharField(max_length=40)
-    second_name = models.CharField(max_length=40)
-    date_of_birth = models.DateField()
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, )
-    insurance = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
-    def __str__(self):
-        return self.first_name
+class Patient(models.Model):
+    id = models.UUIDField(_("patient id"), default=uuid4, unique=True, editable=False, primary_key=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+
+
+# class Patient(models.Model):
+#     GENDER_CHOICES = (
+#         ('M', 'Male'),
+#         ('F', 'Female'),
+#         ('O', 'Other'),
+#     )
+#     first_name = models.CharField(max_length=40)
+#     second_name = models.CharField(max_length=40)
+#     date_of_birth = models.DateField()
+#     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, )
+#     insurance = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
+#     user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+
+#     def __str__(self):
+#         return self.first_name
     
 # meant to create an OrderBill item when a patient is created
-# def order_bill_created(sender, instance, created, **kwargs):
-#     if created:
-#         order_bill = OrderBill.objects.create(patient_ID=Patient.objects.create())
+def order_bill_created(sender, instance, created, **kwargs):
+    if created:
+        order_bill = OrderBill.objects.create(patient_ID=Patient.objects.create())
 
 # post_save.connect(order_bill_created, sender=Patient)
     
 
 class NextOfKin(models.Model):
+    id = models.UUIDField(_("patient visit id"), default=uuid4, unique=True, editable=False, primary_key=True)
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     firts_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     relationship = models.CharField(max_length=40)
-    contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
+    contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE, null=True)
 
 class Service(models.Model):
     name = models.TextField(max_length=300)
 
     def __str__(self):
         return self.name
+    
+
+# class Appointment(models.Model):
+#     # types
+#     PUBLIC = "public"
+#     WALKIN = "walkin"
+
+#     TYPE_CHOICES = (
+        
+#     )
+#     # status
+#     PENDING = "pending"
+#     CONFIRMED = "confirmed"
+#     CANCELLED  = "cancelled"
+
+#     STATUS_CHOICES = (
+#         (PENDING, "Pending"),
+#         (CONFIRMED, "Confirmed"),
+#         (CANCELLED, "Cancelled"),
+#     )
+#     # gender
+#     MALE = "male"
+#     FEMALE = "female"
+
+#     GENDER_CHOICES = (
+#         (MALE, "Male"),
+#         (FEMALE, "Female"),
+#     )
+#     class Meta:
+#         default_related_name = _("appointments")
+        
+#     id = models.UUIDField(_("appointment id"), default=uuid4, unique=True, editable=False, primary_key=True)
+#     first_name = models.CharField(_("first name"), max_length=40)
+#     second_name = models.CharField(_("second name"), max_length=40, null=True)
+#     last_name = models.CharField(_("last name"), max_length=40)
+#     date_of_birth = models.DateField(_("date of birth"))
+#     gender = models.CharField(_("gender"), max_length=6, choices=GENDER_CHOICES)
+#     appointment_date_time = models.DateTimeField(_("appointment date"))
+#     service = models.ForeignKey(Service, on_delete=models.CASCADE)
+#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+#     reason = models.TextField(max_length=300)
+#     created_at = models.DateTimeField(default=timezone.now)
+    # updated_at = models.DateTimeField(editable=False)
+
+    
+
 
 class Appointment(models.Model):
     STATUS_CHOICES = (
@@ -62,8 +126,8 @@ class Appointment(models.Model):
         ('cancelled', 'Cancelled'),
     )
     appointment_date_time = models.DateTimeField()
-    patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
-    assigned_doctor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    assigned_doctor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reason = models.TextField(max_length=300)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -107,6 +171,7 @@ class PublicAppointment(models.Model):
     
 
 class Triage(models.Model):
+    id = models.UUIDField(_("patient visit id"), default=uuid4, unique=True, editable=False, primary_key=True)
     created_by = models.CharField(max_length=45)
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -123,8 +188,9 @@ class Consultation(models.Model):
         ('discharged', 'Discharged'),
         ('lab', 'Lab'),
     )
-    doctor_ID = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    id = models.UUIDField(_("patient visit id"), default=uuid4, unique=True, editable=False, primary_key=True)
+    doctor_ID = models.ForeignKey(CustomUser, on_delete=models.CASCADE,)
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE, )
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     complaint = models.TextField(null=True, blank=True)
@@ -135,10 +201,11 @@ class Prescription(models.Model):
         ('pending', 'Pending'),
         ('dispensed', 'Dispensed'),
     )
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    id = models.UUIDField(_("patient visit id"), default=uuid4, unique=True, editable=False, primary_key=True)
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE,)
     date_created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE,)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
@@ -146,6 +213,7 @@ class Prescription(models.Model):
     
 
 class PrescribedDrug(models.Model):
+    id = models.UUIDField(_("patient visit id"), default=uuid4, unique=True, editable=False, primary_key=True)
     prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE)
     drug_id = models.ForeignKey(Drug, on_delete=models.CASCADE)
     dosage = models.CharField(max_length=45)
@@ -157,3 +225,27 @@ class PrescribedDrug(models.Model):
     def __str__(self):
         return f"Prescribed Drug #{self.drug_id}"    
         
+
+class PatientProfile(models.Model):
+    class Meta:
+        default_related_name = _("patient_profile")
+    
+    id = models.UUIDField(_("patient profile id"), default=uuid4, unique=True, editable=False, primary_key=True)
+    user = models.OneToOneField(Patient, on_delete=models.DO_NOTHING,)
+    insurance = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True,)
+    residence = models.CharField(max_length=100, null=True)
+
+
+
+
+class PatientVisit(models.Model):
+    class Meta:
+        default_related_name = _("patient_visits")
+
+    id = models.UUIDField(_("patient visit id"), default=uuid4, unique=True, editable=False, primary_key=True)
+    patient = models.ForeignKey(Patient, on_delete=models.DO_NOTHING, null=True, verbose_name=_("patient user"))
+    prescription = models.ForeignKey(Prescription, on_delete=models.DO_NOTHING, null=True, verbose_name=_("prescription"))
+    consultation = models.ForeignKey(Consultation, on_delete=models.DO_NOTHING, null=True, verbose_name=_("consultation"))
+
+
+

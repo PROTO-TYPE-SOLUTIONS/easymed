@@ -10,6 +10,7 @@ from .views import (
     PrescribedDrugViewSet,
     PublicAppointmentViewSet,
     ServiceViewSet,
+    CreatePatientAPIView
 )
 
 router = DefaultRouter()
@@ -25,4 +26,5 @@ router.register(r'prescribed-drugs', PrescribedDrugViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('create-patient', CreatePatientAPIView.as_view(), name="create-patient"),
 ]

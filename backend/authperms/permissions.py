@@ -6,10 +6,9 @@ from customuser.models import (
     Doctor,
     Nurse,
     LabTech,
-    Patient,
     Receptionist
 )
-
+from patient.models import Patient
 class IsDoctorUser(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_staff and request.user.role==Doctor.BASE_ROLE)

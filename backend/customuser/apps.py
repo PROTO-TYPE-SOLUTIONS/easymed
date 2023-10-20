@@ -6,4 +6,5 @@ class CustomuserConfig(AppConfig):
     name = 'customuser'
 
     def ready(self) -> None:
-        import customuser.signals
+        # import customuser.signals
+        pass
