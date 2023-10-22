@@ -3,32 +3,15 @@ import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import AddPatientModal from "./add-patient-modal";
 import { BiTransferAlt } from "react-icons/bi";
-import { LuMoreHorizontal } from "react-icons/lu";
-import ReferPatientModal from "./refer-patient-modal";
-import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { Chip } from "@mui/material";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-const getActions = () => {
-  let actions = [
-    {
-      action: "refer",
-      label: "Refer Patient",
-      icon: <BiTransferAlt className="text-card text-xl mx-2" />,
-    },
-  ];
-
-  return actions;
-};
-
+  
 const PatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedRowData, setSelectedRowData] = React.useState({});
-  const [open, setOpen] = React.useState(false);
-  const userActions = getActions();
 
 
   const users = [
@@ -80,32 +63,6 @@ const PatientsDataGrid = () => {
   ];
 
 
-  const onMenuClick = async (menu, data) => {
-    if (menu.action === "refer") {
-      setSelectedRowData(data);
-      setOpen(true);
-    } else if (menu.action === "edit") {
-      // setSelectedRowData(data);
-      // setOpen(true);
-    }
-  };
-
-
-  const actionsFunc = ({ data }) => {
-    return (
-      <>
-        <CmtDropdownMenu
-          sx={{ cursor: "pointer" }}
-          items={userActions}
-          onItemClick={(menu) => onMenuClick(menu, data)}
-          TriggerComponent={
-            <LuMoreHorizontal className="cursor-pointer text-xl" />
-          }
-        />
-      </>
-    );
-  };
-
   const statusFunc = ({ data }) => {
     if (data?.progress_status === "In Treatment") {
       return (
@@ -148,7 +105,7 @@ const PatientsDataGrid = () => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
-        className="shadow-xl"
+        className="shadow-xl w-full"
         height={"70vh"}
       >
         <Pager
@@ -178,14 +135,7 @@ const PatientsDataGrid = () => {
           width={140}
           cellRender={statusFunc}
         />
-        <Column
-          dataField="country"
-          caption="Action"
-          width={140}
-          cellRender={actionsFunc}
-        />
       </DataGrid>
-      <ReferPatientModal {...{open,setOpen,selectedRowData}} />
     </section>
   );
 };

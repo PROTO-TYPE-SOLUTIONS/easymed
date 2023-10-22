@@ -63,7 +63,7 @@ class GroupsAPIView(APIView):
 
 
 class GroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsSystemsAdminUser, IsAdminUser)
     def get_object(self, id: int):
         try:
             return Group.objects.get(id=id)

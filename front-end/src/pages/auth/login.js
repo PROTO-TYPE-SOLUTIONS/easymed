@@ -33,7 +33,6 @@ const Login = () => {
       await loginUser(formValue.email, formValue.password).then(() => {
         helpers.resetForm();
         setLoading(false);
-        router.push("/dashboard");
       });
     } catch (err) {
       console.log("LOGIN_ERROR ", err);
@@ -81,7 +80,7 @@ const Login = () => {
               </div>
               <button
                 type="submit"
-                className="bg-primary rounded w-full px-8 py-3 text-white"
+                className="bg-primary w-full px-8 py-3 text-white"
               >
                 {loading && (
                   <svg

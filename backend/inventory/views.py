@@ -6,11 +6,17 @@ from .serializers import (
     SaleSerializer,
     InventorySerializer,
     SupplierSerializer,
+    OrderBillSerializer,
 )
 
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
+
+
+class OrderBillViewSet(viewsets.ModelViewSet):
+    queryset = OrderBill.objects.all()
+    serializer_class = OrderBillSerializer    
 
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
