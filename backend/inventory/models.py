@@ -25,11 +25,24 @@ class Inventory(models.Model):
 
 
 class Item(models.Model):
+    UNIT_CHOICES = [
+        ('unit', 'Unit'),
+        ('mg', 'Milligram'),
+        ('g', 'Gram'),
+        ('kg', 'Kilogram'),
+        ('ml', 'Milliliter'),
+        ('L', 'Liter'),
+    ]
     name = models.CharField(max_length=255)
     item_no = models.CharField(max_length=255)
     desc = models.CharField(max_length=255)
-    category = models.CharField(max_length=255) # choices=[('SurgicalEquipment', 'Surgical Equipment'), ('LabReagent', 'Lab Reagent'), ('Drug', 'Drug'), ('Furniture', 'Furniture')]
-    units_of_measure = models.CharField(max_length=255)
+    category = models.CharField(max_length=255, choices=[
+        ('SurgicalEquipment', 'Surgical Equipment'),
+        ('LabReagent', 'Lab Reagent'),
+        ('Drug', 'Drug'),
+        ('Furniture', 'Furniture'),
+    ])
+    units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
 
     def __str__(self):
         return self.name
