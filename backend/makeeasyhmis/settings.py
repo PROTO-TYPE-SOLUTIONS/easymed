@@ -150,10 +150,11 @@ SPECTACULAR_SETTINGS = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Adjust as needed
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),  # Adjust as needed
-    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),  # Adjust as needed
-    'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=2),  # Adjust as needed
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=2),
     'SLIDING_TOKEN_REFRESH_SCOPE': None,
     'SLIDING_TOKEN_TYPES': {'access': 'a', 'refresh': 'r'},
+    'TOKEN_OBTAIN_SERIALIZER': 'customuser.serializers.CustomTokenObtainPairSerializer',
 }

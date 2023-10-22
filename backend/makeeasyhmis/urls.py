@@ -23,6 +23,9 @@ urlpatterns = [
     # authperms/sysadmin
     path('authperms/', include('authperms.urls')),
 
+    # customuser
+    path('customuser/', include('customuser.urls')),
+
     # users
     path('users/', include('customuser.urls')),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

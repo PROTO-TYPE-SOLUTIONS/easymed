@@ -92,6 +92,9 @@ class LoginAPIView(TokenObtainPairView):
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
 
+            refresh["email"] = str(user.email)
+            refresh["role"] = str(user.role)
+
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
