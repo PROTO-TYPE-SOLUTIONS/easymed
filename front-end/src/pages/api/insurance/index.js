@@ -21,7 +21,7 @@ export default async function handler(req, res) {
             };
     
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_APPOINTMENTS}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_INSURANCE}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.BOOK_APPOINTMENT}`,body,config)
+            await backendAxiosInstance.post(`${API_URL.CREATE_PATIENT}`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
