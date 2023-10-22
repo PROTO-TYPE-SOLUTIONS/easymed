@@ -93,6 +93,7 @@ class LoginAPIView(TokenObtainPairView):
             refresh = RefreshToken.for_user(user)
 
             refresh["email"] = str(user.email)
+            refresh["first_name"] = str(user.first_name)
             refresh["role"] = str(user.role)
 
             return Response({

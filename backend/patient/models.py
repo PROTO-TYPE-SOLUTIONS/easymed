@@ -87,15 +87,15 @@ class PublicAppointment(models.Model):
         ('cancelled', 'Cancelled'),
     )
     GENDER_CHOICES = (
-        ('M', 'Male'),
-        ('F', 'Female'),
-        ('O', 'Other'),
+        ('MALE', 'Male'),
+        ('FEMALE', 'Female'),
+        ('OTHER', 'Other'),
     )
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, )
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, )
     appointment_date_time = models.DateTimeField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reason = models.TextField(max_length=300)

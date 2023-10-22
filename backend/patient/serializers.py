@@ -44,9 +44,24 @@ class AppointmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PublicAppointmentSerializer(serializers.ModelSerializer):
+    service_name = serializers.SerializerMethodField()
     class Meta:
         model = PublicAppointment
-        fields = '__all__'
+        fields = [
+            'service_name',
+            'first_name',
+            'second_name',
+            'date_of_birth',
+            'gender',
+            'appointment_date_time',
+            'status',
+            'reason',
+            'date_created',
+                  ]
+
+    
+    def get_service_name(self, obj):
+        return obj.service.name    
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):
