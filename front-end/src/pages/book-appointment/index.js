@@ -22,7 +22,7 @@ const BookAppointment = () => {
     gender: "",
     appointment_date_time: "",
     reason: "",
-    service: null,
+    // service: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -32,7 +32,7 @@ const BookAppointment = () => {
     gender: Yup.string().required("Select gender!"),
     appointment_date_time: Yup.string().required("Date is required!"),
     reason: Yup.string().required("Provide a reason!"),
-    service: Yup.number().required("Select a service!"),
+    // service: Yup.number().required("Select a service!"),
   });
 
   const handleBookAppointment = async (formValue, helpers) => {
@@ -40,7 +40,7 @@ const BookAppointment = () => {
     try {
       const formData = {
         ...formValue,
-        service: parseInt(formValue.service),
+        // service: parseInt(formValue.service),
       };
       setLoading(true);
       await bookAppointment(formData).then(() => {
@@ -93,8 +93,8 @@ const BookAppointment = () => {
                     name="gender"
                   >
                     <option value="">Select Gender</option>
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
                   </Field>
 
                   <ErrorMessage
@@ -146,7 +146,7 @@ const BookAppointment = () => {
                   />
                 </div>
 
-                <div className="w-full">
+                {/* <div className="w-full">
                   <Field
                     as="select"
                     className="block pr-9 border border-gray  py-3 px-4 focus:outline-none w-full"
@@ -162,7 +162,7 @@ const BookAppointment = () => {
                     component="div"
                     className="text-warning text-xs"
                   />
-                </div>
+                </div> */}
               </Grid>
             </Grid>
             <div className="w-full my-4">

@@ -11,9 +11,9 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === API_METHODS.GET) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
             };
     
 
-            await backendAxiosInstance.get(`${API_URL.GET_COUNTIES}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_PATIENT}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {

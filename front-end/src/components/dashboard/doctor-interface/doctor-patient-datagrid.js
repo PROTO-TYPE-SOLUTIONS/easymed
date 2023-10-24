@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
@@ -10,6 +10,8 @@ import ConsultPatientModal from './consult-modal'
 import PrescribePatientModal from './prescribe-patient-modal'
 import { BiTransferAlt } from "react-icons/bi";
 import { MdOutlineContactSupport } from 'react-icons/md'
+import { useDispatch,useSelector } from "react-redux";
+import { getAllPatients } from '@/redux/features/patients'
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -47,6 +49,13 @@ const DoctorPatientDataGrid = () => {
   const [consultOpen, setConsultOpen] = useState(false);
   const [prescribeOpen, setPrescribeOpen] = useState(false);
   const userActions = getActions();
+  const dispatch = useDispatch();
+  const { patients } = useSelector((store) => store.patient)
+
+
+  useEffect(() =>{
+    dispatch(getAllPatients());
+  },[])
 
 
   const users = [
@@ -167,7 +176,7 @@ const DoctorPatientDataGrid = () => {
         </div>
       </div>
       <DataGrid
-        dataSource={filteredUser}
+        dataSource={patients}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         onSelectionChanged={onSelectionChanged}
@@ -192,15 +201,27 @@ const DoctorPatientDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="id_number" caption="ID" width={140} />
         <Column
-          dataField="name"
-          caption="Name"
-          width={240}
+          dataField="first_name"
+          caption="First Name"
+          width={200}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Age" width={140} />
+        <Column
+          dataField="second_name"
+          caption="Last Name"
+          width={200}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column
+          dataField="date_of_birth"
+          caption="Date of Birth"
+          width={200}
+          allowFiltering={true}
+          allowSearch={true}
+        />
         <Column
           dataField="gender"
           caption="Status"

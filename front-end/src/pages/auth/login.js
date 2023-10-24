@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  const { loginUser } = useContext(authContext);
+  const { loginUser, user } = useContext(authContext);
   const router = useRouter();
   const initialValues = {
     email: "",
@@ -33,6 +33,11 @@ const Login = () => {
       await loginUser(formValue.email, formValue.password).then(() => {
         helpers.resetForm();
         setLoading(false);
+        // if(user?.role === 'patient'){
+        //   router.push("/")
+        // }else{
+        //   router.push('/')
+        // }
       });
     } catch (err) {
       console.log("LOGIN_ERROR ", err);

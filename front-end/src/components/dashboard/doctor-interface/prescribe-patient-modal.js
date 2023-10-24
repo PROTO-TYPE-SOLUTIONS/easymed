@@ -3,11 +3,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Divider } from "@mui/material";
 import { Grid } from "@mui/material";
+import { prescribePatient } from '@/redux/service/patients'
 
 const PrescribePatientModal = ({ selectedRowData, prescribeOpen, setPrescribeOpen }) => {
   const [loading, setLoading] = React.useState(false);
+
+  console.log("ROW_DATA ",selectedRowData)
 
 
   const handleClose = () => {
@@ -25,12 +27,17 @@ const PrescribePatientModal = ({ selectedRowData, prescribeOpen, setPrescribeOpe
   const handlePrescribePatient = async (formValue, helpers) => {
     console.log("PRESCRIBE_PAYLOAD ", formValue);
     try {
+      const formData = {
+        patient_id: selectedRowData?.id,
+        start_date: "",
+        created_by: ""
+      }
       setLoading(true);
-      // await createPatient(formValue).then(() => {
-      //   helpers.resetForm();
-      //   toast.success("Patient Referred Successfully!");
-      //   setLoading(false);
-      // });
+      await prescribePatient(formData).then(() => {
+        helpers.resetForm();
+        toast.success("Patient Prescribed Successfully!");
+        setLoading(false);
+      });
     } catch (err) {
       toast.error(err);
       console.log("PRESCRIBE_ERROR ", err);
@@ -76,14 +83,14 @@ const PrescribePatientModal = ({ selectedRowData, prescribeOpen, setPrescribeOpe
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       type="submit"
-                      className="bg-[#02273D] px-4 py-2 text-white"
+                      className="bg-[#02273D] px-4 py-2 text-white text-sm"
                     >
-                      Forward to Lab
+                      Submit
                     </button>
                     <button
                       type="submit"
                       onClick={handleClose}
-                      className="border border-warning px-4 py-2"
+                      className="border border-warning px-4 py-2 text-sm"
                     >
                       Cancel
                     </button>

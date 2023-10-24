@@ -35,7 +35,11 @@ export const AuthProvider = ({ children }) => {
             "refresh",
             JSON.stringify(response.data.refresh)
           );
-          router.push("/dashboard");
+          if (user?.role === "patient") {
+            router.push("/");
+          }else{
+            router.push('/dashboard')
+          }
         } catch (error) {
           throw error;
         }
