@@ -31,7 +31,6 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    insurance_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Patient
@@ -43,7 +42,8 @@ class PatientSerializer(serializers.ModelSerializer):
     def to_representation(self, instance: Patient):
         data = super().to_representation(instance)
         data["gender"] = instance.get_gender_display()
-        data["insurance"] = instance.insurance.name
+        if instance.insurance:
+            data["insurance"] = instance.insurance.name
         return data
 
 
@@ -60,12 +60,13 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
 
 class PublicAppointmentSerializer(serializers.ModelSerializer):
-    service_name = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = PublicAppointment
         fields = [
-            'service_name',
+            "id",
+            'service',
             'first_name',
             'second_name',
             'date_of_birth',
@@ -75,8 +76,17 @@ class PublicAppointmentSerializer(serializers.ModelSerializer):
             'reason',
             'date_created',
         ]
+        read_only_fields = ("id", "date_created",)
 
-    def get_service_name(self, obj):
+    def to_representation(self, instance: PublicAppointment):
+        data = super().to_representation(instance)
+        data["gender"] = instance.get_gender_display()
+        data["status"] = instance.get_status_display()
+        if instance.service:
+            data["service"] = instance.service.name
+        return data
+
+    def get_service_name(self, obj: PublicAppointment):
         return obj.service.name
 
 
