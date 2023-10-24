@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import AddPatientModal from "./add-patient-modal";
-import { BiTransferAlt } from "react-icons/bi";
 import { Chip } from "@mui/material";
+import { getAllPatients } from "@/redux/features/patients";
+import { useSelector,useDispatch } from "react-redux";
+
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -12,7 +14,9 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   
 const PatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
-
+  const { patients } = useSelector((store) => store.patient);
+  const dispatch = useDispatch();
+  console.log("PATIENTS ",patients)
 
   const users = [
     {
@@ -84,6 +88,11 @@ const PatientsDataGrid = () => {
     return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
   });
 
+
+  useEffect(() =>{
+    dispatch(getAllPatients());
+  },[])
+
   return (
     <section className="mt-8">
       <div className="flex items-center justify-between mb-2">
@@ -96,7 +105,7 @@ const PatientsDataGrid = () => {
         />
       </div>
       <DataGrid
-        dataSource={filteredUser}
+        dataSource={patients}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -114,21 +123,28 @@ const PatientsDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="id_number" caption="ID" width={140} />
+        
         <Column
-          dataField="name"
-          caption="Name"
+          dataField="first_name"
+          caption="First Name"
           width={200}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Age" width={140} />
         <Column
-          dataField="assigned_doctor"
-          caption="Assigned Doctor"
+          dataField="second_name"
+          caption="Last Name"
+          width={200}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="gender" caption="Gender" width={140} />
+        <Column
+          dataField="insurance"
+          caption="Insurance"
           width={200}
         />
-        <Column dataField="gender" caption="Gender" width={140} />
         <Column
           dataField=""
           caption="Status"

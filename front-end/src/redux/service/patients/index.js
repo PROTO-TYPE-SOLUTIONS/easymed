@@ -14,9 +14,33 @@ export const fetchServices = () =>{
     })
 }
 
+export const fetchPatient = () =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_PATIENT}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const createPatient = (payload) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.CREATE_PATIENT}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const prescribePatient = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.PRESCRIBE}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })

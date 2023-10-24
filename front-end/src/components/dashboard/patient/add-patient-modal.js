@@ -9,13 +9,13 @@ import { createPatient } from "@/redux/service/patients";
 import { toast } from "react-toastify";
 import { getAllInsurance } from "@/redux/features/insurance";
 import { useSelector, useDispatch } from "react-redux";
+import { getAllPatients } from "@/redux/features/patients";
 
 const AddPatientModal = () => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const dispatch = useDispatch();
   const { insurance } = useSelector((store) => store.insurance);
-  console.log("INSURANCE ", insurance);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -71,6 +71,7 @@ const AddPatientModal = () => {
         helpers.resetForm();
         toast.success("Patient Created Successfully!");
         setLoading(false);
+        dispatch(getAllPatients());
         handleClose();
       });
     } catch (err) {
@@ -182,7 +183,7 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
+                  {/* <Grid item md={6} xs={12}>
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="text"
@@ -194,7 +195,7 @@ const AddPatientModal = () => {
                       component="div"
                       className="text-warning text-xs"
                     />
-                  </Grid>
+                  </Grid> */}
                 </Grid>
 
                 <div>

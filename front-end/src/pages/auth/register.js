@@ -12,7 +12,6 @@ const SignUp = () => {
     password: "",
     first_name: "",
     last_name: "",
-    role: "",
   };
 
   const validationSchema = Yup.object().shape({
@@ -29,13 +28,17 @@ const SignUp = () => {
           !val || (val.toString().length >= 6 && val.toString().length <= 40)
       )
       .required("Password is required!"),
-    role: Yup.string().required("Role is required!"),
+    // role: Yup.string().required("Role is required!"),
   });
 
   const handleRegister = async (formValue, helpers) => {
     try {
+      const formData = {
+        ...formValue,
+        role: ''
+      }
       setLoading(true);
-      await registerUser(formValue).then(() => {
+      await registerUser(formData).then(() => {
         helpers.resetForm();
         setLoading(false);
         router.push("/auth/login");
@@ -110,7 +113,7 @@ const SignUp = () => {
                   className="text-warning text-xs"
                 />
               </div>
-              <div className="w-full">
+              {/* <div className="w-full">
                 <Field
                   className="block border border-gray py-3 px-4 focus:outline-none w-full"
                   type="text"
@@ -122,7 +125,7 @@ const SignUp = () => {
                   component="div"
                   className="text-warning text-xs"
                 />
-              </div>
+              </div> */}
               <button
                 type="submit"
                 className="bg-primary w-full px-8 py-3 text-white"

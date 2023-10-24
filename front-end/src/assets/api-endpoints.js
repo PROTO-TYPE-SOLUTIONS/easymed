@@ -11,10 +11,12 @@ export const API_URL = {
 
     /***************** PATIENT APIS **********************/
     CREATE_PATIENT: '/patients/patients/',
+    FETCH_PATIENT: '/patients/patients/',
     BOOK_APPOINTMENT: '/patients/publicappointments/',
     FETCH_APPOINTMENTS: '/patients/publicappointments/',
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
+    PRESCRIBE: '/patients/prescriptions/',
 
 
     /***************** DOCTOR APIS **********************/
@@ -41,10 +43,12 @@ export const APP_API_URL = {
 
     /***************** PATIENT APIS **********************/
     CREATE_PATIENT: '/api/patient',
+    FETCH_PATIENT: '/api/patient',
     BOOK_APPOINTMENT: '/api/appointment',
     FETCH_APPOINTMENTS: '/api/appointment',
     FETCH_SERVICES: '/api/patient/fetch-services',
     FETCH_INSURANCE: '/api/insurance',
+    PRESCRIBE: '/api/patient/prescribe',
 
 
     /***************** DOCTOR APIS **********************/
