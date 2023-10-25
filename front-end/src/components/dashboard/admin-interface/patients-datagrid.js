@@ -121,7 +121,6 @@ const AdminPatientsDataGrid = () => {
   };
 
   const statusFunc = ({ data }) => {
-    console.log("DATA_DATA ", data);
     if (data?.progress_status === "In Treatment") {
       return (
         <Chip variant="contained" size="small" label={data.progress_status} className="bg-primary text-white" />

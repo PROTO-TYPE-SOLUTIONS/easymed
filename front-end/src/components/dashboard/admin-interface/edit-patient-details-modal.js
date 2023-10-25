@@ -6,10 +6,11 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import { useSelector,useDispatch } from "react-redux";
 import { getAllInsurance } from "@/redux/features/insurance";
+import { editPatient } from "@/redux/service/patients";
+import { toast } from 'react-toastify'
 
 const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
-  console.log("ROW_DATA ", selectedRowData);
   const { insurance } = useSelector((store) => store.insurance);
   const dispatch = useDispatch();
 
@@ -17,24 +18,9 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     dispatch(getAllInsurance());
   },[])
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
   const handleClose = () => {
     setOpen(false);
   };
-
-  const gender = [
-    {
-      id: 1,
-      name: "Male",
-    },
-    {
-      id: 2,
-      name: "Female",
-    },
-  ];
 
   const initialValues = {
     first_name: selectedRowData?.first_name || "",
@@ -44,8 +30,6 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     insurance: selectedRowData?.insurance || null,
     user_id: selectedRowData?.user_id || null,
   };
-
-  console.log("INITIAL_VALUES ",initialValues)
 
   const validationSchema = Yup.object().shape({
     first_name: Yup.string().required("First Name is required!"),
@@ -65,16 +49,16 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
         user_id: parseInt(formValue.user_id),
       };
       setLoading(true);
-      await createPatient(formData).then(() => {
+      await editPatient(formData).then(() => {
         helpers.resetForm();
-        toast.success("Patient Created Successfully!");
+        toast.success("Patient Edited Successfully!");
         setLoading(false);
         dispatch(getAllPatients());
         handleClose();
       });
     } catch (err) {
       toast.error(err);
-      console.log("PATIENT_ERROR ", err);
+      console.log("EDIT_ERROR ", err);
     }
   };
 
