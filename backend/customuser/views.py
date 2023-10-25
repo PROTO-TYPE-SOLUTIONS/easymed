@@ -89,7 +89,7 @@ class LoginAPIView(TokenObtainPairView):
     def post(self, request:Request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data['user']
+            user:CustomUser = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
 
             refresh["email"] = str(user.email)

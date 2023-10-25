@@ -22,7 +22,7 @@ const getActions = () => {
   return actions;
 };
 
-const BookedAppointmentsDataGrid = () => {
+const BookedAppointmentsDataGrid = ({ appointments }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRowData, setSelectedRowData] = useState({});
   const userActions = getActions();
@@ -106,6 +106,17 @@ const BookedAppointmentsDataGrid = () => {
     );
   };
 
+
+  const appointmentDateFunc = ({ data }) => {
+    const formattedate = new Date(data?.appointment_date_time).toLocaleDateString()
+    return <p>{formattedate}</p>
+  }
+
+  const dateCreatedFunc = ({ data }) => {
+    const formattedate = new Date(data?.date_created).toLocaleDateString()
+    return <p>{formattedate}</p>
+  }
+
   return (
     <section>
       <div className="flex items-center justify-end">
@@ -122,7 +133,7 @@ const BookedAppointmentsDataGrid = () => {
         </h1>
       </div>
       <DataGrid
-        dataSource={filteredUser}
+        dataSource={appointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -140,23 +151,34 @@ const BookedAppointmentsDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="id_number" caption="ID" width={140} />
-        <Column
-          dataField="name"
-          caption="Name"
-          width={240}
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
         <Column
           dataField="gender"
           caption="Action"
-          width={140}
+          width={100}
+          alignment="center"
           cellRender={actionsFunc}
         />
+        <Column
+          dataField="first_name"
+          caption="First Name"
+          width={140}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column
+          dataField="second_name"
+          caption="Last Name"
+          width={140}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column dataField="appointment_date_time" caption="Date of Appointment" width={140} cellRender={appointmentDateFunc} />
+        <Column dataField="date_created" caption="Date Created" width={140} cellRender={dateCreatedFunc} />
+        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="reason" caption="Reason" width={280} />
+        <Column dataField="gender" caption="Gender" width={100} />
+        <Column dataField="status" caption="Status" width={140} />
+        
       </DataGrid>
       <CreateAppointmentModal {...{ open, setOpen, selectedRowData }} />
     </section>
