@@ -1,16 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
-import { useFormik } from "formik";
-import { Divider } from "@mui/material";
-import { TextField, Autocomplete, Grid } from "@mui/material";
-import { getAutoCompleteValue } from "@/assets/file-helper";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { BiEdit } from 'react-icons/bi';
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Grid } from "@mui/material";
+import { useSelector,useDispatch } from "react-redux";
+import { getAllInsurance } from "@/redux/features/insurance";
 
-const EditPatientDetails = ({ open,setOpen,selectedRowData }) => {
-    console.log("ROW_DATA ",selectedRowData);
+const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
+  const [loading, setLoading] = useState(false);
+  console.log("ROW_DATA ", selectedRowData);
+  const { insurance } = useSelector((store) => store.insurance);
+  const dispatch = useDispatch();
+
+  useEffect(() =>{
+    dispatch(getAllInsurance());
+  },[])
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -31,49 +36,45 @@ const EditPatientDetails = ({ open,setOpen,selectedRowData }) => {
     },
   ];
 
+  const initialValues = {
+    first_name: selectedRowData?.first_name || "",
+    second_name: selectedRowData?.second_name || "",
+    date_of_birth: selectedRowData?.date_of_birth || "",
+    gender: selectedRowData?.gender || "",
+    insurance: selectedRowData?.insurance || null,
+    user_id: selectedRowData?.user_id || null,
+  };
+
+  console.log("INITIAL_VALUES ",initialValues)
+
   const validationSchema = Yup.object().shape({
-    first_name: Yup.string().required("This field is required!"),
-    second_name: Yup.string().required("This field is required!"),
-    last_name: Yup.string().required("This field is required!"),
-    date_of_birth: Yup.date()
-    .required("Date of Birth is required")
-    .max(new Date(), "Date of Birth cannot be in the future"),
-    genderId: Yup.string().required("This field is required!"),
-    telephone: Yup.string().required("This field is required!"),
-    email: Yup.string().required("This field is required!"),
-    residence: Yup.string().required("This field is required!"),
-    provider: Yup.string().required("This field is required!"),
-    card_number: Yup.string().required("This field is required!"),
-    package: Yup.string().required("This field is required!"),
+    first_name: Yup.string().required("First Name is required!"),
+    second_name: Yup.string().required("Second Name is required!"),
+    date_of_birth: Yup.string().required("Date is required!"),
+    gender: Yup.string().required("Select gender!"),
+    insurance: Yup.number(),
+    user_id: Yup.number(),
   });
 
-  const formik = useFormik({
-    initialValues: {
-      first_name: "",
-      second_name: "",
-      last_name: "",
-      date_of_birth: "",
-      genderId: null,
-      telephone: "",
-      email: "",
-      residence: "",
-      provider: "",
-      card_number: "",
-      package: "",
-    },
-    validationSchema: validationSchema,
-    onSubmit: async (values) => {
-      console.log("FORMIK_VALUES ", values);
-      // await dispatch(createSponsorUser(authUser, values));
-    },
-  });
-
-  const handleOnGenderId = (event, value) => {
-    console.log(value);
-    if (value !== null) {
-      formik.setFieldValue("genderId", value.id);
-    } else {
-      formik.setFieldValue("genderId", null);
+  const handleEditPatient = async (formValue, helpers) => {
+    console.log("EDIT_PAYLOAD ", formValue);
+    try {
+      const formData = {
+        ...formValue,
+        insurance: parseInt(formValue.insurance),
+        user_id: parseInt(formValue.user_id),
+      };
+      setLoading(true);
+      await createPatient(formData).then(() => {
+        helpers.resetForm();
+        toast.success("Patient Created Successfully!");
+        setLoading(false);
+        dispatch(getAllPatients());
+        handleClose();
+      });
+    } catch (err) {
+      toast.error(err);
+      console.log("PATIENT_ERROR ", err);
     }
   };
 
@@ -88,256 +89,131 @@ const EditPatientDetails = ({ open,setOpen,selectedRowData }) => {
         aria-describedby="alert-dialog-description"
       >
         <DialogContent>
-          <form onSubmit={formik.handleSubmit}>
-            <section className="space-y-2">
-              <h1 className="font-bold text-xl">Edit Patient Details</h1>
-              <Grid container spacing={2}>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="First Name"
-                    name="first_name"
-                    value={formik.values.first_name}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.first_name &&
-                      Boolean(formik.errors.first_name)
-                    }
-                    helperText={
-                      formik.touched.first_name && formik.errors.first_name
-                    }
-                  />
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleEditPatient}
+          >
+            <Form>
+              <section className="space-y-2">
+                <Grid container spacing={2}>
+                  <Grid item md={6} xs={12}>
+                    <Field
+                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="First Name"
+                      name="first_name"
+                    />
+                    <ErrorMessage
+                      name="first_name"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={6} xs={12}>
+                    <Field
+                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="Second Name"
+                      name="second_name"
+                    />
+                    <ErrorMessage
+                      name="second_name"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Second Name"
-                    name="second_name"
-                    value={formik.values.second_name}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.second_name &&
-                      Boolean(formik.errors.second_name)
-                    }
-                    helperText={
-                      formik.touched.second_name && formik.errors.second_name
-                    }
-                  />
+                <Grid container spacing={2}>
+                  <Grid item md={6} xs={12}>
+                    <Field
+                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      type="date"
+                      placeholder="Date of Birth"
+                      name="date_of_birth"
+                    />
+                    <ErrorMessage
+                      name="date_of_birth"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={6} xs={12}>
+                    <Field
+                      as="select"
+                      className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
+                      name="gender"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </Field>
+                    <ErrorMessage
+                      name="gender"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
                 </Grid>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Last Name"
-                    name="last_name"
-                    value={formik.values.last_name}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.last_name &&
-                      Boolean(formik.errors.last_name)
-                    }
-                    helperText={
-                      formik.touched.last_name && formik.errors.last_name
-                    }
-                  />
+                <Grid container spacing={2}>
+                  <Grid item md={6} xs={12}>
+                    <Field
+                      as="select"
+                      className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
+                      name="insurance"
+                    >
+                      <option value="">Select Insurance</option>
+                      {insurance.map((item) => (
+                        <option key={item?.id} value={item.id}>
+                          {item?.name}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="insurance"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
                 </Grid>
-              </Grid>
-              <Grid container spacing={2}>
-                <Grid item md={4} xs={12}>
-                  <DatePicker
-                    size="small"
-                    label="Date of Birth"
-                    value={formik.values.date_of_birth}
-                    onChange={(date) =>
-                      formik.setFieldValue("date_of_birth", date)
-                    }
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.date_of_birth &&
-                      Boolean(formik.errors.date_of_birth)
-                    }
-                    helperText={
-                      formik.touched.date_of_birth &&
-                      formik.errors.date_of_birth
-                    }
-                  />
-                </Grid>
-                <Grid item md={4} xs={12}>
-                  <Autocomplete
-                    options={gender}
-                    value={getAutoCompleteValue(gender, formik.values.genderId)}
-                    getOptionLabel={(option) => option.name}
-                    onChange={handleOnGenderId}
-                    renderInput={(params) => (
-                      <TextField
-                        size="small"
-                        fullWidth
-                        {...params}
-                        label="Gender"
-                        name="genderId"
-                        onBlur={formik.handleBlur}
-                        error={
-                          formik.touched.genderId &&
-                          Boolean(formik.errors.genderId)
-                        }
-                        helperText={
-                          formik.touched.genderId && formik.errors.genderId
-                        }
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    // size="small"
-                    label="Telephone"
-                    name="telephone"
-                    value={formik.values.telephone}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.telephone &&
-                      Boolean(formik.errors.telephone)
-                    }
-                    helperText={
-                      formik.touched.telephone && formik.errors.telephone
-                    }
-                  />
-                </Grid>
-              </Grid>
-              <Divider />
-              <p>Contact Information</p>
-              <Grid container spacing={2}>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Email"
-                    name="email"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.email && Boolean(formik.errors.email)}
-                    helperText={formik.touched.email && formik.errors.email}
-                  />
-                </Grid>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Residence"
-                    name="residence"
-                    value={formik.values.residence}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.residence &&
-                      Boolean(formik.errors.residence)
-                    }
-                    helperText={
-                      formik.touched.residence && formik.errors.residence
-                    }
-                  />
-                </Grid>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Provider"
-                    name="provider"
-                    value={formik.values.provider}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.provider && Boolean(formik.errors.provider)
-                    }
-                    helperText={
-                      formik.touched.provider && formik.errors.provider
-                    }
-                  />
-                </Grid>
-              </Grid>
-              <Divider />
-              <p>Insurance Information</p>
-              <Grid container spacing={2}>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Card Number"
-                    name="card_number"
-                    value={formik.values.card_number}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.card_number &&
-                      Boolean(formik.errors.card_number)
-                    }
-                    helperText={
-                      formik.touched.card_number && formik.errors.card_number
-                    }
-                  />
-                </Grid>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Package"
-                    name="package"
-                    value={formik.values.package}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.package && Boolean(formik.errors.package)
-                    }
-                    helperText={formik.touched.package && formik.errors.package}
-                  />
-                </Grid>
-                <Grid item md={4} xs={12}>
-                  <TextField
-                    fullWidth
-                    maxWidth="sm"
-                    size="small"
-                    label="Telephone"
-                    name="telephone"
-                  />
-                </Grid>
-              </Grid>
-              <Divider />
-              <div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <button
-                    type="submit"
-                    className="bg-[#02273D] px-4 py-2 text-white"
-                  >
-                    Save Patient
-                  </button>
-                  <button
-                    type="submit"
-                    onClick={handleClose}
-                    className="border border-warning px-4 py-2 text-[#02273D]"
-                  >
-                    Cancel
-                  </button>
+                <div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <button
+                      type="submit"
+                      className="bg-primary px-4 py-2 text-white"
+                    >
+                      {loading && (
+                        <svg
+                          aria-hidden="true"
+                          role="status"
+                          class="inline mr-2 w-4 h-4 text-gray-200 animate-spin dark:text-gray-600"
+                          viewBox="0 0 100 101"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                            fill="currentColor"
+                          ></path>
+                          <path
+                            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                            fill="#1C64F2"
+                          ></path>
+                        </svg>
+                      )}
+                      Edit Patient
+                    </button>
+                    <button
+                      onClick={handleClose}
+                      className="border border-warning px-4 py-2 text-[#02273D]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </section>
-          </form>
+              </section>
+            </Form>
+          </Formik>
         </DialogContent>
       </Dialog>
     </section>
