@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AddPatientModal from "../patient/add-patient-modal";
 import AssignDoctorModal from "./assign-doctor-modal";
 import DischargePatientModal from "./discharge-patient-modal";
-import { Chip } from "@mui/material";
 import Link from "next/link";
+import { getAllPatients } from "@/redux/features/patients";
+import { useSelector,useDispatch } from "react-redux";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -15,6 +16,9 @@ const ReceptionPatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { patients } = useSelector((store) => store.patient)
+
 
   const users = [
     {
@@ -64,9 +68,13 @@ const ReceptionPatientsDataGrid = () => {
     },
   ];
 
+  useEffect(() => {
+    dispatch(getAllPatients());
+  },[])
+
   //   filter users based on search query
-  const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
+  const filteredPatients = patients.filter((patient) => {
+    return patient?.first_name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const onSelectionChanged = (props) => {
@@ -128,7 +136,7 @@ const ReceptionPatientsDataGrid = () => {
         </div>
       </div>
       <DataGrid
-        dataSource={filteredUser}
+        dataSource={filteredPatients}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         onSelectionChanged={onSelectionChanged}
@@ -153,15 +161,21 @@ const ReceptionPatientsDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="id_number" caption="ID" width={140} />
         <Column
-          dataField="name"
-          caption="Name"
+          dataField="first_name"
+          caption="First Name"
           width={240}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Age" width={140} />
+        <Column
+          dataField="second_name"
+          caption="Last Name"
+          width={240}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
         <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
         <Column dataField="gender" caption="Gender" width={140} />
         <Column

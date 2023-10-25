@@ -93,8 +93,8 @@ const BookAppointment = () => {
                     name="gender"
                   >
                     <option value="">Select Gender</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
                   </Field>
 
                   <ErrorMessage
