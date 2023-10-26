@@ -4,14 +4,16 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { registerUser } from "@/redux/service/auth";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import { IoMdAdd } from 'react-icons/io'
+import { IoMdAdd } from "react-icons/io";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const AdminCreateDoctor = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
   const dispatch = useDispatch();
+  const authUser = useAuth();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -21,10 +23,11 @@ const AdminCreateDoctor = () => {
     setOpen(false);
   };
 
-  useEffect(() =>{
-    dispatch(getAllDoctors());
-  },[]);
-
+  useEffect(() => {
+    if (authUser) {
+      dispatch(getAllDoctors(authUser));
+    }
+  }, []);
 
   const initialValues = {
     first_name: "",
@@ -53,8 +56,8 @@ const AdminCreateDoctor = () => {
     try {
       const formData = {
         ...formValue,
-        role: 'doctor'
-      }
+        role: "doctor",
+      };
       setLoading(true);
       await registerUser(formData).then(() => {
         helpers.resetForm();
@@ -85,7 +88,7 @@ const AdminCreateDoctor = () => {
         <DialogContent>
           <section className="flex items-center justify-center gap-8 overflow-hidden">
             <div className="w-full space-y-4 px-4">
-                <h1 className="text-xl text-center">Create Doctor</h1>
+              <h1 className="text-xl text-center">Create Doctor</h1>
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}

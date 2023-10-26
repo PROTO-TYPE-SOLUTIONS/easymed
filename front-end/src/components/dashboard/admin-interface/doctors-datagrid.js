@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import { LuMoreHorizontal } from "react-icons/lu";
@@ -7,6 +7,9 @@ import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import EditDoctorDetailsModal from "./edit-doctor-details-modal";
 import DeleteDoctorModal from "./delete-doctor-modal";
+import { getAllDoctors } from "@/redux/features/doctors";
+import { useSelector, useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -35,86 +38,15 @@ const AdminDoctorsDataGrid = () => {
   const [open, setOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
+  const dispatch = useDispatch();
+  const { doctors } = useSelector((store) => store.doctor);
+  const authUser = useAuth();
 
-  const users = [
-    {
-      number: "1",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "2",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "70081234",
-      name: "Ann Kibet",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-    {
-      number: "4",
-      id_number: "1234821",
-      name: "Ann Ochieng",
-      country: "Rwanda",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-    {
-      number: "5",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "6",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "7",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-  ];
-
-  //   filter users based on search query
-  const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
-  });
+  useEffect(() => {
+    if (authUser) {
+      dispatch(getAllDoctors(authUser));
+    }
+  }, []);
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "delete") {
@@ -143,16 +75,8 @@ const AdminDoctorsDataGrid = () => {
 
   return (
     <section>
-      {/* <div className="flex items-center justify-end mb-3 mt-4 w-5/12">
-        <input
-          className="rounded-3xl shadow-xl py-3 px-4 focus:outline-none w-full"
-          onChange={(e) => setSearchQuery(e.target.value)}
-          value={searchQuery}
-          placeholder="Search..."
-        />
-      </div> */}
       <DataGrid
-        dataSource={filteredUser}
+        dataSource={doctors}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}

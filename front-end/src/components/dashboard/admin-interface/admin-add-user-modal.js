@@ -5,12 +5,11 @@ import { useRouter } from "next/router";
 import { registerUser } from "@/redux/service/auth";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import { IoMdAdd } from 'react-icons/io'
+import { IoMdAdd } from "react-icons/io";
 
-const AdminCreateUserModal = () => {
+const AdminCreateNurseModal = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
-  const router = useRouter();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -21,11 +20,10 @@ const AdminCreateUserModal = () => {
   };
 
   const initialValues = {
-    email: "",
-    password: "",
     first_name: "",
     last_name: "",
-    role: "",
+    email: "",
+    password: "",
   };
 
   const validationSchema = Yup.object().shape({
@@ -42,16 +40,19 @@ const AdminCreateUserModal = () => {
           !val || (val.toString().length >= 6 && val.toString().length <= 40)
       )
       .required("Password is required!"),
-    role: Yup.string().required("Role is required!"),
   });
+
 
   const handleRegister = async (formValue, helpers) => {
     try {
+      const formData = {
+        ...formValue,
+        role: "nurse",
+      };
       setLoading(true);
-      await registerUser(formValue).then(() => {
+      await registerUser(formData).then(() => {
         helpers.resetForm();
         setLoading(false);
-        router.push("/auth/login");
       });
     } catch (err) {
       console.log("SIGNUP_ERROR ", err);
@@ -64,7 +65,7 @@ const AdminCreateUserModal = () => {
         onClick={handleClickOpen}
         className="border border-card text-card font-semibold px-4 py-3 text-sm flex items-center gap-1"
       >
-        <IoMdAdd /> Create User
+        <IoMdAdd /> Create Nurse
       </button>
       <Dialog
         fullWidth
@@ -77,7 +78,7 @@ const AdminCreateUserModal = () => {
         <DialogContent>
           <section className="flex items-center justify-center gap-8 overflow-hidden">
             <div className="w-full space-y-8 px-4">
-                <h1 className="text-xl text-center">Create User</h1>
+              <h1 className="text-xl text-center">Create User</h1>
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -186,4 +187,4 @@ const AdminCreateUserModal = () => {
   );
 };
 
-export default AdminCreateUserModal;
+export default AdminCreateNurseModal;
