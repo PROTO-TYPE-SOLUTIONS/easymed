@@ -365,7 +365,7 @@ class ChangeUserRoleAPIView(APIView):
     @extend_schema(
         request=ChangeUserRoleSerializer,
     )
-    def post(self, request: Request, user_id: int = None, *args, **kwargs):
+    def put(self, request: Request, user_id: int = None, *args, **kwargs):
         data = request.data
         serializer = ChangeUserRoleSerializer(data=data)
         serializer.is_valid(raise_exception=True)
