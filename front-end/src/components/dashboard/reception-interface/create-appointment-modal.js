@@ -21,12 +21,23 @@ export default function CreateAppointmentModal({
 
   const createBookedAppointment = async () => {
     // make api call to create Booked Appointment
+    const formatGender = (gender) => {
+      if (gender === 'Male') {
+        return 'M';
+      } else if (gender === 'Female') {
+        return 'F';
+      } else {
+        return gender; 
+      }
+    };
     try {
       const formData = {
         first_name: selectedRowData?.first_name,
         second_name: selectedRowData?.second_name,
         date_of_birth: selectedRowData?.date_of_birth,
-        gender: selectedRowData?.gender,
+        gender: formatGender(selectedRowData?.gender),
+        appointment_date_time: selectedRowData?.appointment_date_time,
+        reason: selectedRowData?.reason,
         insurance: null,
         user_id: null,
       };

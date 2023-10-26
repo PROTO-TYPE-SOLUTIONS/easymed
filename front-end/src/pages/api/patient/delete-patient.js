@@ -44,8 +44,8 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-
-            await backendAxiosInstance.post(`${API_URL.CREATE_PATIENT}`,body,config)
+            console.log("DELETE_PATIENT_URL ",`${API_URL.DELETE_PATIENT}/${body.id}`);
+            await backendAxiosInstance.delete(`${API_URL.DELETE_PATIENT}${body.id}`,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

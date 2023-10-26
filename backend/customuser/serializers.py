@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser
+from .models import CustomUser, Doctor
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -42,3 +42,10 @@ class CustomUserLoginSerializer(serializers.Serializer):
         return {
             'user': user
         }
+
+class DoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = "__all__"
+
+        

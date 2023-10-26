@@ -233,3 +233,7 @@ class RemovePermissionsFromUserSerializer(serializers.Serializer):
         attrs["permissions"] = permissions
         return super().validate(attrs)
 
+
+class ChangeUserRoleSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=CustomUser.ROLE_CHOICES)
+    

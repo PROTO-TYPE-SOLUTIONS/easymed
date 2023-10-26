@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import EditPatientDetails from "./edit-patient-details-modal";
@@ -8,6 +8,8 @@ import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
 import DeletePatientModal from "./delete-patient-modal";
 import { Chip } from "@mui/material";
+import { getAllPatients } from "@/redux/features/patients";
+import { useSelector,useDispatch } from "react-redux";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -37,6 +39,13 @@ const AdminPatientsDataGrid = () => {
   const [open, setOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
+  const dispatch = useDispatch();
+  const { patients } = useSelector((store) => store.patient);
+
+
+  useEffect(() =>{
+    dispatch(getAllPatients());
+  },[]);
 
   const users = [
     {
@@ -112,7 +121,6 @@ const AdminPatientsDataGrid = () => {
   };
 
   const statusFunc = ({ data }) => {
-    console.log("DATA_DATA ", data);
     if (data?.progress_status === "In Treatment") {
       return (
         <Chip variant="contained" size="small" label={data.progress_status} className="bg-primary text-white" />
@@ -129,8 +137,8 @@ const AdminPatientsDataGrid = () => {
   };
 
   //   filter users based on search query
-  const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
+  const filteredPatients = patients.filter((user) => {
+    return user.first_name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
@@ -144,7 +152,7 @@ const AdminPatientsDataGrid = () => {
         />
       </div> */}
       <DataGrid
-        dataSource={filteredUser}
+        dataSource={filteredPatients}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -153,7 +161,7 @@ const AdminPatientsDataGrid = () => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
-        className="shadow-xl"
+        className="shadow-xl w-full"
         height={"70vh"}
       >
         <Pager
@@ -162,15 +170,22 @@ const AdminPatientsDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="id_number" caption="ID" width={140} />
         <Column
-          dataField="name"
-          caption="Name"
-          width={240}
+          dataField="first_name"
+          caption="First Name"
+          width={140}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Age" width={140} />
+        <Column
+          dataField="second_name"
+          caption="Last Name"
+          width={140}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="insurance" caption="Insurance" width={140} />
         <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
         <Column dataField="gender" caption="Gender" width={140} />
         <Column

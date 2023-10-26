@@ -33,13 +33,14 @@ const Login = () => {
       await loginUser(formValue.email, formValue.password).then(() => {
         helpers.resetForm();
         setLoading(false);
-        // if(user?.role === 'patient'){
-        //   router.push("/")
-        // }else{
-        //   router.push('/')
-        // }
+        if(user?.role === 'patient'){
+          router.push("/")
+        }else{
+          router.push('/dashboard')
+        }
       });
     } catch (err) {
+      setLoading(false);
       console.log("LOGIN_ERROR ", err);
     }
   };

@@ -5,6 +5,7 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import CreateAppointmentModal from "./create-appointment-modal";
 import { FaWheelchair } from "react-icons/fa";
+import AssignDoctorModal from "./assign-doctor-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -17,6 +18,11 @@ const getActions = () => {
       label: "Convert to Patient",
       icon: <FaWheelchair className="text-success text-xl mx-2" />,
     },
+    {
+      action: "assign",
+      label: "Assign Doctor",
+      icon: <FaWheelchair className="text-success text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -27,6 +33,7 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
   const [selectedRowData, setSelectedRowData] = useState({});
   const userActions = getActions();
   const [open, setOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const users = [
     {
@@ -85,9 +92,9 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
     if (menu.action === "create") {
       setSelectedRowData(data);
       setOpen(true);
-    } else if (menu.action === "edit") {
-      // setSelectedRowData(data);
-      // setOpen(true);
+    } else if (menu.action === "assign") {
+      setSelectedRowData(data);
+      setAssignOpen(true);
     }
   };
 
@@ -181,6 +188,7 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
         
       </DataGrid>
       <CreateAppointmentModal {...{ open, setOpen, selectedRowData }} />
+      <AssignDoctorModal {...{ assignOpen, setAssignOpen, selectedRowData }} />
     </section>
   );
 };

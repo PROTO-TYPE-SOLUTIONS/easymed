@@ -24,6 +24,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Superuser must have is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
+        if extra_fields.get("role") is not CustomUser.SYS_ADMIN:
+            raise ValueError("Superuser must have role as SYS ADMIN")
 
         return self.create_user(email, password, **extra_fields)
 
@@ -73,9 +75,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
     
     def save(self, *args, **kwargs):
-        if not self.id:
-            self.role = self.PATIENT
-            return super().save(*args, **kwargs)
+        if not self.pk:
+            if self.role is not CustomUser.PATIENT:
+                self.is_staff = True
+        super().save(*args, **kwargs)
+    
 
 class PatientProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

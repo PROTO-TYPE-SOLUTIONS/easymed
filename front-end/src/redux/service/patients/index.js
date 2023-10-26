@@ -38,9 +38,72 @@ export const createPatient = (payload) =>{
     })
 }
 
+export const editPatient = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.EDIT_PATIENT}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                console.log("EDIT_ERROR ",err)
+                reject(err.message)
+            })
+    })
+}
+
+export const deletePatient = (id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.DELETE_PATIENT}`,{id})
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                console.log("DELETE_ERROR ",err)
+                reject(err.message)
+            })
+    })
+}
+
+
 export const prescribePatient = (payload) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.PRESCRIBE}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const assignDoctor = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.ASSIGN_DOCTOR}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const consultPatient = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.CONSULT_PATIENT}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const referPatient = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.REFER_PATIENT}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })

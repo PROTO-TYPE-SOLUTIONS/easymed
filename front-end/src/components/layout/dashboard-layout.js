@@ -13,7 +13,7 @@ const DashboardLayout = ({ children }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto hideMiddleSectionScrollbar">
-        <CustomizedHeader />
+        <Header />
         <div className="">{children}</div>
       </div>
       <div className="w-72 md:block hidden">

@@ -35,7 +35,7 @@ const SignUp = () => {
     try {
       const formData = {
         ...formValue,
-        role: ''
+        role: 'patient'
       }
       setLoading(true);
       await registerUser(formData).then(() => {
@@ -44,6 +44,7 @@ const SignUp = () => {
         router.push("/auth/login");
       });
     } catch (err) {
+      setLoading(false);
       console.log("SIGNUP_ERROR ", err);
     }
   };

@@ -108,7 +108,6 @@ class PrescribedDrugSerializer(serializers.ModelSerializer):
         model = PrescribedDrug
         fields = '__all__'
 
-
 class ReferralSerializer(serializers.ModelSerializer):
     class Meta:
         model = Referral

@@ -11,12 +11,17 @@ export const API_URL = {
 
     /***************** PATIENT APIS **********************/
     CREATE_PATIENT: '/patients/patients/',
+    EDIT_PATIENT: '/patients/patients/',
+    DELETE_PATIENT: '/patients/patients/',
     FETCH_PATIENT: '/patients/patients/',
     BOOK_APPOINTMENT: '/patients/publicappointments/',
     FETCH_APPOINTMENTS: '/patients/publicappointments/',
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
+    ASSIGN_DOCTOR: '/patients/appointments/',
+    CONSULT_PATIENT: '/patients/consultation/',
+    REFER_PATIENT: '/patients/referrals/',
 
 
     /***************** DOCTOR APIS **********************/
@@ -43,12 +48,17 @@ export const APP_API_URL = {
 
     /***************** PATIENT APIS **********************/
     CREATE_PATIENT: '/api/patient',
+    EDIT_PATIENT: '/api/patient/edit-patient',
+    DELETE_PATIENT: '/api/patient/delete-patient',
     FETCH_PATIENT: '/api/patient',
     BOOK_APPOINTMENT: '/api/appointment',
     FETCH_APPOINTMENTS: '/api/appointment',
     FETCH_SERVICES: '/api/patient/fetch-services',
     FETCH_INSURANCE: '/api/insurance',
     PRESCRIBE: '/api/patient/prescribe',
+    ASSIGN_DOCTOR: '/api/patient/assign-doctor',
+    CONSULT_PATIENT: '/api/patient/consult-patient',
+    REFER_PATIENT: '/api/patient/refer-patient',
 
 
     /***************** DOCTOR APIS **********************/
