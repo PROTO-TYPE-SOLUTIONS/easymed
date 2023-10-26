@@ -12,11 +12,13 @@ class InsuranceCompany(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class ContactDetails(models.Model):
     tel_no = models.IntegerField()
     email_address = models.EmailField()
     residence = models.CharField(max_length=30)
+
 
 class Patient(models.Model):
     GENDER_CHOICES = (
@@ -28,19 +30,21 @@ class Patient(models.Model):
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, )
-    insurance = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    insurance = models.ForeignKey(
+        InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
+    user_id = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.first_name
-    
+
 # meant to create an OrderBill item when a patient is created
 # def order_bill_created(sender, instance, created, **kwargs):
 #     if created:
 #         order_bill = OrderBill.objects.create(patient_ID=Patient.objects.create())
 
 # post_save.connect(order_bill_created, sender=Patient)
-    
+
 
 class NextOfKin(models.Model):
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -49,11 +53,13 @@ class NextOfKin(models.Model):
     relationship = models.CharField(max_length=40)
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
+
 class Service(models.Model):
     name = models.TextField(max_length=300)
 
     def __str__(self):
         return self.name
+
 
 class Appointment(models.Model):
     STATUS_CHOICES = (
@@ -63,23 +69,25 @@ class Appointment(models.Model):
     )
     appointment_date_time = models.DateTimeField()
     patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
-    assigned_doctor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    assigned_doctor = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending')
     reason = models.TextField(max_length=300)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE)
-    fee =  models.CharField(max_length=40)
-
-    order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
+    fee = models.CharField(max_length=40, default="0")
+    order_bill_ID = models.ForeignKey(
+        OrderBill, on_delete=models.CASCADE, null=True)
 
     # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Appointment #{self.patient.first_name}"
 
-# appointments from landing page, with no user or patient registration
-# will provide option to register as patient
+
+
 class PublicAppointment(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -97,14 +105,15 @@ class PublicAppointment(models.Model):
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES,)
     appointment_date_time = models.DateTimeField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending')
     reason = models.TextField(max_length=300,)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Appointment #{self.first_name}"    
-    
+        return f"Appointment #{self.first_name}"
+
 
 class Triage(models.Model):
     created_by = models.CharField(max_length=45)
@@ -128,7 +137,9 @@ class Consultation(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     complaint = models.TextField(null=True, blank=True)
-    disposition = models.CharField(max_length=10, choices=DISPOSITION_CHOICES, default="")
+    disposition = models.CharField(
+        max_length=10, choices=DISPOSITION_CHOICES, default="")
+
 
 class Prescription(models.Model):
     STATUS_CHOICES = (
@@ -139,11 +150,12 @@ class Prescription(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return f"Prescription #{self.patient_id}"    
-    
+        return f"Prescription #{self.patient_id}"
+
 
 class PrescribedDrug(models.Model):
     prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE)
@@ -155,5 +167,4 @@ class PrescribedDrug(models.Model):
     order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Prescribed Drug #{self.drug_id}"    
-        
+        return f"Prescribed Drug #{self.drug_id}"
