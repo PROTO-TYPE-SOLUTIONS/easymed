@@ -18,6 +18,7 @@ from .views import (
     EditPermissionAPIView,
     UserPermissionsAPIView,
     RemovePermissionsFromUserAPIView,
+    ChangeUserRoleAPIView
 )
 
 urlpatterns = [
@@ -30,6 +31,7 @@ urlpatterns = [
     path("groups/add-user/<str:user_id>", AddUserToGroupAPIView.as_view(), name="add-user-to-group"),
     path("groups/user/<str:user_id>", UserGroupsAPIView.as_view(), name="user-groups"),
     path("groups/remove-user/<str:user_id>", RemoveUserFromGroupAPIView.as_view(), name="remove-user-from-group"),
+    path("groups/change-role/user/<int:user_id>", ChangeUserRoleAPIView.as_view(), name="change-user-role"),
     # permissions
     path("permissions", PermissionsAPIView.as_view(), name="permissions"),
     path("permissions/<int:permission_id>", PermissionAPIView.as_view(), name="permission"),
