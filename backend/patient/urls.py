@@ -10,6 +10,7 @@ from .views import (
     PrescribedDrugViewSet,
     PublicAppointmentViewSet,
     ServiceViewSet,
+    ConsultationViewSet
 )
 
 router = DefaultRouter()
@@ -22,6 +23,7 @@ router.register(r'appointments', AppointmentViewSet)
 router.register(r'publicappointments', PublicAppointmentViewSet)
 router.register(r'prescriptions', PrescriptionViewSet)
 router.register(r'prescribed-drugs', PrescribedDrugViewSet)
+router.register(r'consultations', ConsultationViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
