@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { toast } from "react-toastify";
 import { assignDoctor } from "@/redux/service/patients";
+import { getAllDoctors } from "@/redux/features/doctors";
+import { useSelector, useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 export default function AssignDoctorModal({
   selectedRowData,
@@ -12,6 +15,10 @@ export default function AssignDoctorModal({
   setAssignOpen,
 }) {
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { doctors } = useSelector((store) => store.doctor);
+  const authUser = useAuth();
+  console.log("AUTH_USER ", authUser);
 
   const handleClickOpen = () => {
     setAssignOpen(true);
@@ -20,6 +27,12 @@ export default function AssignDoctorModal({
   const handleClose = () => {
     setAssignOpen(false);
   };
+
+  useEffect(() => {
+    if (authUser) {
+      dispatch(getAllDoctors(authUser));
+    }
+  }, [authUser]);
 
   const status = ["pending", "confirmed", "cancelled"];
 
