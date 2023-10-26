@@ -43,9 +43,7 @@ const CustomizedHeader = () => {
                 alt=""
               />
               <span className="text-white">
-                {`${token?.role === "sysadmin" ? token?.role : token?.role}${
-                  token?.first_name
-                }`}
+                {token?.first_name}
               </span>
               <BsChevronDown
                 onClick={handleClick}
