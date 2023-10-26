@@ -74,6 +74,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
     
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            if self.role is not CustomUser.PATIENT:
+                self.is_staff = True
+        super().save(*args, **kwargs)
+    
 
 class PatientProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
