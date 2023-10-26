@@ -24,8 +24,9 @@ router.register(r'appointments', AppointmentViewSet)
 router.register(r'publicappointments', PublicAppointmentViewSet)
 router.register(r'prescriptions', PrescriptionViewSet)
 router.register(r'prescribed-drugs', PrescribedDrugViewSet)
-router.register(r'consultation', ConsultationViewSet)
+router.register(r'consultations', ConsultationViewSet)
 router.register(r'referrals', ReferralViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),
