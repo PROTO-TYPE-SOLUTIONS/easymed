@@ -1,16 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { useRouter } from "next/router";
 import { registerUser } from "@/redux/service/auth";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import { IoMdAdd } from 'react-icons/io'
+import { getAllDoctors } from "@/redux/features/doctors";
+import { useDispatch } from "react-redux";
 
 const AdminCreateDoctor = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
-  const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -20,12 +21,16 @@ const AdminCreateDoctor = () => {
     setOpen(false);
   };
 
+  useEffect(() =>{
+    dispatch(getAllDoctors());
+  },[]);
+
+
   const initialValues = {
-    email: "",
-    password: "",
     first_name: "",
     last_name: "",
-    role: "",
+    email: "",
+    password: "",
   };
 
   const validationSchema = Yup.object().shape({
@@ -42,18 +47,21 @@ const AdminCreateDoctor = () => {
           !val || (val.toString().length >= 6 && val.toString().length <= 40)
       )
       .required("Password is required!"),
-    role: Yup.string().required("Role is required!"),
   });
 
   const handleRegister = async (formValue, helpers) => {
     try {
+      const formData = {
+        ...formValue,
+        role: 'doctor'
+      }
       setLoading(true);
-      await registerUser(formValue).then(() => {
+      await registerUser(formData).then(() => {
         helpers.resetForm();
         setLoading(false);
-        router.push("/auth/login");
       });
     } catch (err) {
+      setLoading(false);
       console.log("SIGNUP_ERROR ", err);
     }
   };
@@ -133,19 +141,6 @@ const AdminCreateDoctor = () => {
                       />
                       <ErrorMessage
                         name="password"
-                        component="div"
-                        className="text-warning text-xs"
-                      />
-                    </div>
-                    <div className="w-full">
-                      <Field
-                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                        type="text"
-                        placeholder="Role"
-                        name="role"
-                      />
-                      <ErrorMessage
-                        name="role"
                         component="div"
                         className="text-warning text-xs"
                       />

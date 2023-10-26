@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const { loginUser, user } = useContext(authContext);
+  console.log("USER_AUTH ",user);
   const router = useRouter();
   const initialValues = {
     email: "",
