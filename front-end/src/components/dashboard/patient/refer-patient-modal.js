@@ -1,13 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Divider } from "@mui/material";
 import { Grid } from "@mui/material";
+import { referPatient } from "@/redux/service/patients";
+import { toast } from "react-toastify";
+import { useContext } from "react";
+import { authContext } from "@/components/use-context";
+import { getAllServices } from "@/redux/features/patients";
+import { useSelector, useDispatch } from "react-redux";
 
 const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
   const [loading, setLoading] = React.useState(false);
+  const { user } = useContext(authContext);
+
+  console.log("USER_ID ",user)
+
+  const dispatch = useDispatch();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -17,33 +27,31 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
     setOpen(false);
   };
 
-  const gender = [
-    {
-      id: 1,
-      name: "Male",
-    },
-    {
-      id: 2,
-      name: "Female",
-    },
+  const services = [
+      'general',
+      'dentist',
+      'cardiologist',
+      'neurologist',
+      'orthopedist',
+      'psychiatrist',
+      'surgeon',
+      'physiotherapist',
   ];
 
   const initialValues = {
-    patientId: null,
-    medicationId: null,
-    facility_name: "",
-    section: "",
-    residence: "",
-    notes: "",
+    note: "",
+    service: "",
+    email: "",
+    patient_id: selectedRowData?.id,
+    referred_by: user?.user_id,
   };
 
   const validationSchema = Yup.object().shape({
-    patientId: Yup.string().required("This field is required!"),
-    medicationId: Yup.string().required("This field is required!"),
-    facility_name: Yup.string().required("This field is required!"),
-    section: Yup.string().required("This field is required!"),
-    residence: Yup.string().required("This field is required!"),
-    notes: Yup.string().required("This field is required!"),
+    note: Yup.string().required("This field is required!"),
+    service: Yup.string().required("This field is required!"),
+    email: Yup.string()
+      .email("This is not a valid email")
+      .required("Email is required!"),
   });
 
   const handleReferPatient = async (formValue, helpers) => {
@@ -51,18 +59,18 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
     try {
       const formData = {
         ...formValue,
-        patientId: parseInt(formValue.patientId),
-        medicationId: parseInt(formValue.medicationId),
+        patient_id: parseInt(formValue.patient_id),
+        referred_by: parseInt(formValue.referred_by),
       };
       setLoading(true);
-      // await createPatient(formData).then(() => {
-      //   helpers.resetForm();
-      //   toast.success("Patient Referred Successfully!");
-      //   setLoading(false);
-      // });
+      await referPatient(formData).then(() => {
+        helpers.resetForm();
+        toast.success("Patient Referred Successfully!");
+        setLoading(false);
+      });
     } catch (err) {
       toast.error(err);
-      console.log("PATIENT_ERROR ", err);
+      console.log("REFER_ERROR ", err);
     }
   };
 
@@ -88,16 +96,14 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
                 <Grid container spacing={2}>
                   <Grid item md={6} xs={12}>
                     <Field
-                      as="select"
+                      as="textarea"
                       className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
-                      name="patientId"
-                    >
-                      <option value="">Select Patient</option>
-                      <option value="M">Marcos</option>
-                      <option value="F">Faith</option>
-                    </Field>
+                      name="note"
+                      placeholder="note"
+                    />
+
                     <ErrorMessage
-                      name="patientId"
+                      name="note"
                       component="div"
                       className="text-warning text-xs"
                     />
@@ -106,14 +112,17 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
                     <Field
                       as="select"
                       className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
-                      name="medicationId"
+                      name="service"
                     >
-                      <option value="">Select Medication</option>
-                      <option value="M">Malaria Tabs</option>
-                      <option value="F">Typhoid Tabs</option>
+                      <option value="">Select service</option>
+                      {services.map((service,index) => (
+                        <option key={index} value={service}>
+                          {service}
+                        </option>
+                      ))}
                     </Field>
                     <ErrorMessage
-                      name="medicationId"
+                      name="service"
                       component="div"
                       className="text-warning text-xs"
                     />
@@ -124,53 +133,11 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="text"
-                      placeholder="Facility Name"
-                      name="facility_name"
+                      placeholder="email"
+                      name="email"
                     />
                     <ErrorMessage
-                      name="facility_name"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={4} xs={12}>
-                    <Field
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                      type="text"
-                      placeholder="Section"
-                      name="section"
-                    />
-                    <ErrorMessage
-                      name="section"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={4} xs={12}>
-                    <Field
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                      type="text"
-                      placeholder="Residence"
-                      name="residence"
-                    />
-                    <ErrorMessage
-                      name="residence"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item md={12} xs={12}>
-                    <Field
-                      as="textarea"
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                      type="text"
-                      placeholder="Notes"
-                      name="notes"
-                    />
-                    <ErrorMessage
-                      name="notes"
+                      name="email"
                       component="div"
                       className="text-warning text-xs"
                     />

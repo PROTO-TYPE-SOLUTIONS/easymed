@@ -3,19 +3,29 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Divider } from "@mui/material";
 import { Grid } from "@mui/material";
+import { consultPatient } from "@/redux/service/patients";
+import { useContext } from "react";
+import { authContext } from "@/components/use-context";
 
-const ConsultPatientModal = ({ selectedRowData, consultOpen, setConsultOpen }) => {
+const ConsultPatientModal = ({
+  selectedRowData,
+  consultOpen,
+  setConsultOpen,
+}) => {
   const [loading, setLoading] = React.useState(false);
-
+  const { user } = useContext(authContext);
 
   const handleClose = () => {
     setConsultOpen(false);
   };
 
   const initialValues = {
-    notes: "",
+    note: "",
+    complaint: "",
+    disposition: "admitted",
+    doctor_ID: user?.user_id,
+    patient_id: selectedRowData?.id,
   };
 
   const validationSchema = Yup.object().shape({
@@ -25,12 +35,17 @@ const ConsultPatientModal = ({ selectedRowData, consultOpen, setConsultOpen }) =
   const handleConsultPatient = async (formValue, helpers) => {
     console.log("CONSULT_PAYLOAD ", formValue);
     try {
+      const formData = {
+        ...formValue,
+        patient_id: parseInt(formValue.patient_id),
+        doctor_ID: parseInt(formValue.doctor_ID),
+      };
       setLoading(true);
-      // await createPatient(formValue).then(() => {
-      //   helpers.resetForm();
-      //   toast.success("Patient Referred Successfully!");
-      //   setLoading(false);
-      // });
+      await consultPatient(formData).then(() => {
+        helpers.resetForm();
+        toast.success("Consultation Successful!");
+        setLoading(false);
+      });
     } catch (err) {
       toast.error(err);
       console.log("CONSULT_ERROR ", err);
@@ -58,32 +73,45 @@ const ConsultPatientModal = ({ selectedRowData, consultOpen, setConsultOpen }) =
                 <h1 className="text-xl text-center">Add Consultation Notes</h1>
                 <Grid container spacing={2}>
                   <Grid item md={12} xs={12}>
-                    <Field
-                      as="textarea"
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                      type="text"
-                      placeholder="Add Consultation Notes"
-                      name="notes"
-                    />
-                    <ErrorMessage
-                      name="notes"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
+                    <section className="space-y-3">
+                      <div>
+                        <Field
+                          as="textarea"
+                          className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                          type="text"
+                          placeholder="Add Consultation Notes"
+                          name="notes"
+                        />
+                        <ErrorMessage
+                          name="notes"
+                          component="div"
+                          className="text-warning text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Field
+                          as="textarea"
+                          className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                          type="text"
+                          placeholder="Add Complaint"
+                          name="complaint"
+                        />
+                      </div>
+                    </section>
                   </Grid>
                 </Grid>
                 <div>
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       type="submit"
-                      className="bg-[#02273D] px-4 py-2 text-white"
+                      className="bg-[#02273D] px-4 py-2 text-white text-sm"
                     >
-                      Forward to Lab
+                      Submit
                     </button>
                     <button
                       type="submit"
                       onClick={handleClose}
-                      className="border border-warning px-4 py-2"
+                      className="border border-warning px-4 py-2 text-sm"
                     >
                       Cancel
                     </button>

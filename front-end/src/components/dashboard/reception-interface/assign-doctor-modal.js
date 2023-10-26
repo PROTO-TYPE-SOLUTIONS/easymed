@@ -3,63 +3,53 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify";
+import { assignDoctor } from "@/redux/service/patients";
 
-
-export default function AssignDoctorModal({ selectedRecords }) {
-  const [open, setOpen] = React.useState(false);
-
+export default function AssignDoctorModal({
+  selectedRowData,
+  assignOpen,
+  setAssignOpen,
+}) {
+  console.log("SELECTED_ROW_DATA ", selectedRowData);
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setAssignOpen(true);
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setAssignOpen(false);
   };
 
   const initialValues = {
-    doctorId: null,
-    patients: [
-      {
-        age: "",
-        country: "",
-        gender: "",
-        id_number: "",
-        name: "",
-      },
-    ],
+    appointment_date_time: selectedRowData?.appointment_date_time,
+    status: selectedRowData?.status,
+    reason: selectedRowData?.reason,
+    fee: "",
+    patient: selectedRowData?.id,
+    assigned_doctor: 0,
+    item_id: null,
+    order_bill_ID: null,
   };
 
   const validationSchema = Yup.object().shape({
-    doctorId: Yup.number().required("Select a doctor!"),
+    assigned_doctor: Yup.number().required("Select a doctor!"),
   });
 
   const handleAssignDoctor = async (formValue, helpers) => {
     try {
-        if(Array.isArray(selectedRecords) && selectedRecords.length > 0) {
-            const patientsData = selectedRecords.map((record) => ({
-                age: record.age || "",
-                country: record.country || "",
-                gender: record.gender || "",
-                id_number: record.id_number || "",
-                name: record.name || "",
-              }));
-              const formData = {
-                ...formValue,
-                doctorId: parseInt(formValue.doctorId),
-                patients: patientsData
-              }
-              console.log("PAYLOAD ",formData);
-              //   await bookAppointment(formData).then(() => {
-              //     helpers.resetForm();
-              //     toast.success("Appointment Booked Successfully!");
-              //     router.push("/");
-              //   });
-        }
+      console.log("FORMDATA ",formValue);
+      const formData = {
+        ...formValue,
+        assigned_doctor: parseInt(formValue.assigned_doctor)
+      }
+      await assignDoctor(formData).then(() => {
+        helpers.resetForm();
+        toast.success("Doctor Assigned Successfully!");
+      });
     } catch (err) {
       toast.error(err);
-      console.log("APPOINTMENT_ERROR ", err);
+      console.log("DOCTOR_ASSIGNED_ERROR ", err);
     }
   };
 
@@ -72,13 +62,13 @@ export default function AssignDoctorModal({ selectedRecords }) {
         Assign Doctor
       </button>
       <Dialog
-        open={open}
+        open={assignOpen}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
         <DialogContent>
-          <p>Are you sure you want to assign a doctor to selected patients?</p>
+          <p>Are you sure you want to assign a doctor to selected patient?</p>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -88,7 +78,7 @@ export default function AssignDoctorModal({ selectedRecords }) {
               <Field
                 as="select"
                 className="block pr-9 mt-4 border border-gray py-3 px-4 focus:outline-none w-full"
-                name="doctorId"
+                name="assigned_doctor"
               >
                 <option value="">Select a Doctor</option>
                 <option value="1">Dr. James Muriithi</option>
@@ -97,14 +87,24 @@ export default function AssignDoctorModal({ selectedRecords }) {
                 <option value="4">Dr. Jane Gathuru</option>
               </Field>
               <ErrorMessage
-                name="doctorId"
+                name="assigned_doctor"
+                component="div"
+                className="text-warning text-xs"
+              />
+              <Field
+                className="block pr-9 mt-4 border border-gray py-3 px-4 focus:outline-none w-full"
+                name="fee"
+                placeholder="Enter Fee"
+              />
+              <ErrorMessage
+                name="fee"
                 component="div"
                 className="text-warning text-xs"
               />
               <div className="flex items-center gap-2 justify-end mt-3">
                 <button
                   type="submit"
-                  className="bg-success px-3 py-2 text-white"
+                  className="bg-primary px-3 py-2 text-white"
                 >
                   Proceed
                 </button>

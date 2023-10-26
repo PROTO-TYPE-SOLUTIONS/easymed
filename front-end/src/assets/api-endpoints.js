@@ -19,6 +19,9 @@ export const API_URL = {
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
+    ASSIGN_DOCTOR: '/patients/appointments/',
+    CONSULT_PATIENT: '/patients/consultation/',
+    REFER_PATIENT: '/patients/referrals/',
 
 
     /***************** DOCTOR APIS **********************/
@@ -53,6 +56,9 @@ export const APP_API_URL = {
     FETCH_SERVICES: '/api/patient/fetch-services',
     FETCH_INSURANCE: '/api/insurance',
     PRESCRIBE: '/api/patient/prescribe',
+    ASSIGN_DOCTOR: '/api/patient/assign-doctor',
+    CONSULT_PATIENT: '/api/patient/consult-patient',
+    REFER_PATIENT: '/api/patient/refer-patient',
 
 
     /***************** DOCTOR APIS **********************/

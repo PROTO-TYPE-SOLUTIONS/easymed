@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
 import AddPatientModal from "../patient/add-patient-modal";
-import AssignDoctorModal from "./assign-doctor-modal";
 import DischargePatientModal from "./discharge-patient-modal";
 import Link from "next/link";
 import { getAllPatients } from "@/redux/features/patients";
@@ -123,9 +122,6 @@ const ReceptionPatientsDataGrid = () => {
         <div className="flex items-center gap-2">
           {selectedRecords.length > 0 && (
             <DischargePatientModal {...{ selectedRecords }} />
-          )}
-          {selectedRecords.length > 0 && (
-            <AssignDoctorModal {...{ selectedRecords }} />
           )}
           <input
             className="shadow-xl py-3 px-4 focus:outline-none mb-2"

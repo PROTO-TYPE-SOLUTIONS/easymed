@@ -4,6 +4,7 @@ import PatientsDataGrid from "@/components/dashboard/patient/patient-data-grid";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
 
+
 const Dashboard = () => {
   return (
     <Container maxWidth="xl">
