@@ -29,7 +29,7 @@ const ConsultPatientModal = ({
   };
 
   const validationSchema = Yup.object().shape({
-    notes: Yup.string().required("This field is required!"),
+    note: Yup.string().required("This field is required!"),
   });
 
   const handleConsultPatient = async (formValue, helpers) => {
@@ -80,10 +80,10 @@ const ConsultPatientModal = ({
                           className="block border border-gray py-3 px-4 focus:outline-none w-full"
                           type="text"
                           placeholder="Add Consultation Notes"
-                          name="notes"
+                          name="note"
                         />
                         <ErrorMessage
-                          name="notes"
+                          name="note"
                           component="div"
                           className="text-warning text-xs"
                         />
