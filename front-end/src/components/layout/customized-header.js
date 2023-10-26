@@ -8,8 +8,6 @@ import { BsChevronDown } from "react-icons/bs";
 import { authContext } from "../use-context";
 import { useAuth } from "@/assets/hooks/use-auth";
 
-
-
 const CustomizedHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -44,8 +42,15 @@ const CustomizedHeader = () => {
                 src="/images/doc.jpg"
                 alt=""
               />
-              <span className="text-white">{token?.first_name}</span>
-              <BsChevronDown onClick={handleClick} className="text-white cursor-pointer" />
+              <span className="text-white">
+                {`${token?.role === "sysadmin" ? token?.role : token?.role}${
+                  token?.first_name
+                }`}
+              </span>
+              <BsChevronDown
+                onClick={handleClick}
+                className="text-white cursor-pointer"
+              />
             </div>
             <Menu
               id="basic-menu"
