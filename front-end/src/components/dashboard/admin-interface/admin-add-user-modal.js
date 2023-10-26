@@ -42,7 +42,6 @@ const AdminCreateNurseModal = () => {
       .required("Password is required!"),
   });
 
-
   const handleRegister = async (formValue, helpers) => {
     try {
       const formData = {
@@ -78,7 +77,7 @@ const AdminCreateNurseModal = () => {
         <DialogContent>
           <section className="flex items-center justify-center gap-8 overflow-hidden">
             <div className="w-full space-y-8 px-4">
-              <h1 className="text-xl text-center">Create User</h1>
+              <h1 className="text-xl text-center">Create Nurse</h1>
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -134,19 +133,6 @@ const AdminCreateNurseModal = () => {
                       />
                       <ErrorMessage
                         name="password"
-                        component="div"
-                        className="text-warning text-xs"
-                      />
-                    </div>
-                    <div className="w-full">
-                      <Field
-                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                        type="text"
-                        placeholder="Role"
-                        name="role"
-                      />
-                      <ErrorMessage
-                        name="role"
                         component="div"
                         className="text-warning text-xs"
                       />
