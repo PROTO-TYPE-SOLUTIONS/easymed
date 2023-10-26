@@ -26,6 +26,7 @@ export const API_URL = {
 
     /***************** DOCTOR APIS **********************/
     CREATE_DOCTOR: '/accounts/register/',
+    FETCH_DOCTOR: '/users/doctors/',
 
 
     /***************** INVENTORY APIS **********************/
@@ -63,6 +64,7 @@ export const APP_API_URL = {
 
     /***************** DOCTOR APIS **********************/
     CREATE_DOCTOR: '/api/doctor/create-doctor',
+    FETCH_DOCTOR: '/api/doctor/fetch-doctor',
 
 
     /***************** INVENTORY APIS **********************/
