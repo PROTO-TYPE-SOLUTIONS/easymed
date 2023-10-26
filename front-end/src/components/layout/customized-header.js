@@ -6,11 +6,13 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { BsChevronDown } from "react-icons/bs";
 import { authContext } from "../use-context";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const CustomizedHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { logoutUser } = useContext(authContext);
+  const token = useAuth();
 
   const open = Boolean(anchorEl);
 
@@ -40,8 +42,15 @@ const CustomizedHeader = () => {
                 src="/images/doc.jpg"
                 alt=""
               />
-              <span className="text-white">Marcos</span>
-              <BsChevronDown onClick={handleClick} className="text-white cursor-pointer" />
+              <span className="text-white">
+                {`${token?.role === "sysadmin" ? token?.role : token?.role}${
+                  token?.first_name
+                }`}
+              </span>
+              <BsChevronDown
+                onClick={handleClick}
+                className="text-white cursor-pointer"
+              />
             </div>
             <Menu
               id="basic-menu"

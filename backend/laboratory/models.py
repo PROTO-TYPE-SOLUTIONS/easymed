@@ -35,6 +35,7 @@ class LabTestRequest(models.Model):
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     note = models.TextField()
     order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return str(self.test_profile_ID)

@@ -1,6 +1,6 @@
 from django.db import models
 from customuser.models import CustomUser
-from pharmacy.models import Drug
+# from pharmacy.models import Drug
 from inventory.models import Item, OrderBill
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -160,15 +160,16 @@ class Prescription(models.Model):
 
 class PrescribedDrug(models.Model):
     prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE)
-    drug_id = models.ForeignKey(Drug, on_delete=models.CASCADE)
+    # drug_id = models.ForeignKey(Drug, on_delete=models.CASCADE)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     note = models.TextField(null=True, blank=True)
     order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
+    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Prescribed Drug #{self.drug_id}"    
+        return f"Prescribed Drug #{self.item_ID}"    
         
 
 class Referral(models.Model):

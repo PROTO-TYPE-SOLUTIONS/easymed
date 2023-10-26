@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { toast } from "react-toastify";
 import { assignDoctor } from "@/redux/service/patients";
+import { getAllDoctors } from "@/redux/features/doctors";
+import { useSelector, useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 export default function AssignDoctorModal({
   selectedRowData,
@@ -12,6 +15,10 @@ export default function AssignDoctorModal({
   setAssignOpen,
 }) {
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { doctors } = useSelector((store) => store.doctor);
+  const authUser = useAuth();
+  console.log("AUTH_USER ", authUser);
 
   const handleClickOpen = () => {
     setAssignOpen(true);
@@ -20,6 +27,12 @@ export default function AssignDoctorModal({
   const handleClose = () => {
     setAssignOpen(false);
   };
+
+  useEffect(() => {
+    if (authUser) {
+      dispatch(getAllDoctors(authUser));
+    }
+  }, [authUser]);
 
   const status = ["pending", "confirmed", "cancelled"];
 
@@ -86,10 +99,9 @@ export default function AssignDoctorModal({
                 name="assigned_doctor"
               >
                 <option value="">Select a Doctor</option>
-                <option value="1">Dr. James Muriithi</option>
-                <option value="2">Dr. Susan Akinyi</option>
-                <option value="3">Dr. Mildred Kimani</option>
-                <option value="4">Dr. Jane Gathuru</option>
+                {doctors.map((doctor, index) => (
+                  <option key={index} value={index}>{doctor?.first_name}</option>
+                ))}
               </Field>
               <ErrorMessage
                 name="assigned_doctor"
