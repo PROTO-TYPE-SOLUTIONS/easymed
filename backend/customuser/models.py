@@ -24,6 +24,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Superuser must have is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
+        if extra_fields.get("role") is not CustomUser.SYS_ADMIN:
+            raise ValueError("Superuser must have role as SYS ADMIN")
 
         return self.create_user(email, password, **extra_fields)
 
