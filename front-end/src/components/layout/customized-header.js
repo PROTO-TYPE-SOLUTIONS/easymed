@@ -42,7 +42,6 @@ const CustomizedHeader = () => {
                 src="/images/doc.jpg"
                 alt=""
               />
-              {/* <span className="text-white">{`${token?.role === "sysadmin" }  : ${token.role} ?  ${token?.first_name}`}</span> */}
               <span className="text-white">
                 {`${token?.role === "sysadmin" ? token?.role : token?.role}${
                   token?.first_name
