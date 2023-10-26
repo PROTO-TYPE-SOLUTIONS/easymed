@@ -9,6 +9,7 @@ from .models import (
     PrescribedDrug,
     PublicAppointment,
     Service,
+    Consultation
 )
 
 
@@ -99,4 +100,10 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 class PrescribedDrugSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrescribedDrug
+        fields = '__all__'
+
+
+class ConsultationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Consultation
         fields = '__all__'
