@@ -10,6 +10,7 @@ from .models import (
     PublicAppointment,
     Service,
     Consultation,
+    Referral
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -20,8 +21,9 @@ from .serializers import (
     PrescriptionSerializer,
     PrescribedDrugSerializer,
     PublicAppointmentSerializer ,
-    ServiceSerializer  ,
-    ConsultationSerializer
+    ServiceSerializer,
+    ConsultationSerializer,
+    ReferralSerializer,
 )
 
 class InsuranceCompanyViewSet(viewsets.ModelViewSet):
@@ -34,7 +36,8 @@ class ConsultationViewSet(viewsets.ModelViewSet):
 
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
-    serializer_class = ServiceSerializer  
+    serializer_class = ServiceSerializer   
+
 
 class ContactDetailsViewSet(viewsets.ModelViewSet):
     queryset = ContactDetails.objects.all()
@@ -52,6 +55,9 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
 
+class ConsultationViewSet(viewsets.ModelViewSet):
+    queryset = Consultation.objects.all()
+    serializer_class = ConsultationSerializer
 
 class PublicAppointmentViewSet(viewsets.ModelViewSet):
     queryset = PublicAppointment.objects.all()
@@ -64,3 +70,9 @@ class PrescriptionViewSet(viewsets.ModelViewSet):
 class PrescribedDrugViewSet(viewsets.ModelViewSet):
     queryset = PrescribedDrug.objects.all()
     serializer_class = PrescribedDrugSerializer
+
+
+class ReferralViewSet(viewsets.ModelViewSet):
+    queryset = Referral.objects.all()
+    serializer_class = ReferralSerializer   
+
