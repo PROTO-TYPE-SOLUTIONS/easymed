@@ -30,8 +30,8 @@ from .serializers import (
     PermissionsSerializer,
     PermissionSerializer,
     AddPermissionSerializer,
-    RemovePermissionsFromUserSerializer
-
+    RemovePermissionsFromUserSerializer,
+    ChangeUserRoleSerializer
 )
 
 # models
@@ -52,6 +52,7 @@ from customuser.models import (
 
 class GroupsAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     @extend_schema(
         responses=GroupsSerializer,
     )
@@ -64,6 +65,7 @@ class GroupsAPIView(APIView):
 
 class GroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser, IsAdminUser)
+
     def get_object(self, id: int):
         try:
             return Group.objects.get(id=id)
@@ -87,6 +89,7 @@ class GroupAPIView(APIView):
 
 class AddGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     @extend_schema(
         request=AddGroupSerializer,
         responses=AddGroupSerializer,
@@ -103,6 +106,7 @@ class AddGroupAPIView(APIView):
 
 class EditGroupNameAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get_object(self, name: str):
         try:
             return Group.objects.get_by_natural_key(name)
@@ -127,6 +131,7 @@ class EditGroupNameAPIView(APIView):
 
 class DeleteGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get_object(self, group_name: str):
         try:
             return Group.objects.get_by_natural_key(group_name)
@@ -145,6 +150,7 @@ class DeleteGroupAPIView(APIView):
 
 class UserGroupsAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get_object(self, user_id: str):
         try:
             return CustomUser.objects.get(id=user_id)
@@ -166,6 +172,7 @@ class UserGroupsAPIView(APIView):
 
 class AddUserToGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get_object(self, id: int):
         try:
             return CustomUser.objects.get(id=id)
@@ -196,6 +203,7 @@ class AddUserToGroupAPIView(APIView):
 
 class RemoveUserFromGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get_object(self, user_id: str):
         try:
             return CustomUser.objects.get(id=user_id)
@@ -238,6 +246,7 @@ class PermissionsAPIView(APIView):
 
 class PermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get_object(self, id: int):
         try:
             return Permission.objects.get(id=id)
@@ -261,6 +270,7 @@ class PermissionAPIView(APIView):
 
 class AddPermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     @extend_schema(
         request=AddPermissionSerializer,
         responses=AddPermissionSerializer,
@@ -277,12 +287,14 @@ class AddPermissionAPIView(APIView):
 
 class EditPermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def put(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class DeletePermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get_object(self, permission_id: int):
         try:
             return Permission.objects.get(id=permission_id)
@@ -300,12 +312,14 @@ class DeletePermissionAPIView(APIView):
 
 class UserPermissionsAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def get(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class AddPermissionsToUserAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
     def post(self, request: Request, *args, **kwargs: dict):
         pass
 
@@ -318,11 +332,11 @@ class RemovePermissionsFromUserAPIView(APIView):
             return CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             return None
-        
+
     @extend_schema(
         request=RemovePermissionsFromUserSerializer,
     )
-    def post(self, request: Request, user_id:str=None, *args, **kwargs: dict):
+    def post(self, request: Request, user_id: str = None, *args, **kwargs: dict):
         data = request.data
         user = self.get_object(user_id)
         if user is None:
@@ -337,3 +351,28 @@ class RemovePermissionsFromUserAPIView(APIView):
             user.user_permissions.remove(group)
 
         return Response({"message": "permissions successfully removed"}, status=status.HTTP_200_OK)
+
+
+class ChangeUserRoleAPIView(APIView):
+    permission_classes = (IsSystemsAdminUser,)
+
+    def get_object(self, user_id: int):
+        try:
+            return CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return None
+
+    @extend_schema(
+        request=ChangeUserRoleSerializer,
+    )
+    def post(self, request: Request, user_id: int = None, *args, **kwargs):
+        data = request.data
+        serializer = ChangeUserRoleSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        user = self.get_object(user_id)
+        if user is None:
+            return Response({"error_message": "provide the user id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.role = serializer.validated_data.get("role", user.role)
+        user.save()
+        return Response({"message": f"changed {user.first_name}'s role to {user.role}"}, status=status.HTTP_200_OK)
