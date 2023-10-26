@@ -10,8 +10,8 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # pharmacy
-    path('pharmacy/', include('pharmacy.urls')),
+    # # pharmacy
+    # path('pharmacy/', include('pharmacy.urls')),
     # patients
     path('patients/', include('patient.urls')),
     # lab
