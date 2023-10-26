@@ -39,3 +39,8 @@ class IsPatientUser(BasePermission):
 class IsReceptionistUser(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_staff and request.user.role == Receptionist.BASE_ROLE)
+
+class IsStaffUser(BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_staff)
+    
