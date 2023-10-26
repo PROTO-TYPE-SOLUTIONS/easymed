@@ -9,6 +9,8 @@ from .models import (
     PrescribedDrug,
     PublicAppointment,
     Service,
+    Consultation,
+    Referral,
 )
 
 
@@ -52,6 +54,12 @@ class NextOfKinSerializer(serializers.ModelSerializer):
         model = NextOfKin
         fields = '__all__'
 
+class ConsultationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Consultation
+        fields = '__all__'
+
+
 
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -60,7 +68,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
 
 class PublicAppointmentSerializer(serializers.ModelSerializer):
-    
 
     class Meta:
         model = PublicAppointment
@@ -99,4 +106,10 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 class PrescribedDrugSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrescribedDrug
+        fields = '__all__'
+
+
+class ReferralSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Referral
         fields = '__all__'

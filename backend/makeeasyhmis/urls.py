@@ -25,6 +25,7 @@ urlpatterns = [
 
     # customuser
     path('customuser/', include('customuser.urls')),
+        
 
     # users
     path('users/', include('customuser.urls')),

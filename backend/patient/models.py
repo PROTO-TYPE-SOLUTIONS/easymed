@@ -2,10 +2,11 @@ from django.db import models
 from customuser.models import CustomUser
 from pharmacy.models import Drug
 from inventory.models import Item, OrderBill
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class InsuranceCompany(models.Model):
     name = models.CharField(max_length=30)
@@ -157,3 +158,34 @@ class PrescribedDrug(models.Model):
     def __str__(self):
         return f"Prescribed Drug #{self.drug_id}"    
         
+
+class Referral(models.Model):
+    SERVICE = (
+        ('general', 'General'),
+        ('dentist', 'Dentist'),
+        ('cardiologist', 'Cardiologist'),
+        ('neurologist', 'Neurologist'),
+        ('orthopedist', 'Orthopedist'),
+        ('psychiatrist', 'Psychiatrist'),
+        ('surgeon', 'Surgeon'),
+        ('physiotherapist', 'Physiotherapist'),
+    )
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    note = models.TextField(null=True, blank=True)
+    referred_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    service = models.CharField(max_length=50, choices=SERVICE, default='general')
+    email = models.EmailField()
+
+    def __str__(self):
+        return f"Referral #{self.patient_id}"
+    
+    def set_referred_by(self, CustomUser):
+        self.referred_by = CustomUser
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # Only set referred_by when creating a new instance
+            if not self.referred_by:
+                raise ValueError("You must set the 'referred_by' user before saving.")
+        super().save(*args, **kwargs)
