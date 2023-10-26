@@ -76,7 +76,7 @@ const AddPatientModal = () => {
       });
     } catch (err) {
       toast.error(err);
-      console.log("PATIENT_ERROR ", err);
+      setLoading(false);
     }
   };
 
