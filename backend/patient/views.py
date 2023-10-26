@@ -56,13 +56,9 @@ class PatientViewSet(viewsets.ModelViewSet):
     def create(self, request: Request, *args, **kwargs):
         data = request.data
         # extract extra fields
-        if "appointment_date_time" not in data.keys():
-            return Response({"message": "appointment_date_time field should be provided"}, status=status.HTTP_400_BAD_REQUEST)
-        if "reason" not in data.keys():
-            return Response({"message": "reason field should be provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        appointment_date_time = data.pop("appointment_date_time")
-        reason = data.get("reason",)
+        appointment_date_time = data.pop("appointment_date_time", None)
+        reason = data.pop("reason", None)
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         try:
@@ -71,11 +67,15 @@ class PatientViewSet(viewsets.ModelViewSet):
             return Response()
 
         try:
-            appointment = Appointment.objects.create(
-                patient=patient, appointment_date_time=appointment_date_time, reason=reason, )
+            appointment = Appointment.objects.create(patient=patient)
+            if appointment_date_time:
+                appointment.appointment_date_time = appointment_date_time
+            if reason:
+                appointment.reason = reason
+            appointment.save()
         except Exception as e:
             return Response({"message": f"creating a patient appointment failed {e}"})
-        
+
         return Response({"message": {"patient_id": patient.pk, "appointment_id": appointment.pk}}, status=status.HTTP_201_CREATED)
 
 
