@@ -68,13 +68,13 @@ class Appointment(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
     )
-    appointment_date_time = models.DateTimeField()
+    appointment_date_time = models.DateTimeField(null=True)
     patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
     assigned_doctor = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
-    reason = models.TextField(max_length=300)
+    reason = models.TextField(max_length=300, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
     item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
