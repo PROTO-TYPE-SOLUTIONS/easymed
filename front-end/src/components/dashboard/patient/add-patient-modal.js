@@ -59,12 +59,13 @@ const AddPatientModal = () => {
   });
 
   const handleCreatePatient = async (formValue, helpers) => {
-    console.log("PATIENT_PAYLOAD ", formValue);
     try {
       const formData = {
         ...formValue,
         insurance: parseInt(formValue.insurance),
         user_id: parseInt(formValue.user_id),
+        appointment_date_time: '',
+        reason: ''
       };
       setLoading(true);
       await createPatient(formData).then(() => {

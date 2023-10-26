@@ -36,6 +36,8 @@ export default function CreateAppointmentModal({
         second_name: selectedRowData?.second_name,
         date_of_birth: selectedRowData?.date_of_birth,
         gender: formatGender(selectedRowData?.gender),
+        appointment_date_time: selectedRowData?.appointment_date_time,
+        reason: selectedRowData?.reason,
         insurance: null,
         user_id: null,
       };
