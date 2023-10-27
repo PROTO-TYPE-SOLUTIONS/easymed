@@ -24,10 +24,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 # models
 from .models import (
     CustomUser,
-    DoctorProfile,
-    LabTechProfile,
-    NurseProfile,
-    SysadminProfile,
     Doctor
 )
 
@@ -122,7 +118,7 @@ class DoctorsAPIView(APIView):
         responses=DoctorSerializer,
     )
     def get(self, request: Request, *args, **kwargs):
-        doctors = Doctor.objects.all()
-        serializers = DoctorSerializer(doctors, many=True)
+        doctors = CustomUser.objects.filter(role = CustomUser.DOCTOR)
+        serializers = CustomUserSerializer(doctors, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
 

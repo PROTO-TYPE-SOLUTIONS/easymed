@@ -12,6 +12,7 @@ from .views import (
     ServiceViewSet,
     ConsultationViewSet,
     ReferralViewSet,
+    PatientsProfileAPIView
 )
 
 router = DefaultRouter()
@@ -28,6 +29,8 @@ router.register(r'consultations', ConsultationViewSet)
 router.register(r'referrals', ReferralViewSet)
 
 
+
 urlpatterns = [
     path('', include(router.urls)),
+    path('profiles/<int:patient_id>/', PatientsProfileAPIView.as_view(), name="patient-profile"),
 ]

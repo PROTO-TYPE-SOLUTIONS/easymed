@@ -6,7 +6,6 @@ from customuser.models import (
     Doctor,
     Nurse,
     LabTech,
-    Patient,
     Receptionist
 )
 
@@ -33,7 +32,7 @@ class IsSystemsAdminUser(BasePermission):
 
 class IsPatientUser(BasePermission):
     def has_permission(self, request, view):
-        return bool(request.user and request.user.role == Patient.BASE_ROLE)
+        return bool(request.user and request.user.role == CustomUser.BASE_ROLE)
 
 
 class IsReceptionistUser(BasePermission):

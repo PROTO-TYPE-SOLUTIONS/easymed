@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.request import Request
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import (
     InsuranceCompany,
@@ -12,7 +13,8 @@ from .models import (
     PublicAppointment,
     Service,
     Consultation,
-    Referral
+    Referral,
+    PatientProfile
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -26,7 +28,14 @@ from .serializers import (
     ServiceSerializer,
     ConsultationSerializer,
     ReferralSerializer,
+    PatientProfileSerializer
 )
+
+# swagger
+from drf_spectacular.utils import (
+    extend_schema,
+)
+
 
 
 class InsuranceCompanyViewSet(viewsets.ModelViewSet):
@@ -54,7 +63,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
 
     def create(self, request: Request, *args, **kwargs):
-        data = request.data
+        data = request.data.copy()
         # extract extra fields
 
         appointment_date_time = data.pop("appointment_date_time", None)
@@ -74,9 +83,31 @@ class PatientViewSet(viewsets.ModelViewSet):
                 appointment.reason = reason
             appointment.save()
         except Exception as e:
-            return Response({"message": f"creating a patient appointment failed {e}"})
+            return Response({"message": f"creating a patient appointment failed {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": {"patient_id": patient.pk, "appointment_id": appointment.pk}}, status=status.HTTP_201_CREATED)
+
+
+class PatientsProfileAPIView(APIView):
+
+    def get_object(self, patient_id: int):
+        try:
+            return Patient.objects.get(pk=patient_id)
+        except Patient.DoesNotExist:
+            return None
+
+    @extend_schema(
+        responses=PatientProfileSerializer,
+    )
+    def get(self, request: Request, patient_id: int=None, *args, **kwargs):
+        patient = self.get_object(patient_id)
+        if patient is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        profile = PatientProfile.objects.filter(patient__pk=patient.pk).first()
+        if profile:
+            serializer = PatientProfileSerializer(profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class NextOfKinViewSet(viewsets.ModelViewSet):
