@@ -45,9 +45,9 @@ export const getAllPatients = () => async (dispatch) => {
   }
 };
 
-export const getPatientProfile = () => async (dispatch) => {
+export const getPatientProfile = (patientId) => async (dispatch) => {
   try {
-    const response = await fetchPatientProfile();
+    const response = await fetchPatientProfile(patientId);
     dispatch(setPatients(response));
   } catch (error) {
     console.log("PROFILE_ERROR ", error);

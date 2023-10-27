@@ -61,7 +61,7 @@ export const APP_API_URL = {
     ASSIGN_DOCTOR: '/api/patient/assign-doctor',
     CONSULT_PATIENT: '/api/patient/consult-patient',
     REFER_PATIENT: '/api/patient/refer-patient',
-    GET_PATIENT_PROFILE: '/api/patient/refer-patient',
+    GET_PATIENT_PROFILE: '/api/patient/patient-profile',
 
 
     /***************** DOCTOR APIS **********************/

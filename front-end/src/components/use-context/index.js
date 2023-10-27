@@ -7,6 +7,7 @@ import SimpleCrypto from "simple-crypto-js";
 import { useDispatch } from "react-redux";
 import { getAllUserPermissions } from "@/redux/features/auth";
 import { toast } from 'react-toastify'
+import { getPatientProfile } from "@/redux/features/patients";
 
 export const authContext = createContext();
 
@@ -37,7 +38,8 @@ export const AuthProvider = ({ children }) => {
             JSON.stringify(response.data.refresh)
           );
           if (decodedUser?.role === "patient") {
-            router.push("/");
+            dispatch(getPatientProfile(decodedUser.user_id));
+            router.push(`/patient-profile/${decodedUser.user_id}`);
           }else{
             router.push('/dashboard')
           }
