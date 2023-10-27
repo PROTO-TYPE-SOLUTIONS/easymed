@@ -31,6 +31,12 @@ from .serializers import (
     PatientProfileSerializer
 )
 
+# swagger
+from drf_spectacular.utils import (
+    extend_schema,
+)
+
+
 
 class InsuranceCompanyViewSet(viewsets.ModelViewSet):
     queryset = InsuranceCompany.objects.all()
@@ -84,10 +90,24 @@ class PatientViewSet(viewsets.ModelViewSet):
 
 class PatientsProfileAPIView(APIView):
 
-    def get(self, request: Request, *args, **kwargs):
-        profiles = PatientProfile.objects.all()
-        serializer = PatientProfileSerializer(profiles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_object(self, patient_id: int):
+        try:
+            return Patient.objects.get(pk=patient_id)
+        except Patient.DoesNotExist:
+            return None
+
+    @extend_schema(
+        responses=PatientProfileSerializer,
+    )
+    def get(self, request: Request, patient_id: int=None, *args, **kwargs):
+        patient = self.get_object(patient_id)
+        if patient is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        profile = PatientProfile.objects.filter(patient__pk=patient.pk).first()
+        if profile:
+            serializer = PatientProfileSerializer(profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class NextOfKinViewSet(viewsets.ModelViewSet):

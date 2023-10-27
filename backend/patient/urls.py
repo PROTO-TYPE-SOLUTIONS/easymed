@@ -32,5 +32,5 @@ router.register(r'referrals', ReferralViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('profiles/', PatientsProfileAPIView.as_view(), name="patient-profile"),
+    path('profiles/<int:patient_id>/', PatientsProfileAPIView.as_view(), name="patient-profile"),
 ]
