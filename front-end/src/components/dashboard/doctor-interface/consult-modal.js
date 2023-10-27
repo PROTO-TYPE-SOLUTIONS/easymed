@@ -7,6 +7,7 @@ import { Grid } from "@mui/material";
 import { consultPatient } from "@/redux/service/patients";
 import { useContext } from "react";
 import { authContext } from "@/components/use-context";
+import { toast } from 'react-toastify'
 
 const ConsultPatientModal = ({
   selectedRowData,
@@ -48,6 +49,7 @@ const ConsultPatientModal = ({
       });
     } catch (err) {
       toast.error(err);
+      setLoading(false);
       setLoading(false);
     }
   };

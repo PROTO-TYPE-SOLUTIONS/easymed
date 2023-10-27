@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const useAxios = (useAuth) => {
+const UseAxios = (useAuth) => {
     const user  = useAuth;
 
     const axiosInstance = axios.create({
@@ -12,4 +12,4 @@ const useAxios = (useAuth) => {
     return axiosInstance;
 };
 
-export default useAxios;
+export default UseAxios;
