@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
             "refresh",
             JSON.stringify(response.data.refresh)
           );
-          if (user?.role === "patient") {
+          if (decodedUser?.role === "patient") {
             router.push("/");
           }else{
             router.push('/dashboard')
