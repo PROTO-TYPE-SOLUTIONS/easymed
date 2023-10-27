@@ -24,10 +24,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 # models
 from .models import (
     CustomUser,
-    DoctorProfile,
-    LabTechProfile,
-    NurseProfile,
-    SysadminProfile,
     Doctor
 )
 
