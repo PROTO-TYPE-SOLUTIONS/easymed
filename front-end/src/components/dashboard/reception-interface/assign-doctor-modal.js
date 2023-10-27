@@ -100,7 +100,7 @@ export default function AssignDoctorModal({
               >
                 <option value="">Select a Doctor</option>
                 {doctors.map((doctor, index) => (
-                  <option key={index} value={index}>{doctor?.first_name}</option>
+                  <option key={index} value={doctor?.id}>{`${doctor?.first_name} ${doctor.last_name}`}</option>
                 ))}
               </Field>
               <ErrorMessage

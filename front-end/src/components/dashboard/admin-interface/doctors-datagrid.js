@@ -42,6 +42,8 @@ const AdminDoctorsDataGrid = () => {
   const { doctors } = useSelector((store) => store.doctor);
   const authUser = useAuth();
 
+  console.log("AUTH_USER ",authUser);
+
   useEffect(() => {
     if (authUser) {
       dispatch(getAllDoctors(authUser));
@@ -85,7 +87,7 @@ const AdminDoctorsDataGrid = () => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
-        className="shadow-xl"
+        className="shadow-xl w-full"
         height={"70vh"}
       >
         <Pager
@@ -94,24 +96,22 @@ const AdminDoctorsDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="number" caption="NO" width={80} />
-        <Column dataField="id_number" caption="ID" width={140} />
         <Column
-          dataField="name"
-          caption="Name"
+          dataField="first_name"
+          caption="First Name"
           width={200}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
         <Column
-          dataField="country"
-          caption="Action"
-          width={140}
-          cellRender={actionsFunc}
+          dataField="last_name"
+          caption="Last Name"
+          width={200}
+          allowFiltering={true}
+          allowSearch={true}
         />
+        <Column dataField="email" caption="Email" width={140} />
+        <Column dataField="role" caption="Role" width={200} />
       </DataGrid>
       <EditDoctorDetailsModal {...{ open, setOpen, selectedRowData }} />
       <DeleteDoctorModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} />
