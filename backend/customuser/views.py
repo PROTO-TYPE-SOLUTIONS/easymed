@@ -24,10 +24,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 # models
 from .models import (
     CustomUser,
-    DoctorProfile,
-    LabTechProfile,
-    NurseProfile,
-    SysadminProfile,
     Doctor
 )
 
@@ -77,15 +73,12 @@ class RegistrationAPIView(APIView):
             return Response({"error_message": "Unauthorized request"}, status=status.HTTP_401_UNAUTHORIZED)
 
         user: CustomUser = request.user
-        if user.role == CustomUser.SYS_ADMIN and user_in_group(user, CustomUser.SYS_ADMIN):
-            # There can only be one sys admin
-            if role != CustomUser.SYS_ADMIN:
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response({"error_message": "This operation is not enabled"}, status=status.HTTP_401_UNAUTHORIZED)
+        if user.role == CustomUser.SYS_ADMIN:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         # doctor, nurse and lab tech can only create a patient and no other role
-        if user.role in [CustomUser.DOCTOR, CustomUser.LAB_TECH, CustomUser.NURSE]:
+        if user.role in [CustomUser.DOCTOR, CustomUser.LAB_TECH, CustomUser.NURSE, CustomUser.RECEPTIONIST]:
             if role == CustomUser.PATIENT:
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -128,3 +121,4 @@ class DoctorsAPIView(APIView):
         doctors = Doctor.objects.all()
         serializers = DoctorSerializer(doctors, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
+

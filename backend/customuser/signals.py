@@ -8,7 +8,6 @@ from .models import (
     NurseProfile,
     SysadminProfile,
     ReceptionistProfile,
-    PatientProfile,
 )
 
 
@@ -24,12 +23,6 @@ def create_user_profile(sender: CustomUser, instance: CustomUser, created: bool,
         except Exception as e:
             return
         
-    if instance.role == CustomUser.PATIENT:
-        try:
-            PatientProfile.objects.create(user=instance)
-            return
-        except Exception as e:
-            return
     if instance.role == CustomUser.DOCTOR:
         try:
             DoctorProfile.objects.create(user=instance)
