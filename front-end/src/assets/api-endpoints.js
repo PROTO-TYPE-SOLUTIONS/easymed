@@ -20,7 +20,7 @@ export const API_URL = {
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
     ASSIGN_DOCTOR: '/patients/appointments/',
-    CONSULT_PATIENT: '/patients/consultation/',
+    CONSULT_PATIENT: '/patients/consultations/',
     REFER_PATIENT: '/patients/referrals/',
 
 

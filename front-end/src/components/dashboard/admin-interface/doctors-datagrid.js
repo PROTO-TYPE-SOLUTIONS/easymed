@@ -48,7 +48,7 @@ const AdminDoctorsDataGrid = () => {
     if (authUser) {
       dispatch(getAllDoctors(authUser));
     }
-  }, []);
+  }, [authUser]);
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "delete") {

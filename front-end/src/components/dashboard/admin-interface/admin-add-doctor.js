@@ -27,7 +27,7 @@ const AdminCreateDoctor = () => {
     if (authUser) {
       dispatch(getAllDoctors(authUser));
     }
-  }, []);
+  }, [authUser]);
 
   const initialValues = {
     first_name: "",
