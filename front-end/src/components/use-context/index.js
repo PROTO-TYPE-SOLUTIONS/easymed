@@ -38,8 +38,9 @@ export const AuthProvider = ({ children }) => {
             JSON.stringify(response.data.refresh)
           );
           if (decodedUser?.role === "patient") {
-            dispatch(getPatientProfile(decodedUser.user_id));
-            router.push(`/patient-profile/${decodedUser.user_id}`);
+            router.push('/')
+            // dispatch(getPatientProfile(decodedUser.user_id));
+            // router.push(`/patient-profile/${decodedUser.user_id}`);
           }else{
             router.push('/dashboard')
           }
