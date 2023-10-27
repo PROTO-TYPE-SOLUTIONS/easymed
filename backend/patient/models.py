@@ -2,7 +2,6 @@ from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item, OrderBill
-from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 
@@ -38,6 +37,44 @@ class Patient(models.Model):
 
     def __str__(self):
         return self.first_name
+    
+class PatientProfile(models.Model):
+    patient = models.OneToOneField(Patient, on_delete=models.CASCADE,)
+
+    @property
+    def no_of_visits(self):
+        return self.patient.appointment_set.count()
+    
+    @property
+    def insurance_name(self):
+        if self.patient.insurance:
+            return self.patient.insurance.name
+        return None
+    
+    @property
+    def all_assigned_doctors(self):
+        appointments:list[Appointment] = list(self.patient.appointment_set.all())
+        doctors = []
+        for appointment in appointments:
+            if appointment.assigned_doctor:
+                doctors.append(appointment.assigned_doctor.get_fullname())
+        return doctors
+    
+    @property
+    def current_status(self):
+        appointments:list[Appointment] = list(self.patient.appointment_set.all())
+        if len(appointments) >0:
+            appointment = appointments[0]
+            return appointment.status
+        return None
+
+    @property
+    def registered_date(self):
+        if self.patient.appointment_set.count()>0:
+            return self.patient.appointment_set.first().date_created
+        return None
+
+
 
 # meant to create an OrderBill item when a patient is created
 # def order_bill_created(sender, instance, created, **kwargs):
@@ -51,7 +88,7 @@ class NextOfKin(models.Model):
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     firts_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
-    relationship = models.CharField(max_length=40)
+    relationship = models.CharField(max_length=40)   
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
 
@@ -63,11 +100,15 @@ class Service(models.Model):
 
 
 class Appointment(models.Model):
+    class Meta:
+        ordering = ("-date_created",)
+
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
     )
+
     appointment_date_time = models.DateTimeField(null=True)
     patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
     assigned_doctor = models.ForeignKey(
@@ -202,3 +243,4 @@ class Referral(models.Model):
             if not self.referred_by:
                 raise ValueError("You must set the 'referred_by' user before saving.")
         super().save(*args, **kwargs)
+

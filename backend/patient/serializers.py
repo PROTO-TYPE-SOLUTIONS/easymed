@@ -11,6 +11,7 @@ from .models import (
     Service,
     Consultation,
     Referral,
+    PatientProfile
 )
 
 
@@ -33,7 +34,6 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Patient
         fields = ("id", "first_name", "second_name", "date_of_birth",
@@ -47,7 +47,28 @@ class PatientSerializer(serializers.ModelSerializer):
         if instance.insurance:
             data["insurance"] = instance.insurance.name
         return data
+    
 
+class PatientProfileSerializer(serializers.ModelSerializer):
+    no_of_visits = serializers.SerializerMethodField()
+    insurance_name = serializers.SerializerMethodField()
+    all_assigned_doctors = serializers.SerializerMethodField()
+    registered_date = serializers.SerializerMethodField()
+    class Meta:
+        model = PatientProfile
+        fields = ("id", "patient", "no_of_visits", "insurance_name", "all_assigned_doctors", "current_status", "registered_date")
+
+    def get_no_of_visits(self, obj: PatientProfile):
+        return obj.no_of_visits
+
+    def get_insurance_name(self, obj: PatientProfile):
+        return obj.insurance_name
+    def get_all_assigned_doctors(self, obj: PatientProfile):
+        return obj.all_assigned_doctors
+    def get_current_status(self, obj: PatientProfile):
+        return obj.current_status
+    def get_registered_date(self, obj: PatientProfile):
+        return obj.registered_date
 
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:
