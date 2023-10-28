@@ -96,6 +96,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if instance.assigned_doctor:
             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
+        
+        if instance.patient:
+            data["first_name"] = instance.patient.first_name
+            data["second_name"] = instance.patient.second_name
         return data
 
 
