@@ -59,9 +59,11 @@ const AdminCreateDoctor = () => {
         role: "doctor",
       };
       setLoading(true);
-      await registerUser(formData,authUser).then(() => {
+      await registerUser(formData, authUser).then(() => {
         helpers.resetForm();
         setLoading(false);
+        handleClose();
+        dispatch(getAllDoctors(authUser));
       });
     } catch (err) {
       setLoading(false);
