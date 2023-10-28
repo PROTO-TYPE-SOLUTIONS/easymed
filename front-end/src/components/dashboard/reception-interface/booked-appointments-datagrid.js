@@ -183,6 +183,7 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
         <Column dataField="date_created" caption="Date Created" width={140} cellRender={dateCreatedFunc} />
         <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
         <Column dataField="reason" caption="Reason" width={280} />
+        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
         <Column dataField="gender" caption="Gender" width={100} />
         <Column dataField="status" caption="Status" width={140} />
         
