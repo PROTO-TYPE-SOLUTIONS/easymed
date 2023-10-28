@@ -164,9 +164,9 @@ const DoctorPatientDataGrid = () => {
     <section>
       <div className="flex items-center gap-2 justify-end">
         <div className="flex items-center gap-2">
-          {selectedRecords.length > 0 && (
+          {/* {selectedRecords.length > 0 && (
             <AssignDoctorModal {...{ selectedRecords }} />
-          )}
+          )} */}
           <input
             className="shadow-xl py-3 px-2 focus:outline-none mb-2"
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -190,11 +190,11 @@ const DoctorPatientDataGrid = () => {
         className="shadow-xl w-full"
         height={"70vh"}
       >
-        <Selection
+        {/* <Selection
           mode="multiple"
           selectAllMode={"allMode"}
-          //showCheckBoxesMode={checkBoxesMode}
-        />
+          showCheckBoxesMode={checkBoxesMode}
+        /> */}
         <Pager
           visible={true}
           // allowedPageSizes={allowedPageSizes}

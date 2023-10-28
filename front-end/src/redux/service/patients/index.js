@@ -26,6 +26,18 @@ export const fetchPatient = () =>{
     })
 }
 
+export const fetchPatientProfile = (patientId) =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.GET_PATIENT_PROFILE}/${patientId}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const createPatient = (payload) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.CREATE_PATIENT}`,payload)
