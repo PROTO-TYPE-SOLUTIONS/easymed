@@ -76,12 +76,12 @@ export default function AssignDoctorModal({
 
   return (
     <div>
-      <button
+      {/* <button
         onClick={handleClickOpen}
         className="border border-card text-card font-semibold px-3 py-3 text-sm"
       >
         Assign Doctor
-      </button>
+      </button> */}
       <Dialog
         open={assignOpen}
         onClose={handleClose}
