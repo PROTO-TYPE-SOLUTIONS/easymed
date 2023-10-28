@@ -92,6 +92,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = '__all__'
 
+    def to_representation(self, instance: Appointment):
+        data = super().to_representation(instance)
+        if instance.assigned_doctor:
+            data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
+        return data
+
 
 class PublicAppointmentSerializer(serializers.ModelSerializer):
 
