@@ -68,7 +68,7 @@ class GroupAPIView(APIView):
 
     def get_object(self, id: int):
         try:
-            return Group.objects.get(id=id)
+            return Group.objects.get(pk=id)
         except Group.DoesNotExist:
             return None
 
@@ -98,7 +98,7 @@ class AddGroupAPIView(APIView):
         data: dict = request.data
         serializer = AddGroupSerializer(data=data)
         if not serializer.is_valid():
-            return Response(serializer.error_messages, status=status.HTTP_400)
+            return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -151,16 +151,16 @@ class DeleteGroupAPIView(APIView):
 class UserGroupsAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
-    def get_object(self, user_id: str):
+    def get_object(self, user_id: int):
         try:
-            return CustomUser.objects.get(id=user_id)
+            return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None
 
     @extend_schema(
         responses=GroupsSerializer,
     )
-    def get(self, request: Request, user_id: str = None, *args, **kwargs: dict):
+    def get(self, request: Request, user_id: int = None, *args, **kwargs: dict):
         user = self.get_object(user_id)
         if user is None:
             return Response({"error_message": f"user id {user_id} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
@@ -173,61 +173,55 @@ class UserGroupsAPIView(APIView):
 class AddUserToGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
-    def get_object(self, id: int):
+    def get_object(self, user_id: int, group_name: str):
         try:
-            return CustomUser.objects.get(id=id)
+            Group.objects.get(name=group_name)
+            return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None
+        except Group.DoesNotExist:
+            return None
 
-    @extend_schema(
-        request=AddUserToGroupsSerializer,
-        responses=AddUserToGroupsSerializer,
-    )
-    def put(self, request: Request, user_id: int = None, *args, **kwargs: dict):
-        if user_id is None:
+    @extend_schema()
+    def put(self, request: Request, group_name: str =None, user_id: int = None, *args, **kwargs: dict):
+        if user_id is None or group_name is None:
             return Response({"error_message": "Provide the user id"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = self.get_object(user_id)
+        user = self.get_object(user_id, group_name)
+
         if user is None:
-            return Response({"error_message": "User id doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
-
-        data: dict = request.data["groups"]
-        serializer = AddUserToGroupsSerializer(user, data=data)
-
-        if not serializer.is_valid():
-            return Response(serializer.error_messages, status=status.HTTP_400)
-
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({"error_message": "User id or group id doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        group = Group.objects.get(name=group_name)
+        user.groups.add(group)
+        return Response({"message": {"user_id": user.pk, "group_id": group.pk}}, status=status.HTTP_201_CREATED)
 
 
 class RemoveUserFromGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
-    def get_object(self, user_id: str):
+    def get_object(self, user_id: int, group_name: str):
         try:
-            return CustomUser.objects.get(id=user_id)
+            Group.objects.get(name=group_name)
+            return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None
+        except Group.DoesNotExist:
+            return None
 
-    @extend_schema(
-        request=RemoveUserFromGroupSerializer,
-    )
-    def post(self, request: Request, user_id: str = None, *args, **kwargs: dict):
-        data = request.data
-        user = self.get_object(user_id)
+    @extend_schema()
+    def post(self, request: Request, user_id: int = None, group_name: str=None, *args, **kwargs: dict):
+        if user_id is None or group_name is None:
+            return Response({"error_message": "Provide both the user id and group id"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = self.get_object(user_id, group_name)
         if user is None:
-            return Response({"error_message": "provide the user id"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error_message": f"User id or group id doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = RemoveUserFromGroupSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        group = Group.objects.get(name=group_name)
+        user.groups.remove(group)
 
-        group_names: list[str] = serializer.validated_data.get("group_name")
-        for group_name in group_names:
-            group = Group.objects.get_by_natural_key(group_name)
-            user.groups.remove(group)
-
-        return Response({"message": "user successfully removed from group(s)"}, status=status.HTTP_200_OK)
+        return Response({"message": f"user id {user_id} successfully removed from group {group_name}"}, status=status.HTTP_200_OK)
 
 # permissions
 
@@ -327,16 +321,16 @@ class AddPermissionsToUserAPIView(APIView):
 class RemovePermissionsFromUserAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
-    def get_object(self, user_id: str):
+    def get_object(self, user_id: int):
         try:
-            return CustomUser.objects.get(id=user_id)
+            return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None
 
     @extend_schema(
         request=RemovePermissionsFromUserSerializer,
     )
-    def post(self, request: Request, user_id: str = None, *args, **kwargs: dict):
+    def post(self, request: Request, user_id: int = None, *args, **kwargs: dict):
         data = request.data
         user = self.get_object(user_id)
         if user is None:
@@ -358,7 +352,7 @@ class ChangeUserRoleAPIView(APIView):
 
     def get_object(self, user_id: int):
         try:
-            return CustomUser.objects.get(id=user_id)
+            return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None
 
