@@ -161,12 +161,12 @@ export default function AssignDoctorModal({
                   )}
                   Proceed
                 </button>
-                <button
-                  className="border border-warning px-3 py-2"
+                <p
+                  className="border border-warning px-3 py-2 cursor-pointer"
                   onClick={handleClose}
                 >
                   Cancel
-                </button>
+                </p>
               </div>
             </Form>
           </Formik>
