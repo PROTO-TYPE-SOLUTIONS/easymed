@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from django.contrib.auth.models import BaseUserManager
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, role=None, **extra_fields):
         if not email:
@@ -75,14 +76,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
     
     def save(self, *args, **kwargs):
-        if not self.pk:
-            if self.role is not CustomUser.PATIENT:
-                self.is_staff = True
+        if self.role is not CustomUser.PATIENT:
+            self.is_staff = True
         super().save(*args, **kwargs)
+
+    def get_fullname(self):
+        fullname = ""
+        if self.first_name:
+            fullname += self.first_name + " "
+        if self.last_name:
+            fullname += self.last_name
+
+        return fullname
     
 
-class PatientProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 class DoctorProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     # Add doctor-specific fields here
@@ -168,7 +175,7 @@ class PatientManager(BaseUserManager):
         return users.filter(role=CustomUser.PATIENT)
     
 
-class Patient(CustomUser):
+class PatientUser(CustomUser):
     class Meta:
         proxy = True
 

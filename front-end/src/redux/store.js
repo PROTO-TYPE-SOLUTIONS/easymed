@@ -4,6 +4,7 @@ import patientReducer from './features/patients'
 import inventoryReducer from './features/inventory'
 import insuranceReducer from './features/insurance'
 import appointmentReducer from './features/appointment'
+import doctorReducer from './features/doctors'
 
 
 export const store = configureStore({
@@ -13,5 +14,6 @@ export const store = configureStore({
         inventory: inventoryReducer,
         insurance: insuranceReducer,
         appointment: appointmentReducer,
+        doctor: doctorReducer,
     }
 })

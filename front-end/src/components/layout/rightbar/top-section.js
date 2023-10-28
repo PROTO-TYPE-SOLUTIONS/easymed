@@ -7,10 +7,12 @@ import MenuItem from "@mui/material/MenuItem";
 import Popover from "@mui/material/Popover";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TextField } from "@mui/material";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const TopSection = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
+  const token = useAuth();
 
   const handleClick2 = (event) => {
     setAnchorEl2(event.currentTarget);
@@ -54,7 +56,7 @@ const TopSection = () => {
               />
             </div>
             <div className="text-xs">
-              <p className="font-semibold">Dr. Patrick</p>
+              <p className="font-semibold">{token?.first_name}</p>
               <p>Surgeon</p>
             </div>
           </div>

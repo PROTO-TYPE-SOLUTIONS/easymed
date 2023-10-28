@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const { loginUser, user } = useContext(authContext);
+  console.log("USER_AUTH ",user);
   const router = useRouter();
   const initialValues = {
     email: "",
@@ -30,14 +31,15 @@ const Login = () => {
   const handleLogin = async (formValue, helpers) => {
     try {
       setLoading(true);
-      await loginUser(formValue.email, formValue.password).then(() => {
+      await loginUser(formValue.email, formValue.password).then((res) => {
+        console.log("LOGIN_RESPONSE ",res)
         helpers.resetForm();
         setLoading(false);
-        if(user?.role === 'patient'){
-          router.push("/")
-        }else{
-          router.push('/dashboard')
-        }
+        // if(user?.role === 'patient'){
+        //   router.push("/")
+        // }else{
+        //   router.push('/dashboard')
+        // }
       });
     } catch (err) {
       setLoading(false);
