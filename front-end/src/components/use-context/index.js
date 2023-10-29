@@ -49,8 +49,7 @@ export const AuthProvider = ({ children }) => {
         }
       }
     } catch (error) {
-      toast.error(error.message);
-      setMessage(error);
+      toast.error(error.response.data.non_field_errors[0]);
     }
   };
 
