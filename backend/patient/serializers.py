@@ -69,6 +69,11 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         return obj.current_status
     def get_registered_date(self, obj: PatientProfile):
         return obj.registered_date
+    
+    def to_representation(self, instance: PatientProfile):
+        data = super().to_representation(instance)
+        data["patient"] = f"{instance.patient.first_name } {instance.patient.second_name}"
+        return data
 
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:
@@ -86,6 +91,16 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'
+
+    def to_representation(self, instance: Appointment):
+        data = super().to_representation(instance)
+        if instance.assigned_doctor:
+            data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
+        
+        if instance.patient:
+            data["first_name"] = instance.patient.first_name
+            data["second_name"] = instance.patient.second_name
+        return data
 
 
 class PublicAppointmentSerializer(serializers.ModelSerializer):
@@ -133,3 +148,10 @@ class ReferralSerializer(serializers.ModelSerializer):
     class Meta:
         model = Referral
         fields = '__all__'
+
+
+# get appointments for a specific doctor
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = '__all__'         

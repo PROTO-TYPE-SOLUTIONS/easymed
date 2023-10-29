@@ -8,6 +8,7 @@ import { assignDoctor } from "@/redux/service/patients";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllAppointments, getAllPatientAppointments } from "@/redux/features/appointment";
 
 export default function AssignDoctorModal({
   selectedRowData,
@@ -64,6 +65,8 @@ export default function AssignDoctorModal({
         helpers.resetForm();
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
+        dispatch(getAllPatientAppointments());
+        handleClose();
       });
     } catch (err) {
       toast.error(err);
@@ -73,12 +76,12 @@ export default function AssignDoctorModal({
 
   return (
     <div>
-      <button
+      {/* <button
         onClick={handleClickOpen}
         className="border border-card text-card font-semibold px-3 py-3 text-sm"
       >
         Assign Doctor
-      </button>
+      </button> */}
       <Dialog
         open={assignOpen}
         onClose={handleClose}
@@ -100,7 +103,7 @@ export default function AssignDoctorModal({
               >
                 <option value="">Select a Doctor</option>
                 {doctors.map((doctor, index) => (
-                  <option key={index} value={index}>{doctor?.first_name}</option>
+                  <option key={index} value={doctor?.id}>{`${doctor?.first_name} ${doctor.last_name}`}</option>
                 ))}
               </Field>
               <ErrorMessage
@@ -161,12 +164,12 @@ export default function AssignDoctorModal({
                   )}
                   Proceed
                 </button>
-                <button
-                  className="border border-warning px-3 py-2"
+                <p
+                  className="border border-warning px-3 py-2 cursor-pointer"
                   onClick={handleClose}
                 >
                   Cancel
-                </button>
+                </p>
               </div>
             </Form>
           </Formik>

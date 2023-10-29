@@ -16,12 +16,14 @@ export const API_URL = {
     FETCH_PATIENT: '/patients/patients/',
     BOOK_APPOINTMENT: '/patients/publicappointments/',
     FETCH_APPOINTMENTS: '/patients/publicappointments/',
+    FETCH_PATIENT_APPOINTMENTS: '/patients/appointments/',
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
     ASSIGN_DOCTOR: '/patients/appointments/',
-    CONSULT_PATIENT: '/patients/consultation/',
+    CONSULT_PATIENT: '/patients/consultations/',
     REFER_PATIENT: '/patients/referrals/',
+    GET_PATIENT_PROFILE: '/patients/profiles/',
 
 
     /***************** DOCTOR APIS **********************/
@@ -54,12 +56,14 @@ export const APP_API_URL = {
     FETCH_PATIENT: '/api/patient',
     BOOK_APPOINTMENT: '/api/appointment',
     FETCH_APPOINTMENTS: '/api/appointment',
+    FETCH_PATIENT_APPOINTMENTS: '/api/appointment/patient-appointment',
     FETCH_SERVICES: '/api/patient/fetch-services',
     FETCH_INSURANCE: '/api/insurance',
     PRESCRIBE: '/api/patient/prescribe',
     ASSIGN_DOCTOR: '/api/patient/assign-doctor',
     CONSULT_PATIENT: '/api/patient/consult-patient',
     REFER_PATIENT: '/api/patient/refer-patient',
+    GET_PATIENT_PROFILE: '/api/patient/patient-profile',
 
 
     /***************** DOCTOR APIS **********************/

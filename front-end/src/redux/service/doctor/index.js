@@ -1,6 +1,6 @@
 import axios from "axios";
 import { APP_API_URL } from "@/assets/api-endpoints";
-import useAxios from "@/assets/hooks/use-axios";
+import UseAxios from "@/assets/hooks/use-axios";
 
 
 export const createDoctor = (payload) =>{
@@ -17,7 +17,7 @@ export const createDoctor = (payload) =>{
 
 
 export const fetchDoctors = (auth) =>{
-    const axiosInstance = useAxios(auth);
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.get(`${APP_API_URL.FETCH_DOCTOR}`)
             .then((res) =>{

@@ -76,9 +76,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
     
     def save(self, *args, **kwargs):
-        if not self.pk:
-            if self.role is not CustomUser.PATIENT:
-                self.is_staff = True
+        if self.role is not CustomUser.PATIENT:
+            self.is_staff = True
         super().save(*args, **kwargs)
 
     def get_fullname(self):

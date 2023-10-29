@@ -1,8 +1,10 @@
 import axios from "axios";
 import { APP_API_URL } from "@/assets/api-endpoints";
+import UseAxios from "@/assets/hooks/use-axios";
 
 
-export const registerUser = (payload) =>{
+export const registerUser = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.REGISTER_USER}`,payload)
             .then((res) =>{
