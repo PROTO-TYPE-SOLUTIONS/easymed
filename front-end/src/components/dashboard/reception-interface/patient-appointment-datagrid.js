@@ -18,17 +18,17 @@ const getActions = () => {
       label: "Convert to Patient",
       icon: <FaWheelchair className="text-success text-xl mx-2" />,
     },
-    // {
-    //   action: "assign",
-    //   label: "Assign Doctor",
-    //   icon: <FaWheelchair className="text-success text-xl mx-2" />,
-    // },
+    {
+      action: "assign",
+      label: "Assign Doctor",
+      icon: <FaWheelchair className="text-success text-xl mx-2" />,
+    },
   ];
 
   return actions;
 };
 
-const BookedAppointmentsDataGrid = ({ appointments }) => {
+const PatientAppointmentDataGrid = ({ patientAppointments }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRowData, setSelectedRowData] = useState({});
   const userActions = getActions();
@@ -93,8 +93,8 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
       setSelectedRowData(data);
       setOpen(true);
     } else if (menu.action === "assign") {
-      // setSelectedRowData(data);
-      // setAssignOpen(true);
+      setSelectedRowData(data);
+      setAssignOpen(true);
     }
   };
 
@@ -136,11 +136,11 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
       </div>
       <div className="mb-2">
         <h1 className="text-xl text-primary uppercase">
-          Booked Appointments
+          Patient Appointments
         </h1>
       </div>
       <DataGrid
-        dataSource={appointments}
+        dataSource={patientAppointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -181,9 +181,10 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
         />
         <Column dataField="appointment_date_time" caption="Date of Appointment" width={140} cellRender={appointmentDateFunc} />
         <Column dataField="date_created" caption="Date Created" width={140} cellRender={dateCreatedFunc} />
-        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
-        <Column dataField="reason" caption="Reason" width={280} />
-        <Column dataField="gender" caption="Gender" width={100} />
+        {/* <Column dataField="date_of_birth" caption="Date of Birth" width={140} /> */}
+        {/* <Column dataField="reason" caption="Reason" width={280} /> */}
+        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
+        {/* <Column dataField="gender" caption="Gender" width={100} /> */}
         <Column dataField="status" caption="Status" width={140} />
         
       </DataGrid>
@@ -193,4 +194,4 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
   );
 };
 
-export default BookedAppointmentsDataGrid;
+export default PatientAppointmentDataGrid;

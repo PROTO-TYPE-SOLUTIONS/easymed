@@ -111,10 +111,15 @@ const ReceptionPatientsDataGrid = () => {
           <div>
             <AddPatientModal />
           </div>
-          <div>
+          <div className="flex gap-2">
             <Link href="/dashboard/reception-interface/booked-appointments">
               <button className="border border-card text-card font-semibold px-4 py-3 text-sm">
-                Booked Appointments
+                Public Appointments
+              </button>
+            </Link>
+            <Link href="/dashboard/reception-interface/patient-appointments">
+              <button className="border bg-primary text-white px-4 py-3 text-sm">
+                Patient Appointments
               </button>
             </Link>
           </div>
