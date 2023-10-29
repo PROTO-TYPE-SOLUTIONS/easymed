@@ -155,7 +155,16 @@ class ReferralSerializer(serializers.ModelSerializer):
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
-        fields = '__all__'         
+        fields = [
+            'patient',
+            'assigned_doctor',
+            'appointment_date_time',
+            'status',
+            'reason',
+            'date_created',
+            'date_changed',
+            'id',
+            ]  
 
 
 class TriageSerializer(serializers.ModelSerializer):
