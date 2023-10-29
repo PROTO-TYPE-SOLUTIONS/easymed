@@ -11,7 +11,8 @@ from .models import (
     Service,
     Consultation,
     Referral,
-    PatientProfile
+    PatientProfile,
+    Triage,
 )
 
 
@@ -155,3 +156,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = '__all__'         
+
+
+class TriageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Triage
+        fields = '__all__'                 

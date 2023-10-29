@@ -14,7 +14,8 @@ from .models import (
     Service,
     Consultation,
     Referral,
-    PatientProfile
+    PatientProfile,
+    Triage,
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -28,7 +29,8 @@ from .serializers import (
     ServiceSerializer,
     ConsultationSerializer,
     ReferralSerializer,
-    PatientProfileSerializer
+    PatientProfileSerializer,
+    TriageSerializer,
 )
 
 # swagger
@@ -143,6 +145,11 @@ class PrescribedDrugViewSet(viewsets.ModelViewSet):
 class ReferralViewSet(viewsets.ModelViewSet):
     queryset = Referral.objects.all()
     serializer_class = ReferralSerializer
+
+
+class TriageViewSet(viewsets.ModelViewSet):
+    queryset = Triage.objects.all()
+    serializer_class = TriageSerializer
 
 
 
