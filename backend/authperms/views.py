@@ -64,7 +64,8 @@ class GroupsAPIView(APIView):
 
 
 class GroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser, IsAdminUser)
+    permission_classes = (IsSystemsAdminUser,)
+
 
     def get_object(self, id: int):
         try:
@@ -89,6 +90,7 @@ class GroupAPIView(APIView):
 
 class AddGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
 
     @extend_schema(
         request=AddGroupSerializer,
@@ -132,6 +134,7 @@ class EditGroupNameAPIView(APIView):
 class DeleteGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
+
     def get_object(self, group_name: str):
         try:
             return Group.objects.get_by_natural_key(group_name)
@@ -150,6 +153,7 @@ class DeleteGroupAPIView(APIView):
 
 class UserGroupsAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
 
     def get_object(self, user_id: int):
         try:
@@ -200,6 +204,7 @@ class AddUserToGroupAPIView(APIView):
 class RemoveUserFromGroupAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
+
     def get_object(self, user_id: int, group_name: str):
         try:
             Group.objects.get(name=group_name)
@@ -229,6 +234,7 @@ class RemoveUserFromGroupAPIView(APIView):
 class PermissionsAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
+
     @extend_schema(
         responses=PermissionsSerializer,
     )
@@ -240,6 +246,7 @@ class PermissionsAPIView(APIView):
 
 class PermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
 
     def get_object(self, id: int):
         try:
@@ -265,6 +272,8 @@ class PermissionAPIView(APIView):
 class AddPermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
+
+
     @extend_schema(
         request=AddPermissionSerializer,
         responses=AddPermissionSerializer,
@@ -282,12 +291,14 @@ class AddPermissionAPIView(APIView):
 class EditPermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
+
     def put(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class DeletePermissionAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
 
     def get_object(self, permission_id: int):
         try:
@@ -307,6 +318,7 @@ class DeletePermissionAPIView(APIView):
 class UserPermissionsAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
 
+
     def get(self, request: Request, *args, **kwargs: dict):
         pass
 
@@ -320,6 +332,7 @@ class AddPermissionsToUserAPIView(APIView):
 
 class RemovePermissionsFromUserAPIView(APIView):
     permission_classes = (IsSystemsAdminUser,)
+
 
     def get_object(self, user_id: int):
         try:

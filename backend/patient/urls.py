@@ -14,6 +14,7 @@ from .views import (
     ReferralViewSet,
     PatientsProfileAPIView,
     DoctorAppointmentViewSet,
+    TriageViewSet,
 )
 
 router = DefaultRouter()
@@ -28,6 +29,7 @@ router.register(r'prescriptions', PrescriptionViewSet)
 router.register(r'prescribed-drugs', PrescribedDrugViewSet)
 router.register(r'consultations', ConsultationViewSet)
 router.register(r'referrals', ReferralViewSet)
+router.register(r'triage', TriageViewSet)
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
 
 
