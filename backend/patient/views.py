@@ -143,3 +143,15 @@ class PrescribedDrugViewSet(viewsets.ModelViewSet):
 class ReferralViewSet(viewsets.ModelViewSet):
     queryset = Referral.objects.all()
     serializer_class = ReferralSerializer
+
+
+
+# get appointments for a specific doctor
+class DoctorAppointmentViewSet(viewsets.ViewSet):
+    serializer_class = AppointmentSerializer
+
+    def list(self, request, doctor_id):
+        # Retrieve appointments for a specific doctor
+        appointments = Appointment.objects.filter(assigned_doctor_id=doctor_id)
+        serializer = AppointmentSerializer(appointments, many=True)
+        return Response(serializer.data)
