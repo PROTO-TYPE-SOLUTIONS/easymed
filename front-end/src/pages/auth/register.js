@@ -3,10 +3,12 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { registerUser } from "@/redux/service/auth";
 import { useRouter } from "next/router";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const auth = useAuth();
   const initialValues = {
     email: "",
     password: "",
@@ -38,7 +40,7 @@ const SignUp = () => {
         role: 'patient'
       }
       setLoading(true);
-      await registerUser(formData).then(() => {
+      await registerUser(formData,auth).then(() => {
         helpers.resetForm();
         setLoading(false);
         router.push("/auth/login");

@@ -8,6 +8,7 @@ import { IoMdAdd } from "react-icons/io";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { toast} from 'react-toastify'
 
 const AdminCreateDoctor = () => {
   const [loading, setLoading] = useState(false);
@@ -59,13 +60,16 @@ const AdminCreateDoctor = () => {
         role: "doctor",
       };
       setLoading(true);
-      await registerUser(formData).then(() => {
+      await registerUser(formData, authUser).then(() => {
         helpers.resetForm();
         setLoading(false);
+        handleClose();
+        toast.success('Doctor Created Successfully!')
+        dispatch(getAllDoctors(authUser));
       });
     } catch (err) {
       setLoading(false);
-      console.log("SIGNUP_ERROR ", err);
+      toast.error(err)
     }
   };
 

@@ -8,6 +8,7 @@ import { assignDoctor } from "@/redux/service/patients";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllAppointments } from "@/redux/features/appointment";
 
 export default function AssignDoctorModal({
   selectedRowData,
@@ -64,6 +65,8 @@ export default function AssignDoctorModal({
         helpers.resetForm();
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
+        dispatch(getAllAppointments());
+        handleClose();
       });
     } catch (err) {
       toast.error(err);
@@ -161,12 +164,12 @@ export default function AssignDoctorModal({
                   )}
                   Proceed
                 </button>
-                <button
-                  className="border border-warning px-3 py-2"
+                <p
+                  className="border border-warning px-3 py-2 cursor-pointer"
                   onClick={handleClose}
                 >
                   Cancel
-                </button>
+                </p>
               </div>
             </Form>
           </Formik>

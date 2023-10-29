@@ -1,6 +1,7 @@
 import React,{ useState,useRef,useEffect } from "react";
 import { Drawer } from "./drawer";
 import { AiOutlineMenu } from "react-icons/ai";
+import Link from "next/link";
 
 
 const Navbar = () => {
@@ -21,9 +22,9 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="md:block hidden">
-        <button className="bg-primary px-4 py-2 text-white">
-          Contact Us
-        </button>
+        <Link href="/auth/login" className="bg-primary px-5 py-3 text-white">
+          Login
+        </Link>
       </div>
       <div className="md:hidden block py-4">
         <AiOutlineMenu
