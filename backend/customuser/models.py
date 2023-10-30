@@ -100,20 +100,24 @@ class NurseProfile(models.Model):
 
 class SysadminProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    # Add sysadmin-specific fields here
+    
+    def __str__(self):
+        return self.user.email
+    
 
 class LabTechProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    # Add lab-tech-specific fields here
+    
+    def __str__(self):
+        return self.user.email
     
 
 class ReceptionistProfile(models.Model):
     id = models.UUIDField(default=uuid4, editable=False, unique=True, primary_key=True)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
-
-# proxy model
-
+    def __str__(self):
+        return self.user.email
 class ReceptionistManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         users = super().get_queryset(*args, **kwargs)

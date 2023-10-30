@@ -62,28 +62,10 @@ class RegistrationAPIView(APIView):
         serializer = CustomUserRegistrationSerializer(data=data)
 
         if not serializer.is_valid():
-            return Response(serializer.error_messages, status=status.HTTP_400)
-
-        role: str = serializer.validated_data.get("role")
-        # anonymous user can only register as a patient
-        if request.user.is_anonymous:
-            if role == CustomUser.PATIENT:
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response({"error_message": "Unauthorized request"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        user: CustomUser = request.user
-        if user.role == CustomUser.SYS_ADMIN:
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        # doctor, nurse and lab tech can only create a patient and no other role
-        if user.role in [CustomUser.DOCTOR, CustomUser.LAB_TECH, CustomUser.NURSE, CustomUser.RECEPTIONIST]:
-            if role == CustomUser.PATIENT:
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response({"error_message": "Unauthorized request"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # Login Endpoint

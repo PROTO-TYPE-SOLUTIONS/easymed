@@ -28,8 +28,8 @@ class Patient(models.Model):
     )
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
-    date_of_birth = models.DateField()
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, )
+    date_of_birth = models.DateField(null=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     insurance = models.ForeignKey(
         InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
     user_id = models.ForeignKey(
@@ -39,21 +39,24 @@ class Patient(models.Model):
         return self.first_name
     
 class PatientProfile(models.Model):
-    patient = models.OneToOneField(Patient, on_delete=models.CASCADE,)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE,)
 
     @property
     def no_of_visits(self):
-        return self.patient.appointment_set.count()
+        patient:Patient = self.user.patient_set.first()
+        return patient.appointment_set.count()
     
     @property
     def insurance_name(self):
-        if self.patient.insurance:
-            return self.patient.insurance.name
+        patient:Patient = self.user.patient_set.first()
+        if patient.insurance:
+            return patient.insurance.name
         return None
     
     @property
     def all_assigned_doctors(self):
-        appointments:list[Appointment] = list(self.patient.appointment_set.all())
+        patient:Patient = self.user.patient_set.first()
+        appointments:list[Appointment] = list(patient.appointment_set.all())
         doctors = []
         for appointment in appointments:
             if appointment.assigned_doctor:
@@ -70,8 +73,9 @@ class PatientProfile(models.Model):
 
     @property
     def registered_date(self):
-        if self.patient.appointment_set.count()>0:
-            return self.patient.appointment_set.first().date_created
+        patient:Patient = self.user.patient_set.first()
+        if patient.appointment_set.count()>0:
+            return patient.appointment_set.first().date_created
         return None
 
 

@@ -19,7 +19,7 @@ export const createDoctor = (payload) =>{
 export const fetchDoctors = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.get(`${APP_API_URL.FETCH_DOCTOR}`)
+        axiosInstance.get(`${APP_API_URL.FETCH_DOCTOR}`,auth)
             .then((res) =>{
                 resolve(res.data)
             })
