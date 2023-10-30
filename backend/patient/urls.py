@@ -12,7 +12,9 @@ from .views import (
     ServiceViewSet,
     ConsultationViewSet,
     ReferralViewSet,
-    PatientsProfileAPIView
+    PatientsProfileAPIView,
+    DoctorAppointmentViewSet,
+    TriageViewSet,
 )
 
 router = DefaultRouter()
@@ -27,10 +29,13 @@ router.register(r'prescriptions', PrescriptionViewSet)
 router.register(r'prescribed-drugs', PrescribedDrugViewSet)
 router.register(r'consultations', ConsultationViewSet)
 router.register(r'referrals', ReferralViewSet)
+router.register(r'triage', TriageViewSet)
+router.register(r'appointments', AppointmentViewSet, basename='appointments')
 
 
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('profiles/<int:patient_id>/', PatientsProfileAPIView.as_view(), name="patient-profile"),
+    path('profiles/<int:user_id>/', PatientsProfileAPIView.as_view(), name="patient-profile"),
+    path('doctors/<int:doctor_id>/appointments/', DoctorAppointmentViewSet.as_view({'get': 'list'}), name='doctor-appointments'),
 ]
