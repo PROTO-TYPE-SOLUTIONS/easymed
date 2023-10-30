@@ -153,6 +153,7 @@ class ReferralSerializer(serializers.ModelSerializer):
 
 # get appointments for a specific doctor
 class AppointmentSerializer(serializers.ModelSerializer):
+    patient = PatientSerializer()
     class Meta:
         model = Appointment
         fields = [
