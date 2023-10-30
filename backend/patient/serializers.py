@@ -173,3 +173,4 @@ class TriageSerializer(serializers.ModelSerializer):
         fields = '__all__'                 
 
         
+
