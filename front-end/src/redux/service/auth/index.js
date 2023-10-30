@@ -6,7 +6,7 @@ import UseAxios from "@/assets/hooks/use-axios";
 export const registerUser = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.post(`${APP_API_URL.REGISTER_USER}`,payload)
+        axios.post(`${APP_API_URL.REGISTER_USER}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })

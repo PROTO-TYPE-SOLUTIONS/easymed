@@ -8,7 +8,7 @@ import { assignDoctor } from "@/redux/service/patients";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getAllAppointments } from "@/redux/features/appointment";
+import { getAllAppointments, getAllPatientAppointments } from "@/redux/features/appointment";
 
 export default function AssignDoctorModal({
   selectedRowData,
@@ -65,7 +65,7 @@ export default function AssignDoctorModal({
         helpers.resetForm();
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
-        dispatch(getAllAppointments());
+        dispatch(getAllPatientAppointments());
         handleClose();
       });
     } catch (err) {
