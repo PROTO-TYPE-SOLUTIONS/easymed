@@ -19,12 +19,12 @@ const Login = () => {
       .email("This is not a valid email")
       .required("Email is required!"),
     password: Yup.string()
-      .test(
-        "len",
-        "The password must be between 6 and 20 characters.",
-        (val) =>
-          !val || (val.toString().length >= 6 && val.toString().length <= 40)
-      )
+      // .test(
+      //   "len",
+      //   "The password must be between 6 and 20 characters.",
+      //   (val) =>
+      //     !val || (val.toString().length >= 6 && val.toString().length <= 40)
+      // )
       .required("Password is required!"),
   });
 
