@@ -22,8 +22,11 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="md:block hidden">
-        <Link href="/auth/login" className="bg-primary px-5 py-3 text-white">
+        <Link href="/auth/login" className="bg-primary px-5 py-3 text-white mx-2">
           Login
+        </Link>
+        <Link href="/auth/register" className="bg-primary px-5 py-3 text-white mx-2">
+          Register
         </Link>
       </div>
       <div className="md:hidden block py-4">
