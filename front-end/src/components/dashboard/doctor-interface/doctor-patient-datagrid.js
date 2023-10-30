@@ -52,14 +52,13 @@ const DoctorPatientDataGrid = () => {
   const dispatch = useDispatch();
   const auth = useAuth();
   const { doctorAppointments } = useSelector((store) => store.appointment);
-
-  console.log("DOCTOR_APPOINTMENTS ",doctorAppointments)
+  
 
   useEffect(() => {
     if (auth) {
       dispatch(getAllDoctorAppointments(auth.user_id));
     }
-  }, []);
+  }, [auth]);
 
   const users = [
     {

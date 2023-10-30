@@ -17,7 +17,7 @@ export const API_URL = {
     BOOK_APPOINTMENT: '/patients/publicappointments/',
     FETCH_APPOINTMENTS: '/patients/publicappointments/',
     FETCH_PATIENT_APPOINTMENTS: '/patients/appointments/',
-    FETCH_DOCTOR_APPOINTMENTS: '/api/appointment/patient-appointment/',
+    FETCH_DOCTOR_APPOINTMENTS: '/patients/appointments/doctors/',
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
