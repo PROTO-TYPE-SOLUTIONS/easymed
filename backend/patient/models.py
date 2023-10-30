@@ -28,8 +28,8 @@ class Patient(models.Model):
     )
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
-    date_of_birth = models.DateField()
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, )
+    date_of_birth = models.DateField(null=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     insurance = models.ForeignKey(
         InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
     user_id = models.ForeignKey(
