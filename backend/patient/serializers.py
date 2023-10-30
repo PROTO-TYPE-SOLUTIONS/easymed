@@ -57,7 +57,7 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     registered_date = serializers.SerializerMethodField()
     class Meta:
         model = PatientProfile
-        fields = ("id", "patient", "no_of_visits", "insurance_name", "all_assigned_doctors", "current_status", "registered_date")
+        fields = ("id", "user", "no_of_visits", "insurance_name", "all_assigned_doctors", "current_status", "registered_date")
 
     def get_no_of_visits(self, obj: PatientProfile):
         return obj.no_of_visits
@@ -73,7 +73,7 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance: PatientProfile):
         data = super().to_representation(instance)
-        data["patient"] = f"{instance.patient.first_name } {instance.patient.second_name}"
+        data["user"] = f"{instance.user.first_name } {instance.user.last_name}"
         return data
 
 class NextOfKinSerializer(serializers.ModelSerializer):
