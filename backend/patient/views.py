@@ -2,6 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from customuser.models import CustomUser
 from .models import (
     InsuranceCompany,
     ContactDetails,
@@ -14,7 +16,8 @@ from .models import (
     Service,
     Consultation,
     Referral,
-    PatientProfile
+    PatientProfile,
+    Triage,
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -28,7 +31,8 @@ from .serializers import (
     ServiceSerializer,
     ConsultationSerializer,
     ReferralSerializer,
-    PatientProfileSerializer
+    PatientProfileSerializer,
+    TriageSerializer,
 )
 
 # swagger
@@ -89,21 +93,20 @@ class PatientViewSet(viewsets.ModelViewSet):
 
 
 class PatientsProfileAPIView(APIView):
-
-    def get_object(self, patient_id: int):
+    def get_object(self, user_id: int):
         try:
-            return Patient.objects.get(pk=patient_id)
-        except Patient.DoesNotExist:
+            return CustomUser.objects.get(pk=user_id)
+        except CustomUser.DoesNotExist:
             return None
 
     @extend_schema(
         responses=PatientProfileSerializer,
     )
-    def get(self, request: Request, patient_id: int=None, *args, **kwargs):
-        patient = self.get_object(patient_id)
+    def get(self, request: Request, user_id: int=None, *args, **kwargs):
+        patient = self.get_object(user_id)
         if patient is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        profile = PatientProfile.objects.filter(patient__pk=patient.pk).first()
+        profile = PatientProfile.objects.filter(user__pk=patient.pk).first()
         if profile:
             serializer = PatientProfileSerializer(profile)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -143,3 +146,20 @@ class PrescribedDrugViewSet(viewsets.ModelViewSet):
 class ReferralViewSet(viewsets.ModelViewSet):
     queryset = Referral.objects.all()
     serializer_class = ReferralSerializer
+
+
+class TriageViewSet(viewsets.ModelViewSet):
+    queryset = Triage.objects.all()
+    serializer_class = TriageSerializer
+
+
+
+# get appointments for a specific doctor
+class DoctorAppointmentViewSet(viewsets.ViewSet):
+    serializer_class = AppointmentSerializer
+
+    def list(self, request, doctor_id):
+        # Retrieve appointments for a specific doctor
+        appointments = Appointment.objects.filter(assigned_doctor_id=doctor_id)
+        serializer = AppointmentSerializer(appointments, many=True)
+        return Response(serializer.data)
