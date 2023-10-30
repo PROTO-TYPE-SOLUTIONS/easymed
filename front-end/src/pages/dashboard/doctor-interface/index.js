@@ -6,6 +6,7 @@ import DoctorPatientDataGrid from "@/components/dashboard/doctor-interface/docto
 import DashboardCards from "@/components/dashboard/dashboard-cards";
 
 const DoctorInterface = () => {
+  
   return (
     <Container maxWidth="xl" className="mt-8">
       <DashboardCards />

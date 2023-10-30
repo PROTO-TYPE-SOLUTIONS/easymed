@@ -8,6 +8,7 @@ import AppointmentHistory from "@/components/patient-profile/appointment-history
 const PatientProfile = () => {
   const dispatch = useDispatch();
   const { profile } = useSelector((store) => store.patient);
+  console.log("PROFILE_DETAILS ",profile);
   const router = useRouter();
   const { patientId } = router.query;
 
