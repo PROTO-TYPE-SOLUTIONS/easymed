@@ -36,6 +36,6 @@ router.register(r'appointments', AppointmentViewSet, basename='appointments')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('profiles/<int:patient_id>/', PatientsProfileAPIView.as_view(), name="patient-profile"),
-    path('doctors/<int:doctor_id>/appointments/', DoctorAppointmentViewSet.as_view({'get': 'list'}), name='doctor-appointments'),
+    path('profiles/<int:user_id>/', PatientsProfileAPIView.as_view(), name="patient-profile"),
+    path('appointments/doctors/<int:doctor_id>/', DoctorAppointmentViewSet.as_view({'get': 'list'}), name='doctor-appointments'),
 ]

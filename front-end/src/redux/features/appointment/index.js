@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAppointment, fetchPatientAppointments } from "@/redux/service/appointment";
+import { fetchAppointment, fetchDoctorAppointments, fetchPatientAppointments } from "@/redux/service/appointment";
 
 
 const initialState = {
   appointments: [],
-  patientAppointments:[]
+  patientAppointments:[],
+  doctorAppointments:[]
 };
 
 const AppointmentSlice = createSlice({
@@ -17,10 +18,13 @@ const AppointmentSlice = createSlice({
     setPatientAppointments: (state, action) => {
       state.patientAppointments = action.payload;
     },
+    setDoctorAppointments: (state, action) => {
+      state.doctorAppointments = action.payload;
+    },
   },
 });
 
-export const { setAppointments,setPatientAppointments } = AppointmentSlice.actions;
+export const { setAppointments,setPatientAppointments,setDoctorAppointments } = AppointmentSlice.actions;
 
 
 export const getAllAppointments = () => async (dispatch) => {
@@ -29,6 +33,15 @@ export const getAllAppointments = () => async (dispatch) => {
     dispatch(setAppointments(response));
   } catch (error) {
     console.log("APPOINTMENTS_ERROR ", error);
+  }
+};
+
+export const getAllDoctorAppointments = (userId) => async (dispatch) => {
+  try {
+    const response = await fetchDoctorAppointments(userId);
+    dispatch(setDoctorAppointments(response));
+  } catch (error) {
+    console.log("DOCTOR_APPOINTMENTS_ERROR ", error);
   }
 };
 

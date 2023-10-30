@@ -6,18 +6,18 @@ import { Chip } from "@mui/material";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import ReferPatientModal from "../patient/refer-patient-modal";
-import ConsultPatientModal from './consult-modal'
-import PrescribePatientModal from './prescribe-patient-modal'
+import ConsultPatientModal from "./consult-modal";
+import PrescribePatientModal from "./prescribe-patient-modal";
 import { BiTransferAlt } from "react-icons/bi";
-import { MdOutlineContactSupport } from 'react-icons/md'
-import { useDispatch,useSelector } from "react-redux";
-import { getAllPatients } from '@/redux/features/patients'
-
+import { MdOutlineContactSupport } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllPatients } from "@/redux/features/patients";
+import { getAllDoctorAppointments } from "@/redux/features/appointment";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
-
 
 const getActions = () => {
   let actions = [
@@ -50,13 +50,16 @@ const DoctorPatientDataGrid = () => {
   const [prescribeOpen, setPrescribeOpen] = useState(false);
   const userActions = getActions();
   const dispatch = useDispatch();
-  const { patients } = useSelector((store) => store.patient)
+  const auth = useAuth();
+  const { doctorAppointments } = useSelector((store) => store.appointment);
 
+  console.log("DOCTOR_APPOINTMENTS ",doctorAppointments)
 
-  useEffect(() =>{
-    dispatch(getAllPatients());
-  },[])
-
+  useEffect(() => {
+    if (auth) {
+      dispatch(getAllDoctorAppointments(auth.user_id));
+    }
+  }, []);
 
   const users = [
     {
@@ -113,7 +116,7 @@ const DoctorPatientDataGrid = () => {
     } else if (menu.action === "consult") {
       setSelectedRowData(data);
       setConsultOpen(true);
-    } else if(menu.action === 'prescribe'){
+    } else if (menu.action === "prescribe") {
       setSelectedRowData(data);
       setPrescribeOpen(true);
     }
@@ -147,15 +150,30 @@ const DoctorPatientDataGrid = () => {
   const statusFunc = ({ data }) => {
     if (data?.progress_status === "In Treatment") {
       return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-primary text-white" />
+        <Chip
+          variant="contained"
+          size="small"
+          label={data.progress_status}
+          className="bg-primary text-white"
+        />
       );
     } else if (data?.progress_status === "Discharged") {
       return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-success text-white" />
+        <Chip
+          variant="contained"
+          size="small"
+          label={data.progress_status}
+          className="bg-success text-white"
+        />
       );
     } else if (data?.progress_status === "New Patient") {
       return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-card text-white" />
+        <Chip
+          variant="contained"
+          size="small"
+          label={data.progress_status}
+          className="bg-card text-white"
+        />
       );
     }
   };
@@ -176,7 +194,7 @@ const DoctorPatientDataGrid = () => {
         </div>
       </div>
       <DataGrid
-        dataSource={patients}
+        dataSource={doctorAppointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         onSelectionChanged={onSelectionChanged}
@@ -241,9 +259,13 @@ const DoctorPatientDataGrid = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <ReferPatientModal {...{open,setOpen,selectedRowData}} />
-      <ConsultPatientModal {...{consultOpen,setConsultOpen,selectedRowData}} />
-      <PrescribePatientModal {...{prescribeOpen,setPrescribeOpen,selectedRowData}} />
+      <ReferPatientModal {...{ open, setOpen, selectedRowData }} />
+      <ConsultPatientModal
+        {...{ consultOpen, setConsultOpen, selectedRowData }}
+      />
+      <PrescribePatientModal
+        {...{ prescribeOpen, setPrescribeOpen, selectedRowData }}
+      />
     </section>
   );
 };
