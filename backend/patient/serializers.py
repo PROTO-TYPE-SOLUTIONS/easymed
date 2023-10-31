@@ -11,7 +11,6 @@ from .models import (
     Service,
     Consultation,
     Referral,
-    PatientProfile,
     Triage,
 )
 
@@ -35,12 +34,18 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    age = serializers.SerializerMethodField()
     class Meta:
         model = Patient
         fields = ("id", "first_name", "second_name", "date_of_birth",
-                  "gender", "insurance", "user_id",)
+                  "gender", "insurance", "user_id","age")
         read_only_fields = ("id",)
         write_only_fields = ("insurance",)
+
+    def get_age(self, obj: Patient):
+        if obj.age:
+            return obj.age
+        return None
     
     def to_representation(self, instance: Patient):
         data = super().to_representation(instance)
@@ -50,31 +55,6 @@ class PatientSerializer(serializers.ModelSerializer):
         return data
     
 
-class PatientProfileSerializer(serializers.ModelSerializer):
-    no_of_visits = serializers.SerializerMethodField()
-    insurance_name = serializers.SerializerMethodField()
-    all_assigned_doctors = serializers.SerializerMethodField()
-    registered_date = serializers.SerializerMethodField()
-    class Meta:
-        model = PatientProfile
-        fields = ("id", "user", "no_of_visits", "insurance_name", "all_assigned_doctors", "current_status", "registered_date")
-
-    def get_no_of_visits(self, obj: PatientProfile):
-        return obj.no_of_visits
-
-    def get_insurance_name(self, obj: PatientProfile):
-        return obj.insurance_name
-    def get_all_assigned_doctors(self, obj: PatientProfile):
-        return obj.all_assigned_doctors
-    def get_current_status(self, obj: PatientProfile):
-        return obj.current_status
-    def get_registered_date(self, obj: PatientProfile):
-        return obj.registered_date
-    
-    def to_representation(self, instance: PatientProfile):
-        data = super().to_representation(instance)
-        data["user"] = f"{instance.user.first_name } {instance.user.last_name}"
-        return data
 
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:

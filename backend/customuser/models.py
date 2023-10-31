@@ -1,4 +1,5 @@
 from uuid import uuid4
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.utils import timezone
@@ -48,7 +49,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         (LAB_TECH, 'Lab Technician'),
         (RECEPTIONIST, 'Receptionist'),
         (SYS_ADMIN, 'Sysadmin'),
-        
+
     )
 
     email = models.EmailField(unique=True)
@@ -57,15 +58,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=BASE_ROLE)
-
+    # TODO:make this a foreign key of occupation model
+    profession = models.CharField(max_length=50, null=True)
+    date_of_birth = models.DateField(null=True)
+    role = models.CharField(
+        max_length=20, choices=ROLE_CHOICES, default=BASE_ROLE)
     user_permissions = models.ManyToManyField(
         Permission,
         blank=True,
-        related_name='custom_users_permissions'
+        related_name='custom_users_permissions',
     )
 
-    groups = models.ManyToManyField(Group, blank=True, related_name='custom_users')
+    groups = models.ManyToManyField(
+        Group, blank=True, related_name='custom_users')
 
     objects = CustomUserManager()
 
@@ -74,7 +79,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-    
+
+    @property
+    def age(self):
+        if self.date_of_birth:
+            today = datetime.today()
+            user_age: int = (today.year - self.date_of_birth.year - (
+                (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)))
+            return user_age
+        return None
+
     def save(self, *args, **kwargs):
         if self.role is not CustomUser.PATIENT:
             self.is_staff = True
@@ -88,40 +102,47 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             fullname += self.last_name
 
         return fullname
-    
+
 
 class DoctorProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
     # Add doctor-specific fields here
+
 
 class NurseProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     # Add nurse-specific fields here
 
+
 class SysadminProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return self.user.email
-    
+
 
 class LabTechProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return self.user.email
-    
+
 
 class ReceptionistProfile(models.Model):
-    id = models.UUIDField(default=uuid4, editable=False, unique=True, primary_key=True)
+    id = models.UUIDField(default=uuid4, editable=False,
+                          unique=True, primary_key=True)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.email
+
+
 class ReceptionistManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         users = super().get_queryset(*args, **kwargs)
         return users.filter(role=CustomUser.RECEPTIONIST)
+
 
 class Receptionist(CustomUser):
     class Meta:
@@ -131,12 +152,12 @@ class Receptionist(CustomUser):
     BASE_ROLE = CustomUser.RECEPTIONIST
 
 
-  
 class DoctorManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         users = super().get_queryset(*args, **kwargs)
         return users.filter(role=CustomUser.DOCTOR)
-    
+
+
 class Doctor(CustomUser):
     class Meta:
         proxy = True
@@ -149,7 +170,7 @@ class NurseManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         users = super().get_queryset(*args, **kwargs)
         return users.filter(role=CustomUser.NURSE)
-    
+
 
 class Nurse(CustomUser):
     class Meta:
@@ -163,7 +184,7 @@ class LabTechManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         users = super().get_queryset(*args, **kwargs)
         return users.filter(role=CustomUser.LAB_TECH)
-    
+
 
 class LabTech(CustomUser):
     class Meta:
@@ -172,12 +193,12 @@ class LabTech(CustomUser):
     objects = LabTechManager()
     BASE_ROLE = CustomUser.LAB_TECH
 
-    
+
 class PatientManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         users = super().get_queryset(*args, **kwargs)
         return users.filter(role=CustomUser.PATIENT)
-    
+
 
 class PatientUser(CustomUser):
     class Meta:
