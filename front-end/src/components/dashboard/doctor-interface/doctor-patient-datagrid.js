@@ -156,7 +156,7 @@ const DoctorPatientDataGrid = () => {
           className="bg-primary text-white"
         />
       );
-    } else if (data?.progress_status === "Discharged") {
+    } else if (data?.progress_status === "confirmed") {
       return (
         <Chip
           variant="contained"
@@ -176,6 +176,17 @@ const DoctorPatientDataGrid = () => {
       );
     }
   };
+
+//   {
+//     "patient": 1,
+//     "assigned_doctor": 1,
+//     "appointment_date_time": "2023-10-26T00:00:00Z",
+//     "status": "confirmed",
+//     "reason": "Test reason",
+//     "date_created": "2023-10-30T14:53:33.159162Z",
+//     "date_changed": "2023-10-30T14:53:33.159162Z",
+//     "id": 2
+// }
 
   return (
     <section>
@@ -233,14 +244,14 @@ const DoctorPatientDataGrid = () => {
           allowSearch={true}
         />
         <Column
-          dataField="date_of_birth"
-          caption="Date of Birth"
+          dataField="date_created"
+          caption="Date Created"
           width={200}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
-          dataField="gender"
+          dataField="status"
           caption="Status"
           width={140}
           cellRender={statusFunc}
@@ -250,7 +261,7 @@ const DoctorPatientDataGrid = () => {
           caption="Assigned Doctor"
           width={200}
         />
-        <Column dataField="gender" caption="Gender" width={140} />
+        <Column dataField="reason" caption="Reason" width={140} />
         <Column
           dataField="country"
           caption="Action"
