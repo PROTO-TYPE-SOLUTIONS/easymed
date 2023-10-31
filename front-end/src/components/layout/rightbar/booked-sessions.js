@@ -50,7 +50,7 @@ const BookedSessions = () => {
         ) : (
           <div className="my-8">
             <p className="text-center text-warning text-sm">
-              No Doctors Available at the moment!
+              No Booked Sessions Available at the moment!
             </p>
           </div>
         )}

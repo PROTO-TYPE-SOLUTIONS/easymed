@@ -1,9 +1,11 @@
-import React from 'react'
+import React from "react";
 
 const AppointmentHistory = () => {
   return (
-    <div>Appointment History Details</div>
-  )
-}
+    <>
+      <h1 className="text-xl text-primary">Appointment History</h1>
+    </>
+  );
+};
 
-export default AppointmentHistory
+export default AppointmentHistory;

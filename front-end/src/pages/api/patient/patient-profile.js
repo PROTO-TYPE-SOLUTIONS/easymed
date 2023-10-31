@@ -20,9 +20,9 @@ export default async function handler(req, res) {
                 }
             };
 
-            const patientId = req.query.patientId;
+            const userId = req.query.userId;
 
-            await backendAxiosInstance.get(`${API_URL.GET_PATIENT_PROFILE}${patientId}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.GET_PATIENT_PROFILE}/${userId}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {

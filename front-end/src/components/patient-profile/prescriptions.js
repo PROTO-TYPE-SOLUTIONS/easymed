@@ -1,9 +1,11 @@
-import React from 'react'
+import React from "react";
 
 const Prescriptions = () => {
   return (
-    <div>Prescriptions</div>
-  )
-}
+    <>
+      <h1 className="text-xl text-primary">Prescriptions</h1>
+    </>
+  );
+};
 
-export default Prescriptions
+export default Prescriptions;
