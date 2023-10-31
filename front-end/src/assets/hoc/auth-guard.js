@@ -1,5 +1,5 @@
 import React,{ useEffect } from 'react'
-import { useAuth } from '@/assets/hooks/use-auth'
+import { useAuth } from '../hooks/use-auth';
 import { useRouter } from 'next/router';
 
 
