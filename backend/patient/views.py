@@ -16,7 +16,6 @@ from .models import (
     Service,
     Consultation,
     Referral,
-    PatientProfile,
     Triage,
 )
 from .serializers import (
@@ -31,7 +30,6 @@ from .serializers import (
     ServiceSerializer,
     ConsultationSerializer,
     ReferralSerializer,
-    PatientProfileSerializer,
     TriageSerializer,
 )
 
@@ -92,25 +90,6 @@ class PatientViewSet(viewsets.ModelViewSet):
         return Response({"message": {"patient_id": patient.pk, "appointment_id": appointment.pk}}, status=status.HTTP_201_CREATED)
 
 
-class PatientsProfileAPIView(APIView):
-    def get_object(self, user_id: int):
-        try:
-            return CustomUser.objects.get(pk=user_id)
-        except CustomUser.DoesNotExist:
-            return None
-
-    @extend_schema(
-        responses=PatientProfileSerializer,
-    )
-    def get(self, request: Request, user_id: int=None, *args, **kwargs):
-        patient = self.get_object(user_id)
-        if patient is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        profile = PatientProfile.objects.filter(user__pk=patient.pk).first()
-        if profile:
-            serializer = PatientProfileSerializer(profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class NextOfKinViewSet(viewsets.ModelViewSet):

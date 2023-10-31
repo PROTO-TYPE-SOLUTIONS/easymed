@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
@@ -38,47 +39,13 @@ class Patient(models.Model):
     def __str__(self):
         return self.first_name
     
-class PatientProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE,)
-
     @property
-    def no_of_visits(self):
-        patient:Patient = self.user.patient_set.first()
-        return patient.appointment_set.count()
-    
-    @property
-    def insurance_name(self):
-        patient:Patient = self.user.patient_set.first()
-        if patient.insurance:
-            return patient.insurance.name
+    def age(self):
+        if self.date_of_birth:
+            patient_age:int = (datetime.now().year - self.date_of_birth.year)
+            return patient_age
         return None
     
-    @property
-    def all_assigned_doctors(self):
-        patient:Patient = self.user.patient_set.first()
-        appointments:list[Appointment] = list(patient.appointment_set.all())
-        doctors = []
-        for appointment in appointments:
-            if appointment.assigned_doctor:
-                doctors.append(appointment.assigned_doctor.get_fullname())
-        return doctors
-    
-    @property
-    def current_status(self):
-        appointments:list[Appointment] = list(self.patient.appointment_set.all())
-        if len(appointments) >0:
-            appointment = appointments[0]
-            return appointment.status
-        return None
-
-    @property
-    def registered_date(self):
-        patient:Patient = self.user.patient_set.first()
-        if patient.appointment_set.count()>0:
-            return patient.appointment_set.first().date_created
-        return None
-
-
 
 # meant to create an OrderBill item when a patient is created
 # def order_bill_created(sender, instance, created, **kwargs):
@@ -159,6 +126,13 @@ class PublicAppointment(models.Model):
 
     def __str__(self):
         return f"Appointment #{self.first_name}"
+    
+    @property
+    def age(self):
+        if self.date_of_birth:
+            patient_age:int = (datetime.now().year - self.date_of_birth.year)
+            return patient_age
+        return None
 
 
 class Triage(models.Model):
