@@ -1,11 +1,12 @@
 from uuid import uuid4
 from datetime import datetime
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
 
 from django.contrib.auth.models import BaseUserManager
 
+from authperms.models import Group, Permission
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, role=None, **extra_fields):
