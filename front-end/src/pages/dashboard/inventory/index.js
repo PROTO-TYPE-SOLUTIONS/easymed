@@ -4,6 +4,7 @@ import React from "react";
 import { inventoryData } from "@/assets/menu";
 import InventoryDataGrid from "@/components/dashboard/inventory";
 import Link from "next/link";
+import AuthGuard from "@/assets/hoc/auth-guard";
 
 const Inventory = () => {
   return (
@@ -40,6 +41,10 @@ const Inventory = () => {
   );
 };
 
-Inventory.getLayout = (page) => <InventoryLayout>{page}</InventoryLayout>;
+Inventory.getLayout = (page) => (
+  <AuthGuard>
+    <InventoryLayout>{page}</InventoryLayout>;
+  </AuthGuard>
+);
 
 export default Inventory;

@@ -8,6 +8,7 @@ import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
 import AdminCreateUserModal from "@/components/dashboard/admin-interface/admin-add-user-modal";
 import AdminCreateDoctor from "@/components/dashboard/admin-interface/admin-add-doctor";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
+import AuthGuard from "@/assets/hoc/auth-guard";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -15,7 +16,6 @@ const Admin = () => {
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
-
 
   return (
     <Container maxWidth="xl" className="py-6">
@@ -108,6 +108,10 @@ const Admin = () => {
   );
 };
 
-Admin.getLayout = (page) => <CustomizedLayout>{page}</CustomizedLayout>;
+Admin.getLayout = (page) => (
+  <AuthGuard>
+    <CustomizedLayout>{page}</CustomizedLayout>
+  </AuthGuard>
+);
 
 export default Admin;
