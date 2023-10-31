@@ -1,8 +1,5 @@
 import React from "react";
-import Sidebar from "./sidebar";
-import CustomizedHeader from "./customized-header";
 import { AiOutlineHome } from "react-icons/ai";
-import { TbLogout2 } from 'react-icons/tb'
 import Link from "next/link";
 
 const menus = [
@@ -10,12 +7,6 @@ const menus = [
     id: 1,
     icon: <AiOutlineHome />,
     label: "Home",
-    link: '/',
-  },
-  {
-    id: 2,
-    icon: <TbLogout2 />,
-    label: "Logout",
     link: '/',
   },
 ];
