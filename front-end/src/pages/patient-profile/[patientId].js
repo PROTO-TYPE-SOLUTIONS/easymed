@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Container, Grid } from "@mui/material";
 import AppointmentHistory from "@/components/patient-profile/appointment-history";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import ProfileLayout from "@/components/layout/profile-layout";
+import { BsArrowLeft, BsImageFill } from "react-icons/bs";
+import { FiEdit } from "react-icons/fi";
 
 const PatientProfile = () => {
   const dispatch = useDispatch();
@@ -21,68 +24,56 @@ const PatientProfile = () => {
 
   return (
     <AuthGuard>
-      <section className="bg-background h-screen space-y-8">
-        <header className="bg-primary text-white p-4">
-          <Container>Marcos Profile</Container>
-        </header>
-        <Container>
-          <section className="">
-            <Grid container spacing={2}>
-              <Grid item md={4} xs={12}>
-                <section className="gap-4 bg-white p-4 space-y-4 rounded shadow-xl">
-                  <div className="space-y-3 flex flex-col items-center justify-center border-b border-primary py-1">
-                    <img
-                      className="rounded-full h-24 w-24"
-                      src="/images/avatar1.png"
-                      alt=""
-                    />
-                    <p className="text-sm text-center">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Tempora ipsa, incidunt.
-                    </p>
-                    {/* <button className="bg-primary text-white px-4 py-2">
-                      Edit Profile
-                    </button> */}
-                  </div>
-                  <div className="space-y-3">
-                    <h1 className="font-semibold">Contact Information</h1>
-                    <div className="flex items-center gap-4">
-                      <p className="text-sm">Name:</p>
-                      <h1 className="text-center">
-                        Marcos Ochieng
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <p className="text-sm">Email:</p>
-                      <h1 className="text-center">
-                        marcos@gmail.com
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <p className="text-sm">Address:</p>
-                      <h1 className="text-center">
-                        marcos@gmail.com
-                      </h1>
-                    </div>
-                  </div>
-                </section>
-              </Grid>
-              <Grid item md={8} xs={12}>
-                <section className="flex items-center gap-4 my-4">
-                  <h1 className="text-xl">Appointment History</h1>
-                  <h1 className="text-xl">Medical History</h1>
-                  <h1 className="text-xl">Prescriptions</h1>
-                </section>
-                <section>
-                  <AppointmentHistory />
-                </section>
-              </Grid>
-            </Grid>
-          </section>
-        </Container>
-      </section>
+      <Container>
+        <section className="flex items-center justify-between border-b border-gray pb-8">
+          <div className="flex items-center gap-4">
+            <BsArrowLeft className="text-xl" />
+            <img
+              className="w-16 h-16 rounded-full shadow-xl"
+              src="/images/avatar1.png"
+              alt=""
+            />
+            <h1 className="text-xl font-semibold">Marcos Ochieng</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm">Created on 4th July 2021</span>
+            <button className="bg-primary text-white shadow-xl px-8 py-2 rounded-xl flex items-center gap-3">
+              <FiEdit />
+              Edit
+            </button>
+          </div>
+        </section>
+        <Grid container spacing={2}>
+          <Grid item md={3} xs={12}>
+            <section className="my-8 space-y-4">
+              <h1 className="uppercase">Profile Image</h1>
+              <img
+                className="w-44 h-48 rounded shadow-xl"
+                src="/images/avatar1.png"
+                alt=""
+              />
+              <div className="flex items-center gap-4 text-link">
+                <BsImageFill />
+                <p className="text-sm font-semibold">
+                  Change Profile Image
+                </p>
+              </div>
+              {/* <div className="flex items-center gap-4">
+                <p className="uppercase font-semibold">Role :</p>
+                <p>Patient</p>
+              </div> */}
+            </section>
+          </Grid>
+          <Grid item md={9} xs={12}>
+            <section className="my-8 space-y-4"></section>
+            hello
+          </Grid>
+        </Grid>
+      </Container>
     </AuthGuard>
   );
 };
+
+PatientProfile.getLayout = (page) => <ProfileLayout>{page}</ProfileLayout>;
 
 export default PatientProfile;
