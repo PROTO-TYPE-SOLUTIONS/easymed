@@ -9,21 +9,12 @@ from .models import (
     SysadminProfile,
     ReceptionistProfile,
 )
-from patient.models import Patient
 
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender: CustomUser, instance: CustomUser, created: bool, **kwargs):
     if not created:
         return
-    if instance.role == CustomUser.BASE_ROLE:
-        try:
-            Patient.objects.create(
-                first_name=instance.first_name, second_name=instance.last_name, user_id=instance)
-            return
-        except Exception as e:
-            print(e)
-            return
     if instance.role == CustomUser.RECEPTIONIST:
         try:
             ReceptionistProfile.objects.create(user=instance)
