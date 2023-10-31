@@ -4,6 +4,7 @@ import { getPatientProfile } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { Container, Grid } from "@mui/material";
 import AppointmentHistory from "@/components/patient-profile/appointment-history";
+import AuthGuard from "@/assets/hoc/auth-guard";
 
 const PatientProfile = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,7 @@ const PatientProfile = () => {
   }, []);
 
   return (
-    <>
+    <AuthGuard>
       <section className="bg-background h-screen space-y-8">
         <header className="bg-primary text-white p-4">
           <Container>Marcos Profile</Container>
@@ -80,7 +81,7 @@ const PatientProfile = () => {
           </section>
         </Container>
       </section>
-    </>
+    </AuthGuard>
   );
 };
 
