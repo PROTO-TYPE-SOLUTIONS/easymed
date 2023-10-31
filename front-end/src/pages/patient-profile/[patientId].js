@@ -4,11 +4,12 @@ import { getPatientProfile } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { Container, Grid } from "@mui/material";
 import AppointmentHistory from "@/components/patient-profile/appointment-history";
+import AuthGuard from "@/assets/hoc/auth-guard";
 
 const PatientProfile = () => {
   const dispatch = useDispatch();
   const { profile } = useSelector((store) => store.patient);
-  console.log("PROFILE_DETAILS ",profile);
+  console.log("PROFILE_DETAILS ", profile);
   const router = useRouter();
   const { patientId } = router.query;
 
@@ -19,7 +20,7 @@ const PatientProfile = () => {
   }, []);
 
   return (
-    <>
+    <AuthGuard>
       <section className="bg-background h-screen space-y-8">
         <header className="bg-primary text-white p-4">
           <Container>Marcos Profile</Container>
@@ -27,30 +28,46 @@ const PatientProfile = () => {
         <Container>
           <section className="">
             <Grid container spacing={2}>
-              <Grid item md={12} xs={12}>
-                <section className="bg-white shadow-xl rounded p-4 flex gap-4">
-                  <div className="space-y-3 w-3/12">
+              <Grid item md={4} xs={12}>
+                <section className="gap-4 bg-white p-4 space-y-4 rounded shadow-xl">
+                  <div className="space-y-3 flex flex-col items-center justify-center border-b border-primary py-1">
                     <img
                       className="rounded-full h-24 w-24"
-                      src="/images/doc.jpg"
+                      src="/images/avatar1.png"
                       alt=""
                     />
-                    <button className="bg-primary text-white px-4 py-2">
+                    <p className="text-sm text-center">
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                      Tempora ipsa, incidunt.
+                    </p>
+                    {/* <button className="bg-primary text-white px-4 py-2">
                       Edit Profile
-                    </button>
+                    </button> */}
                   </div>
                   <div className="space-y-3">
-                    <h1 className="font-semibold text-xl">Marcos Ochieng</h1>
-                    <p>marcos@gmail.com</p>
-                    <p className="">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Tempora ipsa, incidunt placeat eveniet ullam nesciunt
-                      iusto cupiditate labore praesentium dolorum?
-                    </p>
+                    <h1 className="font-semibold">Contact Information</h1>
+                    <div className="flex items-center gap-4">
+                      <p className="text-sm">Name:</p>
+                      <h1 className="text-center">
+                        Marcos Ochieng
+                      </h1>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <p className="text-sm">Email:</p>
+                      <h1 className="text-center">
+                        marcos@gmail.com
+                      </h1>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <p className="text-sm">Address:</p>
+                      <h1 className="text-center">
+                        marcos@gmail.com
+                      </h1>
+                    </div>
                   </div>
                 </section>
               </Grid>
-              <Grid item md={12} xs={12}>
+              <Grid item md={8} xs={12}>
                 <section className="flex items-center gap-4 my-4">
                   <h1 className="text-xl">Appointment History</h1>
                   <h1 className="text-xl">Medical History</h1>
@@ -64,7 +81,7 @@ const PatientProfile = () => {
           </section>
         </Container>
       </section>
-    </>
+    </AuthGuard>
   );
 };
 

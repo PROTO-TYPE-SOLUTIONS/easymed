@@ -3,13 +3,13 @@ import { Container } from "@mui/material";
 import PatientsDataGrid from "@/components/dashboard/patient/patient-data-grid";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
-
+import AuthGuard from "@/assets/hoc/auth-guard";
 
 const Dashboard = () => {
   return (
     <Container maxWidth="xl">
       <DashboardCards />
-          <PatientsDataGrid />
+      <PatientsDataGrid />
       {/* <Grid container spacing={2}>
         <Grid item md={8} xs={12}>
         </Grid>
@@ -29,6 +29,10 @@ const Dashboard = () => {
   );
 };
 
-Dashboard.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
+Dashboard.getLayout = (page) => (
+  <AuthGuard>
+    <DashboardLayout>{page}</DashboardLayout>
+  </AuthGuard>
+);
 
 export default Dashboard;
