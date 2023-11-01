@@ -60,8 +60,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
     # TODO:make this a foreign key of occupation model
-    profession = models.CharField(max_length=50, null=True)
-    date_of_birth = models.DateField(null=True)
+    profession = models.CharField(max_length=50, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
     role = models.CharField(
         max_length=20, choices=ROLE_CHOICES, default=BASE_ROLE)
     user_permissions = models.ManyToManyField(
