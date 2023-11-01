@@ -14,6 +14,7 @@ from .views import (
     ReferralViewSet,
     DoctorAppointmentViewSet,
     TriageViewSet,
+    PatientByUserIdAPIView
 )
 
 router = DefaultRouter()
@@ -35,5 +36,6 @@ router.register(r'appointments', AppointmentViewSet, basename='appointments')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     path('appointments/doctors/<int:doctor_id>/', DoctorAppointmentViewSet.as_view({'get': 'list'}), name='doctor-appointments'),
 ]
