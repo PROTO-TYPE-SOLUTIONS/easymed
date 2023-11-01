@@ -1,7 +1,4 @@
-from rest_framework.permissions import (
-    IsAdminUser,
-    AllowAny,
-)
+
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,7 +6,8 @@ from rest_framework.request import Request
 
 # permissions
 from .permissions import (
-    IsSystemsAdminUser,
+    # IsSystemsAdminUser,
+    IsStaffUser,
 )
 
 # swagger
@@ -52,7 +50,7 @@ from customuser.models import (
 # Group Endpoint
 
 class GroupsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         responses=GroupsSerializer,
@@ -65,7 +63,7 @@ class GroupsAPIView(APIView):
 
 
 class GroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, id: int):
         try:
@@ -89,7 +87,7 @@ class GroupAPIView(APIView):
 
 
 class AddGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         request=AddGroupSerializer,
@@ -106,7 +104,7 @@ class AddGroupAPIView(APIView):
 
 
 class EditGroupNameAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, name: str):
         try:
@@ -131,7 +129,7 @@ class EditGroupNameAPIView(APIView):
 
 
 class DeleteGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, group_name: str):
         try:
@@ -150,7 +148,7 @@ class DeleteGroupAPIView(APIView):
 
 
 class UserGroupsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int):
         try:
@@ -172,7 +170,7 @@ class UserGroupsAPIView(APIView):
 
 
 class AddUserToGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int, group_id: int):
         try:
@@ -204,7 +202,7 @@ class AddUserToGroupAPIView(APIView):
 
 
 class RemoveUserFromGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int, group_name: str):
         try:
@@ -233,7 +231,7 @@ class RemoveUserFromGroupAPIView(APIView):
 
 
 class PermissionsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         responses=PermissionsSerializer,
@@ -245,7 +243,7 @@ class PermissionsAPIView(APIView):
 
 
 class PermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, id: int):
         try:
@@ -269,7 +267,7 @@ class PermissionAPIView(APIView):
 
 
 class AddPermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         request=AddPermissionSerializer,
@@ -286,14 +284,14 @@ class AddPermissionAPIView(APIView):
 
 
 class EditPermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def put(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class DeletePermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, permission_id: int):
         try:
@@ -311,7 +309,7 @@ class DeletePermissionAPIView(APIView):
 
 
 class UserPermissionsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int):
         try:
@@ -339,14 +337,14 @@ class UserPermissionsAPIView(APIView):
 
 
 class AddPermissionsToUserAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def post(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class RemovePermissionsFromUserAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int):
         try:
@@ -375,7 +373,7 @@ class RemovePermissionsFromUserAPIView(APIView):
 
 
 class ChangeUserRoleAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int):
         try:
@@ -400,7 +398,7 @@ class ChangeUserRoleAPIView(APIView):
 
 
 class AddPermissionToGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, group_id: int):
         try:
