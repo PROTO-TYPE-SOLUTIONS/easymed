@@ -22,6 +22,8 @@ export const AuthProvider = ({ children }) => {
       ? JSON.parse(localStorage.getItem("token"))
       : null
   );
+
+  console.log("PARSED_USER ",user)
   const [message, setMessage] = useState("");
 
   // login User
@@ -74,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
   // decode the token and set the user when a component mounts
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    const storedToken = JSON.parse(localStorage.getItem("token"));
     let decodedToken;
     if (storedToken) {
       decodedToken = jwtDecode(storedToken);
