@@ -18,18 +18,17 @@ import { authContext } from "@/components/use-context";
 
 const PatientProfile = () => {
   const dispatch = useDispatch();
-  const { profile } = useSelector((store) => store.patient);
+  const { profileDetails } = useSelector((store) => store.patient);
   const { logoutUser } = useContext(authContext);
   const auth = useAuth();
-  console.log("PROFILE_DETAILS ", profile);
+  console.log("PROFILE_DETAILS ", profileDetails);
   const router = useRouter();
-  const { patientId } = router.query;
 
   console.log("PROFILE_AUTH ", auth);
 
   useEffect(() => {
-    if (patientId) {
-      dispatch(getPatientProfile(patientId));
+    if (auth) {
+      dispatch(getPatientProfile(auth.user_id));
     }
   }, []);
 
@@ -46,7 +45,7 @@ const PatientProfile = () => {
               src="/images/avatar1.png"
               alt=""
             />
-            <h1 className="text-xl">Marcos Ochieng</h1>
+            <h1 className="text-xl">{profileDetails.first_name} {profileDetails.second_name}</h1>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm">Created on 4th July 2021</span>

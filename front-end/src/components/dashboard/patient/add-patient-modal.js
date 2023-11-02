@@ -184,19 +184,6 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  {/* <Grid item md={6} xs={12}>
-                    <Field
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                      type="text"
-                      placeholder="User"
-                      name="user_id"
-                    />
-                    <ErrorMessage
-                      name="user_id"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid> */}
                 </Grid>
 
                 <div>
