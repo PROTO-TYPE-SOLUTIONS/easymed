@@ -81,7 +81,7 @@ class Appointment(models.Model):
     )
 
     appointment_date_time = models.DateTimeField(null=True)
-    patient = models.ForeignKey('Patient', on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     assigned_doctor = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(

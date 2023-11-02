@@ -35,10 +35,11 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     age = serializers.SerializerMethodField()
+
     class Meta:
         model = Patient
         fields = ("id", "first_name", "second_name", "date_of_birth",
-                  "gender", "insurance", "user_id","age")
+                  "gender", "insurance", "user_id", "age")
         read_only_fields = ("id",)
         write_only_fields = ("insurance",)
 
@@ -46,14 +47,13 @@ class PatientSerializer(serializers.ModelSerializer):
         if obj.age:
             return obj.age
         return None
-    
+
     def to_representation(self, instance: Patient):
         data = super().to_representation(instance)
         data["gender"] = instance.get_gender_display()
         if instance.insurance:
             data["insurance"] = instance.insurance.name
         return data
-    
 
 
 class NextOfKinSerializer(serializers.ModelSerializer):
@@ -61,11 +61,11 @@ class NextOfKinSerializer(serializers.ModelSerializer):
         model = NextOfKin
         fields = '__all__'
 
+
 class ConsultationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Consultation
         fields = '__all__'
-
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
@@ -77,7 +77,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if instance.assigned_doctor:
             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
-        
+
         if instance.patient:
             data["first_name"] = instance.patient.first_name
             data["second_name"] = instance.patient.second_name
@@ -125,6 +125,7 @@ class PrescribedDrugSerializer(serializers.ModelSerializer):
         model = PrescribedDrug
         fields = '__all__'
 
+
 class ReferralSerializer(serializers.ModelSerializer):
     class Meta:
         model = Referral
@@ -134,6 +135,7 @@ class ReferralSerializer(serializers.ModelSerializer):
 # get appointments for a specific doctor
 class AppointmentSerializer(serializers.ModelSerializer):
     patient = PatientSerializer()
+
     class Meta:
         model = Appointment
         fields = [
@@ -145,13 +147,26 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'date_created',
             'date_changed',
             'id',
-            ]  
+        ]
 
+    def create(self, validated_data: dict):
+        patient = validated_data.pop("patient", None)
+        try:
+            if patient:
+                patient = Patient.objects.create(**patient)
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError(f"Error occurred {e}")
+        
+        try:
+            appointment = Appointment.objects.create(patient=patient, **validated_data)
+            return appointment
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError(f"Error occurred {e}")
+        
 
 class TriageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Triage
-        fields = '__all__'                 
-
-        
-
+        fields = '__all__'
