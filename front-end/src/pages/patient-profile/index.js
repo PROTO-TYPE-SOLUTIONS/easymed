@@ -19,18 +19,20 @@ import { authContext } from "@/components/use-context";
 const PatientProfile = () => {
   const dispatch = useDispatch();
   const { profileDetails } = useSelector((store) => store.patient);
+  console.log("PARENT_PROFILE_DETAILS ",profileDetails)
+
   const { logoutUser } = useContext(authContext);
   const auth = useAuth();
-  console.log("PROFILE_DETAILS ", profileDetails);
+
+  console.log("AUTH ",auth)
   const router = useRouter();
 
-  console.log("PROFILE_AUTH ", auth);
 
   useEffect(() => {
     if (auth) {
       dispatch(getPatientProfile(auth.user_id));
     }
-  }, []);
+  }, [auth]);
 
   return (
     <AuthGuard>
