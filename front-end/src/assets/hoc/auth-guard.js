@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 
 
 const AuthGuard = ({ children }) => {
-    // const token = typeof window !== "undefined" && localStorage.getItem('token');
     const user = useAuth();
     const router = useRouter();
 

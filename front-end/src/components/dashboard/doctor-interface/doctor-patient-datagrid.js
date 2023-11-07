@@ -147,46 +147,50 @@ const DoctorPatientDataGrid = () => {
   };
 
   const statusFunc = ({ data }) => {
-    if (data?.progress_status === "In Treatment") {
+    if (data?.status === "In Treatment") {
       return (
         <Chip
           variant="contained"
           size="small"
-          label={data.progress_status}
+          label={data.status}
           className="bg-primary text-white"
         />
       );
-    } else if (data?.progress_status === "confirmed") {
+    } else if (data?.status === "confirmed") {
       return (
         <Chip
           variant="contained"
           size="small"
-          label={data.progress_status}
+          label={data.status}
           className="bg-success text-white"
         />
       );
-    } else if (data?.progress_status === "New Patient") {
+    } else if (data?.status === "New Patient") {
       return (
         <Chip
           variant="contained"
           size="small"
-          label={data.progress_status}
+          label={data.status}
           className="bg-card text-white"
         />
       );
     }
   };
 
-//   {
-//     "patient": 1,
-//     "assigned_doctor": 1,
-//     "appointment_date_time": "2023-10-26T00:00:00Z",
-//     "status": "confirmed",
-//     "reason": "Test reason",
-//     "date_created": "2023-10-30T14:53:33.159162Z",
-//     "date_changed": "2023-10-30T14:53:33.159162Z",
-//     "id": 2
-// }
+  const mappedAppointments = doctorAppointments.map(appointment => {
+    return {
+      id: appointment.id,
+      gender: appointment.patient.gender,
+      first_name: appointment.patient.first_name,
+      second_name: appointment.patient.second_name,
+      appointment_date_time: appointment.appointment_date_time,
+      date_created: new Date(appointment.date_created).toLocaleDateString(),
+      date_of_birth: appointment.patient.date_of_birth,
+      assigned_doctor: appointment.assigned_doctor ? appointment.assigned_doctor.name : "Not Assigned", // Assuming assigned_doctor is an object with a 'name' property
+      status: appointment.status,
+      reason: appointment.reason // If you want to include reason, uncomment this line
+    };
+  });
 
   return (
     <section>
@@ -204,7 +208,7 @@ const DoctorPatientDataGrid = () => {
         </div>
       </div>
       <DataGrid
-        dataSource={doctorAppointments}
+        dataSource={mappedAppointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         onSelectionChanged={onSelectionChanged}
@@ -232,14 +236,28 @@ const DoctorPatientDataGrid = () => {
         <Column
           dataField="first_name"
           caption="First Name"
-          width={200}
+          width={140}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
           dataField="second_name"
           caption="Last Name"
-          width={200}
+          width={140}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column
+          dataField="date_of_birth"
+          caption="Date of Birth"
+          width={140}
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column
+          dataField="gender"
+          caption="Gender"
+          width={140}
           allowFiltering={true}
           allowSearch={true}
         />
@@ -256,11 +274,11 @@ const DoctorPatientDataGrid = () => {
           width={140}
           cellRender={statusFunc}
         />
-        <Column
+        {/* <Column
           dataField="assigned_doctor"
           caption="Assigned Doctor"
           width={200}
-        />
+        /> */}
         <Column dataField="reason" caption="Reason" width={140} />
         <Column
           dataField="country"
