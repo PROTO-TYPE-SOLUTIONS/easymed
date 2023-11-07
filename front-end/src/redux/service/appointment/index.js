@@ -26,17 +26,23 @@ export const fetchAppointment = () =>{
     })
 }
 
-export const fetchDoctorAppointments = (userId) =>{
-    return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_DOCTOR_APPOINTMENTS}${userId}`)
-            .then((res) =>{
-                resolve(res.data)
-            })
-            .catch((err) =>{
-                reject(err.message)
-            })
-    })
-}
+
+export const fetchDoctorAppointments = (userId) => {
+    return new Promise((resolve, reject) => {
+      axios.get(`${APP_API_URL.FETCH_DOCTOR_APPOINTMENTS}`,{
+        params:{
+            userId: userId,
+        }
+      })
+        .then((res) => {
+          resolve(res.data);
+        })
+        .catch((err) => {
+          reject(err.message);
+        });
+    });
+  };
+  
 
 export const fetchPatientAppointments = () =>{
     return new Promise((resolve,reject) =>{

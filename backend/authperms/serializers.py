@@ -1,19 +1,8 @@
 from rest_framework import serializers
 
 # models
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import (
-    Group,
-    Permission,
-
-)
+from .models import Group, Permission
 from customuser.models import CustomUser
-
-
-class ContentTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContentType
-        fields = ("app_label", "model")
 
 
 class GroupsSerializer(serializers.ModelSerializer):
@@ -43,7 +32,7 @@ class AddGroupSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 "Group with this name already exists")
 
-        return value
+        return value.upper()
 
     def create(self, validated_data: dict):
         try:
@@ -58,45 +47,40 @@ class EditGroupNameSerializer(serializers.ModelSerializer):
         fields = ("id", "name",)
         read_only_fields = ("id",)
 
+    def validate_name(self, value: str):
+        group_name_exists = Group.objects.filter(name=value).exists()
+        if group_name_exists:
+            raise serializers.ValidationError(
+                "Group with this name already exists")
+
+        return value.upper()
+
     def update(self, instance: Group, validated_data: dict):
         instance.name = validated_data.get("name", instance.name)
         instance.save()
         return instance
-
-
+    
 class AddPermissionToGroupSerializer(serializers.ModelSerializer):
     permissions = serializers.PrimaryKeyRelatedField(
         queryset=Permission.objects.all(),
         required=True,
+        many=True,
     )
-
     class Meta:
         model = Group
-        fields = ("id", "permissions")
+        fields = ("name", "permissions")
+        read_only_fields = ("name",)
 
-    def validate(self, attrs: dict):
-        group_id = attrs.get("id")
-        permission_id = attrs.get("permissions")
-
-        group = Group.objects.filter(pk=group_id)
-
-        if not group.exists():
-            return serializers.ValidationError("Group Id doesn't exists")
-
-        if not Permission.objects.filter(pk=permission_id).exists():
-            return serializers.ValidationError("Permission Id doesn't exists")
-
-        if group.filter(permissions__pk=permission_id).exists():
-            return serializers.ValidationError("Permission already exists in group")
-        return super().validate(attrs)
 
     def update(self, instance: Group, validated_data: dict):
-        permission_id = validated_data.get("permissions")
-        permission = Permission.objects.get(pk=permission_id)
-        instance.permissions.add(permission)
-        instance.save()
+        permissions = validated_data.get("permissions")
+        for permission in permissions:
+            instance.permissions.add(permission)
+            instance.save()
+
         return instance
 
+    
 
 class AddUserToGroupsSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
@@ -169,29 +153,23 @@ class PermissionsSerializer(serializers.ModelSerializer):
 class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
-        fields = ("id", "name", "codename")
+        fields = ("id", "name",)
 
 
 class AddPermissionSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=50)
-    codename = serializers.CharField(max_length=50)
-    content_type = serializers.PrimaryKeyRelatedField(
-        queryset=ContentType.objects.all(),
-        required=False,
-        allow_null=True
-    )
 
     def validate(self, attrs: dict):
-        name = attrs.get("name", None)
-        codename = attrs.get("codename", None)
+        name:str = attrs.get("name", None)
         # validate name and codename uniqueness
         # permission name and codename must be unique together
-        if name is None or codename is None:
-            return serializers.ValidationError("permissions name and codename are required")
+        if name is None:
+            return serializers.ValidationError("permissions name is required")
 
-        if Permission.objects.filter(name=name).exists():
-            if Permission.objects.filter(name=name).filter(codename=codename).exists():
-                return serializers.ValidationError("Permission already exists")
+        if Permission.objects.filter(name=name.upper()).exists():
+            return serializers.ValidationError("Permission already exists")
+            
+        attrs["name"] = name.upper()
 
         return super().validate(attrs)
 
@@ -205,11 +183,10 @@ class AddPermissionSerializer(serializers.Serializer):
 class EditPermissionNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
-        fields = ("name", "codename")
+        fields = ("name",)
 
     def update(self, instance: Permission, validated_data: dict):
         instance.name = validated_data.get("name", instance.name)
-        instance.codename = validated_data.get("codename", instance.codename)
         instance.save()
         return instance
 

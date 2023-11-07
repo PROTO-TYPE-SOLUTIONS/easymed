@@ -7,7 +7,7 @@ import SimpleCrypto from "simple-crypto-js";
 import { useDispatch } from "react-redux";
 import { getAllUserPermissions } from "@/redux/features/auth";
 import { toast } from 'react-toastify'
-import { getPatientProfile } from "@/redux/features/patients";
+
 
 export const authContext = createContext();
 
@@ -16,7 +16,14 @@ const secretKey = new SimpleCrypto("c2FubGFta2VueWFAZ21haWwuY29t");
 export const AuthProvider = ({ children }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() =>
+    typeof window !== "undefined" && localStorage.getItem("token")
+      ? JSON.parse(localStorage.getItem("token"))
+      : null
+  );
+
+  console.log("PARSED_USER ",user)
   const [message, setMessage] = useState("");
 
   // login User
@@ -39,8 +46,7 @@ export const AuthProvider = ({ children }) => {
           );
           if (decodedUser?.role === "patient") {
             // router.push('/')
-            dispatch(getPatientProfile(decodedUser.user_id));
-            router.push(`/patient-profile/${decodedUser.user_id}`);
+            router.push(`/patient-profile`);
           }else{
             router.push('/dashboard')
           }
@@ -70,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
   // decode the token and set the user when a component mounts
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+    const storedToken = JSON.parse(localStorage.getItem("token"));
     let decodedToken;
     if (storedToken) {
       decodedToken = jwtDecode(storedToken);

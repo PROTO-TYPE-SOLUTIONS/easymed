@@ -1,9 +1,13 @@
-import React from 'react'
+import React from "react";
 
 const MedicalHistory = () => {
   return (
-    <div>MedicalHistory</div>
-  )
-}
+    <>
+      <h1 className="text-xl text-primary">
+        Medical History
+      </h1>
+    </>
+  );
+};
 
-export default MedicalHistory
+export default MedicalHistory;

@@ -1,7 +1,4 @@
-from rest_framework.permissions import (
-    IsAdminUser,
-    AllowAny,
-)
+
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,7 +6,8 @@ from rest_framework.request import Request
 
 # permissions
 from .permissions import (
-    IsSystemsAdminUser,
+    # IsSystemsAdminUser,
+    IsStaffUser,
 )
 
 # swagger
@@ -31,11 +29,12 @@ from .serializers import (
     PermissionSerializer,
     AddPermissionSerializer,
     RemovePermissionsFromUserSerializer,
-    ChangeUserRoleSerializer
+    ChangeUserRoleSerializer,
+    AddPermissionToGroupSerializer
 )
 
 # models
-from django.contrib.auth.models import (
+from authperms.models import (
     Group,
     Permission,
 )
@@ -51,7 +50,7 @@ from customuser.models import (
 # Group Endpoint
 
 class GroupsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         responses=GroupsSerializer,
@@ -64,8 +63,7 @@ class GroupsAPIView(APIView):
 
 
 class GroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, id: int):
         try:
@@ -89,8 +87,7 @@ class GroupAPIView(APIView):
 
 
 class AddGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         request=AddGroupSerializer,
@@ -107,7 +104,7 @@ class AddGroupAPIView(APIView):
 
 
 class EditGroupNameAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, name: str):
         try:
@@ -121,7 +118,7 @@ class EditGroupNameAPIView(APIView):
     )
     def put(self, request: Request, group_name: str = None, *args, **kwargs: dict):
         data = request.data
-        instance = self.get_object(group_name)
+        instance = self.get_object(group_name.upper())
         if instance is None:
             return Response({"error_message": f"Group {group_name} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -132,8 +129,7 @@ class EditGroupNameAPIView(APIView):
 
 
 class DeleteGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, group_name: str):
         try:
@@ -152,8 +148,7 @@ class DeleteGroupAPIView(APIView):
 
 
 class UserGroupsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int):
         try:
@@ -175,35 +170,39 @@ class UserGroupsAPIView(APIView):
 
 
 class AddUserToGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
-    def get_object(self, user_id: int, group_name: str):
+    def get_object(self, user_id: int, group_id: int):
         try:
-            Group.objects.get(name=group_name)
+            Group.objects.get(pk=group_id)
             return CustomUser.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None
-        except Group.DoesNotExist:
+        except Group.DoesNotExist as e:
+            print(e)
+            return None
+        except Exception as e:
+            print(e)
             return None
 
     @extend_schema()
-    def put(self, request: Request, group_name: str =None, user_id: int = None, *args, **kwargs: dict):
-        if user_id is None or group_name is None:
+    def put(self, request: Request, group_id: int = None, user_id: int = None, *args, **kwargs: dict):
+        if user_id is None or group_id is None:
             return Response({"error_message": "Provide the user id"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = self.get_object(user_id, group_name)
+        print(group_id)
+        user = self.get_object(user_id, group_id)
 
         if user is None:
             return Response({"error_message": "User id or group id doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        group = Group.objects.get(name=group_name)
+
+        print(f"user {user}")
+        group = Group.objects.get(pk=group_id)
         user.groups.add(group)
         return Response({"message": {"user_id": user.pk, "group_id": group.pk}}, status=status.HTTP_201_CREATED)
 
 
 class RemoveUserFromGroupAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int, group_name: str):
         try:
@@ -215,10 +214,10 @@ class RemoveUserFromGroupAPIView(APIView):
             return None
 
     @extend_schema()
-    def post(self, request: Request, user_id: int = None, group_name: str=None, *args, **kwargs: dict):
+    def post(self, request: Request, user_id: int = None, group_name: str = None, *args, **kwargs: dict):
         if user_id is None or group_name is None:
             return Response({"error_message": "Provide both the user id and group id"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         user = self.get_object(user_id, group_name)
         if user is None:
             return Response({"error_message": f"User id or group id doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
@@ -232,8 +231,7 @@ class RemoveUserFromGroupAPIView(APIView):
 
 
 class PermissionsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         responses=PermissionsSerializer,
@@ -245,8 +243,7 @@ class PermissionsAPIView(APIView):
 
 
 class PermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, id: int):
         try:
@@ -270,9 +267,7 @@ class PermissionAPIView(APIView):
 
 
 class AddPermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
-
+    permission_classes = (IsStaffUser,)
 
     @extend_schema(
         request=AddPermissionSerializer,
@@ -289,16 +284,14 @@ class AddPermissionAPIView(APIView):
 
 
 class EditPermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def put(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class DeletePermissionAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, permission_id: int):
         try:
@@ -316,23 +309,42 @@ class DeletePermissionAPIView(APIView):
 
 
 class UserPermissionsAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
+    def get_object(self, user_id: int):
+        try:
+            return CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return None
 
-    def get(self, request: Request, *args, **kwargs: dict):
-        pass
+    def get(self, request: Request, user_id:int=None, *args, **kwargs: dict):
+        user = self.get_object(user_id)
+
+        if user is None:
+            return Response({"error_message": f"user id {user_id} doesn't exist"})
+        
+        # user doesn't belong to any group
+        if user.groups.count()<1:
+            return Response([], status=status.HTTP_200_OK)
+        
+        permissions = []
+        groups:list[Group] = list(user.groups.all())
+        for group in groups:
+            permissions.extend([permission.name for permission in group.permissions.all()])
+        print(permissions)
+        return Response(permissions, status=status.HTTP_200_OK)
+
 
 
 class AddPermissionsToUserAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def post(self, request: Request, *args, **kwargs: dict):
         pass
 
 
 class RemovePermissionsFromUserAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
-
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int):
         try:
@@ -361,7 +373,7 @@ class RemovePermissionsFromUserAPIView(APIView):
 
 
 class ChangeUserRoleAPIView(APIView):
-    permission_classes = (IsSystemsAdminUser,)
+    permission_classes = (IsStaffUser,)
 
     def get_object(self, user_id: int):
         try:
@@ -383,3 +395,30 @@ class ChangeUserRoleAPIView(APIView):
         user.role = serializer.validated_data.get("role", user.role)
         user.save()
         return Response({"message": f"changed {user.first_name}'s role to {user.role}"}, status=status.HTTP_200_OK)
+
+
+class AddPermissionToGroupAPIView(APIView):
+    permission_classes = (IsStaffUser,)
+
+    def get_object(self, group_id: int):
+        try:
+            return Group.objects.get(pk=group_id)
+        except Group.DoesNotExist:
+            return None
+
+    @extend_schema(
+        request=AddPermissionToGroupSerializer,
+        responses=AddPermissionToGroupSerializer,
+    )
+    def put(self, request: Request, group_id: int = None, *args, **kwargs):
+        group = self.get_object(group_id)
+        if group is None:
+            return Response({"error_message": f"Group {group_id} doesn't exist"})
+
+        data = request.data
+        serializer = AddPermissionToGroupSerializer(group, data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+

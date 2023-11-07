@@ -1,14 +1,15 @@
-import React from 'react'
-import DashboardLayout from '@/components/layout/dashboard-layout'
-import { Container } from '@mui/material'
+import React from "react";
+import DashboardLayout from "@/components/layout/dashboard-layout";
+import { Container } from "@mui/material";
+import AuthGuard from "@/assets/hoc/auth-guard";
 
 const Schedule = () => {
-  return (
-    <Container maxWidth="xl">Schedule</Container>
-  )
-}
+  return <Container maxWidth="xl">Schedule</Container>;
+};
 
-Schedule.getLayout = (page) =>(
+Schedule.getLayout = (page) => (
+  <AuthGuard>
     <DashboardLayout>{page}</DashboardLayout>
-)
-export default Schedule
+  </AuthGuard>
+);
+export default Schedule;

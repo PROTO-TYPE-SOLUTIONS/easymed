@@ -17,14 +17,14 @@ export const API_URL = {
     BOOK_APPOINTMENT: '/patients/publicappointments/',
     FETCH_APPOINTMENTS: '/patients/publicappointments/',
     FETCH_PATIENT_APPOINTMENTS: '/patients/appointments/',
-    FETCH_DOCTOR_APPOINTMENTS: '/api/appointment/patient-appointment/',
+    FETCH_DOCTOR_APPOINTMENTS: '/patients/appointments/doctors',
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
     ASSIGN_DOCTOR: '/patients/appointments/',
     CONSULT_PATIENT: '/patients/consultations/',
     REFER_PATIENT: '/patients/referrals/',
-    GET_PATIENT_PROFILE: '/patients/profiles/',
+    GET_PATIENT_PROFILE: '/patients/patients',
 
 
     /***************** DOCTOR APIS **********************/

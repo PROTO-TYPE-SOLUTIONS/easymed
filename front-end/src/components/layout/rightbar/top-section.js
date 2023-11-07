@@ -8,8 +8,11 @@ import Popover from "@mui/material/Popover";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TextField } from "@mui/material";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { useContext } from "react";
+import { authContext } from "@/components/use-context";
 
 const TopSection = () => {
+  const { logoutUser } = useContext(authContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [anchorEl2, setAnchorEl2] = React.useState(null);
   const token = useAuth();
@@ -57,7 +60,7 @@ const TopSection = () => {
             </div>
             <div className="text-xs">
               <p className="font-semibold">{token?.first_name}</p>
-              <p>Surgeon</p>
+              {/* <p>Surgeon</p> */}
             </div>
           </div>
           <Menu
@@ -77,8 +80,7 @@ const TopSection = () => {
               "aria-labelledby": "basic-button",
             }}
           >
-            <MenuItem onClick={handleClose}>Profile</MenuItem>
-            <MenuItem onClick={handleClose}>Logout</MenuItem>
+            <MenuItem onClick={logoutUser}>Logout</MenuItem>
           </Menu>
 
           <div>

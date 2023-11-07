@@ -8,7 +8,10 @@ import { assignDoctor } from "@/redux/service/patients";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getAllAppointments, getAllPatientAppointments } from "@/redux/features/appointment";
+import {
+  getAllAppointments,
+  getAllPatientAppointments,
+} from "@/redux/features/appointment";
 
 export default function AssignDoctorModal({
   selectedRowData,
@@ -53,12 +56,30 @@ export default function AssignDoctorModal({
     status: "",
   });
 
+  const mapGenderToBackendFormat = (gender) => {
+    if (gender === "Male") {
+      return "M";
+    } else if (gender === "Female") {
+      return "F";
+    }
+    // Handle other cases or return a default value if needed
+    return "";
+  };
+
   const handleAssignDoctor = async (formValue, helpers) => {
     try {
       console.log("FORMDATA ", formValue);
       setLoading(true);
       const formData = {
         ...formValue,
+        patient: {
+          first_name: selectedRowData.first_name,
+          second_name: selectedRowData.second_name,
+          date_of_birth: selectedRowData.date_of_birth,
+          gender: mapGenderToBackendFormat(selectedRowData.gender),
+          insurance: null,
+          user_id: null,
+        },
         assigned_doctor: parseInt(formValue.assigned_doctor),
       };
       await assignDoctor(formData).then(() => {
@@ -103,7 +124,10 @@ export default function AssignDoctorModal({
               >
                 <option value="">Select a Doctor</option>
                 {doctors.map((doctor, index) => (
-                  <option key={index} value={doctor?.id}>{`${doctor?.first_name} ${doctor.last_name}`}</option>
+                  <option
+                    key={index}
+                    value={doctor?.id}
+                  >{`${doctor?.first_name} ${doctor.last_name}`}</option>
                 ))}
               </Field>
               <ErrorMessage
