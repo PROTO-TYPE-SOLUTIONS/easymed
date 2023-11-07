@@ -14,7 +14,8 @@ module.exports = {
       success: '#2E7D32',
       card: '#146EB4',
       cardSecondary: '#0E4F82',
-      gray: '#CCCCCC'
+      gray: '#CCCCCC',
+      link: '#26A0F8'
     }
   },
   plugins: [],

@@ -124,6 +124,21 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
     return <p>{formattedate}</p>
   }
 
+  const mappedAppointments = patientAppointments.map(appointment => {
+    return {
+      id: appointment.id,
+      gender: appointment.patient.gender,
+      first_name: appointment.patient.first_name,
+      second_name: appointment.patient.second_name,
+      appointment_date_time: appointment.appointment_date_time,
+      date_created: appointment.date_created,
+      date_of_birth: appointment.patient.date_of_birth,
+      assigned_doctor: appointment.assigned_doctor ? appointment.assigned_doctor.name : "Not Assigned", // Assuming assigned_doctor is an object with a 'name' property
+      status: appointment.status,
+      reason: appointment.reason // If you want to include reason, uncomment this line
+    };
+  });
+
   return (
     <section>
       <div className="flex items-center justify-end">
@@ -140,7 +155,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
         </h1>
       </div>
       <DataGrid
-        dataSource={patientAppointments}
+        dataSource={mappedAppointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -181,10 +196,10 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
         />
         <Column dataField="appointment_date_time" caption="Date of Appointment" width={140} cellRender={appointmentDateFunc} />
         <Column dataField="date_created" caption="Date Created" width={140} cellRender={dateCreatedFunc} />
-        {/* <Column dataField="date_of_birth" caption="Date of Birth" width={140} /> */}
-        {/* <Column dataField="reason" caption="Reason" width={280} /> */}
+        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="reason" caption="Reason" width={280} />
         <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
-        {/* <Column dataField="gender" caption="Gender" width={100} /> */}
+        <Column dataField="gender" caption="Gender" width={100} />
         <Column dataField="status" caption="Status" width={140} />
         
       </DataGrid>

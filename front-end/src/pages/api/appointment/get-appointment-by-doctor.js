@@ -22,7 +22,9 @@ export default async function handler(req, res) {
 
             const userId= req.query.userId
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_DOCTOR_APPOINTMENTS}/${userId}`, config).then(response => {
+            console.log("DOCTOR_USER_ID ",userId);
+            console.log("APPOINTMENT_URL ",`${API_URL.FETCH_DOCTOR_APPOINTMENTS}/${userId}`)
+            await backendAxiosInstance.get(`${API_URL.FETCH_DOCTOR_APPOINTMENTS}/${userId}/`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {

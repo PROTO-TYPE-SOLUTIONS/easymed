@@ -11,7 +11,7 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-const ReceptionPatientsDataGrid = () => {
+const  ReceptionPatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [open, setOpen] = useState(false);
@@ -136,6 +136,7 @@ const ReceptionPatientsDataGrid = () => {
           />
         </div>
       </div>
+      <h1 className="text-xl font-semibold mt-8 mb-1 uppercase">Patients</h1>
       <DataGrid
         dataSource={filteredPatients}
         allowColumnReordering={true}
@@ -177,9 +178,9 @@ const ReceptionPatientsDataGrid = () => {
           allowSearch={true}
         />
         <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="gender" caption="Gender" width={140} />
         <Column dataField="insurance" caption="Insurance" width={140} />
         <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
-        <Column dataField="gender" caption="Gender" width={140} />
         <Column
           dataField="gender"
           caption="Status"

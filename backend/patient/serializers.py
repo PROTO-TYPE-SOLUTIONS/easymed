@@ -11,7 +11,6 @@ from .models import (
     Service,
     Consultation,
     Referral,
-    PatientProfile,
     Triage,
 )
 
@@ -35,57 +34,38 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    age = serializers.SerializerMethodField()
+
     class Meta:
         model = Patient
         fields = ("id", "first_name", "second_name", "date_of_birth",
-                  "gender", "insurance", "user_id",)
+                  "gender", "insurance", "user_id", "age")
         read_only_fields = ("id",)
         write_only_fields = ("insurance",)
-    
+
+    def get_age(self, obj: Patient):
+        if obj.age:
+            return obj.age
+        return None
+
     def to_representation(self, instance: Patient):
         data = super().to_representation(instance)
         data["gender"] = instance.get_gender_display()
         if instance.insurance:
             data["insurance"] = instance.insurance.name
         return data
-    
 
-class PatientProfileSerializer(serializers.ModelSerializer):
-    no_of_visits = serializers.SerializerMethodField()
-    insurance_name = serializers.SerializerMethodField()
-    all_assigned_doctors = serializers.SerializerMethodField()
-    registered_date = serializers.SerializerMethodField()
-    class Meta:
-        model = PatientProfile
-        fields = ("id", "user", "no_of_visits", "insurance_name", "all_assigned_doctors", "current_status", "registered_date")
-
-    def get_no_of_visits(self, obj: PatientProfile):
-        return obj.no_of_visits
-
-    def get_insurance_name(self, obj: PatientProfile):
-        return obj.insurance_name
-    def get_all_assigned_doctors(self, obj: PatientProfile):
-        return obj.all_assigned_doctors
-    def get_current_status(self, obj: PatientProfile):
-        return obj.current_status
-    def get_registered_date(self, obj: PatientProfile):
-        return obj.registered_date
-    
-    def to_representation(self, instance: PatientProfile):
-        data = super().to_representation(instance)
-        data["user"] = f"{instance.user.first_name } {instance.user.last_name}"
-        return data
 
 class NextOfKinSerializer(serializers.ModelSerializer):
     class Meta:
         model = NextOfKin
         fields = '__all__'
 
+
 class ConsultationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Consultation
         fields = '__all__'
-
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
@@ -97,7 +77,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         if instance.assigned_doctor:
             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
-        
+
         if instance.patient:
             data["first_name"] = instance.patient.first_name
             data["second_name"] = instance.patient.second_name
@@ -145,6 +125,7 @@ class PrescribedDrugSerializer(serializers.ModelSerializer):
         model = PrescribedDrug
         fields = '__all__'
 
+
 class ReferralSerializer(serializers.ModelSerializer):
     class Meta:
         model = Referral
@@ -153,6 +134,8 @@ class ReferralSerializer(serializers.ModelSerializer):
 
 # get appointments for a specific doctor
 class AppointmentSerializer(serializers.ModelSerializer):
+    patient = PatientSerializer()
+
     class Meta:
         model = Appointment
         fields = [
@@ -164,13 +147,26 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'date_created',
             'date_changed',
             'id',
-            ]  
+        ]
 
+    def create(self, validated_data: dict):
+        patient = validated_data.pop("patient", None)
+        try:
+            if patient:
+                patient = Patient.objects.create(**patient)
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError(f"Error occurred {e}")
+        
+        try:
+            appointment = Appointment.objects.create(patient=patient, **validated_data)
+            return appointment
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError(f"Error occurred {e}")
+        
 
 class TriageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Triage
-        fields = '__all__'                 
-
-        
-
+        fields = '__all__'

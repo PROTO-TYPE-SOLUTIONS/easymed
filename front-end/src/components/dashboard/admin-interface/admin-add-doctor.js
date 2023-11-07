@@ -58,6 +58,8 @@ const AdminCreateDoctor = () => {
       const formData = {
         ...formValue,
         role: "doctor",
+        profession: '',
+        groups: [],
       };
       setLoading(true);
       await registerUser(formData, authUser).then(() => {
