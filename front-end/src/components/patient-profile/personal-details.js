@@ -12,6 +12,7 @@ import { useAuth } from "@/assets/hooks/use-auth";
 const PersonalDetails = () => {
   const { insurance } = useSelector((store) => store.insurance);
   const { profileDetails } = useSelector((store) => store.patient);
+  console.log("PROFILE_DETAILS ",profileDetails)
   const dispatch = useDispatch();
   const [loading, setLoading] = React.useState(false);
   const auth = useAuth();
@@ -169,7 +170,7 @@ const PersonalDetails = () => {
               >
                 <option value="">Select Insurance</option>
                 {insurance.map((item) => (
-                  <option key={item?.id} value={item.id}>
+                  <option key={item?.id} value={item.name}>
                     {item?.name}
                   </option>
                 ))}

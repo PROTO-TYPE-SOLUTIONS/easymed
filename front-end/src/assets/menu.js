@@ -53,13 +53,13 @@ export const menus = [
     icon: <HiUsers className="text-xl" />,
   },
   {
-    label: "Messages",
+    label: "AI Assistant",
     href: "/dashboard/messages",
     icon: <RiMessage2Fill className="text-xl" />,
   },
   {
-    label: "Schedule",
-    href: "/dashboard/schedule",
+    label: "Announcements",
+    href: "/dashboard/announcements",
     icon: <BsCalendarEvent className="text-xl" />,
   },
   {
