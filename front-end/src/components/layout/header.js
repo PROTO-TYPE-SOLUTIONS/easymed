@@ -11,6 +11,7 @@ const Header = () => {
 
   return (
     <>
+      <Drawer {...{ isOpen, setIsOpen }} />
       <section className="sticky top-0 py-2 bg-primary h-[10vh] shadow-xl mb-12">
         <Container maxWidth="xl">
           <section className="flex items-center justify-between gap-4">
@@ -19,9 +20,8 @@ const Header = () => {
                 className="text-2xl text-white cursor-pointer"
                 onClick={() => setIsOpen(true)}
               />
-              <Drawer {...{ isOpen, setIsOpen }} />
             </div>
-           
+
             <div className="md:hidden block">
               <TopSection />
             </div>
