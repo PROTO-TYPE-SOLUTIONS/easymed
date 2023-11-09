@@ -71,6 +71,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, related_name='custom_users')
 
+    groups = None
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
