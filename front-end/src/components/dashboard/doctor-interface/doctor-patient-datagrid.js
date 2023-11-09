@@ -14,6 +14,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllPatients } from "@/redux/features/patients";
 import { getAllDoctorAppointments } from "@/redux/features/appointment";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { BiSupport } from 'react-icons/bi'
+import { GiMedicinePills } from 'react-icons/gi'
+import { useRouter } from "next/router";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -29,11 +32,16 @@ const getActions = () => {
     {
       action: "consult",
       label: "Consult",
-      icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
+      icon: <BiSupport className="text-card text-xl mx-2" />,
     },
     {
       action: "prescribe",
       label: "Prescribe",
+      icon: <GiMedicinePills className="text-card text-xl mx-2" />,
+    },
+    {
+      action: "send to lab",
+      label: "Send To Lab",
       icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
     },
   ];
@@ -52,6 +60,7 @@ const DoctorPatientDataGrid = () => {
   const dispatch = useDispatch();
   const auth = useAuth();
   const { doctorAppointments } = useSelector((store) => store.appointment);
+  const router = useRouter();
   
 
   useEffect(() => {
@@ -116,8 +125,11 @@ const DoctorPatientDataGrid = () => {
       setSelectedRowData(data);
       setConsultOpen(true);
     } else if (menu.action === "prescribe") {
-      setSelectedRowData(data);
-      setPrescribeOpen(true);
+      // router.push('/dashboard/doctor-interface/prescription');
+      const encodedData = encodeURIComponent(JSON.stringify(data));
+      router.push(`/dashboard/doctor-interface/prescription?data=${encodedData}`);
+      // setSelectedRowData(data);
+      // setPrescribeOpen(true);
     }
   };
 
