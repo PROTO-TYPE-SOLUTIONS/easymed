@@ -393,6 +393,7 @@ class ChangeUserRoleAPIView(APIView):
             return Response({"error_message": "provide the user id"}, status=status.HTTP_400_BAD_REQUEST)
 
         user.role = serializer.validated_data.get("role", user.role)
+        user.group = serializer.validated_data.get("group", user.group)
         user.save()
         return Response({"message": f"changed {user.first_name}'s role to {user.role}"}, status=status.HTTP_200_OK)
 
