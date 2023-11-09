@@ -6,7 +6,7 @@ from inventory.models import Item, OrderBill
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
+# User = get_user_model()
 
 class InsuranceCompany(models.Model):
     name = models.CharField(max_length=30)
@@ -57,7 +57,7 @@ class Patient(models.Model):
 
 class NextOfKin(models.Model):
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    firts_name = models.CharField(max_length=40)
+    first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     relationship = models.CharField(max_length=40)   
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
