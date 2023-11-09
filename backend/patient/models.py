@@ -159,6 +159,9 @@ class Consultation(models.Model):
     complaint = models.TextField(null=True, blank=True)
     disposition = models.CharField(
         max_length=10, choices=DISPOSITION_CHOICES, default="")
+    
+    def __str__(self):
+        return self.note
 
 
 class Prescription(models.Model):
@@ -174,7 +177,7 @@ class Prescription(models.Model):
         max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return f"Prescription #{self.patient_id}"
+        return f"Prescription #{self.patient_id.pk}"
 
 
 class PrescribedDrug(models.Model):
@@ -184,7 +187,7 @@ class PrescribedDrug(models.Model):
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     note = models.TextField(null=True, blank=True)
-    order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
+    order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True)
     item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
