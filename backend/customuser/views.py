@@ -24,7 +24,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 # models
 from .models import (
     CustomUser,
-    Doctor
+    Doctor,
+    Nurse,
+    Receptionist,
+    LabTech
 )
 
 # swagger
@@ -37,7 +40,11 @@ from .serializers import (
     CustomUserSerializer,
     CustomUserRegistrationSerializer,
     CustomUserLoginSerializer,
-    DoctorSerializer
+    DoctorSerializer,
+    NurseSerializer,
+    LabTechSerializer,
+    ReceptionistSerializer,
+
 )
 
 # utils
@@ -100,7 +107,45 @@ class DoctorsAPIView(APIView):
         responses=DoctorSerializer,
     )
     def get(self, request: Request, *args, **kwargs):
-        doctors = CustomUser.objects.filter(role = CustomUser.DOCTOR)
-        serializers = CustomUserSerializer(doctors, many=True)
+        doctors = Doctor.objects.filter(role = CustomUser.DOCTOR)
+        serializers = DoctorSerializer(doctors, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
+
+class NurseAPIView(APIView):
+    permission_classes = (IsStaffUser,)
+
+    @extend_schema(
+        request=NurseSerializer,
+        responses=NurseSerializer,
+    )
+    def get(self, request: Request, *args, **kwargs):
+        nurse = Nurse.objects.filter(role = CustomUser.DOCTOR)
+        serializers = NurseSerializer(nurse, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class LabTechAPIView(APIView):
+    permission_classes = (IsStaffUser,)
+
+    @extend_schema(
+        request=LabTechSerializer,
+        responses=LabTechSerializer,
+    )
+    def get(self, request: Request, *args, **kwargs):
+        labtech = LabTech.objects.filter(role = CustomUser.DOCTOR)
+        serializers = LabTechSerializer(labtech, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class ReceptionistAPIView(APIView):
+    permission_classes = (IsStaffUser,)
+
+    @extend_schema(
+        request=ReceptionistSerializer,
+        responses=ReceptionistSerializer,
+    )
+    def get(self, request: Request, *args, **kwargs):
+        receptionist = Receptionist.objects.filter(role = CustomUser.DOCTOR)
+        serializers = ReceptionistSerializer(receptionist, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)

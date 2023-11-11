@@ -4,6 +4,9 @@ from django.db import models
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.name
+
 class Inventory(models.Model):
     LOCATION_CHOICES = (
         ('mainst', 'Mainst'),
@@ -17,8 +20,8 @@ class Inventory(models.Model):
     location = models.CharField(max_length=10, choices=LOCATION_CHOICES, default='mainst')
     expiry_date = models.DateField()
     supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    purchase_price = models.CharField(max_length=255)
-    sale_price = models.CharField(max_length=255)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return str(self.item_ID)

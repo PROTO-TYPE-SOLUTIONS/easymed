@@ -12,16 +12,22 @@ from customuser.models import (
 
 class IsDoctorUser(BasePermission):
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         return bool(request.user and request.user.is_staff and request.user.role == Doctor.BASE_ROLE)
 
 
 class IsNurseUser(BasePermission):
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         return bool(request.user and request.user.is_staff and request.user.role == Nurse.BASE_ROLE)
 
 
 class IsLabTechUser(BasePermission):
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         return bool(request.user and request.user.is_staff and request.user.role == LabTech.BASE_ROLE)
 
 
@@ -32,14 +38,20 @@ class IsSystemsAdminUser(BasePermission):
 
 class IsPatientUser(BasePermission):
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         return bool(request.user and request.user.role == CustomUser.BASE_ROLE)
 
 
 class IsReceptionistUser(BasePermission):
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         return bool(request.user and request.user.is_staff and request.user.role == Receptionist.BASE_ROLE)
 
 class IsStaffUser(BasePermission):
     def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
         return bool(request.user and request.user.is_staff)
     

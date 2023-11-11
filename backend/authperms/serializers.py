@@ -38,7 +38,7 @@ class AddGroupSerializer(serializers.Serializer):
         try:
             return Group.objects.create(**validated_data)
         except Exception as e:
-            return serializers.ValidationError(e)
+            raise serializers.ValidationError(e)
 
 
 class EditGroupNameSerializer(serializers.ModelSerializer):
@@ -84,63 +84,53 @@ class AddPermissionToGroupSerializer(serializers.ModelSerializer):
 
 class AddUserToGroupsSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
-    groups = serializers.PrimaryKeyRelatedField(
+    group = serializers.PrimaryKeyRelatedField(
         queryset=Group.objects.all(),
         required=True,
-        many=True,
     )
 
     class Meta:
         model = CustomUser
-        fields = ("user_id", "groups",)
+        fields = ("user_id", "group",)
 
     def get_user_id(self, obj: CustomUser):
         return obj.pk
 
     def validate(self, attrs: dict):
-        group_ids: list[int] = attrs.get("groups")
-        group_clone = group_ids.copy()
-        if group_ids is None:
-            return serializers.ValidationError("Provide a group id")
-        for group_id in group_ids:
+        group_id: int = attrs.get("group")
+        if group_id is None:
+            raise serializers.ValidationError("Provide a group id")
             # iterate over a group ids and remove those where the group id doesn't exist
-            try:
-                Group.objects.get(id=group_id)
-            except Group.DoesNotExist:
-                group_clone.remove(group_id)
-            except Exception as e:
-                return serializers.ValidationError(e)
-
-        attrs["groups"] = group_clone
+        try:
+            Group.objects.get(id=group_id)
+        except Group.DoesNotExist:
+            raise serializers.ValidationError(f"group id {group_id} doesn't exist")
+        except Exception as e:
+            raise serializers.ValidationError(e)
         return super().validate(attrs)
 
     def update(self, instance: CustomUser, validated_data: dict):
-        group_list: list[int] = validated_data.get("groups")
+        group_id: int = validated_data.get("group")
 
-        for group_id in group_list:
-            group = Group.objects.get(id=group_id)
-            instance.groups.add(group)
+        group = Group.objects.get(id=group_id)
+        instance.group = group
 
         return instance
 
 
 class RemoveUserFromGroupSerializer(serializers.Serializer):
-    group_names = serializers.ListField(
-        child=serializers.CharField(max_length=50))
+    group_name = serializers.CharField(max_length=50)
 
     def validate(self, attrs: dict):
-        group_names: list[str] = attrs.get("group_names")
-        if group_names is None or len(group_names) <1:
-            raise serializers.ValidationError("group_names field is required")
+        group_name: str = attrs.get("group_name", None)
+        if group_name is None:
+            raise serializers.ValidationError("group_name field is required")
 
-        groups = group_names.copy()
-        for group_name in groups:
-            try:
-                Group.objects.get_by_natural_key(group_name)
-            except Group.DoesNotExist:
-                group_names.remove(group_name)
+        try:
+            Group.objects.get_by_natural_key(group_name)
+        except Group.DoesNotExist:
+            raise serializers.ValidationError("group_name field doesn't exist")
 
-        attrs["group_names"] = group_names
         return super().validate(attrs)
 
 
@@ -213,4 +203,9 @@ class RemovePermissionsFromUserSerializer(serializers.Serializer):
 
 class ChangeUserRoleSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=CustomUser.ROLE_CHOICES)
+    group = serializers.PrimaryKeyRelatedField(
+        queryset = Group.objects.all(),
+        required = True,
+        allow_null = False,
+    )
     

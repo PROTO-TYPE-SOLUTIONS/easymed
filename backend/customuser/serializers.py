@@ -2,18 +2,24 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 
 from authperms.models import Group
-from .models import CustomUser, Doctor
-
+from .models import (
+    CustomUser,
+    Doctor,
+    Nurse,
+    LabTech,
+    Receptionist
+)
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
     age = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
         fields = ('id', 'email', 'first_name',
                   'last_name', 'role', 'profession', 'age')
-        
+
     def get_age(self, obj: CustomUser):
         if obj.age:
             return obj.age
@@ -22,9 +28,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class CustomUserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    groups = serializers.PrimaryKeyRelatedField(
+    group = serializers.PrimaryKeyRelatedField(
         queryset=Group.objects.all(),
-        many=True,
         required=True,
         allow_null=False
     )
@@ -32,13 +37,7 @@ class CustomUserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('email', 'password', 'first_name',
-                  'last_name', 'role', 'profession', 'groups')
-    
-    # def validate_groups(self, value:list[Group]):
-    #     if len(value)<1:
-    #         raise serializers.ValidationError("Group field must be provided")
-    #     return value
-
+                  'last_name', 'role', 'profession', 'group')
 
     def create(self, validated_data: dict):
         print()
@@ -80,4 +79,22 @@ class CustomUserLoginSerializer(serializers.Serializer):
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
+        fields = "__all__"
+
+
+class NurseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Nurse
+        fields = "__all__"
+
+
+class LabTechSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LabTech
+        fields = "__all__"
+
+
+class ReceptionistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Receptionist
         fields = "__all__"

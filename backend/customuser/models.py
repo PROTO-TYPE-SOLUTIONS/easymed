@@ -50,7 +50,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         (LAB_TECH, 'Lab Technician'),
         (RECEPTIONIST, 'Receptionist'),
         (SYS_ADMIN, 'Sysadmin'),
-
     )
 
     email = models.EmailField(unique=True)
@@ -70,8 +69,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         related_name='custom_users_permissions',
     )
 
-    groups = models.ManyToManyField(
-        Group, blank=True, related_name='custom_users')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, related_name='custom_users')
+
+    groups = None
 
     objects = CustomUserManager()
 
@@ -207,3 +207,4 @@ class PatientUser(CustomUser):
 
     objects = PatientManager()
     BASE_ROLE = CustomUser.PATIENT
+
