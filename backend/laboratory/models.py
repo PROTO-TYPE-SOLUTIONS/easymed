@@ -30,12 +30,21 @@ class LabTestPanel(models.Model):
     def __str__(self):
         return self.name        
 
+
+class LabEquipment(models.Model):
+    name = models.TextField()
+    ip_address = models. GenericIPAddressField()
+    port = models.IntegerField()
+
 class LabTestRequest(models.Model):
     patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     note = models.TextField()
     order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
     item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
+    requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT)
+
 
     def __str__(self):
         return str(self.test_profile_ID)
