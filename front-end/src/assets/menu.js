@@ -54,7 +54,7 @@ export const menus = [
   },
   {
     label: "AI Assistant",
-    href: "/dashboard/messages",
+    href: "/dashboard/ai-assistant",
     icon: <RiMessage2Fill className="text-xl" />,
   },
   {

@@ -19,9 +19,9 @@ const PermissionSlice = createSlice({
 export const { setUserPermissions } = PermissionSlice.actions;
 
 
-export const getAllUserPermissions = (userId) => async (dispatch) => {
+export const getAllUserPermissions = (userId,auth) => async (dispatch) => {
   try {
-    const response = await fetchUserPermissions(userId);
+    const response = await fetchUserPermissions(userId,auth);
     dispatch(setUserPermissions(response));
   } catch (error) {
     console.log("USER_PERMISSIONS_ERROR ", error);

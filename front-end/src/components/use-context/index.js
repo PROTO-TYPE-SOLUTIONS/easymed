@@ -6,8 +6,7 @@ import jwtDecode from "jwt-decode";
 import SimpleCrypto from "simple-crypto-js";
 import { useDispatch } from "react-redux";
 import { getAllUserPermissions } from "@/redux/features/auth";
-import { toast } from 'react-toastify'
-
+import { toast } from "react-toastify";
 
 export const authContext = createContext();
 
@@ -16,14 +15,12 @@ const secretKey = new SimpleCrypto(process.env.NEXT_PUBLIC_ENCRYPTION_KEY);
 export const AuthProvider = ({ children }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  // const [user, setUser] = useState(null);
   const [user, setUser] = useState(() =>
     typeof window !== "undefined" && localStorage.getItem("token")
       ? JSON.parse(localStorage.getItem("token"))
       : null
   );
 
-  console.log("PARSED_USER ",user)
   const [message, setMessage] = useState("");
 
   // login User
@@ -37,7 +34,6 @@ export const AuthProvider = ({ children }) => {
         const decodedUser = jwtDecode(response.data.access);
         setUser({ ...decodedUser, token: response.data.access });
         try {
-          // await dispatch(getAllUserPermissions(decodedUser?.user_id));
           // router.push("/dashboard");
           localStorage.setItem("token", JSON.stringify(response.data.access));
           localStorage.setItem(
@@ -47,8 +43,9 @@ export const AuthProvider = ({ children }) => {
           if (decodedUser?.role === "patient") {
             // router.push('/')
             router.push(`/patient-profile`);
-          }else{
-            router.push('/dashboard')
+          } else {
+            await dispatch(getAllUserPermissions(decodedUser?.user_id));
+            router.push("/dashboard");
           }
         } catch (error) {
           throw error;

@@ -3,6 +3,7 @@ import { APP_API_URL } from "@/assets/api-endpoints";
 import UseAxios from "@/assets/hooks/use-axios";
 
 
+
 export const registerUser = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -16,9 +17,10 @@ export const registerUser = (payload,auth) =>{
     })
 }
 
-export const fetchUserPermissions = (userId) =>{
+export const fetchUserPermissions = (userId,auth) =>{
+    const axiosInstance = UseAxios()
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,{
+        axiosInstance.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,auth,{
             params:{
                 userId: userId,
             }

@@ -6,7 +6,7 @@ export const API_URL = {
     REGISTER_USER: '/users/register/',
     LOGIN: '/users/login/',
     REFRESH_TOKEN: '/api/token/refresh/',
-    GET_USER_PERMISSIONS: '/api/permissions',
+    GET_USER_PERMISSIONS: '/authperms/permissions/user',
 
 
     /***************** PATIENT APIS **********************/
@@ -29,6 +29,11 @@ export const API_URL = {
 
     /***************** DOCTOR APIS **********************/
     CREATE_DOCTOR: '/accounts/register/',
+    FETCH_DOCTOR: '/users/doctors/',
+
+
+    /***************** LABORATORY APIS **********************/
+    FETCH_LAB_RESULTS: '/lab/lab-test-results/',
     FETCH_DOCTOR: '/users/doctors/',
 
 
@@ -71,6 +76,10 @@ export const APP_API_URL = {
     /***************** DOCTOR APIS **********************/
     CREATE_DOCTOR: '/api/doctor/create-doctor',
     FETCH_DOCTOR: '/api/doctor/fetch-doctor',
+
+
+    /***************** LABORATORY APIS **********************/
+    FETCH_LAB_RESULTS: '/api/laboratory/get-lab-results',
 
 
     /***************** INVENTORY APIS **********************/

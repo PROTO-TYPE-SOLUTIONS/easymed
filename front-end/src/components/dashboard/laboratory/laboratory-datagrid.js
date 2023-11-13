@@ -21,9 +21,10 @@ const getActions = () => {
 };
 
 
-const LaboratoryDataGrid = () => {
+const LaboratoryDataGrid = ({ labResults }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
+  console.log("LAB_RESULTS ",labResults)
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
   const filteredData = labData.filter((patient) => {
