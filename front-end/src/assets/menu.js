@@ -46,6 +46,18 @@ export const menus = [
     label: "Laboratory",
     href: "/dashboard/laboratory",
     icon: <TbBrandBandlab className="text-xl" />,
+    children: [
+      {
+        label: "Lab Results",
+        href: "/dashboard/laboratory/lab-results",
+        icon: <GrAdd className="" />,
+      },
+      {
+        label: "Lab Requests",
+        href: "/dashboard/laboratory/lab-requests",
+        icon: <GrAdd className="" />,
+      },
+    ],
   },
   {
     label: "Patients",

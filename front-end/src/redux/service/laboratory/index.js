@@ -16,3 +16,16 @@ export const fetchLabResults = (auth) =>{
     })
 }
 
+export const fetchLabRequests = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_REQUESTS}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+

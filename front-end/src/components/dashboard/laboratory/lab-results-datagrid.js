@@ -21,7 +21,7 @@ const getActions = () => {
 };
 
 
-const LaboratoryDataGrid = ({ labResults }) => {
+const LabResultDataGrid = ({ labResults }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   console.log("LAB_RESULTS ",labResults)
@@ -158,4 +158,4 @@ const LaboratoryDataGrid = ({ labResults }) => {
   );
 };
 
-export default LaboratoryDataGrid;
+export default LabResultDataGrid;

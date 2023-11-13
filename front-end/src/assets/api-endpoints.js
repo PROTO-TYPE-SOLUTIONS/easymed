@@ -34,7 +34,7 @@ export const API_URL = {
 
     /***************** LABORATORY APIS **********************/
     FETCH_LAB_RESULTS: '/lab/lab-test-results/',
-    FETCH_DOCTOR: '/users/doctors/',
+    FETCH_LAB_REQUESTS: '/lab/lab-test-requests/',
 
 
     /***************** INVENTORY APIS **********************/
@@ -80,6 +80,7 @@ export const APP_API_URL = {
 
     /***************** LABORATORY APIS **********************/
     FETCH_LAB_RESULTS: '/api/laboratory/get-lab-results',
+    FETCH_LAB_REQUESTS: '/api/laboratory/get-lab-requests',
 
 
     /***************** INVENTORY APIS **********************/
