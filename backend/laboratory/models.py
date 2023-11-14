@@ -4,6 +4,19 @@ from django.conf import settings
 from customuser.models import CustomUser
 from inventory.models import Item, OrderBill
 
+
+class Equipment(models.Model):
+    CATEGORY_CHOICE = (
+        ("none", "None"),
+        ("rss32", "RS232"),
+        ("tcp", "TCP"),
+    )
+    name = models.CharField(max_length=250)
+    category = models.CharField(max_length=10, default="none", choices=CATEGORY_CHOICE,)
+
+    def __str__(self):
+        return self.name
+
 class LabReagent(models.Model):
     name = models.CharField(max_length=255)
     cas_number = models.CharField(max_length=255)
@@ -38,7 +51,7 @@ class LabTestRequest(models.Model):
     item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return str(self.test_profile_ID)
+        return str(self.test_profile_ID.name)
 
 class LabTestResult(models.Model):
     lab_test_request_ID = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)

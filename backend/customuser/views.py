@@ -68,8 +68,7 @@ class RegistrationAPIView(APIView):
         data = request.data
         serializer = CustomUserRegistrationSerializer(data=data)
 
-        if not serializer.is_valid():
-            return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
