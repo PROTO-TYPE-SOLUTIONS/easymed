@@ -48,12 +48,8 @@ class CustomUserRegistrationSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
             role=validated_data['role'],
             profession=validated_data['profession'],
+            group=validated_data["group"]
         )
-        groups = validated_data["groups"]
-        print(groups)
-        for group in groups:
-            user.groups.add(group)
-            user.save()
         return user
 
 
