@@ -1,12 +1,18 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.request import Request
+
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 # models
 from .models import (
-    LabReagent, 
-    LabTestResult, 
-    LabTestRequest, 
-    LabTestCategory, 
-    LabTestProfile
+    LabReagent,
+    LabTestResult,
+    LabTestRequest,
+    LabTestCategory,
+    LabTestProfile,
+    Equipment
 )
 # serializers
 from .serializers import (
@@ -26,25 +32,59 @@ from authperms.permissions import (
     IsSystemsAdminUser
 )
 
+# utils
+from .utils import (
+    json_to_hl7,
+    send_through_rs232,
+    send_through_tcp
+)
+
+
 class LabReagentViewSet(viewsets.ModelViewSet):
     queryset = LabReagent.objects.all()
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
 
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
     serializer_class = LabTestProfileSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+
 class LabTestResultViewSet(viewsets.ModelViewSet):
     queryset = LabTestResult.objects.all()
     serializer_class = LabTestResultSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+
 class LabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequest.objects.all()
     serializer_class = LabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='equipment_id', type=int,
+                             location=OpenApiParameter.PATH)
+        ],
+    )
+    @action(methods=['post'], detail=True)
+    def send_to_equipment(self, request: Request,  equipment_id, pk=None):
+        instance: LabTestRequest = self.get_object()
+        try:
+            equipment: Equipment = Equipment.objects.get(pk=equipment_id)
+        except Equipment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        data = json_to_hl7(instance)
+        if equipment.category == "rs32":
+            send_through_rs232(data=data)
+            return Response({"message": "Data sent to RS232 equipment"}, status=status.HTTP_200_OK)
+        if equipment.category == 'tcp':
+            send_through_tcp(data=data)
+            return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
+
 
 class LabTestCategoryViewSet(viewsets.ModelViewSet):
     queryset = LabTestCategory.objects.all()
