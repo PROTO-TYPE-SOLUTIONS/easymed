@@ -33,7 +33,7 @@ class Patient(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     insurance = models.ForeignKey(
         InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    user_id = models.ForeignKey(
+    user_id = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
