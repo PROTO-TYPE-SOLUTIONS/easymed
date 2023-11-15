@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from .models import (
     InsuranceCompany,
@@ -157,14 +158,33 @@ class AppointmentSerializer(serializers.ModelSerializer):
         except Exception as e:
             print(e)
             raise serializers.ValidationError(f"Error occurred {e}")
-        
+
         try:
-            appointment = Appointment.objects.create(patient=patient, **validated_data)
+            appointment = Appointment.objects.create(
+                patient=patient, **validated_data)
             return appointment
         except Exception as e:
             print(e)
             raise serializers.ValidationError(f"Error occurred {e}")
+
+    def update(self, instance: Appointment, validated_data: dict):
+        patient_dict: dict = validated_data.get('patient')
+        try:
+            patient = Patient.objects.get(first_name=patient_dict.get(
+                'first_name'), second_name=patient_dict.get('second_name'), user_id=patient_dict.get('user_id'))
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError(f"Error occurred {e}")
         
+        instance.patient = patient
+        instance.assigned_doctor = validated_data.get('assigned_doctor', instance.assigned_doctor)
+        instance.appointment_date_time = validated_data.get('appointment_date_time', instance.appointment_date_time)
+        instance.status = validated_data.get('status', instance.status)
+        instance.reason = validated_data.get('reason', instance.reason)
+        instance.date_changed = timezone.now()
+        return instance
+
+
 
 class TriageSerializer(serializers.ModelSerializer):
     class Meta:
