@@ -14,9 +14,13 @@ export const addInventory = (payload) =>{
     })
 }
 
-export const fetchItems = () =>{
+export const fetchItems = (name) =>{
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_ITEMS}`)
+        axios.get(`${APP_API_URL.FETCH_ITEMS}`,{
+            params:{
+                name: name
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })

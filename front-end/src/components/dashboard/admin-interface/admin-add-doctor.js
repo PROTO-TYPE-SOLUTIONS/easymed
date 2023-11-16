@@ -6,15 +6,19 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import { IoMdAdd } from "react-icons/io";
 import { getAllDoctors } from "@/redux/features/doctors";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { toast} from 'react-toastify'
+import { toast } from "react-toastify";
+import { getAllGroups } from "@/redux/features/auth";
 
 const AdminCreateDoctor = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
+  const { groups } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const authUser = useAuth();
+
+  console.log("GROUPS ", groups);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -27,6 +31,7 @@ const AdminCreateDoctor = () => {
   useEffect(() => {
     if (authUser) {
       dispatch(getAllDoctors(authUser));
+      dispatch(getAllGroups(authUser));
     }
   }, [authUser]);
 
@@ -35,11 +40,13 @@ const AdminCreateDoctor = () => {
     last_name: "",
     email: "",
     password: "",
+    group: null
   };
 
   const validationSchema = Yup.object().shape({
     first_name: Yup.string().required("First Name is required!"),
     last_name: Yup.string().required("Last Name is required!"),
+    group: Yup.string().required("Role is required!"),
     email: Yup.string()
       .email("This is not a valid email")
       .required("Email is required!"),
@@ -58,20 +65,19 @@ const AdminCreateDoctor = () => {
       const formData = {
         ...formValue,
         role: "doctor",
-        profession: '',
-        groups: [],
+        profession: "",
       };
       setLoading(true);
       await registerUser(formData, authUser).then(() => {
         helpers.resetForm();
         setLoading(false);
         handleClose();
-        toast.success('Doctor Created Successfully!')
+        toast.success("User Created Successfully!");
         dispatch(getAllDoctors(authUser));
       });
     } catch (err) {
       setLoading(false);
-      toast.error(err)
+      toast.error(err);
     }
   };
 
@@ -81,7 +87,7 @@ const AdminCreateDoctor = () => {
         onClick={handleClickOpen}
         className="bg-primary text-white px-4 py-3 text-sm flex items-center gap-1"
       >
-        <IoMdAdd /> Create Doctor
+        <IoMdAdd /> Create User
       </button>
       <Dialog
         fullWidth
@@ -150,6 +156,25 @@ const AdminCreateDoctor = () => {
                       />
                       <ErrorMessage
                         name="password"
+                        component="div"
+                        className="text-warning text-xs"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <Field
+                        as="select"
+                        className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
+                        name="group"
+                      >
+                        <option value="">Assign Role</option>
+                        {groups.map((item) => (
+                          <option key={item?.id} value={item.id}>
+                            {item?.name}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage
+                        name="group"
                         component="div"
                         className="text-warning text-xs"
                       />

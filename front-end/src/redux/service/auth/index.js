@@ -33,3 +33,16 @@ export const fetchUserPermissions = (userId,auth) =>{
             })
     })
 }
+
+export const fetchGroups = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_GROUP}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

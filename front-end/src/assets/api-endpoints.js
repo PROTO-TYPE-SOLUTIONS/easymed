@@ -7,6 +7,7 @@ export const API_URL = {
     LOGIN: '/users/login/',
     REFRESH_TOKEN: '/api/token/refresh/',
     GET_USER_PERMISSIONS: '/authperms/permissions/user',
+    FETCH_GROUP: '/authperms/groups',
 
 
     /***************** PATIENT APIS **********************/
@@ -21,7 +22,7 @@ export const API_URL = {
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
-    ASSIGN_DOCTOR: '/patients/appointments/',
+    ASSIGN_DOCTOR: '/patients/appointments',
     CONSULT_PATIENT: '/patients/consultations/',
     REFER_PATIENT: '/patients/referrals/',
     GET_PATIENT_PROFILE: '/patients/patients',
@@ -53,6 +54,7 @@ export const APP_API_URL = {
     LOGIN: '/api/register/login',
     REFRESH_TOKEN: '/api/auth/refresh',
     GET_USER_PERMISSIONS: '/api/auth/user-permissions',
+    FETCH_GROUP: '/api/groups',
    
 
     /***************** PATIENT APIS **********************/
