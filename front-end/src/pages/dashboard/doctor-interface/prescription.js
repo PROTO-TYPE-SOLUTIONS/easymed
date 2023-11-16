@@ -72,7 +72,7 @@ const Prescription = () => {
           </button>
         </div>
       </section>
-      { show && <AllPrescriptions /> }
+      { show && <AllPrescriptions patient={decodedData} /> }
     </Container>
   );
 };

@@ -30,6 +30,18 @@ export const fetchItems = (name) =>{
     })
 }
 
+export const deleteItem = (id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.DELETE_ITEM}`,{id})
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const fetchSuppliers = () =>{
     return new Promise((resolve,reject) =>{
         axios.get(`${APP_API_URL.FETCH_SUPPLIERS}`)

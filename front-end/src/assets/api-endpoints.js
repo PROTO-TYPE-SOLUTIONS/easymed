@@ -26,6 +26,8 @@ export const API_URL = {
     CONSULT_PATIENT: '/patients/consultations/',
     REFER_PATIENT: '/patients/referrals/',
     GET_PATIENT_PROFILE: '/patients/patients',
+    PRESCRIBE_DRUG: '/patients/prescribed-drugs/',
+    CREATE_PRESCRIPTION: '/patients/prescriptions/',
 
 
     /***************** DOCTOR APIS **********************/
@@ -42,6 +44,7 @@ export const API_URL = {
     ADD_INVENTORY: '/inventory/inventories/',
     FETCH_SUPPLIERS: '/inventory/suppliers/',
     FETCH_ITEMS: '/inventory/items/',
+    DELETE_ITEM: '/inventory/items',
 
 }
 
@@ -73,6 +76,10 @@ export const APP_API_URL = {
     CONSULT_PATIENT: '/api/patient/consult-patient',
     REFER_PATIENT: '/api/patient/refer-patient',
     GET_PATIENT_PROFILE: '/api/patient/patient-profile',
+    PRESCRIBE_DRUG: '/api/patient/prescribe-drug',
+    CREATE_PRESCRIPTION: '/api/patient/create-prescription',
+
+
 
 
     /***************** DOCTOR APIS **********************/
@@ -89,6 +96,7 @@ export const APP_API_URL = {
     ADD_INVENTORY: '/api/inventory/add-inventory',
     FETCH_SUPPLIERS: '/api/inventory/fetch-suppliers',
     FETCH_ITEMS: '/api/inventory/fetch-items',
+    DELETE_ITEM: '/api/inventory/delete-item',
 
 }
 
