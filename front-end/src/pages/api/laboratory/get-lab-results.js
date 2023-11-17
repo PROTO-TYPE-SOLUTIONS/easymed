@@ -11,18 +11,17 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === API_METHODS.GET) {
         try {
-            // if (!req.headers?.authorization){
-            //     res.status(401).send('Unauthorized');
-            // }
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
+    
 
-            const name = req.query.name
-
-            await backendAxiosInstance.get(`${API_URL.FETCH_ITEMS}?name=${name}`).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_LAB_RESULTS}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -36,9 +35,9 @@ export default async function handler(req, res) {
     }
     else if (req.method === API_METHODS.POST) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
@@ -46,7 +45,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.ADD_INVENTORY}`,body)
+            await backendAxiosInstance.post(`${API_URL.BOOK_APPOINTMENT}`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

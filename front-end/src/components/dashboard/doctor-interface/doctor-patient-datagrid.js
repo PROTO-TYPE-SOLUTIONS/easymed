@@ -17,6 +17,7 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import { BiSupport } from 'react-icons/bi'
 import { GiMedicinePills } from 'react-icons/gi'
 import { useRouter } from "next/router";
+import LabModal from "./lab-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -56,6 +57,7 @@ const DoctorPatientDataGrid = () => {
   const [open, setOpen] = useState(false);
   const [consultOpen, setConsultOpen] = useState(false);
   const [prescribeOpen, setPrescribeOpen] = useState(false);
+  const [labOpen, setLabOpen] = useState(false);
   const userActions = getActions();
   const dispatch = useDispatch();
   const auth = useAuth();
@@ -130,6 +132,9 @@ const DoctorPatientDataGrid = () => {
       router.push(`/dashboard/doctor-interface/prescription?data=${encodedData}`);
       // setSelectedRowData(data);
       // setPrescribeOpen(true);
+    } else if(menu.action === "send to lab"){
+      setSelectedRowData(data);
+      setLabOpen(true);
     }
   };
 
@@ -305,6 +310,9 @@ const DoctorPatientDataGrid = () => {
       />
       <PrescribePatientModal
         {...{ prescribeOpen, setPrescribeOpen, selectedRowData }}
+      />
+      <LabModal
+        {...{ labOpen, setLabOpen, selectedRowData }}
       />
     </section>
   );
