@@ -33,7 +33,7 @@ class Patient(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     insurance = models.ForeignKey(
         InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    user_id = models.ForeignKey(
+    user_id = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
@@ -181,8 +181,11 @@ class Prescription(models.Model):
 
 
 class PrescribedDrug(models.Model):
-    prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE)
-    # drug_id = models.ForeignKey(Drug, on_delete=models.CASCADE)
+    class Meta:
+        unique_together = ("prescription_id", "item_ID")
+
+    
+    prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)

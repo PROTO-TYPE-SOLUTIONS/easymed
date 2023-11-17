@@ -95,7 +95,7 @@ const Admin = () => {
         </div>
         <div className="flex items-center gap-2">
           <AddPatientModal />
-          <AdminCreateUserModal />
+          {/* <AdminCreateUserModal /> */}
           <AdminCreateDoctor />
         </div>
       </section>
