@@ -22,7 +22,7 @@ export default function AssignDoctorModal({
   const dispatch = useDispatch();
   const { doctors } = useSelector((store) => store.doctor);
   const authUser = useAuth();
-  console.log("AUTH_USER ", authUser);
+  console.log("SELECTED_ROW ", selectedRowData);
 
   const handleClickOpen = () => {
     setAssignOpen(true);
@@ -80,6 +80,7 @@ export default function AssignDoctorModal({
           insurance: null,
           user_id: null,
         },
+        id:selectedRowData.id,
         assigned_doctor: parseInt(formValue.assigned_doctor),
       };
       await assignDoctor(formData).then(() => {
