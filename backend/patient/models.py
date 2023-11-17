@@ -181,8 +181,11 @@ class Prescription(models.Model):
 
 
 class PrescribedDrug(models.Model):
+    class Meta:
+        unique_together = ("prescription_id", "item_ID")
+
+    
     prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
-    # drug_id = models.ForeignKey(Drug, on_delete=models.CASCADE)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
