@@ -23,9 +23,9 @@ const InventorySlice = createSlice({
 export const { setItems,setSuppliers } = InventorySlice.actions;
 
 
-export const getAllItems = () => async (dispatch) => {
+export const getAllItems = (name) => async (dispatch) => {
   try {
-    const response = await fetchItems();
+    const response = await fetchItems(name);
     dispatch(setItems(response));
   } catch (error) {
     console.log("ITEMS_ERROR ", error);

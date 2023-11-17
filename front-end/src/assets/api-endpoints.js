@@ -6,7 +6,8 @@ export const API_URL = {
     REGISTER_USER: '/users/register/',
     LOGIN: '/users/login/',
     REFRESH_TOKEN: '/api/token/refresh/',
-    GET_USER_PERMISSIONS: '/api/permissions',
+    GET_USER_PERMISSIONS: '/authperms/permissions/user',
+    FETCH_GROUP: '/authperms/groups',
 
 
     /***************** PATIENT APIS **********************/
@@ -21,10 +22,12 @@ export const API_URL = {
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
-    ASSIGN_DOCTOR: '/patients/appointments/',
+    ASSIGN_DOCTOR: '/patients/appointments',
     CONSULT_PATIENT: '/patients/consultations/',
     REFER_PATIENT: '/patients/referrals/',
     GET_PATIENT_PROFILE: '/patients/patients',
+    PRESCRIBE_DRUG: '/patients/prescribed-drugs/',
+    CREATE_PRESCRIPTION: '/patients/prescriptions/',
 
 
     /***************** DOCTOR APIS **********************/
@@ -32,10 +35,16 @@ export const API_URL = {
     FETCH_DOCTOR: '/users/doctors/',
 
 
+    /***************** LABORATORY APIS **********************/
+    FETCH_LAB_RESULTS: '/lab/lab-test-results/',
+    FETCH_LAB_REQUESTS: '/lab/lab-test-requests/',
+
+
     /***************** INVENTORY APIS **********************/
     ADD_INVENTORY: '/inventory/inventories/',
     FETCH_SUPPLIERS: '/inventory/suppliers/',
     FETCH_ITEMS: '/inventory/items/',
+    DELETE_ITEM: '/inventory/items',
 
 }
 
@@ -48,6 +57,7 @@ export const APP_API_URL = {
     LOGIN: '/api/register/login',
     REFRESH_TOKEN: '/api/auth/refresh',
     GET_USER_PERMISSIONS: '/api/auth/user-permissions',
+    FETCH_GROUP: '/api/groups',
    
 
     /***************** PATIENT APIS **********************/
@@ -66,6 +76,10 @@ export const APP_API_URL = {
     CONSULT_PATIENT: '/api/patient/consult-patient',
     REFER_PATIENT: '/api/patient/refer-patient',
     GET_PATIENT_PROFILE: '/api/patient/patient-profile',
+    PRESCRIBE_DRUG: '/api/patient/prescribe-drug',
+    CREATE_PRESCRIPTION: '/api/patient/create-prescription',
+
+
 
 
     /***************** DOCTOR APIS **********************/
@@ -73,10 +87,16 @@ export const APP_API_URL = {
     FETCH_DOCTOR: '/api/doctor/fetch-doctor',
 
 
+    /***************** LABORATORY APIS **********************/
+    FETCH_LAB_RESULTS: '/api/laboratory/get-lab-results',
+    FETCH_LAB_REQUESTS: '/api/laboratory/get-lab-requests',
+
+
     /***************** INVENTORY APIS **********************/
     ADD_INVENTORY: '/api/inventory/add-inventory',
     FETCH_SUPPLIERS: '/api/inventory/fetch-suppliers',
     FETCH_ITEMS: '/api/inventory/fetch-items',
+    DELETE_ITEM: '/api/inventory/delete-item',
 
 }
 

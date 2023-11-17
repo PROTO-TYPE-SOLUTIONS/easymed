@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import AllPrescriptions from "@/components/dashboard/doctor-interface/prescriptions";
+import Link from "next/link";
 
 const Prescription = () => {
   const router = useRouter();
@@ -45,33 +46,33 @@ const Prescription = () => {
 
   return (
     <Container maxWidth="xl" className="my-4">
-      <section className="flex items-center gap-2">
+      <Link href="/dashboard/doctor-interface" className="flex font-semibold text-xl items-center gap-2">
         <div>
           <MdOutlineKeyboardBackspace />
         </div>
         <div>
-          <h1 className="">Prescription</h1>
+          <h1 className="">Back</h1>
         </div>
-      </section>
+      </Link>
       <section className="flex items-center gap-2 mt-8">
         <div className="w-7/12">
           <input
             name="drug_name"
             placeholder="Prescription Id"
-            className="block border rounded-3xl bg-background border-gray py-3 text-sm px-4 focus:outline-none w-full"
+            className="block border  bg-background border-gray py-3 text-sm px-4 focus:outline-none w-full"
           />
         </div>
         <div>
           <button
             type="submit"
-            className="bg-primary w-full rounded-3xl px-4 text-sm py-3 text-white"
+            className="bg-primary w-full  px-4 text-sm py-3 text-white"
             onClick={() => setShow(true)}
           >
             Add Drug
           </button>
         </div>
       </section>
-      { show && <AllPrescriptions /> }
+      { show && <AllPrescriptions patient={decodedData} /> }
     </Container>
   );
 };
