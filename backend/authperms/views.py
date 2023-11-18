@@ -317,23 +317,21 @@ class UserPermissionsAPIView(APIView):
         except CustomUser.DoesNotExist:
             return None
 
-    def get(self, request: Request, user_id:int=None, *args, **kwargs: dict):
+    def get(self, request: Request, user_id: int = None, *args, **kwargs: dict):
         user = self.get_object(user_id)
 
         if user is None:
             return Response({"error_message": f"user id {user_id} doesn't exist"})
-        
+
         # user doesn't belong to any group
-        if user.groups.count()<1:
+        if user.groups.count() < 1:
             return Response([], status=status.HTTP_200_OK)
-        
-        permissions = []
-        groups:list[Group] = list(user.groups.all())
-        for group in groups:
-            permissions.extend([permission.name for permission in group.permissions.all()])
+
+        group = user.group
+        permissions = [
+            permission.name for permission in group.permissions.all()]
         print(permissions)
         return Response(permissions, status=status.HTTP_200_OK)
-
 
 
 class AddPermissionsToUserAPIView(APIView):
@@ -421,5 +419,3 @@ class AddPermissionToGroupAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
