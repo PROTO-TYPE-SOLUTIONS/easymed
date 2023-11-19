@@ -69,11 +69,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         related_name='custom_users_permissions',
     )
 
-<<<<<<< HEAD
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True,null=True, related_name='custom_users')
-=======
     group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, related_name='custom_users', null=True)
->>>>>>> 84bd93f0f3a0fe8958978fd164ece66821b20333
 
     groups = None
 

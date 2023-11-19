@@ -5,7 +5,7 @@ from customuser.models import CustomUser
 from inventory.models import Item, OrderBill
 
 
-class Equipment(models.Model):
+class LabEquipment(models.Model):
     CATEGORY_CHOICE = (
         ("none", "None"),
         ("rss32", "RS232"),
@@ -13,6 +13,7 @@ class Equipment(models.Model):
     )
     name = models.CharField(max_length=250)
     category = models.CharField(max_length=10, default="none", choices=CATEGORY_CHOICE,)
+    ip_address = models.GenericIPAddressField() 
 
     def __str__(self):
         return self.name
@@ -44,10 +45,10 @@ class LabTestPanel(models.Model):
         return self.name        
 
 
-class LabEquipment(models.Model):
-    name = models.TextField()
-    ip_address = models. GenericIPAddressField()
-    port = models.IntegerField()
+# class LabEquipment(models.Model):
+#     name = models.TextField()
+#     ip_address = models. GenericIPAddressField()
+#     port = models.IntegerField()
 
 class LabTestRequest(models.Model):
     patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -61,6 +62,9 @@ class LabTestRequest(models.Model):
 
     def __str__(self):
         return str(self.test_profile_ID.name)
+
+class EquipmentTestRequest():
+    pass
 
 class LabTestResult(models.Model):
     lab_test_request_ID = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
