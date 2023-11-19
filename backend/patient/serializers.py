@@ -170,13 +170,13 @@ class AppointmentSerializer(serializers.ModelSerializer):
         print("update appointment")
         patient_dict = validated_data.get('patient')
         print(patient_dict)
-        try:
-            patient = Patient.objects.get(id=patient_dict.get('id'),)
-        except Exception as e:
-            print(e)
-            raise serializers.ValidationError(f"Error occurred {e}")
+        # try:
+        #     patient = Patient.objects.get(id=patient_dict.get('id'),)
+        # except Exception as e:
+        #     print(e)
+        #     raise serializers.ValidationError(f"Error occurred {e}")
         
-        instance.patient = patient
+        instance.patient = validated_data.get('patient', instance.patient)
         instance.assigned_doctor = validated_data.get('assigned_doctor', instance.assigned_doctor)
         instance.appointment_date_time = validated_data.get('appointment_date_time', instance.appointment_date_time)
         instance.status = validated_data.get('status', instance.status)
