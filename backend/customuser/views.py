@@ -27,7 +27,8 @@ from .models import (
     Doctor,
     Nurse,
     Receptionist,
-    LabTech
+    LabTech,
+    
 )
 
 # swagger
@@ -69,8 +70,16 @@ class RegistrationAPIView(APIView):
         serializer = CustomUserRegistrationSerializer(data=data)
 
         serializer.is_valid(raise_exception=True)
-        
-        serializer.save()
+        role = serializer.validated_data.get("role")
+
+        if role == CustomUser.BASE_ROLE:
+            serializer.save()
+        else:
+            is_admin = bool(request.user.is_superuser and request.user.role == CustomUser.SYS_ADMIN)
+            if not is_admin:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            
+            serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

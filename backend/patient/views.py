@@ -3,6 +3,8 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from customuser.models import CustomUser
 from .models import (
     InsuranceCompany,
@@ -31,6 +33,12 @@ from .serializers import (
     ConsultationSerializer,
     ReferralSerializer,
     TriageSerializer,
+)
+
+# filters
+from .filters import (
+    AppointmentFilter,
+    PatientFilter
 )
 
 # swagger
@@ -63,6 +71,8 @@ class ContactDetailsViewSet(viewsets.ModelViewSet):
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PatientFilter
 
     def create(self, request: Request, *args, **kwargs):
         data = request.data.copy()
@@ -121,6 +131,8 @@ class NextOfKinViewSet(viewsets.ModelViewSet):
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
     serializer_class = AppointmentSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = AppointmentFilter
 
 
 class ConsultationViewSet(viewsets.ModelViewSet):
@@ -153,7 +165,7 @@ class TriageViewSet(viewsets.ModelViewSet):
     serializer_class = TriageSerializer
 
 
-
+# TODO
 # get appointments for a specific doctor
 class DoctorAppointmentViewSet(viewsets.ViewSet):
     serializer_class = AppointmentSerializer

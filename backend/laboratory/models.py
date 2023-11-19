@@ -11,9 +11,15 @@ class LabEquipment(models.Model):
         ("rss32", "RS232"),
         ("tcp", "TCP"),
     )
+    FORMAT_CHOICE = (
+        ("hl7", "HL7"),
+        ("astm", "ASTM"),
+    )
     name = models.CharField(max_length=250)
     category = models.CharField(max_length=10, default="none", choices=CATEGORY_CHOICE,)
     ip_address = models.GenericIPAddressField(null=True) 
+    port = models.PositiveIntegerField(null=True)
+    data_format = models.CharField(max_length=10, choices=FORMAT_CHOICE, default="hl7")
 
     def __str__(self):
         return self.name
@@ -58,6 +64,7 @@ class LabTestRequest(models.Model):
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT, null=True, blank=True)
     sample = models.BooleanField(null=True)
+    sample_id = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return str(self.test_profile_ID.name)
