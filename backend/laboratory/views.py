@@ -82,14 +82,15 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
             equipment: LabEquipment = LabEquipment.objects.get(pk=equipment_id)
         except LabEquipment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
-        data = json_to_hl7(instance)
-        if equipment.category == "rs32":
-            send_through_rs232(data=data)
-            return Response({"message": "Data sent to RS232 equipment"}, status=status.HTTP_200_OK)
-        if equipment.category == 'tcp':
-            send_through_tcp(data=data)
-            return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
+        if(equipment.data_format == "hl7"):
+            data = json_to_hl7(instance)
+            if equipment.category == "rs32":
+                send_through_rs232(data=data)
+                return Response({"message": "Data sent to RS232 equipment"}, status=status.HTTP_200_OK)
+            if equipment.category == 'tcp':
+                send_through_tcp(data=data)
+                return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
+        return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
 
 
 class LabTestCategoryViewSet(viewsets.ModelViewSet):

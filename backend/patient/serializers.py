@@ -41,8 +41,6 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = ("id", "first_name", "second_name", "date_of_birth",
                   "gender", "insurance", "user_id", "age")
-        read_only_fields = ("id",)
-        write_only_fields = ("insurance",)
 
     def get_age(self, obj: Patient):
         if obj.age:
@@ -69,20 +67,20 @@ class ConsultationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AppointmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Appointment
-        fields = '__all__'
+# class AppointmentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Appointment
+#         fields = '__all__'
 
-    def to_representation(self, instance: Appointment):
-        data = super().to_representation(instance)
-        if instance.assigned_doctor:
-            data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
+#     def to_representation(self, instance: Appointment):
+#         data = super().to_representation(instance)
+#         if instance.assigned_doctor:
+#             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
 
-        if instance.patient:
-            data["first_name"] = instance.patient.first_name
-            data["second_name"] = instance.patient.second_name
-        return data
+#         if instance.patient:
+#             data["first_name"] = instance.patient.first_name
+#             data["second_name"] = instance.patient.second_name
+#         return data
 
 
 class PublicAppointmentSerializer(serializers.ModelSerializer):
@@ -149,6 +147,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'date_changed',
             'id',
         ]
+        read_only_fields = ("id",)
 
     def create(self, validated_data: dict):
         patient = validated_data.pop("patient", None)
@@ -168,21 +167,32 @@ class AppointmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Error occurred {e}")
 
     def update(self, instance: Appointment, validated_data: dict):
-        patient_dict: dict = validated_data.get('patient')
-        try:
-            patient = Patient.objects.get(first_name=patient_dict.get(
-                'first_name'), second_name=patient_dict.get('second_name'), user_id=patient_dict.get('user_id'))
-        except Exception as e:
-            print(e)
-            raise serializers.ValidationError(f"Error occurred {e}")
+        print("update appointment")
+        patient_dict = validated_data.get('patient')
+        print(patient_dict)
+        # try:
+        #     patient = Patient.objects.get(id=patient_dict.get('id'),)
+        # except Exception as e:
+        #     print(e)
+        #     raise serializers.ValidationError(f"Error occurred {e}")
         
-        instance.patient = patient
+        instance.patient = validated_data.get('patient', instance.patient)
         instance.assigned_doctor = validated_data.get('assigned_doctor', instance.assigned_doctor)
         instance.appointment_date_time = validated_data.get('appointment_date_time', instance.appointment_date_time)
         instance.status = validated_data.get('status', instance.status)
         instance.reason = validated_data.get('reason', instance.reason)
         instance.date_changed = timezone.now()
         return instance
+    
+    def to_representation(self, instance: Appointment):
+        data = super().to_representation(instance)
+        if instance.assigned_doctor:
+            data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
+
+        if instance.patient:
+            data["first_name"] = instance.patient.first_name
+            data["second_name"] = instance.patient.second_name
+        return data
 
 
 
@@ -190,3 +200,4 @@ class TriageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Triage
         fields = '__all__'
+

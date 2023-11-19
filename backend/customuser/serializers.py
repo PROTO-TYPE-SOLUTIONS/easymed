@@ -40,7 +40,7 @@ class CustomUserRegistrationSerializer(serializers.ModelSerializer):
                   'last_name', 'role', 'profession', 'group')
 
     def create(self, validated_data: dict):
-        print()
+        
         user: CustomUser = CustomUser.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
@@ -48,7 +48,8 @@ class CustomUserRegistrationSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name'],
             role=validated_data['role'],
             profession=validated_data['profession'],
-            group=validated_data["group"]
+            group=validated_data["group"],
+            is_staff=validated_data['role'] != 'patient',
         )
         return user
 
