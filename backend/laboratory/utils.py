@@ -24,41 +24,43 @@ def json_to_hl7(test_request: LabTestRequest):
     ])
 
     # PID segment (Patient Identification)
-    try:
-        data.PID = "|".join([
-            "PID",
-            "1",
-            test_request.patient_ID.pk,
+    pid_seg = ["PID", "1"]
+    if test_request.patient_ID:
+        pid_seg +=[str(test_request.patient_ID.pk),
             test_request.patient_ID.first_name,
             test_request.patient_ID.second_name,
-            test_request.patient_ID.age,
-            test_request.patient_ID.gender,
-        ])
+            str(test_request.patient_ID.age),
+            test_request.patient_ID.gender,]
+    
+    try:
+        data.PID = "|".join(pid_seg)
     except Exception as e:
         print(e)
 
     # OBR segment (Observation Request)
+    obr_seg = ["OBR", "1"]
+    if test_request.item_id:
+        obr_seg += [test_request.item_id.name,]
+    if test_request.test_profile_ID:
+        obr_seg += [test_request.test_profile_ID.name,]
+    obr_seg += [str(test_request.pk),]
     try:
-        data.OBR = "|".join([
-            "OBR",
-            "1",
-            str(test_request.pk),
-            test_request.item_id.name,
-            test_request.test_profile_ID.name,
-        ])
+        data.OBR = "|".join(obr_seg)
     except Exception as e:
         print(e)
 
     # ORC segment (Common Order)
+    
     data.ORC = "|".join([
         "ORC", "NW",
     ])
 
     # NTE segment (Notes and Comments)
+    nte_seg = ["NTE", "1"]
+    if test_request.note:
+        nte_seg += [test_request.note,]
     try:
-        data.NTE = "|".join([
-            "NTE", "1", "", test_request.note
-        ])
+        data.NTE = "|".join(nte_seg)
     except Exception as e:
         print(e)
 
