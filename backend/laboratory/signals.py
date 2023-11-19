@@ -20,8 +20,9 @@ def send_to_equipment(sender: EquipmentTestRequest, instance: EquipmentTestReque
         return
     test_request: LabTestRequest = instance.test_request
     equipment: LabEquipment = instance.equipment
+    print("send to equipment signal firing")
     if(equipment.data_format == "hl7"):
-        data = json_to_hl7(instance)
+        data = json_to_hl7(test_request)
         if equipment.category == "rs32":
             send_through_rs232(data=data)
             
