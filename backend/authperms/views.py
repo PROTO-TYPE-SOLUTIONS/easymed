@@ -1,8 +1,10 @@
 
-
+from rest_framework.generics import ListAPIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.permissions import AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
 
 # permissions
 from .permissions import (
@@ -46,20 +48,29 @@ from customuser.models import (
     SysadminProfile,
 )
 
+# filters
+from .filters import (
+    GroupFilter,
+)
+
 
 # Group Endpoint
 
-class GroupsAPIView(APIView):
-    permission_classes = (IsStaffUser,)
+class GroupsAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Group.objects.all()
+    serializer_class = GroupsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = GroupFilter
 
-    @extend_schema(
-        responses=GroupsSerializer,
-    )
-    def get(self, request: Request, *args, **kwargs: dict):
-        groups = Group.objects.all()
-        serializer = GroupsSerializer(groups, many=True)
+    # @extend_schema(
+    #     responses=GroupsSerializer,
+    # )
+    # def get(self, request: Request, *args, **kwargs: dict):
+    #     groups = Group.objects.all()
+    #     serializer = GroupsSerializer(groups, many=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GroupAPIView(APIView):
