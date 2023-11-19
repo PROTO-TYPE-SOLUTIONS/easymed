@@ -44,7 +44,7 @@ const BookAppointment = () => {
       setLoading(true);
       await bookAppointment(formData).then(() => {
         helpers.resetForm();
-        toast.success("Appointment Booked Successfully!");
+        toast.success("Your request for Appointment has been received! We will send you an email confirmation.");
         setLoading(false);
         router.push("/");
       });

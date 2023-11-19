@@ -12,7 +12,7 @@ from .models import (
     LabTestRequest,
     LabTestCategory,
     LabTestProfile,
-    Equipment
+    LabEquipment
 )
 # serializers
 from .serializers import (
@@ -21,6 +21,7 @@ from .serializers import (
     LabTestRequestSerializer,
     LabTestCategorySerializer,
     LabTestProfileSerializer,
+    LabEquipmentSerializer,
 )
 
 # permissions
@@ -43,6 +44,11 @@ from .utils import (
 class LabReagentViewSet(viewsets.ModelViewSet):
     queryset = LabReagent.objects.all()
     serializer_class = LabReagentSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+class LabEquipmentViewSet(viewsets.ModelViewSet):
+    queryset = LabEquipment.objects.all()
+    serializer_class = LabEquipmentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
@@ -73,8 +79,8 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
     def send_to_equipment(self, request: Request,  equipment_id, pk=None):
         instance: LabTestRequest = self.get_object()
         try:
-            equipment: Equipment = Equipment.objects.get(pk=equipment_id)
-        except Equipment.DoesNotExist:
+            equipment: LabEquipment = LabEquipment.objects.get(pk=equipment_id)
+        except LabEquipment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         data = json_to_hl7(instance)
