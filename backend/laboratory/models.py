@@ -51,7 +51,7 @@ class LabTestPanel(models.Model):
 
 class LabTestRequest(models.Model):
     patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
+    test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
     note = models.TextField()
     order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True, blank=True)
     item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
