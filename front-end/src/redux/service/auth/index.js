@@ -17,14 +17,10 @@ export const registerUser = (payload,auth) =>{
     })
 }
 
-export const fetchUserPermissions = (userId,auth) =>{
-    const axiosInstance = UseAxios()
+export const fetchUserPermissions = (auth) =>{
+    const axiosInstance = UseAxios(auth)
     return new Promise((resolve,reject) =>{
-        axiosInstance.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,auth,{
-            params:{
-                userId: userId,
-            }
-        })
+        axiosInstance.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,auth)
             .then((res) =>{
                 resolve(res.data)
             })

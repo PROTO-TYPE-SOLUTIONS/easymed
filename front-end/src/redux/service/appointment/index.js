@@ -27,11 +27,11 @@ export const fetchAppointment = () =>{
 }
 
 
-export const fetchDoctorAppointments = (userId) => {
+export const fetchDoctorAppointments = (assigned_doctor__id) => {
     return new Promise((resolve, reject) => {
       axios.get(`${APP_API_URL.FETCH_DOCTOR_APPOINTMENTS}`,{
         params:{
-            userId: userId,
+            assigned_doctor__id: assigned_doctor__id,
         }
       })
         .then((res) => {

@@ -10,6 +10,7 @@ import LabRequestDataGrid from "@/components/dashboard/laboratory/lab-request-da
 const LabRequests = () => {
   const dispatch = useDispatch();
   const { labRequests } = useSelector((store) => store.laboratory);
+
   const token = useAuth();
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const LabRequests = () => {
 
   return (
     <Container maxWidth="xl">
-      <h1 className="uppercase text-2xl my-4">Lab Requests</h1>
+      <h1 className="uppercase text-2xl my-3">Lab Requests</h1>
       <LabRequestDataGrid labRequests={labRequests} />
     </Container>
   );
