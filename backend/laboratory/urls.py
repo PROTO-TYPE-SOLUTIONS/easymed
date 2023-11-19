@@ -8,6 +8,7 @@ from .views import (
     LabTestCategoryViewSet,
     LabTestProfileViewSet,
     LabEquipmentViewSet,
+    EquipmentTestRequestViewSet,
 )
 
 router = DefaultRouter()
@@ -17,6 +18,7 @@ router.register(r'lab-test-results', LabTestResultViewSet)
 router.register(r'lab-test-requests', LabTestRequestViewSet)
 router.register(r'lab-test-categories', LabTestCategoryViewSet)
 router.register(r'lab-equipment', LabEquipmentViewSet)
+router.register(r'equipment-test-request', EquipmentTestRequestViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -8,7 +8,7 @@ from inventory.models import Item, OrderBill
 class LabEquipment(models.Model):
     CATEGORY_CHOICE = (
         ("none", "None"),
-        ("rss32", "RS232"),
+        ("rs232", "RS232"),
         ("tcp", "TCP"),
     )
     FORMAT_CHOICE = (
@@ -18,7 +18,7 @@ class LabEquipment(models.Model):
     name = models.CharField(max_length=250)
     category = models.CharField(max_length=10, default="none", choices=CATEGORY_CHOICE,)
     ip_address = models.GenericIPAddressField(null=True) 
-    port = models.PositiveIntegerField(null=True)
+    port = models.CharField(max_length=20, null=True)
     data_format = models.CharField(max_length=10, choices=FORMAT_CHOICE, default="hl7")
 
     def __str__(self):
@@ -50,11 +50,6 @@ class LabTestPanel(models.Model):
         return self.name        
 
 
-# class LabEquipment(models.Model):
-#     name = models.TextField()
-#     ip_address = models. GenericIPAddressField()
-#     port = models.IntegerField()
-
 class LabTestRequest(models.Model):
     patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
@@ -69,8 +64,9 @@ class LabTestRequest(models.Model):
     def __str__(self):
         return str(self.test_profile_ID.name)
 
-class EquipmentTestRequest():
-    pass
+class EquipmentTestRequest(models.Model):
+    test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
 
 class LabTestResult(models.Model):
     lab_test_request_ID = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
