@@ -13,7 +13,7 @@ class LabEquipment(models.Model):
     )
     name = models.CharField(max_length=250)
     category = models.CharField(max_length=10, default="none", choices=CATEGORY_CHOICE,)
-    ip_address = models.GenericIPAddressField() 
+    ip_address = models.GenericIPAddressField(null=True) 
 
     def __str__(self):
         return self.name
@@ -27,12 +27,11 @@ class LabReagent(models.Model):
 
     def __str__(self):
         return self.name
-    
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
     cost = models.CharField(max_length=255)
-    item_number = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name    
@@ -54,11 +53,11 @@ class LabTestRequest(models.Model):
     patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     note = models.TextField()
-    order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE)
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
-    requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT)
-
+    order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True, blank=True)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
+    requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT, null=True, blank=True)
+    sample = models.BooleanField(null=True)
 
     def __str__(self):
         return str(self.test_profile_ID.name)
