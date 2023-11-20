@@ -6,11 +6,15 @@ The technical implementation guide can be found [here](https://drive.google.com/
 
 ## Running Backend
 ### Windows
+[Install](https://medium.com/analytics-vidhya/virtual-environment-6ad5d9b6af59) python and virtualenv.
+Next, in the project directory run:
 ```
 virtualenv venv
 venv\scripts\activate
 cd backend
 pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
 python manage.py runserver
 ```
 
@@ -20,6 +24,8 @@ virtualenv venv
 source venv/bin/activate
 cd backend
 pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
 python manage.py runserver
 ```
 

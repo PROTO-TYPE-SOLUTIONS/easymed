@@ -1,10 +1,40 @@
-from django.urls import path
-from .views import *
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import (
+    InsuranceCompanyViewSet,
+    ContactDetailsViewSet,
+    PatientViewSet,
+    NextOfKinViewSet,
+    AppointmentViewSet,
+    PrescriptionViewSet,
+    PrescribedDrugViewSet,
+    PublicAppointmentViewSet,
+    ServiceViewSet,
+    ConsultationViewSet,
+    ReferralViewSet,
+    DoctorAppointmentViewSet,
+    TriageViewSet,
+    PatientByUserIdAPIView
+)
+
+router = DefaultRouter()
+router.register(r'insurance-companies', InsuranceCompanyViewSet)
+router.register(r'contact-details', ContactDetailsViewSet)
+router.register(r'patients', PatientViewSet)
+router.register(r'services', ServiceViewSet)
+router.register(r'next-of-kin', NextOfKinViewSet)
+router.register(r'appointments', AppointmentViewSet)
+router.register(r'publicappointments', PublicAppointmentViewSet)
+router.register(r'prescriptions', PrescriptionViewSet)
+router.register(r'prescribed-drugs', PrescribedDrugViewSet)
+router.register(r'consultations', ConsultationViewSet)
+router.register(r'referrals', ReferralViewSet)
+router.register(r'triage', TriageViewSet)
+router.register(r'appointments', AppointmentViewSet, basename='appointments')
+
 
 
 urlpatterns = [
-    path('patients/', PatientsList.as_view(), name='patients-list'),
-    path('appointments/', AppointmentListCreateView.as_view(), name='appointment-list-create'),
-    path('appointments/<int:pk>/', AppointmentRetrieveUpdateView.as_view(), name='appointment-detail'),
-    # path('drugs/<str:pk>/', DrugDetailView.as_view(), name='drugs-detail'),
+    path('', include(router.urls)),
+    path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
 ]

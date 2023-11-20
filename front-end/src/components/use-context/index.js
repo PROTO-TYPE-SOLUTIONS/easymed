@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 
 export const authContext = createContext();
 
+const secretKey = new SimpleCrypto("c2FubGFta2VueWFAZ21haWwuY29t");
 
 export const AuthProvider = ({ children }) => {
   const dispatch = useDispatch();
