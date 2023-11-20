@@ -4,18 +4,17 @@ import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
-import { consultPatient } from "@/redux/service/patients";
 import { useContext } from "react";
 import { authContext } from "@/components/use-context";
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify";
+import { sendLabRequests } from "@/redux/service/laboratory";
+import { useAuth } from "@/assets/hooks/use-auth";
 
-const LabModal = ({
-  selectedRowData,
-  labOpen,
-  setLabOpen,
-}) => {
+const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
   const [loading, setLoading] = React.useState(false);
-  const { user } = useContext(authContext);
+  const auth = useAuth();
+
+  console.log("ROW_DATA ",selectedRowData)
 
   const handleClose = () => {
     setLabOpen(false);
@@ -23,27 +22,26 @@ const LabModal = ({
 
   const initialValues = {
     note: "",
-    complaint: "",
-    disposition: "admitted",
-    doctor_ID: user?.user_id,
-    patient_id: selectedRowData?.id,
+    sample: true,
+    patient_ID: selectedRowData?.id,
+    test_profile_ID: null,
+    order_bill: null,
+    item_id: null,
+    requested_by: auth?.user_id,
+    equipment: null,
   };
 
   const validationSchema = Yup.object().shape({
     note: Yup.string().required("This field is required!"),
   });
 
-  const handleConsultPatient = async (formValue, helpers) => {
+  const handleSendLabRequest = async (formValue, helpers) => {
+    console.log("FORM_DATA ",formValue);
     try {
-      const formData = {
-        ...formValue,
-        patient_id: parseInt(formValue.patient_id),
-        doctor_ID: parseInt(formValue.doctor_ID),
-      };
       setLoading(true);
-      await consultPatient(formData).then(() => {
+      await sendLabRequests(formValue,auth).then(() => {
         helpers.resetForm();
-        toast.success("Consultation Successful!");
+        toast.success("Lab Request Successful!");
         setLoading(false);
         handleClose();
       });
@@ -68,7 +66,7 @@ const LabModal = ({
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={handleConsultPatient}
+            onSubmit={handleSendLabRequest}
           >
             <Form>
               <section className="space-y-2">

@@ -41,10 +41,10 @@ export const AuthProvider = ({ children }) => {
             JSON.stringify(response.data.refresh)
           );
           if (decodedUser?.role === "patient") {
-            // router.push('/')
             router.push(`/patient-profile`);
           } else {
-            await dispatch(getAllUserPermissions(decodedUser?.user_id));
+            console.log("DECODED ",decodedUser)
+            await dispatch(getAllUserPermissions(decodedUser));
             router.push("/dashboard");
           }
         } catch (error) {
@@ -80,12 +80,12 @@ export const AuthProvider = ({ children }) => {
 
       setUser({ ...decodedToken, token: storedToken });
     }
-    // const fetchPermissions = async () => {
-    //   if (decodedToken) {
-    //     await dispatch(getAllUserPermissions(decodedToken.user_id));
-    //   }
-    // };
-    // fetchPermissions();
+    const fetchPermissions = async () => {
+      if (decodedToken) {
+        await dispatch(getAllUserPermissions(decodedToken.user_id,user));
+      }
+    };
+    fetchPermissions();
   }, []);
 
   return (
