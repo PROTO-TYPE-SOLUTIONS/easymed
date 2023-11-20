@@ -11,7 +11,7 @@ const Sidebar = () => {
         <header className="h-[10vh] shadow flex items-center justify-center font-bold">
           <h1>Logo</h1>
         </header>
-        <section className="px-2 h-[84vh] flex flex-col justify-between">
+        <section className="pl-2 h-[84vh] flex flex-col justify-between">
           <div className="overflow-x-auto">
             <ul className="space-y-3 my-4 ">
               {menus.map((menu, index) => (

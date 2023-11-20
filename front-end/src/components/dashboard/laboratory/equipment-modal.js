@@ -45,11 +45,10 @@ export default function EquipmentModal({ selectedRowData, open, setOpen }) {
   });
 
   const handleSendEquipment = async (formValue, helpers) => {
-    console.log("FORM_DATA ", formValue);
     try {
       const formData = {
         ...formValue,
-        requestId: selectedRowData.id,
+        test_request: selectedRowData.id,
       }
       setLoading(true);
       await sendToEquipment(formData, auth).then(() => {

@@ -40,7 +40,7 @@ export const API_URL = {
     FETCH_LAB_REQUESTS: '/lab/lab-test-requests/',
     SEND_LAB_REQUESTS: '/lab/lab-test-requests/',
     FETCH_LAB_EQUIPMENT: '/lab/lab-equipment/',
-    SEND_TO_EQUIPMENT: '/lab/lab-test-requests/',
+    SEND_TO_EQUIPMENT: '/lab/equipment-test-request/',
 
 
     /***************** INVENTORY APIS **********************/

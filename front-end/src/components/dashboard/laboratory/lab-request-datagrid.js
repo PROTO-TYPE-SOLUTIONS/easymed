@@ -30,8 +30,8 @@ const LabRequestDataGrid = ({ labRequests }) => {
 
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
-  const filteredData = labData.filter((patient) => {
-    return patient?.name
+  const filteredData = labRequests.filter((request) => {
+    return request?.note
       ?.toLocaleLowerCase()
       .includes(searchQuery.toLowerCase());
   });
@@ -60,20 +60,6 @@ const LabRequestDataGrid = ({ labRequests }) => {
   };
 
 
-  const priorityFunc = ({ data }) => {
-    if (data?.priority === "Priority") {
-      return (
-        <div className="flex items-center gap-2">
-          <p>{data?.name}</p>
-          <Chip variant="outlined" size="small" style={{ borderColor: "#FC4B1B" }} label={data?.priority} />
-        </div>
-      );
-    }else{
-        return <p>{data?.name}</p>
-    }
-  };
-
-
   return (
     <>
       <Grid container spacing={2} className="my-2">
@@ -83,7 +69,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
-            placeholder="Search patients by name"
+            placeholder="Search lab requests"
           />
         </Grid>
         <Grid item md={4} xs={12}>
@@ -117,7 +103,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={labRequests}
+        dataSource={filteredData}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -153,7 +139,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <EquipmentModal {...{open,setOpen,selectedRowData}} /> 
+      {open && <EquipmentModal {...{open,setOpen,selectedRowData}} />}
     </>
   );
 };

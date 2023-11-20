@@ -44,8 +44,7 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-            console.log("EQUIPMENT_BODY ",body)
-            await backendAxiosInstance.post(`${API_URL.SEND_TO_EQUIPMENT}${body.requestId}/send_to_equipment/${body.equipment}`,body,config)
+            await backendAxiosInstance.post(`${API_URL.SEND_TO_EQUIPMENT}`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
