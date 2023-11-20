@@ -11,17 +11,20 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === API_METHODS.GET) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
-    
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_LAB_REQUESTS}`, config).then(response => {
+            const name = req.query.name
+
+
+            console.log("PATIENT_URL ",`${API_URL.FETCH_GROUP}?name=${name}`)
+            await backendAxiosInstance.get(`${API_URL.FETCH_GROUP}?name=${name}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -35,17 +38,17 @@ export default async function handler(req, res) {
     }
     else if (req.method === API_METHODS.POST) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
             const body = req.body;
-            console.log("EQUIPMENT_BODY ",body)
-            await backendAxiosInstance.post(`${API_URL.SEND_TO_EQUIPMENT}${body.requestId}/send_to_equipment/${body.equipment}`,body,config)
+
+            await backendAxiosInstance.post(`${API_URL.CREATE_PATIENT}`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

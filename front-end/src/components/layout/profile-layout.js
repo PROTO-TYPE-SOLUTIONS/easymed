@@ -19,8 +19,8 @@ const ProfileLayout = ({ children }) => {
           <p className="">Logo</p>
         </section>
         <section className="py-8 space-y-8">
-          {menus.map((menu) => (
-            <Link href={menu.link} title={menu.label} className="flex items-center justify-center gap-2">
+          {menus.map((menu,index) => (
+            <Link key={index} href={menu.link} title={menu.label} className="flex items-center justify-center gap-2">
               <span className="text-2xl">{menu.icon}</span>
             </Link>
           ))}

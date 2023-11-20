@@ -10,6 +10,8 @@ import { getAllLabEquipments } from "@/redux/features/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import { sendToEquipment } from "@/redux/service/laboratory";
+import { toast } from 'react-toastify'
 
 export default function EquipmentModal({ selectedRowData, open, setOpen }) {
   const dispatch = useDispatch();
@@ -35,28 +37,24 @@ export default function EquipmentModal({ selectedRowData, open, setOpen }) {
   }, [auth]);
 
   const initialValues = {
-    note: "",
-    sample: true,
-    patient_ID: selectedRowData?.id,
-    test_profile_ID: null,
-    order_bill: null,
-    item_id: null,
-    requested_by: auth?.user_id,
     equipment: null,
   };
 
   const validationSchema = Yup.object().shape({
-    note: Yup.string().required("This field is required!"),
     equipment: Yup.string().required("This field is required!"),
   });
 
   const handleSendEquipment = async (formValue, helpers) => {
     console.log("FORM_DATA ", formValue);
     try {
+      const formData = {
+        ...formValue,
+        requestId: selectedRowData.id,
+      }
       setLoading(true);
-      await sendLabRequests(formValue, auth).then(() => {
+      await sendToEquipment(formData, auth).then(() => {
         helpers.resetForm();
-        toast.success("Lab Request Successful!");
+        toast.success("Send to Equipment Successful!");
         setLoading(false);
         handleClose();
       });
@@ -88,18 +86,6 @@ export default function EquipmentModal({ selectedRowData, open, setOpen }) {
             onSubmit={handleSendEquipment}
           >
             <Form>
-              <Field
-                as="textarea"
-                className="block border my-2 border-gray py-3 px-4 focus:outline-none w-full"
-                type="text"
-                placeholder="Add a Note"
-                name="note"
-              />
-              <ErrorMessage
-                name="note"
-                component="div"
-                className="text-warning text-xs"
-              />
               <Field
                 as="select"
                 className="block pr-9 my-2 border border-gray py-3 px-4 focus:outline-none w-full"
@@ -145,12 +131,6 @@ export default function EquipmentModal({ selectedRowData, open, setOpen }) {
             </Form>
           </Formik>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Disagree</Button>
-          <Button onClick={handleClose} autoFocus>
-            Agree
-          </Button>
-        </DialogActions>
       </Dialog>
     </React.Fragment>
   );
