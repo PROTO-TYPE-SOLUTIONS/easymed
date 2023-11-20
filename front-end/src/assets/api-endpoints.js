@@ -40,7 +40,7 @@ export const API_URL = {
     FETCH_LAB_REQUESTS: '/lab/lab-test-requests/',
     SEND_LAB_REQUESTS: '/lab/lab-test-requests/',
     FETCH_LAB_EQUIPMENT: '/lab/lab-equipment/',
-    SEND_TO_EQUIPMENT: '/lab/lab-test-requests/',
+    SEND_TO_EQUIPMENT: '/lab/equipment-test-request/',
 
 
     /***************** INVENTORY APIS **********************/
@@ -61,6 +61,7 @@ export const APP_API_URL = {
     REFRESH_TOKEN: '/api/auth/refresh',
     GET_USER_PERMISSIONS: '/api/auth/user-permissions',
     FETCH_GROUP: '/api/groups',
+    FETCH_PATIENT_GROUP: '/api/auth/get-group',
    
 
     /***************** PATIENT APIS **********************/

@@ -42,3 +42,20 @@ export const fetchGroups = (auth) =>{
             })
     })
 }
+
+export const fetchPatientGroup = (name) =>{
+    const axiosInstance = UseAxios();
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_PATIENT_GROUP}`,{
+            params:{
+                name: name
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

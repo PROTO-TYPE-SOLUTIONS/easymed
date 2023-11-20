@@ -145,7 +145,7 @@ const AllPrescriptions = ({ patient }) => {
       </Formik>
 
       {items.map((item, index) => (
-        <section className="bg-white shadow p-4 rounded mt-4">
+        <section key={index} className="bg-white shadow p-4 rounded mt-4">
           <Formik
             initialValues={prescribedValues}
             onSubmit={handleCreatePrescribedDrug}
