@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -12,7 +13,8 @@ from .models import (
     LabTestRequest,
     LabTestCategory,
     LabTestProfile,
-    LabEquipment
+    LabEquipment,
+    EquipmentTestRequest,
 )
 # serializers
 from .serializers import (
@@ -22,6 +24,7 @@ from .serializers import (
     LabTestCategorySerializer,
     LabTestProfileSerializer,
     LabEquipmentSerializer,
+    EquipmentTestRequestSerializer
 )
 
 # permissions
@@ -91,6 +94,14 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
                 send_through_tcp(data=data)
                 return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
         return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
+
+
+class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
+    queryset = EquipmentTestRequest.objects.all()
+    serializer_class = EquipmentTestRequestSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+
 
 
 class LabTestCategoryViewSet(viewsets.ModelViewSet):

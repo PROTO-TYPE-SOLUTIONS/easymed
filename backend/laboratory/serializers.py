@@ -2,7 +2,7 @@ from random import randrange
 from rest_framework import serializers
 
 from customuser.models import CustomUser
-from .models import LabReagent, LabTestResult, LabTestRequest, LabTestCategory, LabTestProfile, LabEquipment
+from .models import LabReagent, LabTestResult, LabTestRequest, LabTestCategory, LabTestProfile, LabEquipment, EquipmentTestRequest
 
 class LabReagentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +22,11 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
 class LabTestResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestResult
+        fields = '__all__'
+
+class EquipmentTestRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EquipmentTestRequest
         fields = '__all__'
 
 class LabTestRequestSerializer(serializers.ModelSerializer):

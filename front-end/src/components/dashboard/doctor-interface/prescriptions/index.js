@@ -250,7 +250,7 @@ const AllPrescriptions = ({ patient }) => {
                     ></path>
                   </svg>
                 )}
-                Create Prescription
+                Save Prescription
               </button>
             </div>
           </section>

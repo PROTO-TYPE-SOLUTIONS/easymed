@@ -1,22 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
 import { Grid,Chip } from "@mui/material";
 import { LuMoreHorizontal } from "react-icons/lu";
-import { AiFillDelete,AiOutlineDownload,AiFillPrinter } from 'react-icons/ai';
+import { AiOutlineDownload } from 'react-icons/ai';
 import CmtDropdownMenu from "@/assets/DropdownMenu";
+import EquipmentModal from "./equipment-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
 const getActions = () => {
-  let actions = [{ action: "download", label: "Download", icon: <AiOutlineDownload className="text-card text-xl" /> }];
-
-  actions.push({ action: "print", label: "Print", icon: <AiFillPrinter className="text-success" /> });
-
-  actions.push({ action: "delete", label: "Delete", icon: <AiFillDelete className="text-warning text-xl" /> });
+  let actions = [
+    { action: "sample", label: "Confirm Sample Collection", icon: <AiOutlineDownload className="text-card text-xl" /> },
+    { action: "equipment", label: "Send to equipment", icon: <AiOutlineDownload className="text-card text-xl" /> },
+  ];
+ 
   return actions;
 };
 
@@ -24,7 +25,9 @@ const getActions = () => {
 const LabRequestDataGrid = ({ labRequests }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
-  console.log("LAB_REQUESTS ",labRequests)
+  const [open,setOpen] = useState(false);
+  const [selectedRowData, setSelectedRowData] = React.useState({});
+
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
   const filteredData = labData.filter((patient) => {
@@ -35,12 +38,11 @@ const LabRequestDataGrid = ({ labRequests }) => {
 
 
   const onMenuClick = async (menu, data) => {
-   if (menu.action === "delete") {
+   if (menu.action === "sample") {
     //   delete api call
-    }else if(menu.action === 'download'){
-        // download function
-    }else if(menu.action === 'print'){
-        // print function
+    }else if(menu.action === 'equipment'){
+        setSelectedRowData(data)
+        setOpen(true)
     }
   };
 
@@ -115,7 +117,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={filteredData}
+        dataSource={labRequests}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -135,18 +137,15 @@ const LabRequestDataGrid = ({ labRequests }) => {
           showInfo={true}
           showNavigationButtons={true}
         />
-        <Column dataField="number" caption="NO" width={80} />
-        <Column dataField="id_number" caption="ID" width={140} />
-        <Column dataField="name" caption="Name" width={200} cellRender={priorityFunc} />
+        <Column dataField="note" caption="Note" width={180} />
+        <Column dataField="sample_id" caption="Sample" width={180} />
         <Column
-          dataField="age"
-          caption="Age"
-          width={100}
+          dataField="requested_name"
+          caption="Requested By"
+          width={140}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="test" caption="Test" width={240} />
-        <Column dataField="gender" caption="Gender" width={140} />
         <Column
           dataField="number"
           caption="Action"
@@ -154,6 +153,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
           cellRender={actionsFunc}
         />
       </DataGrid>
+      <EquipmentModal {...{open,setOpen,selectedRowData}} /> 
     </>
   );
 };

@@ -36,9 +36,9 @@ export const getAllAppointments = () => async (dispatch) => {
   }
 };
 
-export const getAllDoctorAppointments = (userId) => async (dispatch) => {
+export const getAllDoctorAppointments = (assigned_doctor__id) => async (dispatch) => {
   try {
-    const response = await fetchDoctorAppointments(userId);
+    const response = await fetchDoctorAppointments(assigned_doctor__id);
     dispatch(setDoctorAppointments(response));
   } catch (error) {
     console.log("DOCTOR_APPOINTMENTS_ERROR ", error);
