@@ -4,16 +4,26 @@ from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
-    SpectacularSwaggerView
-    )
+    SpectacularSwaggerView,
+)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/pharmacy/', include('pharmacy.urls')),
-    path('api/v1/patients/', include('patient.urls')),
-    path('api/v1/users/', include('customusers.urls')),
-
+    # patients
+    path('patients/', include('patient.urls')),
+    # lab
+    path('lab/', include('laboratory.urls')),
+    # inventory
+    path('inventory/', include('inventory.urls')),
+    # authperms/sysadmin
+    path('authperms/', include('authperms.urls')),
+    # customuser
+    path('customuser/', include('customuser.urls')),
+    # users
+    path('users/', include('customuser.urls')),
+    # schemas
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/v1/docs/", SpectacularRedocView.as_view(url_name="schema"), name="redoc",),  
-    path("api/v1/docs/swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("docs/", SpectacularRedocView.as_view(url_name="schema"), name="redoc",),  
+    path("docs/swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]

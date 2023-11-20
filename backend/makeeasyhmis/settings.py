@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,14 +31,16 @@ INSTALLED_APPS = [
     #third party apps
     'rest_framework',
     'drf_spectacular',
-    # 'guardian',
+    'rest_framework_simplejwt',
 
     # user apps
-    'patient',
-    'pharmacy',
-    'customusers',
-    'inventory',
-    'laboratory',
+    'authperms.apps.AuthpermsConfig',
+    'customuser.apps.CustomuserConfig',
+    'patient.apps.PatientConfig',
+    'pharmacy.apps.PharmacyConfig',
+    'inventory.apps.InventoryConfig',
+    'laboratory.apps.LaboratoryConfig',
+    'receptions.apps.ReceptionsConfig',
 
 ]
 
@@ -127,18 +130,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        # "rest_framework.permissions.IsAuthenticated",
         ],
     "DEFAULT_AUTHENTICATION_CLASSES": [  
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",  
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+SESSION_COOKIE_AGE = 1209600
+AUTH_USER_MODEL = 'customuser.CustomUser'
 
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Make-Easy HMIS",
     "DESCRIPTION": "Make-Easy HMIS Endpoints",
     "VERSION": "1.0.0",
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=2),
+    'SLIDING_TOKEN_REFRESH_SCOPE': None,
+    'SLIDING_TOKEN_TYPES': {'access': 'a', 'refresh': 'r'},
+    'TOKEN_OBTAIN_SERIALIZER': 'customuser.serializers.CustomTokenObtainPairSerializer',
 }
