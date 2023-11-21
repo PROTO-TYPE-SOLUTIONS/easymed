@@ -42,7 +42,7 @@ export const menus = [
       },
       {
         label: "Nursing",
-        href: "/dashboard/reception-interface",
+        href: "/dashboard/nursing-interface",
         icon: <FaWheelchair className="" />,
       },
     ],
