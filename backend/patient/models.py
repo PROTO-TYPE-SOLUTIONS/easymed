@@ -79,7 +79,6 @@ class Appointment(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
     )
-
     appointment_date_time = models.DateTimeField(null=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     assigned_doctor = models.ForeignKey(
