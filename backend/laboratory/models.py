@@ -58,7 +58,7 @@ class LabTestRequest(models.Model):
     item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT, null=True, blank=True)
-    sample = models.BooleanField(null=True)
+    sample = models.BooleanField(default=False, null=True)
     sample_id = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
