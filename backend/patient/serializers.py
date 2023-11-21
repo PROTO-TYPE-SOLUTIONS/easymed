@@ -36,11 +36,13 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     age = serializers.SerializerMethodField()
+    appointment_date_time = serializers.DateTimeField(required=False, allow_null=True)
+    reason = serializers.CharField(required=False, allow_null=True)
+
 
     class Meta:
         model = Patient
-        fields = ("id", "first_name", "second_name", "date_of_birth",
-                  "gender", "insurance", "user_id", "age")
+        fields = "__all__"
 
     def get_age(self, obj: Patient):
         if obj.age:
@@ -82,7 +84,39 @@ class ConsultationSerializer(serializers.ModelSerializer):
 #             data["second_name"] = instance.patient.second_name
 #         return data
 
+class ConvertToAppointmentsSerializer(serializers.Serializer):
+    first_name = serializers.CharField()
+    second_name = serializers.CharField()
+    date_of_birth = serializers.DateTimeField()
+    gender = serializers.ChoiceField(choices=PublicAppointment.GENDER_CHOICES)
+    appointment_date_time = serializers.DateTimeField()
+    status = serializers.ChoiceField(choices=PublicAppointment.STATUS_CHOICES)
+    reason = serializers.CharField()
 
+    def create_patient_appointment(self) -> int:
+        try:
+            patient = Patient.objects.create(
+                first_name = self.validated_data.get("first_name"),
+                second_name = self.validated_data.get("second_name"),
+                date_of_birth = self.validated_data.get("date_of_birth"),
+                gender = self.validated_data.get("gender"),
+            )
+        except Exception as e:
+            return 400
+        
+        try:
+            Appointment.objects.create(
+                appointment_date_time = self.validated_data.get("appointment_date_time"),
+                patient = patient,
+                status = self.validated_data.get("status"),
+                reason = self.validated_data.get("reason"),
+            )
+        except Exception as e:
+            return 400
+        
+
+        return 201
+    
 class PublicAppointmentSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -133,56 +167,16 @@ class ReferralSerializer(serializers.ModelSerializer):
 
 # get appointments for a specific doctor
 class AppointmentSerializer(serializers.ModelSerializer):
-    patient = PatientSerializer()
-
+    patient = serializers.PrimaryKeyRelatedField(
+        queryset = Patient.objects.all(),
+        required = False,
+        allow_null= True,
+    )
     class Meta:
         model = Appointment
-        fields = [
-            'patient',
-            'assigned_doctor',
-            'appointment_date_time',
-            'status',
-            'reason',
-            'date_created',
-            'date_changed',
-            'id',
-        ]
-        read_only_fields = ("id",)
+        fields = "__all__"
+        read_only_fields = ("id", "date_created", "date_changed")
 
-    def create(self, validated_data: dict):
-        patient = validated_data.pop("patient", None)
-        try:
-            if patient:
-                patient = Patient.objects.create(**patient)
-        except Exception as e:
-            print(e)
-            raise serializers.ValidationError(f"Error occurred {e}")
-
-        try:
-            appointment = Appointment.objects.create(
-                patient=patient, **validated_data)
-            return appointment
-        except Exception as e:
-            print(e)
-            raise serializers.ValidationError(f"Error occurred {e}")
-
-    def update(self, instance: Appointment, validated_data: dict):
-        print("update appointment")
-        patient_dict = validated_data.get('patient')
-        print(patient_dict)
-        # try:
-        #     patient = Patient.objects.get(id=patient_dict.get('id'),)
-        # except Exception as e:
-        #     print(e)
-        #     raise serializers.ValidationError(f"Error occurred {e}")
-        
-        instance.patient = validated_data.get('patient', instance.patient)
-        instance.assigned_doctor = validated_data.get('assigned_doctor', instance.assigned_doctor)
-        instance.appointment_date_time = validated_data.get('appointment_date_time', instance.appointment_date_time)
-        instance.status = validated_data.get('status', instance.status)
-        instance.reason = validated_data.get('reason', instance.reason)
-        instance.date_changed = timezone.now()
-        return instance
     
     def to_representation(self, instance: Appointment):
         data = super().to_representation(instance)

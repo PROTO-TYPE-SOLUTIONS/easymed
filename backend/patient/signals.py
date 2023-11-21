@@ -3,7 +3,6 @@ from django.dispatch import receiver
 
 # models
 from .models import Patient
-from customuser.models import CustomUser
 
 
 

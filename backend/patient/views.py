@@ -33,6 +33,7 @@ from .serializers import (
     ConsultationSerializer,
     ReferralSerializer,
     TriageSerializer,
+    ConvertToAppointmentsSerializer
 )
 
 # filters
@@ -74,30 +75,21 @@ class PatientViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PatientFilter
 
-    def create(self, request: Request, *args, **kwargs):
-        data = request.data.copy()
-        # extract extra fields
+class ConvertToAppointmentAPIView(APIView):
 
-        appointment_date_time = data.pop("appointment_date_time", None)
-        reason = data.pop("reason", None)
-        serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exception=True)
-        try:
-            patient: Patient = serializer.save()
-        except Exception as e:
-            return Response()
+    @extend_schema(
+        request=ConvertToAppointmentsSerializer,
+        responses=ConvertToAppointmentsSerializer,
+    )
+    def post(self, request: Request, *args, **kwargs):
+        data = request.data
+        serializer = ConvertToAppointmentsSerializer(data=data)
+        if serializer.is_valid():
+            code = serializer.create_patient_appointment()
+            if code == 400:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_201_CREATED)
 
-        try:
-            appointment = Appointment.objects.create(patient=patient)
-            if appointment_date_time:
-                appointment.appointment_date_time = appointment_date_time
-            if reason:
-                appointment.reason = reason
-            appointment.save()
-        except Exception as e:
-            return Response({"message": f"creating a patient appointment failed {e}"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"message": {"patient_id": patient.pk, "appointment_id": appointment.pk}}, status=status.HTTP_201_CREATED)
 
 
 class PatientByUserIdAPIView(APIView):
