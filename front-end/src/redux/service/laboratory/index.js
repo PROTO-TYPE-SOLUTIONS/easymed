@@ -29,3 +29,42 @@ export const fetchLabRequests = (auth) =>{
     })
 }
 
+export const fetchLabEquipment = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_EQUIPMENT}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const sendLabRequests = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.SEND_LAB_REQUESTS}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const sendToEquipment = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.SEND_TO_EQUIPMENT}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+

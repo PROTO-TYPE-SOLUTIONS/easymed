@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { registerUser } from "@/redux/service/auth";
 import { useRouter } from "next/router";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllPatientGroups } from "@/redux/features/auth";
+import { useSelector, useDispatch } from "react-redux";
 
 const SignUp = () => {
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { patientGroups } = useSelector((store) => store.auth);
+  console.log("GROUPS ", patientGroups);
   const router = useRouter();
   const auth = useAuth();
   const initialValues = {
@@ -37,12 +42,12 @@ const SignUp = () => {
     try {
       const formData = {
         ...formValue,
-        role: 'patient',
-        profession: '',
-        groups: [],
-      }
+        role: "patient",
+        profession: "",
+        group: patientGroups[0].id,
+      };
       setLoading(true);
-      await registerUser(formData,auth).then(() => {
+      await registerUser(formData, auth).then(() => {
         helpers.resetForm();
         setLoading(false);
         router.push("/auth/login");
@@ -52,6 +57,14 @@ const SignUp = () => {
       console.log("SIGNUP_ERROR ", err);
     }
   };
+
+  const payload = {
+    name: "patient",
+  };
+
+  useEffect(() => {
+      dispatch(getAllPatientGroups(payload.name));
+  }, []);
 
   return (
     <section className="flex items-center gap-8 h-screen overflow-hidden">

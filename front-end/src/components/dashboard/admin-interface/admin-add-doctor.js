@@ -100,7 +100,7 @@ const AdminCreateDoctor = () => {
         <DialogContent>
           <section className="flex items-center justify-center gap-8 overflow-hidden">
             <div className="w-full space-y-4 px-4">
-              <h1 className="text-xl text-center">Create Doctor</h1>
+              <h1 className="text-xl text-center">Create User</h1>
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -202,7 +202,7 @@ const AdminCreateDoctor = () => {
                           ></path>
                         </svg>
                       )}
-                      SignUp
+                      Create User
                     </button>
                   </section>
                 </Form>

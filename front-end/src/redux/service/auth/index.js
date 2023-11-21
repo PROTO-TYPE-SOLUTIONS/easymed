@@ -17,14 +17,10 @@ export const registerUser = (payload,auth) =>{
     })
 }
 
-export const fetchUserPermissions = (userId,auth) =>{
-    const axiosInstance = UseAxios()
+export const fetchUserPermissions = (auth) =>{
+    const axiosInstance = UseAxios(auth)
     return new Promise((resolve,reject) =>{
-        axiosInstance.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,auth,{
-            params:{
-                userId: userId,
-            }
-        })
+        axiosInstance.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,auth)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -38,6 +34,23 @@ export const fetchGroups = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.get(`${APP_API_URL.FETCH_GROUP}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchPatientGroup = (name) =>{
+    const axiosInstance = UseAxios();
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_PATIENT_GROUP}`,{
+            params:{
+                name: name
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })

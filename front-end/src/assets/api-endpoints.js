@@ -18,7 +18,7 @@ export const API_URL = {
     BOOK_APPOINTMENT: '/patients/publicappointments/',
     FETCH_APPOINTMENTS: '/patients/publicappointments/',
     FETCH_PATIENT_APPOINTMENTS: '/patients/appointments/',
-    FETCH_DOCTOR_APPOINTMENTS: '/patients/appointments/doctors',
+    FETCH_DOCTOR_APPOINTMENTS: '/patients/appointments/',
     FETCH_SERVICES: '/patients/services/',
     FETCH_INSURANCE: '/patients/insurance-companies/',
     PRESCRIBE: '/patients/prescriptions/',
@@ -38,6 +38,9 @@ export const API_URL = {
     /***************** LABORATORY APIS **********************/
     FETCH_LAB_RESULTS: '/lab/lab-test-results/',
     FETCH_LAB_REQUESTS: '/lab/lab-test-requests/',
+    SEND_LAB_REQUESTS: '/lab/lab-test-requests/',
+    FETCH_LAB_EQUIPMENT: '/lab/lab-equipment/',
+    SEND_TO_EQUIPMENT: '/lab/equipment-test-request/',
 
 
     /***************** INVENTORY APIS **********************/
@@ -58,6 +61,7 @@ export const APP_API_URL = {
     REFRESH_TOKEN: '/api/auth/refresh',
     GET_USER_PERMISSIONS: '/api/auth/user-permissions',
     FETCH_GROUP: '/api/groups',
+    FETCH_PATIENT_GROUP: '/api/auth/get-group',
    
 
     /***************** PATIENT APIS **********************/
@@ -90,6 +94,10 @@ export const APP_API_URL = {
     /***************** LABORATORY APIS **********************/
     FETCH_LAB_RESULTS: '/api/laboratory/get-lab-results',
     FETCH_LAB_REQUESTS: '/api/laboratory/get-lab-requests',
+    SEND_LAB_REQUESTS: '/api/laboratory/get-lab-requests',
+    FETCH_LAB_EQUIPMENT: '/api/laboratory/get-lab-equipment',
+    SEND_TO_EQUIPMENT: '/api/laboratory/send-to-equipment',
+
 
 
     /***************** INVENTORY APIS **********************/

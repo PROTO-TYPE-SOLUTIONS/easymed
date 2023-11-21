@@ -1,10 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchGroups, fetchUserPermissions } from "@/redux/service/auth";
+import { fetchGroups, fetchPatientGroup, fetchUserPermissions } from "@/redux/service/auth";
 
 
 const initialState = {
   userPermissions: [],
   groups: [],
+  groups: [],
+patientGroups: [],
 };
 
 const PermissionSlice = createSlice({
@@ -17,15 +19,18 @@ const PermissionSlice = createSlice({
     setGroups: (state, action) => {
       state.groups = action.payload;
     },
+    setPatientGroups: (state, action) => {
+      state.patientGroups = action.payload;
+    },
   },
 });
 
-export const { setUserPermissions,setGroups } = PermissionSlice.actions;
+export const { setUserPermissions,setGroups,setPatientGroups } = PermissionSlice.actions;
 
 
-export const getAllUserPermissions = (userId,auth) => async (dispatch) => {
+export const getAllUserPermissions = (auth) => async (dispatch) => {
   try {
-    const response = await fetchUserPermissions(userId,auth);
+    const response = await fetchUserPermissions(auth);
     dispatch(setUserPermissions(response));
   } catch (error) {
     console.log("USER_PERMISSIONS_ERROR ", error);
@@ -36,6 +41,15 @@ export const getAllGroups = (auth) => async (dispatch) => {
   try {
     const response = await fetchGroups(auth);
     dispatch(setGroups(response));
+  } catch (error) {
+    console.log("USER_PERMISSIONS_ERROR ", error);
+  }
+};
+
+export const getAllPatientGroups = (name) => async (dispatch) => {
+  try {
+    const response = await fetchPatientGroup(name);
+    dispatch(setPatientGroups(response));
   } catch (error) {
     console.log("USER_PERMISSIONS_ERROR ", error);
   }

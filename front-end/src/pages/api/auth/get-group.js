@@ -11,20 +11,20 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === API_METHODS.GET) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
 
-            const body = req.body
+            const name = req.query.name
 
-            console.log("PERMISSION_ROLES ",`${API_URL.GET_USER_PERMISSIONS}/${user_id}/`)
-    
-            await backendAxiosInstance.get(`${API_URL.GET_USER_PERMISSIONS}/${body.user_id}/`, config).then(response => {
+
+            console.log("PATIENT_URL ",`${API_URL.FETCH_GROUP}?name=${name}`)
+            await backendAxiosInstance.get(`${API_URL.FETCH_GROUP}?name=${name}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
