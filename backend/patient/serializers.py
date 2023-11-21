@@ -36,9 +36,6 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     age = serializers.SerializerMethodField()
-    appointment_date_time = serializers.DateTimeField(required=False, allow_null=True)
-    reason = serializers.CharField(required=False, allow_null=True)
-
 
     class Meta:
         model = Patient
