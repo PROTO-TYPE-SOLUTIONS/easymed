@@ -26,17 +26,22 @@ export const menus = [
         icon: <GrAdd className="" />,
       },
       {
-        label: "Admin Dashboard",
+        label: "Admin",
         href: "/dashboard/admin-interface",
         icon: <GrAdd className="" />,
       },
       {
-        label: "Doctor Dashboard",
+        label: "Doctor",
         href: "/dashboard/doctor-interface",
         icon: <FaWheelchair className="" />,
       },
       {
-        label: "Reception Dashboard",
+        label: "Reception",
+        href: "/dashboard/reception-interface",
+        icon: <FaWheelchair className="" />,
+      },
+      {
+        label: "Nursing",
         href: "/dashboard/reception-interface",
         icon: <FaWheelchair className="" />,
       },
