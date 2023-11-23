@@ -40,6 +40,7 @@ const LabResultDataGrid = ({ labResults }) => {
     }else if(menu.action === 'download'){
         // download function
     }else if(menu.action === 'print'){
+      window.open('/images/lab.pdf', '_blank');
         // print function
     }
   };
