@@ -3,6 +3,7 @@ from patient.models import Patient
 from django.conf import settings
 from customuser.models import CustomUser
 from inventory.models import Item, OrderBill
+from datetime import datetime
 
 
 class LabEquipment(models.Model):
@@ -83,3 +84,45 @@ class LabTestCategory(models.Model):
 
     def __str__(self):
         return self.category 
+    
+
+class PublicLabTestRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+    )
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    )
+    PROFILE_CHOICES = (
+        ('hemoglobin', 'Hemoglobin'),
+        ('pregnancy test', 'Pregnancy Test'),
+        ('malaria test', 'Malaria Test'),
+        ('liver function test', 'Liver Function Test'),
+    )
+    first_name = models.CharField(max_length=40)
+    second_name = models.CharField(max_length=40)
+    date_of_birth = models.DateField()
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES,)
+    appointment_date_time = models.DateTimeField()
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending')
+    reason = models.TextField(max_length=300,)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_changed = models.DateTimeField(auto_now=True)
+    test_profile = models.CharField(
+        max_length=10, choices=STATUS_CHOICES,)
+    lab_request = models.FileField(upload_to=None, max_length=254,)
+
+    def __str__(self):
+        return f"Appointment #{self.first_name} - {self.test_profile}"
+    
+    @property
+    def age(self):
+        if self.date_of_birth:
+            patient_age:int = (datetime.now().year - self.date_of_birth.year)
+            return patient_age
+        return None
