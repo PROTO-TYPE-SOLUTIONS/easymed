@@ -68,3 +68,16 @@ export const sendToEquipment = (payload,auth) =>{
     })
 }
 
+
+export const publicLabRequest = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.PUBLIC_LAB_REQUEST}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+

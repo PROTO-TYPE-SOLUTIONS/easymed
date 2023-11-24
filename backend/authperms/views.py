@@ -334,10 +334,6 @@ class UserPermissionsAPIView(APIView):
         if user is None:
             return Response({"error_message": f"user id {user_id} doesn't exist"})
 
-        # user doesn't belong to any group
-        if user.groups.count() < 1:
-            return Response([], status=status.HTTP_200_OK)
-
         group = user.group
         permissions = [
             permission.name for permission in group.permissions.all()]
