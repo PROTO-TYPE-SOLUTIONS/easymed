@@ -63,6 +63,8 @@ const DoctorPatientDataGrid = () => {
   const auth = useAuth();
   const { doctorAppointments } = useSelector((store) => store.appointment);
   const router = useRouter();
+
+  console.log("DOCTOR_APPO ",doctorAppointments);
   
 
   useEffect(() => {
@@ -164,7 +166,7 @@ const DoctorPatientDataGrid = () => {
   };
 
   const statusFunc = ({ data }) => {
-    if (data?.status === "In Treatment") {
+    if (data?.status === "pending") {
       return (
         <Chip
           variant="contained"
@@ -194,20 +196,20 @@ const DoctorPatientDataGrid = () => {
     }
   };
 
-  const mappedAppointments = doctorAppointments.map(appointment => {
-    return {
-      id: appointment.id,
-      gender: appointment.patient.gender,
-      first_name: appointment.patient.first_name,
-      second_name: appointment.patient.second_name,
-      appointment_date_time: appointment.appointment_date_time,
-      date_created: new Date(appointment.date_created).toLocaleDateString(),
-      date_of_birth: appointment.patient.date_of_birth,
-      assigned_doctor: appointment.assigned_doctor ? appointment.assigned_doctor.name : "Not Assigned", // Assuming assigned_doctor is an object with a 'name' property
-      status: appointment.status,
-      reason: appointment.reason // If you want to include reason, uncomment this line
-    };
-  });
+  // const mappedAppointments = doctorAppointments.map(appointment => {
+  //   return {
+  //     id: appointment.id,
+  //     gender: appointment.patient.gender,
+  //     first_name: appointment.patient.first_name,
+  //     second_name: appointment.patient.second_name,
+  //     appointment_date_time: appointment.appointment_date_time,
+  //     date_created: new Date(appointment.date_created).toLocaleDateString(),
+  //     date_of_birth: appointment.patient.date_of_birth,
+  //     assigned_doctor: appointment.assigned_doctor ? appointment.assigned_doctor.name : "Not Assigned", // Assuming assigned_doctor is an object with a 'name' property
+  //     status: appointment.status,
+  //     reason: appointment.reason // If you want to include reason, uncomment this line
+  //   };
+  // });
 
   return (
     <section>
@@ -225,7 +227,7 @@ const DoctorPatientDataGrid = () => {
         </div>
       </div>
       <DataGrid
-        dataSource={mappedAppointments}
+        dataSource={doctorAppointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         onSelectionChanged={onSelectionChanged}

@@ -45,8 +45,7 @@ const AddPatientModal = () => {
     second_name: "",
     date_of_birth: "",
     gender: "",
-    insurance: null,
-    // user_id: null,
+    insurance: 0,
   };
 
   const validationSchema = Yup.object().shape({
@@ -54,8 +53,6 @@ const AddPatientModal = () => {
     second_name: Yup.string().required("Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
-    insurance: Yup.number(),
-    user_id: Yup.number(),
   });
 
   const handleCreatePatient = async (formValue, helpers) => {
@@ -64,8 +61,6 @@ const AddPatientModal = () => {
         ...formValue,
         insurance: parseInt(formValue.insurance),
         user_id: parseInt(formValue.user_id),
-        appointment_date_time: '',
-        reason: ''
       };
       setLoading(true);
       await createPatient(formData).then(() => {
@@ -104,9 +99,10 @@ const AddPatientModal = () => {
             onSubmit={handleCreatePatient}
           >
             <Form>
-              <section className="space-y-2">
+              <section className="space-y-1">
                 <Grid container spacing={2}>
                   <Grid item md={6} xs={12}>
+                    <label htmlFor="first_name">First Name</label>
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="text"
@@ -120,6 +116,7 @@ const AddPatientModal = () => {
                     />
                   </Grid>
                   <Grid item md={6} xs={12}>
+                  <label htmlFor="second_name">Last Name</label>
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="text"
@@ -135,6 +132,7 @@ const AddPatientModal = () => {
                 </Grid>
                 <Grid container spacing={2}>
                   <Grid item md={6} xs={12}>
+                  <label htmlFor="date_of_birth">Date of Birth</label>
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="date"
@@ -148,6 +146,7 @@ const AddPatientModal = () => {
                     />
                   </Grid>
                   <Grid item md={6} xs={12}>
+                  <label htmlFor="gender">Select Gender</label>
                     <Field
                       as="select"
                       className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
@@ -156,6 +155,7 @@ const AddPatientModal = () => {
                       <option value="">Select Gender</option>
                       <option value="M">Male</option>
                       <option value="F">Female</option>
+                      <option value="O">Other</option>
                     </Field>
                     <ErrorMessage
                       name="gender"
@@ -166,6 +166,7 @@ const AddPatientModal = () => {
                 </Grid>
                 <Grid container spacing={2}>
                   <Grid item md={6} xs={12}>
+                  <label htmlFor="insurance">Insurance</label>
                     <Field
                       as="select"
                       className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"

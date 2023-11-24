@@ -111,13 +111,13 @@ const LabRequestDataGrid = ({ labRequests }) => {
         showColumnLines={true}
         showRowLines={true}
         wordWrapEnabled={true}
-        allowPaging={true}
+        // allowPaging={true}
         height={"70vh"}
         className="w-full shadow"
       >
         <Paging defaultPageSize={20} pageSize={20} />
         <Pager
-          visible={true}
+          // visible={true}
           displayMode={true}
           showPageSizeSelector={false}
           showInfo={true}
