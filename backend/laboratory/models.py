@@ -97,12 +97,7 @@ class PublicLabTestRequest(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    PROFILE_CHOICES = (
-        ('hemoglobin', 'Hemoglobin'),
-        ('pregnancy test', 'Pregnancy Test'),
-        ('malaria test', 'Malaria Test'),
-        ('liver function test', 'Liver Function Test'),
-    )
+
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
@@ -113,12 +108,11 @@ class PublicLabTestRequest(models.Model):
     reason = models.TextField(max_length=300,)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
-    test_profile = models.CharField(
-        max_length=10, choices=STATUS_CHOICES,)
     lab_request = models.FileField(upload_to=None, max_length=254,)
+    test_profile = models.CharField(max_length=70)
 
     def __str__(self):
-        return f"Appointment #{self.first_name} - {self.test_profile}"
+        return f"PublicTestRequest #{self.first_name} - {self.test_profile}"
     
     @property
     def age(self):
