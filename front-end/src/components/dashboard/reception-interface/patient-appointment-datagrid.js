@@ -119,7 +119,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
     return <p>{formattedate}</p>
   }
 
-  const mappedAppointments = patientAppointments.map(appointment => {
+  const mappedAppointments = patientAppointments?.map(appointment => {
     return {
       id: appointment.id,
       gender: appointment.patient.gender,
