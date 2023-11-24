@@ -15,6 +15,7 @@ from .models import (
     LabTestProfile,
     LabEquipment,
     EquipmentTestRequest,
+    PublicLabTestRequest,
 )
 # serializers
 from .serializers import (
@@ -24,7 +25,8 @@ from .serializers import (
     LabTestCategorySerializer,
     LabTestProfileSerializer,
     LabEquipmentSerializer,
-    EquipmentTestRequestSerializer
+    EquipmentTestRequestSerializer,
+    PublicLabTestRequestSerializer,
 )
 
 # permissions
@@ -108,3 +110,9 @@ class LabTestCategoryViewSet(viewsets.ModelViewSet):
     queryset = LabTestCategory.objects.all()
     serializer_class = LabTestCategorySerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+
+class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
+    queryset = PublicLabTestRequest.objects.all()
+    serializer_class = PublicLabTestRequestSerializer
+    # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
