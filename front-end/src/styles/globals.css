@@ -60,7 +60,6 @@
   background-repeat: no-repeat;
   position: relative;
   z-index: 1;
-  height: 100vh;
 }
 .loginPage::after {
   content: "";
