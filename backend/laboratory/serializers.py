@@ -9,6 +9,10 @@ class LabReagentSerializer(serializers.ModelSerializer):
         model = LabReagent
         fields = '__all__'
 
+class LabTestProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LabTestProfile
+        fields = '__all__'
 
 class PublicLabTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
