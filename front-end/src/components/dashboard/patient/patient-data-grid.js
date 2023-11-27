@@ -84,7 +84,7 @@ const PatientsDataGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="date_of_birth" caption="Age" width={140} />
         <Column dataField="gender" caption="Gender" width={140} />
         <Column dataField="insurance" caption="Insurance" width={140} />
         <Column
