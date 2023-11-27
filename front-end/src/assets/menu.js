@@ -25,11 +25,11 @@ export const menus = [
         href: "/dashboard",
         icon: <GrAdd className="" />,
       },
-      {
-        label: "Admin",
-        href: "/dashboard/admin-interface",
-        icon: <GrAdd className="" />,
-      },
+      // {
+      //   label: "Admin",
+      //   href: "/dashboard/admin-interface",
+      //   icon: <GrAdd className="" />,
+      // },
       {
         label: "Doctor",
         href: "/dashboard/doctor-interface",

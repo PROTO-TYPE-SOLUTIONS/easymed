@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { menus } from "@/assets/menu";
 import MenuChild  from "./menu-children";
+import { IoMdSettings } from "react-icons/io";
+import { AiOutlineQuestionCircle } from "react-icons/ai";
+import Link from "next/link";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -19,24 +22,20 @@ const Sidebar = () => {
               ))}
             </ul>
           </div>
-          {/* <div style={{ fontSize: "10px" }} className="space-y-2 mb-4">
-            <div className="flex items-center gap-2">
-              <AiFillLock className="" />
-              <p>Logout</p>
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="space-y-2 mb-4 pl-4 text-xs">
+            <Link href="/dashboard/admin-interface" className="flex items-center gap-2">
               <IoMdSettings className="" />
               <p>Settings</p>
-            </div>
-            <div className="flex items-center gap-2">
+            </Link>
+            <div className="flex items-center gap-2 text-xs">
               <AiOutlineQuestionCircle className="" />
               <p>Support</p>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <BsFillExclamationCircleFill className="" />
               <p>Make - Easy HMIS v1.0</p>
-            </div>
-          </div> */}
+            </div> */}
+          </div>
         </section>
       </section>
     </>
