@@ -8,9 +8,11 @@ import { getAllServices } from "@/redux/features/patients";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { publicLabRequest } from "@/redux/service/laboratory";
+import { getAllLabTestProfiles } from "@/redux/features/laboratory";
 
 const LabServiceForm = () => {
   const { services } = useSelector(({ patient }) => patient);
+  const { labTestProfiles } = useSelector((store) => store.laboratory);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -34,15 +36,12 @@ const LabServiceForm = () => {
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
     appointment_date_time: Yup.string().required("Date is required!"),
-    reason: Yup.string().required("Provide a reason!"),
     test_profile: Yup.string().required("Provide a test profile!"),
   });
-
 
   const handleLabRequest = async (formValue, helpers) => {
     console.log("FORM_VALUE ",formValue);
     try {
-      
       setLoading(true);
       await publicLabRequest(formValue).then(() => {
         helpers.resetForm();
@@ -59,8 +58,12 @@ const LabServiceForm = () => {
     }
   };
 
+
+
+
   useEffect(() => {
     dispatch(getAllServices());
+    dispatch(getAllLabTestProfiles());
   }, []);
 
   return (
@@ -160,10 +163,11 @@ const LabServiceForm = () => {
                   name="test_profile"
                 >
                   <option value="">Select Test Profile</option>
-                  <option value="H">Hemoglobin</option>
-                  <option value="P">Pregnancy Test</option>
-                  <option value="M">Malaria Test</option>
-                  <option value="L">Liver Function Test</option>
+                  {labTestProfiles.map((test, index) => (
+                    <option key={index} value="H">
+                      {test?.name}
+                    </option>
+                  ))}
                 </Field>
 
                 <ErrorMessage
@@ -182,11 +186,6 @@ const LabServiceForm = () => {
               type="file"
               name="lab_request"
             />
-            <ErrorMessage
-              name="lab_request"
-              component="div"
-              className="text-warning text-xs"
-            />
           </div>
           <div className="w-full my-4">
             <label htmlFor="reason">Reason</label>
@@ -195,11 +194,6 @@ const LabServiceForm = () => {
               as="textarea"
               placeholder="Reason"
               name="reason"
-            />
-            <ErrorMessage
-              name="reason"
-              component="div"
-              className="text-warning text-xs"
             />
           </div>
           <button
