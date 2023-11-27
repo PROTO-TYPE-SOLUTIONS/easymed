@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.permissions import AllowAny
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
@@ -64,7 +65,7 @@ class LabEquipmentViewSet(viewsets.ModelViewSet):
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
     serializer_class = LabTestProfileSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (AllowAny,)
 
 
 class LabTestResultViewSet(viewsets.ModelViewSet):
