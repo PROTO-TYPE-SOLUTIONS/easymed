@@ -108,7 +108,7 @@ class PublicLabTestRequest(models.Model):
     reason = models.TextField(max_length=300,)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
-    lab_request = models.FileField(upload_to=None, max_length=254,)
+    lab_request = models.FileField(upload_to=None, max_length=254, null=True)
     test_profile = models.CharField(max_length=70)
 
     def __str__(self):
