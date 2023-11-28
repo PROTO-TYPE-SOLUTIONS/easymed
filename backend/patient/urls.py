@@ -15,7 +15,8 @@ from .views import (
     DoctorAppointmentViewSet,
     TriageViewSet,
     PatientByUserIdAPIView,
-    ConvertToAppointmentAPIView
+    ConvertToAppointmentAPIView,
+    SendAppointmentConfirmationAPIView
 )
 
 router = DefaultRouter()
@@ -39,4 +40,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
+    path('send-appointment-confirmation/', SendAppointmentConfirmationAPIView.as_view(), name="send-appointment-confirmation"),
 ]

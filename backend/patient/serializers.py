@@ -192,3 +192,12 @@ class TriageSerializer(serializers.ModelSerializer):
         model = Triage
         fields = '__all__'
 
+
+class SendConfirmationMailSerializer(serializers.Serializer):
+    appointments = serializers.PrimaryKeyRelatedField(
+        queryset = Appointment.objects.all(),
+        many = True,
+        required = True,
+        allow_null = False,
+    )
+    
