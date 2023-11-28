@@ -26,8 +26,8 @@ const LabServiceForm = () => {
     appointment_date_time: "",
     status: "pending",
     reason: "",
-    test_profile: "pending",
-    lab_request: "",
+    test_profile: "",
+    lab_request: null,
   };
 
   const validationSchema = Yup.object().shape({
