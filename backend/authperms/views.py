@@ -335,10 +335,14 @@ class UserPermissionsAPIView(APIView):
             return Response({"error_message": f"user id {user_id} doesn't exist"})
 
         group = user.group
-        permissions = [
-            permission.name for permission in group.permissions.all()]
-        print(permissions)
-        return Response(permissions, status=status.HTTP_200_OK)
+        print(group)
+        if group:
+            print("has group")
+            permissions = [
+                permission.name for permission in group.permissions.all()]
+            print(permissions)
+            return Response(permissions, status=status.HTTP_200_OK)
+        return Response([], status=status.HTTP_200_OK)
 
 
 class AddPermissionsToUserAPIView(APIView):
@@ -426,3 +430,5 @@ class AddPermissionToGroupAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
