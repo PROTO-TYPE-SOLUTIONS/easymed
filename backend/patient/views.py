@@ -33,7 +33,8 @@ from .serializers import (
     ConsultationSerializer,
     ReferralSerializer,
     TriageSerializer,
-    ConvertToAppointmentsSerializer
+    ConvertToAppointmentsSerializer,
+    SendConfirmationMailSerializer,
 )
 
 # filters
@@ -47,6 +48,8 @@ from drf_spectacular.utils import (
     extend_schema,
 )
 
+# utils
+from .utils import send_appointment_email
 
 
 class InsuranceCompanyViewSet(viewsets.ModelViewSet):
@@ -75,6 +78,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PatientFilter
 
+
 class ConvertToAppointmentAPIView(APIView):
 
     @extend_schema(
@@ -91,29 +95,29 @@ class ConvertToAppointmentAPIView(APIView):
             return Response(status=status.HTTP_201_CREATED)
 
 
-
 class PatientByUserIdAPIView(APIView):
     def get_object(self, user_id: int):
         try:
             return CustomUser.objects.get(id=user_id)
         except CustomUser.DoesNotExist:
             return None
-    
+
     @extend_schema(
         responses=PatientSerializer,
     )
-    def get(self, request: Request, user_id:int=None, *args, **kwargs):
+    def get(self, request: Request, user_id: int = None, *args, **kwargs):
         user = self.get_object(user_id)
 
         if user is None:
             return Response({"error_message": f"user id {user_id} doesn't exist"})
-        
+
         patient = Patient.objects.filter(user_id__pk=user.pk)
         if not patient.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
-        
+
         serializer = PatientSerializer(patient.first())
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class NextOfKinViewSet(viewsets.ModelViewSet):
     queryset = NextOfKin.objects.all()
@@ -167,3 +171,20 @@ class DoctorAppointmentViewSet(viewsets.ViewSet):
         appointments = Appointment.objects.filter(assigned_doctor_id=doctor_id)
         serializer = AppointmentSerializer(appointments, many=True)
         return Response(serializer.data)
+
+
+class SendAppointmentConfirmationAPIView(APIView):
+    @extend_schema(
+        request=SendConfirmationMailSerializer,
+        responses=str,
+    )
+    def post(self, request: Request, *args, **kwargs):
+        data = request.data
+
+        serializer = SendConfirmationMailSerializer(data=data)
+        if serializer.is_valid():
+            print(serializer.validated_data)
+            appointments = serializer.validated_data.get("appointments")
+            send_appointment_email(appointments)
+            return Response("email sent", status=status.HTTP_200_OK)
+
