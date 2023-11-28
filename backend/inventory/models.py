@@ -44,6 +44,7 @@ class Item(models.Model):
         ('LabReagent', 'Lab Reagent'),
         ('Drug', 'Drug'),
         ('Furniture', 'Furniture'),
+        ('Lab Test', 'Lab Test'),
     ])
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
 

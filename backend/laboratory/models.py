@@ -4,6 +4,7 @@ from django.conf import settings
 from customuser.models import CustomUser
 from inventory.models import Item, OrderBill
 from datetime import datetime
+from django.core.validators import FileExtensionValidator
 
 
 class LabEquipment(models.Model):
@@ -56,10 +57,10 @@ class LabTestRequest(models.Model):
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
     note = models.TextField()
     order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True, blank=True)
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
+  #  item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT, null=True, blank=True)
-    sample = models.BooleanField(default=False, null=True)
+    sample_collected = models.BooleanField(default=False, null=True)
     sample_id = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
@@ -97,19 +98,25 @@ class PublicLabTestRequest(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES,)
-    appointment_date_time = models.DateTimeField()
-    status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default='pending')
-    reason = models.TextField(max_length=300,)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_changed = models.DateTimeField(auto_now=True)
-    lab_request = models.FileField(upload_to=None, max_length=254, null=True)
-    test_profile = models.CharField(max_length=70)
+    appointment_date = models.DateField()
+    status = models.CharField( max_length=10, choices=STATUS_CHOICES, default='pending')
+    reason = models.TextField(max_length=300, null=True, blank=True)
+    date_created = models.DateField(auto_now_add=True)
+    date_changed = models.DateField(auto_now=True)
+    lab_request = models.FileField(
+        upload_to="Lab Test Requests",
+        max_length=254,
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'img', 'png'])]
+    )
+    test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.PROTECT)
+    sample_collected = models.BooleanField(default=False,null=True, blank=True)
+    sample_id = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return f"PublicTestRequest #{self.first_name} - {self.test_profile}"
