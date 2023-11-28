@@ -37,6 +37,7 @@ export const API_URL = {
   FETCH_LAB_EQUIPMENT: "/lab/lab-equipment/",
   SEND_TO_EQUIPMENT: "/lab/equipment-test-request/",
   PUBLIC_LAB_REQUEST: "/lab/public-lab-test-request/",
+  FETCH_LAB_TEST_PROFILE: "/lab/lab-test-profile/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -88,6 +89,7 @@ export const APP_API_URL = {
   FETCH_LAB_EQUIPMENT: "/api/laboratory/get-lab-equipment",
   SEND_TO_EQUIPMENT: "/api/laboratory/send-to-equipment",
   PUBLIC_LAB_REQUEST: "/api/laboratory/public-lab-request",
+  FETCH_LAB_TEST_PROFILE: "/api/laboratory/get-lab-test-profile",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",

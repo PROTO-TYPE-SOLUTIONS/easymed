@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchLabRequests, fetchLabResults,fetchLabEquipment } from "@/redux/service/laboratory";
+import { fetchLabRequests, fetchLabResults,fetchLabEquipment, fetchLabTestProfile } from "@/redux/service/laboratory";
 
 
 const initialState = {
   labResults: [],
   labRequests: [],
   labEquipments: [],
+  labTestProfiles: [],
 };
 
 const LaboratorySlice = createSlice({
@@ -21,10 +22,13 @@ const LaboratorySlice = createSlice({
     setLabEquipments: (state, action) => {
       state.labEquipments = action.payload;
     },
+    setLabTestProfile: (state, action) => {
+      state.labTestProfiles = action.payload;
+    },
   },
 });
 
-export const { setLabResults,setLabRequests,setLabEquipments } = LaboratorySlice.actions;
+export const { setLabResults,setLabRequests,setLabEquipments,setLabTestProfile } = LaboratorySlice.actions;
 
 
 export const getAllLabResults = (auth) => async (dispatch) => {
@@ -49,6 +53,15 @@ export const getAllLabRequests = (auth) => async (dispatch) => {
   try {
     const response = await fetchLabRequests(auth);
     dispatch(setLabRequests(response));
+  } catch (error) {
+    console.log("LAB_ERROR ", error);
+  }
+};
+
+export const getAllLabTestProfiles = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchLabTestProfile(auth);
+    dispatch(setLabTestProfile(response));
   } catch (error) {
     console.log("LAB_ERROR ", error);
   }
