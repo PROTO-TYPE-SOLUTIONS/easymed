@@ -95,7 +95,7 @@ export const prescribePatient = (payload) =>{
 
 export const assignDoctor = (payload) =>{
     return new Promise((resolve,reject) =>{
-        axios.put(`${APP_API_URL.ASSIGN_DOCTOR}`,payload)
+        axios.post(`${APP_API_URL.ASSIGN_DOCTOR}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })

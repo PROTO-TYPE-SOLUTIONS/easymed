@@ -1,12 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchGroups, fetchPatientGroup, fetchUserPermissions } from "@/redux/service/auth";
-
+import {
+  fetchGroups,
+  fetchPatientGroup,
+  fetchUserPermissions,
+} from "@/redux/service/auth";
 
 const initialState = {
   userPermissions: [],
   groups: [],
   groups: [],
-patientGroups: [],
+  patientGroups: [],
 };
 
 const PermissionSlice = createSlice({
@@ -25,12 +28,12 @@ const PermissionSlice = createSlice({
   },
 });
 
-export const { setUserPermissions,setGroups,setPatientGroups } = PermissionSlice.actions;
+export const { setUserPermissions, setGroups, setPatientGroups } =
+  PermissionSlice.actions;
 
-
-export const getAllUserPermissions = (auth) => async (dispatch) => {
+export const getAllUserPermissions = (user_id) => async (dispatch) => {
   try {
-    const response = await fetchUserPermissions(auth);
+    const response = await fetchUserPermissions(user_id);
     dispatch(setUserPermissions(response));
   } catch (error) {
     console.log("USER_PERMISSIONS_ERROR ", error);

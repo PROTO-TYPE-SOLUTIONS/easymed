@@ -10,8 +10,6 @@ import PatientAppointmentDataGrid from '@/components/dashboard/reception-interfa
 
 const PatientAppointments = () => {
   const dispatch = useDispatch();
-  const { patientAppointments } = useSelector(( store ) => store.appointment)
-  console.log("PATIENT_APPOINTMENTS ",patientAppointments);
 
   useEffect(() =>{
     dispatch(getAllPatientAppointments());
@@ -23,7 +21,7 @@ const PatientAppointments = () => {
           <MdOutlineKeyboardBackspace className='text-2xl text-primary' />
           <p className='font-bold text-primary'>Back</p>
         </Link>
-        <PatientAppointmentDataGrid {...{patientAppointments}} />
+        <PatientAppointmentDataGrid />
     </Container>
   )
 }
