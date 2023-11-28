@@ -9,6 +9,7 @@ import AdminCreateUserModal from "@/components/dashboard/admin-interface/admin-a
 import AdminCreateDoctor from "@/components/dashboard/admin-interface/admin-add-doctor";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -107,11 +108,12 @@ const Admin = () => {
     </Container>
   );
 };
-
 Admin.getLayout = (page) => (
-  <AuthGuard>
-    <CustomizedLayout>{page}</CustomizedLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_ADMIN_DASHBOARD'}>
+    <AuthGuard>
+      <CustomizedLayout>{page}</CustomizedLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default Admin;
