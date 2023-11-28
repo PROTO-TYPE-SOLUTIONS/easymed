@@ -2,6 +2,7 @@
 export const API_URL = {
   /***************** AUTHENTICATION APIS **********************/
   REGISTER_USER: "/users/register/",
+  CREATE_USER: "/users/register/",
   LOGIN: "/users/login/",
   REFRESH_TOKEN: "/api/token/refresh/",
   GET_USER_PERMISSIONS: "/authperms/permissions/user",
@@ -53,6 +54,7 @@ export const API_URL = {
 export const APP_API_URL = {
   /***************** AUTH **********************/
   REGISTER_USER: "/api/register",
+  CREATE_USER: "/api/auth/create-user",
   LOGIN: "/api/register/login",
   REFRESH_TOKEN: "/api/auth/refresh",
   GET_USER_PERMISSIONS: "/api/auth/user-permissions",

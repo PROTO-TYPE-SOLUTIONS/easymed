@@ -5,11 +5,10 @@ import AdminUsersDataGrid from "@/components/dashboard/admin-interface/users-dat
 import AdminPatientsDataGrid from "@/components/dashboard/admin-interface/patients-datagrid";
 import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors-datagrid";
 import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
-import AdminCreateUserModal from "@/components/dashboard/admin-interface/admin-add-user-modal";
-import AdminCreateDoctor from "@/components/dashboard/admin-interface/admin-add-doctor";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import ProtectedRoute from "@/assets/hoc/protected-route";
+import AdminCreateUser from "@/components/dashboard/admin-interface/admin-create-user";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -97,7 +96,7 @@ const Admin = () => {
         <div className="flex items-center gap-2">
           <AddPatientModal />
           {/* <AdminCreateUserModal /> */}
-          <AdminCreateDoctor />
+          <AdminCreateUser />
         </div>
       </section>
       <div className="mt-8">
