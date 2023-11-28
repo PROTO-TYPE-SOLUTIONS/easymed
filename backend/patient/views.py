@@ -178,13 +178,16 @@ class SendAppointmentConfirmationAPIView(APIView):
         request=SendConfirmationMailSerializer,
         responses=str,
     )
+
+
+
     def post(self, request: Request, *args, **kwargs):
         data = request.data
-
         serializer = SendConfirmationMailSerializer(data=data)
+
         if serializer.is_valid():
             print(serializer.validated_data)
             appointments = serializer.validated_data.get("appointments")
             send_appointment_email(appointments)
-            return Response("email sent", status=status.HTTP_200_OK)
+            return Response("email sent successfully", status=status.HTTP_200_OK)
 
