@@ -6,7 +6,7 @@ import CustomizedHeader from "./customized-header";
 const CustomizedLayout = ({ children }) => {
   return (
     <div className="md:flex md:h-screen h-auto overflow-hidden bg-background">
-      <div className="w-60 bg-white shadow-xl rounded md:block hidden">
+      <div className="w-56 bg-white shadow-xl rounded md:block hidden">
         <Sidebar />
       </div>
 

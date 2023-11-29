@@ -52,6 +52,10 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
     }
   };
 
+  // useEffect(() => {
+  //   dispatch(getPatientProfile())
+  // },[]);
+
   return (
     <section>
       <Dialog

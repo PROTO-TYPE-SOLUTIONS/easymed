@@ -14,6 +14,7 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import PersonalDetails from "@/components/patient-profile/personal-details";
 import { TbLogout2 } from 'react-icons/tb'
 import { authContext } from "@/components/use-context";
+import { FaUserCircle } from "react-icons/fa";
 
 
 const PatientProfile = () => {
@@ -42,11 +43,7 @@ const PatientProfile = () => {
             <Link href="/">
               <BsArrowLeft className="text-xl" />
             </Link>
-            <img
-              className="w-16 h-16 rounded-full shadow-xl"
-              src="/images/avatar1.png"
-              alt=""
-            />
+            <FaUserCircle className="w-12 h-12" />
             <h1 className="text-xl">{profileDetails.first_name} {profileDetails.second_name}</h1>
           </div>
           <div className="flex items-center gap-4">
@@ -58,13 +55,13 @@ const PatientProfile = () => {
           </div>
         </section>
         <Grid container spacing={4}>
-          <Grid item md={3} xs={12}>
+          <Grid item md={12} xs={12}>
             <section className="my-8 space-y-4 ">
               <h1 className="text-xl text-primary">Personal Information</h1>
               <PersonalDetails />
             </section>
           </Grid>
-          <Grid item md={3} xs={12}>
+          {/* <Grid item md={3} xs={12}>
             <section className="my-8 space-y-4">
               <MedicalHistory />
             </section>
@@ -78,7 +75,7 @@ const PatientProfile = () => {
             <section className="my-8 space-y-4">
               <AppointmentHistory />
             </section>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Container>
     </AuthGuard>
