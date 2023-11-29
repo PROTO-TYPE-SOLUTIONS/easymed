@@ -4,17 +4,16 @@ import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
-import { useContext } from "react";
-import { authContext } from "@/components/use-context";
 import { toast } from "react-toastify";
 import { sendLabRequests } from "@/redux/service/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getPatientProfile } from "@/redux/features/patients";
+import { getPatientProfile, getPatientTriage } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllLabTestProfiles } from "@/redux/features/laboratory";
 
 const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
   const { labTestProfiles } = useSelector((store) => store.laboratory);
+  const { patientTriage } = useSelector((store) => store.patient);
   const [loading, setLoading] = React.useState(false);
   const auth = useAuth();
   const dispatch = useDispatch();
@@ -61,6 +60,10 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
     dispatch(getAllLabTestProfiles());
   }, []);
 
+  useEffect(() => {
+    dispatch(getPatientTriage(selectedRowData?.id));
+  }, [selectedRowData]);
+
   return (
     <section>
       <Dialog
@@ -79,7 +82,27 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
           >
             <Form>
               <section className="space-y-2">
-                <h1 className="text-xl text-center">Send To Lab</h1>
+                <h1 className="">Triage Information</h1>
+                <section className="flex items-center justify-between text-sm border-b bg-background p-1 rounded border-gray">
+                  <div className="flex items-center gap-2">
+                    <span>
+                      Temperature :
+                    </span>
+                    <span>{patientTriage?.temperature}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Height :</span>
+                    <span>{patientTriage?.height}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Pulse :</span>
+                    <span>{patientTriage?.pulse}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Weight :</span>
+                    <span>{patientTriage?.weight}</span>
+                  </div>
+                </section>
                 <Grid container spacing={2}>
                   <Grid item md={12} xs={12}>
                     <section className="space-y-3">

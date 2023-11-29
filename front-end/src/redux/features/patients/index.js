@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchServices,fetchPatient, fetchPatientProfile } from "@/redux/service/patients";
+import { fetchServices,fetchPatient, fetchPatientProfile, fetchPatientTriage } from "@/redux/service/patients";
 
 
 const initialState = {
   services: [],
   patients: [],
   profileDetails: {},
+  patientTriage: {},
 };
 
 const PatientSlice = createSlice({
@@ -21,10 +22,13 @@ const PatientSlice = createSlice({
     setProfile: (state, action) => {
       state.profileDetails = action.payload;
     },
+    setPatientTriage: (state, action) => {
+      state.patientTriage = action.payload;
+    },
   },
 });
 
-export const { setServices,setPatients,setProfile } = PatientSlice.actions;
+export const { setServices,setPatients,setProfile,setPatientTriage } = PatientSlice.actions;
 
 
 export const getAllServices = () => async (dispatch) => {
@@ -49,6 +53,15 @@ export const getPatientProfile = (userId) => async (dispatch) => {
   try {
     const response = await fetchPatientProfile(userId);
     dispatch(setProfile(response));
+  } catch (error) {
+    console.log("PROFILE_ERROR ", error);
+  }
+};
+
+export const getPatientTriage = (id) => async (dispatch) => {
+  try {
+    const response = await fetchPatientTriage(id);
+    dispatch(setPatientTriage(response));
   } catch (error) {
     console.log("PROFILE_ERROR ", error);
   }

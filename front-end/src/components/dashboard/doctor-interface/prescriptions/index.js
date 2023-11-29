@@ -101,7 +101,7 @@ const AllPrescriptions = ({ patient }) => {
           <section className="flex items-center gap-2">
             <div className="w-7/12">
               <Field
-                className="block border bg-background  border-gray py-3 text-sm px-4 focus:outline-none w-full"
+                className="block border bg-background rounded-xl border-gray py-2 text-sm px-4 focus:outline-none w-full"
                 type="text"
                 name="name"
                 placeholder="Search Drug..."
@@ -115,7 +115,7 @@ const AllPrescriptions = ({ patient }) => {
             <div>
               <button
                 type="submit"
-                className="bg-primary flex items-center gap-2 w-full px-4 text-sm py-3 text-white"
+                className="bg-primary rounded-xl flex items-center gap-2 w-full px-4 text-sm py-2 text-white"
               >
                 {loading && (
                   <svg
@@ -144,7 +144,7 @@ const AllPrescriptions = ({ patient }) => {
         </Form>
       </Formik>
 
-      {items.map((item, index) => (
+      {items?.map((item, index) => (
         <section key={index} className="bg-white shadow p-4 rounded mt-4">
           <Formik
             initialValues={prescribedValues}
@@ -161,13 +161,13 @@ const AllPrescriptions = ({ patient }) => {
                 <div className="flex items-center gap-4">
                   <div className="space-y-2">
                     <Field
-                      className="block border  border-gray py-2 text-sm px-4 focus:outline-none w-full"
+                      className="block border rounded-xl border-gray py-2 text-sm px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Dosage"
                       name="dosage"
                     />
                     <Field
-                      className="block border border-gray  py-2 text-sm px-4 focus:outline-none w-full"
+                      className="block border rounded-xl border-gray  py-2 text-sm px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Frequency"
                       name="frequency"
@@ -175,13 +175,13 @@ const AllPrescriptions = ({ patient }) => {
                   </div>
                   <div className="space-y-2">
                     <Field
-                      className="block border border-gray  py-2 text-sm px-4 focus:outline-none w-full"
+                      className="block border rounded-xl border-gray  py-2 text-sm px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Duration"
                       name="duration"
                     />
                     <Field
-                      className="block border border-gray  py-2 text-sm px-4 focus:outline-none w-full"
+                      className="block border rounded-xl border-gray  py-2 text-sm px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Note"
                       name="note"
@@ -191,7 +191,7 @@ const AllPrescriptions = ({ patient }) => {
                 <div className="space-y-2">
                   <button
                     type="submit"
-                    className="bg-primary w-full px-4 text-sm py-2 text-white"
+                    className="bg-primary w-full rounded-xl px-4 text-sm py-2 text-white"
                   >
                     {loading && (
                       <svg
@@ -229,7 +229,7 @@ const AllPrescriptions = ({ patient }) => {
             <div className="">
               <button
                 onClick={handleCreatePrescription}
-                className="bg-primary flex items-center gap-2 w-full px-4 text-sm py-3 text-white"
+                className="bg-primary rounded-xl flex items-center gap-2 w-full px-4 text-sm py-2 text-white"
               >
                 {loading && (
                   <svg
