@@ -79,7 +79,7 @@ const SignUp = () => {
             <section className="flex flex-col items-center justify-center space-y-4">
               <div className="w-full">
                 <Field
-                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="First Name"
                   name="first_name"
@@ -92,7 +92,7 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="Last Name"
                   name="last_name"
@@ -105,7 +105,7 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
                   type="email"
                   placeholder="Email"
                   name="email"
@@ -118,7 +118,7 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                  className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
                   type="password"
                   placeholder="Password"
                   name="password"
@@ -144,7 +144,7 @@ const SignUp = () => {
               </div> */}
               <button
                 type="submit"
-                className="bg-primary w-full px-8 py-3 text-white"
+                className="bg-primary w-full rounded-xl text-sm px-8 py-3 text-white"
               >
                 {loading && (
                   <svg
@@ -172,7 +172,7 @@ const SignUp = () => {
         </Formik>
       </div>
       <div className="md:block hidden w-1/2">
-        <section className="loginPage rounded-2xl flex items-center justify-center p-4">
+        <section className="loginPage h-screen rounded-2xl flex items-center justify-center p-4">
           <div className="text-white">
             <div className="space-y-4">
               <h1 className="text-2xl text-center">

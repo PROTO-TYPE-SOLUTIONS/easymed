@@ -78,7 +78,7 @@ export default function AddTriageModal({
                 <section className="space-y-2 w-full">
                   <div className="w-full">
                     <Field
-                      className="block border text-sm border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Temperature"
                       name="temperature"
@@ -91,7 +91,7 @@ export default function AddTriageModal({
                   </div>
                   <div className="w-full">
                     <Field
-                      className="block border text-sm border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Height"
                       name="height"
@@ -106,7 +106,7 @@ export default function AddTriageModal({
                 <section className="space-y-2 w-full">
                   <div className="w-full">
                     <Field
-                      className="block border text-sm border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Weight"
                       name="weight"
@@ -119,7 +119,7 @@ export default function AddTriageModal({
                   </div>
                   <div className="w-full">
                     <Field
-                      className="block border text-sm border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Pulse"
                       name="pulse"
@@ -134,7 +134,7 @@ export default function AddTriageModal({
               </section>
               <button
                 type="submit"
-                className="bg-primary text-sm w-full px-8 py-3 mt-3 text-white"
+                className="bg-primary text-sm rounded-xl w-full px-8 py-2 mt-3 text-white"
               >
                 {loading && (
                   <svg

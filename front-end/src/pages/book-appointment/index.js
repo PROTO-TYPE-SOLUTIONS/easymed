@@ -17,7 +17,7 @@ const BookAppointment = () => {
             <label htmlFor="first_name">Select Service</label>
             <select
               as="select"
-              className="block text-sm pr-9 border border-gray py-2 px-4 focus:outline-none w-full"
+              className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
               name="gender"
               value={selectedService}
               onChange={handleServiceChange}

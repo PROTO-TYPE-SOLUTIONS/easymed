@@ -78,7 +78,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="first_name">First Name</label>
                 <Field
-                  className="block border text-sm border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="First Name"
                   name="first_name"
@@ -93,7 +93,7 @@ const LabServiceForm = () => {
                 <label htmlFor="gender">Gender</label>
                 <Field
                   as="select"
-                  className="block text-sm pr-9 border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   name="gender"
                 >
                   <option value="">Select Gender</option>
@@ -111,7 +111,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="date_of_birth">Date of Birth</label>
                 <Field
-                  className="block text-sm border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="date"
                   placeholder="Date of birth"
                   name="date_of_birth"
@@ -127,7 +127,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="second_name">Second Name</label>
                 <Field
-                  className="block border text-sm border-gray  py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="Second Name"
                   name="second_name"
@@ -142,7 +142,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="appointment_date_time">Appointment Date</label>
                 <Field
-                  className="block border text-sm border-gray  py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="date"
                   placeholder="Appointment Date"
                   name="appointment_date_time"
@@ -157,7 +157,7 @@ const LabServiceForm = () => {
                 <label htmlFor="test_profile">Test Profile</label>
                 <Field
                   as="select"
-                  className="block text-sm pr-9 border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   name="test_profile"
                 >
                   <option value="">Select Test Profile</option>
@@ -179,7 +179,7 @@ const LabServiceForm = () => {
           <div className="w-full my-4">
             <label htmlFor="reason">Upload Document</label>
             <Field
-              className="block border border-gray  py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
               placeholder="Upload Document"
               type="file"
               name="lab_request"
@@ -188,7 +188,7 @@ const LabServiceForm = () => {
           <div className="w-full my-4">
             <label htmlFor="reason">Reason</label>
             <Field
-              className="block border border-gray  py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
               as="textarea"
               placeholder="Reason"
               name="reason"
@@ -196,7 +196,7 @@ const LabServiceForm = () => {
           </div>
           <button
             type="submit"
-            className="bg-primary text-sm w-full px-8 py-2 text-white"
+            className="bg-primary text-sm w-full rounded-xl px-8 py-2 text-white"
           >
             {loading && (
               <svg
