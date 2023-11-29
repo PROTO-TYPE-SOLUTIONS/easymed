@@ -39,12 +39,13 @@ export const AuthProvider = ({ children }) => {
             "refresh",
             JSON.stringify(response.data.refresh)
           );
+          console.log("I AM DECODED ", decodedUser);
           if (decodedUser?.role === "patient") {
             router.push(`/patient-profile`);
+          } else {
+            await dispatch(getAllUserPermissions(decodedUser?.user_id));
+            router.push("/dashboard");
           }
-          console.log("DECODED_RIGHT_NOW ", decodedUser);
-          await dispatch(getAllUserPermissions(decodedUser?.user_id));
-          router.push("/dashboard");
         } catch (error) {
           throw error;
         }
