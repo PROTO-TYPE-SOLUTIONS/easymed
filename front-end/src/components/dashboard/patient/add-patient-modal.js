@@ -104,7 +104,7 @@ const AddPatientModal = () => {
                   <Grid item md={6} xs={12}>
                     <label htmlFor="first_name">First Name</label>
                     <Field
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="First Name"
                       name="first_name"
@@ -118,7 +118,7 @@ const AddPatientModal = () => {
                   <Grid item md={6} xs={12}>
                   <label htmlFor="second_name">Last Name</label>
                     <Field
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
                       type="text"
                       placeholder="Second Name"
                       name="second_name"
@@ -134,7 +134,7 @@ const AddPatientModal = () => {
                   <Grid item md={6} xs={12}>
                   <label htmlFor="date_of_birth">Date of Birth</label>
                     <Field
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
                       type="date"
                       placeholder="Date of Birth"
                       name="date_of_birth"
@@ -149,7 +149,7 @@ const AddPatientModal = () => {
                   <label htmlFor="gender">Select Gender</label>
                     <Field
                       as="select"
-                      className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block pr-9 border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
                       name="gender"
                     >
                       <option value="">Select Gender</option>
@@ -169,7 +169,7 @@ const AddPatientModal = () => {
                   <label htmlFor="insurance">Insurance</label>
                     <Field
                       as="select"
-                      className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block pr-9 border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
                       name="insurance"
                     >
                       <option value="">Select Insurance</option>
@@ -191,7 +191,7 @@ const AddPatientModal = () => {
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       type="submit"
-                      className="bg-primary px-4 py-2 text-white"
+                      className="bg-primary rounded-xl text-sm px-4 py-2 text-white"
                     >
                       {loading && (
                         <svg
@@ -216,7 +216,7 @@ const AddPatientModal = () => {
                     </button>
                     <button
                       onClick={handleClose}
-                      className="border border-warning px-4 py-2 text-[#02273D]"
+                      className="border border-warning rounded-xl text-sm px-4 py-2 text-[#02273D]"
                     >
                       Cancel
                     </button>

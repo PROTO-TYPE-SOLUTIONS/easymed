@@ -16,7 +16,6 @@ const Prescription = () => {
   // Decode and parse the data back to the original object
   const decodedData = data ? JSON.parse(decodeURIComponent(data)) : null;
 
-  console.log("DECODED_DATA ", decodedData);
 
   const initialValues = {
     drug_name: "",
@@ -59,13 +58,13 @@ const Prescription = () => {
           <input
             name="drug_name"
             placeholder="Prescription Id"
-            className="block border  bg-background border-gray py-3 text-sm px-4 focus:outline-none w-full"
+            className="block border  bg-background rounded-xl border-gray py-2 text-sm px-4 focus:outline-none w-full"
           />
         </div>
         <div>
           <button
             type="submit"
-            className="bg-primary w-full  px-4 text-sm py-3 text-white"
+            className="bg-primary w-full rounded-xl px-4 text-sm py-2 text-white"
             onClick={() => setShow(true)}
           >
             Add Drug

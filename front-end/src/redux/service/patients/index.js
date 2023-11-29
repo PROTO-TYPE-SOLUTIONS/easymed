@@ -154,3 +154,19 @@ export const createPrescription = (payload) =>{
     })
 }
 
+export const fetchPatientTriage = (id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.GET_PATIENT_TRIAGE}`,{
+            params:{
+                id: id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+

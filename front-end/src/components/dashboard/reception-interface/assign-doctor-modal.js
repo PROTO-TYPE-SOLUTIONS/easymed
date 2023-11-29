@@ -98,7 +98,7 @@ export default function AssignDoctorModal({
             <Form>
               <Field
                 as="select"
-                className="block pr-9 mt-4 border border-gray py-2 text-sm px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="assigned_doctor"
               >
                 <option value="">Select a Doctor</option>
@@ -116,7 +116,7 @@ export default function AssignDoctorModal({
               />
               <Field
                 as="select"
-                className="block pr-9 mt-4 border border-gray py-2 text-sm px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="status"
               >
                 <option value="">Select Status</option>
@@ -132,7 +132,7 @@ export default function AssignDoctorModal({
                 className="text-warning text-xs"
               />
               <Field
-                className="block pr-9 mt-4 border border-gray py-2 text-sm px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="fee"
                 placeholder="Enter Fee"
               />
@@ -142,7 +142,7 @@ export default function AssignDoctorModal({
                 className="text-warning text-xs"
               />
               <Field
-                className="block pr-9 mt-4 border border-gray py-2 text-sm px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="reason"
                 placeholder="Reason"
               />
@@ -154,7 +154,7 @@ export default function AssignDoctorModal({
               <div className="flex items-center gap-2 justify-end mt-3">
                 <button
                   type="submit"
-                  className="bg-primary px-3 py-2 text-white"
+                  className="bg-primary px-3 py-2 text-sm text-white rounded-xl"
                 >
                   {loading && (
                     <svg
@@ -178,7 +178,7 @@ export default function AssignDoctorModal({
                   Proceed
                 </button>
                 <p
-                  className="border border-warning px-3 py-2 cursor-pointer"
+                  className="border border-warning text-sm rounded-xl px-3 py-2 cursor-pointer"
                   onClick={handleClose}
                 >
                   Cancel
