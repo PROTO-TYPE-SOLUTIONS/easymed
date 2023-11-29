@@ -59,8 +59,6 @@ const LabServiceForm = () => {
   };
 
 
-
-
   useEffect(() => {
     dispatch(getAllServices());
     dispatch(getAllLabTestProfiles());
