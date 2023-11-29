@@ -3,7 +3,6 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { registerUser } from "@/redux/service/auth";
 import { useRouter } from "next/router";
-import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllPatientGroups } from "@/redux/features/auth";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -13,7 +12,6 @@ const SignUp = () => {
   const { patientGroups } = useSelector((store) => store.auth);
   console.log("GROUPS ", patientGroups);
   const router = useRouter();
-  const auth = useAuth();
   const initialValues = {
     email: "",
     password: "",
@@ -44,10 +42,10 @@ const SignUp = () => {
         ...formValue,
         role: "patient",
         profession: "",
-        group: patientGroups[0].id,
+        group: patientGroups[0]?.id,
       };
       setLoading(true);
-      await registerUser(formData, auth).then(() => {
+      await registerUser(formData).then(() => {
         helpers.resetForm();
         setLoading(false);
         router.push("/auth/login");

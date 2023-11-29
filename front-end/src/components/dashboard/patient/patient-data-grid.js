@@ -4,40 +4,53 @@ import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import AddPatientModal from "./add-patient-modal";
 import { Chip } from "@mui/material";
 import { getAllPatients } from "@/redux/features/patients";
-import { useSelector,useDispatch } from "react-redux";
-
+import { useSelector, useDispatch } from "react-redux";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-  
 const PatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const { patients } = useSelector((store) => store.patient);
   const dispatch = useDispatch();
 
-
   const statusFunc = ({ data }) => {
     if (data?.progress_status === "In Treatment") {
       return (
-        <Chip variant="contained" size="small" className="bg-primary text-white" label={data.progress_status} />
+        <Chip
+          variant="contained"
+          size="small"
+          className="bg-primary text-white"
+          label={data.progress_status}
+        />
       );
     } else if (data?.progress_status === "Discharged") {
       return (
-        <Chip variant="contained" size="small" className="bg-success text-white" label={data.progress_status} />
+        <Chip
+          variant="contained"
+          size="small"
+          className="bg-success text-white"
+          label={data.progress_status}
+        />
       );
     } else if (data?.progress_status === "New Patient") {
       return (
-        <Chip variant="contained" size="small" className="bg-card text-white" label={data.progress_status} />
+        <Chip
+          variant="contained"
+          size="small"
+          className="bg-card text-white"
+          label={data.progress_status}
+        />
       );
     }
   };
 
+ 
 
-  useEffect(() =>{
+  useEffect(() => {
     dispatch(getAllPatients());
-  },[])
+  }, []);
 
   return (
     <section className="mt-8">
@@ -59,17 +72,17 @@ const PatientsDataGrid = () => {
         showColumnLines={true}
         showRowLines={true}
         wordWrapEnabled={true}
-        allowPaging={true}
+        allowPaging={false}
         className="shadow-xl w-full"
         height={"70vh"}
       >
         <Pager
-          visible={true}
+          visible={false}
           // allowedPageSizes={allowedPageSizes}
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        
+
         <Column
           dataField="first_name"
           caption="First Name"
@@ -84,14 +97,15 @@ const PatientsDataGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="date_of_birth" caption="Age" width={140} />
+        <Column
+          dataField="date_of_birth"
+          caption="Age"
+          width={140}
+          // calculateCellValue={(data) => calculateAge(data.date_of_birth)}
+        />
         <Column dataField="gender" caption="Gender" width={140} />
         <Column dataField="insurance" caption="Insurance" width={140} />
-        <Column
-          dataField="insurance"
-          caption="Insurance"
-          width={200}
-        />
+        <Column dataField="insurance" caption="Insurance" width={200} />
         <Column
           dataField=""
           caption="Status"

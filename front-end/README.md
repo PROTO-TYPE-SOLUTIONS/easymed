@@ -1,6 +1,6 @@
 
 
-## Running FrontEnd
+# Running FrontEnd
 
 #### First, create a .env.local file in the same directory as the src folder then add the following:
 
@@ -9,17 +9,16 @@
 
 ###### Include your base_url in the field above then use the above encryption key
 
+# Adding Permissions
+
+* Doctor Dashboard => CAN_ACCESS_DOCTOR_DASHBOARD
+* Admin Dashboard => CAN_ACCESS_ADMIN_DASHBOARD
 
 Lastly run the development server using either of the following commands:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
 ```
 
 Visit localhost 3000 then visit /dashboard to access the dashboard route

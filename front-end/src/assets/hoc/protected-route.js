@@ -6,8 +6,6 @@ import NotAuthorized from './not-authorised'
 const ProtectedRoute = ({ permission,children }) => {
     const { userPermissions } = useSelector(( store ) => store.auth);
 
-    console.log("PROTECTED_PERMISSIONS ",userPermissions)
-
 
     // check if current user has permission to access the route in question
     const isAuthorized = userPermissions && userPermissions.find((perm) => perm === permission)

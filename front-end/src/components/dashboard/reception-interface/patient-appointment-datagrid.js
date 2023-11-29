@@ -186,7 +186,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
         <Column
           dataField="appointment_date_time"
           caption="Date of Appointment"
-          width={140}
+          width={180}
           cellRender={appointmentDateFunc}
         />
         <Column
