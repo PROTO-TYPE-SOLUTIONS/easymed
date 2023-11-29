@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }) => {
         const decodedUser = jwtDecode(response.data.access);
         setUser({ ...decodedUser, token: response.data.access });
         try {
-          // router.push("/dashboard");
           localStorage.setItem("token", JSON.stringify(response.data.access));
           localStorage.setItem(
             "refresh",
@@ -42,11 +41,10 @@ export const AuthProvider = ({ children }) => {
           );
           if (decodedUser?.role === "patient") {
             router.push(`/patient-profile`);
-          } else {
-            console.log("DECODED ",decodedUser)
-            await dispatch(getAllUserPermissions(decodedUser));
-            router.push("/dashboard");
           }
+          console.log("DECODED_RIGHT_NOW ", decodedUser);
+          await dispatch(getAllUserPermissions(decodedUser?.user_id));
+          router.push("/dashboard");
         } catch (error) {
           throw error;
         }
@@ -82,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     }
     const fetchPermissions = async () => {
       if (decodedToken) {
-        await dispatch(getAllUserPermissions(decodedToken.user_id,user));
+        await dispatch(getAllUserPermissions(decodedToken.user_id));
       }
     };
     fetchPermissions();

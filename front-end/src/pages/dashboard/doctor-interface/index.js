@@ -4,6 +4,7 @@ import { Container } from "@mui/material";
 import DoctorPatientDataGrid from "@/components/dashboard/doctor-interface/doctor-patient-datagrid";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const DoctorInterface = () => {
   return (
@@ -15,9 +16,11 @@ const DoctorInterface = () => {
 };
 
 DoctorInterface.getLayout = (page) => (
-  <AuthGuard>
-    <CustomizedLayout>{page}</CustomizedLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_DOCTOR_DASHBOARD'}>
+    <AuthGuard>
+      <CustomizedLayout>{page}</CustomizedLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default DoctorInterface;

@@ -17,10 +17,26 @@ export const registerUser = (payload,auth) =>{
     })
 }
 
-export const fetchUserPermissions = (auth) =>{
-    const axiosInstance = UseAxios(auth)
+export const createUser = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,auth)
+        axiosInstance.post(`${APP_API_URL.CREATE_USER}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchUserPermissions = (user_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.GET_USER_PERMISSIONS}`,{
+            params:{
+                user_id: user_id
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })

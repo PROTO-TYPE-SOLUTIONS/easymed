@@ -4,27 +4,16 @@ import PatientsDataGrid from "@/components/dashboard/patient/patient-data-grid";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
+  const { userPermissions } = useSelector(( store ) => store.auth)
+
+  console.log("USER_PERMISSIONS ",userPermissions)
   return (
     <Container maxWidth="xl">
       <DashboardCards />
       <PatientsDataGrid />
-      {/* <Grid container spacing={2}>
-        <Grid item md={8} xs={12}>
-        </Grid>
-        <Grid item md={4} xs={12} className="space-y-4">
-          <Doctors />
-        </Grid>
-      </Grid> */}
-      {/* <Grid container spacing={2}>
-        <Grid item md={8} xs={12}>
-          <CalenderDate />
-        </Grid>
-        <Grid item md={4} xs={12} className="space-y-4">
-          <BookedSessions />
-        </Grid>
-      </Grid> */}
     </Container>
   );
 };

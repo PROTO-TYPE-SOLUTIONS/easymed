@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { registerUser } from "@/redux/service/auth";
+import { createUser, registerUser } from "@/redux/service/auth";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import { IoMdAdd } from "react-icons/io";
@@ -11,14 +11,13 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import { toast } from "react-toastify";
 import { getAllGroups } from "@/redux/features/auth";
 
-const AdminCreateDoctor = () => {
+const AdminCreateUser = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
   const { groups } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const authUser = useAuth();
 
-  console.log("GROUPS ", groups);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -60,7 +59,7 @@ const AdminCreateDoctor = () => {
       .required("Password is required!"),
   });
 
-  const handleRegister = async (formValue, helpers) => {
+  const handleCreateUser = async (formValue, helpers) => {
     try {
       const formData = {
         ...formValue,
@@ -68,7 +67,7 @@ const AdminCreateDoctor = () => {
         profession: "",
       };
       setLoading(true);
-      await registerUser(formData, authUser).then(() => {
+      await createUser(formData, authUser).then(() => {
         helpers.resetForm();
         setLoading(false);
         handleClose();
@@ -104,7 +103,7 @@ const AdminCreateDoctor = () => {
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleRegister}
+                onSubmit={handleCreateUser}
               >
                 <Form className="w-full">
                   <section className="flex flex-col items-center justify-center space-y-4">
@@ -215,4 +214,4 @@ const AdminCreateDoctor = () => {
   );
 };
 
-export default AdminCreateDoctor;
+export default AdminCreateUser;
