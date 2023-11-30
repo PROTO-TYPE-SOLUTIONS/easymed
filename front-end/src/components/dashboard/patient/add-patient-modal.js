@@ -45,7 +45,7 @@ const AddPatientModal = () => {
     second_name: "",
     date_of_birth: "",
     gender: "",
-    insurance: 0,
+    insurance: null,
   };
 
   const validationSchema = Yup.object().shape({
