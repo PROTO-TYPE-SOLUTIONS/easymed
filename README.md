@@ -10,6 +10,7 @@ In the root directory run;
 
 ### Running manually
 ## Running Backend
+(refer to ./front-end/README.md to run frontend)
 ### Windows
 [Install](https://medium.com/analytics-vidhya/virtual-environment-6ad5d9b6af59) python and virtualenv.
 Next, in the project directory run:
