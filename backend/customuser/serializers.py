@@ -74,24 +74,51 @@ class CustomUserLoginSerializer(serializers.Serializer):
 
 
 class DoctorSerializer(serializers.ModelSerializer):
+    age = serializers.SerializerMethodField()
     class Meta:
         model = Doctor
         fields = "__all__"
 
+    def get_age(self, obj: Doctor):
+        if obj.age:
+            return obj.age
+        return None
+
+
 
 class NurseSerializer(serializers.ModelSerializer):
+    age = serializers.SerializerMethodField()
     class Meta:
         model = Nurse
         fields = "__all__"
 
+    def get_age(self, obj: Doctor):
+        if obj.age:
+            return obj.age
+        return None
+
 
 class LabTechSerializer(serializers.ModelSerializer):
+    age = serializers.SerializerMethodField()
     class Meta:
         model = LabTech
         fields = "__all__"
 
+    def get_age(self, obj: Doctor):
+        if obj.age:
+            return obj.age
+        return None
+
 
 class ReceptionistSerializer(serializers.ModelSerializer):
+    age = serializers.SerializerMethodField()
     class Meta:
         model = Receptionist
         fields = "__all__"
+
+    def get_age(self, obj: Doctor):
+        if obj.age:
+            return obj.age
+        return None
+    
+    
