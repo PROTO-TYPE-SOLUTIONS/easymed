@@ -143,6 +143,17 @@ export default function AssignDoctorModal({
               />
               <Field
                 className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                name="appointment_date_time"
+                placeholder="Appointment date time"
+                type="date"
+              />
+              <ErrorMessage
+                name="appointment_date_time"
+                component="div"
+                className="text-warning text-xs"
+              />
+              <Field
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="reason"
                 placeholder="Reason"
               />
