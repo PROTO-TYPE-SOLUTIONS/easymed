@@ -19,6 +19,7 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    OrderBill
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -35,12 +36,15 @@ from .serializers import (
     TriageSerializer,
     ConvertToAppointmentsSerializer,
     SendConfirmationMailSerializer,
+    OrderBillSerializer,
+    InvoiceSerializer
 )
 
 # filters
 from .filters import (
     AppointmentFilter,
-    PatientFilter
+    PatientFilter,
+    OrderBillFilter,
 )
 
 # swagger
@@ -178,9 +182,6 @@ class SendAppointmentConfirmationAPIView(APIView):
         request=SendConfirmationMailSerializer,
         responses=str,
     )
-
-
-
     def post(self, request: Request, *args, **kwargs):
         data = request.data
         serializer = SendConfirmationMailSerializer(data=data)
@@ -191,3 +192,19 @@ class SendAppointmentConfirmationAPIView(APIView):
             send_appointment_email(appointments)
             return Response("email sent successfully", status=status.HTTP_200_OK)
 
+
+class OrderBillViewSet(viewsets.ModelViewSet):
+    queryset = OrderBill.objects.all()
+    serializer_class = OrderBillSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = OrderBillFilter
+
+
+class InvoiceAPIView(APIView):
+
+    @extend_schema(
+        request=None,
+        responses=InvoiceSerializer,
+    )
+    def get(self, request: Request, appointment_id: int, *args, **kwargs):
+        pass
