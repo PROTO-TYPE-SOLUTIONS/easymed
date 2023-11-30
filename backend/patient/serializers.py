@@ -13,6 +13,7 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    OrderBill
 )
 
 
@@ -66,20 +67,6 @@ class ConsultationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class AppointmentSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Appointment
-#         fields = '__all__'
-
-#     def to_representation(self, instance: Appointment):
-#         data = super().to_representation(instance)
-#         if instance.assigned_doctor:
-#             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
-
-#         if instance.patient:
-#             data["first_name"] = instance.patient.first_name
-#             data["second_name"] = instance.patient.second_name
-#         return data
 
 class ConvertToAppointmentsSerializer(serializers.Serializer):
     first_name = serializers.CharField()
@@ -174,12 +161,19 @@ class AppointmentSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("id", "date_created", "date_changed")
 
+    def validate(self, attrs: dict):
+        appointment_date_time = attrs.get("appointment_date_time", None)
+        if not appointment_date_time:
+            raise serializers.ValidationError("appointment_date_time field is required")
+    
+        return super().validate(attrs)
+
     
     def to_representation(self, instance: Appointment):
         data = super().to_representation(instance)
+
         if instance.assigned_doctor:
             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
-
         if instance.patient:
             data["first_name"] = instance.patient.first_name
             data["second_name"] = instance.patient.second_name
@@ -201,3 +195,17 @@ class SendConfirmationMailSerializer(serializers.Serializer):
         allow_null = False,
     )
     
+
+class OrderBillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderBill
+        fields = '__all__'
+
+
+class InvoiceSerializer(serializers.Serializer):
+    appointment = AppointmentSerializer()
+    consultation = ConsultationSerializer()
+    triage = TriageSerializer()
+    
+    prescribed_drugs = PrescribedDrugSerializer(many=True, read_only=True)
+
