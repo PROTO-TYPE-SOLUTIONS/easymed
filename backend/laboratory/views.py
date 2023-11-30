@@ -55,6 +55,7 @@ class LabReagentViewSet(viewsets.ModelViewSet):
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabReagent.objects.all()
     serializer_class = LabTestProfileSerializer
+    permission_classes = (AllowAny,)
 
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
