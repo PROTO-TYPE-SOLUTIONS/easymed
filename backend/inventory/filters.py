@@ -4,7 +4,6 @@ import django_filters
 from .models import (
     Inventory,
     Item,
-    OrderBill,
     PurchaseOrder,
     Supplier
 )
@@ -31,13 +30,6 @@ class PurchaseOrderFilter(django_filters.FilterSet):
     class Meta:
         model = PurchaseOrder
         fields = ('quantity', 'Total_Cost', 'supplier_ID__name')
-
-
-class OrderBillFilter(django_filters.FilterSet):
-    payment_status = django_filters.CharFilter(lookup_expr='exact')
-    class Meta:
-        model = OrderBill
-        fields = ('payment_status',)
 
 
 class SupplierFilter(django_filters.FilterSet):
