@@ -13,6 +13,7 @@ import { BiSolidPurchaseTagAlt } from 'react-icons/bi'
 import { FaMoneyBillAlt } from 'react-icons/fa'
 import { FaProductHunt } from 'react-icons/fa'
 import { TbBrandBandlab } from 'react-icons/tb'
+import { FaMoneyBillWave } from "react-icons/fa";
 
 export const menus = [
   {
@@ -67,7 +68,7 @@ export const menus = [
   {
     label: "Billing",
     href: "/dashboard/billing",
-    icon: <HiUsers className="text-xl" />,
+    icon: <FaMoneyBillWave className="text-xl" />,
   },
   {
     label: "Patients",
