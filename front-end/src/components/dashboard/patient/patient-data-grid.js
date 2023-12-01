@@ -53,7 +53,7 @@ const PatientsDataGrid = () => {
   }, []);
 
   return (
-    <section className="mt-8">
+    <section className="mt-4">
       <div className="flex items-center justify-between mb-2">
         <AddPatientModal />
         {/* <input
@@ -74,7 +74,7 @@ const PatientsDataGrid = () => {
         wordWrapEnabled={true}
         allowPaging={false}
         className="shadow-xl w-full"
-        height={"70vh"}
+        height={"60vh"}
       >
         <Pager
           visible={false}

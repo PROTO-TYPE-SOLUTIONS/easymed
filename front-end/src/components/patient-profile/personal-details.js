@@ -36,7 +36,6 @@ const PersonalDetails = () => {
     second_name: Yup.string().required("Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
-    insurance: Yup.number(),
     user_id: Yup.number(),
   });
 
@@ -182,11 +181,6 @@ const PersonalDetails = () => {
                   </option>
                 ))}
               </Field>
-              <ErrorMessage
-                name="insurance"
-                component="div"
-                className="text-warning text-xs"
-              />
             </div>
           </section>
           <div className="flex items-center justify-start my-2">

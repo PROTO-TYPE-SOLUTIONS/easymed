@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
@@ -7,7 +7,9 @@ import { Grid } from "@mui/material";
 import { consultPatient } from "@/redux/service/patients";
 import { useContext } from "react";
 import { authContext } from "@/components/use-context";
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { getPatientTriage } from "@/redux/features/patients";
 
 const ConsultPatientModal = ({
   selectedRowData,
@@ -16,6 +18,8 @@ const ConsultPatientModal = ({
 }) => {
   const [loading, setLoading] = React.useState(false);
   const { user } = useContext(authContext);
+  const { patientTriage } = useSelector((store) => store.patient);
+  const dispatch = useDispatch();
 
   const handleClose = () => {
     setConsultOpen(false);
@@ -54,6 +58,10 @@ const ConsultPatientModal = ({
     }
   };
 
+  useEffect(() => {
+    dispatch(getPatientTriage(selectedRowData?.id));
+  }, [selectedRowData]);
+
   return (
     <section>
       <Dialog
@@ -72,14 +80,32 @@ const ConsultPatientModal = ({
           >
             <Form>
               <section className="space-y-2">
-                <h1 className="text-xl text-center">Add Consultation Notes</h1>
+                <h1 className="">Triage Information</h1>
+                <section className="flex items-center justify-between text-sm border-b bg-background p-1 rounded border-gray">
+                  <div className="flex items-center gap-2">
+                    <span>Temperature :</span>
+                    <span>{patientTriage?.temperature}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Height :</span>
+                    <span>{patientTriage?.height}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Pulse :</span>
+                    <span>{patientTriage?.pulse}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Weight :</span>
+                    <span>{patientTriage?.weight}</span>
+                  </div>
+                </section>
                 <Grid container spacing={2}>
                   <Grid item md={12} xs={12}>
                     <section className="space-y-3">
                       <div>
                         <Field
                           as="textarea"
-                          className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                          className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                           type="text"
                           placeholder="Add Consultation Notes"
                           name="note"
@@ -93,7 +119,7 @@ const ConsultPatientModal = ({
                       <div>
                         <Field
                           as="textarea"
-                          className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                          className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
                           type="text"
                           placeholder="Add Complaint"
                           name="complaint"
@@ -106,7 +132,7 @@ const ConsultPatientModal = ({
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       type="submit"
-                      className="bg-[#02273D] px-4 py-2 text-white text-sm"
+                      className="bg-[#02273D] px-4 rounded-xl py-2 text-white text-sm"
                     >
                       {loading && (
                         <svg
@@ -132,7 +158,7 @@ const ConsultPatientModal = ({
                     <button
                       type="submit"
                       onClick={handleClose}
-                      className="border border-warning px-4 py-2 text-sm"
+                      className="border border-warning rounded-xl px-4 py-2 text-sm"
                     >
                       Cancel
                     </button>

@@ -127,7 +127,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
     <>
       <section className="flex items-center justify-between mb-2">
         <div className="">
-          <h1 className="text-xl text-primary uppercase">
+          <h1 className="text-xl text-primary">
             Patient Appointments
           </h1>
         </div>
@@ -196,12 +196,12 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
           cellRender={dateCreatedFunc}
         />
         <Column dataField="date_of_birth" caption="Age" width={140} />
-        <Column dataField="reason" caption="Reason" width={280} />
-        <Column
+        {/* <Column dataField="reason" caption="Reason" width={280} /> */}
+        {/* <Column
           dataField="assigned_doctor"
           caption="Assigned Doctor"
           width={200}
-        />
+        /> */}
         <Column dataField="gender" caption="Gender" width={100} />
         <Column dataField="status" caption="Status" width={140} />
       </DataGrid>

@@ -100,7 +100,7 @@ const NursePatientDataGrid = () => {
         height={"70vh"}
       >
         <Pager
-          visible={true}
+          visible={false}
           // allowedPageSizes={allowedPageSizes}
           showPageSizeSelector={true}
           showNavigationButtons={true}
@@ -108,21 +108,21 @@ const NursePatientDataGrid = () => {
         <Column
           dataField="first_name"
           caption="First Name"
-          width={140}
+          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
           dataField="second_name"
           caption="Last Name"
-          width={140}
+          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
-        <Column dataField="gender" caption="Gender" width={140} />
-        <Column dataField="insurance" caption="Insurance" width={140} />
-        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />
+        <Column dataField="gender" caption="Gender" width={120} />
+        <Column dataField="insurance" caption="Insurance" width={120} />
+        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={140} />
         <Column
           dataField=""
           caption="Status"

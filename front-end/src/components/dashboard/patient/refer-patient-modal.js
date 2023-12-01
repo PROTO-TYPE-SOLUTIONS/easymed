@@ -8,11 +8,14 @@ import { referPatient } from "@/redux/service/patients";
 import { toast } from "react-toastify";
 import { useContext } from "react";
 import { authContext } from "@/components/use-context";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getPatientTriage } from "@/redux/features/patients";
 
 const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
   const [loading, setLoading] = React.useState(false);
+  const { patientTriage } = useSelector((store) => store.patient);
   const { user } = useContext(authContext);
+  const dispatch = useDispatch();
 
   const handleClose = () => {
     setOpen(false);
@@ -65,6 +68,10 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
     }
   };
 
+  useEffect(() => {
+    dispatch(getPatientTriage(selectedRowData?.id));
+  }, [selectedRowData]);
+
   return (
     <section>
       <Dialog
@@ -83,18 +90,35 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
           >
             <Form>
               <section className="space-y-2">
-                <h1 className="text-xl text-center">Refer Patient</h1>
+                <h1 className="">Triage Information</h1>
+                <section className="flex items-center justify-between text-sm border-b bg-background p-1 rounded border-gray">
+                  <div className="flex items-center gap-2">
+                    <span>Temperature :</span>
+                    <span>{patientTriage?.temperature}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Height :</span>
+                    <span>{patientTriage?.height}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Pulse :</span>
+                    <span>{patientTriage?.pulse}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Weight :</span>
+                    <span>{patientTriage?.weight}</span>
+                  </div>
+                </section>
                 <Grid container spacing={2}>
                   <Grid item md={6} xs={12}>
                     <Field
-                      as="textarea"
-                      className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
-                      name="note"
-                      placeholder="note"
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="email"
+                      name="email"
                     />
-
                     <ErrorMessage
-                      name="note"
+                      name="email"
                       component="div"
                       className="text-warning text-xs"
                     />
@@ -102,7 +126,7 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
                   <Grid item md={6} xs={12}>
                     <Field
                       as="select"
-                      className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
+                      className="block pr-9 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                       name="service"
                     >
                       <option value="">Select service</option>
@@ -120,15 +144,16 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
                   </Grid>
                 </Grid>
                 <Grid container spacing={2}>
-                  <Grid item md={4} xs={12}>
+                  <Grid item md={12} xs={12}>
                     <Field
-                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                      type="text"
-                      placeholder="email"
-                      name="email"
+                      as="textarea"
+                      className="block pr-9 border rounded-xl border-gray py-2 text-sm px-4 focus:outline-none w-full"
+                      name="note"
+                      placeholder="note"
                     />
+
                     <ErrorMessage
-                      name="email"
+                      name="note"
                       component="div"
                       className="text-warning text-xs"
                     />
@@ -138,7 +163,7 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       type="submit"
-                      className="bg-[#02273D] px-4 py-2 text-white"
+                      className="bg-[#02273D] px-4 rounded-xl text-sm py-2 text-white"
                     >
                       {loading && (
                         <svg
@@ -164,7 +189,7 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
                     <button
                       type="submit"
                       onClick={handleClose}
-                      className="border border-warning px-4 py-2"
+                      className="border border-warning rounded-xl text-sm px-4 py-2"
                     >
                       Cancel
                     </button>

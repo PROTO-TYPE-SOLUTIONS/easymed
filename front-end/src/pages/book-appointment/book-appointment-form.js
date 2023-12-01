@@ -75,7 +75,7 @@ const BookAppointmentForm = () => {
               <div className="w-full">
                 <label htmlFor="first_name">First Name</label>
                 <Field
-                  className="block border text-sm border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="First Name"
                   name="first_name"
@@ -90,7 +90,7 @@ const BookAppointmentForm = () => {
                 <label htmlFor="gender">Gender</label>
                 <Field
                   as="select"
-                  className="block text-sm pr-9 border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   name="gender"
                 >
                   <option value="">Select Gender</option>
@@ -108,7 +108,7 @@ const BookAppointmentForm = () => {
               <div className="w-full">
                 <label htmlFor="date_of_birth">Date of Birth</label>
                 <Field
-                  className="block text-sm border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="date"
                   placeholder="Date of birth"
                   name="date_of_birth"
@@ -124,7 +124,7 @@ const BookAppointmentForm = () => {
               <div className="w-full">
                 <label htmlFor="second_name">Second Name</label>
                 <Field
-                  className="block border text-sm border-gray  py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl  py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="Second Name"
                   name="second_name"
@@ -139,7 +139,7 @@ const BookAppointmentForm = () => {
               <div className="w-full">
                 <label htmlFor="appointment_date_time">Appointment Date</label>
                 <Field
-                  className="block border text-sm border-gray  py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="date"
                   placeholder="Appointment Date"
                   name="appointment_date_time"
@@ -150,30 +150,12 @@ const BookAppointmentForm = () => {
                   className="text-warning text-xs"
                 />
               </div>
-
-              {/* <div className="w-full">
-                  <Field
-                    as="select"
-                    className="block pr-9 border border-gray  py-3 px-4 focus:outline-none w-full"
-                    name="service"
-                  >
-                    <option value="">Select Service</option>
-                    {services?.map((service) => (
-                      <option key={service.id} value={service.id}>{service.name}</option>
-                    ))}
-                  </Field>
-                  <ErrorMessage
-                    name="service"
-                    component="div"
-                    className="text-warning text-xs"
-                  />
-                </div> */}
             </Grid>
           </Grid>
           <div className="w-full my-4">
             <label htmlFor="reason">Reason</label>
             <Field
-              className="block border border-gray  py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
               as="textarea"
               placeholder="Reason"
               name="reason"
@@ -186,7 +168,7 @@ const BookAppointmentForm = () => {
           </div>
           <button
             type="submit"
-            className="bg-primary  w-full px-8 py-3 text-white"
+            className="bg-primary rounded-xl text-sm w-full px-8 py-3 text-white"
           >
             {loading && (
               <svg

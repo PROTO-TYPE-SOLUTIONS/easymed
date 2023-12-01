@@ -1,20 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
-import { useContext } from "react";
-import { authContext } from "@/components/use-context";
 import { toast } from "react-toastify";
 import { sendLabRequests } from "@/redux/service/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getPatientProfile, getPatientTriage } from "@/redux/features/patients";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllLabTestProfiles } from "@/redux/features/laboratory";
 
 const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
+  const { labTestProfiles } = useSelector((store) => store.laboratory);
+  const { patientTriage } = useSelector((store) => store.patient);
   const [loading, setLoading] = React.useState(false);
   const auth = useAuth();
+  const dispatch = useDispatch();
 
-  console.log("ROW_DATA ",selectedRowData)
+  console.log("ROW_DATA ", selectedRowData);
 
   const handleClose = () => {
     setLabOpen(false);
@@ -36,10 +40,10 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
   });
 
   const handleSendLabRequest = async (formValue, helpers) => {
-    console.log("FORM_DATA ",formValue);
+    console.log("FORM_DATA ", formValue);
     try {
       setLoading(true);
-      await sendLabRequests(formValue,auth).then(() => {
+      await sendLabRequests(formValue, auth).then(() => {
         helpers.resetForm();
         toast.success("Lab Request Successful!");
         setLoading(false);
@@ -52,9 +56,13 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
     }
   };
 
-  // useEffect(() => {
-  //   dispatch(getPatientProfile())
-  // },[]);
+  useEffect(() => {
+    dispatch(getAllLabTestProfiles());
+  }, []);
+
+  useEffect(() => {
+    dispatch(getPatientTriage(selectedRowData?.id));
+  }, [selectedRowData]);
 
   return (
     <section>
@@ -74,14 +82,53 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
           >
             <Form>
               <section className="space-y-2">
-                <h1 className="text-xl text-center">Send To Lab</h1>
+                <h1 className="">Triage Information</h1>
+                <section className="flex items-center justify-between text-sm border-b bg-background p-1 rounded border-gray">
+                  <div className="flex items-center gap-2">
+                    <span>
+                      Temperature :
+                    </span>
+                    <span>{patientTriage?.temperature}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Height :</span>
+                    <span>{patientTriage?.height}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Pulse :</span>
+                    <span>{patientTriage?.pulse}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Weight :</span>
+                    <span>{patientTriage?.weight}</span>
+                  </div>
+                </section>
                 <Grid container spacing={2}>
                   <Grid item md={12} xs={12}>
                     <section className="space-y-3">
                       <div>
                         <Field
+                          as="select"
+                          className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                          name="test_profile_ID"
+                        >
+                          <option value="">Select Test Profile</option>
+                          {labTestProfiles.map((test, index) => (
+                            <option key={index} value={test.id}>
+                              {test?.name}
+                            </option>
+                          ))}
+                        </Field>
+                        <ErrorMessage
+                          name="test_profile_ID"
+                          component="div"
+                          className="text-warning text-xs"
+                        />
+                      </div>
+                      <div>
+                        <Field
                           as="textarea"
-                          className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                          className="block border border-gray rounded-xl py-3 px-4 focus:outline-none w-full"
                           type="text"
                           placeholder="Add a Note"
                           name="note"
@@ -99,7 +146,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                   <div className="flex justify-end gap-2 mt-4">
                     <button
                       type="submit"
-                      className="bg-[#02273D] px-4 py-2 text-white text-sm"
+                      className="bg-[#02273D] px-4 py-2 text-white rounded-xl text-sm"
                     >
                       {loading && (
                         <svg
@@ -125,7 +172,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                     <button
                       type="submit"
                       onClick={handleClose}
-                      className="border border-warning px-4 py-2 text-sm"
+                      className="border border-warning rounded-xl px-4 py-2 text-sm"
                     >
                       Cancel
                     </button>
