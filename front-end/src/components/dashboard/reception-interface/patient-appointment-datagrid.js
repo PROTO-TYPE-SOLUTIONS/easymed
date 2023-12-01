@@ -132,7 +132,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
           </h1>
         </div>
         <div className="">
-          <Link href="/dashboard/reception-interface/booked-appointments" className="bg-primary text-white rounded px-2 py-2 text-sm">
+          <Link href="/dashboard/reception-interface/booked-appointments" className="bg-primary text-white rounded-xl px-3 py-2 text-sm">
             Booked Appointments
           </Link>
           {/* <input
@@ -157,7 +157,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
         height={"70vh"}
       >
         <Pager
-          visible={true}
+          visible={false}
           // allowedPageSizes={allowedPageSizes}
           showPageSizeSelector={true}
           showNavigationButtons={true}
@@ -195,14 +195,8 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
           width={140}
           cellRender={dateCreatedFunc}
         />
-        <Column dataField="date_of_birth" caption="Age" width={140} />
-        {/* <Column dataField="reason" caption="Reason" width={280} /> */}
-        {/* <Column
-          dataField="assigned_doctor"
-          caption="Assigned Doctor"
-          width={200}
-        /> */}
-        <Column dataField="gender" caption="Gender" width={100} />
+        {/* <Column dataField="age" caption="Age" width={140} />
+        <Column dataField="gender" caption="Gender" width={100} /> */}
         <Column dataField="status" caption="Status" width={140} />
       </DataGrid>
       <CreateAppointmentModal {...{ open, setOpen, selectedRowData }} />

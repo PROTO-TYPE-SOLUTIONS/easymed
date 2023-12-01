@@ -98,7 +98,7 @@ const PatientsDataGrid = () => {
           allowSearch={true}
         />
         <Column
-          dataField="date_of_birth"
+          dataField="age"
           caption="Age"
           width={140}
           // calculateCellValue={(data) => calculateAge(data.date_of_birth)}

@@ -258,9 +258,9 @@ const DoctorPatientDataGrid = () => {
           allowSearch={true}
         />
         <Column
-          dataField="date_of_birth"
-          caption="Date of Birth"
-          width={140}
+          dataField="age"
+          caption="Age"
+          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
