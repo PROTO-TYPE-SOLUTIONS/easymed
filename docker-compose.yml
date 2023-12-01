@@ -8,27 +8,43 @@ services:
     volumes:
       - ./backend/:/usr/src/app/
     ports:
-      - 8000:8000
+      - 127.0.0.1:8000:8000
     env_file:
       - ./backend/.env
     depends_on:
       - db
+    
+    networks:
+      - mkis   
+
   db:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=hello_django
-      - POSTGRES_PASSWORD=hello_django
-      - POSTGRES_DB=hello_django_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mks
+
+    networks:
+      - mkis  
 
   frontend:
-    build: ./front-end
-    volumes:
-      - ./front-end:/app
+    container_name: frontend
+    build:
+      context: ./front-end
+    restart: always
     ports:
-      - "3000:3000"
+      - 127.0.0.1:3000:3000
     depends_on:
-      - backend
+      - backend  
+
+    networks:
+      - mkis
+
+networks:
+  mkis:
+    driver: bridge      
+
 volumes:
   postgres_data:
