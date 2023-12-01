@@ -65,6 +65,11 @@ export const menus = [
     ],
   },
   {
+    label: "Billing",
+    href: "/dashboard/billing",
+    icon: <HiUsers className="text-xl" />,
+  },
+  {
     label: "Patients",
     href: "/dashboard/patients",
     icon: <HiUsers className="text-xl" />,
