@@ -40,3 +40,18 @@ API Endpoints:
 api/v1/docs/
 api/v1/docs/swagger/
 ```
+
+
+## Adding Permissions
+Create super user then navigate to localhost:8080/admin and add permissions;
+* Doctor Dashboard => CAN_ACCESS_DOCTOR_DASHBOARD
+* General Dashboard => CAN_ACCESS_GENERAL_DASHBOARD
+* Admin Dashboard => CAN_ACCESS_ADMIN_DASHBOARD
+* Reception Dashboard => CAN_ACCESS_RECEPTION_DASHBOARD
+* Nursing Dashboard => CAN_ACCESS_NURSING_DASHBOARD
+* Laboratory Dashboard => CAN_ACCESS_LABORATORY_DASHBOARD
+* Patients Dashboard => CAN_ACCESS_PATIENTS_DASHBOARD
+* AI ASSISTANT Dashboard => CAN_ACCESS_AI_ASSISTANT_DASHBOARD
+* Announcement Dashboard => CAN_ACCESS_ANNOUNCEMENT_DASHBOARD
+* Pharmacy Dashboard => CAN_ACCESS_PHARMACY_DASHBOARD
+* Inventory Dashboard => CAN_ACCESS_INVENTORY_DASHBOARD
