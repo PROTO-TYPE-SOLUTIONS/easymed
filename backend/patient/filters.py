@@ -8,7 +8,6 @@ from .models import (
     Triage,
     Prescription,
     PrescribedDrug,
-
 )
 
 
@@ -47,5 +46,12 @@ class PrescriptionFilter(django_filters.FilterSet):
     class Meta:
         model = Prescription
         fields = ("patient_id__id", "status")
+
+class PrescribedDrugFilter(django_filters.FilterSet):
+    prescription_id__id = django_filters.NumberFilter(lookup_expr='exact', label='prescription_id')
+    item_ID__id = django_filters.NumberFilter(lookup_expr='exact', label='item_id')
+    class Meta:
+        model = PrescribedDrug
+        fields = ("prescription_id__id", "item_ID__id")
 
 
