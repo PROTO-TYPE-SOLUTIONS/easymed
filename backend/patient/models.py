@@ -1,9 +1,12 @@
 from datetime import datetime
 from django.db import models
 from customuser.models import CustomUser
-from inventory.models import Item
+# from pharmacy.models import Drug
+from inventory.models import Item, OrderBill
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
 
-
+# User = get_user_model()
 
 class InsuranceCompany(models.Model):
     name = models.CharField(max_length=30)
@@ -16,7 +19,6 @@ class ContactDetails(models.Model):
     tel_no = models.IntegerField()
     email_address = models.EmailField()
     residence = models.CharField(max_length=30)
-    
 
 
 class Patient(models.Model):
@@ -66,9 +68,6 @@ class Service(models.Model):
 
     def __str__(self):
         return self.name
-    
-
-
 
 
 class Appointment(models.Model):
@@ -90,15 +89,14 @@ class Appointment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
     item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
-    fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    # order_bill_ID = models.ForeignKey(
-    #     OrderBill, on_delete=models.CASCADE, null=True)
+    fee = models.CharField(max_length=40, default="0")
+    order_bill_ID = models.ForeignKey(
+        OrderBill, on_delete=models.CASCADE, null=True)
 
     # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Appointment #{self.patient.first_name}"
-    
 
 
 
@@ -139,7 +137,6 @@ class PublicAppointment(models.Model):
 class Triage(models.Model):
     created_by = models.CharField(max_length=45)
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     temperature = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
@@ -157,7 +154,6 @@ class Consultation(models.Model):
     )
     doctor_ID = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     complaint = models.TextField(null=True, blank=True)
@@ -175,7 +171,6 @@ class Prescription(models.Model):
         ('dispensed', 'Dispensed'),
     )
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -184,7 +179,6 @@ class Prescription(models.Model):
 
     def __str__(self):
         return f"Prescription #{self.patient_id.pk}"
-
 
 
 class PrescribedDrug(models.Model):
@@ -197,7 +191,7 @@ class PrescribedDrug(models.Model):
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     note = models.TextField(null=True, blank=True)
-    # order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True)
+    order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True)
     item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -215,10 +209,7 @@ class Referral(models.Model):
         ('surgeon', 'Surgeon'),
         ('physiotherapist', 'Physiotherapist'),
     )
-
-    
     patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     referred_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -237,24 +228,4 @@ class Referral(models.Model):
             if not self.referred_by:
                 raise ValueError("You must set the 'referred_by' user before saving.")
         super().save(*args, **kwargs)
-
-
-class OrderBill (models.Model):
-    STATUS_CHOICES = (
-        ('unpaid', 'Unpaid'),
-        ('paid', 'Paid'),
-    )
-    payment_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unpaid')
-    appointment =  models.OneToOneField(Appointment, on_delete=models.CASCADE)
-    triage_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    prescription_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    lab_test_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    appointment_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    bill_date = models.DateTimeField(auto_now_add=True)
-    total_Cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-
-    def calculate_total_cost(self):
-        self.total_cost = self.triage_cost + self.prescription_cost + self.lab_test_cost + self.appointment_cost
-        self.save()
 

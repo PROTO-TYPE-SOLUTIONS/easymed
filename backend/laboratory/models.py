@@ -2,8 +2,7 @@ from django.db import models
 from patient.models import Patient
 from django.conf import settings
 from customuser.models import CustomUser
-from inventory.models import Item
-from patient.models import OrderBill, Appointment
+from inventory.models import Item, OrderBill
 from datetime import datetime
 
 
@@ -39,18 +38,17 @@ class LabReagent(models.Model):
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
     cost = models.CharField(max_length=255)
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name
+        return self.name    
     
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name    
+        return self.name        
 
 
 class LabTestRequest(models.Model):
@@ -124,16 +122,3 @@ class PublicLabTestRequest(models.Model):
             patient_age:int = (datetime.now().year - self.date_of_birth.year)
             return patient_age
         return None
-    
-
-
-class OrderBill (models.Model):
-    STATUS_CHOICES = (
-        ('unpaid', 'Unpaid'),
-        ('paid', 'Paid'),
-    )
-    payment_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unpaid')
-    # patient_ID =  models.ForeignKey(Patient, on_delete=models.CASCADE)
-    bill_date = models.DateTimeField(auto_now_add=True)
-    total_Cost = models.CharField(max_length=255, null=True, blank=True)
-    

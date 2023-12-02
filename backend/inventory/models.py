@@ -1,5 +1,5 @@
 from django.db import models
-# from patient.models import Appointment
+# from patient.models import Patient
 
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
@@ -59,3 +59,13 @@ class PurchaseOrder(models.Model):
     Total_Cost = models.CharField(max_length=255)
 
 
+class OrderBill (models.Model):
+    STATUS_CHOICES = (
+        ('unpaid', 'Unpaid'),
+        ('paid', 'Paid'),
+    )
+    payment_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unpaid')
+    # patient_ID =  models.ForeignKey(Patient, on_delete=models.CASCADE)
+    bill_date = models.DateTimeField(auto_now_add=True)
+    total_Cost = models.CharField(max_length=255, null=True, blank=True)
+    
