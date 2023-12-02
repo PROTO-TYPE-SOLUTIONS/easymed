@@ -4,13 +4,17 @@ Repository for Make-Easy HMIS
 The technical implementation guide can be found [here](https://drive.google.com/drive/folders/1YjqVylXmq7H-xYRadxENCc-8_zBcDrpp?usp=sharing).
 
 
-### Running with Docker
+## ===== Running with Docker ======
+If you're running with docker, inside ./src/assets/backend-axios-instance/index.js
+with docker baseURL = baseURL: "http://backend:8000",
+
 In the root directory run;
 ```docker compose up```
+Frontend will be running on http://backend:3000 and backend on http://backend:8000
 
-### Running manually
+## ====== Running manually =======
 ## Running Backend
-(refer to ./front-end/README.md to run frontend)
+
 ### Windows
 [Install](https://medium.com/analytics-vidhya/virtual-environment-6ad5d9b6af59) python and virtualenv.
 Next, in the project directory run:
@@ -41,6 +45,23 @@ api/v1/docs/
 api/v1/docs/swagger/
 ```
 
+##  Running FrontEnd
+Inside ./src/assets/backend-axios-instance/index.js
+running manually  = baseURL: "http://127.0.0.1:8000",
+
+#### First, create a .envl file in the same directory as the src folder then add the following:
+
+* NEXT_PUBLIC_BASE_URL=""
+* NEXT_PUBLIC_ENCRYPTION_KEY="c2FubGFta2VueWFAZ21haWwuY29t"
+
+Lastly run the development server using either of the following commands:
+
+```bash
+npm run dev
+
+```
+
+Visit localhost 3000 then visit /dashboard to access the dashboard route
 
 ## Adding Permissions
 Create super user then navigate to localhost:8080/admin and add permissions;
@@ -55,3 +76,4 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 * Announcement Dashboard => CAN_ACCESS_ANNOUNCEMENT_DASHBOARD
 * Pharmacy Dashboard => CAN_ACCESS_PHARMACY_DASHBOARD
 * Inventory Dashboard => CAN_ACCESS_INVENTORY_DASHBOARD
+
