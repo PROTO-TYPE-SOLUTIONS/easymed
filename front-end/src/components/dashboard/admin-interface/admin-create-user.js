@@ -84,7 +84,7 @@ const AdminCreateUser = () => {
     <>
       <button
         onClick={handleClickOpen}
-        className="bg-primary text-white px-4 py-3 text-sm flex items-center gap-1"
+        className="bg-primary rounded-xl text-white px-4 py-2 text-sm flex items-center gap-1"
       >
         <IoMdAdd /> Create User
       </button>

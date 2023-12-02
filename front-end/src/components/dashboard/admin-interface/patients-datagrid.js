@@ -184,7 +184,7 @@ const AdminPatientsDataGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="age" caption="Age" width={100} />
         <Column dataField="gender" caption="Gender" width={140} />
         <Column dataField="insurance" caption="Insurance" width={140} />
         <Column dataField="assigned_doctor" caption="Assigned Doctor" width={200} />

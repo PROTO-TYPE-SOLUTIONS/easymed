@@ -17,7 +17,7 @@ const Sidebar = () => {
         </header>
         <section className="pl-2 h-[84vh] flex flex-col justify-between">
           <div className="overflow-x-auto">
-            <ul className="space-y-3 my-4 ">
+            <ul className="space-y-3 my-4 pr-1">
               {menus.map((menu, index) => (
                 <MenuChild key={index} {...{ index, menu, collapsed }} />
               ))}
