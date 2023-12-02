@@ -10,14 +10,14 @@ const AddInventory = () => {
     <Container maxWidth="xl" className="space-y-6 py-4">
       <div className="flex items-center gap-4 mb-4">
         <Link href="/dashboard/inventory/add-inventory">
-          <button className="bg-primary text-white text-sm px-3 py-2 mb-1">
+          <button className="bg-primary rounded-xl text-white text-sm px-3 py-2 mb-1">
             Add Item
           </button>
         </Link>
-        <button className="bg-primary text-white text-sm px-3 py-2 mb-1">
+        <button className="bg-primary rounded-xl text-white text-sm px-3 py-2 mb-1">
           Sale Order
         </button>
-        <button className="bg-primary text-white text-sm px-3 py-2 mb-1">
+        <button className="bg-primary rounded-xl text-white text-sm px-3 py-2 mb-1">
           View Items
         </button>
       </div>

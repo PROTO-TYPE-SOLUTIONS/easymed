@@ -119,18 +119,11 @@ const NursePatientDataGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column dataField="age" caption="Age" width={140} />
         <Column dataField="gender" caption="Gender" width={120} />
         <Column dataField="insurance" caption="Insurance" width={120} />
-        <Column dataField="assigned_doctor" caption="Assigned Doctor" width={140} />
         <Column
           dataField=""
-          caption="Status"
-          width={140}
-          cellRender={statusFunc}
-        />
-        <Column
-          dataField="country"
           caption="Action"
           width={140}
           cellRender={actionsFunc}

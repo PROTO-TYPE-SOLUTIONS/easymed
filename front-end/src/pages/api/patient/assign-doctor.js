@@ -44,8 +44,6 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-            console.log("ASSIGN_BODY ",body)
-            console.log("ASSIGN_URL ",`${API_URL.ASSIGN_DOCTOR}/${body.patient}/`)
 
             await backendAxiosInstance.put(`${API_URL.ASSIGN_DOCTOR}/${body.patient}/`,body, config)
                 .then(response => {
