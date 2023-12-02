@@ -20,7 +20,6 @@ from .models import (
     Consultation,
     Referral,
     Triage,
-    OrderBill
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -37,15 +36,12 @@ from .serializers import (
     TriageSerializer,
     ConvertToAppointmentsSerializer,
     SendConfirmationMailSerializer,
-    OrderBillSerializer,
-    InvoiceSerializer
 )
 
 # filters
 from .filters import (
     AppointmentFilter,
-    PatientFilter,
-    OrderBillFilter,
+    PatientFilter
 )
 
 # swagger
@@ -183,6 +179,9 @@ class SendAppointmentConfirmationAPIView(APIView):
         request=SendConfirmationMailSerializer,
         responses=str,
     )
+
+
+
     def post(self, request: Request, *args, **kwargs):
         data = request.data
         serializer = SendConfirmationMailSerializer(data=data)
@@ -193,60 +192,3 @@ class SendAppointmentConfirmationAPIView(APIView):
             send_appointment_email(appointments)
             return Response("email sent successfully", status=status.HTTP_200_OK)
 
-
-class OrderBillViewSet(viewsets.ModelViewSet):
-    queryset = OrderBill.objects.all()
-    serializer_class = OrderBillSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = OrderBillFilter
-
-
-class InvoiceAPIView(APIView):
-
-    @extend_schema(
-        request=None,
-        responses=InvoiceSerializer,
-    )
-
-    def get_object(self, pk:int):
-        try:
-            return Appointment.objects.get(pk=pk)
-        except Exception as e:
-            return None
-        
-    def get(self, request: Request, appointment_id: int, *args, **kwargs):
-        appointment = self.get_object(appointment_id)
-
-        if not appointment:
-            return Response({"error_message": "appointment id doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
-        # appointment
-        appointment_item = appointment.item_id
-        
-        # consultations
-        try:
-            consultation = Consultation.objects.get(appointment=appointment)
-            consultation_fee = consultation.fee
-        except Exception as e:
-            print(e)
-        
-        # triage
-        try:
-            triage = Triage.objects.get(appointment=appointment)
-            triage_fee = triage.fee
-        except Exception as e:
-            print(e)
-        
-        # prescribed drugs
-        try:
-            prescription = Prescription.objects.get(appointment=appointment)
-            prescribed_drugs = PrescribedDrug.objects.filter(prescription_id=prescription)
-            prescribed_drugs_items: list[Item] = [drug.item_ID for drug in prescribed_drugs]
-            
-        except Exception as e:
-            print(e)
-
-        
-
-
-
-        
