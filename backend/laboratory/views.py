@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.permissions import AllowAny
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 # models
@@ -46,6 +48,10 @@ from .utils import (
     send_through_tcp
 )
 
+# filters
+from .filters import (
+    LabTestRequestFilter,
+)
 
 class LabReagentViewSet(viewsets.ModelViewSet):
     queryset = LabReagent.objects.all()
@@ -74,6 +80,8 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequest.objects.all()
     serializer_class = LabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LabTestRequestFilter
 
     @extend_schema(
         parameters=[
