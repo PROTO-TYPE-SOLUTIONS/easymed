@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from customuser.models import CustomUser
+from inventory.models import Item
 from .models import (
     InsuranceCompany,
     ContactDetails,
@@ -40,7 +41,11 @@ from .serializers import (
 # filters
 from .filters import (
     AppointmentFilter,
-    PatientFilter
+    PatientFilter,
+    ConsultationFilter,
+    TriageFilter,
+    PrescriptionFilter,
+    PrescribedDrugFilter
 )
 
 # swagger
@@ -60,6 +65,9 @@ class InsuranceCompanyViewSet(viewsets.ModelViewSet):
 class ConsultationViewSet(viewsets.ModelViewSet):
     queryset = Consultation.objects.all()
     serializer_class = ConsultationSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ConsultationFilter
+    
 
 
 class ServiceViewSet(viewsets.ModelViewSet):
@@ -144,11 +152,15 @@ class PublicAppointmentViewSet(viewsets.ModelViewSet):
 class PrescriptionViewSet(viewsets.ModelViewSet):
     queryset = Prescription.objects.all()
     serializer_class = PrescriptionSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PrescriptionFilter
 
 
 class PrescribedDrugViewSet(viewsets.ModelViewSet):
     queryset = PrescribedDrug.objects.all()
     serializer_class = PrescribedDrugSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PrescribedDrugFilter
 
 
 class ReferralViewSet(viewsets.ModelViewSet):
@@ -159,6 +171,8 @@ class ReferralViewSet(viewsets.ModelViewSet):
 class TriageViewSet(viewsets.ModelViewSet):
     queryset = Triage.objects.all()
     serializer_class = TriageSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TriageFilter
 
 
 # TODO

@@ -142,6 +142,7 @@ class Triage(models.Model):
     height = models.DecimalField(max_digits=5, decimal_places=2)
     weight = models.IntegerField()
     pulse = models.PositiveIntegerField()
+    fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 
 class Consultation(models.Model):
@@ -156,6 +157,7 @@ class Consultation(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     complaint = models.TextField(null=True, blank=True)
+    fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     disposition = models.CharField(
         max_length=10, choices=DISPOSITION_CHOICES, default="")
     

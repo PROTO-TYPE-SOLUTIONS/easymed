@@ -15,13 +15,12 @@ class Inventory(models.Model):
         ('pharmacy', 'Pharmacy'),
         ('reception', 'Reception'),
     )
-    item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
+    # item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
     quantity = models.CharField(max_length=255)
     location = models.CharField(max_length=10, choices=LOCATION_CHOICES, default='mainst')
     expiry_date = models.DateField()
     supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
 
     def __str__(self):
         return str(self.item_ID)
@@ -47,6 +46,8 @@ class Item(models.Model):
         ('Lab Test', 'Lab Test'),
     ])
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.name
