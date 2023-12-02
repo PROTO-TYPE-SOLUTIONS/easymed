@@ -66,9 +66,11 @@ class LabTestRequest(models.Model):
     def __str__(self):
         return str(self.test_profile_ID.name)
 
+
 class EquipmentTestRequest(models.Model):
     test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
+
 
 class LabTestResult(models.Model):
     lab_test_request_ID = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)

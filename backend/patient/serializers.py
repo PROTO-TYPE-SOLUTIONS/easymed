@@ -183,6 +183,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
         if instance.patient:
             data["first_name"] = instance.patient.first_name
             data["second_name"] = instance.patient.second_name
+            data["gender"] = instance.patient.gender
+            data["age"] = instance.patient.age
+
+        
         return data
 
 
