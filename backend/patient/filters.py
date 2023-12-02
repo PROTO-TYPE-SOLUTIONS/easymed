@@ -4,6 +4,11 @@ import django_filters
 from .models import (
     Appointment,
     Patient,
+    Consultation,
+    Triage,
+    Prescription,
+    PrescribedDrug,
+
 )
 
 
@@ -21,3 +26,26 @@ class PatientFilter(django_filters.FilterSet):
     class Meta:
         model = Patient
         fields = ("user_id__id", "first_name", "second_name", "gender")
+
+
+class ConsultationFilter(django_filters.FilterSet):
+    doctor_ID__id = django_filters.NumberFilter(lookup_expr='exact', label='doctor_id')
+    patient_id__id = django_filters.NumberFilter(lookup_expr='exact', label='patient_id')
+    class Meta:
+        model = Consultation
+        fields = ("doctor_ID__id", "patient_id__id",)
+
+
+class TriageFilter(django_filters.FilterSet):
+    patient_id__id = django_filters.NumberFilter(lookup_expr='exact', label='patient_id')
+    class Meta:
+        model = Triage
+        fields = ("patient_id__id", )
+
+class PrescriptionFilter(django_filters.FilterSet):
+    patient_id__id = django_filters.NumberFilter(lookup_expr='exact', label='patient_id')
+    class Meta:
+        model = Prescription
+        fields = ("patient_id__id", "status")
+
+
