@@ -16,9 +16,7 @@ from .views import (
     TriageViewSet,
     PatientByUserIdAPIView,
     ConvertToAppointmentAPIView,
-    SendAppointmentConfirmationAPIView,
-    OrderBillViewSet,
-    InvoiceAPIView
+    SendAppointmentConfirmationAPIView
 )
 
 router = DefaultRouter()
@@ -35,7 +33,6 @@ router.register(r'consultations', ConsultationViewSet)
 router.register(r'referrals', ReferralViewSet)
 router.register(r'triage', TriageViewSet)
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
-router.register(r'orderbill', OrderBillViewSet)
 
 
 
@@ -44,5 +41,4 @@ urlpatterns = [
     path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
     path('send-appointment-confirmation/', SendAppointmentConfirmationAPIView.as_view(), name="send-appointment-confirmation"),
-    path('invoice/<int:appointment_id>/', InvoiceAPIView.as_view(), name='invoice')
 ]
