@@ -4,7 +4,7 @@ import { BiArrowBack } from "react-icons/bi";
 
 const NotAuthorized = () => {
   return (
-    <section className="p-12 h-auto flex items-center justify-center">
+    <section className="p-12 h-auto flex items-center justify-center h-screen">
       <div className="p-8 space-y-4 rounded md:w-5/12 mx-auto text-center">
         <h1 className="text-7xl font-bold">403</h1>
         <p className="font-semibold">Restricted Access</p>

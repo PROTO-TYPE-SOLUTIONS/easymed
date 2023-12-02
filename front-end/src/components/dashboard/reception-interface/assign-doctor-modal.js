@@ -41,12 +41,12 @@ export default function AssignDoctorModal({
   const status = ["pending", "confirmed", "cancelled"];
 
   const initialValues = {
-    appointment_date_time: selectedRowData?.appointment_date_time,
+    patient: null,
+    appointment_date_time: "",
     status: "",
-    reason: selectedRowData?.reason,
+    reason: "",
     fee: "",
-    patient: selectedRowData?.id,
-    assigned_doctor: 0,
+    assigned_doctor: null,
     item_id: null,
     order_bill_ID: null,
   };
@@ -56,31 +56,15 @@ export default function AssignDoctorModal({
     status: "",
   });
 
-  const mapGenderToBackendFormat = (gender) => {
-    if (gender === "Male") {
-      return "M";
-    } else if (gender === "Female") {
-      return "F";
-    }
-    // Handle other cases or return a default value if needed
-    return "";
-  };
-
   const handleAssignDoctor = async (formValue, helpers) => {
     try {
       console.log("FORMDATA ", formValue);
+      
+
       setLoading(true);
       const formData = {
         ...formValue,
-        patient: {
-          first_name: selectedRowData.first_name,
-          second_name: selectedRowData.second_name,
-          date_of_birth: selectedRowData.date_of_birth,
-          gender: mapGenderToBackendFormat(selectedRowData.gender),
-          insurance: null,
-          user_id: null,
-        },
-        id:selectedRowData.id,
+        patient: selectedRowData.id,
         assigned_doctor: parseInt(formValue.assigned_doctor),
       };
       await assignDoctor(formData).then(() => {
@@ -98,12 +82,6 @@ export default function AssignDoctorModal({
 
   return (
     <div>
-      {/* <button
-        onClick={handleClickOpen}
-        className="border border-card text-card font-semibold px-3 py-3 text-sm"
-      >
-        Assign Doctor
-      </button> */}
       <Dialog
         open={assignOpen}
         onClose={handleClose}
@@ -120,7 +98,7 @@ export default function AssignDoctorModal({
             <Form>
               <Field
                 as="select"
-                className="block pr-9 mt-4 border border-gray py-3 px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="assigned_doctor"
               >
                 <option value="">Select a Doctor</option>
@@ -138,7 +116,7 @@ export default function AssignDoctorModal({
               />
               <Field
                 as="select"
-                className="block pr-9 mt-4 border border-gray py-3 px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="status"
               >
                 <option value="">Select Status</option>
@@ -154,7 +132,7 @@ export default function AssignDoctorModal({
                 className="text-warning text-xs"
               />
               <Field
-                className="block pr-9 mt-4 border border-gray py-3 px-4 focus:outline-none w-full"
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="fee"
                 placeholder="Enter Fee"
               />
@@ -163,10 +141,31 @@ export default function AssignDoctorModal({
                 component="div"
                 className="text-warning text-xs"
               />
+              <Field
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                name="appointment_date_time"
+                placeholder="Appointment date time"
+                type="date"
+              />
+              <ErrorMessage
+                name="appointment_date_time"
+                component="div"
+                className="text-warning text-xs"
+              />
+              <Field
+                className="block pr-9 mt-4 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                name="reason"
+                placeholder="Reason"
+              />
+              <ErrorMessage
+                name="reason"
+                component="div"
+                className="text-warning text-xs"
+              />
               <div className="flex items-center gap-2 justify-end mt-3">
                 <button
                   type="submit"
-                  className="bg-primary px-3 py-2 text-white"
+                  className="bg-primary px-3 py-2 text-sm text-white rounded-xl"
                 >
                   {loading && (
                     <svg
@@ -190,7 +189,7 @@ export default function AssignDoctorModal({
                   Proceed
                 </button>
                 <p
-                  className="border border-warning px-3 py-2 cursor-pointer"
+                  className="border border-warning text-sm rounded-xl px-3 py-2 cursor-pointer"
                   onClick={handleClose}
                 >
                   Cancel

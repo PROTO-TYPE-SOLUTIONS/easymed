@@ -87,7 +87,7 @@ export default function EquipmentModal({ selectedRowData, open, setOpen }) {
             <Form>
               <Field
                 as="select"
-                className="block pr-9 my-2 border border-gray py-3 px-4 focus:outline-none w-full"
+                className="block pr-9 my-2 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                 name="equipment"
               >
                 <option value="">Select Equipment</option>
@@ -104,7 +104,7 @@ export default function EquipmentModal({ selectedRowData, open, setOpen }) {
               />
               <button
                 type="submit"
-                className="bg-[#02273D] px-4 py-2 text-white text-sm"
+                className="bg-[#02273D] px-4 py-2 rounded-xl text-white text-sm"
               >
                 {loading && (
                   <svg

@@ -43,6 +43,7 @@ class Item(models.Model):
         ('LabReagent', 'Lab Reagent'),
         ('Drug', 'Drug'),
         ('Furniture', 'Furniture'),
+        ('Lab Test', 'Lab Test'),
     ])
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)

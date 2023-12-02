@@ -172,6 +172,7 @@ const DoctorPatientDataGrid = () => {
           variant="contained"
           size="small"
           label={data.status}
+          color="primary"
           className="bg-primary text-white"
         />
       );
@@ -196,20 +197,10 @@ const DoctorPatientDataGrid = () => {
     }
   };
 
-  // const mappedAppointments = doctorAppointments.map(appointment => {
-  //   return {
-  //     id: appointment.id,
-  //     gender: appointment.patient.gender,
-  //     first_name: appointment.patient.first_name,
-  //     second_name: appointment.patient.second_name,
-  //     appointment_date_time: appointment.appointment_date_time,
-  //     date_created: new Date(appointment.date_created).toLocaleDateString(),
-  //     date_of_birth: appointment.patient.date_of_birth,
-  //     assigned_doctor: appointment.assigned_doctor ? appointment.assigned_doctor.name : "Not Assigned", // Assuming assigned_doctor is an object with a 'name' property
-  //     status: appointment.status,
-  //     reason: appointment.reason // If you want to include reason, uncomment this line
-  //   };
-  // });
+  const dateCreated = ({ data }) => {
+    const formattedDate = new Date(data.date_created).toLocaleDateString();
+    return <div>{formattedDate}</div>
+  }
 
   return (
     <section>
@@ -218,12 +209,12 @@ const DoctorPatientDataGrid = () => {
           {/* {selectedRecords.length > 0 && (
             <AssignDoctorModal {...{ selectedRecords }} />
           )} */}
-          <input
+          {/* <input
             className="shadow-xl py-3 px-2 focus:outline-none mb-2"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             placeholder="Search..."
-          />
+          /> */}
         </div>
       </div>
       <DataGrid
@@ -247,7 +238,7 @@ const DoctorPatientDataGrid = () => {
           showCheckBoxesMode={checkBoxesMode}
         /> */}
         <Pager
-          visible={true}
+          visible={false}
           // allowedPageSizes={allowedPageSizes}
           showPageSizeSelector={true}
           showNavigationButtons={true}
@@ -255,21 +246,21 @@ const DoctorPatientDataGrid = () => {
         <Column
           dataField="first_name"
           caption="First Name"
-          width={140}
+          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
           dataField="second_name"
           caption="Last Name"
-          width={140}
+          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
-          dataField="date_of_birth"
-          caption="Date of Birth"
-          width={140}
+          dataField="age"
+          caption="Age"
+          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
@@ -283,9 +274,10 @@ const DoctorPatientDataGrid = () => {
         <Column
           dataField="date_created"
           caption="Date Created"
-          width={200}
+          width={140}
           allowFiltering={true}
           allowSearch={true}
+          cellRender={dateCreated}
         />
         <Column
           dataField="status"

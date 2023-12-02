@@ -2,6 +2,7 @@
 export const API_URL = {
   /***************** AUTHENTICATION APIS **********************/
   REGISTER_USER: "/users/register/",
+  CREATE_USER: "/users/register/",
   LOGIN: "/users/login/",
   REFRESH_TOKEN: "/api/token/refresh/",
   GET_USER_PERMISSIONS: "/authperms/permissions/user",
@@ -25,6 +26,7 @@ export const API_URL = {
   GET_PATIENT_PROFILE: "/patients/patients",
   PRESCRIBE_DRUG: "/patients/prescribed-drugs/",
   CREATE_PRESCRIPTION: "/patients/prescriptions/",
+  GET_PATIENT_TRIAGE: "/patients/triage/",
 
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/accounts/register/",
@@ -37,6 +39,7 @@ export const API_URL = {
   FETCH_LAB_EQUIPMENT: "/lab/lab-equipment/",
   SEND_TO_EQUIPMENT: "/lab/equipment-test-request/",
   PUBLIC_LAB_REQUEST: "/lab/public-lab-test-request/",
+  FETCH_LAB_TEST_PROFILE: "/lab/lab-test-profile/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -52,6 +55,7 @@ export const API_URL = {
 export const APP_API_URL = {
   /***************** AUTH **********************/
   REGISTER_USER: "/api/register",
+  CREATE_USER: "/api/auth/create-user",
   LOGIN: "/api/register/login",
   REFRESH_TOKEN: "/api/auth/refresh",
   GET_USER_PERMISSIONS: "/api/auth/user-permissions",
@@ -76,6 +80,7 @@ export const APP_API_URL = {
   GET_PATIENT_PROFILE: "/api/patient/patient-profile",
   PRESCRIBE_DRUG: "/api/patient/prescribe-drug",
   CREATE_PRESCRIPTION: "/api/patient/create-prescription",
+  GET_PATIENT_TRIAGE: "/api/patient/get-patient-triage",
 
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/api/doctor/create-doctor",
@@ -88,6 +93,7 @@ export const APP_API_URL = {
   FETCH_LAB_EQUIPMENT: "/api/laboratory/get-lab-equipment",
   SEND_TO_EQUIPMENT: "/api/laboratory/send-to-equipment",
   PUBLIC_LAB_REQUEST: "/api/laboratory/public-lab-request",
+  FETCH_LAB_TEST_PROFILE: "/api/laboratory/get-lab-test-profile",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",

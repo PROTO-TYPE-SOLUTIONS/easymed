@@ -58,6 +58,11 @@ class LabReagentViewSet(viewsets.ModelViewSet):
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+class LabTestProfileViewSet(viewsets.ModelViewSet):
+    queryset = LabReagent.objects.all()
+    serializer_class = LabTestProfileSerializer
+    permission_classes = (AllowAny,)
+
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
     serializer_class = LabEquipmentSerializer
@@ -106,13 +111,10 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
                 return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
         return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
 
-
 class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
     queryset = EquipmentTestRequest.objects.all()
     serializer_class = EquipmentTestRequestSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
-
-
 
 
 class LabTestCategoryViewSet(viewsets.ModelViewSet):

@@ -35,57 +35,11 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
   const [open, setOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
 
-  const users = [
-    {
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      progress: "In Progress",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      progress: "Progress",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      id_number: "1234821",
-      name: "Jane Munyua",
-      progress: "In Progress",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Ann Kibet",
-      progress: "Progress",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-    {
-      id_number: "1234221",
-      name: "Ann Ochieng",
-      progress: "In Progress",
-      country: "Rwanda",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-  ];
-
   //   filter users based on search query
-  const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
+  const filteredAppointments = appointments.filter((user) => {
+    return user.first_name
+      .toLocaleLowerCase()
+      .includes(searchQuery.toLowerCase());
   });
 
   const onMenuClick = async (menu, data) => {
@@ -113,34 +67,37 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
     );
   };
 
-
   const appointmentDateFunc = ({ data }) => {
-    const formattedate = new Date(data?.appointment_date_time).toLocaleDateString()
-    return <p>{formattedate}</p>
-  }
+    const formattedate = new Date(
+      data?.appointment_date_time
+    ).toLocaleDateString();
+    return <p>{formattedate}</p>;
+  };
 
   const dateCreatedFunc = ({ data }) => {
-    const formattedate = new Date(data?.date_created).toLocaleDateString()
-    return <p>{formattedate}</p>
-  }
+    const formattedate = new Date(data?.date_created).toLocaleDateString();
+    return <p>{formattedate}</p>;
+  };
 
   return (
-    <section>
-      <div className="flex items-center justify-end">
-        <input
-          className="shadow-2xl py-3 px-8 focus:outline-none mb-2 w-1/2 rounded-3xl"
-          onChange={(e) => setSearchQuery(e.target.value)}
-          value={searchQuery}
-          placeholder="Search..."
-        />
-      </div>
-      <div className="mb-2">
-        <h1 className="text-xl text-primary uppercase">
-          Booked Appointments
-        </h1>
-      </div>
+    <>
+      <section className="flex items-center justify-between">
+        <div className="mb-2">
+          <h1 className="text-xl text-primary uppercase">
+            Booked Appointments
+          </h1>
+        </div>
+        <div className="flex items-center justify-end">
+          <input
+            className="shadow-2xl py-2 px-4 focus:outline-none mb-2 rounded"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery}
+            placeholder="Search..."
+          />
+        </div>
+      </section>
       <DataGrid
-        dataSource={appointments}
+        dataSource={filteredAppointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -179,17 +136,26 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="appointment_date_time" caption="Date of Appointment" width={140} cellRender={appointmentDateFunc} />
-        <Column dataField="date_created" caption="Date Created" width={140} cellRender={dateCreatedFunc} />
-        <Column dataField="date_of_birth" caption="Date of Birth" width={140} />
+        <Column
+          dataField="appointment_date_time"
+          caption="Date of Appointment"
+          width={180}
+          cellRender={appointmentDateFunc}
+        />
+        <Column
+          dataField="date_created"
+          caption="Date Created"
+          width={140}
+          cellRender={dateCreatedFunc}
+        />
+        <Column dataField="date_of_birth" caption="Age" width={140} />
         <Column dataField="reason" caption="Reason" width={280} />
         <Column dataField="gender" caption="Gender" width={100} />
         <Column dataField="status" caption="Status" width={140} />
-        
       </DataGrid>
       <CreateAppointmentModal {...{ open, setOpen, selectedRowData }} />
       <AssignDoctorModal {...{ assignOpen, setAssignOpen, selectedRowData }} />
-    </section>
+    </>
   );
 };
 

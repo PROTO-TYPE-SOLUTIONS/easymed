@@ -8,9 +8,11 @@ import { getAllServices } from "@/redux/features/patients";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { publicLabRequest } from "@/redux/service/laboratory";
+import { getAllLabTestProfiles } from "@/redux/features/laboratory";
 
 const LabServiceForm = () => {
   const { services } = useSelector(({ patient }) => patient);
+  const { labTestProfiles } = useSelector((store) => store.laboratory);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -24,8 +26,8 @@ const LabServiceForm = () => {
     appointment_date_time: "",
     status: "pending",
     reason: "",
-    test_profile: "pending",
-    lab_request: "",
+    test_profile: "",
+    lab_request: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -34,15 +36,12 @@ const LabServiceForm = () => {
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
     appointment_date_time: Yup.string().required("Date is required!"),
-    reason: Yup.string().required("Provide a reason!"),
     test_profile: Yup.string().required("Provide a test profile!"),
   });
-
 
   const handleLabRequest = async (formValue, helpers) => {
     console.log("FORM_VALUE ",formValue);
     try {
-      
       setLoading(true);
       await publicLabRequest(formValue).then(() => {
         helpers.resetForm();
@@ -59,8 +58,10 @@ const LabServiceForm = () => {
     }
   };
 
+
   useEffect(() => {
     dispatch(getAllServices());
+    dispatch(getAllLabTestProfiles());
   }, []);
 
   return (
@@ -77,7 +78,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="first_name">First Name</label>
                 <Field
-                  className="block border text-sm border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="First Name"
                   name="first_name"
@@ -92,7 +93,7 @@ const LabServiceForm = () => {
                 <label htmlFor="gender">Gender</label>
                 <Field
                   as="select"
-                  className="block text-sm pr-9 border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   name="gender"
                 >
                   <option value="">Select Gender</option>
@@ -110,7 +111,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="date_of_birth">Date of Birth</label>
                 <Field
-                  className="block text-sm border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="date"
                   placeholder="Date of birth"
                   name="date_of_birth"
@@ -126,7 +127,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="second_name">Second Name</label>
                 <Field
-                  className="block border text-sm border-gray  py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="text"
                   placeholder="Second Name"
                   name="second_name"
@@ -141,7 +142,7 @@ const LabServiceForm = () => {
               <div className="w-full">
                 <label htmlFor="appointment_date_time">Appointment Date</label>
                 <Field
-                  className="block border text-sm border-gray  py-2 px-4 focus:outline-none w-full"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="date"
                   placeholder="Appointment Date"
                   name="appointment_date_time"
@@ -156,14 +157,15 @@ const LabServiceForm = () => {
                 <label htmlFor="test_profile">Test Profile</label>
                 <Field
                   as="select"
-                  className="block text-sm pr-9 border border-gray py-2 px-4 focus:outline-none w-full"
+                  className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   name="test_profile"
                 >
                   <option value="">Select Test Profile</option>
-                  <option value="H">Hemoglobin</option>
-                  <option value="P">Pregnancy Test</option>
-                  <option value="M">Malaria Test</option>
-                  <option value="L">Liver Function Test</option>
+                  {labTestProfiles.map((test, index) => (
+                    <option key={index} value="H">
+                      {test?.name}
+                    </option>
+                  ))}
                 </Field>
 
                 <ErrorMessage
@@ -177,34 +179,24 @@ const LabServiceForm = () => {
           <div className="w-full my-4">
             <label htmlFor="reason">Upload Document</label>
             <Field
-              className="block border border-gray  py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
               placeholder="Upload Document"
               type="file"
               name="lab_request"
-            />
-            <ErrorMessage
-              name="lab_request"
-              component="div"
-              className="text-warning text-xs"
             />
           </div>
           <div className="w-full my-4">
             <label htmlFor="reason">Reason</label>
             <Field
-              className="block border border-gray  py-3 px-4 focus:outline-none w-full"
+              className="block border border-gray rounded-xl text-sm py-3 px-4 focus:outline-none w-full"
               as="textarea"
               placeholder="Reason"
               name="reason"
             />
-            <ErrorMessage
-              name="reason"
-              component="div"
-              className="text-warning text-xs"
-            />
           </div>
           <button
             type="submit"
-            className="bg-primary text-sm w-full px-8 py-2 text-white"
+            className="bg-primary text-sm w-full rounded-xl px-8 py-2 text-white"
           >
             {loading && (
               <svg

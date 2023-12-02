@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             res.status(500).json(e.message);
         }
     }
-    else if (req.method === API_METHODS.PUT) {
+    else if (req.method === API_METHODS.POST) {
         try {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
@@ -44,9 +44,8 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-            console.log("ASSIGN_BODY ",body)
 
-            await backendAxiosInstance.put(`${API_URL.ASSIGN_DOCTOR}/${body.id}/`,body, config)
+            await backendAxiosInstance.put(`${API_URL.ASSIGN_DOCTOR}/${body.patient}/`,body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

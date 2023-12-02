@@ -7,6 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { BsChevronDown } from "react-icons/bs";
 import { authContext } from "../use-context";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { FaUserCircle } from "react-icons/fa";
 
 const CustomizedHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,14 +38,8 @@ const CustomizedHeader = () => {
               <Drawer {...{ isOpen, setIsOpen }} />
             </div>
             <div className="flex items-center gap-2">
-              <img
-                className="h-8 w-8 rounded-full"
-                src="/images/doc.jpg"
-                alt=""
-              />
-              <span className="text-white">
-                {token?.first_name}
-              </span>
+              <FaUserCircle className="w-6 h-6 text-white" />
+              <span className="text-white text-sm">{token?.first_name}</span>
               <BsChevronDown
                 onClick={handleClick}
                 className="text-white cursor-pointer"

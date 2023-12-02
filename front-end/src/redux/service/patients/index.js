@@ -95,7 +95,7 @@ export const prescribePatient = (payload) =>{
 
 export const assignDoctor = (payload) =>{
     return new Promise((resolve,reject) =>{
-        axios.put(`${APP_API_URL.ASSIGN_DOCTOR}`,payload)
+        axios.post(`${APP_API_URL.ASSIGN_DOCTOR}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -145,6 +145,22 @@ export const prescribeDrug = (payload) =>{
 export const createPrescription = (payload) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.CREATE_PRESCRIPTION}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchPatientTriage = (id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.GET_PATIENT_TRIAGE}`,{
+            params:{
+                id: id
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })

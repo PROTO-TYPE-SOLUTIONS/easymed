@@ -4,6 +4,7 @@ import MenuChild  from "./menu-children";
 import { IoMdSettings } from "react-icons/io";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import Link from "next/link";
+import { BsFillExclamationCircleFill } from "react-icons/bs";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -16,7 +17,7 @@ const Sidebar = () => {
         </header>
         <section className="pl-2 h-[84vh] flex flex-col justify-between">
           <div className="overflow-x-auto">
-            <ul className="space-y-3 my-4 ">
+            <ul className="space-y-3 my-4 pr-1">
               {menus.map((menu, index) => (
                 <MenuChild key={index} {...{ index, menu, collapsed }} />
               ))}
@@ -31,10 +32,10 @@ const Sidebar = () => {
               <AiOutlineQuestionCircle className="" />
               <p>Support</p>
             </div>
-            {/* <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <BsFillExclamationCircleFill className="" />
               <p>Make - Easy HMIS v1.0</p>
-            </div> */}
+            </div>
           </div>
         </section>
       </section>
