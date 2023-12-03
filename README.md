@@ -40,11 +40,12 @@ python manage.py runserver
 ```
 Create a superadmin with ``python manage.py createsuperadmin``
 You'll use this account to log into the dashboard in frontend
+To register patients using landing page, create a group in django Admin called PATIENT
 
 API Endpoints:
 ```
-api/v1/docs/
-api/v1/docs/swagger/
+/docs/
+docs/swagger/
 ```
 
 
@@ -52,7 +53,8 @@ api/v1/docs/swagger/
 Inside ./src/assets/backend-axios-instance/index.js
 running manually  = baseURL: "http://127.0.0.1:8000",
 
-#### First, create a .envl file in the same directory as the src folder then add the following:
+
+#### First, create a .env file in the same directory as the src folder then add the following:
 
 * NEXT_PUBLIC_BASE_URL=""
 * NEXT_PUBLIC_ENCRYPTION_KEY="c2FubGFta2VueWFAZ21haWwuY29t"
@@ -61,10 +63,9 @@ Lastly run the development server using either of the following commands:
 
 ```bash
 npm run dev
-
 ```
 
-Visit localhost 3000 then visit /dashboard to access the dashboard route
+Visit localhost 127.0.0.1:3000/dashboard
 
 ## Adding Permissions
 Create super user then navigate to localhost:8080/admin and add permissions;
