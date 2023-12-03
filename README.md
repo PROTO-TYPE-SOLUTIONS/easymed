@@ -38,12 +38,15 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver
 ```
+Create a superadmin with ``python manage.py createsuperadmin``
+You'll use this account to log into the dashboard in frontend
 
 API Endpoints:
 ```
 api/v1/docs/
 api/v1/docs/swagger/
 ```
+
 
 ##  Running FrontEnd
 Inside ./src/assets/backend-axios-instance/index.js
