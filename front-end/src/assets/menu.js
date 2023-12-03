@@ -69,6 +69,18 @@ export const menus = [
     label: "Billing",
     href: "/dashboard/billing",
     icon: <FaMoneyBillWave className="text-xl" />,
+    children: [
+      {
+        label: "New Invoice",
+        href: "/dashboard/billing/new-invoice",
+        icon: <GrAdd className="" />,
+      },
+      {
+        label: "Invoices",
+        href: "/dashboard/billing/invoices-datagrid",
+        icon: <GrAdd className="" />,
+      },
+    ],
   },
   {
     label: "Patients",

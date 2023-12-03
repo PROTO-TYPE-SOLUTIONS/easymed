@@ -31,7 +31,7 @@ const PrescriptionBilling = () => {
                 <Field
                   as="select"
                   className="block pr-9 border w-full rounded-xl text-sm border-gray py-2 px-4 focus:outline-none"
-                  name="group"
+                  // name="group"
                 >
                   <option value="">Select Patient</option>
                   {patients.map((patient) => (
@@ -45,7 +45,7 @@ const PrescriptionBilling = () => {
                 <Field
                   as="select"
                   className="block pr-9 border w-full rounded-xl text-sm border-gray py-2 px-4 focus:outline-none"
-                  name="group"
+                  // name="group"
                 >
                   <option value="">Select Prescription</option>
                   {patients.map((patient) => (
@@ -55,7 +55,15 @@ const PrescriptionBilling = () => {
                   ))}
                 </Field>
               </div>
-              <div className="w-5/12">
+              <div className="w-full">
+                    <Field
+                      className="block pr-9 border w-full rounded-xl text-sm border-gray py-2 px-4 focus:outline-none"
+                    //   name="group"
+                      placeholder="Set Price"
+                    />
+                      
+                  </div>
+              <div className="w-7/12">
                 <button
                   type="submit"
                   className="bg-primary w-full rounded-xl px-3 py-2 text-xs text-white"
