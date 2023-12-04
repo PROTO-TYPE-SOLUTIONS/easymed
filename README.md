@@ -14,6 +14,7 @@ Frontend will be running on http://backend:3000 and backend on http://backend:80
 
 ## ====== Running manually =======
 ## Running Backend
+First rename the ./backend/.env/local  to .env with the sample code inside
 
 ### Windows
 [Install](https://medium.com/analytics-vidhya/virtual-environment-6ad5d9b6af59) python and virtualenv.
