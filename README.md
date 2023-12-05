@@ -1,10 +1,10 @@
-# make-easy-hmis
+# 1.0.0 make-easy-hmis
 Repository for Make-Easy HMIS
 
 The technical implementation guide can be found [here](https://drive.google.com/drive/folders/1YjqVylXmq7H-xYRadxENCc-8_zBcDrpp?usp=sharing).
 
 
-## ===== Running with Docker ======
+## 1.2.0 Running with Docker
 If you're running with docker, inside ./src/assets/backend-axios-instance/index.js
 with docker baseURL = baseURL: "http://backend:8000",
 
@@ -12,11 +12,11 @@ In the root directory run;
 ```docker compose up```
 Frontend will be running on http://backend:3000 and backend on http://backend:8000
 
-## ====== Running manually =======
-## Running Backend
+## 1.3.0 Running Manually
+## 1.3.1 Running Backend
 First rename the ``./backend/.env.local``  to ``.env`` with the sample code inside
 
-### Windows
+### i) Windows
 [Install](https://medium.com/analytics-vidhya/virtual-environment-6ad5d9b6af59) python and virtualenv.
 Next, in the project directory run:
 ```
@@ -29,7 +29,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-### Linux
+### ii) Linux
 ```
 virtualenv venv
 source venv/bin/activate
@@ -39,8 +39,9 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver
 ```
-Create a superadmin with ``python manage.py createsuperadmin``
+Create a superuser with ``python manage.py createsuperuser``
 You'll use this account to log into the dashboard in frontend
+
 To register patients using landing page, create a group in django Admin called PATIENT
 
 API Endpoints:
@@ -50,7 +51,7 @@ docs/swagger/
 ```
 
 
-##  Running FrontEnd
+## 1.3.2 Running FrontEnd
 Inside ./src/assets/backend-axios-instance/index.js
 running manually  = baseURL: "http://127.0.0.1:8000",
 
