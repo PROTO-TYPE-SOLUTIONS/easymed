@@ -143,6 +143,7 @@ class Triage(models.Model):
     weight = models.IntegerField()
     pulse = models.PositiveIntegerField()
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    notes = models.CharField(max_length=300, blank=True)
 
 
 class Consultation(models.Model):
