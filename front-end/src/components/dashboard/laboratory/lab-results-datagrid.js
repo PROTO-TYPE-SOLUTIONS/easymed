@@ -1,6 +1,8 @@
 import React from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import { Column, Paging, Pager,
+  HeaderFilter
+ } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
 import { Grid,Chip } from "@mui/material";
 import { LuMoreHorizontal } from "react-icons/lu";
@@ -129,6 +131,7 @@ const LabResultDataGrid = ({ labResults }) => {
         className="w-full shadow"
       >
         <Paging defaultPageSize={20} pageSize={20} />
+        <HeaderFilter visible={true} />
         <Pager
           visible={true}
           displayMode={true}

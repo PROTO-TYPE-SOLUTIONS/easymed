@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Selection,
+  HeaderFilter,
+ } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import CreateAppointmentModal from "./create-appointment-modal";
@@ -162,10 +164,12 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
+        <HeaderFilter visible={true} />
         <Column
           dataField="gender"
           caption="Action"
           width={100}
+          allowFiltering={false}
           alignment="center"
           cellRender={actionsFunc}
         />
@@ -186,7 +190,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
         <Column
           dataField="appointment_date_time"
           caption="Date of Appointment"
-          width={180}
+          width={200}
           cellRender={appointmentDateFunc}
         />
         <Column

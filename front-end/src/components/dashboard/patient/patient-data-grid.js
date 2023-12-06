@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import { Column, Paging, Pager,
+  HeaderFilter,
+ } from "devextreme-react/data-grid";
 import AddPatientModal from "./add-patient-modal";
 import { Chip } from "@mui/material";
 import { getAllPatients } from "@/redux/features/patients";
@@ -76,6 +78,7 @@ const PatientsDataGrid = () => {
         className="shadow-xl w-full"
         height={"60vh"}
       >
+        <HeaderFilter visible={true} />
         <Pager
           visible={false}
           // allowedPageSizes={allowedPageSizes}

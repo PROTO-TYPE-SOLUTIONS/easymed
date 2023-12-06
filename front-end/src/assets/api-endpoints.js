@@ -102,7 +102,7 @@ export const APP_API_URL = {
   DELETE_ITEM: "/api/inventory/delete-item",
 
   /***************** NURSING APIS **********************/
-  ADD_TRIAGE: "/api/nursing",
+  ADD_TRIAGE: "/api/nursing/add-triage",
 };
 
 export const API_METHODS = {
