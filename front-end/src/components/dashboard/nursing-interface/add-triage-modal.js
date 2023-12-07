@@ -8,8 +8,6 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { createTriage } from "@/redux/service/nursing";
 
-
-
 export default function AddTriageModal({
   triageOpen,
   setTriageOpen,
@@ -27,6 +25,7 @@ export default function AddTriageModal({
     height: "",
     weight: null,
     pulse: null,
+    notes: "",
   };
 
   const validationSchema = Yup.object().shape({
@@ -44,10 +43,10 @@ export default function AddTriageModal({
         patient_id: selectedRowData?.id,
       };
       setLoading(true);
-      await createTriage(formData,auth).then(() => {
+      await createTriage(formData, auth).then(() => {
         helpers.resetForm();
         setLoading(false);
-        handleClose(); 
+        handleClose();
         toast.success("Triage Created Successfully!");
       });
     } catch (err) {
@@ -132,6 +131,20 @@ export default function AddTriageModal({
                   </div>
                 </section>
               </section>
+              <div className="w-full my-2">
+                <Field
+                  as="textarea"
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                  type="text"
+                  placeholder="Notes"
+                  name="notes"
+                />
+                <ErrorMessage
+                  name="notes"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
               <button
                 type="submit"
                 className="bg-primary text-sm rounded-xl w-full px-8 py-2 mt-3 text-white"
