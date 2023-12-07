@@ -14,6 +14,7 @@ export const API_URL = {
   DELETE_PATIENT: "/patients/patients/",
   FETCH_PATIENT: "/patients/patients/",
   BOOK_APPOINTMENT: "/patients/publicappointments/",
+  CREATE_APPOINTMENT: "/patients/appointments/",
   FETCH_APPOINTMENTS: "/patients/publicappointments/",
   FETCH_PATIENT_APPOINTMENTS: "/patients/appointments/",
   FETCH_DOCTOR_APPOINTMENTS: "/patients/appointments/",
@@ -46,9 +47,13 @@ export const API_URL = {
   FETCH_SUPPLIERS: "/inventory/suppliers/",
   FETCH_ITEMS: "/inventory/items/",
   DELETE_ITEM: "/inventory/items",
+  FETCH_ORDER_BILL: "/inventory/orderbill/",
+
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/patients/triage/",
+
+
 };
 
 //------------------------ Application APIs ----------------------//
@@ -68,6 +73,7 @@ export const APP_API_URL = {
   DELETE_PATIENT: "/api/patient/delete-patient",
   FETCH_PATIENT: "/api/patient",
   BOOK_APPOINTMENT: "/api/appointment",
+  CREATE_APPOINTMENT: "/api/appointment/create-appointment",
   FETCH_APPOINTMENTS: "/api/appointment",
   FETCH_PATIENT_APPOINTMENTS: "/api/appointment/patient-appointment",
   FETCH_DOCTOR_APPOINTMENTS: "/api/appointment/get-appointment-by-doctor",
@@ -99,7 +105,9 @@ export const APP_API_URL = {
   ADD_INVENTORY: "/api/inventory/add-inventory",
   FETCH_SUPPLIERS: "/api/inventory/fetch-suppliers",
   FETCH_ITEMS: "/api/inventory/fetch-items",
+  FETCH_ITEM: "/api/inventory/get-item",
   DELETE_ITEM: "/api/inventory/delete-item",
+  FETCH_ORDER_BILL: "/api/order-bills/fetch-order-bill",
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/api/nursing/add-triage",
