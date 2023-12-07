@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Selection,
+  HeaderFilter,
+ } from "devextreme-react/data-grid";
 import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
 import { Chip } from "@mui/material";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
@@ -237,6 +239,7 @@ const DoctorPatientDataGrid = () => {
           selectAllMode={"allMode"}
           showCheckBoxesMode={checkBoxesMode}
         /> */}
+        <HeaderFilter visible={true} />
         <Pager
           visible={false}
           // allowedPageSizes={allowedPageSizes}
@@ -246,7 +249,7 @@ const DoctorPatientDataGrid = () => {
         <Column
           dataField="first_name"
           caption="First Name"
-          width={120}
+          width={140}
           allowFiltering={true}
           allowSearch={true}
         />
