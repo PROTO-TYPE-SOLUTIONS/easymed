@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import { Column, Paging, Pager,
+  HeaderFilter,
+ } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { MdAddCircle } from "react-icons/md";
@@ -105,10 +107,11 @@ const NursePatientDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
+        <HeaderFilter visible={true} />
         <Column
           dataField="first_name"
           caption="First Name"
-          width={120}
+          width={140}
           allowFiltering={true}
           allowSearch={true}
         />

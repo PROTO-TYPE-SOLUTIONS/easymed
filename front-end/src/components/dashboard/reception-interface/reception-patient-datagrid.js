@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Selection,
+  HeaderFilter,
+ } from "devextreme-react/data-grid";
 import AddPatientModal from "../patient/add-patient-modal";
 import DischargePatientModal from "./discharge-patient-modal";
 import Link from "next/link";
@@ -157,6 +159,7 @@ const  ReceptionPatientsDataGrid = () => {
           selectAllMode={"allMode"}
           //showCheckBoxesMode={checkBoxesMode}
         />
+        <HeaderFilter visible={true} />
         <Pager
           visible={true}
           // allowedPageSizes={allowedPageSizes}
