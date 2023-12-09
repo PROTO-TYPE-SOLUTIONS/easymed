@@ -30,7 +30,7 @@ class PurchaseOrderFilter(django_filters.FilterSet):
     supplier_ID__name = django_filters.CharFilter(lookup_expr='icontains')
     class Meta:
         model = PurchaseOrder
-        fields = ('quantity', 'Total_Cost', 'supplier_ID__name')
+        fields = ('quantity', 'id', 'supplier_ID__name')
 
 
 class OrderBillFilter(django_filters.FilterSet):

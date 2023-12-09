@@ -1,31 +1,19 @@
 from django.db import models
-# from patient.models import Patient
+# from inventory.models import CustomUser
 
+
+class Department(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
-
-class Inventory(models.Model):
-    LOCATION_CHOICES = (
-        ('mainst', 'Mainst'),
-        ('laboratory', 'Laboratory'),
-        ('radiology', 'Radiology'),
-        ('pharmacy', 'Pharmacy'),
-        ('reception', 'Reception'),
-    )
-    # item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
-    quantity = models.CharField(max_length=255)
-    location = models.CharField(max_length=10, choices=LOCATION_CHOICES, default='mainst')
-    expiry_date = models.DateField()
-    supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     
-
-    def __str__(self):
-        return str(self.item_ID)
-
-
 class Item(models.Model):
     UNIT_CHOICES = [
         ('unit', 'Unit'),
@@ -35,29 +23,64 @@ class Item(models.Model):
         ('ml', 'Milliliter'),
         ('L', 'Liter'),
     ]
-    name = models.CharField(max_length=255)
-    item_no = models.CharField(max_length=255)
-    desc = models.CharField(max_length=255)
-    category = models.CharField(max_length=255, choices=[
+    CATEGORY_CHOICES = [
         ('SurgicalEquipment', 'Surgical Equipment'),
         ('LabReagent', 'Lab Reagent'),
         ('Drug', 'Drug'),
         ('Furniture', 'Furniture'),
         ('Lab Test', 'Lab Test'),
-    ])
+        ('general', 'General'),
+    ]
+    name = models.CharField(max_length=255)
+    desc = models.CharField(max_length=255)
+    category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+
 
     def __str__(self):
         return self.name
+
+# will create signal to update Inventory table when this object is created
+class IncomingItem(models.Model):
+    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+    supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    packed = models.CharField(max_length=255)
+    subpacked = models.CharField(max_length=255)
+
+
+class DepartmentInventory(models.Model):
+    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    packed = models.CharField(max_length=255)
+    subpacked = models.CharField(max_length=255)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    
+    def __str__(self):
+        return str(self.item_ID)
+
+class Inventory(models.Model):
+    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity_in_stock = models.IntegerField()
+    packed = models.CharField(max_length=255)
+    subpacked = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.item_ID
+
+class Requisition(models.Model):
+    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    # requested_by = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    requested_date = models.DateField()
+    supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
 
 class PurchaseOrder(models.Model):
     supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     order_date = models.DateField()
     item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    Total_Cost = models.CharField(max_length=255)
 
 
 class OrderBill (models.Model):
