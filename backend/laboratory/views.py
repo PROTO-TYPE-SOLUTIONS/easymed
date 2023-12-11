@@ -3,6 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.permissions import AllowAny
+
+from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
@@ -15,6 +18,7 @@ from .models import (
     LabTestProfile,
     LabEquipment,
     EquipmentTestRequest,
+    PublicLabTestRequest,
 )
 # serializers
 from .serializers import (
@@ -24,7 +28,8 @@ from .serializers import (
     LabTestCategorySerializer,
     LabTestProfileSerializer,
     LabEquipmentSerializer,
-    EquipmentTestRequestSerializer
+    EquipmentTestRequestSerializer,
+    PublicLabTestRequestSerializer,
 )
 
 # permissions
@@ -43,11 +48,20 @@ from .utils import (
     send_through_tcp
 )
 
+# filters
+from .filters import (
+    LabTestRequestFilter,
+)
 
 class LabReagentViewSet(viewsets.ModelViewSet):
     queryset = LabReagent.objects.all()
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+class LabTestProfileViewSet(viewsets.ModelViewSet):
+    queryset = LabReagent.objects.all()
+    serializer_class = LabTestProfileSerializer
+    permission_classes = (AllowAny,)
 
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
@@ -58,7 +72,7 @@ class LabEquipmentViewSet(viewsets.ModelViewSet):
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
     serializer_class = LabTestProfileSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (AllowAny,)
 
 
 class LabTestResultViewSet(viewsets.ModelViewSet):
@@ -71,6 +85,8 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequest.objects.all()
     serializer_class = LabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = LabTestRequestFilter
 
     @extend_schema(
         parameters=[
@@ -95,16 +111,19 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
                 return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
         return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
 
-
 class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
     queryset = EquipmentTestRequest.objects.all()
     serializer_class = EquipmentTestRequestSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
-
-
 class LabTestCategoryViewSet(viewsets.ModelViewSet):
     queryset = LabTestCategory.objects.all()
     serializer_class = LabTestCategorySerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+
+class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
+    queryset = PublicLabTestRequest.objects.all()
+    serializer_class = PublicLabTestRequestSerializer
+    # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)

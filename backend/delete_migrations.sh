@@ -24,3 +24,4 @@ python manage.py makemigrations authperms customuser inventory laboratory patien
 python manage.py migrate
 
 echo "Migrations made successfully"
+
