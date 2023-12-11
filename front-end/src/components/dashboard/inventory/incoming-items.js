@@ -2,7 +2,7 @@ import React from 'react'
 
 const IncomingItems = () => {
   return (
-    <div>IncomingItems</div>
+    <div>Incoming Items</div>
   )
 }
 

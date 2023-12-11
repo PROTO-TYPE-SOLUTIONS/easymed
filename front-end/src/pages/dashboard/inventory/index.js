@@ -19,9 +19,6 @@ const Inventory = () => {
           Inventory
         </button>
         <RequisitionModal />
-        {/* <button onClick={()=> setCurrentTab(1)} className={`${currentTab === 1 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-          Requisition Entry
-        </button> */}
         <button onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
           Incoming Items
         </button>

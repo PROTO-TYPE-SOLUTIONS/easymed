@@ -3,6 +3,8 @@ import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import Link from "next/link";
 import AddInventoryModal from "./add-inventory";
+import { Grid } from "@mui/material";
+import { months } from "@/assets/dummy-data/laboratory";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -52,6 +54,42 @@ const InventoryDataGrid = () => {
 
   return (
     <section className=" my-8">
+      <Grid container spacing={2} className="my-2">
+        <Grid item md={4} xs={12}>
+          <input
+            className="py-2 w-full px-4 focus:outline-none placeholder-font font-thin text-sm"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery}
+            fullWidth
+            placeholder="Search patients by name"
+          />
+        </Grid>
+        <Grid item md={4} xs={12}>
+          <select className="px-4 w-full py-2 focus:outline-none" name="" id="">
+            <option value="" selected>
+              Search by Month
+            </option>
+            {months.map((month, index) => (
+              <option key={index} value="">
+                {month.name}
+              </option>
+            ))}
+          </select>
+        </Grid>
+        <Grid item md={4} xs={12}>
+          <div className="flex">
+            <button className="bg-white shadow border-primary py-2 px-4 w-full">
+              Date
+            </button>
+            <button className="bg-white shadow border-primary py-2 px-4 w-full">
+              Week
+            </button>
+            <button className="bg-white shadow border-primary py-2 px-4 w-full">
+              Month
+            </button>
+          </div>
+        </Grid>
+      </Grid>
       <AddInventoryModal />
       <DataGrid
         dataSource={users}
