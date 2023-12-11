@@ -107,7 +107,7 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl w-full"
-        height={"70vh"}
+        // height={"70vh"}
       >
         <Pager
           visible={true}
