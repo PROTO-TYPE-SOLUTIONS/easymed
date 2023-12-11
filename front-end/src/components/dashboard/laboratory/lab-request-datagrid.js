@@ -114,7 +114,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
         showRowLines={true}
         wordWrapEnabled={true}
         // allowPaging={true}
-        height={"70vh"}
+        // height={"70vh"}
         className="w-full shadow"
       >
         <Paging defaultPageSize={20} pageSize={20} />

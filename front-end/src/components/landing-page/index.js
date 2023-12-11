@@ -2,8 +2,12 @@ import React from "react";
 import Navbar from "./navbar";
 import LandingVideo from "./landing-video";
 import Link from "next/link";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const LandingPage = () => {
+
+
+
   return (
     <section className="heroSection sm:px-24 px-4 py-4">
       <Navbar />
