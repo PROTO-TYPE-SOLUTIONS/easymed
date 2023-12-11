@@ -1,21 +1,24 @@
 
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# This is where the sqlite database will be
+PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--d8^ja_j-qc7$to9u669%5wilc73e)eza2j0k-zok&oit&x0wi'
+SECRET_KEY = config('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -78,13 +81,6 @@ WSGI_APPLICATION = 'makeeasyhmis.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -117,10 +113,17 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+STATIC_URL = "static/"
+STATIC_ROOT = PROJECT_DIR / "staticfiles"
 
-STATIC_URL = 'static/'
+STATIC_FILES_DIRS = [
+    os.path.join(PROJECT_DIR, "static"),
+]
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+)
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -158,3 +161,11 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_TYPES': {'access': 'a', 'refresh': 'r'},
     'TOKEN_OBTAIN_SERIALIZER': 'customuser.serializers.CustomTokenObtainPairSerializer',
 }
+
+# emails
+EMAIL_BACKEND =config("EMAIL_BACKEND", cast=str)
+EMAIL_HOST = config("EMAIL_HOST", cast=str)
+EMAIL_PORT = config("EMAIL_PORT", cast=int)
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str)
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str)

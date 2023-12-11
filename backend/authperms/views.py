@@ -320,7 +320,7 @@ class DeletePermissionAPIView(APIView):
 
 
 class UserPermissionsAPIView(APIView):
-    permission_classes = (IsStaffUser,)
+    permission_classes = (AllowAny,)
 
     def get_object(self, user_id: int):
         try:
@@ -333,10 +333,6 @@ class UserPermissionsAPIView(APIView):
 
         if user is None:
             return Response({"error_message": f"user id {user_id} doesn't exist"})
-
-        # user doesn't belong to any group
-        if user.groups.count() < 1:
-            return Response([], status=status.HTTP_200_OK)
 
         group = user.group
         permissions = [

@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import Item, PurchaseOrder, OrderBill, Inventory, Supplier
+from .models import Item, PurchaseOrder, OrderBill, Inventory, Supplier, Requisition, IncomingItem, Department, DepartmentInventory
+
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = '__all__'
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,14 +17,14 @@ class OrderBillSerializer(serializers.ModelSerializer):
         model = OrderBill
         fields = '__all__'
 
-class PurchaseSerializer(serializers.ModelSerializer):
+class PurchaseOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchaseOrder
         fields = '__all__'
 
-class SaleSerializer(serializers.ModelSerializer):
+class IncomingItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrderBill
+        model = IncomingItem
         fields = '__all__'
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -26,7 +32,19 @@ class InventorySerializer(serializers.ModelSerializer):
         model = Inventory
         fields = '__all__'
 
+
+class DepartmentInventorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DepartmentInventory
+        fields = '__all__'
+
+
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = '__all__'
+
+class RequisitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Requisition
+        fields = '__all__'        
