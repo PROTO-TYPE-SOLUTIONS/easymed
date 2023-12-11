@@ -28,6 +28,8 @@ class Patient(models.Model):
         ('O', 'Other'),
     )
     first_name = models.CharField(max_length=40)
+    email = models.EmailField(unique=True, null=True, blank=True)
+    phone = models.CharField(max_length=30, null=True, blank=True)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField(null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
