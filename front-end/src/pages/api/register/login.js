@@ -45,7 +45,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            console.log("LOGIN_BODY ",body);
+            console.log("LOGIN_URL ",API_URL.LOGIN);
 
             await backendAxiosInstance.post(`${API_URL.LOGIN}`,body,config)
                 .then(response => {

@@ -150,8 +150,36 @@ const BookAppointmentForm = () => {
                   className="text-warning text-xs"
                 />
               </div>
+              <div className="w-full">
+                <label htmlFor="phone_number">Phone Number</label>
+                <Field
+                  className="block text-sm border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                  type="text"
+                  placeholder="Phone Number"
+                  name="phone_number"
+                />
+                <ErrorMessage
+                  name="phone_number"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
             </Grid>
           </Grid>
+          <div className="w-full my-4">
+            <label htmlFor="email">Email</label>
+            <Field
+              className="block text-sm border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+              type="email"
+              placeholder="Email"
+              name="email"
+            />
+            <ErrorMessage
+              name="email"
+              component="div"
+              className="text-warning text-xs"
+            />
+          </div>
           <div className="w-full my-4">
             <label htmlFor="reason">Reason</label>
             <Field

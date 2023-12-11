@@ -24,11 +24,11 @@ const PatientProfile = () => {
   const { logoutUser } = useContext(authContext);
   const auth = useAuth();
 
-  console.log("AUTH ", auth);
+  console.log("PATIENT_AUTH ", auth);
   const router = useRouter();
 
   useEffect(() => {
-    if (auth) {
+    if (auth?.user_id) {
       dispatch(getPatientProfile(auth.user_id));
     }
   }, [auth]);
