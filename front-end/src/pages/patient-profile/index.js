@@ -3,18 +3,16 @@ import { useRouter } from "next/router";
 import { getPatientProfile } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { Container, Grid } from "@mui/material";
-import AppointmentHistory from "@/components/patient-profile/appointment-history";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import ProfileLayout from "@/components/layout/profile-layout";
 import { BsArrowLeft } from "react-icons/bs";
 import Link from "next/link";
-import MedicalHistory from "@/components/patient-profile/medical-history";
-import Prescriptions from "@/components/patient-profile/prescriptions";
 import { useAuth } from "@/assets/hooks/use-auth";
 import PersonalDetails from "@/components/patient-profile/personal-details";
 import { TbLogout2 } from "react-icons/tb";
 import { authContext } from "@/components/use-context";
 import { FaUserCircle } from "react-icons/fa";
+import BookAppointmentModal from "./book-appointment-modal";
 
 const PatientProfile = () => {
   const dispatch = useDispatch();
@@ -65,9 +63,7 @@ const PatientProfile = () => {
                   <h1 className="text-xl text-primary">Personal Information</h1>
                 </div>
                 <div>
-                  <Link href="/book-appointment" className="bg-primary text-white shadow-xl px-4 text-sm py-2 rounded-xl">
-                    Book Appointment
-                  </Link>
+                  <BookAppointmentModal />
                 </div>
               </div>
               <PersonalDetails />

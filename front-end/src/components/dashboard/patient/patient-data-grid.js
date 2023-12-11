@@ -114,7 +114,7 @@ const PatientsDataGrid = () => {
         wordWrapEnabled={true}
         allowPaging={false}
         className="shadow-xl w-full"
-        height={"60vh"}
+        // height={"60vh"}
       >
         <HeaderFilter visible={true} />
         <Pager
