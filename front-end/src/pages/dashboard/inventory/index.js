@@ -1,49 +1,46 @@
-import InventoryLayout from "@/components/layout/inventory-layout";
+import React, { useState } from "react";
 import { Container, Grid } from "@mui/material";
-import React from "react";
-import { inventoryData } from "@/assets/menu";
 import InventoryDataGrid from "@/components/dashboard/inventory";
 import Link from "next/link";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import CustomizedLayout from "@/components/layout/customized-layout";
+import AddInventoryForm from "@/components/dashboard/inventory/add-inventory";
+import RequisitionModal from "@/components/dashboard/inventory/requisition-modal";
+import IncomingItems from "@/components/dashboard/inventory/incoming-items";
+import Reports from "@/components/dashboard/inventory/reports";
 
 const Inventory = () => {
+  const [currentTab, setCurrentTab] = useState(0);
+
   return (
     <Container maxWidth="xl">
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard/inventory/add-inventory">
-          <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
-            Add Item
-          </button>
-        </Link>
-        <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
-          Sale Order
+      <div className="flex items-center gap-4 my-8">
+        <button onClick={()=> setCurrentTab(0)} className={`${currentTab === 0 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          Inventory
         </button>
-        <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
-          View Items
+        <RequisitionModal />
+        {/* <button onClick={()=> setCurrentTab(1)} className={`${currentTab === 1 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          Requisition Entry
+        </button> */}
+        <button onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          Incoming Items
+        </button>
+        <button onClick={()=> setCurrentTab(3)} className={`${currentTab === 3 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          Reports
         </button>
       </div>
-      <h1 className="mb-2 font-semibold">Sales Summary</h1>
-      <Grid container spacing={1}>
-        {inventoryData.map((data, index) => (
-          <Grid key={index} item md={4} xs={12}>
-            <section className=" bg-white shadow-xl border-primary rounded-xl px-4 py-3 h-20 flex items-center justify-center gap-4">
-              <div className="text-2xl">{data?.icon}</div>
-              <div className="text-center text-sm">
-                <p className="">{data?.label}</p>
-                <p className="text-[#02273D]">{data?.number}</p>
-              </div>
-            </section>
-          </Grid>
-        ))}
-      </Grid>
-      <InventoryDataGrid />
+
+      {currentTab === 0 && <InventoryDataGrid /> }
+      {/* {currentTab === 1 && <RequisitionModal /> } */}
+      {currentTab === 2 && <IncomingItems /> }
+      {currentTab === 3 && <Reports /> }
     </Container>
   );
 };
 
 Inventory.getLayout = (page) => (
   <AuthGuard>
-    <InventoryLayout>{page}</InventoryLayout>;
+    <CustomizedLayout>{page}</CustomizedLayout>;
   </AuthGuard>
 );
 

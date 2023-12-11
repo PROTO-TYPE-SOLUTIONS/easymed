@@ -2,6 +2,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import Link from "next/link";
+import AddInventoryModal from "./add-inventory";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -47,49 +48,11 @@ const InventoryDataGrid = () => {
       age: "49",
       status: "Active",
     },
-    {
-      number: "4",
-      id_number: "1234821",
-      name: "Ann Ochieng",
-      country: "Rwanda",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-    {
-      number: "5",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "6",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "7",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
   ];
 
   return (
     <section className=" my-8">
-      <Link href="/dashboard/inventory/add-inventory" className="">
-         <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">Add Inventory</button>
-      </Link>
+      <AddInventoryModal />
       <DataGrid
         dataSource={users}
         allowColumnReordering={true}
@@ -101,10 +64,10 @@ const InventoryDataGrid = () => {
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl"
-        height={"70vh"}
+        // height={"70vh"}
       >
         <Pager
-          visible={true}
+          visible={false}
           // allowedPageSizes={allowedPageSizes}
           showPageSizeSelector={true}
           showNavigationButtons={true}

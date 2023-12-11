@@ -26,11 +26,6 @@ export const menus = [
         href: "/dashboard",
         icon: <GrAdd className="" />,
       },
-      // {
-      //   label: "Admin",
-      //   href: "/dashboard/admin-interface",
-      //   icon: <GrAdd className="" />,
-      // },
       {
         label: "Doctor",
         href: "/dashboard/doctor-interface",
@@ -106,13 +101,13 @@ export const menus = [
     label: "Inventory",
     href: "/dashboard/inventory",
     icon: <MdInventory2 className="text-xl" />,
-    children: [
-      {
-        label: "Add Inventory",
-        href: "/dashboard/inventory/add-inventory",
-        icon: <GrAdd className="" />,
-      },
-    ],
+    // children: [
+    //   {
+    //     label: "Add Inventory",
+    //     href: "/dashboard/inventory/add-inventory",
+    //     icon: <GrAdd className="" />,
+    //   },
+    // ],
   },
 ];
 
