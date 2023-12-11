@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import { Container, Grid } from "@mui/material";
+import { Container } from "@mui/material";
 import InventoryDataGrid from "@/components/dashboard/inventory";
-import Link from "next/link";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import CustomizedLayout from "@/components/layout/customized-layout";
-import AddInventoryForm from "@/components/dashboard/inventory/add-inventory";
-import RequisitionModal from "@/components/dashboard/inventory/requisition-modal";
 import IncomingItems from "@/components/dashboard/inventory/incoming-items";
 import Reports from "@/components/dashboard/inventory/reports";
 
@@ -28,7 +25,6 @@ const Inventory = () => {
       </div>
 
       {currentTab === 0 && <InventoryDataGrid /> }
-      {/* {currentTab === 1 && <RequisitionModal /> } */}
       {currentTab === 2 && <IncomingItems /> }
       {currentTab === 3 && <Reports /> }
     </Container>

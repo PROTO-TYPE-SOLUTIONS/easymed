@@ -64,18 +64,18 @@ export const menus = [
     label: "Billing",
     href: "/dashboard/billing",
     icon: <FaMoneyBillWave className="text-xl" />,
-    children: [
-      {
-        label: "New Invoice",
-        href: "/dashboard/billing/new-invoice",
-        icon: <GrAdd className="" />,
-      },
-      {
-        label: "Invoices",
-        href: "/dashboard/billing/invoices-datagrid",
-        icon: <GrAdd className="" />,
-      },
-    ],
+    // children: [
+    //   {
+    //     label: "New Invoice",
+    //     href: "/dashboard/billing/new-invoice",
+    //     icon: <GrAdd className="" />,
+    //   },
+    //   {
+    //     label: "Invoices",
+    //     href: "/dashboard/billing/invoices-datagrid",
+    //     icon: <GrAdd className="" />,
+    //   },
+    // ],
   },
   {
     label: "Patients",
@@ -101,13 +101,6 @@ export const menus = [
     label: "Inventory",
     href: "/dashboard/inventory",
     icon: <MdInventory2 className="text-xl" />,
-    // children: [
-    //   {
-    //     label: "Add Inventory",
-    //     href: "/dashboard/inventory/add-inventory",
-    //     icon: <GrAdd className="" />,
-    //   },
-    // ],
   },
 ];
 
