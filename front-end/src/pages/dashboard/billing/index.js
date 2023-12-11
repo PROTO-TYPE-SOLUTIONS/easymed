@@ -2,23 +2,35 @@ import React,{useState} from 'react'
 import CustomizedLayout from "../../../components/layout/customized-layout";
 import { Container } from '@mui/material';
 import BilledDataGrid from './billed-datagrid';
-import InvoicesDataGrid from './invoices-datagrid';
-import PaidInvoiceDataGrid from './paid-invoice-datagrid';
+import AddInvoiceModal from '@/components/dashboard/billing/add-invoice-modal';
+import OverdueInvoices from '@/components/dashboard/billing/overdue-invoices';
+import InvoiceItems from '@/components/dashboard/billing/InvoiceItems';
+import BillingReports from '@/components/dashboard/billing/billing-reports';
 
 
 const Billing = () => {
   const [currentTab,setCurrentTab] = useState(0)
+
   return (
     <Container maxWidth="xl" className='my-8'>
-      <section className="flex items-center gap-4 bg-white p-2 mb-4">
-      <h1 onClick={() => setCurrentTab(0)} className={`${currentTab === 0 ? 'font-semibold' : ''} text-xl cursor-pointer`}>Billed</h1>
-      <h1 onClick={() => setCurrentTab(1)} className={`${currentTab === 1 ? 'font-semibold' : ''} text-xl cursor-pointer`}>All Invoices</h1>
-        <h1 onClick={() => setCurrentTab(2)} className={`${currentTab === 2 ? 'font-semibold' : ''} text-xl cursor-pointer`}>Paid Invoices</h1>
-      </section>
+      <div className="flex items-center gap-4 my-8">
+        <AddInvoiceModal />
+        <button onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          Overdue Invoices
+        </button>
+        <button onClick={()=> setCurrentTab(3)} className={`${currentTab === 3 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          View Items
+        </button>
+        <button onClick={()=> setCurrentTab(4)} className={`${currentTab === 4 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          Reports
+        </button>
+      </div>
 
       {currentTab === 0 && <BilledDataGrid /> }
-      {currentTab === 1 && <InvoicesDataGrid /> }
-      {currentTab === 2 && <PaidInvoiceDataGrid /> }
+      {/* {currentTab === 1 && <OverdueInvoices /> } */}
+      {currentTab === 2 && <OverdueInvoices /> }
+      {currentTab === 3 && <InvoiceItems /> }
+      {currentTab === 4 && <BillingReports /> }
     </Container>
   )
 }
