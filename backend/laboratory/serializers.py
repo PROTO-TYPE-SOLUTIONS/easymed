@@ -40,6 +40,8 @@ class EquipmentTestRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LabTestRequestSerializer(serializers.ModelSerializer):
+    patient_first_name = serializers.ReadOnlyField(source='patient_ID.first_name')
+    patient_last_name = serializers.ReadOnlyField(source='patient_ID.second_name')
     class Meta:
         model = LabTestRequest
         fields = "__all__"
