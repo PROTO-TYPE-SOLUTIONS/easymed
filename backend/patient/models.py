@@ -113,6 +113,8 @@ class PublicAppointment(models.Model):
     )
     service = models.ForeignKey(Service, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=40)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=30, null=True, blank=True)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES,)
