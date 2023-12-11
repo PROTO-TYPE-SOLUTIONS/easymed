@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { useRouter } from "next/router";
 import { getPatientProfile } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,16 +13,29 @@ import { TbLogout2 } from "react-icons/tb";
 import { authContext } from "@/components/use-context";
 import { FaUserCircle } from "react-icons/fa";
 import BookAppointmentModal from "./book-appointment-modal";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import { IoChevronDownOutline } from "react-icons/io5";
+import LabServiceModal from "./lab-service-modal";
 
 const PatientProfile = () => {
   const dispatch = useDispatch();
   const { profileDetails } = useSelector((store) => store.patient);
-  console.log("PARENT_PROFILE_DETAILS ", profileDetails);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const { logoutUser } = useContext(authContext);
   const auth = useAuth();
 
-  console.log("PATIENT_AUTH ", auth);
   const router = useRouter();
 
   useEffect(() => {
@@ -58,14 +71,46 @@ const PatientProfile = () => {
         <Grid container spacing={4}>
           <Grid item md={12} xs={12}>
             <section className="my-8 space-y-8 ">
-              <div className="flex items-center justify-between">
+              <section className="flex items-center justify-between">
                 <div>
                   <h1 className="text-xl text-primary">Personal Information</h1>
                 </div>
                 <div>
-                  <BookAppointmentModal />
+                  <div
+                    onClick={handleClick}
+                    className="flex items-center cursor-pointer gap-2 bg-primary text-white rounded-xl p-2"
+                  >
+                    <p className="text-sm">Select Service</p>
+                    <IoChevronDownOutline className="font-bold cursor-pointer" />
+                  </div>
+                  <div>
+                    <Menu
+                      id="basic-menu"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleClose}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left",
+                      }}
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "left",
+                      }}
+                      MenuListProps={{
+                        "aria-labelledby": "basic-button",
+                      }}
+                    >
+                      <MenuItem>
+                        <BookAppointmentModal />
+                      </MenuItem>
+                      <MenuItem>
+                        <LabServiceModal />
+                      </MenuItem>
+                    </Menu>
+                  </div>
                 </div>
-              </div>
+              </section>
               <PersonalDetails />
             </section>
           </Grid>
