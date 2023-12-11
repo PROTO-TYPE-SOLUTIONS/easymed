@@ -80,9 +80,9 @@ const BookAppointmentModal = () => {
 
   return (
     <section>
-      <button  variant="outlined" onClick={handleClickOpen} className="bg-primary text-white shadow-xl px-4 text-sm py-2 rounded-xl">
+      <p onClick={handleClickOpen} className="text-sm">
         Book Appointment
-      </button>
+      </p>
       <Dialog
         fullWidth
         maxWidth="sm"

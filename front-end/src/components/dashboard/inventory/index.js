@@ -2,6 +2,9 @@ import React from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager } from "devextreme-react/data-grid";
 import Link from "next/link";
+import AddInventoryModal from "./add-inventory";
+import { Grid } from "@mui/material";
+import { months } from "@/assets/dummy-data/laboratory";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -47,49 +50,47 @@ const InventoryDataGrid = () => {
       age: "49",
       status: "Active",
     },
-    {
-      number: "4",
-      id_number: "1234821",
-      name: "Ann Ochieng",
-      country: "Rwanda",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-    {
-      number: "5",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "6",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "7",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
   ];
 
   return (
     <section className=" my-8">
-      <Link href="/dashboard/inventory/add-inventory" className="">
-         <button className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">Add Inventory</button>
-      </Link>
+      <Grid container spacing={2} className="my-2">
+        <Grid item md={4} xs={12}>
+          <input
+            className="py-2 w-full px-4 focus:outline-none placeholder-font font-thin text-sm"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery}
+            fullWidth
+            placeholder="Search patients by name"
+          />
+        </Grid>
+        <Grid item md={4} xs={12}>
+          <select className="px-4 w-full py-2 focus:outline-none" name="" id="">
+            <option value="" selected>
+              Search by Month
+            </option>
+            {months.map((month, index) => (
+              <option key={index} value="">
+                {month.name}
+              </option>
+            ))}
+          </select>
+        </Grid>
+        <Grid item md={4} xs={12}>
+          <div className="flex">
+            <button className="bg-white shadow border-primary py-2 px-4 w-full">
+              Date
+            </button>
+            <button className="bg-white shadow border-primary py-2 px-4 w-full">
+              Week
+            </button>
+            <button className="bg-white shadow border-primary py-2 px-4 w-full">
+              Month
+            </button>
+          </div>
+        </Grid>
+      </Grid>
+      <AddInventoryModal />
       <DataGrid
         dataSource={users}
         allowColumnReordering={true}
@@ -101,10 +102,10 @@ const InventoryDataGrid = () => {
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl"
-        height={"70vh"}
+        // height={"70vh"}
       >
         <Pager
-          visible={true}
+          visible={false}
           // allowedPageSizes={allowedPageSizes}
           showPageSizeSelector={true}
           showNavigationButtons={true}

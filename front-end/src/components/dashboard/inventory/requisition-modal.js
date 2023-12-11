@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 
-const AddInventoryModal = () => {
+const RequisitionModal = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
@@ -89,7 +89,7 @@ const AddInventoryModal = () => {
   return (
     <section>
       <button onClick={handleClickOpen} className="bg-primary text-white text-sm rounded px-3 py-2 mb-1">
-        Add Inventory
+        Requisition Entry
       </button>
       <Dialog
         fullWidth
@@ -244,7 +244,7 @@ const AddInventoryModal = () => {
                           ></path>
                         </svg>
                       )}
-                      Add Inventory
+                      Add Requisition
                     </button>
                   </div>
                 </Grid>
@@ -257,4 +257,4 @@ const AddInventoryModal = () => {
   );
 };
 
-export default AddInventoryModal;
+export default RequisitionModal;
