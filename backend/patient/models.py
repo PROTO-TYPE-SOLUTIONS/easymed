@@ -47,14 +47,6 @@ class Patient(models.Model):
             patient_age:int = (datetime.now().year - self.date_of_birth.year)
             return patient_age
         return None
-    
-
-# meant to create an OrderBill item when a patient is created
-# def order_bill_created(sender, instance, created, **kwargs):
-#     if created:
-#         order_bill = OrderBill.objects.create(patient_ID=Patient.objects.create())
-
-# post_save.connect(order_bill_created, sender=Patient)
 
 
 class NextOfKin(models.Model):
@@ -90,10 +82,8 @@ class Appointment(models.Model):
     reason = models.TextField(max_length=300, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True,)
     fee = models.CharField(max_length=40, default="0")
-    order_bill_ID = models.ForeignKey(
-        OrderBill, on_delete=models.CASCADE, null=True)
 
     # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -196,8 +186,7 @@ class PrescribedDrug(models.Model):
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     note = models.TextField(null=True, blank=True)
-    order_bill_ID = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True)
-    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return f"Prescribed Drug #{self.item_ID}"    

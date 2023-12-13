@@ -81,15 +81,4 @@ class PurchaseOrder(models.Model):
     order_date = models.DateField()
     item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-
-
-class OrderBill (models.Model):
-    STATUS_CHOICES = (
-        ('unpaid', 'Unpaid'),
-        ('paid', 'Paid'),
-    )
-    payment_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unpaid')
-    # patient_ID =  models.ForeignKey(Patient, on_delete=models.CASCADE)
-    bill_date = models.DateTimeField(auto_now_add=True)
-    total_Cost = models.CharField(max_length=255, null=True, blank=True)
     
