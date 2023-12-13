@@ -2,7 +2,7 @@ from django.db import models
 from patient.models import Patient
 from django.conf import settings
 from customuser.models import CustomUser
-from inventory.models import Item, OrderBill
+from inventory.models import Item
 from datetime import datetime
 from django.core.validators import FileExtensionValidator
 
@@ -56,8 +56,6 @@ class LabTestRequest(models.Model):
     patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
     test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
     note = models.TextField()
-    order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True, blank=True)
-  #  item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT, null=True, blank=True)
     sample_collected = models.BooleanField(default=False, null=True)

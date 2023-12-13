@@ -2,7 +2,7 @@ from datetime import datetime
 from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
-from inventory.models import Item, OrderBill
+from inventory.models import Item
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 
