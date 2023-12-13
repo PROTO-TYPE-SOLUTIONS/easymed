@@ -61,12 +61,17 @@ running manually  = baseURL: "http://127.0.0.1:8000",
 * NEXT_PUBLIC_BASE_URL=""
 * NEXT_PUBLIC_ENCRYPTION_KEY="c2FubGFta2VueWFAZ21haWwuY29t"
 
-Lastly run the development server using either of the following commands:
+Lastly run the development server using:
 
-```bash
+```
 npm run dev
 ```
+Dev version can be a little slow. To run a faster build version, use  the follwoing commands:
 
+```
+npm run build
+npm start
+```
 Visit localhost 127.0.0.1:3000/dashboard
 
 ## Adding Permissions
