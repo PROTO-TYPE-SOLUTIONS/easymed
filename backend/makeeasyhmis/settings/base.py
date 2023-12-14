@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'inventory.apps.InventoryConfig',
     'laboratory.apps.LaboratoryConfig',
     'receptions.apps.ReceptionsConfig',
+    'billing.apps.BillingConfig',
 
 ]
 
