@@ -14,6 +14,8 @@ urlpatterns = [
     path('patients/', include('patient.urls')),
     # lab
     path('lab/', include('laboratory.urls')),
+    # billing
+    path('billing/', include('billing.urls')),
     # inventory
     path('inventory/', include('inventory.urls')),
     # authperms/sysadmin
