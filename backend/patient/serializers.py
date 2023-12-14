@@ -84,6 +84,8 @@ class ConsultationSerializer(serializers.ModelSerializer):
 class ConvertToAppointmentsSerializer(serializers.Serializer):
     first_name = serializers.CharField()
     second_name = serializers.CharField()
+    email = serializers.EmailField()
+    phone_number = serializers.CharField()
     date_of_birth = serializers.DateTimeField()
     gender = serializers.ChoiceField(choices=PublicAppointment.GENDER_CHOICES)
     appointment_date_time = serializers.DateTimeField()
@@ -97,6 +99,8 @@ class ConvertToAppointmentsSerializer(serializers.Serializer):
                 second_name = self.validated_data.get("second_name"),
                 date_of_birth = self.validated_data.get("date_of_birth"),
                 gender = self.validated_data.get("gender"),
+                email = self.validated_data.get("email"),
+                phone_number = self.validated_data.get("phone_number"),
             )
         except Exception as e:
             return 400
