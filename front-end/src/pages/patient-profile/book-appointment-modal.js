@@ -20,7 +20,6 @@ const BookAppointmentModal = () => {
   const { doctors } = useSelector((store) => store.doctor);
   const auth = useAuth();
 
-
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -60,7 +59,7 @@ const BookAppointmentModal = () => {
     console.log("APPOINTMENT_DATA ", formValue);
     const formData = {
       ...formValue,
-    //   patient: selectedRowData?.id,
+      //   patient: selectedRowData?.id,
     };
     console.log("FORM_DATA ", formData);
     try {
@@ -100,7 +99,7 @@ const BookAppointmentModal = () => {
             <Form>
               <section className="space-y-1">
                 <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={12} xs={12}>
                     <label htmlFor="first_name">Appointment Date</label>
                     <Field
                       className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
@@ -114,89 +113,9 @@ const BookAppointmentModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="insurance">Assign Doctor</label>
-                    <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      name="assigned_doctor"
-                    >
-                      <option value="">Select Doctor</option>
-                      {doctors.map((item) => (
-                        <option
-                          className="flex gap-2"
-                          key={item?.id}
-                          value={item.id}
-                        >
-                          <span>{item?.first_name}</span>
-                          <span>{item?.last_name}</span>
-                        </option>
-                      ))}
-                    </Field>
-                    <ErrorMessage
-                      name="assigned_doctor"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
+                  
                 </Grid>
                 <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="date_of_birth">Fee</label>
-                    <Field
-                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      type="text"
-                      placeholder="Fee"
-                      name="fee"
-                    />
-                    <ErrorMessage
-                      name="fee"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="order bill">Order Bill</label>
-                    <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      name="order_bill_ID"
-                    >
-                      <option value="">Select Order Bill</option>
-                      {orderBills.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.total_Cost}
-                        </option>
-                      ))}
-                    </Field>
-                    <ErrorMessage
-                      name="order_bill_ID"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item md={12} xs={12}>
-                    <label htmlFor="item_id">Item</label>
-                    <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      name="item_id"
-                    >
-                      <option value="">Select Item</option>
-                      {item.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.name}
-                        </option>
-                      ))}
-                    </Field>
-                    <ErrorMessage
-                      name="item_id"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
                   <Grid item md={12} xs={12}>
                     <label htmlFor="second_name">Reason</label>
                     <Field

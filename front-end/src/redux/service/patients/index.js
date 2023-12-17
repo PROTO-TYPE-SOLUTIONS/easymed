@@ -26,6 +26,24 @@ export const fetchPatient = () =>{
     })
 }
 
+
+export const searchPatients = (first_name) =>{
+    return new Promise((resolve,reject) =>{
+        console.log("PATIENT_URL ",`${APP_API_URL.SEARCH_PATIENT}`)
+        axios.get(`${APP_API_URL.SEARCH_PATIENT}`,{
+            params:{
+                first_name:first_name,
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const fetchPatientProfile = (userId) =>{
     return new Promise((resolve,reject) =>{
         axios.get(`${APP_API_URL.GET_PATIENT_PROFILE}`,{

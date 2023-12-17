@@ -109,7 +109,7 @@ const AdminCreateUser = () => {
                   <section className="flex flex-col items-center justify-center space-y-4">
                     <div className="w-full">
                       <Field
-                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="First Name"
                         name="first_name"
@@ -122,7 +122,7 @@ const AdminCreateUser = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                         type="text"
                         placeholder="Last Name"
                         name="last_name"
@@ -135,7 +135,7 @@ const AdminCreateUser = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                         type="email"
                         placeholder="Email"
                         name="email"
@@ -148,7 +148,7 @@ const AdminCreateUser = () => {
                     </div>
                     <div className="w-full">
                       <Field
-                        className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                        className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                         type="password"
                         placeholder="Password"
                         name="password"
@@ -162,7 +162,7 @@ const AdminCreateUser = () => {
                     <div className="w-full">
                       <Field
                         as="select"
-                        className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
+                        className="block pr-9 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                         name="group"
                       >
                         <option value="">Assign Role</option>
@@ -180,7 +180,7 @@ const AdminCreateUser = () => {
                     </div>
                     <button
                       type="submit"
-                      className="bg-primary w-full px-8 py-3 text-white"
+                      className="bg-primary w-full px-8 py-2 rounded-xl text-white"
                     >
                       {loading && (
                         <svg
