@@ -16,11 +16,11 @@ const DoctorInterface = () => {
 };
 
 DoctorInterface.getLayout = (page) => (
-  <ProtectedRoute permission={'CAN_ACCESS_DOCTOR_DASHBOARD'}>
-    <AuthGuard>
+  // <ProtectedRoute permission={'CAN_ACCESS_DOCTOR_DASHBOARD'}>
+  //   <AuthGuard>
       <CustomizedLayout>{page}</CustomizedLayout>
-    </AuthGuard>
-  </ProtectedRoute>
+  //   </AuthGuard>
+  // </ProtectedRoute>
 );
 
 export default DoctorInterface;
