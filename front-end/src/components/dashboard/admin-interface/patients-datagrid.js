@@ -47,54 +47,6 @@ const AdminPatientsDataGrid = () => {
     dispatch(getAllPatients());
   },[]);
 
-  const users = [
-    {
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      assigned_doctor: "Dr. Patrick",
-      progress_status: "Discharged",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      progress_status: "In Treatment",
-      assigned_doctor: "Dr. Moses",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      id_number: "1234821",
-      name: "Jane Munyua",
-      progress_status: "New Patient",
-      assigned_doctor: "Dr. Melanie",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Ann Kibet",
-      progress_status: "Discharged",
-      assigned_doctor: "Dr. Brenda",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-    {
-      id_number: "1234221",
-      name: "Ann Ochieng",
-      progress_status: "In Treatment",
-      assigned_doctor: "Dr. Patrick",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-  ];
-
   const onMenuClick = async (menu, data) => {
     if (menu.action === "delete") {
       setSelectedRowData(data);
@@ -137,20 +89,12 @@ const AdminPatientsDataGrid = () => {
   };
 
   //   filter users based on search query
-  const filteredPatients = patients.filter((user) => {
+  const filteredPatients = patients?.filter((user) => {
     return user.first_name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
     <section>
-      {/* <div className="flex items-center justify-start mb-3 mt-4 w-5/12">
-        <input
-          className="rounded-3xl shadow-xl py-3 px-4 focus:outline-none w-full"
-          onChange={(e) => setSearchQuery(e.target.value)}
-          value={searchQuery}
-          placeholder="Search..."
-        />
-      </div> */}
       <DataGrid
         dataSource={filteredPatients}
         allowColumnReordering={true}
@@ -162,7 +106,7 @@ const AdminPatientsDataGrid = () => {
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl w-full"
-        height={"70vh"}
+        // height={"70vh"}
       >
         <Pager
           visible={true}

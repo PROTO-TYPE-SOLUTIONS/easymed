@@ -13,6 +13,7 @@ export const API_URL = {
   EDIT_PATIENT: "/patients/patients/",
   DELETE_PATIENT: "/patients/patients/",
   FETCH_PATIENT: "/patients/patients/",
+  SEARCH_PATIENT: "/patients/patients/",
   BOOK_APPOINTMENT: "/patients/publicappointments/",
   CREATE_APPOINTMENT: "/patients/appointments/",
   FETCH_APPOINTMENTS: "/patients/publicappointments/",
@@ -54,6 +55,11 @@ export const API_URL = {
   ADD_TRIAGE: "/patients/triage/",
 
 
+  /***************** BILLING APIS **********************/
+  FETCH_PATIENT_BILLING_APPOINTMENTS: "/patients/appointments",
+  FETCH_PATIENT_BILLING_LAB_REQUEST: "/lab/lab-test-requests",
+  FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/patients/prescribed-drugs",
+
 };
 
 //------------------------ Application APIs ----------------------//
@@ -72,6 +78,7 @@ export const APP_API_URL = {
   EDIT_PATIENT: "/api/patient/edit-patient",
   DELETE_PATIENT: "/api/patient/delete-patient",
   FETCH_PATIENT: "/api/patient",
+  SEARCH_PATIENT: "/api/billing/search-patients",
   BOOK_APPOINTMENT: "/api/appointment",
   CREATE_APPOINTMENT: "/api/appointment/create-appointment",
   FETCH_APPOINTMENTS: "/api/appointment",
@@ -111,6 +118,11 @@ export const APP_API_URL = {
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/api/nursing/add-triage",
+
+  /***************** BILLING APIS **********************/
+  FETCH_PATIENT_BILLING_APPOINTMENTS: "/api/billing/patient-appointments",
+  FETCH_PATIENT_BILLING_LAB_REQUEST: "/api/billing/patient-lab-request",
+  FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/api/billing/prescribed-drug",
 };
 
 export const API_METHODS = {

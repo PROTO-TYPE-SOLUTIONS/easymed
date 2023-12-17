@@ -7,12 +7,24 @@ import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
+import { getAllSearchedPatients } from "@/redux/features/patients";
+import { getAllPatientBillingAppointments, getAllPatientBillingLabRequest, getAllPatientBillingPrescribedDrug } from "@/redux/features/billing";
+import { useAuth } from "@/assets/hooks/use-auth";
+import PatientCheckServices from "./checkServices";
 
 const AddInvoiceModal = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const { searchedPatients } = useSelector((store) => store.patient);
+  const { patientAppointment,patientLabRequest,patientPrescribedDrug } = useSelector((store) => store.billing);
+  const [inputValue, setInputValue] = useState("");
+  const auth = useAuth();
+
+  console.log("PATIENT_APPOINTMENT ",patientAppointment)
+  console.log("LAB_REQUEST ",patientLabRequest)
+  console.log("PRESCRIBED_DRUG ",patientPrescribedDrug)
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -23,26 +35,38 @@ const AddInvoiceModal = () => {
   };
 
   const initialValues = {
-    quantity: "",
+    first_name: "",
   };
 
   const validationSchema = Yup.object().shape({
-    quantity: Yup.string().required("This field is required!"),
+    first_name: Yup.string().required("This field is required!"),
   });
 
-  const handleSearchPatient = async (formValue, helpers) => {
+  const handleInputChange = async (event) => {
+    const { value } = event.target;
+    setInputValue(value);
+
     try {
       setLoading(true);
-      await addInventory(formValue).then(() => {
-        helpers.resetForm();
-        toast.success("Inventory Added Successfully!");
-        setLoading(false);
-      });
+
+      if (value.trim() === "" || value.length < 3) {
+        // Clear the searchedPatients array or take appropriate action for short input
+        // Example: dispatch(clearSearchedPatients());
+      } else {
+        await dispatch(getAllSearchedPatients(inputValue));
+        await dispatch(getAllPatientBillingAppointments(searchedPatients[0]?.id));
+        await dispatch(getAllPatientBillingLabRequest(auth,searchedPatients[0]?.id));
+        await dispatch(getAllPatientBillingPrescribedDrug(auth,searchedPatients[0]?.id));
+      }
+
+      setLoading(false);
     } catch (err) {
       toast.error(err);
+      setLoading(false);
     }
   };
 
+  
   return (
     <section>
       <button
@@ -53,7 +77,7 @@ const AddInvoiceModal = () => {
       </button>
       <Dialog
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -65,22 +89,39 @@ const AddInvoiceModal = () => {
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleSearchPatient}
               >
                 <Form className="">
                   <Grid container spacing={2}>
                     <Grid item md={12} xs={12}>
-                      <Field
+                      <input
                         className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
                         maxWidth="sm"
                         placeholder="Search Patient"
-                        name="quantity"
+                        name="first_name"
+                        onChange={handleInputChange}
+                        value={inputValue}
                       />
                       <ErrorMessage
-                        name="quantity"
+                        name="first_name"
                         component="div"
                         className="text-warning text-xs"
                       />
+                      <div>
+                        {inputValue !== "" &&
+                          searchedPatients
+                            .filter((patient) =>
+                              `${patient.first_name} ${patient.second_name}`
+                                .toLowerCase()
+                                .includes(inputValue.toLowerCase())
+                            )
+                            .map((patient, index) => (
+                              <span
+                              onClick={() => setInputValue(`${patient.first_name} ${patient.second_name}`)}
+                               className="text-sm px-4 cursor-pointer hover:bg-background rounded p-1"
+                                key={index}
+                              >{`${patient.first_name} ${patient.second_name}`}</span>
+                            ))}
+                      </div>
                     </Grid>
                   </Grid>
                 </Form>
@@ -88,16 +129,16 @@ const AddInvoiceModal = () => {
             </>
           )}
           {currentStep === 1 && (
-            <section className="border border-gray h-[40vh] flex items-center justify-center rounded p-4">
-              Display Patient Details Here
+            <section className="">
+              <PatientCheckServices {...{patientAppointment}} />
             </section>
           )}
           <div className="flex items-center justify-end gap-2 mt-2">
             <button
-              onClick={handleClose}
+              onClick={() => setCurrentStep(currentStep - 1)}
               className="border border-primary rounded-xl px-4 py-2 text-sm"
             >
-              Cancel
+              Prev
             </button>
             {currentStep === 0 ? (
               <button

@@ -32,6 +32,8 @@ class Patient(models.Model):
     phone = models.CharField(max_length=30, null=True, blank=True)
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField(null=True)
+    email = models.EmailField(null=True)
+    phone_number = models.CharField(max_length=15, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     insurance = models.ForeignKey(
         InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
@@ -110,6 +112,8 @@ class PublicAppointment(models.Model):
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES,)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=15)
     appointment_date_time = models.DateTimeField()
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
