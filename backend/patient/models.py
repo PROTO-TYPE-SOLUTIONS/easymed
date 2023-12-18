@@ -169,7 +169,6 @@ class Prescription(models.Model):
         ('pending', 'Pending'),
         ('dispensed', 'Dispensed'),
     )
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -177,14 +176,13 @@ class Prescription(models.Model):
         max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return f"Prescription #{self.patient_id.pk}"
+        return f"Prescription #{self.id}"
 
 
 class PrescribedDrug(models.Model):
     class Meta:
         unique_together = ("prescription_id", "item_ID")
-
-    
+    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
     prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)

@@ -152,7 +152,30 @@ class AppointmentsByPatientIdAPIView(APIView):
         serializer = AppointmentSerializer(appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class PrescribedDrugByPatinetIdAPIView(APIView):
+    def get_object(self, patient_id: int):
+        try:
+            return Patient.objects.get(id=patient_id)
+        except Patient.DoesNotExist:
+            return None
 
+    @extend_schema(
+        responses=PrescribedDrugSerializer,
+    )
+    def get(self, request: Request, *args, **kwargs):
+        patient_id = self.kwargs.get('patient_id')
+        patient = self.get_object(patient_id)
+
+        if patient is None:
+            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
+
+        prescribed_drugs = PrescribedDrug.objects.filter(patient_id=patient_id)
+
+        if not prescribed_drugs.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PrescribedDrugSerializer(prescribed_drugs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class NextOfKinViewSet(viewsets.ModelViewSet):
