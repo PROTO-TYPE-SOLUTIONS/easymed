@@ -11,6 +11,7 @@ from .views import (
     EquipmentTestRequestViewSet,
     PublicLabTestRequestViewSet,
     LabTestProfileViewSet,
+    LabTestRequestByPatientIdAPIView,
 )
 
 router = DefaultRouter()
@@ -26,4 +27,5 @@ router.register(r'lab-test-profile', LabTestProfileViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('lab-test-request-by-patient-id/<int:patient_id>/', LabTestRequestByPatientIdAPIView.as_view()),
 ]

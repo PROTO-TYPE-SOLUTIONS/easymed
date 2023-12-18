@@ -15,7 +15,7 @@ const Inventory = () => {
         <button onClick={()=> setCurrentTab(0)} className={`${currentTab === 0 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
           Inventory
         </button>
-        <RequisitionModal />
+        {/* <RequisitionModal /> */}
         <button onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
           Incoming Items
         </button>
