@@ -7,7 +7,7 @@ class Invoice(models.Model):
     invoice_amount = models.DecimalField(max_digits=10, decimal_places=2)
     invoice_status = models.CharField(max_length=50)
     invoice_description = models.CharField(max_length=200)
-    invoice_file = models.FileField(upload_to='invoices/')
+    invoice_file = models.FileField(upload_to='invoices/', null=True, blank=True)
     invoice_created_at = models.DateTimeField(auto_now_add=True)
     invoice_updated_at = models.DateTimeField(auto_now=True)
 

@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_AGE = 300
 AUTH_USER_MODEL = 'customuser.CustomUser'
 
 
