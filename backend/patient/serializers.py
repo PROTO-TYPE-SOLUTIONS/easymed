@@ -66,21 +66,6 @@ class ConsultationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class AppointmentSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Appointment
-#         fields = '__all__'
-
-#     def to_representation(self, instance: Appointment):
-#         data = super().to_representation(instance)
-#         if instance.assigned_doctor:
-#             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
-
-#         if instance.patient:
-#             data["first_name"] = instance.patient.first_name
-#             data["second_name"] = instance.patient.second_name
-#         return data
-
 class ConvertToAppointmentsSerializer(serializers.Serializer):
     first_name = serializers.CharField()
     second_name = serializers.CharField()
@@ -119,7 +104,6 @@ class ConvertToAppointmentsSerializer(serializers.Serializer):
         return 201
     
 class PublicAppointmentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = PublicAppointment
         fields = [
@@ -155,6 +139,8 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 
 
 class PrescribedDrugSerializer(serializers.ModelSerializer):
+    # Include the 'name' field from the related 'Item' model
+    item_name = serializers.ReadOnlyField(source='item_id.name')
     class Meta:
         model = PrescribedDrug
         fields = '__all__'
@@ -173,6 +159,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
         required = False,
         allow_null= True,
     )
+
+    # Include the 'name' field from the related 'Item' model
+    item_name = serializers.ReadOnlyField(source='item_id.name')
     class Meta:
         model = Appointment
         fields = "__all__"
@@ -190,7 +179,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
             data["gender"] = instance.patient.gender
             data["age"] = instance.patient.age
 
-        
         return data
 
 
