@@ -1,6 +1,6 @@
 import React from 'react'
 import { Grid } from '@mui/material'
-import { adminData } from '@/assets/menu'
+import { AdminData as adminData } from '@/assets/menu'
 import { AiOutlineRight } from "react-icons/ai";
 
 
@@ -8,7 +8,7 @@ const DashboardCards = () => {
   return (
     <Grid container spacing={1} className="my-4">
         <Grid container spacing={2} className="mb-8">
-          {adminData.map((data, index) => (
+          {adminData().map((data, index) => (
             <Grid key={index} item md={4} xs={12}>
               <section
                 className={`${
