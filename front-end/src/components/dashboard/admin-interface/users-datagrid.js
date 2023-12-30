@@ -82,33 +82,6 @@ const AdminUsersDataGrid = () => {
       age: "88",
       status: "Active",
     },
-    {
-      number: "5",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "6",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "7",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
   ];
 
   const onMenuClick = async (menu, data) => {
@@ -162,7 +135,7 @@ const AdminUsersDataGrid = () => {
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl"
-        height={"70vh"}
+        // height={"70vh"}
       >
         <Pager
           visible={true}

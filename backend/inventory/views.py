@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Item, PurchaseOrder, OrderBill, Inventory, Supplier, IncomingItem, DepartmentInventory, Requisition
+from .models import Item, PurchaseOrder, Inventory, Supplier, IncomingItem, DepartmentInventory, Requisition
 from .serializers import (
     ItemSerializer,
     PurchaseOrderSerializer,
@@ -10,13 +10,11 @@ from .serializers import (
     DepartmentSerializer,
     DepartmentInventorySerializer,
     RequisitionSerializer,
-    OrderBillSerializer,
 )
 
 from .filters import (
     InventoryFilter,
     ItemFilter,
-    OrderBillFilter,
     PurchaseOrderFilter,
     SupplierFilter
 )
@@ -28,11 +26,11 @@ class ItemViewSet(viewsets.ModelViewSet):
     filterset_class = ItemFilter
 
 
-class OrderBillViewSet(viewsets.ModelViewSet):
-    queryset = OrderBill.objects.all()
-    serializer_class = OrderBillSerializer  
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = OrderBillFilter  
+# class OrderBillViewSet(viewsets.ModelViewSet):
+#     queryset = OrderBill.objects.all()
+#     serializer_class = OrderBillSerializer  
+#     filter_backends = (DjangoFilterBackend,)
+#     filterset_class = OrderBillFilter  
 
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()

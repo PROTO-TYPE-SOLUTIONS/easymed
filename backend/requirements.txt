@@ -23,3 +23,6 @@ tzdata==2023.3
 uritemplate==4.1.1
 gunicorn==21.2.0
 psycopg2-binary==2.9.9
+chardet==5.2.0
+pillow==10.1.0
+reportlab==4.0.8

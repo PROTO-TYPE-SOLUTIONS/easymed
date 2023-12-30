@@ -1,6 +1,7 @@
 # 1.0.0 make-easy-hmis
 Repository for Make-Easy HMIS
 
+Checkout the Wiki page for the technical implementation
 
 ## 1.2.0 Running with Docker
 If you're running with docker, inside ./src/assets/backend-axios-instance/index.js

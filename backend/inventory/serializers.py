@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Item, PurchaseOrder, OrderBill, Inventory, Supplier, Requisition, IncomingItem, Department, DepartmentInventory
+from .models import Item, PurchaseOrder, Inventory, Supplier, Requisition, IncomingItem, Department, DepartmentInventory
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -10,11 +10,6 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = '__all__'
-
-class OrderBillSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderBill
         fields = '__all__'
 
 class PurchaseOrderSerializer(serializers.ModelSerializer):

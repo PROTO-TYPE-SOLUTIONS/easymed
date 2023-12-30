@@ -20,49 +20,15 @@ const Admin = () => {
   return (
     <Container maxWidth="xl" className="py-6">
       <DashboardCards />
-      {/* <Grid container spacing={2}>
-        {adminData.map((data, index) => (
-          <Grid key={index} item md={4} xs={12}>
-            <section
-              className={`${
-                index === 1
-                  ? "bg-white shadow-xl"
-                  : "bg-card shadow-xl text-white "
-              } rounded h-[20vh]`}
-            >
-              <div className="p-2 h-[14vh] space-y-4">
-                <p className="text-sm">{data.label}</p>
-                <div className="flex items-center justify-between">
-                  <h1 className="font-semibold text-xl">{data.number}</h1>
-                  <div className="flex items-center">
-                    <p className="text-xs font-thin underline">
-                      {data?.waiting} {data?.status}
-                    </p>
-                    <AiOutlineRight />
-                  </div>
-                </div>
-              </div>
-              <div
-                className={`${
-                  index === 1 ? "bg-background" : "bg-cardSecondary "
-                } rounded-br rounded-bl h-[6vh] p-2 flex items-center justify-between text-xs font-thin`}
-              >
-                <p>{data.condition}</p>
-                <p>{data.condition_number}</p>
-              </div>
-            </section>
-          </Grid>
-        ))}
-      </Grid> */}
-      <section className="mt-8 flex items-center justify-between">
-        <div className="flex items-center gap-8 uppercase border-b border-primary text-primary text-center">
+      <section className="flex items-center justify-between mt-4 mb-2">
+        <div className="bg-white shadow-xl rounded-3xl py-1 px-2 flex items-center gap-4 text-primary text-center text-xs">
           <div>
             <p
               className={`${
                 currentTab === 0
-                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
-                  : "cursor-pointer font-bold"
-              } `}
+                  ? "cursor-pointer bg-primary rounded-3xl p-2 text-white text-center"
+                  : "cursor-pointer text-center"
+              }`}
               onClick={() => setCurrentTab(0)}
             >
               Users
@@ -72,9 +38,9 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 1
-                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
-                  : "cursor-pointer font-bold"
-              }`}
+                  ? "cursor-pointer bg-primary text-center rounded-3xl p-2 text-white"
+                  : "cursor-pointer text-center"
+              } `}
               onClick={() => setCurrentTab(1)}
             >
               Patients
@@ -84,9 +50,9 @@ const Admin = () => {
             <p
               className={`${
                 currentTab === 2
-                  ? "cursor-pointer border-b-2 py-1 border-primary font-bold"
-                  : "cursor-pointer font-bold"
-              }`}
+                  ? "cursor-pointer bg-primary text-center rounded-3xl p-2 text-white"
+                  : "cursor-pointer text-center"
+              } `}
               onClick={() => setCurrentTab(2)}
             >
               Doctors
@@ -95,11 +61,10 @@ const Admin = () => {
         </div>
         <div className="flex items-center gap-2">
           <AddPatientModal />
-          {/* <AdminCreateUserModal /> */}
           <AdminCreateUser />
         </div>
       </section>
-      <div className="mt-8">
+      <div className="mt-2">
         {currentTab === 0 && <AdminUsersDataGrid />}
         {currentTab === 1 && <AdminPatientsDataGrid />}
         {currentTab === 2 && <AdminDoctorsDataGrid />}
@@ -108,11 +73,13 @@ const Admin = () => {
   );
 };
 Admin.getLayout = (page) => (
-  <ProtectedRoute permission={'CAN_ACCESS_ADMIN_DASHBOARD'}>
-    <AuthGuard>
-      <CustomizedLayout>{page}</CustomizedLayout>
-    </AuthGuard>
-  </ProtectedRoute>
+  <>
+    {/* <ProtectedRoute permission={'CAN_ACCESS_ADMIN_DASHBOARD'}> */}
+    {/* <AuthGuard> */}
+    <CustomizedLayout>{page}</CustomizedLayout>
+    {/* </AuthGuard> */}
+    {/* </ProtectedRoute> */}
+  </>
 );
 
 export default Admin;
