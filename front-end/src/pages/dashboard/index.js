@@ -12,7 +12,6 @@ const Dashboard = () => {
   console.log("USER_PERMISSIONS ",userPermissions)
   return (
     <Container maxWidth="xl">
-      <DashboardCards />
       <PatientsDataGrid />
     </Container>
   );
