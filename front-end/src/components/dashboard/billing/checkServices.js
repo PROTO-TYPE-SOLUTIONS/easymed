@@ -2,58 +2,54 @@ import React, { useState } from "react";
 import Appointments from "./appointments";
 import LabRequests from "./lab-requests";
 import Drugs from "./drugs";
+import { useSelector } from "react-redux";
 
-
-const appointments = [
-  { name: "appointment one" },
-  { name: "appointment two" },
-  { name: "appointment three" },
-  { name: "appointment four" },
-];
-
-const labRequests = [
-  { name: "labrequest one" },
-  { name: "labrequest two" },
-  { name: "labrequest three" },
-  { name: "labrequest four" },
-];
-
-const drugs = [
-  { name: "prescribed drug one" },
-  { name: "prescribed drug two" },
-  { name: "prescribed drug three" },
-  { name: "prescribed drug four" },
-];
-
-const PatientCheckServices = ({ patientAppointment }) => {
-  const [selectedAppointments,setSelectedAppointments] = useState([]);
-  const [selectedDrugs,setSelectedDrugs] = useState([]);
-  const [selectedRequest,setSelectedRequest] = useState([]);
+const PatientCheckServices = () => {
+  const { patientAppointment, patientLabRequest, patientPrescribedDrug } =
+    useSelector((store) => store.billing);
 
   return (
     <section className="flex items-stretch gap-4 bg-background p-2">
       <div className="w-4/12">
-        <h1 className="text-center">Appointment</h1>
+        <h1 className="text-center text-sm">Appointment</h1>
         <section>
-          {appointments.map((item, index) => (
-            <Appointments key={index} {...{item,selectedAppointments,setSelectedAppointments}} />
-          ))}
+          {patientAppointment?.length > 0 ? (
+            patientAppointment.map((item, index) => (
+              <Appointments key={index} {...{ item }} />
+            ))
+          ) : (
+            <p className="text-xs my-8 text-center text-warning">
+              No appointments available
+            </p>
+          )}
         </section>
       </div>
       <div className="w-4/12">
-        <h1 className="text-center">Lab Test Request</h1>
+        <h1 className="text-center text-sm">Lab Test Request</h1>
         <section>
-          {labRequests.map((item, index) => (
-            <LabRequests key={index} {...{item,selectedRequest,setSelectedRequest}} />
-          ))}
+          {patientLabRequest?.length > 0 ? (
+            patientAppointment.map((item, index) => (
+              <LabRequests key={index} {...{ item }} />
+            ))
+          ) : (
+            <p className="text-xs my-8 text-center text-warning">
+              No Lab Requests available
+            </p>
+          )}
         </section>
       </div>
       <div className="w-4/12">
-        <h1 className="text-center">Prescribed Drug</h1>
+        <h1 className="text-center text-sm">Prescribed Drug</h1>
         <section>
-          {drugs.map((item, index) => (
-            <Drugs key={index} {...{item,selectedDrugs,setSelectedDrugs}} />
-          ))}
+          {patientPrescribedDrug?.length > 0 ? (
+            patientAppointment.map((item, index) => (
+              <Drugs key={index} {...{ item }} />
+            ))
+          ) : (
+            <p className="text-xs my-8 text-center text-warning">
+              No Prescribed Drugs available
+            </p>
+          )}
         </section>
       </div>
     </section>

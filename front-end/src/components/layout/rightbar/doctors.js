@@ -9,7 +9,6 @@ const Doctors = () => {
   const dispatch = useDispatch();
   const auth = useAuth();
 
-  console.log("DOCTORS ", doctors);
 
   useEffect(() => {
     if (auth) {
@@ -19,7 +18,7 @@ const Doctors = () => {
 
   return (
     <section className="space-y-1">
-      {doctors.length > 0 ? (
+      {doctors?.length > 0 ? (
         <>
           {doctors.map((doc, index) => (
             <div
@@ -32,7 +31,7 @@ const Doctors = () => {
                   src="/images/doc.jpg"
                   alt=""
                 />
-                <div className="text-xs">
+                <div className="text-xs flex items-center gap-1">
                   <p>{doc.first_name}</p>
                   <p>{doc.last_name}</p>
                 </div>
