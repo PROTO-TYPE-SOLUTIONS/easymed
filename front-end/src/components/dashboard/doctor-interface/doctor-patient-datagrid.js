@@ -66,7 +66,6 @@ const DoctorPatientDataGrid = () => {
   const { doctorAppointments } = useSelector((store) => store.appointment);
   const router = useRouter();
 
-  console.log("DOCTOR_APPO ",doctorAppointments);
   
 
   useEffect(() => {
@@ -206,19 +205,6 @@ const DoctorPatientDataGrid = () => {
 
   return (
     <section>
-      <div className="flex items-center gap-2 justify-end">
-        <div className="flex items-center gap-2">
-          {/* {selectedRecords.length > 0 && (
-            <AssignDoctorModal {...{ selectedRecords }} />
-          )} */}
-          {/* <input
-            className="shadow-xl py-3 px-2 focus:outline-none mb-2"
-            onChange={(e) => setSearchQuery(e.target.value)}
-            value={searchQuery}
-            placeholder="Search..."
-          /> */}
-        </div>
-      </div>
       <DataGrid
         dataSource={doctorAppointments}
         allowColumnReordering={true}

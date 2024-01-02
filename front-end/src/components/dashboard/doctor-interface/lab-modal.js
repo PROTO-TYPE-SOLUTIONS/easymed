@@ -27,7 +27,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
   const initialValues = {
     note: "",
     sample: true,
-    patient_ID: selectedRowData?.id,
+    patient_id: selectedRowData?.id,
     test_profile_ID: null,
     order_bill: null,
     item_id: null,

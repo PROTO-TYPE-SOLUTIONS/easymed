@@ -1,24 +1,37 @@
 import React, { useState } from "react";
+import { setSelectedAppointment } from "@/redux/features/billing";
+import { useSelector,useDispatch } from "react-redux";
 
-const Appointments = ({ item,selectedAppointments,setSelectedAppointments }) => {
-    const [selected, setSelected] = useState(false);
+const Appointments = ({ item }) => {
+  const [selected, setSelected] = useState(false);
+  const { selectedAppointments } = useSelector((store) => store.billing);
+  const dispatch = useDispatch();
 
-    const handleSelect = () => {
-        setSelected(!selected);
-        if (!selected) {
-          setSelectedAppointments([...selectedAppointments, item]);
-        } else {
-          const updatedSelection = selectedAppointments.filter(
-            (appointment) => appointment.name !== item.name
-          );
-          setSelectedAppointments(updatedSelection);
-        }
-      }
+  console.log("APPO ",selectedAppointments)
+
+  const handleSelect = () => {
+    setSelected(!selected);
+    if (!selected) {
+      dispatch(setSelectedAppointment([...selectedAppointments, item]));
+    } else {
+      const updatedSelection = selectedAppointments.filter(
+        (appointment) => appointment?.first_name !== item?.first_name
+      );
+      dispatch(setSelectedAppointment(updatedSelection));
+    }
+  };
+
 
   return (
-    <div onClick={handleSelect} className="flex gap-2 cursor-pointer bg-white shadow rounded-xl p-2 my-2">
+    <div
+      onClick={handleSelect}
+      className="flex gap-2 cursor-pointer bg-white shadow rounded-xl p-2 my-2"
+    >
       <input type="checkbox" className="rounded" checked={selected} />
-      <p className="text-xs">{item.name}</p>
+      <div className="flex items-center gap-2">
+        <p className="text-xs">{item?.first_name}</p>
+        <p className="text-xs">{item?.second_name}</p>
+      </div>
     </div>
   );
 };
