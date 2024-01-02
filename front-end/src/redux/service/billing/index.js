@@ -55,8 +55,14 @@ export const fetchPatientBillingPrescribedDrug = (patient_id) =>{
 
 export const billingInvoiceItems = (auth,appointment,lab,drugs) =>{
     const axiosInstance = UseAxios(auth);
+    const requestData = {
+        auth,
+        appointment,
+        lab,
+        drugs
+      };
     return new Promise((resolve,reject) =>{
-        axiosInstance.post(`${APP_API_URL.BILLING_INVOICE_ITEMS}`,auth,appointment,lab,drugs)
+        axiosInstance.post(`${APP_API_URL.BILLING_INVOICE_ITEMS}`,requestData)
             .then((res) =>{
                 resolve(res.data)
             })
