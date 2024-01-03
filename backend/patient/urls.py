@@ -17,7 +17,8 @@ from .views import (
     ConvertToAppointmentAPIView,
     SendAppointmentConfirmationAPIView,
     AppointmentsByPatientIdAPIView,
-    PrescribedDrugByPatinetIdAPIView
+    PrescribedDrugByPatinetIdAPIView,
+    PrescribedDrugByPrescriptionViewSet
 )
 
 router = DefaultRouter()
@@ -35,6 +36,7 @@ router.register(r'referrals', ReferralViewSet)
 router.register(r'triage', TriageViewSet)
 router.register(r'appointments', AppointmentViewSet)
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
+# router.register(r'prescribed_drugs_by_prescription', PrescribedDrugByPrescriptionViewSet)
 
 
 
@@ -47,5 +49,7 @@ urlpatterns = [
 
     path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
     path('send-appointment-confirmation/', SendAppointmentConfirmationAPIView.as_view(), name="send-appointment-confirmation"),
+    
+    path('prescribed-drugs/by-prescription/<int:prescription_id>/', PrescribedDrugByPrescriptionViewSet.as_view({'get': 'list'}), name='prescribed_drugs_by_prescription'),
 
 ]

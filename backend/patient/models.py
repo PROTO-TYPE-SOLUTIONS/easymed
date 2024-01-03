@@ -33,11 +33,10 @@ class Patient(models.Model):
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField(null=True)
     email = models.EmailField(null=True)
-    phone_number = models.CharField(max_length=15, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     insurance = models.ForeignKey(
         InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
-    user_id = models.OneToOneField(
+    user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
@@ -52,7 +51,7 @@ class Patient(models.Model):
 
 
 class NextOfKin(models.Model):
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=40)
     second_name = models.CharField(max_length=40)
     relationship = models.CharField(max_length=40)   
@@ -84,7 +83,7 @@ class Appointment(models.Model):
     reason = models.TextField(max_length=300, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
-    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, default=22)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, default=22)
     fee = models.CharField(max_length=40, default="0")
 
     # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
@@ -134,7 +133,7 @@ class PublicAppointment(models.Model):
 
 class Triage(models.Model):
     created_by = models.CharField(max_length=45)
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     temperature = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
@@ -151,8 +150,8 @@ class Consultation(models.Model):
         ('discharged', 'Discharged'),
         ('lab', 'Lab'),
     )
-    doctor_ID = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     complaint = models.TextField(null=True, blank=True)
@@ -181,17 +180,17 @@ class Prescription(models.Model):
 
 class PrescribedDrug(models.Model):
     class Meta:
-        unique_together = ("prescription_id", "item_ID")
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    prescription_id = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
+        unique_together = ("prescription_id", "item")
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     note = models.TextField(null=True, blank=True)
-    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True, null=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE,)
 
     def __str__(self):
-        return f"Prescribed Drug #{self.item_ID}"    
+        return f"Prescribed Drug #{self.item.name}"    
         
 
 class Referral(models.Model):
@@ -205,7 +204,7 @@ class Referral(models.Model):
         ('surgeon', 'Surgeon'),
         ('physiotherapist', 'Physiotherapist'),
     )
-    patient_id = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     referred_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

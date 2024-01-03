@@ -12,10 +12,10 @@ class Invoice(models.Model):
     invoice_updated_at = models.DateTimeField(auto_now=True)
 
 class InvoiceItem(models.Model):
-    invoice_id = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     item_name = models.CharField(max_length=100)
     #service_type = models.CharField(max_length=50)  'Appointment', 'Lab Test', 'Prescription'
-    service_id = models.ForeignKey(Item, on_delete=models.CASCADE)
+    service = models.ForeignKey(Item, on_delete=models.CASCADE)
     # item_quantity = models.IntegerField()
     item_price = models.DecimalField(max_digits=10, decimal_places=2)
     item_created_at = models.DateTimeField(auto_now_add=True)
