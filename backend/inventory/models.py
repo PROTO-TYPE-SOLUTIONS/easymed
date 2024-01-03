@@ -58,7 +58,7 @@ class DepartmentInventory(models.Model):
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     
     def __str__(self):
-        return str(self.item_ID)
+        return str(self.item)
 
 class Inventory(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -69,7 +69,7 @@ class Inventory(models.Model):
     subpacked = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.item_ID
+        return self.item
 
 class Requisition(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)

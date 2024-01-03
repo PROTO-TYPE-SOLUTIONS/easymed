@@ -33,7 +33,6 @@ class Patient(models.Model):
     second_name = models.CharField(max_length=40)
     date_of_birth = models.DateField(null=True)
     email = models.EmailField(null=True)
-    phone_number = models.CharField(max_length=15, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     insurance = models.ForeignKey(
         InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
@@ -191,7 +190,7 @@ class PrescribedDrug(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE,)
 
     def __str__(self):
-        return f"Prescribed Drug #{self.item_ID}"    
+        return f"Prescribed Drug #{self.item.name}"    
         
 
 class Referral(models.Model):

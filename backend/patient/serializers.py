@@ -140,7 +140,7 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 
 class PrescribedDrugSerializer(serializers.ModelSerializer):
     # Include the 'name' field from the related 'Item' model
-    item_name = serializers.ReadOnlyField(source='item_id.name')
+    item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = PrescribedDrug
         fields = '__all__'
@@ -161,7 +161,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     )
 
     # Include the 'name' field from the related 'Item' model
-    item_name = serializers.ReadOnlyField(source='item_id.name')
+    item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = Appointment
         fields = "__all__"
