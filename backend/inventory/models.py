@@ -43,16 +43,16 @@ class Item(models.Model):
 
 # will create signal to update Inventory table when this object is created
 class IncomingItem(models.Model):
-    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
 
 
 class DepartmentInventory(models.Model):
-    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
@@ -61,7 +61,7 @@ class DepartmentInventory(models.Model):
         return str(self.item_ID)
 
 class Inventory(models.Model):
-    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity_in_stock = models.IntegerField()
@@ -72,14 +72,14 @@ class Inventory(models.Model):
         return self.item_ID
 
 class Requisition(models.Model):
-    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     # requested_by = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
     requested_date = models.DateField()
-    supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
 
 class PurchaseOrder(models.Model):
-    supplier_ID = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     order_date = models.DateField()
-    item_ID = models.ForeignKey('Item', on_delete=models.CASCADE)
+    item = models.ForeignKey('Item', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     
