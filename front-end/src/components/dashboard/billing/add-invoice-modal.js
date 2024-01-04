@@ -86,7 +86,6 @@ const AddInvoiceModal = () => {
           service: appointment?.id,
         };
         await billingInvoiceItems(auth, appointmentPayload);
-        toast.success("Appointment Invoice generated successfully!");
         setLoading(false);
       }
 
