@@ -2,15 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
-import { addInventory } from "@/redux/service/inventory";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import { getAllSearchedPatients } from "@/redux/features/patients";
-import { getAllPatientBillingAppointments, getAllPatientBillingLabRequest, getAllPatientBillingPrescribedDrug } from "@/redux/features/billing";
-import { useAuth } from "@/assets/hooks/use-auth";
+import {
+  getAllPatientBillingAppointments,
+  getAllPatientBillingLabRequest,
+  getAllPatientBillingPrescribedDrug,
+} from "@/redux/features/billing";
 import PatientCheckServices from "./checkServices";
+import { billingInvoiceItems } from "@/redux/service/billing";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const AddInvoiceModal = () => {
   const [loading, setLoading] = useState(false);
@@ -18,13 +22,16 @@ const AddInvoiceModal = () => {
   const [open, setOpen] = React.useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const { searchedPatients } = useSelector((store) => store.patient);
-  const { patientAppointment,patientLabRequest,patientPrescribedDrug } = useSelector((store) => store.billing);
+  const {
+    patientAppointment,
+    patientLabRequest,
+    patientPrescribedDrug,
+    selectedAppointments,
+    selectedLabRequests,
+    selectedPrescribedDrugs,
+  } = useSelector((store) => store.billing);
   const [inputValue, setInputValue] = useState("");
   const auth = useAuth();
-
-  console.log("PATIENT_APPOINTMENT ",patientAppointment)
-  console.log("LAB_REQUEST ",patientLabRequest)
-  console.log("PRESCRIBED_DRUG ",patientPrescribedDrug)
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -49,14 +56,18 @@ const AddInvoiceModal = () => {
     try {
       setLoading(true);
 
-      if (value.trim() === "" || value.length < 3) {
+      if (value.trim() === "" || value.length < 4) {
         // Clear the searchedPatients array or take appropriate action for short input
         // Example: dispatch(clearSearchedPatients());
       } else {
         await dispatch(getAllSearchedPatients(inputValue));
-        await dispatch(getAllPatientBillingAppointments(searchedPatients[0]?.id));
-        await dispatch(getAllPatientBillingLabRequest(auth,searchedPatients[0]?.id));
-        await dispatch(getAllPatientBillingPrescribedDrug(auth,searchedPatients[0]?.id));
+        await dispatch(
+          getAllPatientBillingAppointments(searchedPatients[0]?.id)
+        );
+        await dispatch(getAllPatientBillingLabRequest(searchedPatients[0]?.id));
+        await dispatch(
+          getAllPatientBillingPrescribedDrug(searchedPatients[0]?.id)
+        );
       }
 
       setLoading(false);
@@ -66,6 +77,84 @@ const AddInvoiceModal = () => {
     }
   };
 
+  // const handleGenerateInvoice = () => {
+  //   const appointmentPayload = {};
+  //   selectedAppointments.forEach((appointment, index) => {
+  //     appointmentPayload[`appointment_${index + 1}`] = {
+  //       item_name: `item one`, // Adjust as per your naming convention
+  //       item_price: "3000", // Add item price if available
+  //       invoice_id: 1, // Replace with actual invoice ID
+  //       service_id: 1, // Replace with actual service ID
+  //     };
+  //   });
+
+  //   const labRequestPayload = {};
+  //   selectedLabRequests.forEach((labRequest, index) => {
+  //     labRequestPayload[`lab_request_${index + 1}`] = {
+  //       item_name: "item one", // Adjust as per lab request payload structure
+  //       item_price: "200", // Add item price if available
+  //       invoice_id: 1, // Replace with actual invoice ID
+  //       service_id: 1, // Replace with actual service ID
+  //     };
+  //   });
+
+  //   const prescribedDrugsPayload = {};
+  //   selectedPrescribedDrugs.forEach((prescribedDrug, index) => {
+  //     prescribedDrugsPayload[`prescribed_drug_${index + 1}`] = {
+  //       item_name: "item one", // Adjust as per prescribed drugs payload structure
+  //       item_price: "300", // Add item price if available
+  //       invoice_id: 1, // Replace with actual invoice ID
+  //       service_id: 1, // Replace with actual service ID
+  //     };
+  //   });
+
+  //   const combinedPayload = {
+  //     appointment: appointmentPayload,
+  //     lab: labRequestPayload,
+  //     drugs: prescribedDrugsPayload,
+  //   };
+
+  //   console.log("Generated Combined Payload: ", combinedPayload);
+
+  //   billingInvoiceItems(auth, combinedPayload);
+  // };
+
+  const handleGenerateInvoice = () => {
+    const appointmentPayload = selectedAppointments.map((appointment, index) => ({
+      item_name: `item one`, // Adjust as per your naming convention
+      item_price: "3000", // Add item price if available
+      invoice_id: 1, // Replace with actual invoice ID
+      service_id: 1, // Replace with actual service ID
+      ...appointment, // Add other appointment details as needed
+    }));
+  
+    const labRequestPayload = selectedLabRequests.map((labRequest, index) => ({
+      item_name: "item one", // Adjust as per lab request payload structure
+      item_price: "200", // Add item price if available
+      invoice_id: 1, // Replace with actual invoice ID
+      service_id: 1, // Replace with actual service ID
+      ...labRequest, // Add other lab request details as needed
+    }));
+  
+    const prescribedDrugsPayload = selectedPrescribedDrugs.map((prescribedDrug, index) => ({
+      item_name: "item one", // Adjust as per prescribed drugs payload structure
+      item_price: "300", // Add item price if available
+      invoice_id: 1, // Replace with actual invoice ID
+      service_id: 1, // Replace with actual service ID
+      ...prescribedDrug, // Add other prescribed drug details as needed
+    }));
+  
+    const combinedPayload = {
+      auth,
+      appointment: appointmentPayload,
+      lab: labRequestPayload,
+      drugs: prescribedDrugsPayload,
+    };
+  
+    console.log("Generated Combined Payload: ", combinedPayload);
+  
+    billingInvoiceItems(auth, combinedPayload);
+  };
   
   return (
     <section>
@@ -95,8 +184,8 @@ const AddInvoiceModal = () => {
                     <Grid item md={12} xs={12}>
                       <input
                         className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                        maxWidth="sm"
                         placeholder="Search Patient"
+                        // type="search"
                         name="first_name"
                         onChange={handleInputChange}
                         value={inputValue}
@@ -116,8 +205,12 @@ const AddInvoiceModal = () => {
                             )
                             .map((patient, index) => (
                               <span
-                              onClick={() => setInputValue(`${patient.first_name} ${patient.second_name}`)}
-                               className="text-sm px-4 cursor-pointer hover:bg-background rounded p-1"
+                                onClick={() =>
+                                  setInputValue(
+                                    `${patient.first_name} ${patient.second_name}`
+                                  )
+                                }
+                                className="text-xs px-4 cursor-pointer hover:bg-background rounded p-1 flex flex-col"
                                 key={index}
                               >{`${patient.first_name} ${patient.second_name}`}</span>
                             ))}
@@ -130,7 +223,7 @@ const AddInvoiceModal = () => {
           )}
           {currentStep === 1 && (
             <section className="">
-              <PatientCheckServices {...{patientAppointment}} />
+              <PatientCheckServices {...{ patientAppointment }} />
             </section>
           )}
           <div className="flex items-center justify-end gap-2 mt-2">
@@ -149,7 +242,7 @@ const AddInvoiceModal = () => {
               </button>
             ) : (
               <button
-                onClick={() => setCurrentStep(currentStep + 1)}
+                onClick={handleGenerateInvoice}
                 className="bg-primary text-white rounded-xl px-4 py-2 text-sm"
               >
                 Generate Invoice

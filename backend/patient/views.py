@@ -169,6 +169,20 @@ class PrescribedDrugByPatinetIdAPIView(APIView):
 
 
 
+'''
+Get prescribed drugs by prescription ID
+'''
+class PrescribedDrugByPrescriptionViewSet(viewsets.ModelViewSet):
+    queryset = PrescribedDrug.objects.all()
+    serializer_class = PrescribedDrugSerializer
+
+    # Override the queryset to filter by prescription_id
+    def get_queryset(self):
+        prescription_id = self.kwargs.get('prescription_id')
+        print(f"Prescription ID: {prescription_id}")
+        return PrescribedDrug.objects.filter(prescription__id=prescription_id)
+
+
 class NextOfKinViewSet(viewsets.ModelViewSet):
     queryset = NextOfKin.objects.all()
     serializer_class = NextOfKinSerializer
@@ -216,18 +230,6 @@ class TriageViewSet(viewsets.ModelViewSet):
     serializer_class = TriageSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TriageFilter
-
-
-# # TODO
-# # get appointments for a specific doctor
-# class DoctorAppointmentViewSet(viewsets.ViewSet):
-#     serializer_class = AppointmentSerializer
-
-#     def list(self, request, doctor_id):
-#         # Retrieve appointments for a specific doctor
-#         appointments = Appointment.objects.filter(assigned_doctor_id=doctor_id)
-#         serializer = AppointmentSerializer(appointments, many=True)
-#         return Response(serializer.data)
 
 
 class SendAppointmentConfirmationAPIView(APIView):
