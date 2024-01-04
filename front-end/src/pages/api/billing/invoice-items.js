@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
             const body = req.query
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_PATIENT_BILLING_PRESCRIBED_DRUG}/${body.patient_id}/`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_PATIENT_BILLING_APPOINTMENTS}/?patient__id=${body.patient__id}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -36,17 +36,20 @@ export default async function handler(req, res) {
     }
     else if (req.method === API_METHODS.POST) {
         try {
-            // if (!req.headers?.authorization){
-            //     res.status(401).send('Unauthorized');
-            // }
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
+            
             const body = req.body;
 
-            await backendAxiosInstance.put(`${API_URL.ASSIGN_DOCTOR}/${body.patient}/`,body, config)
+            console.log("INVOICE_ITEMS_BODY ",body);
+            
+            await backendAxiosInstance.post(`${API_URL.BILLING_INVOICE_ITEMS}`,body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

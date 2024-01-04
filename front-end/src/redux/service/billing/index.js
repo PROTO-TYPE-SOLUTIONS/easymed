@@ -3,11 +3,11 @@ import { APP_API_URL } from "@/assets/api-endpoints";
 import UseAxios from "@/assets/hooks/use-axios";
 
 
-export const fetchPatientBillingAppointments = (id) =>{
+export const fetchPatientBillingAppointments = (patient__id) =>{
     return new Promise((resolve,reject) =>{
         axios.get(`${APP_API_URL.FETCH_PATIENT_BILLING_APPOINTMENTS}`,{
             params:{
-                id: id,
+                patient__id: patient__id,
             }
         })
             .then((res) =>{
@@ -19,12 +19,12 @@ export const fetchPatientBillingAppointments = (id) =>{
     })
 }
 
-export const fetchPatientBillingLabRequest = (auth,id) =>{
-    const axiosInstance = UseAxios(auth);
+export const fetchPatientBillingLabRequest = (patient_id) =>{
+    // const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.get(`${APP_API_URL.FETCH_PATIENT_BILLING_LAB_REQUEST}`,{
+        axios.get(`${APP_API_URL.FETCH_PATIENT_BILLING_LAB_REQUEST}`,{
             params:{
-                id: id,
+                patient_id: patient_id,
             }
         })
             .then((res) =>{
@@ -36,14 +36,33 @@ export const fetchPatientBillingLabRequest = (auth,id) =>{
     })
 }
 
-export const fetchPatientBillingPrescribedDrug = (auth,id) =>{
-    const axiosInstance = UseAxios(auth);
+export const fetchPatientBillingPrescribedDrug = (patient_id) =>{
+    // const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.get(`${APP_API_URL.FETCH_PATIENT_BILLING_PRESCRIBED_DRUG}`,{
+        axios.get(`${APP_API_URL.FETCH_PATIENT_BILLING_PRESCRIBED_DRUG}`,{
             params:{
-                id: id,
+                patient_id: patient_id,
             }
         })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const billingInvoiceItems = (auth,appointment,lab,drugs) =>{
+    const axiosInstance = UseAxios(auth);
+    const requestData = {
+        auth,
+        appointment,
+        lab,
+        drugs
+      };
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.BILLING_INVOICE_ITEMS}`,requestData)
             .then((res) =>{
                 resolve(res.data)
             })

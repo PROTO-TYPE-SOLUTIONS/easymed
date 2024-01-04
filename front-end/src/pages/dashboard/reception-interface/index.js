@@ -2,7 +2,6 @@ import React from "react";
 import CustomizedLayout from "@/components/layout/customized-layout";
 import { Container } from "@mui/material";
 import PatientAppointmentDataGrid from "@/components/dashboard/reception-interface/patient-appointment-datagrid";
-import DashboardCards from "@/components/dashboard/dashboard-cards";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import { getAllPatientAppointments } from "@/redux/features/appointment";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,7 +19,6 @@ const ReceptionInterface = () => {
 
   return (
     <Container maxWidth="xl" className="mt-8">
-      <DashboardCards />
       <PatientAppointmentDataGrid {...{ patientAppointments }} />
     </Container>
   );

@@ -12,7 +12,7 @@ const Sidebar = () => {
   return (
     <>
       <section className="">
-        <header className="h-[10vh] shadow flex items-center justify-center font-bold">
+        <header className="h-[15vh] shadow flex items-center justify-center font-bold">
           <h1>Logo</h1>
         </header>
         <section className="pl-2 h-[84vh] flex flex-col justify-between">

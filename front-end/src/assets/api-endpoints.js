@@ -17,7 +17,7 @@ export const API_URL = {
   BOOK_APPOINTMENT: "/patients/publicappointments/",
   CREATE_APPOINTMENT: "/patients/appointments/",
   FETCH_APPOINTMENTS: "/patients/publicappointments/",
-  FETCH_PATIENT_APPOINTMENTS: "/patients/appointments/",
+  FETCH_PATIENT_APPOINTMENTS: "/patients/appointments",
   FETCH_DOCTOR_APPOINTMENTS: "/patients/appointments/",
   FETCH_SERVICES: "/patients/services/",
   FETCH_INSURANCE: "/patients/insurance-companies/",
@@ -57,8 +57,9 @@ export const API_URL = {
 
   /***************** BILLING APIS **********************/
   FETCH_PATIENT_BILLING_APPOINTMENTS: "/patients/appointments",
-  FETCH_PATIENT_BILLING_LAB_REQUEST: "/lab/lab-test-requests",
-  FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/patients/prescribed-drugs",
+  FETCH_PATIENT_BILLING_LAB_REQUEST: "/lab/lab-test-request-by-patient-id",
+  FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/patients/prescribed-drugs/by_patient_id",
+  BILLING_INVOICE_ITEMS: "/billing/invoice-items/",
 
 };
 
@@ -123,6 +124,7 @@ export const APP_API_URL = {
   FETCH_PATIENT_BILLING_APPOINTMENTS: "/api/billing/patient-appointments",
   FETCH_PATIENT_BILLING_LAB_REQUEST: "/api/billing/patient-lab-request",
   FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/api/billing/prescribed-drug",
+  BILLING_INVOICE_ITEMS: "/api/billing/invoice-items",
 };
 
 export const API_METHODS = {
