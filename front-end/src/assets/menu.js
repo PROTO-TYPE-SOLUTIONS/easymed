@@ -249,3 +249,22 @@ export const inventoryData = [
     icon: <FaProductHunt className="" />,
   },
 ];
+
+export const pharmacyDisplayStats = [
+  {
+    label: "Drugs Feedback",
+    icon: "/images/svgs/message.svg",
+    figures: 13
+  },
+  {
+    label: "Close Expiring",
+    icon: "/images/svgs/expire.svg",
+    figures: 13
+  },
+  {
+    label: "Out of stock",
+    icon: "/images/svgs/outstock.svg",
+    figures: 13
+  },
+]
+
