@@ -4,8 +4,8 @@ import { Container } from '@mui/material';
 import BilledDataGrid from './billed-datagrid';
 import AddInvoiceModal from '@/components/dashboard/billing/add-invoice-modal';
 import OverdueInvoices from '@/components/dashboard/billing/overdue-invoices';
-import InvoiceItems from '@/components/dashboard/billing/InvoiceItems';
 import BillingReports from '@/components/dashboard/billing/billing-reports';
+import InvoiceItems from '@/components/dashboard/billing/invoice-items';
 
 
 const Billing = () => {
