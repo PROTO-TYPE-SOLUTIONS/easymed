@@ -1,10 +1,11 @@
 import React from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
-import Link from "next/link";
-import AddInventoryModal from "./add-inventory";
+import { Column, Pager } from "devextreme-react/data-grid";
+import { Link } from 'react-router-dom'
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
+import { inventoryDisplayStats } from "@/assets/menu";
+import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -12,6 +13,8 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const InventoryDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+
+  const inventorySummaryInfo = inventoryDisplayStats.map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
 
   const users = [
     {
@@ -54,43 +57,48 @@ const InventoryDataGrid = () => {
 
   return (
     <section className=" my-8">
-      <Grid container spacing={2} className="my-2">
-        <Grid item md={4} xs={12}>
+      <h3 className="text-xl mb-2"> Sales Summary </h3>
+      <Grid container spacing={2}>
+        {inventorySummaryInfo}      
+      </Grid>
+      <h3 className="text-xl mt-8"> Inventory </h3>
+      <Grid className="my-2 flex justify-between">
+        <Grid className="flex justify-between gap-8 rounded-lg">
+          <Grid item md={4} xs={4}>
+            <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
+              <option value="" selected>                
+              </option>
+              {months.map((month, index) => (
+                <option key={index} value="">
+                  {month.name}
+                </option>
+              ))}
+            </select>
+          </Grid>
+          <Grid>
+          <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
+              <option value="" selected>
+                All the Items
+              </option>
+            </select>
+          </Grid>        
+        </Grid>
+        <Grid className="flex items-center rounded-lg" item md={4} xs={4}>
+          <img className="h-4 w-4" src='/images/svgs/search.svg'/>
           <input
-            className="py-2 w-full px-4 focus:outline-none placeholder-font font-thin text-sm"
+            className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
-            placeholder="Search patients by name"
+            placeholder="Search referrals by facility"
           />
         </Grid>
-        <Grid item md={4} xs={12}>
-          <select className="px-4 w-full py-2 focus:outline-none" name="" id="">
-            <option value="" selected>
-              Search by Month
-            </option>
-            {months.map((month, index) => (
-              <option key={index} value="">
-                {month.name}
-              </option>
-            ))}
-          </select>
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <div className="flex">
-            <button className="bg-white shadow border-primary py-2 px-4 w-full">
-              Date
-            </button>
-            <button className="bg-white shadow border-primary py-2 px-4 w-full">
-              Week
-            </button>
-            <button className="bg-white shadow border-primary py-2 px-4 w-full">
-              Month
-            </button>
-          </div>
+        <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
+          <Link className="mx-4" to='/dashboard/inventory/add-inventory'>
+            Add Inventory
+          </Link>
         </Grid>
       </Grid>
-      <AddInventoryModal />
       <DataGrid
         dataSource={users}
         allowColumnReordering={true}
