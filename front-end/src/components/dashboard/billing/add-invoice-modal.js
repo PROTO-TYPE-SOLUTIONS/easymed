@@ -246,7 +246,7 @@ const AddInvoiceModal = () => {
                     ></path>
                   </svg>
                 )}
-                Generate Invoice
+                Submit
               </button>
             )}
           </div>

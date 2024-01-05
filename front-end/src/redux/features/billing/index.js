@@ -1,12 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  fetchServices,
-  fetchPatient,
-  fetchPatientProfile,
-  fetchPatientTriage,
-  searchPatients,
-} from "@/redux/service/patients";
-import {
+  fetchInvoices,
   fetchPatientBillingAppointments,
   fetchPatientBillingLabRequest,
   fetchPatientBillingPrescribedDrug,
@@ -19,6 +13,7 @@ const initialState = {
   selectedAppointments: [],
   selectedLabRequests: [],
   selectedPrescribedDrugs: [],
+  invoices: [],
 };
 
 const BillingSlice = createSlice({
@@ -43,6 +38,9 @@ const BillingSlice = createSlice({
     setSelectedLabRequest: (state, action) => {
       state.selectedLabRequests = action.payload;
     },
+    setInvoices: (state, action) => {
+      state.invoices = action.payload;
+    },
   },
 });
 
@@ -52,7 +50,8 @@ export const {
   setPatientPrescrribedDrug,
   setSelectedAppointment,
   setSelectedLabRequest,
-  setSelectedPrescribedDrug
+  setSelectedPrescribedDrug,
+  setInvoices,
 } = BillingSlice.actions;
 
 export const getAllPatientBillingAppointments =
@@ -84,5 +83,14 @@ export const getAllPatientBillingPrescribedDrug =
       console.log("BILLING_ERROR ", error);
     }
   };
+
+export const getAllInvoices = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchInvoices(auth);
+    dispatch(setInvoices(response));
+  } catch (error) {
+    console.log("BILLINGI_ERROR ", error);
+  }
+};
 
 export default BillingSlice.reducer;

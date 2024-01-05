@@ -1,44 +1,60 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { billingInvoices } from "@/redux/service/billing";
+import { getAllInvoices } from "@/redux/features/billing";
+import { useDispatch, useSelector } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
+import { toast } from "react-toastify";
 
 const BillingInvoices = () => {
   const [loading,setLoading] = useState(false);
+  const { invoices } = useSelector((store) => store.billing);
+  const dispatch = useDispatch();
+  const auth = useAuth();
+
+  console.log("FETCH_INVOICES ",invoices);
 
   const initialValues = {
-    invoice_number: "",
     status: "pending",
     invoice_description: "",
   };
 
   const validationSchema = Yup.object().shape({
-    invoice_description: Yup.string().required("Amount is required!"),
+    invoice_description: Yup.string().required("Invoice Description is required!"),
   });
 
-  const handleRegister = async (formValue, helpers) => {
+
+  const handleSubmit = async (formValue, helpers) => {
     try {
       const formData = {
-        invoice_number: "",
-        invoice_amount: "",
-        invoice_date: "",
+        invoice_number: invoices[0]?.id + 1,
+        invoice_amount: invoices[0]?.invoice_amount,
+        invoice_date: invoices[0]?.invoice_date,
         ...formValue,
       };
       setLoading(true);
-      await billingInvoices(formData).then(() => {
+      await billingInvoices(auth,formData).then(() => {
         helpers.resetForm();
+        toast.success('Operation completed successfully')
         setLoading(false);
       });
     } catch (err) {
+      setLoading(false);
       console.log("BILLING_INVOICES ", err);
     }
   };
+
+  useEffect(() => {
+    dispatch(getAllInvoices(auth));
+  },[]);
+
   return (
     <>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleRegister}
+        onSubmit={handleSubmit}
       >
         <Form className="w-full">
           <section className="flex flex-col items-center justify-center space-y-4">
@@ -47,11 +63,11 @@ const BillingInvoices = () => {
                as="textarea"
                 className="block border border-gray py-2 text-sm rounded-xl px-4 focus:outline-none w-full"
                 type="text"
-                placeholder="First Name"
-                name="first_name"
+                placeholder="Invoice Description"
+                name="invoice_description"
               />
               <ErrorMessage
-                name="first_name"
+                name="invoice_description"
                 component="div"
                 className="text-warning text-xs"
               />
