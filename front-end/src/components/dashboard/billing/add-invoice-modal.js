@@ -91,9 +91,9 @@ const AddInvoiceModal = () => {
 
       for (const [index, labRequest] of selectedLabRequests.entries()) {
         const labRequestPayload = {
-          item_name: labRequest?.item_name,
-          item_price: labRequest?.fee,
-          invoice_id: 1,
+          item_name: "test name",
+          item_price: "200",
+          invoice: 1,
           service: labRequest?.id,
         };
         await billingInvoiceItems(auth, labRequestPayload);
@@ -102,9 +102,9 @@ const AddInvoiceModal = () => {
       for (const [index, prescribedDrug] of selectedPrescribedDrugs.entries()) {
         const prescribedDrugsPayload = {
           item_name: prescribedDrug?.item_name,
-          item_price: prescribedDrug?.fee,
-          invoice_id: 1,
-          service_id: prescribedDrug?.id,
+          item_price: "200",
+          invoice: 1,
+          service: prescribedDrug?.id,
         };
         await billingInvoiceItems(auth, prescribedDrugsPayload);
       }
