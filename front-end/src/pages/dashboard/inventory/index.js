@@ -8,6 +8,8 @@ import IncomingItems from "@/components/dashboard/inventory/incoming-items";
 import Reports from "@/components/dashboard/inventory/reports";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AddInventory from "@/components/dashboard/inventory/AddInventory";
+import PurchaseOrdersDatagrid from "@/components/dashboard/inventory/PurchaseOrdersDatagrid";
+import AddProductPurchase from "@/components/dashboard/inventory/AddProductPurchase";
 
 const Inventory = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -21,7 +23,7 @@ const Inventory = () => {
           <Link to='/dashboard/inventory' onClick={()=> setCurrentTab(0)} className={`${currentTab === 0 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             Inventory
           </Link>
-          <Link to='/dashboard/inventory' onClick={()=> setCurrentTab(1)} className={`${currentTab === 1 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          <Link to='/dashboard/inventory/purchase-orders' onClick={()=> setCurrentTab(1)} className={`${currentTab === 1 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             Purchase Order
           </Link>
           <Link to='/dashboard/inventory' onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
@@ -38,7 +40,10 @@ const Inventory = () => {
 
         <Routes>
           <Route path="/dashboard/inventory" exact element={<InventoryDataGrid />} />
+          <Route path="/dashboard/inventory/purchase-orders" exact element={<PurchaseOrdersDatagrid />} />
+
           <Route path="/dashboard/inventory/add-inventory" exact element={<AddInventory />} />
+          <Route path="/dashboard/inventory/add-purchase" exact element={<AddProductPurchase />} />
           <Route path="/dashboard/inventory/incoming-items" exact element={<IncomingItems />} />
           <Route path="/dashboard/inventory/report" exact element={<Reports />} />
 
