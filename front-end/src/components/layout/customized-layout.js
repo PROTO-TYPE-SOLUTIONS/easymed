@@ -15,9 +15,6 @@ const CustomizedLayout = ({ children }) => {
         <CustomizedHeader />
         <div>{children}</div>
       </div>
-      <div className="w-72 md:block hidden">
-        <RightBar />
-      </div>
     </div>
   );
 };
