@@ -268,3 +268,21 @@ export const pharmacyDisplayStats = [
   },
 ]
 
+export const inventoryDisplayStats = [
+  {
+    label: "Today's Sales",
+    icon: "/images/svgs/sales.svg",
+    figures: 320
+  },
+  {
+    label: "Purchases",
+    icon: "/images/svgs/purchases.svg",
+    figures: 28
+  },
+  {
+    label: "Slow Moving",
+    icon: "/images/svgs/slow-moving.svg",
+    figures: 3222
+  },
+]
+
