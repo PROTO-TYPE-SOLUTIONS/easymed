@@ -127,6 +127,62 @@ class PatientByUserIdAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class AppointmentsByPatientIdAPIView(APIView):
+    def get_object(self, patient_id: int):
+        try:
+            return Patient.objects.get(id=patient_id)
+        except Patient.DoesNotExist:
+            return None
+    @extend_schema(
+        responses=AppointmentSerializer,
+    )
+    def get(self, request: Request, *args, **kwargs):
+        patient_id = self.kwargs.get('patient_id')
+        patient = self.get_object(patient_id)
+        if patient is None:
+            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
+        appointments = Appointment.objects.filter(patient=patient)
+        if not appointments.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = AppointmentSerializer(appointments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PrescribedDrugByPatinetIdAPIView(APIView):
+    def get_object(self, patient_id: int):
+        try:
+            return Patient.objects.get(id=patient_id)
+        except Patient.DoesNotExist:
+            return None
+    @extend_schema(
+        responses=PrescribedDrugSerializer,
+    )
+    def get(self, request: Request, *args, **kwargs):
+        patient_id = self.kwargs.get('patient_id')
+        patient = self.get_object(patient_id)
+        if patient is None:
+            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
+        prescribed_drugs = PrescribedDrug.objects.filter(patient_id=patient_id)
+        if not prescribed_drugs.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = PrescribedDrugSerializer(prescribed_drugs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+'''
+Get prescribed drugs by prescription ID
+'''
+class PrescribedDrugByPrescriptionViewSet(viewsets.ModelViewSet):
+    queryset = PrescribedDrug.objects.all()
+    serializer_class = PrescribedDrugSerializer
+
+    # Override the queryset to filter by prescription_id
+    def get_queryset(self):
+        prescription_id = self.kwargs.get('prescription_id')
+        print(f"Prescription ID: {prescription_id}")
+        return PrescribedDrug.objects.filter(prescription__id=prescription_id)
+
+
 class NextOfKinViewSet(viewsets.ModelViewSet):
     queryset = NextOfKin.objects.all()
     serializer_class = NextOfKinSerializer
@@ -139,6 +195,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     filterset_class = AppointmentFilter
 
 
+        
 class ConsultationViewSet(viewsets.ModelViewSet):
     queryset = Consultation.objects.all()
     serializer_class = ConsultationSerializer
@@ -173,18 +230,6 @@ class TriageViewSet(viewsets.ModelViewSet):
     serializer_class = TriageSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TriageFilter
-
-
-# TODO
-# get appointments for a specific doctor
-class DoctorAppointmentViewSet(viewsets.ViewSet):
-    serializer_class = AppointmentSerializer
-
-    def list(self, request, doctor_id):
-        # Retrieve appointments for a specific doctor
-        appointments = Appointment.objects.filter(assigned_doctor_id=doctor_id)
-        serializer = AppointmentSerializer(appointments, many=True)
-        return Response(serializer.data)
 
 
 class SendAppointmentConfirmationAPIView(APIView):

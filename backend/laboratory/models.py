@@ -2,7 +2,7 @@ from django.db import models
 from patient.models import Patient
 from django.conf import settings
 from customuser.models import CustomUser
-from inventory.models import Item, OrderBill
+from inventory.models import Item
 from datetime import datetime
 from django.core.validators import FileExtensionValidator
 
@@ -39,29 +39,27 @@ class LabReagent(models.Model):
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
     cost = models.CharField(max_length=255)
-    item_ID = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name    
     
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
-    test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
+    test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name        
 
 
 class LabTestRequest(models.Model):
-    patient_ID = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
     note = models.TextField()
-    order_bill = models.ForeignKey(OrderBill, on_delete=models.CASCADE, null=True, blank=True)
-  #  item_id = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT, null=True, blank=True)
     sample_collected = models.BooleanField(default=False, null=True)
-    sample_id = models.CharField(max_length=100, null=True, blank=True)
+    sample = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return str(self.test_profile_ID.name)
@@ -70,6 +68,9 @@ class LabTestRequest(models.Model):
 class EquipmentTestRequest(models.Model):
     test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.equipment.name + " " + self.test_request.test_profile_ID.name + " " + self.equipment.ip_address + " " + self.equipment.port)
 
 
 class LabTestResult(models.Model):
@@ -116,9 +117,9 @@ class PublicLabTestRequest(models.Model):
         blank=True,
         validators=[FileExtensionValidator(allowed_extensions=['pdf', 'img', 'png'])]
     )
-    test_profile_ID = models.ForeignKey(LabTestProfile, on_delete=models.PROTECT)
+    test_profile = models.ForeignKey(LabTestProfile, on_delete=models.PROTECT)
     sample_collected = models.BooleanField(default=False,null=True, blank=True)
-    sample_id = models.CharField(max_length=100, null=True, blank=True)
+    sample = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return f"PublicTestRequest #{self.first_name} - {self.test_profile}"

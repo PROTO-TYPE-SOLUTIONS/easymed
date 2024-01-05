@@ -7,6 +7,7 @@ import appointmentReducer from './features/appointment'
 import doctorReducer from './features/doctors'
 import labReducer from './features/laboratory'
 import billingReducer from './features/billing'
+import prescriptionsReducer from './features/pharmacy'
 
 
 export const store = configureStore({
@@ -19,5 +20,6 @@ export const store = configureStore({
         doctor: doctorReducer,
         laboratory: labReducer,
         billing: billingReducer,
+        prescription: prescriptionsReducer,
     }
 })

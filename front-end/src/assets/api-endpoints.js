@@ -63,6 +63,11 @@ export const API_URL = {
   BILLING_INVOICES: "/billing/invoices/",
   FETCH_INVOICES: "/billing/invoices/",
 
+  /***************** PRESCRIPRION **********************/
+  FETCH_PRESCRIPTION: "/patients/prescriptions",
+  FETCH_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/",
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription"
+
 };
 
 //------------------------ Application APIs ----------------------//
@@ -129,6 +134,12 @@ export const APP_API_URL = {
   BILLING_INVOICE_ITEMS: "/api/billing/invoice-items",
   BILLING_INVOICES: "/api/billing/billing-invoices",
   FETCH_INVOICES: "/api/billing/fetch-invoices",
+
+  /***************** PRESCRIPRION **********************/
+  FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
+  FETCH_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescribed-drugs",
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug"
+
 };
 
 export const API_METHODS = {

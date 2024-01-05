@@ -14,6 +14,7 @@ import { FaMoneyBillAlt } from 'react-icons/fa'
 import { FaProductHunt } from 'react-icons/fa'
 import { TbBrandBandlab } from 'react-icons/tb'
 import { FaMoneyBillWave } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 export const menus = [
   {
@@ -121,33 +122,40 @@ export const dashboardData = [
     icon: <FaCodePullRequest className="text-xl" />,
   },
 ];
-export const adminData = [
-  {
-    label: "No. of Patients",
-    number: 37,
-    waiting: 17,
-    status: 'Patients waiting',
-    condition: 'Patients Discharged',
-    condition_number: 13
-  },
-  {
-    label: "No. of Doctors",
-    number: 44,
-    waiting: 3,
-    status: 'Doctors On leave',
-    condition: 'Doctors On Duty',
-    condition_number: 41
-  },
-  {
-    label: "Test Requests",
-    number: 23,
-    waiting: 12,
-    status: 'Tests Approved',
-    condition: 'Test Requests Pending',
-    condition_number: 4
-  },
-];
+export const AdminData = ()=> {
+  // get data from redux store for display
+  const { doctors } = useSelector((store) => store.doctor);
+  const { patients } = useSelector((store) => store.patient);
+  const { labRequests } = useSelector((store) => store.laboratory);
 
+  return([
+    {
+      label: "No. of Patients",
+      number: patients.length,
+      waiting: 17,
+      status: 'Patients waiting',
+      condition: 'Patients Discharged',
+      condition_number: 13
+    },
+    {
+      label: "No. of Doctors",
+      number: doctors.length,
+      waiting: 3,
+      status: 'Doctors On leave',
+      condition: 'Doctors On Duty',
+      condition_number: 41
+    },
+    {
+      label: "Test Requests",
+      number: labRequests.length,
+      waiting: 12,
+      status: 'Tests Approved',
+      condition: 'Test Requests Pending',
+      condition_number: 4
+    },
+  ]);
+
+}
 export const doctorData = [
   {
     name: "Dr. Patrick",
@@ -241,3 +249,22 @@ export const inventoryData = [
     icon: <FaProductHunt className="" />,
   },
 ];
+
+export const pharmacyDisplayStats = [
+  {
+    label: "Drugs Feedback",
+    icon: "/images/svgs/message.svg",
+    figures: 13
+  },
+  {
+    label: "Close Expiring",
+    icon: "/images/svgs/expire.svg",
+    figures: 13
+  },
+  {
+    label: "Out of stock",
+    icon: "/images/svgs/outstock.svg",
+    figures: 13
+  },
+]
+

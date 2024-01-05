@@ -25,8 +25,10 @@ def send_to_equipment(sender: EquipmentTestRequest, instance: EquipmentTestReque
         data = json_to_hl7(test_request)
         if equipment.category == "rs32":
             send_through_rs232(data=data)
+            print("Data is:" + data) 
             
         if equipment.category == 'tcp':
             send_through_tcp(data=data)
+            print("Data is:" + data) 
 
         
