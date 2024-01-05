@@ -7,8 +7,6 @@ const LabRequests = ({ item }) => {
   const { selectedLabRequests } = useSelector((store) => store.billing);
   const dispatch = useDispatch();
 
-  console.log("SELECTED_LAB_REQUEST ",selectedLabRequests);
-  console.log("LAB_REQUEST_ITEM ",item);
 
     const handleSelect = () => {
         setSelected(!selected);

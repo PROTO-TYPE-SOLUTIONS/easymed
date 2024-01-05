@@ -7,7 +7,6 @@ const Drugs = ({ item }) => {
   const { selectedPrescribedDrugs } = useSelector((store) => store.billing);
   const dispatch = useDispatch();
 
-  console.log("SELECTED_DRUG ",selectedPrescribedDrugs)
   const handleSelect = () => {
     setSelected(!selected);
     if (!selected) {

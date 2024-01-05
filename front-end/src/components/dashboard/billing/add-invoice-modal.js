@@ -11,12 +11,15 @@ import {
   getAllPatientBillingAppointments,
   getAllPatientBillingLabRequest,
   getAllPatientBillingPrescribedDrug,
+  setSelectedLabRequest,
+  setSelectedPrescribedDrug,
 } from "@/redux/features/billing";
 import PatientCheckServices from "./checkServices";
 import { billingInvoiceItems, billingInvoices } from "@/redux/service/billing";
 import { useAuth } from "@/assets/hooks/use-auth";
 import BillingInvoices from "./billing-invoices";
 import { setSelectedAppointment } from "@/redux/features/billing";
+import PrintInvoice from "./print-invoice";
 
 const AddInvoiceModal = () => {
   const [loading, setLoading] = useState(false);
@@ -104,6 +107,7 @@ const AddInvoiceModal = () => {
             service: labRequest?.id,
           };
           await billingInvoiceItems(auth, labRequestPayload);
+          dispatch(setSelectedLabRequest([]));
         }
 
         for (const [
@@ -117,13 +121,14 @@ const AddInvoiceModal = () => {
             service: prescribedDrug?.id,
           };
           await billingInvoiceItems(auth, prescribedDrugsPayload);
+          dispatch(setSelectedPrescribedDrug([]));
         }
         toast.success("Invoice generated successfully!");
         setLoading(false);
         setCurrentStep(2);
-      }else{
+      } else {
         setLoading(false);
-        toast.error('Please select at least one item')
+        toast.error("Please select at least one item");
       }
     } catch (error) {
       console.error("Error submitting payloads: ", error);
@@ -140,7 +145,7 @@ const AddInvoiceModal = () => {
       </button>
       <Dialog
         fullWidth
-        maxWidth="md"
+        maxWidth="sm"
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -201,7 +206,8 @@ const AddInvoiceModal = () => {
             </section>
           )}
 
-          {currentStep === 2 && <BillingInvoices />}
+          {currentStep === 2 && <BillingInvoices {...{ setCurrentStep }} />}
+          {currentStep === 3 && <PrintInvoice />}
           <div className="flex items-center justify-end gap-2 mt-2">
             {currentStep > 0 && (
               <button

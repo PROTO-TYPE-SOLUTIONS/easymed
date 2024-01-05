@@ -7,7 +7,6 @@ const Appointments = ({ item }) => {
   const { selectedAppointments } = useSelector((store) => store.billing);
   const dispatch = useDispatch();
 
-  console.log("SELECTED_APPOINTMENT ",selectedAppointments)
 
   const handleSelect = () => {
     setSelected(!selected);

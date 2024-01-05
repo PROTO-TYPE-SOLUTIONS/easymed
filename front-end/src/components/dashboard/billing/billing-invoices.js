@@ -7,13 +7,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { toast } from "react-toastify";
 
-const BillingInvoices = () => {
+const BillingInvoices = ({ setCurrentStep }) => {
   const [loading,setLoading] = useState(false);
   const { invoices } = useSelector((store) => store.billing);
   const dispatch = useDispatch();
   const auth = useAuth();
 
-  console.log("FETCH_INVOICES ",invoices);
+  
 
   const initialValues = {
     status: "pending",
@@ -38,6 +38,7 @@ const BillingInvoices = () => {
         helpers.resetForm();
         toast.success('Operation completed successfully')
         setLoading(false);
+        setCurrentStep(3)
       });
     } catch (err) {
       setLoading(false);
