@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar from "./sidebar";
+import RightBar from "./rightbar";
 import CustomizedHeader from "./customized-header";
 
 
@@ -13,6 +14,9 @@ const CustomizedLayout = ({ children }) => {
       <div className="flex-1 overflow-y-auto hideMiddleSectionScrollbar">
         <CustomizedHeader />
         <div>{children}</div>
+      </div>
+      <div className="w-72 md:block hidden">
+        <RightBar />
       </div>
     </div>
   );
