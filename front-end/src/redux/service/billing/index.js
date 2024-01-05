@@ -69,3 +69,20 @@ export const billingInvoiceItems = (auth,payloads) =>{
             })
     })
 }
+
+export const billingInvoices = (auth,payload) =>{
+    const axiosInstance = UseAxios(auth);
+    const requestData = {
+        auth,
+        payload,
+      };
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.BILLING_INVOICES}`,requestData)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

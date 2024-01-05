@@ -60,6 +60,7 @@ export const API_URL = {
   FETCH_PATIENT_BILLING_LAB_REQUEST: "/lab/lab-test-request-by-patient-id",
   FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/patients/prescribed-drugs/by_patient_id",
   BILLING_INVOICE_ITEMS: "/billing/invoice-items/",
+  BILLING_INVOICES: "/billing/invoices/",
 
 };
 
@@ -125,6 +126,7 @@ export const APP_API_URL = {
   FETCH_PATIENT_BILLING_LAB_REQUEST: "/api/billing/patient-lab-request",
   FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/api/billing/prescribed-drug",
   BILLING_INVOICE_ITEMS: "/api/billing/invoice-items",
+  BILLING_INVOICES: "/api/billing/billing-invoices",
 };
 
 export const API_METHODS = {

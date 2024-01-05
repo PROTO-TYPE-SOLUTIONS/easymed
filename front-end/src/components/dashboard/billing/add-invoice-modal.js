@@ -13,8 +13,10 @@ import {
   getAllPatientBillingPrescribedDrug,
 } from "@/redux/features/billing";
 import PatientCheckServices from "./checkServices";
-import { billingInvoiceItems } from "@/redux/service/billing";
+import { billingInvoiceItems, billingInvoices } from "@/redux/service/billing";
 import { useAuth } from "@/assets/hooks/use-auth";
+import BillingInvoices from "./billing-invoices";
+import { setSelectedAppointment } from "@/redux/features/billing";
 
 const AddInvoiceModal = () => {
   const [loading, setLoading] = useState(false);
@@ -24,8 +26,6 @@ const AddInvoiceModal = () => {
   const { searchedPatients } = useSelector((store) => store.patient);
   const {
     patientAppointment,
-    patientLabRequest,
-    patientPrescribedDrug,
     selectedAppointments,
     selectedLabRequests,
     selectedPrescribedDrugs,
@@ -78,39 +78,53 @@ const AddInvoiceModal = () => {
   const handleGenerateInvoice = async () => {
     try {
       setLoading(true);
-      for (const [index, appointment] of selectedAppointments.entries()) {
-        const appointmentPayload = {
-          item_name: appointment?.item_name,
-          item_price: appointment?.fee,
-          invoice: 1,
-          service: appointment?.id,
-        };
-        await billingInvoiceItems(auth, appointmentPayload);
+
+      if (
+        selectedAppointments.length > 0 ||
+        selectedLabRequests.length > 0 ||
+        selectedPrescribedDrugs.length > 0
+      ) {
+        for (const [index, appointment] of selectedAppointments.entries()) {
+          const appointmentPayload = {
+            item_name: appointment?.item_name,
+            item_price: appointment?.fee,
+            invoice: 1,
+            service: appointment?.id,
+          };
+          await billingInvoiceItems(auth, appointmentPayload);
+          setLoading(false);
+          dispatch(setSelectedAppointment([]));
+        }
+
+        for (const [index, labRequest] of selectedLabRequests.entries()) {
+          const labRequestPayload = {
+            item_name: "test name",
+            item_price: "200",
+            invoice: 1,
+            service: labRequest?.id,
+          };
+          await billingInvoiceItems(auth, labRequestPayload);
+        }
+
+        for (const [
+          index,
+          prescribedDrug,
+        ] of selectedPrescribedDrugs.entries()) {
+          const prescribedDrugsPayload = {
+            item_name: prescribedDrug?.item_name,
+            item_price: "200",
+            invoice: 1,
+            service: prescribedDrug?.id,
+          };
+          await billingInvoiceItems(auth, prescribedDrugsPayload);
+        }
+        toast.success("Invoice generated successfully!");
         setLoading(false);
+        setCurrentStep(2);
+      }else{
+        setLoading(false);
+        toast.error('Please select at least one item')
       }
-
-      for (const [index, labRequest] of selectedLabRequests.entries()) {
-        const labRequestPayload = {
-          item_name: "test name",
-          item_price: "200",
-          invoice: 1,
-          service: labRequest?.id,
-        };
-        await billingInvoiceItems(auth, labRequestPayload);
-      }
-
-      for (const [index, prescribedDrug] of selectedPrescribedDrugs.entries()) {
-        const prescribedDrugsPayload = {
-          item_name: prescribedDrug?.item_name,
-          item_price: "200",
-          invoice: 1,
-          service: prescribedDrug?.id,
-        };
-        await billingInvoiceItems(auth, prescribedDrugsPayload);
-      }
-      toast.success("Invoice generated successfully!");
-      setLoading(false);
-      console.log("All payloads submitted successfully");
     } catch (error) {
       console.error("Error submitting payloads: ", error);
     }
@@ -145,7 +159,7 @@ const AddInvoiceModal = () => {
                       <input
                         className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
                         placeholder="Search Patient"
-                        // type="search"
+                        type="search"
                         name="first_name"
                         onChange={handleInputChange}
                         value={inputValue}
@@ -186,13 +200,18 @@ const AddInvoiceModal = () => {
               <PatientCheckServices {...{ patientAppointment }} />
             </section>
           )}
+
+          {currentStep === 2 && <BillingInvoices />}
           <div className="flex items-center justify-end gap-2 mt-2">
-            <button
-              onClick={() => setCurrentStep(currentStep - 1)}
-              className="border border-primary rounded-xl px-4 py-2 text-sm"
-            >
-              Prev
-            </button>
+            {currentStep > 0 && (
+              <button
+                onClick={() => setCurrentStep(currentStep - 1)}
+                className="border border-primary rounded-xl px-4 py-2 text-sm"
+              >
+                Prev
+              </button>
+            )}
+
             {currentStep === 0 ? (
               <button
                 onClick={() => setCurrentStep(currentStep + 1)}
@@ -201,6 +220,9 @@ const AddInvoiceModal = () => {
                 Next
               </button>
             ) : (
+              ""
+            )}
+            {currentStep === 1 && (
               <button
                 onClick={handleGenerateInvoice}
                 className="bg-primary text-white rounded-xl px-4 py-2 text-sm"
