@@ -10,6 +10,9 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import AddInventory from "@/components/dashboard/inventory/AddInventory";
 import PurchaseOrdersDatagrid from "@/components/dashboard/inventory/PurchaseOrdersDatagrid";
 import AddProductPurchase from "@/components/dashboard/inventory/AddProductPurchase";
+import CreateRequisition from "@/components/dashboard/inventory/CreateRequisition";
+import RequisitionDatagrid from "@/components/dashboard/inventory/RequisitionDatagrid";
+import DashboardLayout from "@/components/layout/dashboard-layout";
 
 const Inventory = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -26,7 +29,7 @@ const Inventory = () => {
           <Link to='/dashboard/inventory/purchase-orders' onClick={()=> setCurrentTab(1)} className={`${currentTab === 1 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             Purchase Order
           </Link>
-          <Link to='/dashboard/inventory' onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          <Link to='/dashboard/inventory/requisitions' onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             Requisition Entry
           </Link>
           {/* <RequisitionModal /> */}
@@ -40,10 +43,12 @@ const Inventory = () => {
 
         <Routes>
           <Route path="/dashboard/inventory" exact element={<InventoryDataGrid />} />
+          <Route path="/dashboard/inventory/requisitions" exact element={<RequisitionDatagrid />} />
           <Route path="/dashboard/inventory/purchase-orders" exact element={<PurchaseOrdersDatagrid />} />
 
           <Route path="/dashboard/inventory/add-inventory" exact element={<AddInventory />} />
           <Route path="/dashboard/inventory/add-purchase" exact element={<AddProductPurchase />} />
+          <Route path="/dashboard/inventory/create-requisition" exact element={<CreateRequisition />}/>
           <Route path="/dashboard/inventory/incoming-items" exact element={<IncomingItems />} />
           <Route path="/dashboard/inventory/report" exact element={<Reports />} />
 
@@ -59,7 +64,7 @@ const Inventory = () => {
 
 Inventory.getLayout = (page) => (
   <AuthGuard>
-    <CustomizedLayout>{page}</CustomizedLayout>;
+    <DashboardLayout>{page}</DashboardLayout>;
   </AuthGuard>
 );
 
