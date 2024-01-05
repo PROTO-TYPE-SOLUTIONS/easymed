@@ -26,8 +26,8 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
 
   const initialValues = {
     note: "",
-    sample: true,
-    patient_id: selectedRowData?.id,
+    sample: null,
+    patient: selectedRowData?.id,
     test_profile_ID: null,
     order_bill: null,
     item_id: null,
@@ -170,7 +170,6 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                       Send To Lab
                     </button>
                     <button
-                      type="submit"
                       onClick={handleClose}
                       className="border border-warning rounded-xl px-4 py-2 text-sm"
                     >
