@@ -21,11 +21,26 @@ const RightBar = () => {
               <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
               <h1 className="text-sm">See All</h1>
             </div>
-            <DrugsInfo />
+            <DrugsInfo displayNUmber={3}/>
           </section>
           <section className="space-y-1 my-4">
             <News />
           </section>
+          </>
+        );
+      case '/dashboard/inventory':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
+          {/* <section className="space-y-1 my-4">
+            <News />
+          </section> */}
           </>
         );
       default:
