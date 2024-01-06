@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux"; 
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
 import { Link } from 'react-router-dom'
@@ -6,6 +7,9 @@ import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
 import { inventoryDisplayStats } from "@/assets/menu";
 import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
+import { getAllInventories } from "@/redux/features/inventory";
+import { useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -13,47 +17,21 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const InventoryDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const { item, inventories } = useSelector((store) => store.inventory);
+  const dispatch = useDispatch()
+  const auth = useAuth();
+
+
+  useEffect(() => {
+    if (auth) {
+      dispatch(getAllInventories(auth));
+    }
+  }, [auth]);
+
+  console.log(item)
+
 
   const inventorySummaryInfo = inventoryDisplayStats.map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
-
-  const users = [
-    {
-      number: "1",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "2",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "70081234",
-      name: "Ann Kibet",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-  ];
 
   return (
     <section className=" my-8">
@@ -100,7 +78,7 @@ const InventoryDataGrid = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={users}
+        dataSource={inventories}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -118,19 +96,25 @@ const InventoryDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="number" caption="Product Name" width={200} />
-        <Column dataField="id_number" caption="Category" width={140} />
+        <Column 
+          dataField="item" 
+          caption="Product Name"
+          cellRender={(cellData) => {
+            const prodName = item.find(prod => prod.id === cellData.data.item);
+            console.log(prodName)
+            return prodName ? `${prodName.name}` : 'NA';
+          }}   
+        />
+        <Column dataField="purchase_price" caption="Purchase Price"/>
         <Column
-          dataField="name"
+          dataField="sale_price"
           caption="Description"
-          width={200}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Price" width={140} />
-        <Column dataField="country" caption="Quantity" width={200} />
-        <Column dataField="gender" caption="Unit Price" width={200} />
-        <Column dataField="country" caption="Buying Price" width={200} />
+        <Column dataField="packed" caption="Packed"/>
+        <Column dataField="subpacked" caption="Subpacked"/>
+        <Column dataField="quantity_in_stock" caption="Quantity"/>
       </DataGrid>
     </section>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
@@ -12,65 +13,48 @@ const AddInventory = () => {
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const [open, setOpen] = React.useState(false);
-  const { items, suppliers } = useSelector(({ inventory }) => inventory);
+  const navigate = useNavigate();
+  const { item } = useSelector((store) => store.inventory);
 
-
-
-  const locations = [
-    {
-      id: 1,
-      name: "laboratory",
-    },
-    {
-      id: 2,
-      name: "radiology",
-    },
-    {
-      id: 3,
-      name: "pharmacy",
-    },
-    {
-      id: 4,
-      name: "reception",
-    },
-  ];
 
   const initialValues = {
-    quantity: "",
-    location: "",
-    expiry_date: "",
+    quantity_in_stock: "",
+    packed: "",
+    subpacked: "",
     purchase_price: "",
     sale_price: "",
-    item_ID: null,
-    supplier_ID: null,
+    item: "",
+    // supplier_ID: null,
   };
 
   const validationSchema = Yup.object().shape({
-    quantity: Yup.string().required("This field is required!"),
-    location: Yup.string().required("This field is required!"),
-    expiry_date: Yup.string().required("This field is required!"),
+    quantity_in_stock: Yup.string().required("This field is required!"),
+    packed: Yup.string().required("This field is required!"),
+    subpacked: Yup.string().required("This field is required!"),
     purchase_price: Yup.string().required("This field is required!"),
     sale_price: Yup.string().required("This field is required!"),
-    item_ID: Yup.string().required("This field is required!"),
-    supplier_ID: Yup.string().required("This field is required!"),
+    item: Yup.string().required("This field is required!"),
+    // supplier_ID: Yup.string().required("This field is required!"),
   });
 
   const handleAddInventory = async (formValue, helpers) => {
     try {
       const formData = {
         ...formValue,
-        item_ID: parseInt(formValue.item_ID),
-        supplier_ID: parseInt(formValue.supplier_ID),
+        item: parseInt(formValue.item),
+        
       };
+
       setLoading(true);
       await addInventory(formData).then(() => {
         helpers.resetForm();
         toast.success("Inventory Added Successfully!");
         setLoading(false);
+        navigate('/dashboard/inventory')
       });
     } catch (err) {
       toast.error(err);
+      setLoading(false);
     }
   };
 
@@ -92,74 +76,44 @@ const AddInventory = () => {
       >
         <Form className="">
           <Grid container spacing={2}>
-            <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Product Name"
-                name="product-name"
-              />
-              <ErrorMessage
-                name="product-name"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid className='my-2' item md={6} xs={12}>
               <Field
                 as="select"
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Location"
-                name="location"
-              >
-                <option value="">Select Category</option>
-                {locations?.map((location) => (
-                  <option key={location.id} value={location.name}>
-                    {location.name}
-                  </option>
-                ))}
-              </Field>
-              <ErrorMessage
-                name="location"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={12} xs={12}>
-              <Field
-                as="select"
-                className="block pr-9 border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                name="item_ID"
+                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                name="item"
               >
                 <option value="">Select Item</option>
-                {items?.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
+                {item?.map((item) => {
+                  return (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  )
+                })}
               </Field>
               <ErrorMessage
-                name="item_ID"
+                name="item"
                 component="div"
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={12} xs={12}>
-              <textarea
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                placeholder="Description"
-                name="description"
+            <Grid className='my-2' item md={6} xs={12}>
+              <Field
+                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="Quantity"
+                name="quantity_in_stock"
+                type="number"
               />
               <ErrorMessage
-                name="description"
+                name="quantity_in_stock"
                 component="div"
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid className='my-2' item md={6} xs={12}>
               <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
+                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="Purchase Price"
                 name="purchase_price"
@@ -170,22 +124,9 @@ const AddInventory = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid className='my-2' item md={6} xs={12}>
               <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Quantity"
-                name="quantity"
-              />
-              <ErrorMessage
-                name="quantity"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
+                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="Sale Price"
                 name="sale_price"
@@ -196,7 +137,33 @@ const AddInventory = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid className='my-2' item md={6} xs={12}>
+              <Field
+                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="packed"
+                name="packed"
+              />
+              <ErrorMessage
+                name="packed"
+                component="div"
+                className="text-warning text-xs"
+              />
+            </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
+              <Field
+                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="subpacked"
+                name="subpacked"
+              />
+              <ErrorMessage
+                name="subpacked"
+                component="div"
+                className="text-warning text-xs"
+              />
+            </Grid>
+            {/* <Grid item md={6} xs={12}>
               <Field
                 className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
                 maxWidth="sm"
@@ -209,8 +176,8 @@ const AddInventory = () => {
                 component="div"
                 className="text-warning text-xs"
               />
-            </Grid>
-            <Grid item md={12} xs={12}>
+            </Grid> */}
+            <Grid className='my-2' item md={12} xs={12}>
               <div className="flex items-center justify-end">
                 <button
                   type="submit"

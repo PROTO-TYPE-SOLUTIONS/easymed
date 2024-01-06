@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom'
 import { Container, Grid } from "@mui/material";
 import InventoryDataGrid from "@/components/dashboard/inventory";
@@ -13,9 +13,24 @@ import AddProductPurchase from "@/components/dashboard/inventory/AddProductPurch
 import CreateRequisition from "@/components/dashboard/inventory/CreateRequisition";
 import RequisitionDatagrid from "@/components/dashboard/inventory/RequisitionDatagrid";
 import DashboardLayout from "@/components/layout/dashboard-layout";
+import { getAllInventories } from "@/redux/features/inventory";
+import { getAllOrderBills, getItems } from "@/redux/features/inventory";
+import { useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
+
 
 const Inventory = () => {
   const [currentTab, setCurrentTab] = useState(0);
+  const dispatch = useDispatch()
+  const auth = useAuth();
+
+
+  useEffect(() => {
+    if (auth) {
+      dispatch(getAllInventories(auth));
+      dispatch(getItems());
+    }
+  }, [auth]);
 
   return (
 

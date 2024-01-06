@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers } from "@/redux/service/inventory";
+import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories } from "@/redux/service/inventory";
 
 
 const initialState = {
+  inventories: [],
   items: [],
   suppliers: [],
   orderBills: [],
@@ -25,16 +26,28 @@ const InventorySlice = createSlice({
     setItem: (state, action) => {
       state.item = action.payload;
     },
+    setInventories: (state, action) => {
+      state.inventories = action.payload;
+    },
   },
 });
 
-export const { setItems,setSuppliers,setOrderBills,setItem } = InventorySlice.actions;
+export const { setItems,setSuppliers,setOrderBills,setItem, setInventories } = InventorySlice.actions;
 
 
 export const getAllItems = (name) => async (dispatch) => {
   try {
     const response = await fetchItems(name);
     dispatch(setItems(response));
+  } catch (error) {
+    console.log("ITEMS_ERROR ", error);
+  }
+};
+
+export const getAllInventories = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchInventories(auth);
+    dispatch(setInventories(response));
   } catch (error) {
     console.log("ITEMS_ERROR ", error);
   }
