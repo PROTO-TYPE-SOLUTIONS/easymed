@@ -45,6 +45,7 @@ export const API_URL = {
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
+  FETCH_INVENTORY: "/inventory/inventories/",
   FETCH_SUPPLIERS: "/inventory/suppliers/",
   FETCH_ITEMS: "/inventory/items/",
   DELETE_ITEM: "/inventory/items",
@@ -116,6 +117,7 @@ export const APP_API_URL = {
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",
+  FETCH_INVENTORY: "/api/inventory/fetch-inventory",
   FETCH_SUPPLIERS: "/api/inventory/fetch-suppliers",
   FETCH_ITEMS: "/api/inventory/fetch-items",
   FETCH_ITEM: "/api/inventory/get-item",
