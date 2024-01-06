@@ -1,15 +1,29 @@
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Item, PurchaseOrder, Inventory, Supplier, IncomingItem, DepartmentInventory, Requisition
+from .models import (
+    Item,
+    Inventory,
+    Supplier,
+    IncomingItem,
+    DepartmentInventory,
+    RequisitionItem,
+    Requisition,
+    PurchaseOrder,
+    PurchaseOrderItem,
+)
+
 from .serializers import (
     ItemSerializer,
     PurchaseOrderSerializer,
+    PurchaseOrderItemSerializer,
     IncomingItemSerializer,
     InventorySerializer,
     SupplierSerializer,
     DepartmentSerializer,
     DepartmentInventorySerializer,
     RequisitionSerializer,
+    RequisitionItemSerializer,  
+
 )
 
 from .filters import (
@@ -24,13 +38,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ItemFilter
-
-
-# class OrderBillViewSet(viewsets.ModelViewSet):
-#     queryset = OrderBill.objects.all()
-#     serializer_class = OrderBillSerializer  
-#     filter_backends = (DjangoFilterBackend,)
-#     filterset_class = OrderBillFilter  
 
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
@@ -51,6 +58,10 @@ class RequisitionViewSet(viewsets.ModelViewSet):
     queryset = Requisition.objects.all()
     serializer_class = RequisitionSerializer
 
+class RequisitionItemViewSet(viewsets.ModelViewSet):
+    queryset = RequisitionItem.objects.all()
+    serializer_class = RequisitionItemSerializer    
+
 
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
@@ -63,3 +74,12 @@ class SupplierViewSet(viewsets.ModelViewSet):
     serializer_class = SupplierSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = SupplierFilter
+
+
+class PurchaseOrderViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseOrder.objects.all()
+    serializer_class = RequisitionSerializer
+
+class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseOrderItem.objects.all()
+    serializer_class = PurchaseOrderItemSerializer 

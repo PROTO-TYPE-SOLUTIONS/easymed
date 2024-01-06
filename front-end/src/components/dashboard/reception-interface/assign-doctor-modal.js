@@ -48,7 +48,6 @@ export default function AssignDoctorModal({
     fee: "",
     assigned_doctor: null,
     item_id: null,
-    order_bill_ID: null,
   };
 
   const validationSchema = Yup.object().shape({

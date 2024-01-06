@@ -45,7 +45,6 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
     fee: "",
     assigned_doctor: null,
     item_id: null,
-    order_bill_ID: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -148,26 +147,6 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                     />
                     <ErrorMessage
                       name="fee"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="order bill">Order Bill</label>
-                    <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      name="order_bill_ID"
-                    >
-                      <option value="">Select Order Bill</option>
-                      {orderBills.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.total_Cost}
-                        </option>
-                      ))}
-                    </Field>
-                    <ErrorMessage
-                      name="order_bill_ID"
                       component="div"
                       className="text-warning text-xs"
                     />
