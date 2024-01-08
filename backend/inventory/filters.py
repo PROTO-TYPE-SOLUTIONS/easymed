@@ -5,7 +5,8 @@ from .models import (
     Inventory,
     Item,
     PurchaseOrder,
-    Supplier
+    Supplier,
+    PurchaseOrderItem
 )
 
 class InventoryFilter(django_filters.FilterSet):
@@ -29,14 +30,14 @@ class PurchaseOrderFilter(django_filters.FilterSet):
     supplier_ID__name = django_filters.CharFilter(lookup_expr='icontains')
     class Meta:
         model = PurchaseOrder
-        fields = ('quantity', 'id', 'supplier_ID__name')
+        fields = ('id', 'supplier_ID__name')
 
 
-# class OrderBillFilter(django_filters.FilterSet):
-#     payment_status = django_filters.CharFilter(lookup_expr='exact')
-#     class Meta:
-#         model = OrderBill
-#         fields = ('payment_status',)
+
+class PurchaseOrderItemFilter(django_filters.FilterSet):
+    class Meta:
+        model = PurchaseOrderItem
+        fields = ('quantity_purchased', 'id', 'item')
 
 
 class SupplierFilter(django_filters.FilterSet):

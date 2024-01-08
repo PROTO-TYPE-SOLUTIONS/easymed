@@ -13,7 +13,7 @@ const AppointmentBilling = () => {
   const dispatch = useDispatch();
   const [currentStep, setCurrentStep] = useState(0);
 
-  console.log("PATIENTS ", patients);
+  
 
   useEffect(() => {
     dispatch(getAllPatients());
