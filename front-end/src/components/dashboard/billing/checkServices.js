@@ -8,6 +8,7 @@ const PatientCheckServices = () => {
   const { patientAppointment, patientLabRequest, patientPrescribedDrug } =
     useSelector((store) => store.billing);
 
+
   return (
     <section className="flex items-stretch gap-4 bg-background p-2">
       <div className="w-4/12">
@@ -28,7 +29,7 @@ const PatientCheckServices = () => {
         <h1 className="text-center text-sm">Lab Test Request</h1>
         <section>
           {patientLabRequest?.length > 0 ? (
-            patientAppointment.map((item, index) => (
+            patientLabRequest.map((item, index) => (
               <LabRequests key={index} {...{ item }} />
             ))
           ) : (
@@ -42,7 +43,7 @@ const PatientCheckServices = () => {
         <h1 className="text-center text-sm">Prescribed Drug</h1>
         <section>
           {patientPrescribedDrug?.length > 0 ? (
-            patientAppointment.map((item, index) => (
+            patientPrescribedDrug.map((item, index) => (
               <Drugs key={index} {...{ item }} />
             ))
           ) : (

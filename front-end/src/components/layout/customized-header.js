@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Container, Grid } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { Drawer } from "@/assets/drawer";
@@ -8,6 +8,9 @@ import { BsChevronDown } from "react-icons/bs";
 import { authContext } from "../use-context";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { FaUserCircle } from "react-icons/fa";
+import { AdminData as adminData } from '@/assets/menu'
+import DashboardCards from "../dashboard/dashboard-cards";
+
 
 const CustomizedHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,9 +28,11 @@ const CustomizedHeader = () => {
     setAnchorEl(null);
   };
 
+  const dashboardCards = adminData().map((data, index)=> <DashboardCards dashData={data} index={index} key={`dashboard-card-${index}`}/>)
+
   return (
     <>
-      <section className="sticky top-0 py-4 bg-primary shadow-xl h-[10vh]">
+      <section className="sticky top-0 py-2 md:p-0 bg-white shadow-sm h-[10vh] md:h-[15vh]">
         <Container maxWidth="xl">
           <section className="flex items-center md:justify-end justify-between gap-4">
             <div className="md:hidden block">
@@ -37,12 +42,17 @@ const CustomizedHeader = () => {
               />
               <Drawer {...{ isOpen, setIsOpen }} />
             </div>
+            <Grid container spacing={1} className="my-2 hidden md:block">
+              <Grid container spacing={2}>
+                {dashboardCards}
+              </Grid>
+            </Grid>
             <div className="flex items-center gap-2">
-              <FaUserCircle className="w-6 h-6 text-white" />
-              <span className="text-white text-sm">{token?.first_name}</span>
+              <FaUserCircle className="w-6 h-6 text-primary" />
+              <span className="text-primary text-sm">{token?.first_name}</span>
               <BsChevronDown
                 onClick={handleClick}
-                className="text-white cursor-pointer"
+                className="text-primary cursor-pointer"
               />
             </div>
             <Menu
