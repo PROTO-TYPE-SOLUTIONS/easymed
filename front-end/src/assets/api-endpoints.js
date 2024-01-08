@@ -50,6 +50,8 @@ export const API_URL = {
   FETCH_ITEMS: "/inventory/items/",
   DELETE_ITEM: "/inventory/items",
   FETCH_ORDER_BILL: "/inventory/orderbill/",
+  REQUISITION: "/inventory/requisition/",
+
 
 
   /***************** NURSING APIS **********************/
@@ -123,6 +125,8 @@ export const APP_API_URL = {
   FETCH_ITEM: "/api/inventory/get-item",
   DELETE_ITEM: "/api/inventory/delete-item",
   FETCH_ORDER_BILL: "/api/order-bills/fetch-order-bill",
+  REQUISITION: "/api/inventory/requisition",
+
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/api/nursing/add-triage",
