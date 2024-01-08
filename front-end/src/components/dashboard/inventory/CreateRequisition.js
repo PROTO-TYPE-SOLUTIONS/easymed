@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
-import { addInventory } from "@/redux/service/inventory";
+import { addRequisition } from "@/redux/service/inventory";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllItems, getAllSuppliers } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
@@ -12,65 +13,40 @@ const CreateRequisition = () => {
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const [open, setOpen] = React.useState(false);
-  const { items, suppliers } = useSelector(({ inventory }) => inventory);
-
-
-
-  const locations = [
-    {
-      id: 1,
-      name: "laboratory",
-    },
-    {
-      id: 2,
-      name: "radiology",
-    },
-    {
-      id: 3,
-      name: "pharmacy",
-    },
-    {
-      id: 4,
-      name: "reception",
-    },
-  ];
+  const navigate = useNavigate();
+  const { item, suppliers } = useSelector(({ inventory }) => inventory);
 
   const initialValues = {
-    quantity: "",
-    location: "",
-    expiry_date: "",
-    purchase_price: "",
-    sale_price: "",
-    item_ID: null,
-    supplier_ID: null,
+    requested_date: "",
+    item: null,
+    supplier: null,
   };
 
   const validationSchema = Yup.object().shape({
-    quantity: Yup.string().required("This field is required!"),
-    location: Yup.string().required("This field is required!"),
-    expiry_date: Yup.string().required("This field is required!"),
-    purchase_price: Yup.string().required("This field is required!"),
-    sale_price: Yup.string().required("This field is required!"),
-    item_ID: Yup.string().required("This field is required!"),
-    supplier_ID: Yup.string().required("This field is required!"),
+    requested_date: Yup.string().required("This field is required!"),
+    item: Yup.string().required("This field is required!"),
+    supplier: Yup.string().required("This field is required!"),
   });
 
-  const handleAddInventory = async (formValue, helpers) => {
+  const handleAddRequisition = async (formValue, helpers) => {
     try {
       const formData = {
         ...formValue,
-        item_ID: parseInt(formValue.item_ID),
-        supplier_ID: parseInt(formValue.supplier_ID),
+        // item: parseInt(formValue.item),
+        supplier: parseInt(formValue.supplier),
       };
+
+      console.log(formData)
       setLoading(true);
-      await addInventory(formData).then(() => {
+      await addRequisition(formData).then(() => {
         helpers.resetForm();
         toast.success("Inventory Added Successfully!");
         setLoading(false);
+        navigate('/dashboard/inventory/requisitions')
       });
     } catch (err) {
       toast.error(err);
+      setLoading(false);
     }
   };
 
@@ -88,124 +64,71 @@ const CreateRequisition = () => {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleAddInventory}
+        onSubmit={handleAddRequisition}
       >
         <Form className="">
-          <Grid container spacing={2}>
-            <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Product Name"
-                name="product-name"
-              />
-              <ErrorMessage
-                name="product-name"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Field
-                as="select"
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Location"
-                name="location"
-              >
-                <option value="">Select Category</option>
-                {locations?.map((location) => (
-                  <option key={location.id} value={location.name}>
-                    {location.name}
-                  </option>
-                ))}
-              </Field>
-              <ErrorMessage
-                name="location"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
+          <Grid container spacing={4}>
             <Grid item md={12} xs={12}>
               <Field
                 as="select"
-                className="block pr-9 border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                name="item_ID"
+                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                name="item"
               >
                 <option value="">Select Item</option>
-                {items?.map((item) => (
+                {item?.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
                   </option>
                 ))}
               </Field>
               <ErrorMessage
-                name="item_ID"
+                name="item"
                 component="div"
                 className="text-warning text-xs"
               />
             </Grid>
             <Grid item md={12} xs={12}>
-              <textarea
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                placeholder="Description"
-                name="description"
-              />
+              <Field
+                as="select"
+                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                name="supplier"
+              >
+                <option value="">Select supplier</option>
+                {suppliers?.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </option>
+                ))}
+              </Field>
               <ErrorMessage
-                name="description"
+                name="supplier"
                 component="div"
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            {/* <Grid item md={6} xs={12}>
               <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
+                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
-                placeholder="Purchase Price"
-                name="purchase_price"
+                placeholder="supplier"
+                name="supplier"
               />
               <ErrorMessage
-                name="purchase_price"
+                name="supplier"
                 component="div"
                 className="text-warning text-xs"
               />
-            </Grid>
-            <Grid item md={6} xs={12}>
+            </Grid> */}
+            <Grid item md={12} xs={12}>
               <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Quantity"
-                name="quantity"
-              />
-              <ErrorMessage
-                name="quantity"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Sale Price"
-                name="sale_price"
-              />
-              <ErrorMessage
-                name="sale_price"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
+                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 type="date"
-                placeholder="Expiry Date"
-                name="expiry_date"
+                placeholder="Requested Date"
+                name="requested_date"
               />
               <ErrorMessage
-                name="expiry_date"
+                name="requested_date"
                 component="div"
                 className="text-warning text-xs"
               />
@@ -214,7 +137,7 @@ const CreateRequisition = () => {
               <div className="flex items-center justify-end">
                 <button
                   type="submit"
-                  className="bg-primary rounded-xl text-sm px-8 py-2 text-white"
+                  className="bg-primary rounded-xl text-sm px-8 py-4 text-white"
                 >
                   {loading && (
                     <svg
@@ -235,7 +158,7 @@ const CreateRequisition = () => {
                       ></path>
                     </svg>
                   )}
-                  Add Product Purchase
+                  Create Requisition
                 </button>
               </div>
             </Grid>

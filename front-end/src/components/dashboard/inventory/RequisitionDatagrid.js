@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
 import { Link } from 'react-router-dom'
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
+import { useDispatch, useSelector } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllRequisitions, getAllSuppliers, getAllItems } from "@/redux/features/inventory";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -11,45 +14,19 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const RequisitionDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const { item, suppliers, requisitions } = useSelector(({ inventory }) => inventory);
 
-  const users = [
-    {
-      number: "1",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "2",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "70081234",
-      name: "Ann Kibet",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-  ];
+  const dispatch = useDispatch()
+  const auth = useAuth();
+
+
+  useEffect(() => {
+    if (auth) {
+      dispatch(getAllRequisitions(auth));
+      dispatch(getAllSuppliers());
+      dispatch(getAllItems());
+    }
+  }, [auth]);
 
   return (
     <section className=" my-8">
@@ -92,7 +69,7 @@ const RequisitionDatagrid = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={users}
+        dataSource={requisitions}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -110,19 +87,23 @@ const RequisitionDatagrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="number" caption="Product Name" width={200} />
-        <Column dataField="id_number" caption="Category" width={140} />
-        <Column
-          dataField="name"
-          caption="Description"
-          width={200}
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column dataField="age" caption="Price" width={140} />
-        <Column dataField="country" caption="Quantity" width={200} />
-        <Column dataField="gender" caption="Unit Price" width={200} />
-        <Column dataField="country" caption="Buying Price" width={200} />
+        <Column 
+          dataField="item" 
+          caption="Product Name" 
+          cellRender={(cellData) => {
+            const prodName = item.find(prod => prod.id === cellData.data.item);
+            return prodName ? `${prodName.name}` : 'NA';
+          }}  
+          />
+        <Column 
+          dataField="supplier" 
+          caption="Supplier" 
+          cellRender={(cellData) => {
+            const supplierName = suppliers.find(supplier => supplier.id === cellData.data.supplier);
+            return supplierName ? `${supplierName.name}` : 'NA';
+          }}  
+          />
+        <Column dataField="requested_date" caption="Requested Date" />
       </DataGrid>
     </section>
   );

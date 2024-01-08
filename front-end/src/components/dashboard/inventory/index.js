@@ -101,14 +101,13 @@ const InventoryDataGrid = () => {
           caption="Product Name"
           cellRender={(cellData) => {
             const prodName = item.find(prod => prod.id === cellData.data.item);
-            console.log(prodName)
             return prodName ? `${prodName.name}` : 'NA';
           }}   
         />
         <Column dataField="purchase_price" caption="Purchase Price"/>
         <Column
           dataField="sale_price"
-          caption="Description"
+          caption="Sale price"
           allowFiltering={true}
           allowSearch={true}
         />
