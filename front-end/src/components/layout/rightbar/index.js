@@ -38,6 +38,95 @@ const RightBar = () => {
             </div>
             <DrugsInfo displayNUmber={6}/>
           </section>
+          </>
+        );
+      case '/dashboard/inventory/add-inventory':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
+          </>
+        );
+      case '/dashboard/inventory/purchase-orders':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
+          </>
+      );
+
+      case '/dashboard/inventory/add-purchase':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
+          </>
+      );
+
+      case '/dashboard/inventory/requisitions':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
+          </>
+      );
+
+      case '/dashboard/inventory/create-requisition':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
+          </>
+      );
+
+      case '/dashboard/inventory/incoming-items':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
+          </>
+      );
+
+      case '/dashboard/inventory/report':
+        return (
+          <>
+          <section className="space-y-1 my-4">
+          <div className="flex items-center justify-between">
+              <h1 className="uppercase text-xs font-semibold">Low quantity drugs</h1>
+              <h1 className="text-sm">See All</h1>
+            </div>
+            <DrugsInfo displayNUmber={6}/>
+          </section>
           {/* <section className="space-y-1 my-4">
             <News />
           </section> */}

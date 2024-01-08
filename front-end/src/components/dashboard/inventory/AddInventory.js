@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
@@ -13,7 +13,7 @@ const AddInventory = () => {
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const router = useRouter()
   const { item } = useSelector((store) => store.inventory);
 
 
@@ -50,7 +50,7 @@ const AddInventory = () => {
         helpers.resetForm();
         toast.success("Inventory Added Successfully!");
         setLoading(false);
-        navigate('/dashboard/inventory')
+        router.push('/dashboard/inventory')
       });
     } catch (err) {
       toast.error(err);
@@ -66,7 +66,7 @@ const AddInventory = () => {
   return (
     <section>
       <div className="flex items-center gap-4 mb-8">
-        <Link to='/dashboard/inventory'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
+        <Link href='/dashboard/inventory'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
         <h3 className="text-xl"> Add Inventory Item </h3>
       </div>
       <Formik

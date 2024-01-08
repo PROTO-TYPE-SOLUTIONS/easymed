@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
@@ -82,7 +82,7 @@ const AddProductPurchase = () => {
   return (
     <section>
       <div className="flex items-center gap-4 mb-8">
-        <Link to='/dashboard/inventory/purchase-orders'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
+        <Link href='/dashboard/inventory/purchase-orders'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
         <h3 className="text-xl"> Purchase Product </h3>
       </div>
       <Formik

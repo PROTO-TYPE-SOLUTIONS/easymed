@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux"; 
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
-import { Link } from 'react-router-dom'
+import Link from 'next/link';
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
 import { inventoryDisplayStats } from "@/assets/menu";
@@ -72,7 +72,7 @@ const InventoryDataGrid = () => {
           />
         </Grid>
         <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
-          <Link className="mx-4" to='/dashboard/inventory/add-inventory'>
+          <Link className="mx-4" href='/dashboard/inventory/add-inventory'>
             Add Inventory
           </Link>
         </Grid>

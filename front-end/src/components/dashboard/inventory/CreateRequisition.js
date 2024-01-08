@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
@@ -13,17 +12,18 @@ const CreateRequisition = () => {
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { item, suppliers } = useSelector(({ inventory }) => inventory);
 
   const initialValues = {
-    requested_date: "",
+    date_created: "",
     item: null,
     supplier: null,
+    quantity_requested: "string",
+    requisition: 0
   };
 
   const validationSchema = Yup.object().shape({
-    requested_date: Yup.string().required("This field is required!"),
+    date_created: Yup.string().required("This field is required!"),
     item: Yup.string().required("This field is required!"),
     supplier: Yup.string().required("This field is required!"),
   });
@@ -42,7 +42,6 @@ const CreateRequisition = () => {
         helpers.resetForm();
         toast.success("Inventory Added Successfully!");
         setLoading(false);
-        navigate('/dashboard/inventory/requisitions')
       });
     } catch (err) {
       toast.error(err);
@@ -58,7 +57,7 @@ const CreateRequisition = () => {
   return (
     <section>
       <div className="flex items-center gap-4 mb-8">
-        <Link to='/dashboard/inventory/requisitions'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
+        <Link href='/dashboard/inventory/requisitions'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
         <h3 className="text-xl"> Requisition entry </h3>
       </div>
       <Formik
@@ -124,11 +123,11 @@ const CreateRequisition = () => {
                 className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 type="date"
-                placeholder="Requested Date"
-                name="requested_date"
+                placeholder="Created Date"
+                name="date_created"
               />
               <ErrorMessage
-                name="requested_date"
+                name="date_created"
                 component="div"
                 className="text-warning text-xs"
               />

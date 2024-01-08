@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
 import { useDispatch, useSelector } from "react-redux";
@@ -63,7 +63,7 @@ const RequisitionDatagrid = () => {
           />
         </Grid>
         <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
-          <Link className="mx-4" to='/dashboard/inventory/create-requisition'>
+          <Link className="mx-4" href='/dashboard/inventory/create-requisition'>
             Create Requisition
           </Link>
         </Grid>
