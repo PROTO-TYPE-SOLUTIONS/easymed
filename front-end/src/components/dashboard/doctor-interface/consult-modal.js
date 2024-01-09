@@ -29,8 +29,8 @@ const ConsultPatientModal = ({
     note: "",
     complaint: "",
     disposition: "admitted",
-    doctor_ID: user?.user_id,
-    patient_id: selectedRowData?.id,
+    doctor: user?.user_id,
+    patient: selectedRowData?.id,
   };
 
   const validationSchema = Yup.object().shape({
