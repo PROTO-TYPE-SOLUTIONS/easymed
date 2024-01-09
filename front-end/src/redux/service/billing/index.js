@@ -53,16 +53,40 @@ export const fetchPatientBillingPrescribedDrug = (patient_id) =>{
     })
 }
 
-export const billingInvoiceItems = (auth,appointment,lab,drugs) =>{
+export const billingInvoiceItems = (auth,payloads) =>{
     const axiosInstance = UseAxios(auth);
     const requestData = {
         auth,
-        appointment,
-        lab,
-        drugs
+        ...payloads,
       };
     return new Promise((resolve,reject) =>{
         axiosInstance.post(`${APP_API_URL.BILLING_INVOICE_ITEMS}`,requestData)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const billingInvoices = (auth,payload) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.BILLING_INVOICES}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchInvoices = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_INVOICES}`)
             .then((res) =>{
                 resolve(res.data)
             })

@@ -149,7 +149,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-SESSION_COOKIE_AGE = 300
+SESSION_COOKIE_AGE = 30000
 AUTH_USER_MODEL = 'customuser.CustomUser'
 
 
@@ -161,7 +161,7 @@ SPECTACULAR_SETTINGS = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=3600),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=36000),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=2),

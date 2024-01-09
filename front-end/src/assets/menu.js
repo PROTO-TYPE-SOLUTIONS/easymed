@@ -249,3 +249,40 @@ export const inventoryData = [
     icon: <FaProductHunt className="" />,
   },
 ];
+
+export const pharmacyDisplayStats = [
+  {
+    label: "Drugs Feedback",
+    icon: "/images/svgs/message.svg",
+    figures: 13
+  },
+  {
+    label: "Close Expiring",
+    icon: "/images/svgs/expire.svg",
+    figures: 13
+  },
+  {
+    label: "Out of stock",
+    icon: "/images/svgs/outstock.svg",
+    figures: 13
+  },
+]
+
+export const inventoryDisplayStats = [
+  {
+    label: "Today's Sales",
+    icon: "/images/svgs/sales.svg",
+    figures: 320
+  },
+  {
+    label: "Purchases",
+    icon: "/images/svgs/purchases.svg",
+    figures: 28
+  },
+  {
+    label: "Slow Moving",
+    icon: "/images/svgs/slow-moving.svg",
+    figures: 3222
+  },
+]
+

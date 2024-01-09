@@ -40,7 +40,7 @@ export default function AddTriageModal({
       const formData = {
         ...formValue,
         created_by: auth?.user_id,
-        patient_id: selectedRowData?.id,
+        patient: selectedRowData?.id,
       };
       setLoading(true);
       await createTriage(formData, auth).then(() => {

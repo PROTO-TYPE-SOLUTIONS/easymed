@@ -45,10 +45,14 @@ export const API_URL = {
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
+  FETCH_INVENTORY: "/inventory/inventories/",
   FETCH_SUPPLIERS: "/inventory/suppliers/",
   FETCH_ITEMS: "/inventory/items/",
   DELETE_ITEM: "/inventory/items",
   FETCH_ORDER_BILL: "/inventory/orderbill/",
+  REQUISITION: "/inventory/requisition/",
+  REQUISITION_ITEM: "/inventory/requisition-tem/",
+
 
 
   /***************** NURSING APIS **********************/
@@ -60,6 +64,13 @@ export const API_URL = {
   FETCH_PATIENT_BILLING_LAB_REQUEST: "/lab/lab-test-request-by-patient-id",
   FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/patients/prescribed-drugs/by_patient_id",
   BILLING_INVOICE_ITEMS: "/billing/invoice-items/",
+  BILLING_INVOICES: "/billing/invoices/",
+  FETCH_INVOICES: "/billing/invoices/",
+
+  /***************** PRESCRIPRION **********************/
+  FETCH_PRESCRIPTION: "/patients/prescriptions",
+  FETCH_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/",
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription"
 
 };
 
@@ -111,11 +122,15 @@ export const APP_API_URL = {
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",
+  FETCH_INVENTORY: "/api/inventory/fetch-inventory",
   FETCH_SUPPLIERS: "/api/inventory/fetch-suppliers",
   FETCH_ITEMS: "/api/inventory/fetch-items",
   FETCH_ITEM: "/api/inventory/get-item",
   DELETE_ITEM: "/api/inventory/delete-item",
   FETCH_ORDER_BILL: "/api/order-bills/fetch-order-bill",
+  REQUISITION: "/api/inventory/requisition",
+  REQUISITION_ITEM: "/api/inventory/requisition-item",
+
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/api/nursing/add-triage",
@@ -125,6 +140,14 @@ export const APP_API_URL = {
   FETCH_PATIENT_BILLING_LAB_REQUEST: "/api/billing/patient-lab-request",
   FETCH_PATIENT_BILLING_PRESCRIBED_DRUG: "/api/billing/prescribed-drug",
   BILLING_INVOICE_ITEMS: "/api/billing/invoice-items",
+  BILLING_INVOICES: "/api/billing/billing-invoices",
+  FETCH_INVOICES: "/api/billing/fetch-invoices",
+
+  /***************** PRESCRIPRION **********************/
+  FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
+  FETCH_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescribed-drugs",
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug"
+
 };
 
 export const API_METHODS = {

@@ -47,7 +47,6 @@ export default async function handler(req, res) {
             
             const body = req.body;
 
-            console.log("INVOICE_ITEMS_BODY ",body);
             
             await backendAxiosInstance.post(`${API_URL.BILLING_INVOICE_ITEMS}`,body, config)
                 .then(response => {

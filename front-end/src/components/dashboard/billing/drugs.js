@@ -7,7 +7,6 @@ const Drugs = ({ item }) => {
   const { selectedPrescribedDrugs } = useSelector((store) => store.billing);
   const dispatch = useDispatch();
 
-  console.log("DRUGS ",selectedPrescribedDrugs)
   const handleSelect = () => {
     setSelected(!selected);
     if (!selected) {
@@ -32,7 +31,7 @@ const Drugs = ({ item }) => {
       className="flex gap-2 cursor-pointer bg-white shadow rounded-xl p-2 my-2"
     >
       <input type="checkbox" className="rounded" checked={selected} />
-      <p className="text-xs">{formateDate(item?.date_created)}</p>
+      <p className="text-xs">{item?.item_name}</p>
     </div>
   );
 };

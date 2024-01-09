@@ -2,12 +2,11 @@ import { setSelectedLabRequest } from '@/redux/features/billing';
 import React, { useState } from 'react'
 import { useSelector,useDispatch } from 'react-redux';
 
-const LabRequests = ({ item,selectedRequest,setSelectedRequest }) => {
+const LabRequests = ({ item }) => {
     const [selected, setSelected] = useState(false);
   const { selectedLabRequests } = useSelector((store) => store.billing);
   const dispatch = useDispatch();
 
-  console.log("LABRE ",selectedLabRequests)
 
     const handleSelect = () => {
         setSelected(!selected);
@@ -30,7 +29,7 @@ const LabRequests = ({ item,selectedRequest,setSelectedRequest }) => {
   return (
     <div onClick={handleSelect} className="flex gap-2 cursor-pointer bg-white shadow rounded-xl p-2 my-2">
       <input type="checkbox" className="rounded" checked={selected} />
-      <p className="text-xs">{formateDate(item?.date_created)}</p>
+      <p className="text-xs">{item?.note}</p>
     </div>
   )
 }

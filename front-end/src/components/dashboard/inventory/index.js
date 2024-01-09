@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux"; 
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
-import Link from "next/link";
-import AddInventoryModal from "./add-inventory";
+import { Column, Pager } from "devextreme-react/data-grid";
+import Link from 'next/link';
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
+import { inventoryDisplayStats } from "@/assets/menu";
+import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
+import { getAllInventories } from "@/redux/features/inventory";
+import { useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -12,87 +17,68 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const InventoryDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const { item, inventories } = useSelector((store) => store.inventory);
+  const dispatch = useDispatch()
+  const auth = useAuth();
 
-  const users = [
-    {
-      number: "1",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "2",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "70081234",
-      name: "Ann Kibet",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-  ];
+
+  useEffect(() => {
+    if (auth) {
+      dispatch(getAllInventories(auth));
+    }
+  }, [auth]);
+
+  console.log(item)
+
+
+  const inventorySummaryInfo = inventoryDisplayStats.map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
 
   return (
     <section className=" my-8">
-      <Grid container spacing={2} className="my-2">
-        <Grid item md={4} xs={12}>
+      <h3 className="text-xl mb-2"> Sales Summary </h3>
+      <Grid container spacing={2}>
+        {inventorySummaryInfo}      
+      </Grid>
+      <h3 className="text-xl mt-8"> Inventory </h3>
+      <Grid className="my-2 flex justify-between">
+        <Grid className="flex justify-between gap-8 rounded-lg">
+          <Grid item md={4} xs={4}>
+            <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
+              <option value="" selected>                
+              </option>
+              {months.map((month, index) => (
+                <option key={index} value="">
+                  {month.name}
+                </option>
+              ))}
+            </select>
+          </Grid>
+          <Grid>
+          <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
+              <option value="" selected>
+                All the Items
+              </option>
+            </select>
+          </Grid>        
+        </Grid>
+        <Grid className="flex items-center rounded-lg" item md={4} xs={4}>
+          <img className="h-4 w-4" src='/images/svgs/search.svg'/>
           <input
-            className="py-2 w-full px-4 focus:outline-none placeholder-font font-thin text-sm"
+            className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
-            placeholder="Search patients by name"
+            placeholder="Search referrals by facility"
           />
         </Grid>
-        <Grid item md={4} xs={12}>
-          <select className="px-4 w-full py-2 focus:outline-none" name="" id="">
-            <option value="" selected>
-              Search by Month
-            </option>
-            {months.map((month, index) => (
-              <option key={index} value="">
-                {month.name}
-              </option>
-            ))}
-          </select>
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <div className="flex">
-            <button className="bg-white shadow border-primary py-2 px-4 w-full">
-              Date
-            </button>
-            <button className="bg-white shadow border-primary py-2 px-4 w-full">
-              Week
-            </button>
-            <button className="bg-white shadow border-primary py-2 px-4 w-full">
-              Month
-            </button>
-          </div>
+        <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
+          <Link className="mx-4" href='/dashboard/inventory/add-inventory'>
+            Add Inventory
+          </Link>
         </Grid>
       </Grid>
-      <AddInventoryModal />
       <DataGrid
-        dataSource={users}
+        dataSource={inventories}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -110,19 +96,24 @@ const InventoryDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column dataField="number" caption="Product Name" width={200} />
-        <Column dataField="id_number" caption="Category" width={140} />
+        <Column 
+          dataField="item" 
+          caption="Product Name"
+          cellRender={(cellData) => {
+            const prodName = item.find(prod => prod.id === cellData.data.item);
+            return prodName ? `${prodName.name}` : 'NA';
+          }}   
+        />
+        <Column dataField="purchase_price" caption="Purchase Price"/>
         <Column
-          dataField="name"
-          caption="Description"
-          width={200}
+          dataField="sale_price"
+          caption="Sale price"
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Price" width={140} />
-        <Column dataField="country" caption="Quantity" width={200} />
-        <Column dataField="gender" caption="Unit Price" width={200} />
-        <Column dataField="country" caption="Buying Price" width={200} />
+        <Column dataField="packed" caption="Packed"/>
+        <Column dataField="subpacked" caption="Subpacked"/>
+        <Column dataField="quantity_in_stock" caption="Quantity"/>
       </DataGrid>
     </section>
   );

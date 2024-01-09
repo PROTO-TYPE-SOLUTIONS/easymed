@@ -7,7 +7,6 @@ const Appointments = ({ item }) => {
   const { selectedAppointments } = useSelector((store) => store.billing);
   const dispatch = useDispatch();
 
-  console.log("APPO ",selectedAppointments)
 
   const handleSelect = () => {
     setSelected(!selected);
@@ -15,7 +14,7 @@ const Appointments = ({ item }) => {
       dispatch(setSelectedAppointment([...selectedAppointments, item]));
     } else {
       const updatedSelection = selectedAppointments.filter(
-        (appointment) => appointment?.first_name !== item?.first_name
+        (appointment) => appointment?.id !== item?.id
       );
       dispatch(setSelectedAppointment(updatedSelection));
     }

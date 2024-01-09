@@ -42,11 +42,18 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
     appointment_date_time: "",
     status: "pending",
     reason: "",
-    fee: "",
+    fee: 0,
     assigned_doctor: null,
-    item_id: null,
-    order_bill_ID: null,
+    item: null,
   };
+
+
+  const parseNumber = (value) => {
+    // Parse the value as a number or return null if not a valid number
+    const parsedValue = parseFloat(value);
+    return isNaN(parsedValue) ? null : parsedValue;
+  };
+
 
   const validationSchema = Yup.object().shape({
     appointment_date_time: Yup.string().required("Date is required!"),
@@ -142,32 +149,12 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                     <label htmlFor="date_of_birth">Fee</label>
                     <Field
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      type="text"
+                      type="number"
                       placeholder="Fee"
                       name="fee"
                     />
                     <ErrorMessage
                       name="fee"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="order bill">Order Bill</label>
-                    <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      name="order_bill_ID"
-                    >
-                      <option value="">Select Order Bill</option>
-                      {orderBills.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.total_Cost}
-                        </option>
-                      ))}
-                    </Field>
-                    <ErrorMessage
-                      name="order_bill_ID"
                       component="div"
                       className="text-warning text-xs"
                     />
