@@ -51,6 +51,7 @@ export const API_URL = {
   DELETE_ITEM: "/inventory/items",
   FETCH_ORDER_BILL: "/inventory/orderbill/",
   REQUISITION: "/inventory/requisition/",
+  REQUISITION_ITEM: "/inventory/requisition-tem/",
 
 
 
@@ -128,6 +129,7 @@ export const APP_API_URL = {
   DELETE_ITEM: "/api/inventory/delete-item",
   FETCH_ORDER_BILL: "/api/order-bills/fetch-order-bill",
   REQUISITION: "/api/inventory/requisition",
+  REQUISITION_ITEM: "/api/inventory/requisition-item",
 
 
   /***************** NURSING APIS **********************/

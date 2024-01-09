@@ -93,10 +93,21 @@ export const fetchOrderBills = () =>{
     })
 }
 
-// purchase order services
 export const addRequisition = (payload) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.REQUISITION}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const addRequisitionItem = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.REQUISITION_ITEM}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })

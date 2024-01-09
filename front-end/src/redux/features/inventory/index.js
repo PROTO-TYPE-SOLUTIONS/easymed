@@ -4,6 +4,7 @@ import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventorie
 
 const initialState = {
   inventories: [],
+  inventoryItems: [],
   requisitions: [],
   items: [],
   suppliers: [],
@@ -33,10 +34,30 @@ const InventorySlice = createSlice({
     setRequisitions: (state, action) => {
       state.requisitions = action.payload;
     },
+    clearInventoryItemsPdf: (state, action)=>{
+      state.inventoryItems = [];
+    },
+    setInventoryItemsPdf: (state, action) => {
+      const inventoryItem = state.inventoryItems.filter(item => item.item != action.payload.item );
+      state.inventoryItems = inventoryItem;
+    },
+    setInventoryItems: (state, action) => {
+
+      const inventoryItem = state.inventoryItems.find(item => item.item === action.payload.item );
+      if (inventoryItem) {
+        // If inventoryItem is found, update the existing item in the array
+        state.inventoryItems = state.inventoryItems.map(item =>
+          item.item === action.payload.item ? { ...item, date_created:action.payload.date_created, supplier:action.payload.supplier, quantity_requested:action.payload.quantity_requested } : item
+        );
+      } else {
+        // If inventoryItem is not found, add the new item to the array
+        state.inventoryItems = [...state.inventoryItems, action.payload];
+      }
+    },
   },
 });
 
-export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions } = InventorySlice.actions;
+export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf } = InventorySlice.actions;
 
 
 export const getAllItems = (name) => async (dispatch) => {
@@ -91,6 +112,18 @@ export const getAllOrderBills = () => async (dispatch) => {
   } catch (error) {
     console.log("SUPPLIERS_ERROR ", error);
   }
+};
+
+export const addItemToInventoryPdf = (payload) => (dispatch) => {
+  dispatch(setInventoryItems(payload));
+};
+
+export const removeItemToInventoryPdf = (payload) => (dispatch) => {
+  dispatch(setInventoryItemsPdf(payload));
+};
+
+export const clearItemsToInventoryPdf = () => (dispatch) => {
+  dispatch(clearInventoryItemsPdf());
 };
 
 export default InventorySlice.reducer;

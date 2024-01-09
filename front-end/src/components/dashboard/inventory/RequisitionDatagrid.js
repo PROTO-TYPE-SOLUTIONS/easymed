@@ -7,6 +7,7 @@ import { months } from "@/assets/dummy-data/laboratory";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllRequisitions, getAllSuppliers, getAllItems } from "@/redux/features/inventory";
+import { getAllDoctors } from "@/redux/features/doctors";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -14,17 +15,18 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const RequisitionDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const { item, suppliers, requisitions } = useSelector(({ inventory }) => inventory);
+  const { requisitions } = useSelector(({ inventory }) => inventory);
+  const doctorsData = useSelector((store)=>store.doctor.doctors)
 
   const dispatch = useDispatch()
   const auth = useAuth();
-
 
   useEffect(() => {
     if (auth) {
       dispatch(getAllRequisitions(auth));
       dispatch(getAllSuppliers());
       dispatch(getAllItems());
+      dispatch(getAllDoctors(auth))
     }
   }, [auth]);
 
@@ -88,22 +90,18 @@ const RequisitionDatagrid = () => {
           showNavigationButtons={true}
         />
         <Column 
-          dataField="item" 
-          caption="Product Name" 
+          dataField="requested_by"
+          caption="Requested By" 
           cellRender={(cellData) => {
-            const prodName = item.find(prod => prod.id === cellData.data.item);
-            return prodName ? `${prodName.name}` : 'NA';
-          }}  
+            const doctor = doctorsData.find(doc => doc.id === cellData.data.requested_by);
+            return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
+          }}
           />
         <Column 
-          dataField="supplier" 
-          caption="Supplier" 
-          cellRender={(cellData) => {
-            const supplierName = suppliers.find(supplier => supplier.id === cellData.data.supplier);
-            return supplierName ? `${supplierName.name}` : 'NA';
-          }}  
-          />
-        <Column dataField="requested_date" caption="Requested Date" />
+          dataField="status"
+          caption="Status"
+        />
+        <Column dataField="date_created" caption="Requested Date" />
       </DataGrid>
     </section>
   );
