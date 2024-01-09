@@ -45,10 +45,14 @@ export const API_URL = {
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
+  FETCH_INVENTORY: "/inventory/inventories/",
   FETCH_SUPPLIERS: "/inventory/suppliers/",
   FETCH_ITEMS: "/inventory/items/",
   DELETE_ITEM: "/inventory/items",
   FETCH_ORDER_BILL: "/inventory/orderbill/",
+  REQUISITION: "/inventory/requisition/",
+  REQUISITION_ITEM: "/inventory/requisition-tem/",
+
 
 
   /***************** NURSING APIS **********************/
@@ -118,11 +122,15 @@ export const APP_API_URL = {
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",
+  FETCH_INVENTORY: "/api/inventory/fetch-inventory",
   FETCH_SUPPLIERS: "/api/inventory/fetch-suppliers",
   FETCH_ITEMS: "/api/inventory/fetch-items",
   FETCH_ITEM: "/api/inventory/get-item",
   DELETE_ITEM: "/api/inventory/delete-item",
   FETCH_ORDER_BILL: "/api/order-bills/fetch-order-bill",
+  REQUISITION: "/api/inventory/requisition",
+  REQUISITION_ITEM: "/api/inventory/requisition-item",
+
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/api/nursing/add-triage",

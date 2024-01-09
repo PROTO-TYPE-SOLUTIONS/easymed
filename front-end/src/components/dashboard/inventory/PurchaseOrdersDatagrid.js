@@ -1,45 +1,59 @@
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux"; 
+import React from "react";
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
-import Link from 'next/link';
+import Link from 'next/link'
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
-import { inventoryDisplayStats } from "@/assets/menu";
-import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
-import { getAllInventories } from "@/redux/features/inventory";
-import { useDispatch } from "react-redux";
-import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-const InventoryDataGrid = () => {
+const PurchaseOrdersDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const { item, inventories } = useSelector((store) => store.inventory);
-  const dispatch = useDispatch()
-  const auth = useAuth();
 
-
-  useEffect(() => {
-    if (auth) {
-      dispatch(getAllInventories(auth));
-    }
-  }, [auth]);
-
-  console.log(item)
-
-
-  const inventorySummaryInfo = inventoryDisplayStats.map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
+  const users = [
+    {
+      number: "1",
+      id_number: "1234821",
+      name: "Marcos Ochieng",
+      country: "Kenya",
+      gender: "Male",
+      age: "34",
+      status: "Active",
+    },
+    {
+      number: "2",
+      id_number: "70081234",
+      name: "Derrick Kimani",
+      country: "Uganda",
+      gender: "Male",
+      age: "23",
+      status: "Active",
+    },
+    {
+      number: "3",
+      id_number: "1234821",
+      name: "Jane Munyua",
+      country: "Tanzania",
+      gender: "Female",
+      age: "70",
+      status: "Active",
+    },
+    {
+      number: "3",
+      id_number: "70081234",
+      name: "Ann Kibet",
+      country: "Burundi",
+      gender: "Male",
+      age: "49",
+      status: "Active",
+    },
+  ];
 
   return (
     <section className=" my-8">
-      <h3 className="text-xl mb-2"> Sales Summary </h3>
-      <Grid container spacing={2}>
-        {inventorySummaryInfo}      
-      </Grid>
-      <h3 className="text-xl mt-8"> Inventory </h3>
+      <h3 className="text-xl mb-8"> Purchase Orders </h3>
       <Grid className="my-2 flex justify-between">
         <Grid className="flex justify-between gap-8 rounded-lg">
           <Grid item md={4} xs={4}>
@@ -72,13 +86,13 @@ const InventoryDataGrid = () => {
           />
         </Grid>
         <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
-          <Link className="mx-4" href='/dashboard/inventory/add-inventory'>
-            Add Inventory
+          <Link className="mx-4" href='/dashboard/inventory/add-purchase'>
+            Purchase Product
           </Link>
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={inventories}
+        dataSource={users}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -96,27 +110,22 @@ const InventoryDataGrid = () => {
           showPageSizeSelector={true}
           showNavigationButtons={true}
         />
-        <Column 
-          dataField="item" 
-          caption="Product Name"
-          cellRender={(cellData) => {
-            const prodName = item.find(prod => prod.id === cellData.data.item);
-            return prodName ? `${prodName.name}` : 'NA';
-          }}   
-        />
-        <Column dataField="purchase_price" caption="Purchase Price"/>
+        <Column dataField="number" caption="Product Name" width={200} />
+        <Column dataField="id_number" caption="Category" width={140} />
         <Column
-          dataField="sale_price"
-          caption="Sale price"
+          dataField="name"
+          caption="Description"
+          width={200}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="packed" caption="Packed"/>
-        <Column dataField="subpacked" caption="Subpacked"/>
-        <Column dataField="quantity_in_stock" caption="Quantity"/>
+        <Column dataField="age" caption="Price" width={140} />
+        <Column dataField="country" caption="Quantity" width={200} />
+        <Column dataField="gender" caption="Unit Price" width={200} />
+        <Column dataField="country" caption="Buying Price" width={200} />
       </DataGrid>
     </section>
   );
 };
 
-export default InventoryDataGrid;
+export default PurchaseOrdersDatagrid;
