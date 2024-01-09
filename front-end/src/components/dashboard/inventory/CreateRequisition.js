@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { useRouter } from 'next/navigation'
 import html2canvas from 'html2canvas';
@@ -33,14 +35,28 @@ const getActions = () => {
   return actions;
 };
 
+
 const CreateRequisition = () => {
+  const [requestedBy, setRequestedBy] = useState(null);
   const pdfRef = useRef();
   const router = useRouter()
   const userActions = getActions();
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const { item, suppliers, inventoryItems } = useSelector(({ inventory }) => inventory);
+  const doctorsData = useSelector((store)=>store.doctor.doctors)
   const auth = useAuth();
+
+  const initialValues = {
+    status: "COMPLETED",
+    requested_by: "",
+    requisition_items: inventoryItems,
+
+  };
+
+  const validationSchema = Yup.object().shape({
+    requested_by: Yup.string().required("This field is required!"),
+  });
 
 
   useEffect(() => {
@@ -116,7 +132,7 @@ const CreateRequisition = () => {
     inventoryItems.forEach(item => saveRequisitionItem(item, payload))
   }
 
-  const saveRequisitionPdf = async () => {
+  const saveRequisitionPdf = async (formValue, helpers) => {
     // generatePdf().then( async (pdf) => {
     //   try {
 
@@ -138,11 +154,16 @@ const CreateRequisition = () => {
     // });
 
     try {
+      if (inventoryItems.length <= 0) {
+        toast.error("No requisition items");
+        return;
+      }      
+
       setLoading(true);
 
       const payload = {
-        status: "COMPLETED",
-        requested_by: 1,
+        status: formValue.status,
+        requested_by: formValue.requested_by,
         date_created:5
       }
       await addRequisition(payload).then((res) => {
@@ -150,6 +171,7 @@ const CreateRequisition = () => {
         console.log(res)
         toast.success("Requisition Added Successfully!");
         setLoading(false);
+        helpers.clear()
         dispatch(clearItemsToInventoryPdf())
         router.push('/dashboard/inventory/requisitions')
       });
@@ -169,25 +191,38 @@ const CreateRequisition = () => {
           <Link href='/dashboard/inventory/requisitions'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
           <h3 className="text-xl"> Requisition entry </h3>
       </div>
-
-      <Grid container className=" flex justify-between mt-2">
-        <Grid item md={4} xs={12}>
-          <select className="px-8 w-full py-2 focus:outline-none" name="" id="">
-            <option>requested by</option>
-            {/* {months.map((month, index) => (
-              <option key={index} value="">
-                {month.name}
-              </option>
-            ))} */}
-          </select>
-        </Grid>
-        <Grid item md={3} xs={12}>
+      <div className="flex items-center justify-end">
           <AddRequisitionItemModal/>
-        </Grid>
-      </Grid>  
+      </div>
 
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={saveRequisitionPdf}
+      >
+      <Form className="">
+      <Grid container className=" flex justify-between items-center my-2">
+        <Grid item md={12} xs={12}>
+              <Field
+                as="select"
+                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                name="requested_by"
+              >
+                <option value="">requested by</option>
+                {doctorsData?.map((doc) => (
+                  <option key={doc.id} value={doc.id}>
+                    {`${doc.first_name} ${doc.last_name}`}
+                  </option>
+                ))}
+              </Field>
+              <ErrorMessage
+                name="requested_by"
+                component="div"
+                className="text-warning text-xs"
+              />
+            </Grid>
+      </Grid>
       <DataGrid
-        
         dataSource={inventoryItems}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
@@ -238,7 +273,7 @@ const CreateRequisition = () => {
       <Grid className="mt-8" item md={12} xs={12}>
         <div className="flex items-center justify-start">
           <button
-            onClick={saveRequisitionPdf}
+            type="submit"
             className="bg-primary rounded-xl text-sm px-8 py-4 text-white"
           >
             {loading && (
@@ -264,6 +299,8 @@ const CreateRequisition = () => {
           </button>
         </div>
       </Grid>
+      </Form>
+      </Formik>
     </section>
   )
 }
