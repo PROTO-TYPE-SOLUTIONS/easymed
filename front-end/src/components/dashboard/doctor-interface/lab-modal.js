@@ -30,7 +30,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
     patient: selectedRowData?.id,
     test_profile_ID: null,
     order_bill: null,
-    item_id: null,
+    item: null,
     requested_by: auth?.user_id,
     equipment: null,
   };

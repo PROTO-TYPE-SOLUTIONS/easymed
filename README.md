@@ -74,7 +74,7 @@ npm start
 Visit localhost 127.0.0.1:3000/dashboard
 
 ## Adding Permissions
-You need to create groups and associate permissions ie ``DOCTORS``,         ``SYS_ADMIN``, ``RECEPTIONISTS``
+You need to create groups and associate permissions ie ``DOCTORS``,``PHARMACISTS``, ``SYS_ADMIN``, ``RECEPTIONISTS``, ``PATIENTS``, ``LAB_TECHS`` 
 Then create permissions below and link to the ``GROUPS``.
 
 Create super user then navigate to localhost:8080/admin and add permissions;

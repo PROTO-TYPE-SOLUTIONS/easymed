@@ -1,10 +1,11 @@
 from django.db import models
 from customuser.models import CustomUser
+from django.utils import timezone
 
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
-    date_created = models.DateField(auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True, null=True, blank=True)
 
 
     def __str__(self):
@@ -12,7 +13,7 @@ class Department(models.Model):
     
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
-    date_created = models.DateField(auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True, null=True, blank=True)
 
 
     def __str__(self):
@@ -33,6 +34,8 @@ class Item(models.Model):
         ('Drug', 'Drug'),
         ('Furniture', 'Furniture'),
         ('Lab Test', 'Lab Test'),
+        ('General Appointment', 'General Appointment'),
+        ('Specialized Appointment', 'Specialized Appointment'),
         ('general', 'General'),
     ]
     id = models.CharField(max_length=255, primary_key=True, editable=True)
@@ -40,8 +43,7 @@ class Item(models.Model):
     desc = models.CharField(max_length=255)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
-    date_created = models.DateField(auto_now_add=True)
-
+    date_created = models.DateField(auto_now_add=True, null=True, blank=True)
 
 
     def __str__(self):
@@ -55,7 +57,7 @@ class IncomingItem(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
-    date_created = models.DateField(auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True, null=True, blank=True)
 
 
 
@@ -64,7 +66,8 @@ class DepartmentInventory(models.Model):
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    date_created = models.DateField(auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True, null=True, blank=True)
+
 
     
     def __str__(self):
@@ -77,7 +80,7 @@ class Inventory(models.Model):
     quantity_in_stock = models.IntegerField()
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
-    date_created = models.DateField(auto_now_add=True)
+    date_created = models.DateField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return self.item
