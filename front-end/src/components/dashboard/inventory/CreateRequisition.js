@@ -158,24 +158,27 @@ const CreateRequisition = () => {
         toast.error("No requisition items");
         return;
       }      
-
+    
       setLoading(true);
-
+    
       const payload = {
         status: formValue.status,
         requested_by: formValue.requested_by,
-        date_created:5
+        date_created: 5
       }
+    
       await addRequisition(payload).then((res) => {
         sendEachItemToDb(res)
         console.log(res)
         toast.success("Requisition Added Successfully!");
         setLoading(false);
-        helpers.clear()
         dispatch(clearItemsToInventoryPdf())
+        console.log("Dispatched clearItemsToInventoryPdf()");
+        
         router.push('/dashboard/inventory/requisitions')
+        console.log("Router pushed to /dashboard/inventory/requisitions");
       });
-    }catch (err) {
+    } catch (err) {
       toast.error(err);
       setLoading(false);
     }
