@@ -1,45 +1,38 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux"; 
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
-import Link from 'next/link';
+import Link from 'next/link'
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
-import { inventoryDisplayStats } from "@/assets/menu";
-import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
-import { getAllInventories } from "@/redux/features/inventory";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllRequisitions, getAllSuppliers, getAllItems } from "@/redux/features/inventory";
+import { getAllDoctors } from "@/redux/features/doctors";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-const InventoryDataGrid = () => {
+const RequisitionDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const { item, inventories } = useSelector((store) => store.inventory);
+  const { requisitions } = useSelector(({ inventory }) => inventory);
+  const doctorsData = useSelector((store)=>store.doctor.doctors)
+
   const dispatch = useDispatch()
   const auth = useAuth();
 
-
   useEffect(() => {
     if (auth) {
-      dispatch(getAllInventories(auth));
+      dispatch(getAllRequisitions(auth));
+      dispatch(getAllSuppliers());
+      dispatch(getAllItems());
+      dispatch(getAllDoctors(auth))
     }
   }, [auth]);
 
-  console.log(item)
-
-
-  const inventorySummaryInfo = inventoryDisplayStats.map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
-
   return (
     <section className=" my-8">
-      <h3 className="text-xl mb-2"> Sales Summary </h3>
-      <Grid container spacing={2}>
-        {inventorySummaryInfo}      
-      </Grid>
-      <h3 className="text-xl mt-8"> Inventory </h3>
+      <h3 className="text-xl mb-8"> Requisitions</h3>
       <Grid className="my-2 flex justify-between">
         <Grid className="flex justify-between gap-8 rounded-lg">
           <Grid item md={4} xs={4}>
@@ -72,13 +65,13 @@ const InventoryDataGrid = () => {
           />
         </Grid>
         <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
-          <Link className="mx-4" href='/dashboard/inventory/add-inventory'>
-            Add Inventory
+          <Link className="mx-4" href='/dashboard/inventory/create-requisition'>
+            Create Requisition
           </Link>
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={inventories}
+        dataSource={requisitions}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -97,26 +90,21 @@ const InventoryDataGrid = () => {
           showNavigationButtons={true}
         />
         <Column 
-          dataField="item" 
-          caption="Product Name"
+          dataField="requested_by"
+          caption="Requested By" 
           cellRender={(cellData) => {
-            const prodName = item.find(prod => prod.id === cellData.data.item);
-            return prodName ? `${prodName.name}` : 'NA';
-          }}   
+            const doctor = doctorsData.find(doc => doc.id === cellData.data.requested_by);
+            return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
+          }}
+          />
+        <Column 
+          dataField="status"
+          caption="Status"
         />
-        <Column dataField="purchase_price" caption="Purchase Price"/>
-        <Column
-          dataField="sale_price"
-          caption="Sale price"
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column dataField="packed" caption="Packed"/>
-        <Column dataField="subpacked" caption="Subpacked"/>
-        <Column dataField="quantity_in_stock" caption="Quantity"/>
+        <Column dataField="date_created" caption="Requested Date" />
       </DataGrid>
     </section>
   );
 };
 
-export default InventoryDataGrid;
+export default RequisitionDatagrid;

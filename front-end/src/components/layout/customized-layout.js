@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar from "./sidebar";
+import RightBar from "./rightbar";
 import CustomizedHeader from "./customized-header";
 
 

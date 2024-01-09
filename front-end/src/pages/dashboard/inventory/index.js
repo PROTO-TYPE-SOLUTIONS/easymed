@@ -1,39 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import Link from 'next/link'
 import { Container } from "@mui/material";
 import InventoryDataGrid from "@/components/dashboard/inventory";
 import AuthGuard from "@/assets/hoc/auth-guard";
-import CustomizedLayout from "@/components/layout/customized-layout";
-import IncomingItems from "@/components/dashboard/inventory/incoming-items";
-import Reports from "@/components/dashboard/inventory/reports";
+import DashboardLayout from "@/components/layout/dashboard-layout";
+import { getAllInventories } from "@/redux/features/inventory";
+import { getAllOrderBills, getItems } from "@/redux/features/inventory";
+import { useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
+import InventoryNav from "@/components/dashboard/inventory/nav";
+
 
 const Inventory = () => {
-  const [currentTab, setCurrentTab] = useState(0);
+  const dispatch = useDispatch()
+  const auth = useAuth();
+
+
+  useEffect(() => {
+    if (auth) {
+      dispatch(getAllInventories(auth));
+      dispatch(getItems())
+    }
+  }, [auth]);
 
   return (
-    <Container maxWidth="xl">
-      <div className="flex items-center gap-4 my-8">
-        <button onClick={()=> setCurrentTab(0)} className={`${currentTab === 0 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-          Inventory
-        </button>
-        {/* <RequisitionModal /> */}
-        <button onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-          Incoming Items
-        </button>
-        <button onClick={()=> setCurrentTab(3)} className={`${currentTab === 3 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-          Reports
-        </button>
+
+      <div>
+        <Container maxWidth="xl">
+          <InventoryNav />
+          <InventoryDataGrid />
+        </Container>
+        
       </div>
 
-      {currentTab === 0 && <InventoryDataGrid /> }
-      {currentTab === 2 && <IncomingItems /> }
-      {currentTab === 3 && <Reports /> }
-    </Container>
   );
 };
 
 Inventory.getLayout = (page) => (
   <AuthGuard>
-    <CustomizedLayout>{page}</CustomizedLayout>;
+    <DashboardLayout>{page}</DashboardLayout>;
   </AuthGuard>
 );
 

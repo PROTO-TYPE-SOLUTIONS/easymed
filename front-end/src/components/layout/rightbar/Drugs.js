@@ -1,6 +1,6 @@
 import React from 'react'
 
-const DrugsInfo = () => {
+const DrugsInfo = ({displayNUmber}) => {
     const drugs = [
         {
             name:"Cold Seas",
@@ -32,7 +32,7 @@ const DrugsInfo = () => {
         },
     ]
 
-    const drugsInfo = drugs.slice(0,3).map((item, index)=>{
+    const drugsInfo = drugs.slice(0,displayNUmber).map((item, index)=>{
         return (
             <li key={`dugs-info-${index}`} className='flex justify-between px-4 text-xs my-2 rounded'>
                 <p className='w-full'>{item.name}</p>
