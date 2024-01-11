@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import CreateAppointmentModal from "./create-appointment-modal";
@@ -10,6 +10,8 @@ import AssignDoctorModal from "./assign-doctor-modal";
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -34,6 +36,9 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
   const userActions = getActions();
   const [open, setOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
   //   filter users based on search query
   const filteredAppointments = appointments.filter((user) => {
@@ -109,11 +114,14 @@ const BookedAppointmentsDataGrid = ({ appointments }) => {
         className="shadow-xl w-full"
         // height={"70vh"}
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
           visible={true}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <Column
           dataField="gender"
