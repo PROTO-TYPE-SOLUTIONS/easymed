@@ -133,7 +133,7 @@ class PurchaseOrderItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_purchased = models.CharField(max_length=255)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
     date_created = models.DateField(auto_now_add=True)
 
     
