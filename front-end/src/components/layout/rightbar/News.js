@@ -23,8 +23,8 @@ const News = () => {
   }, [url]);
 
   return (
-  <div className='w-full h-80 py-2'>
-    {feed && (
+  <div className='w-full h-80 py-2 justify-center flex'>
+    {feed ? (
     <div>
     <p className='text-xs text-center'>Medical News - Latest Updates at Drugs.com</p>
     <Carousel
@@ -38,7 +38,7 @@ const News = () => {
     }
     </Carousel>
     </div>
-    )}
+    ) : <div class="loading-spin"><div></div><div></div></div> }
   </div>
 
   )
