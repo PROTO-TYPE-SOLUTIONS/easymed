@@ -8,7 +8,7 @@ const InventoryNav = () => {
 
   console.log(pathName === '/dashboard/inventory/add-purchase')
   return (
-    <div className="flex items-center justify-between my-8">
+    <div className="flex items-center gap-8 my-8">
       <Link href='/dashboard/inventory' className={`${ pathName === '/dashboard/inventory' || pathName === '/dashboard/inventory/add-inventory'  ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
         Inventory
       </Link>

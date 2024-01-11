@@ -3,7 +3,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
-import { getAllItems, getAllSuppliers, addItemToInventoryPdf } from "@/redux/features/inventory";
+import { getAllItems, getItems, getAllSuppliers, addItemToInventoryPdf } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -61,6 +61,7 @@ const AddRequisitionItemModal = () => {
 
   useEffect(() => {
     dispatch(getAllItems());
+    dispatch(getItems())
     dispatch(getAllSuppliers());
     
   }, []);
