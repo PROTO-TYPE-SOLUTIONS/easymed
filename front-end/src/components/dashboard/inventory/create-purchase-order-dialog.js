@@ -3,19 +3,16 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
-import { getAllItems, getItems, getAllSuppliers, addItemToInventoryPdf } from "@/redux/features/inventory";
+import { getAllItems, getItems, getAllSuppliers, addItemToPurchaseOrderPdf } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 
-const AddRequisitionItemModal = () => {
+const AddPurchaseOrderItemModal = () => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { item, suppliers, inventoryItems } = useSelector(({ inventory }) => inventory);
-
-  console.log(inventoryItems)
-
+  const { item, suppliers, purchaseOrderItems } = useSelector(({ inventory }) => inventory);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -30,26 +27,27 @@ const AddRequisitionItemModal = () => {
     date_created: "",
     item: null,
     supplier: null,
-    quantity_requested: "",
-    requisition: 0
+    quantity_purchased: "",
+    purchase_order: 0
   };
 
   const validationSchema = Yup.object().shape({
     date_created: Yup.string().required("This field is required!"),
     item: Yup.string().required("This field is required!"),
     supplier: Yup.string().required("This field is required!"),
-    quantity_requested: Yup.string().required("This field is required!"),
+    quantity_purchased: Yup.string().required("This field is required!"),
   });
 
-  const handleAddRequisition = async (formValue, helpers) => {
+  const handleAddPurchaseOrder = async (formValue, helpers) => {
     try {
       const formData = {
         ...formValue,
         supplier: parseInt(formValue.supplier),
       };
+      console.log(formData)
 
       setLoading(true);    
-      dispatch(addItemToInventoryPdf(formValue))
+      dispatch(addItemToPurchaseOrderPdf(formValue))
       setLoading(false);
       handleClose()
 
@@ -69,7 +67,7 @@ const AddRequisitionItemModal = () => {
   return (
     <section>
       <button onClick={handleClickOpen} className="bg-primary text-white text-sm rounded px-3 py-2">
-        Add Requisition Item
+        Add Purchase Order Item
       </button>
       <Dialog
         fullWidth
@@ -80,11 +78,11 @@ const AddRequisitionItemModal = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogContent>
-          <h3 className="text-xl my-4"> Add Requisition Item </h3>
+          <h3 className="text-xl my-4"> Add Purchase Order Item </h3>
         <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleAddRequisition}
+        onSubmit={handleAddPurchaseOrder}
       >
         <Form className="">
           <Grid container spacing={4}>
@@ -131,10 +129,10 @@ const AddRequisitionItemModal = () => {
                 className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="Quantity"
-                name="quantity_requested"
+                name="quantity_purchased"
               />
               <ErrorMessage
-                name="quantity_requested"
+                name="quantity_purchased"
                 component="div"
                 className="text-warning text-xs"
               />
@@ -191,4 +189,4 @@ const AddRequisitionItemModal = () => {
   );
 };
 
-export default AddRequisitionItemModal;
+export default AddPurchaseOrderItemModal;

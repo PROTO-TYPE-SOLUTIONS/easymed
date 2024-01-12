@@ -1,11 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions } from "@/redux/service/inventory";
+import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions, fetchPurchaseOrders } from "@/redux/service/inventory";
 
 
 const initialState = {
   inventories: [],
   inventoryItems: [],
   requisitions: [],
+  purchaseOrderItems: [],
+  purchaseOrders: [],
   items: [],
   suppliers: [],
   orderBills: [],
@@ -34,6 +36,9 @@ const InventorySlice = createSlice({
     setRequisitions: (state, action) => {
       state.requisitions = action.payload;
     },
+    setPurchaseOrders: (state, action) => {
+      state.purchaseOrders = action.payload;
+    },
     clearInventoryItemsPdf: (state, action)=>{
       state.inventoryItems = [];
     },
@@ -54,10 +59,31 @@ const InventorySlice = createSlice({
         state.inventoryItems = [...state.inventoryItems, action.payload];
       }
     },
+
+    clearPurchaseOrderItemsPdf: (state, action)=>{
+      state.purchaseOrderItems = [];
+    },
+    setPurchaseOrderItemsPdf: (state, action) => {
+      const purchaseOrderItem = state.purchaseOrderItems.filter(item => item.item != action.payload.item );
+      state.purchaseOrderItems = purchaseOrderItem;
+    },
+    setPurchaseOrderItems: (state, action) => {
+
+      const purchaseOrderItem = state.purchaseOrderItems.find(item => item.item === action.payload.item );
+      if (purchaseOrderItem) {
+        // If PurchaseOrderItem is found, update the existing item in the array
+        state.purchaseOrderItems = state.purchaseOrderItems.map(item =>
+          item.item === action.payload.item ? { ...item, date_created:action.payload.date_created, supplier:action.payload.supplier, quantity_purchased:action.payload.quantity_purchased } : item
+        );
+      } else {
+        // If PurchaseOrderItem is not found, add the new item to the array
+        state.purchaseOrderItems = [...state.purchaseOrderItems, action.payload];
+      }
+    },
   },
 });
 
-export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf } = InventorySlice.actions;
+export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf } = InventorySlice.actions;
 
 
 export const getAllItems = (name) => async (dispatch) => {
@@ -74,7 +100,7 @@ export const getAllInventories = (auth) => async (dispatch) => {
     const response = await fetchInventories(auth);
     dispatch(setInventories(response));
   } catch (error) {
-    console.log("ITEMS_ERROR ", error);
+    console.log("INVENTORIES_ERROR ", error);
   }
 };
 
@@ -83,7 +109,16 @@ export const getAllRequisitions = (auth) => async (dispatch) => {
     const response = await fetchRequisitions(auth);
     dispatch(setRequisitions(response));
   } catch (error) {
-    console.log("ITEMS_ERROR ", error);
+    console.log("REQUISITIONS_ERROR ", error);
+  }
+};
+
+export const getAllPurchaseOrders = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchPurchaseOrders(auth);
+    dispatch(setPurchaseOrders(response));
+  } catch (error) {
+    console.log("PURCHASE_ORDERS_ERROR ", error);
   }
 };
 
@@ -124,6 +159,18 @@ export const removeItemToInventoryPdf = (payload) => (dispatch) => {
 
 export const clearItemsToInventoryPdf = () => (dispatch) => {
   dispatch(clearInventoryItemsPdf());
+};
+
+export const addItemToPurchaseOrderPdf = (payload) => (dispatch) => {
+  dispatch(setPurchaseOrderItems(payload));
+};
+
+export const removeItemToPurchaseOrderPdf = (payload) => (dispatch) => {
+  dispatch(setPurchaseOrderItemsPdf(payload));
+};
+
+export const clearItemsToPurchaseOrderPdf = () => (dispatch) => {
+  dispatch(clearPurchaseOrderItemsPdf());
 };
 
 export default InventorySlice.reducer;
