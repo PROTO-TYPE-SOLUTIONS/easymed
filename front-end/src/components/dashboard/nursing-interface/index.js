@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager,
-  HeaderFilter,
+  HeaderFilter, Scrolling,
  } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
@@ -15,6 +15,8 @@ import AddTriageModal from './add-triage-modal';
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -36,6 +38,9 @@ const NursePatientDataGrid = () => {
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const dispatch = useDispatch();
   const { patients } = useSelector((store) => store.patient);
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
 
   useEffect(() =>{
@@ -101,11 +106,14 @@ const NursePatientDataGrid = () => {
         className="shadow-xl w-full"
         height={"70vh"}
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <HeaderFilter visible={true} />
         <Column

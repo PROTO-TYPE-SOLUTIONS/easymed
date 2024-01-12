@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection,
-  HeaderFilter,
+  HeaderFilter, Scrolling,
  } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
@@ -13,6 +13,8 @@ import Link from "next/link";
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -32,6 +34,9 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
   const userActions = getActions();
   const [open, setOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
   const users = [
     {
@@ -158,11 +163,14 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
         className="shadow-xl w-full"
         // height={"70vh"}
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <HeaderFilter visible={true} />
         <Column

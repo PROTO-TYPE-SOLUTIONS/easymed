@@ -5,6 +5,7 @@ import {
   Paging,
   Pager,
   HeaderFilter,
+  Scrolling,
 } from "devextreme-react/data-grid";
 import AddPatientModal from "./add-patient-modal";
 import { Chip } from "@mui/material";
@@ -15,9 +16,12 @@ import { MdAddCircle } from "react-icons/md";
 import { LuMoreHorizontal } from "react-icons/lu";
 import CreateAppointmentModal from "./create-appointment-modal";
 
+
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -38,6 +42,9 @@ const PatientsDataGrid = () => {
   const userActions = getActions();
   const [open,setOpen] = useState(false)
   const [selectedRowData,setSelectedRowData] = useState({});
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
 
 
   const onMenuClick = async (menu, data) => {
@@ -117,11 +124,14 @@ const PatientsDataGrid = () => {
         // height={"60vh"}
       >
         <HeaderFilter visible={true} />
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          showInfo={showInfo}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showNavigationButtons={showNavButtons}
         />
 
         <Column

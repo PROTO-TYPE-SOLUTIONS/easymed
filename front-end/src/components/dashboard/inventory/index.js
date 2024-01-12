@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux"; 
 import dynamic from "next/dynamic";
-import { Column, Pager } from "devextreme-react/data-grid";
+import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import Link from 'next/link';
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
@@ -15,12 +15,16 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const allowedPageSizes = [5, 10, 'all'];
+
 const InventoryDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const { item, inventories } = useSelector((store) => store.inventory);
   const dispatch = useDispatch()
   const auth = useAuth();
-
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
   useEffect(() => {
     if (auth) {
@@ -90,11 +94,14 @@ const InventoryDataGrid = () => {
         className="shadow-xl"
         // height={"70vh"}
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <Column 
           dataField="item" 

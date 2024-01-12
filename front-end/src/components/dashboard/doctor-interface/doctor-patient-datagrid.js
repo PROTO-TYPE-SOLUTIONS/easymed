@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection,
-  HeaderFilter,
+  HeaderFilter, Scrolling,
  } from "devextreme-react/data-grid";
 import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
 import { Chip } from "@mui/material";
@@ -24,6 +24,8 @@ import LabModal from "./lab-modal";
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -65,6 +67,9 @@ const DoctorPatientDataGrid = () => {
   const auth = useAuth();
   const { doctorAppointments } = useSelector((store) => store.appointment);
   const router = useRouter();
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
   
 
@@ -226,11 +231,14 @@ const DoctorPatientDataGrid = () => {
           showCheckBoxesMode={checkBoxesMode}
         /> */}
         <HeaderFilter visible={true} />
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <Column
           dataField="first_name"
