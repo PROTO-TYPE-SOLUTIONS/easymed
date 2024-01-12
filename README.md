@@ -91,3 +91,9 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 * Inventory Dashboard => ``CAN_ACCESS_INVENTORY_DASHBOARD``
 
 You will notice that we have a Role and a Group. A group is associated with permissions which determines which speccific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
+
+
+## Running celery
+If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
+``pip install celery redis``
+``celery -A makeeasyhmis worker --loglevel=INFO``

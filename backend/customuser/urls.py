@@ -1,8 +1,13 @@
-# urls.py
 from django.urls import path
-# views
 from .views import *
 from rest_framework_simplejwt.views import TokenRefreshView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'users', UserListViewSet)
+
+
 
 urlpatterns = [
     path('doctors/', DoctorsAPIView.as_view(), name='doctors'),
@@ -12,5 +17,7 @@ urlpatterns = [
     path('register/', RegistrationAPIView.as_view(), name='register'),
     path('login/', LoginAPIView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
+
+    path('', include(router.urls)),
 ]
 
