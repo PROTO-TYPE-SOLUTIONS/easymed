@@ -11,6 +11,7 @@ import { getAllOrderBills, getItems } from "@/redux/features/inventory";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { createAppointment } from "@/redux/service/appointment";
+import SeachableSelect from "@/components/select/Searchable";
 
 const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
   const [loading, setLoading] = React.useState(false);
@@ -18,6 +19,10 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
   const { orderBills,item } = useSelector((store) => store.inventory);
   const { doctors } = useSelector((store) => store.doctor);
   const auth = useAuth();
+
+  const handleChange = (selectedOption) => {
+    setValue(selectedOption);
+  };
 
   console.log("ROW_DATA ",selectedRowData)
 
@@ -44,7 +49,7 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
     reason: "",
     fee: 0,
     assigned_doctor: null,
-    item: null,
+    item_id: null,
   };
 
 
@@ -59,8 +64,8 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
     appointment_date_time: Yup.string().required("Date is required!"),
     // reason: Yup.string().required("Prov is required!"),
     fee: Yup.string().required("Fee is required!"),
-    assigned_doctor: Yup.string().required("Assign Doctor!"),
-    item_id: Yup.string().required("Select Item!"),
+    assigned_doctor: Yup.object().required("Assign Doctor!"),
+    item_id: Yup.object().required('Select Item!'),
   });
 
   const handleCreateAppointment = async (formValue, helpers) => {
@@ -68,6 +73,8 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
     const formData = {
       ...formValue,
       patient: selectedRowData?.id,
+      item: parseInt(formValue.item_id.value),
+      assigned_doctor: parseInt(formValue.assigned_doctor.value)
     };
     console.log("FORM_DATA ", formData);
     try {
@@ -107,7 +114,7 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                   <Grid item md={6} xs={12}>
                     <label htmlFor="first_name">Appointment Date</label>
                     <Field
-                      className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                      className="block border border-gray rounded-md py-2 text-sm px-4 focus:outline-none w-full"
                       type="date"
                       placeholder="Appointment date time"
                       name="appointment_date_time"
@@ -119,24 +126,11 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                     />
                   </Grid>
                   <Grid item md={6} xs={12}>
-                    <label htmlFor="insurance">Assign Doctor</label>
-                    <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                    <SeachableSelect
+                      label="Assign Doctor"
                       name="assigned_doctor"
-                    >
-                      <option value="">Select Doctor</option>
-                      {doctors.map((item) => (
-                        <option
-                          className="flex gap-2"
-                          key={item?.id}
-                          value={item.id}
-                        >
-                          <span>{item?.first_name}</span>
-                          <span>{item?.last_name}</span>
-                        </option>
-                      ))}
-                    </Field>
+                      options={doctors.map((item) => ({ value: item.id, label: `${item?.first_name} ${item?.last_name}` }))}
+                    />
                     <ErrorMessage
                       name="assigned_doctor"
                       component="div"
@@ -148,7 +142,7 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                   <Grid item md={6} xs={12}>
                     <label htmlFor="date_of_birth">Fee</label>
                     <Field
-                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      className="block border border-gray rounded-md text-sm py-2 px-4 focus:outline-none w-full"
                       type="number"
                       placeholder="Fee"
                       name="fee"
@@ -162,19 +156,11 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                 </Grid>
                 <Grid container spacing={2}>
                   <Grid item md={12} xs={12}>
-                    <label htmlFor="item_id">Item</label>
-                    <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                    <SeachableSelect
+                      label="Select Item"
                       name="item_id"
-                    >
-                      <option value="">Select Item</option>
-                      {item.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.name}
-                        </option>
-                      ))}
-                    </Field>
+                      options={item.map((item) => ({ value: item.id, label: item.name }))}
+                    />
                     <ErrorMessage
                       name="item_id"
                       component="div"
