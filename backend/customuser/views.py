@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework import viewsets
 
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -55,8 +56,6 @@ from utils.group_perms import user_in_group
 from authperms.permissions import IsStaffUser
 
 # Register Endpoint
-
-
 class RegistrationAPIView(APIView):
     permission_classes = (AllowAny,)
 
@@ -157,3 +156,8 @@ class ReceptionistAPIView(APIView):
         receptionist = Receptionist.objects.filter(role = CustomUser.DOCTOR)
         serializers = ReceptionistSerializer(receptionist, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class UserListViewSet(viewsets.ModelViewSet):
+    serializer_class = CustomUserSerializer
+    queryset = CustomUser.objects.all()
