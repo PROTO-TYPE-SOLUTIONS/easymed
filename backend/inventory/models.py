@@ -3,6 +3,8 @@ from customuser.models import CustomUser
 from django.utils import timezone
 
 
+
+
 class Department(models.Model):
     name = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -49,7 +51,7 @@ class Item(models.Model):
 # will create signal to update Inventory table when this object is created
 class IncomingItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)
@@ -57,9 +59,23 @@ class IncomingItem(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
 
+
+
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
 
+class Inventory(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity_in_stock = models.IntegerField()
+    packed = models.CharField(max_length=255)
+    subpacked = models.CharField(max_length=255)
+    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.item.name} - {self.date_created}"
+    
 class DepartmentInventory(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)
@@ -70,17 +86,7 @@ class DepartmentInventory(models.Model):
     def __str__(self):
         return str(self.item)
 
-class Inventory(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity_in_stock = models.IntegerField()
-    packed = models.CharField(max_length=255)
-    subpacked = models.CharField(max_length=255)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.item.name} - {self.date_created}"
 
 
 class Requisition(models.Model):
