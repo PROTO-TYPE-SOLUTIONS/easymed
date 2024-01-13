@@ -49,14 +49,8 @@ const CreateRequisition = () => {
 
   const initialValues = {
     status: "COMPLETED",
-    requested_by: "",
     requisition_items: inventoryItems,
-
   };
-
-  const validationSchema = Yup.object().shape({
-    requested_by: Yup.string().required("This field is required!"),
-  });
 
 
   useEffect(() => {
@@ -163,7 +157,7 @@ const CreateRequisition = () => {
     
       const payload = {
         status: formValue.status,
-        requested_by: formValue.requested_by,
+        requested_by: auth.user_id,
         date_created: 5
       }
     
@@ -182,10 +176,6 @@ const CreateRequisition = () => {
     }
   };
 
-
-
-
-
   return (
     <section ref={pdfRef}>
       <div className="flex gap-4 mb-8 items-center">
@@ -198,31 +188,9 @@ const CreateRequisition = () => {
 
       <Formik
         initialValues={initialValues}
-        validationSchema={validationSchema}
         onSubmit={saveRequisitionPdf}
       >
       <Form className="">
-      <Grid container className=" flex justify-between items-center my-2">
-        <Grid item md={12} xs={12}>
-              <Field
-                as="select"
-                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                name="requested_by"
-              >
-                <option value="">requested by</option>
-                {doctorsData?.map((doc) => (
-                  <option key={doc.id} value={doc.id}>
-                    {`${doc.first_name} ${doc.last_name}`}
-                  </option>
-                ))}
-              </Field>
-              <ErrorMessage
-                name="requested_by"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-      </Grid>
       <DataGrid
         dataSource={inventoryItems}
         allowColumnReordering={true}
