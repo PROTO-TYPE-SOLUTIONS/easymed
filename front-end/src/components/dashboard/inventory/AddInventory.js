@@ -8,6 +8,7 @@ import { addInventory } from "@/redux/service/inventory";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllItems, getAllSuppliers } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
+import SeachableSelect from "@/components/select/Searchable";
 
 const AddInventory = () => {
 
@@ -33,7 +34,7 @@ const AddInventory = () => {
     subpacked: Yup.string().required("This field is required!"),
     purchase_price: Yup.string().required("This field is required!"),
     sale_price: Yup.string().required("This field is required!"),
-    item: Yup.string().required("This field is required!"),
+    item: Yup.object().required("This field is required!"),
     // supplier_ID: Yup.string().required("This field is required!"),
   });
 
@@ -41,8 +42,7 @@ const AddInventory = () => {
     try {
       const formData = {
         ...formValue,
-        item: parseInt(formValue.item),
-        
+        item: parseInt(formValue.item.value),        
       };
 
       setLoading(true);
@@ -77,29 +77,21 @@ const AddInventory = () => {
         <Form className="">
           <Grid container spacing={2}>
             <Grid className='my-2' item md={6} xs={12}>
-              <Field
-                as="select"
-                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                name="item"
-              >
-                <option value="">Select Item</option>
-                {item?.map((item) => {
-                  return (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  )
-                })}
-              </Field>
-              <ErrorMessage
-                name="item"
-                component="div"
-                className="text-warning text-xs"
-              />
+                <SeachableSelect
+                  label="Select Item"
+                  name="item"
+                  options={item.map((item) => ({ value: item.id, label: `${item?.name}` }))}
+                />
+                <ErrorMessage
+                  name="item"
+                  component="div"
+                  className="text-warning text-xs"
+                />
             </Grid>
             <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="quantity">Quantity</label>
               <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="Quantity"
                 name="quantity_in_stock"
@@ -112,8 +104,9 @@ const AddInventory = () => {
               />
             </Grid>
             <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="Purchase-Price">Purchase Price</label>
               <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="Purchase Price"
                 name="purchase_price"
@@ -125,8 +118,9 @@ const AddInventory = () => {
               />
             </Grid>
             <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="Sale-Price">Sale Price</label>
               <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="Sale Price"
                 name="sale_price"
@@ -138,8 +132,9 @@ const AddInventory = () => {
               />
             </Grid>
             <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="packed">Packed</label>
               <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="packed"
                 name="packed"
@@ -151,8 +146,9 @@ const AddInventory = () => {
               />
             </Grid>
             <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="subpacked">Subpacked</label>
               <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="subpacked"
                 name="subpacked"
@@ -163,20 +159,6 @@ const AddInventory = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            {/* <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-2 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                type="date"
-                placeholder="Expiry Date"
-                name="expiry_date"
-              />
-              <ErrorMessage
-                name="expiry_date"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid> */}
             <Grid className='my-2' item md={12} xs={12}>
               <div className="flex items-center justify-end">
                 <button
