@@ -7,25 +7,30 @@ from celery import shared_task
 from inventory.models import IncomingItem, Inventory
 
 @shared_task
-def create_inventory_record(incoming_item_id):
+def create_or_update_inventory_record(incoming_item_id):
     """
-    Creates an Inventory record based on the provided IncomingItem ID.
+    Creates a new Inventory record or updates an existing one based on the IncomingItem.
     """
     try:
         incoming_item = IncomingItem.objects.get(id=incoming_item_id)
 
-        # Create the Inventory record
-        inventory = Inventory.objects.create(
-            item=incoming_item.item,
-            purchase_price=incoming_item.purchase_price,
-            sale_price=incoming_item.sale_price,
-            quantity_in_stock=incoming_item.quantity,
-            packed=incoming_item.packed,
-            subpacked=incoming_item.subpacked
+        # Check if an Inventory record exists for the item
+        inventory, created = Inventory.objects.get_or_create(
+            item=incoming_item.item
         )
 
-        # Log success or handle any errors if necessary
-        print(f"Inventory record created for incoming item: {incoming_item}")
+        # Update the existing record or create a new one
+        if created:
+            print(f"Inventory record created for incoming item: {incoming_item}")
+        else:
+            inventory.purchase_price = incoming_item.purchase_price
+            inventory.sale_price = incoming_item.sale_price
+            inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity
+            inventory.packed = incoming_item.packed
+            inventory.subpacked = incoming_item.subpacked
+            inventory.save()
+            print(f"Inventory record updated for incoming item: {incoming_item}")
+
     except IncomingItem.DoesNotExist:
         print(f"Incoming item with ID {incoming_item_id} not found.")
-        # Handle the exception appropriately, e.g., logging or notifying users
+        # Handle the exception appropriately
