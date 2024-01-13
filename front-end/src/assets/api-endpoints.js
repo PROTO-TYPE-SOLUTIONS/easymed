@@ -71,7 +71,11 @@ export const API_URL = {
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
   FETCH_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/",
-  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription"
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription",
+
+  /***************** User **********************/
+  GET_USER_NAME: "/customuser/users",
+  FETCH_ALL_USERS: "/customuser/users/"
 
 };
 
@@ -149,7 +153,11 @@ export const APP_API_URL = {
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
   FETCH_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescribed-drugs",
-  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug"
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug",
+
+  /***************** User **********************/
+  GET_USER_NAME: "/api/user/getUserName",
+  FETCH_ALL_USERS: "/api/user/getAllUsers"
 
 };
 

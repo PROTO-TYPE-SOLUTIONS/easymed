@@ -8,6 +8,7 @@ import { months } from "@/assets/dummy-data/laboratory";
 import { getAllPurchaseOrders } from "@/redux/features/inventory";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllTheUsers } from "@/redux/features/users";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -18,7 +19,7 @@ const allowedPageSizes = [5, 10, 'all'];
 const PurchaseOrdersDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const { purchaseOrders } = useSelector(({ inventory }) => inventory);
-  const doctorsData = useSelector((store)=>store.doctor.doctors)
+  const usersData = useSelector((store)=>store.user.users);
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
@@ -30,6 +31,7 @@ const PurchaseOrdersDatagrid = () => {
     if (auth) {
       dispatch(getAllPurchaseOrders(auth));
       dispatch(getAllDoctors(auth))
+      dispatch(getAllTheUsers(auth))
     }
   }, [auth]);
 
@@ -99,8 +101,8 @@ const PurchaseOrdersDatagrid = () => {
           dataField="requested_by"
           caption="Requested By" 
           cellRender={(cellData) => {
-            const doctor = doctorsData.find(doc => doc.id === cellData.data.requested_by);
-            return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
+            const user = usersData.find(user => user.id === cellData.data.requested_by);
+            return user ? `${user.first_name} ${user.last_name}` : 'user not found';
           }}
           />
         <Column 
