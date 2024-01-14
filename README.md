@@ -96,4 +96,5 @@ You will notice that we have a Role and a Group. A group is associated with perm
 ## Running celery
 If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
 ``pip install celery redis``
-``celery -A makeeasyhmis worker --loglevel=INFO``
+Run Celery: ``celery -A makeeasyhmis worker --loglevel=INFO``
+Run Redis: ``redis-cli -h 127.0.0.1 -p 6379``
