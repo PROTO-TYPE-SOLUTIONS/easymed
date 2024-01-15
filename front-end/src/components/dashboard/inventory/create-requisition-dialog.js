@@ -36,18 +36,22 @@ const AddRequisitionItemModal = () => {
   };
 
   const validationSchema = Yup.object().shape({
-    date_created: Yup.string().required("This field is required!"),
     item: Yup.object().required("This field is required!"),
     supplier: Yup.object().required("This field is required!"),
     quantity_requested: Yup.string().required("This field is required!"),
   });
 
   const handleAddRequisition = async (formValue, helpers) => {
+    let currentDate = new Date();
+    let year = currentDate.getFullYear();
+    let month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    let day = String(currentDate.getDate()).padStart(2, '0');
     try {
       const formData = {
         ...formValue,
         supplier: formValue.supplier.value,
         item: formValue.item.value,
+        date_created:`${year}-${month}-${day}`
       };
 
       setLoading(true);    
@@ -114,7 +118,7 @@ const AddRequisitionItemModal = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid item md={12} xs={12}>
               <Field
                 className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
@@ -123,20 +127,6 @@ const AddRequisitionItemModal = () => {
               />
               <ErrorMessage
                 name="quantity_requested"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                type="date"
-                placeholder="Created Date"
-                name="date_created"
-              />
-              <ErrorMessage
-                name="date_created"
                 component="div"
                 className="text-warning text-xs"
               />

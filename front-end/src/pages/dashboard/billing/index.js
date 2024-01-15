@@ -1,5 +1,6 @@
 import React,{useState} from 'react'
 import CustomizedLayout from "../../../components/layout/customized-layout";
+import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Container } from '@mui/material';
 import BilledDataGrid from './billed-datagrid';
 import AddInvoiceModal from '@/components/dashboard/billing/add-invoice-modal';
@@ -36,7 +37,7 @@ const Billing = () => {
 }
 
 Billing.getLayout = (page) => (
-  <CustomizedLayout>{page}</CustomizedLayout>
+  <DashboardLayout>{page}</DashboardLayout>
 )
 
 export default Billing

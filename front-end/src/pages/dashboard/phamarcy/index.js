@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import Link from "next/link";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Container, Grid, Paper } from "@mui/material";
 import AuthGuard from "@/assets/hoc/auth-guard";
@@ -43,9 +44,9 @@ const Phamarcy = () => {
           New Invoice
         </button>
         {/* <RequisitionModal /> */}
-        <button onClick={()=> setCurrentTab(2)} className={`${currentTab === 2 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+        <Link href='/dashboard/inventory/requisitions'>
           Create Requisition
-        </button>
+        </Link>
       </div>
       <Grid container spacing={2}>
         {displayInformation}      
