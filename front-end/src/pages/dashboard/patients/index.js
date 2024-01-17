@@ -2,6 +2,7 @@ import PatientDataGrid from "@/components/dashboard/patient/patient-data-grid";
 import { Container } from "@mui/material";
 import React from "react";
 import CustomizedLayout from "@/components/layout/customized-layout";
+import DashboardLayout from "@/components/layout/dashboard-layout";
 import AuthGuard from "@/assets/hoc/auth-guard";
 
 const Patient = () => {
@@ -15,7 +16,7 @@ const Patient = () => {
 
 Patient.getLayout = (page) => (
   <AuthGuard>
-    <CustomizedLayout>{page}</CustomizedLayout>
+    <DashboardLayout>{page}</DashboardLayout>
   </AuthGuard>
 );
 

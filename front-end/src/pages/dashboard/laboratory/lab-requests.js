@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Container } from "@mui/material";
 import CustomizedLayout from "@/components/layout/customized-layout";
+import DashboardLayout from "@/components/layout/dashboard-layout";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import { getAllLabRequests, getAllLabResults } from "@/redux/features/laboratory";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,7 +30,7 @@ const LabRequests = () => {
 
 LabRequests.getLayout = (page) => (
   <AuthGuard>
-    <CustomizedLayout>{page}</CustomizedLayout>
+    <DashboardLayout>{page}</DashboardLayout>
   </AuthGuard>
 );
 
