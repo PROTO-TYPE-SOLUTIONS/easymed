@@ -1,50 +1,73 @@
-version: '3.8'
+version: "3.8"
 
 services:
+
+  database:
+    image: "postgres:16-alpine"
+    restart: unless-stopped
+    environment:
+      POSTGRES_NAME: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    healthcheck:
+            test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+            timeout: 45s
+            interval: 10s
+            retries: 10  
+    env_file:
+      - .env
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./dbdump:/opt/dbdump
+    #   - ./db_init-script.sh:/docker-entrypoint-initdb.d/init-script.sh
+    # # command: chmod +x db_init-script.sh
+
+
+  redis:
+    restart: unless-stopped
+    image: redis:7.2.4-alpine
+    ports:
+      - "6379:6379"
+
+  celery:
+    build: ./backend
+    restart: always
+    command: celery -A makeeasyhmis.celery_app worker -l info
+    depends_on:
+      - redis
+
+  celery-beat:
+    build: ./backend
+    restart: always
+    command: celery -A makeeasyhmis.celery_app beat -l info
+    depends_on:
+      - redis
+      - celery
+
   backend:
     build: ./backend
-    # command: gunicorn makeeasyhmis.wsgi:application --bind 0.0.0.0:8000
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - ./backend/:/usr/src/app/
-    ports:
-      - 127.0.0.1:8000:8000
+    container_name: "makeeasyhmis"
+    command: "gunicorn makeeasyhmis.wsgi:application --bind 0.0.0.0:8085"
     env_file:
-      - ./backend/.env
-    depends_on:
-      - db
-    
-    networks:
-      - mkis   
-
-  db:
-    image: postgres:15
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=mks
-
-    networks:
-      - mkis  
-
-  frontend:
-    container_name: frontend
-    build:
-      context: ./front-end
-    restart: always
+      - ./.env
     ports:
-      - 127.0.0.1:3000:3000
+      - 8085:8085
+    environment:
+      - "DJANGO_SETTINGS_MODULE=makeeasyhmis.settings.production"
+    volumes:
+      # - "./backendstatic_volume:/home/app/web/staticfiles"
+      # - "./backendmedia_volume:/home/app/web/mediafiles"
+      - "./backend/makeeasyhmis/static:/home/app/web/staticfiles/makeeasyhmis/static "
+      - "./backend:/home/app/web"
     depends_on:
-      - backend  
+      - redis
+      - celery
+      - database
 
-    networks:
-      - mkis
 
-networks:
-  mkis:
-    driver: bridge      
 
 volumes:
-  postgres_data:
+  dbdata:
+  static_volume:
+  media_volume:

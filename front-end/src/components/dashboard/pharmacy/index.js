@@ -45,6 +45,8 @@ const PharmacyDataGrid = () => {
   const dispatch = useDispatch();
   const auth = useAuth();
 
+  console.log(doctorsData)
+  console.log(prescriptionsData)
 
   useEffect(() => {
     if (auth) {
@@ -130,8 +132,9 @@ const PharmacyDataGrid = () => {
           caption="Doctor"
           cellRender={(cellData) => {
             const prescription = prescriptionsData.prescriptions.find(prescription => prescription.id === cellData.data.created_by);
-            const doctor = doctorsData.find(doc => doc.id === prescription.created_by);
+            const doctor = doctorsData.find(doc => doc.id === prescription?.created_by);
             return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
+        
           }}        
         />
         <Column 
