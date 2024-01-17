@@ -32,7 +32,7 @@ const CustomizedHeader = () => {
 
   return (
     <>
-      <section className="sticky top-0 py-2 md:p-0 bg-white shadow-sm h-[10vh] md:h-[15vh]">
+      <section className="sticky top-0 py-2 md:p-0 bg-white shadow-sm h-[10vh] md:h-[10vh]">
         <Container maxWidth="xl">
           <section className="flex items-center md:justify-end justify-between gap-4">
             <div className="md:hidden block">
@@ -42,11 +42,11 @@ const CustomizedHeader = () => {
               />
               <Drawer {...{ isOpen, setIsOpen }} />
             </div>
-            <Grid container spacing={1} className="my-2 hidden md:block">
+            {/* <Grid container spacing={1} className="my-2 hidden md:block">
               <Grid container spacing={2}>
                 {dashboardCards}
               </Grid>
-            </Grid>
+            </Grid> */}
             <div className="flex items-center gap-2">
               <FaUserCircle className="w-6 h-6 text-primary" />
               <span className="text-primary text-sm">{token?.first_name}</span>

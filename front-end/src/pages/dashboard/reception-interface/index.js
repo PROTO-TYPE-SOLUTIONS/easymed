@@ -1,5 +1,6 @@
 import React from "react";
 import CustomizedLayout from "@/components/layout/customized-layout";
+import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Container } from "@mui/material";
 import PatientAppointmentDataGrid from "@/components/dashboard/reception-interface/patient-appointment-datagrid";
 import AuthGuard from "@/assets/hoc/auth-guard";
@@ -26,7 +27,7 @@ const ReceptionInterface = () => {
 
 ReceptionInterface.getLayout = (page) => (
   <AuthGuard>
-    <CustomizedLayout>{page}</CustomizedLayout>
+    <DashboardLayout>{page}</DashboardLayout>
   </AuthGuard>
 );
 

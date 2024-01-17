@@ -33,18 +33,22 @@ const AddPurchaseOrderItemModal = () => {
   };
 
   const validationSchema = Yup.object().shape({
-    date_created: Yup.string().required("This field is required!"),
     item: Yup.object().required("This field is required!"),
     supplier: Yup.object().required("This field is required!"),
     quantity_purchased: Yup.string().required("This field is required!"),
   });
 
   const handleAddPurchaseOrder = async (formValue, helpers) => {
+    let currentDate = new Date();
+    let year = currentDate.getFullYear();
+    let month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    let day = String(currentDate.getDate()).padStart(2, '0');
     try {
       const formData = {
         ...formValue,
         supplier: formValue.supplier.value,
         item: formValue.item.value,
+        date_created:`${year}-${month}-${day}`
       };
       console.log(formData)
 
@@ -112,12 +116,13 @@ const AddPurchaseOrderItemModal = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid item md={12} xs={12}>
               <Field
                 className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
                 placeholder="Quantity"
                 name="quantity_purchased"
+                type="number"
               />
               <ErrorMessage
                 name="quantity_purchased"
@@ -125,7 +130,7 @@ const AddPurchaseOrderItemModal = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            {/* <Grid item md={6} xs={12}>
               <Field
                 className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
@@ -138,7 +143,7 @@ const AddPurchaseOrderItemModal = () => {
                 component="div"
                 className="text-warning text-xs"
               />
-            </Grid>
+            </Grid> */}
             <Grid item md={12} xs={12}>
               <div className="flex items-center justify-end">
                 <button

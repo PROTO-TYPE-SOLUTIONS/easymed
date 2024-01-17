@@ -12,7 +12,7 @@ const Sidebar = () => {
   return (
     <>
       <section className="">
-        <header className="h-[15vh] shadow flex items-center justify-center font-bold">
+        <header className="h-[10vh] shadow flex items-center justify-center font-bold">
           <h1>Logo</h1>
         </header>
         <section className="pl-2 h-[84vh] flex flex-col justify-between">
@@ -22,8 +22,7 @@ const Sidebar = () => {
                 <MenuChild key={index} {...{ index, menu, collapsed }} />
               ))}
             </ul>
-          </div>
-          <div className="space-y-2 mb-4 pl-4 text-xs">
+            <div className="space-y-2 mt-4 pl-4 text-xs">
             <Link href="/dashboard/admin-interface" className="flex items-center gap-2">
               <IoMdSettings className="" />
               <p>Settings</p>
@@ -36,6 +35,7 @@ const Sidebar = () => {
               <BsFillExclamationCircleFill className="" />
               <p>Make - Easy HMIS v1.0</p>
             </div>
+          </div>
           </div>
         </section>
       </section>
