@@ -28,6 +28,7 @@ def create_or_update_inventory_record(incoming_item_id):
             inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity
             inventory.packed = incoming_item.packed
             inventory.subpacked = incoming_item.subpacked
+            inventory.category_1 = incoming_item.catgeory_1
             inventory.save()
             print(f"Inventory record updated for incoming item: {incoming_item}")
 

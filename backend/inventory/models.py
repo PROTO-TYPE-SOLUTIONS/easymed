@@ -50,6 +50,10 @@ class Item(models.Model):
 
 # will create signal to update Inventory table when this object is created
 class IncomingItem(models.Model):
+    CATEGORY_1_CHOICES = [
+        ('Resale', 'resale'),
+        ('Internal', 'internal'),
+    ]
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -58,13 +62,16 @@ class IncomingItem(models.Model):
     subpacked = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
-
-
+    category_1 = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES)
 
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
 
 class Inventory(models.Model):
+    CATEGORY_1_CHOICES = [
+        ('Resale', 'resale'),
+        ('Internal', 'internal'),
+    ]
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -72,6 +79,7 @@ class Inventory(models.Model):
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    category_1 = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES)
 
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
