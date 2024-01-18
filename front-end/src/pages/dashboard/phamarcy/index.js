@@ -5,6 +5,7 @@ import { Container, Grid, Paper } from "@mui/material";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import PharmacyDataGrid from "@/components/dashboard/pharmacy";
 import { pharmacyDisplayStats } from "@/assets/menu";
+import PhamarcyNav from "@/components/dashboard/pharmacy/PhamarcyNav";
 
 
 const Phamarcy = () => {
@@ -39,15 +40,7 @@ const Phamarcy = () => {
 
   return (
     <Container maxWidth="xl">
-      <div className="flex items-center gap-4 my-8">
-        <button onClick={()=> setCurrentTab(0)} className={`${currentTab === 0 ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-          New Invoice
-        </button>
-        {/* <RequisitionModal /> */}
-        <Link href='/dashboard/inventory/requisitions'>
-          Create Requisition
-        </Link>
-      </div>
+      <PhamarcyNav/>
       <Grid container spacing={2}>
         {displayInformation}      
       </Grid>

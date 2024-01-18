@@ -179,7 +179,8 @@ const CreateRequisition = () => {
   return (
     <section ref={pdfRef}>
       <div className="flex gap-4 mb-8 items-center">
-          <Link href='/dashboard/inventory/requisitions'><img className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link>
+          {/* <Link href='/dashboard/inventory/requisitions'><img onClick={() => router.back()} className="h-3 w-3" src="/images/svgs/back_arrow.svg" alt="return to inventory"/></Link> */}
+          <img onClick={() => router.back()} className="h-3 w-3 cursor-pointer" src="/images/svgs/back_arrow.svg" alt="go back"/>
           <h3 className="text-xl"> Requisition entry </h3>
       </div>
       <div className="flex items-center justify-end">
