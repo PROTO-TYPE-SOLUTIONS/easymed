@@ -27,9 +27,8 @@ const AllPrescriptions = ({ patient }) => {
     frequency: "",
     duration: "",
     note: "",
-    prescription_id: null,
-    order_bill_ID: null,
-    item_ID: items[0]?.id,
+    prescription: null,
+    item: items[0]?.id,
   };
 
   const validationSchema = Yup.object().shape({

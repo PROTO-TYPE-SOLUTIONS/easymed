@@ -20,7 +20,6 @@ class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     item_name = models.CharField(max_length=100)
     service = models.ForeignKey(Item, on_delete=models.CASCADE)
-    # item_quantity = models.IntegerField()
     item_price = models.DecimalField(max_digits=10, decimal_places=2)
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)    

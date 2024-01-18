@@ -189,6 +189,7 @@ class PrescribedDrug(models.Model):
     note = models.TextField(null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE,)
 
+
     def __str__(self):
         return f"Prescribed Drug #{self.item.name}"    
         

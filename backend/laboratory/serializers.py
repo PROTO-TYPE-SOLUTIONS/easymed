@@ -40,16 +40,16 @@ class EquipmentTestRequestSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LabTestRequestSerializer(serializers.ModelSerializer):
-    patient_first_name = serializers.ReadOnlyField(source='patient_ID.first_name')
-    patient_last_name = serializers.ReadOnlyField(source='patient_ID.second_name')
+    patient_first_name = serializers.ReadOnlyField(source='patient.first_name')
+    patient_last_name = serializers.ReadOnlyField(source='patient.second_name')
     # Include the 'name' field from the related 'Test Profile' model
-    test_profile_name = serializers.ReadOnlyField(source='test_profile_ID.name')
-    cost = serializers.ReadOnlyField(source='test_profile_ID.cost')
+    test_profile_name = serializers.ReadOnlyField(source='test_profile.name')
+    cost = serializers.ReadOnlyField(source='test_profile.cost')
 
     class Meta:
         model = LabTestRequest
         fields = "__all__"
-        read_only_fields = ("id", "sample_id")
+        read_only_fields = ("id", "sample")
 
 
     def sample_code():
@@ -57,7 +57,7 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         while True:
             random_number = [randrange(0,10000) for _ in range(4) ]
             sp_id = f"SP-{random_number}"
-            lab_req = LabTestRequest.objects.filter(sample_id=sp_id)
+            lab_req = LabTestRequest.objects.filter(sample=sp_id)
             if not lab_req.exists():
                 break
 
@@ -69,11 +69,11 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         while True:
             random_number = "".join([str(randrange(0,9)) for _ in range(4) ])
             sp_id = f"SP-{random_number}"
-            lab_req = LabTestRequest.objects.filter(sample_id=sp_id)
+            lab_req = LabTestRequest.objects.filter(sample=sp_id)
             if not lab_req.exists():
                 break
 
-        validated_data["sample_id"] = sp_id
+        validated_data["sample"] = sp_id
         return super().create(validated_data)
 
 

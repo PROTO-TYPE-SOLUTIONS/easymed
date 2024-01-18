@@ -91,7 +91,7 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name='equipment_id', type=int,
+            OpenApiParameter(name='equipment', type=int,
                              location=OpenApiParameter.PATH)
         ],
     )
@@ -124,7 +124,7 @@ class LabTestRequestByPatientIdAPIView(APIView):
         responses=LabTestRequestSerializer,
     )
     def get(self, request: Request, *args, **kwargs):
-        patient_id = self.kwargs.get('patient_id')
+        patient_id = self.kwargs.get('patient')
         patient = self.get_object(patient_id)
         if patient is None:
             return Response({"error_message": f"patient id {patient_id} doesn't exist"})
