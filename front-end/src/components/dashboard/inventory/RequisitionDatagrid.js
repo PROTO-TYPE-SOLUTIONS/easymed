@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Pager } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import Link from 'next/link'
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
@@ -8,15 +8,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllRequisitions, getAllSuppliers, getAllItems } from "@/redux/features/inventory";
 import { getAllDoctors } from "@/redux/features/doctors";
+import { getAllTheUsers } from "@/redux/features/users";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const allowedPageSizes = [5, 10, 'all'];
+
 const RequisitionDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const { requisitions } = useSelector(({ inventory }) => inventory);
-  const doctorsData = useSelector((store)=>store.doctor.doctors)
+  const usersData = useSelector((store)=>store.user.users);
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
   const dispatch = useDispatch()
   const auth = useAuth();
@@ -27,6 +33,7 @@ const RequisitionDatagrid = () => {
       dispatch(getAllSuppliers());
       dispatch(getAllItems());
       dispatch(getAllDoctors(auth))
+      dispatch(getAllTheUsers(auth))
     }
   }, [auth]);
 
@@ -83,18 +90,21 @@ const RequisitionDatagrid = () => {
         className="shadow-xl"
         // height={"70vh"}
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <Column 
           dataField="requested_by"
           caption="Requested By" 
           cellRender={(cellData) => {
-            const doctor = doctorsData.find(doc => doc.id === cellData.data.requested_by);
-            return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
+            const user = usersData.find(user => user.id === cellData.data.requested_by);
+            return user ? `${user.first_name} ${user.last_name}` : 'user not found';
           }}
           />
         <Column 

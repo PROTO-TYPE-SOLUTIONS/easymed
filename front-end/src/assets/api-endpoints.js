@@ -52,7 +52,8 @@ export const API_URL = {
   FETCH_ORDER_BILL: "/inventory/orderbill/",
   REQUISITION: "/inventory/requisition/",
   REQUISITION_ITEM: "/inventory/requisition-tem/",
-
+  PURCHASE_ORDER: "/inventory/purchase-order/",
+  PURCHASE_ORDER_ITEM: "/inventory/purchase-order-item/",
 
 
   /***************** NURSING APIS **********************/
@@ -70,7 +71,11 @@ export const API_URL = {
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
   FETCH_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/",
-  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription"
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription",
+
+  /***************** User **********************/
+  GET_USER_NAME: "/customuser/users",
+  FETCH_ALL_USERS: "/customuser/users/"
 
 };
 
@@ -130,6 +135,8 @@ export const APP_API_URL = {
   FETCH_ORDER_BILL: "/api/order-bills/fetch-order-bill",
   REQUISITION: "/api/inventory/requisition",
   REQUISITION_ITEM: "/api/inventory/requisition-item",
+  PURCHASE_ORDER: "/api/inventory/purchase-order",
+  PURCHASE_ORDER_ITEM: "/api/inventory/purchase-order-item",
 
 
   /***************** NURSING APIS **********************/
@@ -146,7 +153,11 @@ export const APP_API_URL = {
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
   FETCH_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescribed-drugs",
-  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug"
+  FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug",
+
+  /***************** User **********************/
+  GET_USER_NAME: "/api/user/getUserName",
+  FETCH_ALL_USERS: "/api/user/getAllUsers"
 
 };
 

@@ -129,3 +129,40 @@ export const fetchRequisitions = (auth) =>{
             })
     })
 }
+
+export const addPurchaseOrder = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.PURCHASE_ORDER}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchPurchaseOrders = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.PURCHASE_ORDER}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const addPurchaseOrdersItem = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.PURCHASE_ORDER_ITEM}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

@@ -7,9 +7,9 @@ import {
 } from "@/redux/service/billing";
 
 const initialState = {
-  patientAppointment: {},
-  patientLabRequest: {},
-  patientPrescribedDrug: {},
+  patientAppointment: [],
+  patientLabRequest: [],
+  patientPrescribedDrug: [],
   selectedAppointments: [],
   selectedLabRequests: [],
   selectedPrescribedDrugs: [],

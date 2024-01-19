@@ -3,10 +3,11 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
-import { getAllItems, getAllSuppliers, addItemToInventoryPdf } from "@/redux/features/inventory";
+import { getAllItems, getItems, getAllSuppliers, addItemToInventoryPdf } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
+import SeachableSelect from "@/components/select/Searchable";
 
 const AddRequisitionItemModal = () => {
   const [open, setOpen] = React.useState(false);
@@ -35,21 +36,26 @@ const AddRequisitionItemModal = () => {
   };
 
   const validationSchema = Yup.object().shape({
-    date_created: Yup.string().required("This field is required!"),
-    item: Yup.string().required("This field is required!"),
-    supplier: Yup.string().required("This field is required!"),
+    item: Yup.object().required("This field is required!"),
+    supplier: Yup.object().required("This field is required!"),
     quantity_requested: Yup.string().required("This field is required!"),
   });
 
   const handleAddRequisition = async (formValue, helpers) => {
+    let currentDate = new Date();
+    let year = currentDate.getFullYear();
+    let month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    let day = String(currentDate.getDate()).padStart(2, '0');
     try {
       const formData = {
         ...formValue,
-        supplier: parseInt(formValue.supplier),
+        supplier: formValue.supplier.value,
+        item: formValue.item.value,
+        date_created:`${year}-${month}-${day}`
       };
 
       setLoading(true);    
-      dispatch(addItemToInventoryPdf(formValue))
+      dispatch(addItemToInventoryPdf(formData))
       setLoading(false);
       handleClose()
 
@@ -61,6 +67,7 @@ const AddRequisitionItemModal = () => {
 
   useEffect(() => {
     dispatch(getAllItems());
+    dispatch(getItems())
     dispatch(getAllSuppliers());
     
   }, []);
@@ -87,45 +94,31 @@ const AddRequisitionItemModal = () => {
       >
         <Form className="">
           <Grid container spacing={4}>
-            <Grid item md={12} xs={12}>
-              <Field
-                as="select"
-                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                        <Grid className='my-2' item md={12} xs={12}>
+              <SeachableSelect
+                label="Select Item"
                 name="item"
-              >
-                <option value="">Select Item</option>
-                {item?.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </Field>
+                options={item.map((item) => ({ value: item.id, label: `${item?.name}` }))}
+              />
               <ErrorMessage
                 name="item"
                 component="div"
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={12} xs={12}>
-              <Field
-                as="select"
-                className="block pr-9 border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+            <Grid className='my-2' item md={12} xs={12}>
+              <SeachableSelect
+                label="Select Supplier"
                 name="supplier"
-              >
-                <option value="">Select supplier</option>
-                {suppliers?.map((supplier) => (
-                  <option key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </option>
-                ))}
-              </Field>
+                options={suppliers.map((supplier) => ({ value: supplier.id, label: `${supplier?.name}` }))}
+              />
               <ErrorMessage
                 name="supplier"
                 component="div"
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={6} xs={12}>
+            <Grid item md={12} xs={12}>
               <Field
                 className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
@@ -134,20 +127,6 @@ const AddRequisitionItemModal = () => {
               />
               <ErrorMessage
                 name="quantity_requested"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                type="date"
-                placeholder="Created Date"
-                name="date_created"
-              />
-              <ErrorMessage
-                name="date_created"
                 component="div"
                 className="text-warning text-xs"
               />

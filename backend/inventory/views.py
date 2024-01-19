@@ -78,7 +78,7 @@ class SupplierViewSet(viewsets.ModelViewSet):
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
-    serializer_class = RequisitionSerializer
+    serializer_class = PurchaseOrderSerializer
 
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrderItem.objects.all()

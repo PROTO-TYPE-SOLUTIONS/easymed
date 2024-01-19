@@ -21,6 +21,7 @@ router.register(r'requisition', RequisitionViewSet)
 router.register(r'requisition-tem', RequisitionItemViewSet)
 router.register(r'purchase-order', PurchaseOrderViewSet)
 router.register(r'purchase-order-item', PurchaseOrderItemViewSet)
+router.register(r'incoming-item', IncomingItemViewSet)
 
 
 urlpatterns = [

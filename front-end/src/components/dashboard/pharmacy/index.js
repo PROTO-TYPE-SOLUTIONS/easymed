@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
 import { getAllPrescriptions, getAllPrescribedDrugs, getAllPrescriptionsPrescribedDrugs } from "@/redux/features/pharmacy";
@@ -16,6 +16,8 @@ import ViewPrescribedDrugsModal from "./view-prescribed-drugs-modal";
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -36,10 +38,15 @@ const PharmacyDataGrid = () => {
   const prescriptionsData = useSelector((store)=>store.prescription)
   const doctorsData = useSelector((store)=>store.doctor.doctors)
   const [selectedRowData,setSelectedRowData] = useState({});
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
   const dispatch = useDispatch();
   const auth = useAuth();
 
+  console.log(doctorsData)
+  console.log(prescriptionsData)
 
   useEffect(() => {
     if (auth) {
@@ -106,10 +113,14 @@ const PharmacyDataGrid = () => {
         className="shadow-xl"
 
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <Column dataField="id" caption="No" />
         <Column 
@@ -121,8 +132,9 @@ const PharmacyDataGrid = () => {
           caption="Doctor"
           cellRender={(cellData) => {
             const prescription = prescriptionsData.prescriptions.find(prescription => prescription.id === cellData.data.created_by);
-            const doctor = doctorsData.find(doc => doc.id === prescription.created_by);
+            const doctor = doctorsData.find(doc => doc.id === prescription?.created_by);
             return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
+        
           }}        
         />
         <Column 

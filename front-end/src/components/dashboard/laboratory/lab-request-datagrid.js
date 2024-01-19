@@ -127,7 +127,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
           showNavigationButtons={true}
         />
         <Column dataField="note" caption="Note" width={180} />
-        <Column dataField="sample_id" caption="Sample" width={180} />
+        <Column dataField="sample" caption="Sample" width={180} />
         <Column
           dataField="requested_name"
           caption="Requested By"

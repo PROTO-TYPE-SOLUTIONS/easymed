@@ -91,7 +91,7 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(name='equipment_id', type=int,
+            OpenApiParameter(name='equipment', type=int,
                              location=OpenApiParameter.PATH)
         ],
     )
@@ -113,26 +113,28 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
         return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
 
 
-
 class LabTestRequestByPatientIdAPIView(APIView):
-    def get_object(self, patient_id: int):
+    def get_object(self, patient: int):
         try:
-            return Patient.objects.get(id=patient_id)
+            return Patient.objects.get(id=patient)
         except Patient.DoesNotExist:
             return None
+
     @extend_schema(
         responses=LabTestRequestSerializer,
     )
-    def get(self, request: Request, *args, **kwargs):
-        patient_id = self.kwargs.get('patient_id')
+    def get(self, request: Request, patient_id: int, *args, **kwargs):
         patient = self.get_object(patient_id)
         if patient is None:
             return Response({"error_message": f"patient id {patient_id} doesn't exist"})
-        prescribed_drugs = LabTestRequest.objects.filter(patient_id=patient_id)
+        
+        prescribed_drugs = LabTestRequest.objects.filter(patient=patient)
         if not prescribed_drugs.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
         serializer = LabTestRequestSerializer(prescribed_drugs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class EquipmentTestRequestViewSet(viewsets.ModelViewSet):

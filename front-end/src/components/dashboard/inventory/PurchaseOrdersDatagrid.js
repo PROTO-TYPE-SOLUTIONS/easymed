@@ -1,55 +1,39 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
+import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
-import { Column, Pager } from "devextreme-react/data-grid";
+import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import Link from 'next/link'
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
+import { getAllPurchaseOrders } from "@/redux/features/inventory";
+import { getAllDoctors } from "@/redux/features/doctors";
+import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllTheUsers } from "@/redux/features/users";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const allowedPageSizes = [5, 10, 'all'];
+
 const PurchaseOrdersDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const { purchaseOrders } = useSelector(({ inventory }) => inventory);
+  const usersData = useSelector((store)=>store.user.users);
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
-  const users = [
-    {
-      number: "1",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "2",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "70081234",
-      name: "Ann Kibet",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-  ];
+  const dispatch = useDispatch()
+  const auth = useAuth();
+
+  useEffect(() => {
+    if (auth) {
+      dispatch(getAllPurchaseOrders(auth));
+      dispatch(getAllDoctors(auth))
+      dispatch(getAllTheUsers(auth))
+    }
+  }, [auth]);
 
   return (
     <section className=" my-8">
@@ -92,7 +76,7 @@ const PurchaseOrdersDatagrid = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={users}
+        dataSource={purchaseOrders}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -104,25 +88,28 @@ const PurchaseOrdersDatagrid = () => {
         className="shadow-xl"
         // height={"70vh"}
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
-          visible={false}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
-        <Column dataField="number" caption="Product Name" width={200} />
-        <Column dataField="id_number" caption="Category" width={140} />
-        <Column
-          dataField="name"
-          caption="Description"
-          width={200}
-          allowFiltering={true}
-          allowSearch={true}
+        <Column 
+          dataField="requested_by"
+          caption="Requested By" 
+          cellRender={(cellData) => {
+            const user = usersData.find(user => user.id === cellData.data.requested_by);
+            return user ? `${user.first_name} ${user.last_name}` : 'user not found';
+          }}
+          />
+        <Column 
+          dataField="status"
+          caption="Status"
         />
-        <Column dataField="age" caption="Price" width={140} />
-        <Column dataField="country" caption="Quantity" width={200} />
-        <Column dataField="gender" caption="Unit Price" width={200} />
-        <Column dataField="country" caption="Buying Price" width={200} />
+        <Column dataField="date_created" caption="Requested Date" />
       </DataGrid>
     </section>
   );
