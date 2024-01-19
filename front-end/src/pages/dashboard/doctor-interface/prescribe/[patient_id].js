@@ -86,7 +86,7 @@ const PrescribeDrug = () => {
 
     try {
       await prescribeDrug(payloadData).then(()=>{
-        toast.success("Requisition Item Added Successfully!");
+        toast.success("Prescribed Drug Added Successfully!");
       })
 
     } catch(err) {
