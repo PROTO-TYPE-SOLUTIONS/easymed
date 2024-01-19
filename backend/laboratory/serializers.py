@@ -42,15 +42,20 @@ class EquipmentTestRequestSerializer(serializers.ModelSerializer):
 class LabTestRequestSerializer(serializers.ModelSerializer):
     patient_first_name = serializers.ReadOnlyField(source='patient.first_name')
     patient_last_name = serializers.ReadOnlyField(source='patient.second_name')
-    # Include the 'name' field from the related 'Test Profile' model
     test_profile_name = serializers.ReadOnlyField(source='test_profile.name')
-    cost = serializers.ReadOnlyField(source='test_profile.cost')
+    sale_price = serializers.SerializerMethodField()
+
 
     class Meta:
         model = LabTestRequest
         fields = "__all__"
         read_only_fields = ("id", "sample")
 
+    def get_sale_price(self, instance):
+        if instance.test_profile and instance.test_profile.item:
+            inventory = instance.test_profile.item.inventory_set.first()
+            return inventory.sale_price if inventory else None
+        return None
 
     def sample_code():
         sp_id = ""
@@ -88,7 +93,7 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
                 pass
 
         return data
-
+    
 
 class LabTestCategorySerializer(serializers.ModelSerializer):
     class Meta:
