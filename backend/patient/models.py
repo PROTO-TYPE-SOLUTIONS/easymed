@@ -84,7 +84,7 @@ class Appointment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, default=22)
-    fee = models.CharField(max_length=40, default="0")
+
 
     # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
 

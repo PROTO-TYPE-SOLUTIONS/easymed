@@ -62,7 +62,7 @@ class LabTestRequest(models.Model):
     sample = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return str(self.test_profile_ID.name)
+        return str(self.id)
 
 
 class EquipmentTestRequest(models.Model):

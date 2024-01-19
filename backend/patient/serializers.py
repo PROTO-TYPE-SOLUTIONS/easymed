@@ -149,6 +149,7 @@ class PrescribedDrugSerializer(serializers.ModelSerializer):
         model = PrescribedDrug
         fields = '__all__'
 
+
     def get_sale_price(self, instance):
         inventory = instance.item.inventory_set.first()
         return inventory.sale_price if inventory else None
@@ -167,9 +168,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
         required = False,
         allow_null= True,
     )
-
-    # Include the 'name' field from the related 'Item' model
     item_name = serializers.ReadOnlyField(source='item.name')
+    sale_price = serializers.SerializerMethodField()
     class Meta:
         model = Appointment
         fields = "__all__"
@@ -190,6 +190,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
         return data
 
 
+    def get_sale_price(self, instance):
+        inventory = instance.item.inventory_set.first()
+        return inventory.sale_price if inventory else None
 
 class TriageSerializer(serializers.ModelSerializer):
     class Meta:
