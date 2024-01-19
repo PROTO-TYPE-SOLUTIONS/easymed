@@ -5,6 +5,7 @@ import { fetchServices,fetchPatient, fetchPatientProfile, fetchPatientTriage, se
 const initialState = {
   services: [],
   patients: [],
+  prescriptionItems: [],
   searchedPatients: [],
   profileDetails: {},
   patientTriage: {},
@@ -29,10 +30,29 @@ const PatientSlice = createSlice({
     setPatientTriage: (state, action) => {
       state.patientTriage = action.payload;
     },
+    setPatientPrescriptionItem: (state, action) => {
+      const prescriptionItem = state.prescriptionItems.find(item => item.item === action.payload.item );
+      if (prescriptionItem) {
+        // If prescriptionItem is found, update the existing item in the array
+        state.prescriptionItems = state.prescriptionItems.map(item =>
+          item.item === action.payload.item ? { ...item, dosage:action.payload.dosage, frequency:action.payload.frequency, duration:action.payload.duration, note:action.payload.note } : item
+        );
+      } else {
+        // If prescriptionItem is not found, add the new item to the array
+        state.prescriptionItems = [...state.prescriptionItems, action.payload];
+      }
+    },
+    removePrescriptionItem: (state, action) => {
+      const prescriptionItem = state.prescriptionItems.filter(item => item.item != action.payload.item );
+      state.prescriptionItems = prescriptionItem;
+    },
+    clearPrescriptionItems: (state, action)=>{
+      state.prescriptionItems = [];
+    },
   },
 });
 
-export const { setServices,setPatients,setProfile,setPatientTriage,setSearchedPatients } = PatientSlice.actions;
+export const { setServices,setPatients,setProfile,setPatientTriage,setSearchedPatients, removePrescriptionItem, setPatientPrescriptionItem, clearPrescriptionItems } = PatientSlice.actions;
 
 
 export const getAllServices = () => async (dispatch) => {
@@ -78,6 +98,18 @@ export const getPatientTriage = (id) => async (dispatch) => {
   } catch (error) {
     console.log("PROFILE_ERROR ", error);
   }
+};
+
+export const addPrescriptionItem = (payload) => (dispatch) => {
+  dispatch(setPatientPrescriptionItem(payload));
+};
+
+export const removeAPrescriptionItem = (payload) => (dispatch) => {
+  dispatch(removePrescriptionItem(payload));
+};
+
+export const clearAllPrescriptionItems = () => (dispatch) => {
+  dispatch(clearPrescriptionItems());
 };
 
 export default PatientSlice.reducer;
