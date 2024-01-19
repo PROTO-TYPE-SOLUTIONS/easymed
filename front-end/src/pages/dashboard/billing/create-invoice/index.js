@@ -8,11 +8,6 @@ import { getAllPatients } from "@/redux/features/patients";
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import AuthGuard from '@/assets/hoc/auth-guard';
 
-import LabTestRequests from './lab-test-requests';
-import PrescribedDrug from './prescribed-drug';
-import Appointments from './Appointments';
-import CustomizedLayout from '@/components/layout/customized-layout';
-import ReviewInvoice from './ReviewInvoice';
 import BillingNav from '@/components/dashboard/billing/BillingNav';
 import NewInvoice from './NewInvoice';
 
@@ -22,9 +17,6 @@ const CreateNewInvoice = () => {
 
     useEffect(() => {
         dispatch(getAllPatients());
-        setSelectedAppointments([]);
-        setSelectedLabRequests([]);
-        setSelectedPrescribedDrugs([]);
     }, [selectedOption]);
     
 
