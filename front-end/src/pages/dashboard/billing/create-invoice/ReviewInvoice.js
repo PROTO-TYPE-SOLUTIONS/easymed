@@ -12,7 +12,8 @@ import { ErrorMessage, Field, Form, Formik, FormikProps } from 'formik';
 import * as Yup from "yup";
 
 const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabRequests, selectedPrescribedDrugs, }) => {
-    const [appointmentSum, setAppointmentSum] = useState(0)
+    const [appointmentSum, setAppointmentSum] = useState(0);
+    const [prescribedDrugsSum, setPrescribedDrugsSum] = useState(0);
     const { invoices } = useSelector((store) => store.billing);
     const auth = useAuth()
     const invoiceRef = useRef();
@@ -36,6 +37,16 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
         })
 
         setAppointmentSum(sumArray(fees))
+
+    }
+
+    const totalPrescribedDrugsSum = () => {
+        let fees = []
+        selectedPrescribedDrugs.forEach((item)=>{
+            fees.push(parseInt(item.sale_price))
+        })
+
+        setPrescribedDrugsSum(sumArray(fees))
 
     }
 
@@ -87,34 +98,6 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
         });
     };
 
-    // const saveNewInvoice = async (formValue, helpers) => {
-    //     generatePdf().then( async (pdf) => {
-    //         console.log(pdf)
-    //       try {    
-    //         const payloadData = {
-    //             ...formValue,
-    //             invoice_date: "2024-01-16",
-    //             invoice_amount: "-319",
-    //             status: "pending",
-    //             invoice_file: "pdf",
-    //             invoice_number: invoices.length + 1
-    //         }
-    //         if (selectedAppointments.length <= 0 && selectedLabRequests <= 0 && selectedPrescribedDrugs <= 0) {
-    //         toast.error("Select atleast one item");
-    //         return;
-    //         }   
-
-    //         const response = await billingInvoices(auth, payloadData)
-    //         console.log(response)
-    //         toast.success("invoice saved successfully")
-    //         router.push('/dashboard/billing')
-    //       }catch (err) {
-    //         toast.error(err);
-    //       }
-          
-    //     });
-    // }
-
     const saveInvoice = async (formValue) => {
         
         const payloadData = {
@@ -149,6 +132,7 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
     useEffect(()=>{
         if(auth){
             totalAppointmentSum()
+            totalPrescribedDrugsSum()
             dispatch(getAllInvoices(auth));
         }
     },[selectedOption, selectedAppointments, selectedLabRequests, selectedPrescribedDrugs, auth])
@@ -189,7 +173,7 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
                     <ul className='space-y-2'>
                         {selectedAppointments.map(appointment=> (
                             <li className='flex justify-between text-xs' key={appointment.id}> 
-                                <span>{appointment.date_created.substring(0,10)}</span> 
+                                <span>{appointment.item_name}</span> 
                                 <span>{`ksh ${appointment.fee}`}</span>
                             </li>
                             )
@@ -201,7 +185,12 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
                 <div className='space-y-2'>
                     <h2 className='text-primary'> Lab Test Requests </h2>
                     <ul className='space-y-2'>
-                        {selectedLabRequests.map(testReq=> <li className='flex justify-between text-xs' key={testReq.id}> {testReq.name} </li>)}
+                        {selectedLabRequests.map(testReq=> (
+                            <li className='flex justify-between text-xs' key={testReq.id}>
+                                <span>{testReq.name}</span> 
+                                {/* <span>{`ksh ${appointment.fee}`}</span> */}
+                            </li>
+                        ))}
                     </ul>
                 </div>
             )}
@@ -209,7 +198,12 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
                 <div className='space-y-2'>
                     <h2 className='text-primary'> Prescribed Drugs </h2>
                     <ul className='space-y-2'>
-                        {selectedPrescribedDrugs.map(drug=> <li className='flex justify-between text-xs' key={drug.id}> {drug.item_name} </li>)}
+                        {selectedPrescribedDrugs.map(drug=> (
+                            <li className='flex justify-between text-xs' key={drug.id}>
+                                <span>{drug.item_name}</span> 
+                                <span>{`ksh ${drug.sale_price}`}</span>
+                            </li>
+                        ))}
                     </ul>
                 </div>
             )}
@@ -220,13 +214,13 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
                 <div className='flex justify-end'>
                     <div className='border-b w-48 justify-between flex'>
                         <h2 className='border-b w-full '>Total</h2>
-                        <h2 className='border-b w-24 '>{appointmentSum}</h2>
+                        <h2 className='border-b w-24 '>{appointmentSum + prescribedDrugsSum}</h2>
                     </div>
                 </div>
                 <div className='flex justify-end'>
                     <div className='border-b w-48 justify-between flex'>
                         <h2 className='border-b w-full '>Payable</h2>
-                        <h2 className='border-b w-24 '>{appointmentSum}</h2>
+                        <h2 className='border-b w-24 '>{appointmentSum + prescribedDrugsSum}</h2>
                     </div>
                 </div>
             </div>
