@@ -138,7 +138,7 @@ const PrescribeDrug = () => {
           <h3 className="text-xl"> patient prescription </h3>
       </div>
       <div className="flex items-center justify-end">
-          <PrescriptionItemDialog patient_id={params.patient_id}/>
+          <PrescriptionItemDialog patient_id={params?.patient_id}/>
       </div>
 
       <Formik
