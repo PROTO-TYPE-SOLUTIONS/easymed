@@ -37,7 +37,7 @@ const Appointments = ({patient_id, setSelectedAppointments}) => {
                     <div className='flex items-center text-xs'>
                         <FormControlLabel 
                             control={<Checkbox sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }}/>} 
-                            label={appointment.date_created.substring(0,10)}
+                            label={appointment.item_name}
                             onChange={(event) => handleCheckboxChange(event, appointment)}
                         />
                     </div>

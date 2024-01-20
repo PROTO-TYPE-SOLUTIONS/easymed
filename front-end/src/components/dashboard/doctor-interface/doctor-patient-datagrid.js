@@ -137,7 +137,7 @@ const DoctorPatientDataGrid = () => {
     } else if (menu.action === "prescribe") {
       // router.push('/dashboard/doctor-interface/prescription');
       const encodedData = encodeURIComponent(JSON.stringify(data));
-      router.push(`/dashboard/doctor-interface/prescription?data=${encodedData}`);
+      router.push(`/dashboard/doctor-interface/prescribe/${data.patient}`);
       // setSelectedRowData(data);
       // setPrescribeOpen(true);
     } else if(menu.action === "send to lab"){

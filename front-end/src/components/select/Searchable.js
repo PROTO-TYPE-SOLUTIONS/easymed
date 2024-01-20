@@ -5,7 +5,6 @@ import { useField, ErrorMessage } from 'formik';
 const SeachableSelect = ({ label, name, options, ...props }) => {
   const [field, meta, helpers] = useField({ ...props, name: name });
   const { setValue } = helpers;
-  console.log(field.value == null)
 
   const handleChange = (selectedOption) => {
     setValue(selectedOption);
@@ -18,6 +17,7 @@ const SeachableSelect = ({ label, name, options, ...props }) => {
         {...field}
         {...props}
         isSearchable
+        isClearable
         value={field.value || null}
         onChange={handleChange}
         options={options}
