@@ -189,10 +189,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
         return data
 
-
     def get_sale_price(self, instance):
-        inventory = instance.item.inventory_set.first()
-        return inventory.sale_price if inventory else None
+        if instance.item:
+            inventory = instance.item.inventory_set.first()
+            return inventory.sale_price if inventory else None
+        return None
+
 
 class TriageSerializer(serializers.ModelSerializer):
     class Meta:

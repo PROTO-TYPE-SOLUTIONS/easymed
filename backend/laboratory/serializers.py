@@ -4,6 +4,8 @@ from rest_framework import serializers
 from customuser.models import CustomUser
 from .models import LabReagent, LabTestResult, LabTestRequest, LabTestCategory, LabTestProfile, LabEquipment, EquipmentTestRequest, PublicLabTestRequest
 
+
+
 class LabReagentSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabReagent
