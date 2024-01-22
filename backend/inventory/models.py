@@ -75,7 +75,7 @@ class PurchaseOrder(models.Model):
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return self.id
+        return self.reqquested_by
     
 
 class IncomingItem(models.Model):

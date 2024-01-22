@@ -1,6 +1,10 @@
 from django.db import models
 from inventory.models import Item
 
+
+def invoice_file_path(instance, filename):
+    return f'invoices/{instance.invoice_number}/{filename}'
+
 class Invoice(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -12,9 +16,12 @@ class Invoice(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
     invoice_description = models.CharField(max_length=200)
-    invoice_file = models.FileField(upload_to='invoices', null=True, blank=True)
+    invoice_file = models.FileField(upload_to=invoice_file_path, null=True, blank=True)
     invoice_created_at = models.DateTimeField(auto_now_add=True)
     invoice_updated_at = models.DateTimeField(auto_now=True)
+
+
+
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)

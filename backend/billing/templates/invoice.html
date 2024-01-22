@@ -1,0 +1,24 @@
+<!-- your_app/templates/your_app/invoice_template.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ invoice.invoice_number }} - Invoice</title>
+</head>
+<body>
+    <div>Heading Goes Here</div>
+    <h1>Invoice Number {{ invoice.invoice_number }} </h1>
+    <!-- Add the content for your invoice here -->
+    <p>Date: {{ invoice.invoice_date }}</p>
+    <p>Amount: {{ invoice.invoice_amount }}</p>
+    <p>Description: {{ invoice.invoice_description }}</p>
+    <!-- Add more details as needed -->
+
+    <!-- Example: Displaying invoice items -->
+    <ul>
+        {% for item in invoice.invoiceitem_set.all %}
+            <li>{{ item.item_name }} - {{ item.item_price }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
