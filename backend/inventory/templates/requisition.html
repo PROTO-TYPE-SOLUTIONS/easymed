@@ -1,44 +1,51 @@
-<!-- your_app/templates/your_app/invoice_template.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="./requisition.css" media="print" rel="stylesheet">
     <title>Requisition: {{ requisition.id }}</title>
 </head>
-<body>
-    <div>Heading Goes Here</div>
-    <h1>Requisition Number: {{ requisition.id }} </h1>
-    <!-- Add the content for your invoice here -->
-    <p>Date: {{ requisition.date_created }}</p>
-    <p>Amount: {{ requisition.requested_by }}</p>
-    <p>Description:</p>
 
-     <h2>Requisition Itemss</h2>
+<body>
+    <h1>Requisition Note</h1>
+
+    <aside>
+        <address id="from">
+            Hospital Name
+            Ngon Road, 32 Bleve
+            Nairobi, Kenya
+        </address>
+
+        <address id="to">
+            {{ requisition.requested_by }}
+            From all around the world
+            Earth
+        </address>
+    </aside>
+    <h1>Requisition Number: {{ requisition.id }} </h1>
+    <p>Date: {{ requisition.date_created }}</p>
+    <p>Status: {{ requisition.status }}</p>
+
+    <h2>Requisition Items</h2>
 
     <table border="1">
         <thead>
             <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
-                <th>Column 3</th>
+                <th>Item</th>
+                <th>Quantity Requested</th>
+                <th>Supplier</th>
+                <th>Date Created</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>Row 1, Cell 1</td>
-                <td>Row 1, Cell 2</td>
-                <td>Row 1, Cell 3</td>
-            </tr>
-            <tr>
-                <td>Row 2, Cell 1</td>
-                <td>Row 2, Cell 2</td>
-                <td>Row 2, Cell 3</td>
-            </tr>
-            <tr>
-                <td>Row 3, Cell 1</td>
-                <td>Row 3, Cell 2</td>
-                <td>Row 3, Cell 3</td>
-            </tr>
+            {% for item in requisition.requisitionitem_set.all %}
+                <tr>
+                    <td>{{ item.item.name }}</td>
+                    <td>{{ item.quantity_requested }}</td>
+                    <td>{{ item.supplier.name|default:"N/A" }}</td>
+                    <td>{{ item.date_created }}</td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 </body>

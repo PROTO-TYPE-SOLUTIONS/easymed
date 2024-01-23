@@ -32,7 +32,7 @@ router.register(r'incoming-item', IncomingItemViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('download__requisition_pdf/<int:invoice_id>/', download_requisition_pdf, name='download__requisition_pdf'),
+    path('download__requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
 ]
 
 if settings.DEBUG:
