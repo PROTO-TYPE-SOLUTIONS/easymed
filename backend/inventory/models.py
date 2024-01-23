@@ -61,7 +61,16 @@ class Requisition(models.Model):
 
     def __str__(self):
         return self.id
+        
+class RequisitionItem(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity_requested = models.IntegerField()
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
     
+    def __str__(self):
+        return self.id    
 
 class PurchaseOrder(models.Model):
     STATUS_CHOICES = [
@@ -129,15 +138,7 @@ class DepartmentInventory(models.Model):
 
 
 
-class RequisitionItem(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity_requested = models.IntegerField()
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return self.id
+
 
 
 
