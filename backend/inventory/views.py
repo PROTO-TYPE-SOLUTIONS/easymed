@@ -83,3 +83,29 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrderItem.objects.all()
     serializer_class = PurchaseOrderItemSerializer 
+
+
+
+'''
+This view gets the geneated pdf and downloads it locally
+pdf accessed here http://127.0.0.1:8080/download_requisition_pdf/26/
+'''
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
+
+from .models import Requisition
+
+def download_requisition_pdf(request, requisition_id):
+    requisition = get_object_or_404(Requisition, pk=requisition_id)
+
+    # Path to the generated PDF file
+    # pdf_file_path = os.path.join(settings.MEDIA_ROOT, invoice.invoice_file.name)
+    pdf_file_path = os.path.join('./makeeasyhmis/static/requisitions/', f'{requisition.id}.pdf')
+
+    # Open the PDF file and serve it as an attachment
+    with open(pdf_file_path, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{requisition.id}.pdf"'
+        return response    

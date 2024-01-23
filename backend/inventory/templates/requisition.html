@@ -1,0 +1,45 @@
+<!-- your_app/templates/your_app/invoice_template.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Requisition: {{ requisition.id }}</title>
+</head>
+<body>
+    <div>Heading Goes Here</div>
+    <h1>Requisition Number: {{ requisition.id }} </h1>
+    <!-- Add the content for your invoice here -->
+    <p>Date: {{ requisition.date_created }}</p>
+    <p>Amount: {{ requisition.requested_by }}</p>
+    <p>Description:</p>
+
+     <h2>Requisition Itemss</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Column 1</th>
+                <th>Column 2</th>
+                <th>Column 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Row 1, Cell 1</td>
+                <td>Row 1, Cell 2</td>
+                <td>Row 1, Cell 3</td>
+            </tr>
+            <tr>
+                <td>Row 2, Cell 1</td>
+                <td>Row 2, Cell 2</td>
+                <td>Row 2, Cell 3</td>
+            </tr>
+            <tr>
+                <td>Row 3, Cell 1</td>
+                <td>Row 3, Cell 2</td>
+                <td>Row 3, Cell 3</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
