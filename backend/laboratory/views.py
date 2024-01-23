@@ -20,6 +20,8 @@ from .models import (
     LabEquipment,
     EquipmentTestRequest,
     PublicLabTestRequest,
+    LabTestPanel,
+    LabTestResultItem,
 )
 # serializers
 from .serializers import (
@@ -31,6 +33,8 @@ from .serializers import (
     LabEquipmentSerializer,
     EquipmentTestRequestSerializer,
     PublicLabTestRequestSerializer,
+    LabTestPanelSerializer,
+    LabTestResultItemSerializer,
 )
 
 # permissions
@@ -59,16 +63,20 @@ class LabReagentViewSet(viewsets.ModelViewSet):
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
-class LabTestProfileViewSet(viewsets.ModelViewSet):
-    queryset = LabReagent.objects.all()
-    serializer_class = LabTestProfileSerializer
-    permission_classes = (AllowAny,)
+# class LabTestProfileViewSet(viewsets.ModelViewSet):
+#     queryset = LabReagent.objects.all()
+#     serializer_class = LabTestProfileSerializer
+#     permission_classes = (AllowAny,)
 
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
     serializer_class = LabEquipmentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+class LabTestPanelViewSet(viewsets.ModelViewSet):
+    queryset = LabTestPanel.objects.all()
+    serializer_class = LabTestPanelSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
@@ -80,6 +88,11 @@ class LabTestResultViewSet(viewsets.ModelViewSet):
     queryset = LabTestResult.objects.all()
     serializer_class = LabTestResultSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+class LabTestResultItemViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResultItem.objects.all()
+    serializer_class = LabTestResultItemSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)    
 
 
 class LabTestRequestViewSet(viewsets.ModelViewSet):
