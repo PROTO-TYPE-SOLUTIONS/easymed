@@ -1,7 +1,13 @@
+import os
 from celery import shared_task
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from inventory.models import IncomingItem, Inventory
+from billing.models import Invoice, InvoiceItem
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.apps import apps
+from django.conf import settings
 
 from celery import shared_task
 from inventory.models import IncomingItem, Inventory
@@ -35,3 +41,33 @@ def create_or_update_inventory_record(incoming_item_id):
     except IncomingItem.DoesNotExist:
         print(f"Incoming item with ID {incoming_item_id} not found.")
         # Handle the exception appropriately
+
+        
+'''Task to generated pdf once Invoice tale gets a new entry'''
+@shared_task
+def generate_invoice_pdf(invoice_id):
+    from billing.models import Invoice
+    invoice = Invoice.objects.get(pk=invoice_id)
+    app_template_dir = apps.get_app_config('billing').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'invoice.html', {'invoice': invoice})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/invoices/', f'{invoice.invoice_number}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    invoice.save()
+
+
+'''Task to generated Requisition'''   
+@shared_task
+def generate_requisition_pdf(requisition_id):
+    from inventory.models import Requisition
+    requisition = Requisition.objects.get(pk=requisition_id)
+    app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'requisition.html', {'requisition': requisition})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/requisitions/', f'{requisition.id}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    requisition.save
