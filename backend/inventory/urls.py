@@ -24,7 +24,7 @@ router.register(r'inventories', InventoryViewSet)
 router.register(r'suppliers', SupplierViewSet)
 router.register(r'department-inventory', DepartmentInventoryViewSet)
 router.register(r'requisition', RequisitionViewSet)
-router.register(r'requisition-tem', RequisitionItemViewSet)
+router.register(r'requisition-item', RequisitionItemViewSet)
 router.register(r'purchase-order', PurchaseOrderViewSet)
 router.register(r'purchase-order-item', PurchaseOrderItemViewSet)
 router.register(r'incoming-item', IncomingItemViewSet)
@@ -33,6 +33,8 @@ router.register(r'incoming-item', IncomingItemViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('download__requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
+    path('requisition-item/by-requisition-id/<int:requisition_id>/', RequisitionItemViewSet.as_view({'get': 'by_requisition_id'}), name='requisition-item-by-requisition-id'),
+    path('purchase-order-item/by-purchase-order-id/<int:purchase_order_id>/', PurchaseOrderItemViewSet.as_view({'get': 'by_purchase_order_id'}), name='purchase-order-item-by-purchase-order-id'),
 ]
 
 if settings.DEBUG:

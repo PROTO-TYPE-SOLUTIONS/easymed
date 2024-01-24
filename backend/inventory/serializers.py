@@ -61,8 +61,6 @@ class RequisitionSerializer(serializers.ModelSerializer):
         model = Requisition
         fields = '__all__'        
 
-
-
 class RequisitionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequisitionItem

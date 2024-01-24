@@ -1,5 +1,7 @@
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import (
     Item,
     Inventory,
@@ -62,6 +64,11 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemSerializer    
 
+    @action(detail=False, methods=['GET'])
+    def by_requisition_id(self, request, requisition_id):
+        items = RequisitionItem.objects.filter(requisition_id=requisition_id)
+        serializer = self.get_serializer(items, many=True)
+        return Response(serializer.data)
 
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
@@ -83,6 +90,12 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrderItem.objects.all()
     serializer_class = PurchaseOrderItemSerializer 
+
+    @action(detail=False, methods=['GET'])
+    def by_purchase_order_id(self, request, purchase_order_id):
+        items = PurchaseOrderItem.objects.filter(purchase_order_id=purchase_order_id)
+        serializer = self.get_serializer(items, many=True)
+        return Response(serializer.data)
 
 
 

@@ -85,7 +85,18 @@ class PurchaseOrder(models.Model):
 
     def __str__(self):
         return self.reqquested_by
+
+class PurchaseOrderItem(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity_purchased = models.IntegerField()
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+
     
+    def __str__(self):
+        return self.id
+
 
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
@@ -142,13 +153,3 @@ class DepartmentInventory(models.Model):
 
 
 
-class PurchaseOrderItem(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity_purchased = models.IntegerField()
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
-
-    
-    def __str__(self):
-        return self.id

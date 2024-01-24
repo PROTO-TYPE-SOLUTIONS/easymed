@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'laboratory.apps.LaboratoryConfig',
     'receptions.apps.ReceptionsConfig',
     'billing.apps.BillingConfig',
+    'announcement.apps.AnnouncementConfig'
 
 ]
 
