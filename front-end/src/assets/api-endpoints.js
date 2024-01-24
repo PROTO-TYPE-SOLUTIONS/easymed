@@ -54,6 +54,7 @@ export const API_URL = {
   REQUISITION_ITEM: "/inventory/requisition-tem/",
   PURCHASE_ORDER: "/inventory/purchase-order/",
   PURCHASE_ORDER_ITEM: "/inventory/purchase-order-item/",
+  FETCH_INCOMING_ITEMS: "/inventory/incoming-item/",
 
 
   /***************** NURSING APIS **********************/
@@ -137,6 +138,7 @@ export const APP_API_URL = {
   REQUISITION_ITEM: "/api/inventory/requisition-item",
   PURCHASE_ORDER: "/api/inventory/purchase-order",
   PURCHASE_ORDER_ITEM: "/api/inventory/purchase-order-item",
+  FETCH_INCOMING_ITEMS: "/api/inventory/incomingItem",
 
 
   /***************** NURSING APIS **********************/
