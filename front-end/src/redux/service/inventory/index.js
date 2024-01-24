@@ -166,3 +166,29 @@ export const addPurchaseOrdersItem = (payload) =>{
             })
     })
 }
+
+export const fetchIncomingItems = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_INCOMING_ITEMS}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const addIncomingItem = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_INCOMING_ITEMS}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

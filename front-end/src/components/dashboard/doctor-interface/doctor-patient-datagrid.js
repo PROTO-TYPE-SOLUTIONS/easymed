@@ -79,54 +79,6 @@ const DoctorPatientDataGrid = () => {
     }
   }, [auth]);
 
-  const users = [
-    {
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      assigned_doctor: "Dr. Patrick",
-      progress_status: "Discharged",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      progress_status: "In Treatment",
-      assigned_doctor: "Dr. Moses",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      id_number: "1234821",
-      name: "Jane Munyua",
-      progress_status: "New Patient",
-      assigned_doctor: "Dr. Melanie",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Ann Kibet",
-      progress_status: "Discharged",
-      assigned_doctor: "Dr. Brenda",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-    {
-      id_number: "1234221",
-      name: "Ann Ochieng",
-      progress_status: "In Treatment",
-      assigned_doctor: "Dr. Patrick",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-  ];
-
   const onMenuClick = async (menu, data) => {
     if (menu.action === "refer") {
       setSelectedRowData(data);
@@ -160,11 +112,6 @@ const DoctorPatientDataGrid = () => {
       </>
     );
   };
-
-  //   filter users based on search query
-  const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
-  });
 
   const onSelectionChanged = (props) => {
     const { selectedRowKeys, selectedRowsData } = props;

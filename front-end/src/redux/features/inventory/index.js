@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions, fetchPurchaseOrders } from "@/redux/service/inventory";
+import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions, fetchPurchaseOrders, fetchIncomingItems } from "@/redux/service/inventory";
 
 
 const initialState = {
@@ -12,6 +12,7 @@ const initialState = {
   suppliers: [],
   orderBills: [],
   item: [],
+  incomingItems: [],
 };
 
 const InventorySlice = createSlice({
@@ -38,6 +39,9 @@ const InventorySlice = createSlice({
     },
     setPurchaseOrders: (state, action) => {
       state.purchaseOrders = action.payload;
+    },
+    setIncoming:(state, action) => {
+      state.incomingItems = action.payload;
     },
     clearInventoryItemsPdf: (state, action)=>{
       state.inventoryItems = [];
@@ -83,7 +87,7 @@ const InventorySlice = createSlice({
   },
 });
 
-export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf } = InventorySlice.actions;
+export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf, setIncoming } = InventorySlice.actions;
 
 
 export const getAllItems = (name) => async (dispatch) => {
@@ -117,6 +121,15 @@ export const getAllPurchaseOrders = (auth) => async (dispatch) => {
   try {
     const response = await fetchPurchaseOrders(auth);
     dispatch(setPurchaseOrders(response));
+  } catch (error) {
+    console.log("PURCHASE_ORDERS_ERROR ", error);
+  }
+};
+
+export const getAllIncomingItems = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchIncomingItems(auth);
+    dispatch(setIncoming(response));
   } catch (error) {
     console.log("PURCHASE_ORDERS_ERROR ", error);
   }
