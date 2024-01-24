@@ -38,7 +38,7 @@ const LabTestRequests = ({patient_id, setSelectedLabRequests}) => {
                     <div className='flex items-center'>
                         <FormControlLabel 
                             control={<Checkbox sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }}/>} 
-                            label={testReq.item_name} 
+                            label={testReq.test_profile_name} 
                             onChange={(event) => handleCheckboxChange(event, testReq)}
                         />
                     </div>
