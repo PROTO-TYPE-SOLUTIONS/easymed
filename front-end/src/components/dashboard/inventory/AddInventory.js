@@ -25,6 +25,7 @@ const AddInventory = () => {
     purchase_price: "",
     sale_price: "",
     item: "",
+    category_one:null,
     // supplier_ID: null,
   };
 
@@ -35,6 +36,7 @@ const AddInventory = () => {
     purchase_price: Yup.string().required("This field is required!"),
     sale_price: Yup.string().required("This field is required!"),
     item: Yup.object().required("This field is required!"),
+    category_one: Yup.string().required("This field is required"),
     // supplier_ID: Yup.string().required("This field is required!"),
   });
 
@@ -76,7 +78,7 @@ const AddInventory = () => {
       >
         <Form className="">
           <Grid container spacing={2}>
-            <Grid className='my-2' item md={6} xs={12}>
+            <Grid className='my-2' item md={12} xs={12}>
                 <SeachableSelect
                   label="Select Item"
                   name="item"
@@ -88,6 +90,27 @@ const AddInventory = () => {
                   className="text-warning text-xs"
                 />
             </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="quantity">Category</label>
+              <Field
+                as="select"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="category"
+                name="category_one"
+                type="number"
+              >
+                <option value="" disabled>Select a category</option>
+                <option value="Resale">Resale</option>
+                <option value="Internal">Internal</option>
+              </Field>
+              <ErrorMessage
+                name="category_one"
+                component="div"
+                className="text-warning text-xs"
+              />
+            </Grid>
+
             <Grid className='my-2' item md={6} xs={12}>
             <label htmlFor="quantity">Quantity</label>
               <Field
@@ -102,7 +125,7 @@ const AddInventory = () => {
                 component="div"
                 className="text-warning text-xs"
               />
-            </Grid>
+            </Grid>            
             <Grid className='my-2' item md={6} xs={12}>
             <label htmlFor="Purchase-Price">Purchase Price</label>
               <Field
