@@ -26,9 +26,9 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
 
   const initialValues = {
     note: "",
-    sample: null,
+    sample_collected: null,
     patient: selectedRowData?.id,
-    test_profile_ID: null,
+    test_profile: null,
     order_bill: null,
     item: null,
     requested_by: auth?.user_id,
@@ -37,6 +37,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
 
   const validationSchema = Yup.object().shape({
     note: Yup.string().required("This field is required!"),
+    test_profile:Yup.number().required("This field is required!"),
   });
 
   const handleSendLabRequest = async (formValue, helpers) => {
@@ -110,7 +111,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                         <Field
                           as="select"
                           className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
-                          name="test_profile_ID"
+                          name="test_profile"
                         >
                           <option value="">Select Test Profile</option>
                           {labTestProfiles.map((test, index) => (
@@ -120,7 +121,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                           ))}
                         </Field>
                         <ErrorMessage
-                          name="test_profile_ID"
+                          name="test_profile"
                           component="div"
                           className="text-warning text-xs"
                         />
