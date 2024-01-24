@@ -15,6 +15,9 @@ from drf_spectacular.views import (
 
 
 urlpatterns = [
+    # announcement
+    path('announcement/', include('announcement.urls')),
+
     path('admin/', admin.site.urls),
     # patients
     path('patients/', include('patient.urls')),
