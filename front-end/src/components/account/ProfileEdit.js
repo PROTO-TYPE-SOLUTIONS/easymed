@@ -9,6 +9,7 @@ import DialogContent from "@mui/material/DialogContent";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getUserById } from "@/redux/service/user";
 import { updateUser } from "@/redux/service/user";
+import { getCurrentUser } from '@/redux/features/users'
 
 const ProfileEdit = () => {
   const [open, setOpen] = React.useState(false);
@@ -60,10 +61,10 @@ const ProfileEdit = () => {
         ...formValue,
       };
       console.log(formData)
-      await updateUser(formData, auth).then((res)=>{
-        console.log(res);
-      });
-      toast.success("User updated successfully");  
+      const response = await updateUser(formData, auth);
+      dispatch(getCurrentUser(auth));      
+      toast.success("User updated successfully");
+      
       setLoading(false);
       handleClose();
 

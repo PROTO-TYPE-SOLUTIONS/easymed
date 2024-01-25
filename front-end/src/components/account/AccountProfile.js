@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Link from 'next/link'
 import { Grid } from '@mui/material'
 import ProfileEdit from './ProfileEdit'
 import { useAuth } from '@/assets/hooks/use-auth'
 import { getUserById } from '@/redux/service/user'
+import { getCurrentUser } from '@/redux/features/users'
 
 const AccountProfile = () => {
   const auth = useAuth();
-  const [user, setUser] = useState({})
-
-  console.log(user)
-
-  const getUser = async (auth) => {
-    await getUserById(auth).then((res)=>setUser(res));
-  }
+  const dispatch = useDispatch();
+  const currentUser = useSelector((store)=> store.user.userProfile)
 
   useEffect(()=>{
     if (auth){
-      getUser(auth);
+      dispatch(getCurrentUser(auth));
     }
   }, []);
 
@@ -33,9 +30,9 @@ const AccountProfile = () => {
               alt=""
             />
             <div className='flex flex-col text-center gap-2'>
-              <p className='text-xl font-semibold'>{`${user.first_name} ${user.last_name}`}</p>
-              <p className='text-sm'>{`${user.role}`}</p>
-              <p className='text-sm'>{`${user.profession}`}</p>
+              <p className='text-xl font-semibold'>{`${currentUser.first_name} ${currentUser.last_name}`}</p>
+              <p className='text-sm'>{`${currentUser.role}`}</p>
+              <p className='text-sm'>{`${currentUser.profession}`}</p>
             </div>
           </div>
         </Grid>
@@ -52,27 +49,27 @@ const AccountProfile = () => {
         <Grid className='justify-center flex px-8' container spacing={2}>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
             <label>First Name</label>
-            <p className='text-sm text-primary'>{`${user.first_name}`}</p>
+            <p className='text-sm text-primary'>{`${currentUser.first_name}`}</p>
           </Grid>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
             <label>Last Name</label>
-            <p className='text-sm text-primary'>{`${user.last_name}`}</p>          
+            <p className='text-sm text-primary'>{`${currentUser.last_name}`}</p>          
           </Grid>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
             <label>Email Address</label>
-            <p className='text-sm text-primary'>{`${user.email}`}</p>
+            <p className='text-sm text-primary'>{`${currentUser.email}`}</p>
           </Grid>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
             <label>Age</label>
-            <p className='text-sm text-primary'>{`${user.age}`}</p>          
+            <p className='text-sm text-primary'>{`${currentUser.age}`}</p>          
           </Grid>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
             <label>Role</label>
-            <p className='text-sm text-primary'>{`${user.role}`}</p>          
+            <p className='text-sm text-primary'>{`${currentUser.role}`}</p>          
           </Grid>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
             <label>Proffession</label>
-            <p className='text-sm text-primary'>{`${user.profession}`}</p>          
+            <p className='text-sm text-primary'>{`${currentUser.profession}`}</p>          
           </Grid>
         </Grid>        
       </div>
