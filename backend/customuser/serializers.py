@@ -18,7 +18,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('id', 'email', 'first_name',
-                  'last_name', 'role', 'profession', 'age')
+                  'last_name', 'role', 'profession', 'age', 'phone')
 
     def get_age(self, obj: CustomUser):
         if obj.age:
@@ -37,7 +37,7 @@ class CustomUserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('email', 'password', 'first_name',
-                  'last_name', 'role', 'profession', 'group')
+                  'last_name', 'role', 'profession', 'group', 'phone')
 
     def create(self, validated_data: dict):
         
@@ -49,6 +49,7 @@ class CustomUserRegistrationSerializer(serializers.ModelSerializer):
             role=validated_data['role'],
             profession=validated_data['profession'],
             group=validated_data["group"],
+            phone=validated_data["phone"],
             is_staff=validated_data['role'] != 'patient',
         )
         return user
