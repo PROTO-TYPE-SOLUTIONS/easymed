@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Test Results</title>
+</head>
+<body>
+    <h1>Lab Test Results for {{ patient.first_name }} {{ patient.second_name }}</h1>
+    <p><strong>Date of Birth:</strong> {{ patient.date_of_birth }}</p>
+    <p><strong>Gender:</strong> {{ patient.get_gender_display }}</p>
+    <p><strong>Age:</strong> {{ patient.age }}</p>
+    <hr>
+    <h2>Lab Tests</h2>
+    {% for lab_test_result in lab_test_results %}
+        <h3>{{ lab_test_result.title }}</h3>
+        <p><strong>Date Created:</strong> {{ lab_test_result.date_created }}</p>
+        <table border="1">
+            <tr>
+                <th>Test Panel</th>
+                <th>Result</th>
+                <th>Reference Value</th>
+            </tr>
+            {% for lab_test_result_item in lab_test_result.labtestresultitem_set.all %}
+                <tr>
+                    <td>{{ lab_test_result_item.test_panel.name }}</td>
+                    <td>{{ lab_test_result_item.result }}</td>
+                    <td>{{ lab_test_result_item.ref_value }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+    {% endfor %}
+</body>
+</html>

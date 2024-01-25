@@ -12,11 +12,9 @@ from django.conf import settings
 from celery import shared_task
 from inventory.models import IncomingItem, Inventory
 
+"""Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
 def create_or_update_inventory_record(incoming_item_id):
-    """
-    Creates a new Inventory record or updates an existing one based on the IncomingItem.
-    """
     try:
         incoming_item = IncomingItem.objects.get(id=incoming_item_id)
 
@@ -71,3 +69,18 @@ def generate_requisition_pdf(requisition_id):
     HTML(string=html_content).write_pdf(pdf_file_path)
 
     requisition.save
+
+
+'''Task to generated Lab Results Report'''   
+@shared_task
+def generate_labtestresult_pdf(labtestresult_id):
+    from laboratory.models import LabTestResult
+    labtestresult = LabTestResult.objects.get(pk=labtestresult_id)
+    app_template_dir  = apps.get_app_config('labtestresults').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'labtestresult.html', {'labtestresult': labtestresult})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/labtestresult/', f'{labtestresult.id}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    labtestresult.save()
