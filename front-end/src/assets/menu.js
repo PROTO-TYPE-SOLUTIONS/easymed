@@ -11,7 +11,7 @@ import { GrAdd } from 'react-icons/gr'
 import { MdInventory2 } from 'react-icons/md'
 import { BiSolidPurchaseTagAlt } from 'react-icons/bi'
 import { FaMoneyBillAlt } from 'react-icons/fa'
-import { FaProductHunt } from 'react-icons/fa'
+import { FaProductHunt, FaLock, FaUser } from 'react-icons/fa'
 import { TbBrandBandlab } from 'react-icons/tb'
 import { FaMoneyBillWave } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -102,6 +102,20 @@ export const menus = [
     label: "Inventory",
     href: "/dashboard/inventory",
     icon: <MdInventory2 className="text-xl" />,
+  },
+];
+
+export const AccMenus = [
+  {
+    label: "Profile",
+    href: "/account/profile",
+    sub_href: "/account/profile/edit",
+    icon: <FaUser className="text-xl" />,
+  },
+  {
+    label: "Security",
+    href: "/account/profile/security",
+    icon: <FaLock className="text-xl" />,
   },
 ];
 

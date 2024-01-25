@@ -76,7 +76,8 @@ export const API_URL = {
 
   /***************** User **********************/
   GET_USER_NAME: "/customuser/users",
-  FETCH_ALL_USERS: "/customuser/users/"
+  FETCH_ALL_USERS: "/customuser/users/",
+  FETCH_USER_BY_ID: "/customuser/users"
 
 };
 
@@ -159,7 +160,8 @@ export const APP_API_URL = {
 
   /***************** User **********************/
   GET_USER_NAME: "/api/user/getUserName",
-  FETCH_ALL_USERS: "/api/user/getAllUsers"
+  FETCH_ALL_USERS: "/api/user/getAllUsers",
+  FETCH_USER_BY_ID: "/api/user/user-by-id"
 
 };
 
