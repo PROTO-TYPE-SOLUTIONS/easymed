@@ -2,6 +2,7 @@ import React from "react";
 import Sidebar from "./sidebar";
 import RightBar from "./rightbar";
 import CustomizedHeader from "./customized-header";
+import TopSection from "./rightbar/top-section";
 
 
 const CustomizedLayout = ({ children }) => {
@@ -12,7 +13,11 @@ const CustomizedLayout = ({ children }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto hideMiddleSectionScrollbar">
-        <CustomizedHeader />
+        <div className="w-full pr-8 h-[10vh]">
+          <div className="flex justify-end">
+            <TopSection />
+          </div>  
+        </div>    
         <div>{children}</div>
       </div>
     </div>

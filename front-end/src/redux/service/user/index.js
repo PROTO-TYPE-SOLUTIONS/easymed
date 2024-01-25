@@ -32,3 +32,38 @@ export const getAllUsers = (auth) =>{
             })
     })
 }
+
+export const getUserById = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_USER_BY_ID}`, {            
+            params:{
+                user_id:auth.user_id
+            },
+        })
+        .then((res) =>{
+            resolve(res.data)
+        })
+        .catch((err) =>{
+            reject(err.message)
+        })
+    })
+}
+
+export const updateUser = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    console.log("HELLO CALLED UPDATE USER")
+    return new Promise((resolve,reject) =>{
+        axiosInstance.put(`${APP_API_URL.FETCH_USER_BY_ID}`,{
+            body:payload,
+            user_id:auth.user_id
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                console.log("USER_STATUS_UPDATE_ERROR ",err)
+                reject(err.message)
+            })
+    })
+}
