@@ -9,10 +9,10 @@ const MyProfile = () => {
   return (
     <Container className='py-8' maxWidth="xl">
       <Grid container className='bg-white h-[80vh] rounded-lg py-8 px-4'>
-          <Grid className='flex justify-center' item xs={2}>
+          <Grid className='flex justify-center' item xs={3}>
               <AccountNav/>
           </Grid>
-          <Grid className='flex justify-center rounded-lg' item xs={10}>
+          <Grid className='flex justify-center rounded-lg' item xs={9}>
               <AccountProfile/>
           </Grid>
       </Grid>

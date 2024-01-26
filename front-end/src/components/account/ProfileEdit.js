@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -13,20 +13,18 @@ import { getCurrentUser } from '@/redux/features/users'
 
 const ProfileEdit = () => {
   const [open, setOpen] = React.useState(false);
-  const [user, setUser] = useState({})
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
 
-  const getUser = async (auth) => {
-    await getUserById(auth).then((res)=>setUser(res));
-  }
+  const currentUser = useSelector((store)=> store.user.userProfile)
 
   useEffect(()=>{
     if (auth){
-      getUser(auth);
+      dispatch(getCurrentUser(auth));
     }
   }, []);
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -38,11 +36,11 @@ const ProfileEdit = () => {
 
 
   const initialValues = {
-    first_name: user.first_name,
-    last_name: user.last_name,
-    email: user.email,
-    profession: user.profession,
-    phone: user.phone,
+    first_name: currentUser.first_name,
+    last_name: currentUser.last_name,
+    email: currentUser.email,
+    profession: currentUser.profession,
+    phone: currentUser.phone,
   };
 
   const validationSchema = Yup.object().shape({
