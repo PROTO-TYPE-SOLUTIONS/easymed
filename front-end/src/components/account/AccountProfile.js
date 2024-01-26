@@ -60,8 +60,8 @@ const AccountProfile = () => {
             <p className='text-sm text-primary'>{`${currentUser.email}`}</p>
           </Grid>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
-            <label>Age</label>
-            <p className='text-sm text-primary'>{`${currentUser.age}`}</p>          
+            <label>Phone Number</label>
+            <p className='text-sm text-primary'>{`${currentUser.phone}`}</p>          
           </Grid>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
             <label>Role</label>
