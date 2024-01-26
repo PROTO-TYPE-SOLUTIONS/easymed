@@ -166,3 +166,28 @@ class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
     # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+
+'''
+This view gets the geneated pdf and downloads it ocally
+pdf accessed here http://127.0.0.1:8080/download_labtestresult_pdf/26/
+'''
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
+
+from .models import LabTestResult
+
+def download_labtestresult_pdf(request, labtestresult_id):
+    labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
+
+    # Path to the generated PDF file
+    # pdf_file_path = os.path.join(settings.MEDIA_ROOT, invoice.invoice_file.name)
+    pdf_file_path = os.path.join('./makeeasyhmis/static/labtestresult/', f'{labtestresult.id}.pdf')
+
+    # Open the PDF file and serve it as an attachment
+    with open(pdf_file_path, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{labtestresult.id}.pdf"'
+        return response

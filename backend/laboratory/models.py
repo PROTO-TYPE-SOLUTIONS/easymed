@@ -50,7 +50,7 @@ class LabTestPanel(models.Model):
     unit = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.name        
+        return self.name   
 
 
 class LabTestRequest(models.Model):
@@ -63,16 +63,7 @@ class LabTestRequest(models.Model):
 
     def __str__(self):
         return str(self.id)
-
-
-class EquipmentTestRequest(models.Model):
-    test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
-    equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.equipment.name + " " + self.test_request.test_profile_ID.name + " " + self.equipment.ip_address + " " + self.equipment.port)
-
-
+    
 class LabTestResult(models.Model):
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
@@ -92,6 +83,19 @@ class LabTestCategory(models.Model):
 
     def __str__(self):
         return self.category 
+
+
+
+
+class EquipmentTestRequest(models.Model):
+    test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.equipment.name + " " + self.test_request.test_profile_ID.name + " " + self.equipment.ip_address + " " + self.equipment.port)
+
+
+
     
 
 class PublicLabTestRequest(models.Model):
