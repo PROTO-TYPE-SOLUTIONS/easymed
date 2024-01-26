@@ -133,9 +133,9 @@ const TopSection = () => {
                 <Avatar /> Profile
               </MenuItem>
             </Link>
-            <Link href='/account'>
+            <Link href='/account/announcements'>
               <MenuItem onClick={handleClose}>
-                <Avatar /> My account
+                <Avatar /> Announcements
               </MenuItem>
             </Link>
             <Divider />

@@ -107,9 +107,13 @@ export const menus = [
 
 export const AccMenus = [
   {
+    label: "Announcements",
+    href: "/account/announcements",
+    icon: <BsCalendarEvent className="text-xl" />,
+  },
+  {
     label: "Profile",
     href: "/account/profile",
-    sub_href: "/account/profile/edit",
     icon: <FaUser className="text-xl" />,
   },
   {

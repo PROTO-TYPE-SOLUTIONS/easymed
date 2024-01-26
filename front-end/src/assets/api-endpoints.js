@@ -77,7 +77,11 @@ export const API_URL = {
   /***************** User **********************/
   GET_USER_NAME: "/customuser/users",
   FETCH_ALL_USERS: "/customuser/users/",
-  FETCH_USER_BY_ID: "/customuser/users"
+  FETCH_USER_BY_ID: "/customuser/users",
+
+  /***************** Announcements **********************/
+  FETCH_ANNOUNCEMENTS_CHANNELS: "/announcement/channels/",
+  FETCH_ANNOUNCEMENTS:"/announcement/announcements/"
 
 };
 
@@ -161,7 +165,11 @@ export const APP_API_URL = {
   /***************** User **********************/
   GET_USER_NAME: "/api/user/getUserName",
   FETCH_ALL_USERS: "/api/user/getAllUsers",
-  FETCH_USER_BY_ID: "/api/user/user-by-id"
+  FETCH_USER_BY_ID: "/api/user/user-by-id",
+
+  /***************** Announcements **********************/
+  FETCH_ANNOUNCEMENTS_CHANNELS: "/api/announcement/channels/",
+  FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/"
 
 };
 
