@@ -219,7 +219,7 @@ const PrescribeDrug = () => {
                 ></path>
               </svg>
             )}
-            Save Requisition Pdf
+            Save Prescription
           </button>
         </div>
       </Grid>
