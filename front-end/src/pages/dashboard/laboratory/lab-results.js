@@ -7,6 +7,7 @@ import { getAllLabResults } from "@/redux/features/laboratory";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import LabResultDataGrid from "@/components/dashboard/laboratory/lab-results-datagrid";
+import LabNav from "@/components/dashboard/laboratory/LabNav";
 
 const LabResults = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ const LabResults = () => {
 
   return (
     <Container maxWidth="xl">
+      <LabNav/>
       <h1 className="uppercase text-2xl my-4">Lab Results</h1>
       <LabResultDataGrid labResults={labResults} />
     </Container>
