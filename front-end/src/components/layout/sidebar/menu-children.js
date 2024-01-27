@@ -14,8 +14,6 @@ const MenuChild = ({ collapsed, menu, index }) => {
     const dispatch = useDispatch();
     const currentPath = router.pathname;
 
-    console.log(showChild)
-
     const icon = showChild == true ? <AiFillCaretDown /> : <AiFillCaretRight />;
 
     const childMenuClasses = showChild
