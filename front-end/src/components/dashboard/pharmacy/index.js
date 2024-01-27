@@ -7,6 +7,7 @@ import { getAllPrescriptions, getAllPrescribedDrugs, getAllPrescriptionsPrescrib
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllPatients } from "@/redux/features/patients";
 
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
@@ -53,6 +54,7 @@ const PharmacyDataGrid = () => {
       dispatch(getAllPrescriptions(auth));
       dispatch(getAllPrescribedDrugs(auth));
       dispatch(getAllDoctors(auth));
+      dispatch(getAllPatients())
     }
   }, [auth]);
 
