@@ -81,7 +81,10 @@ export const API_URL = {
 
   /***************** Announcements **********************/
   FETCH_ANNOUNCEMENTS_CHANNELS: "/announcement/channels/",
-  FETCH_ANNOUNCEMENTS:"/announcement/announcements/"
+  FETCH_ANNOUNCEMENTS:"/announcement/announcements/",
+
+  /***************** PDFs **********************/
+  DOWNLOAD_PDF: "/download"
 
 };
 
@@ -169,7 +172,10 @@ export const APP_API_URL = {
 
   /***************** Announcements **********************/
   FETCH_ANNOUNCEMENTS_CHANNELS: "/api/announcement/channels/",
-  FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/"
+  FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/",
+
+  /***************** PDFs **********************/
+  DOWNLOAD_PDF: "/api/pdf/download_pdf"
 
 };
 

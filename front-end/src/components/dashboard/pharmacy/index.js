@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from "react";
+import { toast } from "react-toastify";
+import { MdLocalPrintshop } from 'react-icons/md'
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import { Grid } from "@mui/material";
@@ -8,6 +10,7 @@ import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllPatients } from "@/redux/features/patients";
+import { downloadPDF } from '@/redux/service/pdfs';
 
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
@@ -46,8 +49,32 @@ const PharmacyDataGrid = () => {
   const dispatch = useDispatch();
   const auth = useAuth();
 
-  console.log(doctorsData)
-  console.log(prescriptionsData)
+  const renderGridCell = (rowData) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span
+            style={{ marginLeft: '5px', cursor: 'pointer' }}
+            onClick={() => handlePrint(rowData)}
+          >
+            <MdLocalPrintshop />
+          </span>
+        </div>
+      );
+  };
+
+  const handlePrint = async (data) => {
+    console.log(data.values[3]);
+    try{
+        const response = await downloadPDF(data.values[3], "_prescription_pdf", auth)
+        window.open(response.link, '_blank');
+        toast.success("got pdf successfully")
+
+    }catch(error){
+        console.log(error)
+        toast.error(error)
+    }      
+  };
+
 
   useEffect(() => {
     if (auth) {
@@ -147,6 +174,12 @@ const PharmacyDataGrid = () => {
           dataField="" 
           caption=""
           cellRender={actionsFunc}
+        />
+        <Column
+            dataField="id"
+            caption=""
+            alignment="center"
+            cellRender={(rowData) => renderGridCell(rowData)}
         />
       </DataGrid>
       {open && <ViewPrescribedDrugsModal {...{setOpen,open,selectedRowData}} />}
