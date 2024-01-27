@@ -12,11 +12,14 @@ const AccountProfile = () => {
   const dispatch = useDispatch();
   const currentUser = useSelector((store)=> store.user.userProfile)
 
+  console.log(currentUser);
+  console.log(auth)
+
   useEffect(()=>{
     if (auth){
       dispatch(getCurrentUser(auth));
     }
-  }, []);
+  }, [auth]);
 
   return (
     <div className='flex flex-col justify-between w-full px-4'>
