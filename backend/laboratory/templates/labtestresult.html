@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Test Report</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .report-header {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <h1>Lab Test Report</h1>
+        <p><strong>Patient Name:</strong> {{ lab_test_result.lab_test_request.patient }}</p>
+        <p><strong>Test Title: is thsi changing</strong> {{ LabTestResult.title }}</p>
+        <p><strong>Date Created:</strong> {{ lab_test_result.date_created }}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Test Panel</th>
+                <th>Result</th>
+                <th>Reference Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result_item in lab_test_result.labtestresultitem_set.all %}
+            <tr>
+                <td>{{ result_item.test_panel.name }}</td>
+                <td>{{ result_item.result }}</td>
+                <td>{{ result_item.ref_value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p><strong>Notes:</strong></p>
+    <p>{{ lab_test_result.lab_test_request.note }}</p>
+
+    <p><strong>Requested By:</strong> {{ lab_test_result.lab_test_request.requested_by }}</p>
+</body>
+</html>

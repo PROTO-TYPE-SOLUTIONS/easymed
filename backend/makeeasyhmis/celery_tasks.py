@@ -76,7 +76,7 @@ def generate_requisition_pdf(requisition_id):
 def generate_labtestresult_pdf(labtestresult_id):
     from laboratory.models import LabTestResult
     labtestresult = LabTestResult.objects.get(pk=labtestresult_id)
-    app_template_dir  = apps.get_app_config('labtestresults').path + '/templates/'
+    app_template_dir  = apps.get_app_config('laboratory').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'labtestresult.html', {'labtestresult': labtestresult})
     pdf_file_path = os.path.join('./makeeasyhmis/static/labtestresult/', f'{labtestresult.id}.pdf')
 

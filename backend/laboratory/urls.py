@@ -33,5 +33,5 @@ router.register(r'lab-test-panel', LabTestPanelViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('lab-test-request-by-patient-id/<int:patient_id>/', LabTestRequestByPatientIdAPIView.as_view()),
-    path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
+    #path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
 ]
