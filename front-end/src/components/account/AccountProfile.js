@@ -20,7 +20,7 @@ const AccountProfile = () => {
 
   return (
     <div className='flex flex-col justify-between w-full px-4'>
-      <div className='w-full border border-gray py-4 my-2 rounded'>
+      <div className='w-full border border-gray py-4 my-2 rounded shadow-lg'>
       <Grid className='justify-center flex px-8' container>
         <Grid className='' xs={6}>
           <div className='flex items-center gap-4'>
@@ -44,7 +44,7 @@ const AccountProfile = () => {
         </Grid>
       </Grid>
       </div>
-      <div className='w-full border border-gray py-4 my-2 rounded'>
+      <div className='w-full border border-gray py-4 my-2 rounded shadow-lg'>
         <h5 className='mb-4 pl-4 font-bold'>Personal Information</h5>
         <Grid className='justify-center flex px-8' container spacing={2}>
           <Grid className='my-4 gap-2 flex flex-col' xs={4}>
