@@ -2,12 +2,19 @@ import React,{useState} from "react";
 import Link from 'next/link'
 import { AiFillCaretRight, AiFillCaretDown} from "react-icons/ai";
 import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+
+import { toggleShowMenu } from "@/redux/features/menu";
 
 
 const MenuChild = ({ collapsed, menu, index }) => {
-    const [showChild,setShowChild] = useState(false);
+    // const [showChild,setShowChild] = useState(true);
+    const showChild = useSelector(store => store.menu.showChild)
     const router = useRouter();
+    const dispatch = useDispatch();
     const currentPath = router.pathname;
+
+    console.log(showChild)
 
     const icon = showChild == true ? <AiFillCaretDown /> : <AiFillCaretRight />;
 
@@ -21,7 +28,7 @@ const MenuChild = ({ collapsed, menu, index }) => {
       {!collapsed && menu?.children ? (
         <>
           <span
-            onClick={() => setShowChild((prev) => !prev)}
+            onClick={() => dispatch(toggleShowMenu())}
             className="flex text-sm items-center justify-between p-2 cursor-pointer"
           >
             <div className="flex items-center gap-2">
@@ -44,7 +51,7 @@ const MenuChild = ({ collapsed, menu, index }) => {
           </Link>
         </>
       )}
-      {showChild && (
+      {showChild && menu.children && (
         <ul className={`bg-[#F2F2F6] py-1 rounded mx-2 ${childMenuClasses}`}>
           {menu?.children?.map((child, index) => (
             <li key={index} className="px-4 text-xs">
