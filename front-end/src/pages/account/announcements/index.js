@@ -14,7 +14,7 @@ const Announcements = () => {
             <Grid className='flex justify-center' item xs={3}>
                 <AccountNav/>
             </Grid>
-            <Grid className='flex flex-col items-center rounded-lg' item xs={9}>
+            <Grid className='flex flex-col items-center rounded-lg gap-4' item xs={9}>
                 <NewPostModal/>
                 <AnnouncementPosts/>
             </Grid>
