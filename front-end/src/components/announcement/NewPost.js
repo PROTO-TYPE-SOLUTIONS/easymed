@@ -72,7 +72,7 @@ const NewPostModal = () => {
     };
   return (
     <section className="w-full p-2">
-        <div className="w-full px-4 py-4 rounded-lg bg-background">
+        <div className="w-full px-4 py-4 rounded-lg border border-background shadow-lg">
             <div className='rounded-xl w-full px-4 py-2 cursor-pointer flex items-center gap-2'>
                 <div onClick={handleClickOpen} className="py-2 w-full border bg-white text-center rounded-3xl border-gray text-gray"> 
                      Share your latest update here ! What is the big news ? #NewAnnouncement ! !

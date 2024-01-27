@@ -23,28 +23,30 @@ const AnnouncementPosts = () => {
     .slice(0, 5) // Take the top 5 announcements
     .map((announcement) => (
       <li className='w-full' key={announcement.id}>
-        <div className='flex flex-col w-full'>
-          <h3 className='font-semibold text-lg'>{announcement.title}</h3>
+        <div className='flex flex-col w-full gap-2'>
+          <h3 className='font-semibold text-warning text-lg'>{announcement.title}</h3>
           <span className='text-sm'>{announcement.content}</span>
         </div>
       </li>
     ));
 
   return (
-    <div className='w-full items-center p-8 flex h-full'>
-      {announcements.length <= 0 ? (
-        <div className='w-full items-center flex h-full justify-center'>
-          <h2>no announcement</h2>
-        </div>
-      ) : (
-        <div className='w-full flex h-full flex-col'>
-          <h2 className='text-2xl font-bold my-4 text-primary'>Top 5 Announcements</h2>
-          <ul className='flex flex-col gap-4 w-full'>
-            {topFiveAnnouncements}
-          </ul>
-        </div>
-      )}
-    </div>
+    <section className="w-full p-2">
+      <div className='w-full items-center px-8 pb-4 flex h-full rounded-lg border border-background shadow-lg'>
+        {announcements.length <= 0 ? (
+          <div className='w-full items-center flex h-full justify-center'>
+            <h2>no announcement</h2>
+          </div>
+        ) : (
+          <div className='w-full flex h-full flex-col'>
+            <h2 className='text-2xl font-bold my-4 text-primary'>Top 5 Announcements</h2>
+            <ul className='flex flex-col gap-4 w-full'>
+              {topFiveAnnouncements}
+            </ul>
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 
