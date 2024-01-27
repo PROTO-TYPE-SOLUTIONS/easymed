@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from "react";
+import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import { MdLocalPrintshop } from 'react-icons/md'
 import dynamic from "next/dynamic";
 import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import Link from 'next/link'
@@ -9,6 +11,7 @@ import { getAllPurchaseOrders } from "@/redux/features/inventory";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllTheUsers } from "@/redux/features/users";
+import { downloadPDF } from '@/redux/service/pdfs';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -26,6 +29,32 @@ const PurchaseOrdersDatagrid = () => {
 
   const dispatch = useDispatch()
   const auth = useAuth();
+
+  const renderGridCell = (rowData) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span
+            style={{ marginLeft: '5px', cursor: 'pointer' }}
+            onClick={() => handlePrint(rowData)}
+          >
+            <MdLocalPrintshop />
+          </span>
+        </div>
+      );
+  };
+
+  const handlePrint = async (data) => {
+    console.log(data.values[3]);
+    try{
+        const response = await downloadPDF(data.values[3], "_purchaseorder_pdf", auth)
+        window.open(response.link, '_blank');
+        toast.success("got pdf successfully")
+
+    }catch(error){
+        console.log(error)
+        toast.error(error)
+    }      
+  };
 
   useEffect(() => {
     if (auth) {
@@ -110,6 +139,12 @@ const PurchaseOrdersDatagrid = () => {
           caption="Status"
         />
         <Column dataField="date_created" caption="Requested Date" />
+        <Column
+            dataField="id"
+            caption=""
+            alignment="center"
+            cellRender={(rowData) => renderGridCell(rowData)}
+        />
       </DataGrid>
     </section>
   );
