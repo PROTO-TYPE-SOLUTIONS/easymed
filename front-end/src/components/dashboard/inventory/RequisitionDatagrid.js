@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import Link from 'next/link'
@@ -9,6 +10,8 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllRequisitions, getAllSuppliers, getAllItems } from "@/redux/features/inventory";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { getAllTheUsers } from "@/redux/features/users";
+import { downloadPDF } from '@/redux/service/pdfs';
+import { MdLocalPrintshop } from 'react-icons/md'
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -26,6 +29,33 @@ const RequisitionDatagrid = () => {
 
   const dispatch = useDispatch()
   const auth = useAuth();
+
+  const renderGridCell = (rowData) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span
+            style={{ marginLeft: '5px', cursor: 'pointer' }}
+            onClick={() => handlePrint(rowData)}
+          >
+            <MdLocalPrintshop />
+          </span>
+        </div>
+      );
+  };
+
+  const handlePrint = async (data) => {
+      console.log(data.values[3]);
+      try{
+          const response = await downloadPDF(data.values[3], "_requisition_pdf", auth)
+          window.open(response.link, '_blank');
+          toast.success("got pdf successfully")
+
+      }catch(error){
+          console.log(error)
+          toast.error(error)
+      }
+      
+  };
 
   useEffect(() => {
     if (auth) {
@@ -112,6 +142,12 @@ const RequisitionDatagrid = () => {
           caption="Status"
         />
         <Column dataField="date_created" caption="Requested Date" />
+        <Column
+            dataField="id"
+            caption=""
+            alignment="center"
+            cellRender={(rowData) => renderGridCell(rowData)}
+        />
       </DataGrid>
     </section>
   );
