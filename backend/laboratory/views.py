@@ -177,17 +177,23 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
 
+from django.template.loader import render_to_string
+from weasyprint import HTML
+
 from .models import LabTestResult
 
 def download_labtestresult_pdf(request, labtestresult_id):
     labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
+    labtestresultitem = LabTestResultItem.objects.filter(result_report=labtestresult)
 
-    # Path to the generated PDF file
-    # pdf_file_path = os.path.join(settings.MEDIA_ROOT, invoice.invoice_file.name)
-    pdf_file_path = os.path.join('./makeeasyhmis/static/labtestresult/', f'{labtestresult.id}.pdf')
+
+    html = render_to_string ('labtestresult.html', {'labtestresult': labtestresult, 'labtestresultiem':labtestresultitem})
+    
+    # Use WeasyPrint to generate the PDF from the rendered HTML
+    pdf_file = HTML(string=html).write_pdf()
 
     # Open the PDF file and serve it as an attachment
-    with open(pdf_file_path, 'rb') as pdf_file:
-        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{labtestresult.id}.pdf"'
-        return response
+    # Create the HTTP response with the PDF file
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{labtestresult.id}.pdf"'
+    return response

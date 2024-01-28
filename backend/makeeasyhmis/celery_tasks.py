@@ -76,7 +76,7 @@ def generate_requisition_pdf(requisition_id):
 def generate_labtestresult_pdf(labtestresult_id):
     from laboratory.models import LabTestResult
     labtestresult = LabTestResult.objects.get(pk=labtestresult_id)
-    app_template_dir  = apps.get_app_config('labtestresults').path + '/templates/'
+    app_template_dir  = apps.get_app_config('laboratory').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'labtestresult.html', {'labtestresult': labtestresult})
     pdf_file_path = os.path.join('./makeeasyhmis/static/labtestresult/', f'{labtestresult.id}.pdf')
 
@@ -84,3 +84,18 @@ def generate_labtestresult_pdf(labtestresult_id):
     HTML(string=html_content).write_pdf(pdf_file_path)
 
     labtestresult.save()
+
+
+
+'''Task to generated Lab Results Report'''   
+@shared_task
+def generate_prescription_pdf(prescription_id):
+    from patient.models import Prescription
+    prescription = Prescription.objects.get(pk=prescription_id)
+    app_template_dir  = apps.get_app_config('patient').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'prescription.html', {'prescription': prescription})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/prescription/', f'{prescription.id}.pdf')
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    prescription.save()

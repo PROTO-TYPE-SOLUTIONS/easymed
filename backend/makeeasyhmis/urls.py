@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 
 from billing.views import download_invoice_pdf
 from inventory.views import download_requisition_pdf
+from laboratory.views import download_labtestresult_pdf
+from patient.views import download_prescription_pdf
 
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -41,6 +43,11 @@ urlpatterns = [
 
     path('download_invoice_pdf/<int:invoice_id>/', download_invoice_pdf, name='download_invoice_pdf'),
     path('download_requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download_requisition_pdf'),
+    path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
+
+    path('download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
+
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
