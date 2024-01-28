@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux';
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import { Grid } from "@mui/material";
+import { MdLocalPrintshop } from 'react-icons/md'
 
 import { getAllInvoices } from '@/redux/features/billing';
+import { downloadPDF } from '@/redux/service/pdfs';
 import { useAuth } from '@/assets/hooks/use-auth';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -22,7 +25,32 @@ const BilledDataGrid = () => {
     const [showInfo, setShowInfo] = useState(true);
     const [showNavButtons, setShowNavButtons] = useState(true);
 
-    console.log("ALL INVOICES", invoices)
+    const renderGridCell = (rowData) => {
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span
+              style={{ marginLeft: '5px', cursor: 'pointer' }}
+              onClick={() => handlePrint(rowData)}
+            >
+              <MdLocalPrintshop />
+            </span>
+          </div>
+        );
+    };
+
+    const handlePrint = async (data) => {
+        console.log(data.values[5]);
+        try{
+            const response = await downloadPDF(data.values[5], "_invoice_pdf", auth)
+            window.open(response.link, '_blank');
+            toast.success("got pdf successfully")
+
+        }catch(error){
+            console.log(error)
+            toast.error(error)
+        }
+        
+    };
 
     useEffect(()=> {
         if(auth){
@@ -71,7 +99,12 @@ const BilledDataGrid = () => {
                     dataField="status"
                     caption="Status"
                 />
-                
+                <Column
+                    dataField="id"
+                    caption=""
+                    alignment="center"
+                    cellRender={(rowData) => renderGridCell(rowData)}
+                />
             </DataGrid>
         </section>
     )

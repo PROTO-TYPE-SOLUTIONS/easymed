@@ -51,7 +51,7 @@ export const API_URL = {
   DELETE_ITEM: "/inventory/items",
   FETCH_ORDER_BILL: "/inventory/orderbill/",
   REQUISITION: "/inventory/requisition/",
-  REQUISITION_ITEM: "/inventory/requisition-tem/",
+  REQUISITION_ITEM: "/inventory/requisition-item/",
   PURCHASE_ORDER: "/inventory/purchase-order/",
   PURCHASE_ORDER_ITEM: "/inventory/purchase-order-item/",
   FETCH_INCOMING_ITEMS: "/inventory/incoming-item/",
@@ -81,7 +81,10 @@ export const API_URL = {
 
   /***************** Announcements **********************/
   FETCH_ANNOUNCEMENTS_CHANNELS: "/announcement/channels/",
-  FETCH_ANNOUNCEMENTS:"/announcement/announcements/"
+  FETCH_ANNOUNCEMENTS:"/announcement/announcements/",
+
+  /***************** PDFs **********************/
+  DOWNLOAD_PDF: "/download"
 
 };
 
@@ -169,7 +172,10 @@ export const APP_API_URL = {
 
   /***************** Announcements **********************/
   FETCH_ANNOUNCEMENTS_CHANNELS: "/api/announcement/channels/",
-  FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/"
+  FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/",
+
+  /***************** PDFs **********************/
+  DOWNLOAD_PDF: "/api/pdf/download_pdf"
 
 };
 
