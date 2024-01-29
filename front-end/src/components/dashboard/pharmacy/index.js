@@ -63,9 +63,9 @@ const PharmacyDataGrid = () => {
   };
 
   const handlePrint = async (data) => {
-    console.log(data.values[3]);
+
     try{
-        const response = await downloadPDF(data.values[3], "_prescription_pdf", auth)
+        const response = await downloadPDF(data.values[0], "_prescription_pdf", auth)
         window.open(response.link, '_blank');
         toast.success("got pdf successfully")
 
