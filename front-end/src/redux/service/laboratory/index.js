@@ -42,10 +42,49 @@ export const fetchLabEquipment = (auth) =>{
     })
 }
 
+export const fetchLabTestPanels = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_TEST_PANELS}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const sendLabRequests = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.post(`${APP_API_URL.SEND_LAB_REQUESTS}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const sendLabResults = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.SEND_LAB_RESULTS}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const addTestResultItem = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.SEND_LAB_RESULTS_ITEMS}`,payload,auth)
             .then((res) =>{
                 resolve(res.data)
             })
