@@ -1,33 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
+import Link from "next/link";
+import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager,
+import { Column, Paging, Pager, Scrolling,
   HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
 import { Grid,Chip } from "@mui/material";
-import { LuMoreHorizontal } from "react-icons/lu";
 import { AiFillDelete,AiOutlineDownload,AiFillPrinter } from 'react-icons/ai';
-import CmtDropdownMenu from "@/assets/DropdownMenu";
+import { MdLocalPrintshop } from "react-icons/md";
+
+import { downloadPDF } from "@/redux/service/pdfs";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
-const getActions = () => {
-  let actions = [{ action: "download", label: "Download", icon: <AiOutlineDownload className="text-card text-xl" /> }];
-
-  actions.push({ action: "print", label: "Print", icon: <AiFillPrinter className="text-success" /> });
-
-  actions.push({ action: "delete", label: "Delete", icon: <AiFillDelete className="text-warning text-xl" /> });
-  return actions;
-};
-
+const allowedPageSizes = [5, 10, 'all'];
 
 const LabResultDataGrid = ({ labResults }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const userActions = getActions();
-  console.log("LAB_RESULTS ",labResults)
-
+  const auth = useAuth();
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
+  
   //   FILTER PATIENTS BASED ON SEARCH QUERY
   const filteredData = labData.filter((patient) => {
     return patient?.name
@@ -35,31 +33,32 @@ const LabResultDataGrid = ({ labResults }) => {
       .includes(searchQuery.toLowerCase());
   });
 
-
-  const onMenuClick = async (menu, data) => {
-   if (menu.action === "delete") {
-    //   delete api call
-    }else if(menu.action === 'download'){
-        // download function
-    }else if(menu.action === 'print'){
-      window.open('/images/lab.pdf', '_blank');
-        // print function
-    }
+  const renderGridCell = (rowData) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span
+            style={{ marginLeft: '5px', cursor: 'pointer' }}
+            onClick={() => handlePrint(rowData)}
+          >
+            <MdLocalPrintshop />
+          </span>
+        </div>
+      );
   };
 
-  const actionsFunc = ({ data }) => {
-    return (
-      <>
-        <CmtDropdownMenu
-        sx={{ cursor: "pointer" }}
-        items={userActions}
-        onItemClick={(menu) => onMenuClick(menu, data)}
-        TriggerComponent={<LuMoreHorizontal className="cursor-pointer text-xl" />}
-      />
-      </>
-    );
-  };
+  const handlePrint = async (data) => {
+      console.log(data.values[0]);
+      try{
+          const response = await downloadPDF(data.values[0], "_labtestresults_pdf", auth)
+          window.open(response.link, '_blank');
+          toast.success("got pdf successfully")
 
+      }catch(error){
+          console.log(error)
+          toast.error(error)
+      }
+      
+  };
 
   const priorityFunc = ({ data }) => {
     if (data?.priority === "Priority") {
@@ -74,51 +73,49 @@ const LabResultDataGrid = ({ labResults }) => {
     }
   };
 
-
   return (
     <>
-      <Grid container spacing={2} className="my-2">
-        <Grid item md={4} xs={12}>
+      <Grid className="my-2 flex justify-between">
+        <Grid className="flex justify-between gap-8 rounded-lg">
+          <Grid item md={4} xs={4}>
+            <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
+              <option value="" selected>                
+              </option>
+              {months.map((month, index) => (
+                <option key={index} value="">
+                  {month.name}
+                </option>
+              ))}
+            </select>
+          </Grid>
+          <Grid>
+          <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
+              <option value="" selected>
+                All the Items
+              </option>
+            </select>
+          </Grid>        
+        </Grid>
+        <Grid className="flex items-center rounded-lg" item md={4} xs={4}>
+          <img className="h-4 w-4" src='/images/svgs/search.svg'/>
           <input
-            className="py-3 w-full px-4 focus:outline-none placeholder-font font-thin text-sm"
+            className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
-            placeholder="Search patients by name"
+            placeholder="Search referrals by facility"
           />
         </Grid>
-        <Grid item md={4} xs={12}>
-          <select
-            className="px-4 w-full py-3 focus:outline-none"
-            name=""
-            id=""
-          >
-            <option value="" selected>
-              Search by Month
-            </option>
-            {months.map((month, index) => (
-              <option key={index} value="">{month.name}</option>
-            ))}
-          </select>
-        </Grid>
-        <Grid item md={4} xs={12}>
-          <div className="flex">
-            <button className="bg-white shadow border-primary py-3 px-4 w-full">
-              Date
-            </button>
-            <button className="bg-white shadow border-primary py-3 px-4 w-full">
-              Week
-            </button>
-            <button className="bg-white shadow border-primary py-3 px-4 w-full">
-              Month
-            </button>
-          </div>
+        <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
+          <Link className="mx-4" href='/dashboard/laboratory/add-results'>
+            Add Test Result
+          </Link>
         </Grid>
       </Grid>
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={filteredData}
+        dataSource={labResults}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -130,32 +127,30 @@ const LabResultDataGrid = ({ labResults }) => {
         height={"70vh"}
         className="w-full shadow"
       >
-        <Paging defaultPageSize={20} pageSize={20} />
         <HeaderFilter visible={true} />
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={5} />
         <Pager
           visible={true}
-          displayMode={true}
-          showPageSizeSelector={false}
-          showInfo={true}
-          showNavigationButtons={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
-        <Column dataField="number" caption="NO" width={80} />
-        <Column dataField="id_number" caption="ID" width={140} />
-        <Column dataField="name" caption="Name" width={200} cellRender={priorityFunc} />
+        <Column dataField="id" caption="Result ID" />
+        <Column dataField="title" caption="Title"  />
+        <Column dataField="date_created" caption="Date Created"  cellRender={priorityFunc} />
         <Column
-          dataField="age"
-          caption="Age"
-          width={100}
+          dataField="lab_test_request"
+          caption="Test Request"
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="test" caption="Test" width={240} />
-        <Column dataField="gender" caption="Gender" width={140} />
         <Column
-          dataField="number"
-          caption="Action"
-          width={80}
-          cellRender={actionsFunc}
+          dataField=""
+          caption=""
+          alignment="center"
+          cellRender={(rowData) => renderGridCell(rowData)}
         />
       </DataGrid>
     </>
