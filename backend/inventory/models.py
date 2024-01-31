@@ -60,7 +60,7 @@ class Requisition(models.Model):
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
 
     def __str__(self):
-        return self.id
+        return self.status
         
 class RequisitionItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -84,7 +84,7 @@ class PurchaseOrder(models.Model):
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return self.reqquested_by
+        return str(self.requested_by)
 
 class PurchaseOrderItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)

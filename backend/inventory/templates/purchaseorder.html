@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Order Report</title>
+</head>
+<body>
+    <h1>Purchase Order Report</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity Purchased</th>
+                <th>Supplier</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for purchase_order_item in purchase_order_items %}
+            <tr>
+                <td>{{ purchase_order_item.item.name }}</td>
+                <td>{{ purchase_order_item.quantity_purchased }}</td>
+                <td>{{ purchase_order_item.supplier.name }}</td>
+                <td>{{ purchase_order_item.date_created }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

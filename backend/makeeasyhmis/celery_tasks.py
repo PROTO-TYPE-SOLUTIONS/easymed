@@ -10,7 +10,7 @@ from django.apps import apps
 from django.conf import settings
 
 from celery import shared_task
-from inventory.models import IncomingItem, Inventory
+from inventory.models import IncomingItem, Inventory, PurchaseOrder, Requisition
 
 """Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
@@ -59,7 +59,6 @@ def generate_invoice_pdf(invoice_id):
 '''Task to generated Requisition'''   
 @shared_task
 def generate_requisition_pdf(requisition_id):
-    from inventory.models import Requisition
     requisition = Requisition.objects.get(pk=requisition_id)
     app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'requisition.html', {'requisition': requisition})
@@ -99,3 +98,17 @@ def generate_prescription_pdf(prescription_id):
     HTML(string=html_content).write_pdf(pdf_file_path)
 
     prescription.save()
+
+
+'''Task to generated Purchase Order Report'''   
+@shared_task
+def generate_purchaseorder_pdf(purchaseorder_id):
+    from inventory.models import PurchaseOrder
+    purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
+    app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchaseorder': purchaseorder})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/purchaseorder/', f'{purchaseorder.id}.pdf')
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    purchaseorder.save()

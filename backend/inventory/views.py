@@ -2,6 +2,13 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from django.shortcuts import render
+from django.template.loader import get_template
+from django.http import HttpResponse
+from weasyprint import HTML
+from .models import PurchaseOrderItem
+
 from .models import (
     Item,
     Inventory,
@@ -122,3 +129,22 @@ def download_requisition_pdf(request, requisition_id):
         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{requisition.id}.pdf"'
         return response    
+    
+
+
+
+def download_purchaseorder_pdf(request, purchaseorder_id):
+    # Retrieve purchase order items
+    purchase_order_items = PurchaseOrderItem.objects.all()
+
+    # Render the HTML template with purchase order items
+    html_template = get_template('purchaseorder.html').render({'purchase_order_items': purchase_order_items})
+
+    # Generate PDF using WeasyPrint
+    pdf_file = HTML(string=html_template).write_pdf()
+
+    # Create HTTP response with PDF attachment
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="purchase_order_report.pdf"'
+
+    return response

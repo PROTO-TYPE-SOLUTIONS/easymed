@@ -16,6 +16,7 @@ from .views import (
     RequisitionViewSet,
     RequisitionItemViewSet,
     download_requisition_pdf,
+    download_purchaseorder_pdf,
 )
 
 router = DefaultRouter()
@@ -33,6 +34,9 @@ router.register(r'incoming-item', IncomingItemViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('download__requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
+    path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
+
+
     path('requisition-item/by-requisition-id/<int:requisition_id>/', RequisitionItemViewSet.as_view({'get': 'by_requisition_id'}), name='requisition-item-by-requisition-id'),
     path('purchase-order-item/by-purchase-order-id/<int:purchase_order_id>/', PurchaseOrderItemViewSet.as_view({'get': 'by_purchase_order_id'}), name='purchase-order-item-by-purchase-order-id'),
 ]

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from billing.views import download_invoice_pdf
-from inventory.views import download_requisition_pdf
+from inventory.views import download_requisition_pdf, download_purchaseorder_pdf
 from laboratory.views import download_labtestresult_pdf
 from patient.views import download_prescription_pdf
 
@@ -46,6 +46,8 @@ urlpatterns = [
     path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
 
     path('download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
+
+    path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
 
 
 ]
