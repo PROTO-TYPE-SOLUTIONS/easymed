@@ -117,50 +117,30 @@ import os
 
 from .models import Requisition
 
-# def download_requisition_pdf(request, requisition_id):
-#     requisition = get_object_or_404(Requisition, pk=requisition_id)
-
-#     # Path to the generated PDF file
-#     # pdf_file_path = os.path.join(settings.MEDIA_ROOT, invoice.invoice_file.name)
-#     pdf_file_path = os.path.join('./makeeasyhmis/static/requisitions/', f'{requisition.id}.pdf')
-
-#     # Open the PDF file and serve it as an attachment
-#     with open(pdf_file_path, 'rb') as pdf_file:
-#         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="{requisition.id}.pdf"'
-#         return response    
-    
-
 def download_requisition_pdf(request, requisition_id):
-        # Retrieve purchase order items
-    requisition_items = RequisitionItem.objects.all()
-
-    # Render the HTML template with purchase order items
+    requisition = get_object_or_404(Requisition, pk=requisition_id)
+    requisition_items = RequisitionItem.objects.filter(requisition=requisition)
     html_template = get_template('requisition.html').render({'requisition_items': requisition_items})
-
-    # Generate PDF using WeasyPrint
+    from weasyprint import HTML
     pdf_file = HTML(string=html_template).write_pdf()
-
-    # Create HTTP response with PDF attachment
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = 'filename="requisition.pdf"'
+    response['Content-Disposition'] = f'filename="purchase_order_report_{requisition_id}.pdf"'
 
     return response
 
-    
 
 def download_purchaseorder_pdf(request, purchaseorder_id):
-    # Retrieve purchase order items
-    purchase_order_items = PurchaseOrderItem.objects.all()
+    purchase_order = get_object_or_404(PurchaseOrder, pk=purchaseorder_id)
+    purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=purchase_order)
 
-    # Render the HTML template with purchase order items
-    html_template = get_template('purchaseorder.html').render({'purchase_order_items': purchase_order_items})
-
-    # Generate PDF using WeasyPrint
+    html_template = get_template('purchaseorder.html').render({
+        'purchaseorder': purchase_order,
+        'purchaseorder_items': purchase_order_items
+    })
+    
+    from weasyprint import HTML
     pdf_file = HTML(string=html_template).write_pdf()
-
-    # Create HTTP response with PDF attachment
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = 'filename="purchase_order_report.pdf"'
+    response['Content-Disposition'] = f'filename="purchase_order_report_{purchaseorder_id}.pdf"'
 
     return response

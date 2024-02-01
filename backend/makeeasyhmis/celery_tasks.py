@@ -112,3 +112,15 @@ def generate_purchaseorder_pdf(purchaseorder_id):
     HTML(string=html_content).write_pdf(pdf_file_path)
 
     purchaseorder.save()
+
+
+# @shared_task
+# def generate_purchaseorder_pdf(purchaseorder_id):
+#     purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
+#     purchaseorder_items = purchaseorder.purchaseorderitem_set.all()  # Fetch related PurchaseOrderItems
+#     html_content = render_to_string('purchaseorder.html', {'purchaseorder': purchaseorder, 'purchaseorder_items': purchaseorder_items})
+#     pdf_file_path = os.path.join('./makeeasyhmis/static/purchaseorder/', f'{purchaseorder.id}.pdf')
+#     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+#     HTML(string=html_content).write_pdf(pdf_file_path)
+
+#     purchaseorder.save()
