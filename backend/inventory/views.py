@@ -117,21 +117,37 @@ import os
 
 from .models import Requisition
 
-def download_requisition_pdf(request, requisition_id):
-    requisition = get_object_or_404(Requisition, pk=requisition_id)
+# def download_requisition_pdf(request, requisition_id):
+#     requisition = get_object_or_404(Requisition, pk=requisition_id)
 
-    # Path to the generated PDF file
-    # pdf_file_path = os.path.join(settings.MEDIA_ROOT, invoice.invoice_file.name)
-    pdf_file_path = os.path.join('./makeeasyhmis/static/requisitions/', f'{requisition.id}.pdf')
+#     # Path to the generated PDF file
+#     # pdf_file_path = os.path.join(settings.MEDIA_ROOT, invoice.invoice_file.name)
+#     pdf_file_path = os.path.join('./makeeasyhmis/static/requisitions/', f'{requisition.id}.pdf')
 
-    # Open the PDF file and serve it as an attachment
-    with open(pdf_file_path, 'rb') as pdf_file:
-        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{requisition.id}.pdf"'
-        return response    
+#     # Open the PDF file and serve it as an attachment
+#     with open(pdf_file_path, 'rb') as pdf_file:
+#         response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+#         response['Content-Disposition'] = f'attachment; filename="{requisition.id}.pdf"'
+#         return response    
     
 
+def download_requisition_pdf(request, requisition_id):
+        # Retrieve purchase order items
+    requisition_items = RequisitionItem.objects.all()
 
+    # Render the HTML template with purchase order items
+    html_template = get_template('requisition.html').render({'requisition_items': requisition_items})
+
+    # Generate PDF using WeasyPrint
+    pdf_file = HTML(string=html_template).write_pdf()
+
+    # Create HTTP response with PDF attachment
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="requisition.pdf"'
+
+    return response
+
+    
 
 def download_purchaseorder_pdf(request, purchaseorder_id):
     # Retrieve purchase order items
