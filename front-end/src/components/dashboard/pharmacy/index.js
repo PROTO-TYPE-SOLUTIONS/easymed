@@ -30,6 +30,11 @@ const getActions = () => {
       label: "Dispense",
       icon: <MdAddCircle className="text-success text-xl mx-2" />,
     },
+    {
+      action: "print",
+      label: "Print",
+      icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -49,23 +54,10 @@ const PharmacyDataGrid = () => {
   const dispatch = useDispatch();
   const auth = useAuth();
 
-  const renderGridCell = (rowData) => {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span
-            style={{ marginLeft: '5px', cursor: 'pointer' }}
-            onClick={() => handlePrint(rowData)}
-          >
-            <MdLocalPrintshop />
-          </span>
-        </div>
-      );
-  };
-
   const handlePrint = async (data) => {
 
     try{
-        const response = await downloadPDF(data.values[0], "_prescription_pdf", auth)
+        const response = await downloadPDF(data.id, "_prescription_pdf", auth)
         window.open(response.link, '_blank');
         toast.success("got pdf successfully")
 
@@ -90,12 +82,13 @@ const PharmacyDataGrid = () => {
       dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
       setSelectedRowData(data);
       setOpen(true);
+    }else if (menu.action === "print"){
+      handlePrint(data);
     }
   };
 
   const actionsFunc = ({ data }) => {
     return (
-      <>
         <CmtDropdownMenu
           sx={{ cursor: "pointer" }}
           items={userActions}
@@ -104,7 +97,6 @@ const PharmacyDataGrid = () => {
             <LuMoreHorizontal className="cursor-pointer text-xl" />
           }
         />
-      </>
     );
   };
 
@@ -175,12 +167,12 @@ const PharmacyDataGrid = () => {
           caption=""
           cellRender={actionsFunc}
         />
-        <Column
+        {/* <Column
             dataField="id"
             caption=""
             alignment="center"
             cellRender={(rowData) => renderGridCell(rowData)}
-        />
+        /> */}
       </DataGrid>
       {open && <ViewPrescribedDrugsModal {...{setOpen,open,selectedRowData}} />}
     </section>

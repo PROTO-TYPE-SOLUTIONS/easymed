@@ -12,6 +12,8 @@ import { getAllDoctors } from "@/redux/features/doctors";
 import { getAllTheUsers } from "@/redux/features/users";
 import { downloadPDF } from '@/redux/service/pdfs';
 import { MdLocalPrintshop } from 'react-icons/md'
+import CmtDropdownMenu from "@/assets/DropdownMenu";
+import { LuMoreHorizontal } from "react-icons/lu";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -19,8 +21,21 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const allowedPageSizes = [5, 10, 'all'];
 
+const getActions = () => {
+  let actions = [
+    {
+      action: "print",
+      label: "Print",
+      icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+    },
+  ];
+
+  return actions;
+};
+
 const RequisitionDatagrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
+  const userActions = getActions();
   const { requisitions } = useSelector(({ inventory }) => inventory);
   const usersData = useSelector((store)=>store.user.users);
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -30,23 +45,32 @@ const RequisitionDatagrid = () => {
   const dispatch = useDispatch()
   const auth = useAuth();
 
-  const renderGridCell = (rowData) => {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span
-            style={{ marginLeft: '5px', cursor: 'pointer' }}
-            onClick={() => handlePrint(rowData)}
-          >
-            <MdLocalPrintshop />
-          </span>
-        </div>
-      );
+  const onMenuClick = async (menu, data) => {
+    if (menu.action === "dispense") {
+      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+      setSelectedRowData(data);
+      setOpen(true);
+    }else if (menu.action === "print"){
+      handlePrint(data);
+    }
+  };
+
+  const actionsFunc = ({ data }) => {
+    return (
+        <CmtDropdownMenu
+          sx={{ cursor: "pointer" }}
+          items={userActions}
+          onItemClick={(menu) => onMenuClick(menu, data)}
+          TriggerComponent={
+            <LuMoreHorizontal className="cursor-pointer text-xl" />
+          }
+        />
+    );
   };
 
   const handlePrint = async (data) => {
-      console.log(data.values[3]);
       try{
-          const response = await downloadPDF(data.values[3], "_requisition_pdf", auth)
+          const response = await downloadPDF(data.id, "_requisition_pdf", auth)
           window.open(response.link, '_blank');
           toast.success("got pdf successfully")
 
@@ -70,9 +94,8 @@ const RequisitionDatagrid = () => {
   return (
     <section className=" my-8">
       <h3 className="text-xl mb-8"> Requisitions</h3>
-      <Grid className="my-2 flex justify-between">
-        <Grid className="flex justify-between gap-8 rounded-lg">
-          <Grid item md={4} xs={4}>
+      <Grid className="my-2 flex justify-between gap-4">
+        <Grid className="w-full flex justify-between gap-8 rounded-lg">
             <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
               <option value="" selected>                
               </option>
@@ -82,16 +105,8 @@ const RequisitionDatagrid = () => {
                 </option>
               ))}
             </select>
-          </Grid>
-          <Grid>
-          <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
-              <option value="" selected>
-                All the Items
-              </option>
-            </select>
-          </Grid>        
         </Grid>
-        <Grid className="flex items-center rounded-lg" item md={4} xs={4}>
+        <Grid className="w-full bg-white px-2 flex items-center rounded-lg" item md={4} xs={4}>
           <img className="h-4 w-4" src='/images/svgs/search.svg'/>
           <input
             className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
@@ -101,8 +116,8 @@ const RequisitionDatagrid = () => {
             placeholder="Search referrals by facility"
           />
         </Grid>
-        <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
-          <Link className="mx-4" href='/dashboard/inventory/create-requisition'>
+        <Grid className="w-full bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
+          <Link className="mx-4 w-full text-center" href='/dashboard/inventory/create-requisition'>
             Create Requisition
           </Link>
         </Grid>
@@ -142,11 +157,10 @@ const RequisitionDatagrid = () => {
           caption="Status"
         />
         <Column dataField="date_created" caption="Requested Date" />
-        <Column
-            dataField="id"
-            caption=""
-            alignment="center"
-            cellRender={(rowData) => renderGridCell(rowData)}
+        <Column 
+          dataField="" 
+          caption=""
+          cellRender={actionsFunc}
         />
       </DataGrid>
     </section>
