@@ -38,12 +38,12 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in requisition.requisitionitem_set.all %}
+            {% for requisition_items in requisition_items %}
                 <tr>
-                    <td>{{ item.item.name }}</td>
-                    <td>{{ item.quantity_requested }}</td>
-                    <td>{{ item.supplier.name|default:"N/A" }}</td>
-                    <td>{{ item.date_created }}</td>
+                    <td>{{ requisition_items.item.name }}</td>
+                    <td>{{ requisition_items.quantity_requested }}</td>
+                    <td>{{ requisition_items.supplier.name|default:"N/A" }}</td>
+                    <td>{{ requisition_items.date_created }}</td>
                 </tr>
             {% endfor %}
         </tbody>

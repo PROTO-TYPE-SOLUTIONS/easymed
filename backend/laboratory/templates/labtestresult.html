@@ -30,7 +30,7 @@
 <body>
     <div class="report-header">
         <h1>Lab Test Report</h1>
-        <p><strong>Patient Name:</strong> {{ labtestresult.result_report.lab_test_request.patient }}</p>
+        <p><strong>Patient Name:</strong> {{ labtestresult.labtestrequest.patient.first_name }}</p>
         <p><strong>Test Title: {{ labtestresult.title }}</strong></p>
         <p><strong>Date Created:</strong> {{ labtestresult.date_created }}</p>
     </div>
