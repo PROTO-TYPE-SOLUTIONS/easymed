@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
+from django.template.loader import get_template
 from .models import Invoice, InvoiceItem
+
 from authperms.permissions import (
     IsStaffUser,
     IsDoctorUser,
@@ -29,20 +31,24 @@ pdf accessed here http://127.0.0.1:8080/download_invoice_pdf/26/
 '''
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from django.conf import settings
-import os
+from weasyprint import HTML
 
-from .models import Invoice
+
+from inventory.models import Inventory
+
 
 def download_invoice_pdf(request, invoice_id):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
+    invoice_items = InvoiceItem.objects.filter(invoice=invoice)
 
-    # Path to the generated PDF file
-    # pdf_file_path = os.path.join(settings.MEDIA_ROOT, invoice.invoice_file.name)
-    pdf_file_path = os.path.join('./makeeasyhmis/static/invoices/', f'{invoice.invoice_number}.pdf')
+    html_template = get_template('invoice.html').render({
+        'invoice': invoice,
+        'invoice_items': invoice_items
+    })
+    pdf_file = HTML(string=html_template).write_pdf()
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="invoice_report_{invoice_id}.pdf"'
 
-    # Open the PDF file and serve it as an attachment
-    with open(pdf_file_path, 'rb') as pdf_file:
-        response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{invoice.invoice_number}.pdf"'
-        return response
+    return response

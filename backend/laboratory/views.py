@@ -179,21 +179,22 @@ import os
 
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from django.template.loader import get_template
+
 
 from .models import LabTestResult
 
 def download_labtestresult_pdf(request, labtestresult_id):
     labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
     labtestresultitem = LabTestResultItem.objects.filter(result_report=labtestresult)
+    html_template = get_template('labtestresult.html').render({
+        'labtestresult': labtestresult,
+        'labtestresultiem':labtestresultitem
+    })
 
 
-    html = render_to_string ('labtestresult.html', {'labtestresult': labtestresult, 'labtestresultiem':labtestresultitem})
-    
-    # Use WeasyPrint to generate the PDF from the rendered HTML
-    pdf_file = HTML(string=html).write_pdf()
-
-    # Open the PDF file and serve it as an attachment
-    # Create the HTTP response with the PDF file
+    pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{labtestresult.id}.pdf"'
+    response['Content-Disposition'] = f'filename="invoice_report_{labtestresult_id}.pdf"'
+
     return response

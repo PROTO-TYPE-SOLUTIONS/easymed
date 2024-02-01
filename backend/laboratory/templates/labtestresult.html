@@ -25,12 +25,28 @@
         .report-header {
             margin-bottom: 20px;
         }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+            max-height: 150px;
+        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
+        <h1>Medicare Clinic</h1>
+        <p>Address: 123 Street, City, Country</p>
+        <p>Phone: +1234567890 | Email: info@example.com</p>
+    </div>
+
     <div class="report-header">
         <h1>Lab Test Report</h1>
-        <p><strong>Patient Name:</strong> {{ labtestresult.labtestrequest.patient.first_name }}</p>
+        <p><strong>Patient Name:</strong> {{ labtestresult.lab_test_request.patient.first_name }}</p>
         <p><strong>Test Title: {{ labtestresult.title }}</strong></p>
         <p><strong>Date Created:</strong> {{ labtestresult.date_created }}</p>
     </div>
