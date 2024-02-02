@@ -91,7 +91,7 @@ const AddTestResults = () => {
 
     const payloadData = {
       ...item,
-      result_report: payload.id
+      lab_test_result: payload.id
     }
 
     console.log("PAYLOAD LAB RESULTS" , payloadData)

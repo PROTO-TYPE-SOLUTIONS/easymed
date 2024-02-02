@@ -30,12 +30,12 @@ const AddResultItemModal = () => {
     result: "",
     test_panel: "",
     ref_value: "",
-    result_report: 0
+    lab_test_result: 0
   };
 
   const validationSchema = Yup.object().shape({
     test_panel: Yup.object().required("This field is required!"),
-    // result_report: Yup.object().required("This field is required!"),
+    // lab_test_result: Yup.object().required("This field is required!"),
     ref_value: Yup.string().required("This field is required!"),
     result: Yup.string().required("This field is required!"),
   });
