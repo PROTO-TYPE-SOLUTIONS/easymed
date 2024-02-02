@@ -43,7 +43,7 @@
         <thead>
             <tr>
                 <th>Item</th>
-                <th>Quantity Purchased</th>
+                <th>Quantity</th>
                 <th>Supplier</th>
                 <th>Date Created</th>
             </tr>
@@ -59,6 +59,7 @@
             {% endfor %}
         </tbody>
     </table>
+    <p>Requested By: {{ purchase_order_item.purchase_order.requested_by }}</p>
 
 </body>
 </html>

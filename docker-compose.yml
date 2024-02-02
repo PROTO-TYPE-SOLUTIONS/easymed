@@ -12,7 +12,7 @@ services:
             - POSTGRES_PASSWORD=postgres
             - HOST=db
         networks:
-            - hunet2
+            - mks
         restart: unless-stopped
     redis:
         image: redis:7.0-alpine
@@ -23,16 +23,16 @@ services:
         ports:
             - 6379:6379
         networks:
-            - hunet2
+            - mks
         restart: unless-stopped
-    api:
+    backend:
         build:
           context: ./backend
-        container_name: api
-        command: bash -c "python3 /code/manage.py migrate && python3 /code/manage.py runserver 0.0.0.0:8000 && /code/vendor/unoconv --listener"
+        container_name: backend
+        command: python manage.py runserver 0.0.0.0:8000
         volumes:
-            - /opt/eqa/:/opt/eqa
-            - /tmp/:/tmp/
+            - ./mks/:/opt/mks
+            - ./:/tmp/
         ports:
             - 8000:8000
         env_file:
@@ -40,27 +40,38 @@ services:
         depends_on:
             - db
         networks:
-            - hunet2
+            - mks
         restart: unless-stopped
     celery:
         build:
           context: ./backend
         container_name: celery
         restart: always
-        command: celery -A huqas_api.config worker -B -l info
+        command: celery -A makeeasyhmis worker -B -l info
         volumes:
-            - /opt/eqa/:/opt/eqa
-            - /tmp/:/tmp/
+            - ./mks/:/opt/mks
+            - ./:/tmp/
         env_file:
             - ./.env
         depends_on:
             - db
             - redis
-            - api
+            - backend
         networks:
-            - hunet2
+            - mks
+
+    frontend:
+        build:
+            context: ./front-emd
+        container_name: front-end
+        restart: unless-stopped
+        depends_on:
+            - backend
+        networks:
+            - mks
+
 
 networks:
-    hunet2:
-        name: hunet2
+    mks:
+        name: mks
         driver: bridge

@@ -71,9 +71,9 @@
     </table>
 
     <p><strong>Notes:</strong></p>
-    <p>{{ labtestresult.result_report.lab_test_request.note }}</p>
+    <p>{{ labtestresult.lab_test_request.note }}</p>
 
-    <p><strong>Requested By:</strong> {{ labtestresult.result_report.lab_test_request.requested_by }}</p>
+    <p><strong>Requested By:</strong> {{ labtestresult.lab_test_request.requested_by.first_name }}</p>
 </body>
 </html>
 
