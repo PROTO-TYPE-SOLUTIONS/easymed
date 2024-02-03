@@ -9,6 +9,8 @@ import labReducer from './features/laboratory'
 import billingReducer from './features/billing'
 import prescriptionsReducer from './features/pharmacy'
 import userReducer from './features/users'
+import AnnouncementReducer from './features/announcements'
+import MenuReducer from './features/menu'
 
 
 export const store = configureStore({
@@ -22,6 +24,8 @@ export const store = configureStore({
         laboratory: labReducer,
         billing: billingReducer,
         prescription: prescriptionsReducer,
-        user: userReducer
+        user: userReducer,
+        announcement: AnnouncementReducer,
+        menu: MenuReducer,
     }
 })

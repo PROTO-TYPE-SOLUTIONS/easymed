@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from "react";
+import { toast } from "react-toastify";
+import { MdLocalPrintshop } from 'react-icons/md'
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import { Grid } from "@mui/material";
@@ -7,6 +9,8 @@ import { getAllPrescriptions, getAllPrescribedDrugs, getAllPrescriptionsPrescrib
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllPatients } from "@/redux/features/patients";
+import { downloadPDF } from '@/redux/service/pdfs';
 
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
@@ -25,6 +29,11 @@ const getActions = () => {
       action: "dispense",
       label: "Dispense",
       icon: <MdAddCircle className="text-success text-xl mx-2" />,
+    },
+    {
+      action: "print",
+      label: "Print",
+      icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
     },
   ];
 
@@ -45,14 +54,26 @@ const PharmacyDataGrid = () => {
   const dispatch = useDispatch();
   const auth = useAuth();
 
-  console.log(doctorsData)
-  console.log(prescriptionsData)
+  const handlePrint = async (data) => {
+
+    try{
+        const response = await downloadPDF(data.id, "_prescription_pdf", auth)
+        window.open(response.link, '_blank');
+        toast.success("got pdf successfully")
+
+    }catch(error){
+        console.log(error)
+        toast.error(error)
+    }      
+  };
+
 
   useEffect(() => {
     if (auth) {
       dispatch(getAllPrescriptions(auth));
       dispatch(getAllPrescribedDrugs(auth));
       dispatch(getAllDoctors(auth));
+      dispatch(getAllPatients())
     }
   }, [auth]);
 
@@ -61,12 +82,13 @@ const PharmacyDataGrid = () => {
       dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
       setSelectedRowData(data);
       setOpen(true);
+    }else if (menu.action === "print"){
+      handlePrint(data);
     }
   };
 
   const actionsFunc = ({ data }) => {
     return (
-      <>
         <CmtDropdownMenu
           sx={{ cursor: "pointer" }}
           items={userActions}
@@ -75,7 +97,6 @@ const PharmacyDataGrid = () => {
             <LuMoreHorizontal className="cursor-pointer text-xl" />
           }
         />
-      </>
     );
   };
 
@@ -146,6 +167,12 @@ const PharmacyDataGrid = () => {
           caption=""
           cellRender={actionsFunc}
         />
+        {/* <Column
+            dataField="id"
+            caption=""
+            alignment="center"
+            cellRender={(rowData) => renderGridCell(rowData)}
+        /> */}
       </DataGrid>
       {open && <ViewPrescribedDrugsModal {...{setOpen,open,selectedRowData}} />}
     </section>

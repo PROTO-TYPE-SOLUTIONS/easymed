@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Order Report</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+            max-height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
+        <h1>Medicare Clinic</h1>
+        <p>Address: 123 Street, City, Country</p>
+        <p>Phone: +1234567890 | Email: info@example.com</p>
+    </div>
+
+    <h2>Purchase Order Form</h2>
+    <p>Purchase Order Nu: {{ purchaseorder.id }}</p>
+    <p>Purchase Date: {{ purchaseorder.id }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Supplier</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for purchase_order_item in purchaseorder_items %}
+            <tr>
+                <td>{{ purchase_order_item.item.name }}</td>
+                <td>{{ purchase_order_item.quantity_purchased }}</td>
+                <td>{{ purchase_order_item.supplier.name }}</td>
+                <td>{{ purchase_order_item.date_created }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>Requested By: {{ purchase_order_item.purchase_order.requested_by }}</p>
+
+</body>
+</html>

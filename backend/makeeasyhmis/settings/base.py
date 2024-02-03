@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'rest_framework_simplejwt',
+    'weasyprint',
 
     # user apps
     'authperms.apps.AuthpermsConfig',
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'laboratory.apps.LaboratoryConfig',
     'receptions.apps.ReceptionsConfig',
     'billing.apps.BillingConfig',
+    'announcement.apps.AnnouncementConfig'
 
 ]
 

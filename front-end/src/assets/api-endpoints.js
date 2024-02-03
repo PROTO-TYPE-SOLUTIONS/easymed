@@ -36,12 +36,15 @@ export const API_URL = {
 
   /***************** LABORATORY APIS **********************/
   FETCH_LAB_RESULTS: "/lab/lab-test-results/",
+  SEND_LAB_RESULTS: "/lab/lab-test-results/",
   FETCH_LAB_REQUESTS: "/lab/lab-test-requests/",
   SEND_LAB_REQUESTS: "/lab/lab-test-requests/",
   FETCH_LAB_EQUIPMENT: "/lab/lab-equipment/",
   SEND_TO_EQUIPMENT: "/lab/equipment-test-request/",
   PUBLIC_LAB_REQUEST: "/lab/public-lab-test-request/",
   FETCH_LAB_TEST_PROFILE: "/lab/lab-test-profile/",
+  FETCH_LAB_TEST_PANELS: "/lab/lab-test-panel/",
+  SEND_LAB_RESULTS_ITEMS: "/lab/lab-test-result-item/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -51,9 +54,10 @@ export const API_URL = {
   DELETE_ITEM: "/inventory/items",
   FETCH_ORDER_BILL: "/inventory/orderbill/",
   REQUISITION: "/inventory/requisition/",
-  REQUISITION_ITEM: "/inventory/requisition-tem/",
+  REQUISITION_ITEM: "/inventory/requisition-item/",
   PURCHASE_ORDER: "/inventory/purchase-order/",
   PURCHASE_ORDER_ITEM: "/inventory/purchase-order-item/",
+  FETCH_INCOMING_ITEMS: "/inventory/incoming-item/",
 
 
   /***************** NURSING APIS **********************/
@@ -75,7 +79,15 @@ export const API_URL = {
 
   /***************** User **********************/
   GET_USER_NAME: "/customuser/users",
-  FETCH_ALL_USERS: "/customuser/users/"
+  FETCH_ALL_USERS: "/customuser/users/",
+  FETCH_USER_BY_ID: "/customuser/users",
+
+  /***************** Announcements **********************/
+  FETCH_ANNOUNCEMENTS_CHANNELS: "/announcement/channels/",
+  FETCH_ANNOUNCEMENTS:"/announcement/announcements/",
+
+  /***************** PDFs **********************/
+  DOWNLOAD_PDF: "/download"
 
 };
 
@@ -118,12 +130,15 @@ export const APP_API_URL = {
 
   /***************** LABORATORY APIS **********************/
   FETCH_LAB_RESULTS: "/api/laboratory/get-lab-results",
+  SEND_LAB_RESULTS: "/api/laboratory/get-lab-results",
   FETCH_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
   SEND_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
   FETCH_LAB_EQUIPMENT: "/api/laboratory/get-lab-equipment",
   SEND_TO_EQUIPMENT: "/api/laboratory/send-to-equipment",
   PUBLIC_LAB_REQUEST: "/api/laboratory/public-lab-request",
   FETCH_LAB_TEST_PROFILE: "/api/laboratory/get-lab-test-profile",
+  FETCH_LAB_TEST_PANELS: "/api/laboratory/get-lab-test-panels",
+  SEND_LAB_RESULTS_ITEMS: "/api/laboratory/get-lab-test-result-item",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",
@@ -137,6 +152,7 @@ export const APP_API_URL = {
   REQUISITION_ITEM: "/api/inventory/requisition-item",
   PURCHASE_ORDER: "/api/inventory/purchase-order",
   PURCHASE_ORDER_ITEM: "/api/inventory/purchase-order-item",
+  FETCH_INCOMING_ITEMS: "/api/inventory/incomingItem",
 
 
   /***************** NURSING APIS **********************/
@@ -157,7 +173,15 @@ export const APP_API_URL = {
 
   /***************** User **********************/
   GET_USER_NAME: "/api/user/getUserName",
-  FETCH_ALL_USERS: "/api/user/getAllUsers"
+  FETCH_ALL_USERS: "/api/user/getAllUsers",
+  FETCH_USER_BY_ID: "/api/user/user-by-id",
+
+  /***************** Announcements **********************/
+  FETCH_ANNOUNCEMENTS_CHANNELS: "/api/announcement/channels/",
+  FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/",
+
+  /***************** PDFs **********************/
+  DOWNLOAD_PDF: "/api/pdf/download_pdf"
 
 };
 

@@ -11,7 +11,7 @@ import { GrAdd } from 'react-icons/gr'
 import { MdInventory2 } from 'react-icons/md'
 import { BiSolidPurchaseTagAlt } from 'react-icons/bi'
 import { FaMoneyBillAlt } from 'react-icons/fa'
-import { FaProductHunt } from 'react-icons/fa'
+import { FaProductHunt, FaLock, FaUser } from 'react-icons/fa'
 import { TbBrandBandlab } from 'react-icons/tb'
 import { FaMoneyBillWave } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -48,18 +48,18 @@ export const menus = [
     label: "Laboratory",
     href: "/dashboard/laboratory",
     icon: <TbBrandBandlab className="text-xl" />,
-    children: [
-      {
-        label: "Lab Results",
-        href: "/dashboard/laboratory/lab-results",
-        icon: <GrAdd className="" />,
-      },
-      {
-        label: "Lab Requests",
-        href: "/dashboard/laboratory/lab-requests",
-        icon: <GrAdd className="" />,
-      },
-    ],
+    // children: [
+    //   {
+    //     label: "Lab Results",
+    //     href: "/dashboard/laboratory/lab-results",
+    //     icon: <GrAdd className="" />,
+    //   },
+    //   {
+    //     label: "Lab Requests",
+    //     href: "/dashboard/laboratory/lab-requests",
+    //     icon: <GrAdd className="" />,
+    //   },
+    // ],
   },
   {
     label: "Billing",
@@ -102,6 +102,24 @@ export const menus = [
     label: "Inventory",
     href: "/dashboard/inventory",
     icon: <MdInventory2 className="text-xl" />,
+  },
+];
+
+export const AccMenus = [
+  {
+    label: "Announcements",
+    href: "/account/announcements",
+    icon: <BsCalendarEvent className="text-xl" />,
+  },
+  {
+    label: "Profile",
+    href: "/account/profile",
+    icon: <FaUser className="text-xl" />,
+  },
+  {
+    label: "Security",
+    href: "/account/profile/security",
+    icon: <FaLock className="text-xl" />,
   },
 ];
 

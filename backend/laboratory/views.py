@@ -20,6 +20,8 @@ from .models import (
     LabEquipment,
     EquipmentTestRequest,
     PublicLabTestRequest,
+    LabTestPanel,
+    LabTestResultItem,
 )
 # serializers
 from .serializers import (
@@ -31,6 +33,8 @@ from .serializers import (
     LabEquipmentSerializer,
     EquipmentTestRequestSerializer,
     PublicLabTestRequestSerializer,
+    LabTestPanelSerializer,
+    LabTestResultItemSerializer,
 )
 
 # permissions
@@ -59,16 +63,20 @@ class LabReagentViewSet(viewsets.ModelViewSet):
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
-class LabTestProfileViewSet(viewsets.ModelViewSet):
-    queryset = LabReagent.objects.all()
-    serializer_class = LabTestProfileSerializer
-    permission_classes = (AllowAny,)
+# class LabTestProfileViewSet(viewsets.ModelViewSet):
+#     queryset = LabReagent.objects.all()
+#     serializer_class = LabTestProfileSerializer
+#     permission_classes = (AllowAny,)
 
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
     serializer_class = LabEquipmentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+class LabTestPanelViewSet(viewsets.ModelViewSet):
+    queryset = LabTestPanel.objects.all()
+    serializer_class = LabTestPanelSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
@@ -80,6 +88,11 @@ class LabTestResultViewSet(viewsets.ModelViewSet):
     queryset = LabTestResult.objects.all()
     serializer_class = LabTestResultSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+class LabTestResultItemViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResultItem.objects.all()
+    serializer_class = LabTestResultItemSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)    
 
 
 class LabTestRequestViewSet(viewsets.ModelViewSet):
@@ -153,3 +166,35 @@ class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
     # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+
+'''
+This view gets the geneated pdf and downloads it ocally
+pdf accessed here http://127.0.0.1:8080/download_labtestresult_pdf/26/
+'''
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
+
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.template.loader import get_template
+
+
+from .models import LabTestResult
+
+def download_labtestresult_pdf(request, labtestresult_id):
+    labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
+    labtestresultitem = LabTestResultItem.objects.filter(result_report=labtestresult)
+    html_template = get_template('labtestresult.html').render({
+        'labtestresult': labtestresult,
+        'labtestresultiem':labtestresultitem
+    })
+
+
+    pdf_file = HTML(string=html_template).write_pdf()
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="invoice_report_{labtestresult_id}.pdf"'
+
+    return response

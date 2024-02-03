@@ -250,3 +250,32 @@ class SendAppointmentConfirmationAPIView(APIView):
             send_appointment_email(appointments)
             return Response("email sent successfully", status=status.HTTP_200_OK)
 
+
+
+'''
+This view gets the geneated pdf and downloads it locally
+pdf accessed here http://127.0.0.1:8080/download_prescription_pdf/26/
+'''
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.conf import settings
+import os
+
+
+from django.template.loader import render_to_string
+from weasyprint import HTML
+
+def download_prescription_pdf(request, prescription_id):
+    prescription = get_object_or_404(Prescription, pk=prescription_id)
+    prescribed_drugs = PrescribedDrug.objects.filter(prescription=prescription)
+
+    # Render the HTML template with the context
+    html = render_to_string('prescription.html', {'prescription': prescription, 'prescribed_drugs': prescribed_drugs})
+
+    # Use WeasyPrint to generate the PDF from the rendered HTML
+    pdf_file = HTML(string=html).write_pdf()
+
+    # Create the HTTP response with the PDF file
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{prescription.id}.pdf"'
+    return response

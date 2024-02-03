@@ -44,9 +44,8 @@ const InventoryDataGrid = () => {
         {inventorySummaryInfo}      
       </Grid>
       <h3 className="text-xl mt-8"> Inventory </h3>
-      <Grid className="my-2 flex justify-between">
-        <Grid className="flex justify-between gap-8 rounded-lg">
-          <Grid item md={4} xs={4}>
+      <Grid className="my-2 flex justify-between gap-4">
+        <Grid className="flex justify-between gap-8 rounded-lg w-full">
             <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
               <option value="" selected>                
               </option>
@@ -55,17 +54,9 @@ const InventoryDataGrid = () => {
                   {month.name}
                 </option>
               ))}
-            </select>
-          </Grid>
-          <Grid>
-          <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
-              <option value="" selected>
-                All the Items
-              </option>
-            </select>
-          </Grid>        
+            </select> 
         </Grid>
-        <Grid className="flex items-center rounded-lg" item md={4} xs={4}>
+        <Grid className="flex items-center rounded-lg bg-white px-2 w-full" item md={4} xs={4}>
           <img className="h-4 w-4" src='/images/svgs/search.svg'/>
           <input
             className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
@@ -75,8 +66,8 @@ const InventoryDataGrid = () => {
             placeholder="Search referrals by facility"
           />
         </Grid>
-        <Grid className="bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
-          <Link className="mx-4" href='/dashboard/inventory/add-inventory'>
+        <Grid className="bg-primary rounded-md flex items-center text-white w-full" item md={4} xs={4}>
+          <Link className="mx-4 w-full text-center" href='/dashboard/inventory/add-inventory'>
             Add Inventory
           </Link>
         </Grid>

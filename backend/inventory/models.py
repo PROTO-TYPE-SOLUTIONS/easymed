@@ -60,8 +60,17 @@ class Requisition(models.Model):
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
 
     def __str__(self):
-        return self.id
+        return self.status
+        
+class RequisitionItem(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity_requested = models.IntegerField()
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
     
+    def __str__(self):
+        return self.id    
 
 class PurchaseOrder(models.Model):
     STATUS_CHOICES = [
@@ -75,8 +84,19 @@ class PurchaseOrder(models.Model):
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return self.id
+        return str(self.requested_by)
+
+class PurchaseOrderItem(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity_purchased = models.IntegerField()
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+
     
+    def __str__(self):
+        return self.id
+
 
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
@@ -129,25 +149,7 @@ class DepartmentInventory(models.Model):
 
 
 
-class RequisitionItem(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity_requested = models.IntegerField()
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return self.id
 
 
 
-class PurchaseOrderItem(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity_purchased = models.IntegerField()
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
 
-    
-    def __str__(self):
-        return self.id

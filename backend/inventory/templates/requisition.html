@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="./requisition.css" media="print" rel="stylesheet">
+    <title>Requisition: {{ requisition.id }}</title>
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+            max-height: 150px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
+        <h1>Medicare Clinic</h1>
+        <p>Address: 123 Street, City, Country</p>
+        <p>Phone: +1234567890 | Email: info@example.com</p>
+    </div>
+    <h1>Requisition Note</h1>
+
+    <aside>
+        <address id="from">
+            Hospital Name
+            Ngon Road, 32 Bleve
+            Nairobi, Kenya
+        </address>
+
+        <address id="to">
+            {{ requisition.requested_by }}
+            From all around the world
+            Earth
+        </address>
+    </aside>
+    <h1>Requisition Number: {{ requisition.id }} </h1>
+    <p>Date: {{ requisition.date_created }}</p>
+    <p>Status: {{ requisition.status }}</p>
+
+    <h2>Requisition Items</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity Requested</th>
+                <th>Supplier</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for requisition_items in requisition_items %}
+                <tr>
+                    <td>{{ requisition_items.item.name }}</td>
+                    <td>{{ requisition_items.quantity_requested }}</td>
+                    <td>{{ requisition_items.supplier.name|default:"N/A" }}</td>
+                    <td>{{ requisition_items.date_created }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Test Report</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .report-header {
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+            max-height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
+        <h1>Medicare Clinic</h1>
+        <p>Address: 123 Street, City, Country</p>
+        <p>Phone: +1234567890 | Email: info@example.com</p>
+    </div>
+
+    <div class="report-header">
+        <h1>Lab Test Report</h1>
+        <p><strong>Patient Name:</strong> {{ labtestresult.lab_test_request.patient.first_name }}</p>
+        <p><strong>Test Title: {{ labtestresult.title }}</strong></p>
+        <p><strong>Date Created:</strong> {{ labtestresult.date_created }}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Test Panel</th>
+                <th>Result</th>
+                <th>Reference Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result_item in labtestresult.labtestresultitem_set.all %}
+            <tr>
+                <td>{{ result_item.test_panel.name }}</td>
+                <td>{{ result_item.result }}</td>
+                <td>{{ result_item.ref_value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p><strong>Notes:</strong></p>
+    <p>{{ labtestresult.lab_test_request.note }}</p>
+
+    <p><strong>Requested By:</strong> {{ labtestresult.lab_test_request.requested_by.first_name }}</p>
+</body>
+</html>
+

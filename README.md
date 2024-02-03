@@ -98,3 +98,7 @@ If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
 ``pip install celery redis``
 Run Celery: ``celery -A makeeasyhmis worker --loglevel=INFO``
 Run Redis: ``redis-cli -h 127.0.0.1 -p 6379``
+
+Generated PDFs
+``http://127.0.0.1:8080/download_{service_name}_pdf/{id}``
+i.e ``http://127.0.0.1:8080/download_invoice_pdf/24``

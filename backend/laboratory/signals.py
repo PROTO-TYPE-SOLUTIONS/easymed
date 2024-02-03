@@ -1,10 +1,12 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from makeeasyhmis.celery_tasks import generate_labtestresult_pdf
 # models
 from .models import (
     EquipmentTestRequest,
     LabTestRequest,
-    LabEquipment
+    LabEquipment,
+    LabTestResult,
 )
 # utils
 from .utils import (
@@ -30,5 +32,13 @@ def send_to_equipment(sender: EquipmentTestRequest, instance: EquipmentTestReque
         if equipment.category == 'tcp':
             send_through_tcp(data=data)
             print("Data is:" + data) 
+
+
+
+'''signal to fire up celery task to  to generated pdf once LabTestResult tale gets a new entry'''
+@receiver(post_save, sender=LabTestResult)
+def generate_labtestresult(sender, instance, created, **kwargs):
+    if created:
+        generate_labtestresult_pdf.delay(instance.pk)
 
         

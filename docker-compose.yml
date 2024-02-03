@@ -1,73 +1,77 @@
 version: "3.8"
 
 services:
+    db:
+        image: postgres:10
+        container_name: db
+        volumes:
+            - ./data/db:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_DB=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - HOST=db
+        networks:
+            - mks
+        restart: unless-stopped
+    redis:
+        image: redis:7.0-alpine
+        container_name: redis
+        command: redis-server --appendonly yes --replica-read-only no
+        volumes:
+            - ./redis/:/etc/redis/
+        ports:
+            - 6379:6379
+        networks:
+            - mks
+        restart: unless-stopped
+    backend:
+        build:
+          context: ./backend
+        container_name: backend
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - ./mks/:/opt/mks
+            - ./:/tmp/
+        ports:
+            - 8000:8000
+        env_file:
+            - ./.env
+        depends_on:
+            - db
+        networks:
+            - mks
+        restart: unless-stopped
+    celery:
+        build:
+          context: ./backend
+        container_name: celery
+        restart: always
+        command: celery -A makeeasyhmis worker -B -l info
+        volumes:
+            - ./mks/:/opt/mks
+            - ./:/tmp/
+        env_file:
+            - ./.env
+        depends_on:
+            - db
+            - redis
+            - backend
+        networks:
+            - mks
 
-  database:
-    image: "postgres:16-alpine"
-    restart: unless-stopped
-    environment:
-      POSTGRES_NAME: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
-    healthcheck:
-            test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
-            timeout: 45s
-            interval: 10s
-            retries: 10  
-    env_file:
-      - .env
-    volumes:
-      - dbdata:/var/lib/postgresql/data
-      - ./dbdump:/opt/dbdump
-    #   - ./db_init-script.sh:/docker-entrypoint-initdb.d/init-script.sh
-    # # command: chmod +x db_init-script.sh
+    frontend:
+        build:
+            context: ./front-emd
+        container_name: front-end
+        restart: unless-stopped
+        depends_on:
+            - backend
+        networks:
+            - mks
 
 
-  redis:
-    restart: unless-stopped
-    image: redis:7.2.4-alpine
-    ports:
-      - "6379:6379"
-
-  celery:
-    build: ./backend
-    restart: always
-    command: celery -A makeeasyhmis.celery_app worker -l info
-    depends_on:
-      - redis
-
-  celery-beat:
-    build: ./backend
-    restart: always
-    command: celery -A makeeasyhmis.celery_app beat -l info
-    depends_on:
-      - redis
-      - celery
-
-  backend:
-    build: ./backend
-    container_name: "makeeasyhmis"
-    command: "gunicorn makeeasyhmis.wsgi:application --bind 0.0.0.0:8085"
-    env_file:
-      - ./.env
-    ports:
-      - 8085:8085
-    environment:
-      - "DJANGO_SETTINGS_MODULE=makeeasyhmis.settings.production"
-    volumes:
-      # - "./backendstatic_volume:/home/app/web/staticfiles"
-      # - "./backendmedia_volume:/home/app/web/mediafiles"
-      - "./backend/makeeasyhmis/static:/home/app/web/staticfiles/makeeasyhmis/static "
-      - "./backend:/home/app/web"
-    depends_on:
-      - redis
-      - celery
-      - database
-
-
-
-volumes:
-  dbdata:
-  static_volume:
-  media_volume:
+networks:
+    mks:
+        name: mks
+        driver: bridge

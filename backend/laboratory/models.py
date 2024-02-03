@@ -38,18 +38,19 @@ class LabReagent(models.Model):
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
-    cost = models.CharField(max_length=255)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name    
-    
+
+# i.e Sodium, Calcium,     
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
+    unit = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.name        
+        return self.name   
 
 
 class LabTestRequest(models.Model):
@@ -57,12 +58,33 @@ class LabTestRequest(models.Model):
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
     note = models.TextField()
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
-    equipment = models.ForeignKey(LabEquipment, on_delete=models.PROTECT, null=True, blank=True)
     sample_collected = models.BooleanField(default=False, null=True)
     sample = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return str(self.id)
+    
+class LabTestResult(models.Model):
+    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    title = models.CharField(max_length=45)
+    date_created = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title  
+
+class LabTestResultItem (models.Model):
+    result_report= models.ForeignKey(LabTestResult, on_delete=models.CASCADE)
+    test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET_NULL, null=True, blank=True )
+    result = models.CharField(max_length=45)
+    ref_value = models.CharField(max_length=45)
+
+class LabTestCategory(models.Model):
+    category = models.CharField(max_length=45)
+
+    def __str__(self):
+        return self.category 
+
+
 
 
 class EquipmentTestRequest(models.Model):
@@ -73,21 +95,7 @@ class EquipmentTestRequest(models.Model):
         return str(self.equipment.name + " " + self.test_request.test_profile_ID.name + " " + self.equipment.ip_address + " " + self.equipment.port)
 
 
-class LabTestResult(models.Model):
-    lab_test_request_ID = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
-    title = models.CharField(max_length=45)
-    test_element =  models.CharField(max_length=45)
-    value = models.CharField(max_length=45)
-    date_created = models.DateField(auto_now_add=True)
 
-    def __str__(self):
-        return self.title  
-
-class LabTestCategory(models.Model):
-    category = models.CharField(max_length=45)
-
-    def __str__(self):
-        return self.category 
     
 
 class PublicLabTestRequest(models.Model):

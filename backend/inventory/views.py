@@ -1,5 +1,14 @@
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from django.shortcuts import render
+from django.template.loader import get_template
+from django.http import HttpResponse
+from weasyprint import HTML
+from .models import PurchaseOrderItem
+
 from .models import (
     Item,
     Inventory,
@@ -62,6 +71,11 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemSerializer    
 
+    @action(detail=False, methods=['GET'])
+    def by_requisition_id(self, request, requisition_id):
+        items = RequisitionItem.objects.filter(requisition_id=requisition_id)
+        serializer = self.get_serializer(items, many=True)
+        return Response(serializer.data)
 
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
@@ -83,3 +97,50 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrderItem.objects.all()
     serializer_class = PurchaseOrderItemSerializer 
+
+    @action(detail=False, methods=['GET'])
+    def by_purchase_order_id(self, request, purchase_order_id):
+        items = PurchaseOrderItem.objects.filter(purchase_order_id=purchase_order_id)
+        serializer = self.get_serializer(items, many=True)
+        return Response(serializer.data)
+
+
+
+'''
+This view gets the geneated pdf and downloads it locally
+pdf accessed here http://127.0.0.1:8080/download_requisition_pdf/26/
+'''
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
+
+from .models import Requisition
+
+def download_requisition_pdf(request, requisition_id):
+    requisition = get_object_or_404(Requisition, pk=requisition_id)
+    requisition_items = RequisitionItem.objects.filter(requisition=requisition)
+    html_template = get_template('requisition.html').render({'requisition_items': requisition_items})
+    from weasyprint import HTML
+    pdf_file = HTML(string=html_template).write_pdf()
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="purchase_order_report_{requisition_id}.pdf"'
+
+    return response
+
+
+def download_purchaseorder_pdf(request, purchaseorder_id):
+    purchase_order = get_object_or_404(PurchaseOrder, pk=purchaseorder_id)
+    purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=purchase_order)
+
+    html_template = get_template('purchaseorder.html').render({
+        'purchaseorder': purchase_order,
+        'purchaseorder_items': purchase_order_items
+    })
+    
+    from weasyprint import HTML
+    pdf_file = HTML(string=html_template).write_pdf()
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="purchase_order_report_{purchaseorder_id}.pdf"'
+
+    return response

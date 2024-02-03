@@ -1,16 +1,20 @@
+import os
 from celery import shared_task
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from inventory.models import IncomingItem, Inventory
+from billing.models import Invoice, InvoiceItem
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.apps import apps
+from django.conf import settings
 
 from celery import shared_task
-from inventory.models import IncomingItem, Inventory
+from inventory.models import IncomingItem, Inventory, PurchaseOrder, Requisition
 
+"""Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
 def create_or_update_inventory_record(incoming_item_id):
-    """
-    Creates a new Inventory record or updates an existing one based on the IncomingItem.
-    """
     try:
         incoming_item = IncomingItem.objects.get(id=incoming_item_id)
 
@@ -35,3 +39,88 @@ def create_or_update_inventory_record(incoming_item_id):
     except IncomingItem.DoesNotExist:
         print(f"Incoming item with ID {incoming_item_id} not found.")
         # Handle the exception appropriately
+
+        
+'''Task to generated pdf once Invoice tale gets a new entry'''
+@shared_task
+def generate_invoice_pdf(invoice_id):
+    from billing.models import Invoice
+    invoice = Invoice.objects.get(pk=invoice_id)
+    app_template_dir = apps.get_app_config('billing').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'invoice.html', {'invoice': invoice})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/invoices/', f'{invoice.invoice_number}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    invoice.save()
+
+
+'''Task to generated Requisition'''   
+@shared_task
+def generate_requisition_pdf(requisition_id):
+    requisition = Requisition.objects.get(pk=requisition_id)
+    app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'requisition.html', {'requisition': requisition})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/requisitions/', f'{requisition.id}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    requisition.save
+
+
+'''Task to generated Lab Results Report'''   
+@shared_task
+def generate_labtestresult_pdf(labtestresult_id):
+    from laboratory.models import LabTestResult
+    labtestresult = LabTestResult.objects.get(pk=labtestresult_id)
+    app_template_dir  = apps.get_app_config('laboratory').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'labtestresult.html', {'labtestresult': labtestresult})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/labtestresult/', f'{labtestresult.id}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    labtestresult.save()
+
+
+
+'''Task to generated Lab Results Report'''   
+@shared_task
+def generate_prescription_pdf(prescription_id):
+    from patient.models import Prescription
+    prescription = Prescription.objects.get(pk=prescription_id)
+    app_template_dir  = apps.get_app_config('patient').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'prescription.html', {'prescription': prescription})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/prescription/', f'{prescription.id}.pdf')
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    prescription.save()
+
+
+'''Task to generated Purchase Order Report'''   
+@shared_task
+def generate_purchaseorder_pdf(purchaseorder_id):
+    from inventory.models import PurchaseOrder
+    purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
+    app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchaseorder': purchaseorder})
+    pdf_file_path = os.path.join('./makeeasyhmis/static/purchaseorder/', f'{purchaseorder.id}.pdf')
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    purchaseorder.save()
+
+
+# @shared_task
+# def generate_purchaseorder_pdf(purchaseorder_id):
+#     purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
+#     purchaseorder_items = purchaseorder.purchaseorderitem_set.all()  # Fetch related PurchaseOrderItems
+#     html_content = render_to_string('purchaseorder.html', {'purchaseorder': purchaseorder, 'purchaseorder_items': purchaseorder_items})
+#     pdf_file_path = os.path.join('./makeeasyhmis/static/purchaseorder/', f'{purchaseorder.id}.pdf')
+#     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+#     HTML(string=html_content).write_pdf(pdf_file_path)
+
+#     purchaseorder.save()
