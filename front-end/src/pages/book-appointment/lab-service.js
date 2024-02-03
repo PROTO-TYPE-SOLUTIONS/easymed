@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import { publicLabRequest } from "@/redux/service/laboratory";
 import { getAllLabTestProfiles } from "@/redux/features/laboratory";
+import SeachableSelect from "@/components/select/Searchable";
 
 const LabServiceForm = () => {
   const { services } = useSelector(({ patient }) => patient);
@@ -21,7 +22,7 @@ const LabServiceForm = () => {
     second_name: "",
     date_of_birth: "",
     gender: "",
-    appointment_date_time: "",
+    appointment_date: "",
     status: "pending",
     reason: "",
     test_profile: "",
@@ -32,9 +33,9 @@ const LabServiceForm = () => {
     first_name: Yup.string().required("FirstName is required!"),
     second_name: Yup.string().required("Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
-    gender: Yup.string().required("Select gender!"),
-    appointment_date_time: Yup.string().required("Date is required!"),
-    test_profile: Yup.string().required("Provide a test profile!"),
+    gender: Yup.object().required("Select gender!"),
+    appointment_date: Yup.string().required("Date is required!"),
+    test_profile: Yup.object().required("Provide a test profile!"),
   });
 
 
@@ -43,10 +44,16 @@ const LabServiceForm = () => {
   };
 
   const handleLabRequest = async (formValue, helpers) => {
-    console.log("FORM_VALUE ", formValue);
+    
+    const payload = {
+      ...formValue,
+      test_profile: formValue.test_profile.value,
+      gender: formValue.gender.value
+    }
+    console.log("FORM_VALUE ", payload);
     try {
       setLoading(true);
-      await publicLabRequest(formValue).then(() => {
+      await publicLabRequest(payload).then(() => {
         helpers.resetForm();
         toast.success("Lab Request sent successfully!");
         setLoading(false);
@@ -55,7 +62,7 @@ const LabServiceForm = () => {
     } catch (err) {
       toast.error(err);
       setLoading(false);
-      console.log("APPOINTMENT_ERROR ", err);
+      console.log("LAB_REQ_ERROR ", err);
     }
   };
 
@@ -93,18 +100,11 @@ const LabServiceForm = () => {
                   />
                 </div>
                 <div className="w-full">
-                <label htmlFor="gender">Gender</label>
-                <Field
-                  as="select"
-                  className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
-                  name="gender"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="M">Male</option>
-                  <option value="F">Female</option>
-                  <option value="O">Other</option>
-                </Field>
-
+                <SeachableSelect
+                label="Gender"
+                name="gender"
+                options={[{value:"M", name: "Male"}, {value:"F", name: "Female"}, {value:"M", name: "Other"}].map((gender) => ({ value: gender.value, label: `${gender?.name}` }))}
+                />
                 <ErrorMessage
                   name="gender"
                   component="div"
@@ -148,29 +148,20 @@ const LabServiceForm = () => {
                   className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                   type="date"
                   placeholder="Appointment Date"
-                  name="appointment_date_time"
+                  name="appointment_date"
                 />
                 <ErrorMessage
-                  name="appointment_date_time"
+                  name="appointment_date"
                   component="div"
                   className="text-warning text-xs"
                 />
               </div>
               <div>
-                <label htmlFor="test_profile">Test Profile</label>
-                <Field
-                  as="select"
-                  className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
-                  name="test_profile"
-                >
-                  <option value="">Select Test Profile</option>
-                  {labTestProfiles.map((test, index) => (
-                    <option key={index} value="H">
-                      {test?.name}
-                    </option>
-                  ))}
-                </Field>
-
+                <SeachableSelect
+                label="Test Profile"
+                name="test_profile"
+                options={labTestProfiles.map((labTestProfile) => ({ value: labTestProfile.id, label: `${labTestProfile?.name}` }))}
+                />
                 <ErrorMessage
                   name="test_profile"
                   component="div"

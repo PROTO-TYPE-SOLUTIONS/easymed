@@ -31,6 +31,7 @@ const BookAppointment = () => {
         </section>
         {selectedService === "G" && <BookAppointmentForm />}
         {selectedService === "L" && <LabServiceForm />}
+        {selectedService === "P" && <LabServiceForm />}
       </div>
       <div className="md:block hidden w-1/2">
         <section className="loginPage h-[120vh] flex items-center justify-center p-4">

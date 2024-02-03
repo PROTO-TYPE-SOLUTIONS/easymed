@@ -13,6 +13,9 @@ const LabNav = () => {
         <Link href="/dashboard/laboratory/lab-requests" className={`${ pathName === "/dashboard/laboratory/lab-requests"  ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             Lab Requests
         </Link>
+        <Link href="/dashboard/laboratory/public-lab-requests" className={`${ pathName === "/dashboard/laboratory/public-lab-requests"  ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+            Public Lab Requests
+        </Link>
     </div>
   )
 }

@@ -119,6 +119,32 @@ export const publicLabRequest = (payload) =>{
     })
 }
 
+export const fetchPublicLabRequests = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.PUBLIC_LAB_REQUEST}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updatePublicLabRequest = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.put(`${APP_API_URL.PUBLIC_LAB_REQUEST}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const fetchLabTestProfile = () =>{
     return new Promise((resolve,reject) =>{
         axios.get(`${APP_API_URL.FETCH_LAB_TEST_PROFILE}`)

@@ -21,7 +21,7 @@ export default async function handler(req, res) {
             };
     
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_LAB_REQUESTS}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.PUBLIC_LAB_REQUEST}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.DELETE_DEPARTMENT}/${body.id}`, config).then(response => {
+            await backendAxiosInstance.put(`${API_URL.PUBLIC_LAB_REQUEST}${body.id}/`,body, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
