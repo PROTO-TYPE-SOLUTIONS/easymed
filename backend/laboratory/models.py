@@ -43,11 +43,12 @@ class LabTestProfile(models.Model):
     def __str__(self):
         return self.name    
 
-# i.e Sodium, Calcium,     
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=255)
+
+    ref_value = models.CharField(max_length=45)
 
     def __str__(self):
         return self.name   
@@ -64,25 +65,35 @@ class LabTestRequest(models.Model):
     def __str__(self):
         return str(self.id)
     
+class LabTestRequestPanel(models.Model):
+    test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
+    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.test_panel.name
+
 class LabTestResult(models.Model):
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
+    recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.title  
 
-class LabTestResultItem (models.Model):
-    result_report= models.ForeignKey(LabTestResult, on_delete=models.CASCADE)
+class LabTestResultPanel(models.Model):
+    lab_test_result= models.ForeignKey(LabTestResult, on_delete=models.CASCADE)
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET_NULL, null=True, blank=True )
     result = models.CharField(max_length=45)
-    ref_value = models.CharField(max_length=45)
-
-class LabTestCategory(models.Model):
-    category = models.CharField(max_length=45)
-
+    
     def __str__(self):
-        return self.category 
+        return self.test_panel.name
+
+# class LabTestCategory(models.Model):
+#     category = models.CharField(max_length=45)
+
+#     def __str__(self):
+#         return self.category 
 
 
 
@@ -119,7 +130,7 @@ class PublicLabTestRequest(models.Model):
     date_created = models.DateField(auto_now_add=True)
     date_changed = models.DateField(auto_now=True)
     lab_request = models.FileField(
-        upload_to="Lab Test Requests",
+        upload_to="Lab Test Requests/public-requests",
         max_length=254,
         null=True,
         blank=True,

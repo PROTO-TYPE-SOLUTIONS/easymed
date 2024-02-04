@@ -29,12 +29,13 @@ services:
         build:
           context: ./backend
         container_name: backend
-        command: python manage.py runserver 0.0.0.0:8000
+        command: python manage.py runserver 0.0.0.0:8080
         volumes:
             - ./mks/:/opt/mks
             - ./:/tmp/
+            - ./backend:/code/
         ports:
-            - 8000:8000
+            - 8080:8080
         env_file:
             - ./.env
         depends_on:
@@ -62,9 +63,11 @@ services:
 
     frontend:
         build:
-            context: ./front-emd
+            context: ./front-end
         container_name: front-end
         restart: unless-stopped
+        ports:
+            - 3000:3000
         depends_on:
             - backend
         networks:

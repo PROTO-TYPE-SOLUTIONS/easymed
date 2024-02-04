@@ -5,13 +5,14 @@ from customuser.models import CustomUser
 from .models import (
     LabReagent, LabTestResult, 
     LabTestRequest, 
-    LabTestCategory, 
+    # LabTestCategory, 
     LabTestProfile, 
     LabEquipment, 
     EquipmentTestRequest, 
     PublicLabTestRequest, 
     LabTestPanel, 
-    LabTestResultItem,
+    LabTestResultPanel,
+     LabTestRequestPanel,
     )
 
 
@@ -53,9 +54,15 @@ class LabTestResultSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LabTestResultItemSerializer(serializers.ModelSerializer):
+class LabTestResultPanelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LabTestResultItem
+        model = LabTestResultPanel
+        fields = '__all__'
+
+
+class LabTestRequestPanelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LabTestRequestPanel
         fields = '__all__'
 
 
@@ -120,7 +127,9 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         return data
     
 
-class LabTestCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LabTestCategory
-        fields = '__all__'
+
+
+# class LabTestCategorySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = LabTestCategory
+#         fields = '__all__'

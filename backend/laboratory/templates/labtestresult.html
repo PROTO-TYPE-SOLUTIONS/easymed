@@ -60,7 +60,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for result_item in labtestresult.labtestresultitem_set.all %}
+            {% for result_item in labtestresult.labtestresultpanel_set.all %}
             <tr>
                 <td>{{ result_item.test_panel.name }}</td>
                 <td>{{ result_item.result }}</td>
