@@ -4,6 +4,7 @@ import React from "react";
 import CustomizedLayout from "@/components/layout/customized-layout";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const Patient = () => {
   
@@ -15,9 +16,11 @@ const Patient = () => {
 };
 
 Patient.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_PATIENTS_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default Patient;

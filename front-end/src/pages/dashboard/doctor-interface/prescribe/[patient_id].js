@@ -17,6 +17,8 @@ import { SlMinus } from "react-icons/sl";
 import { LuMoreHorizontal } from "react-icons/lu";
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import PrescriptionItemDialog from "@/components/dashboard/doctor-interface/prescriptionItemDialog";
+import ProtectedRoute from "@/assets/hoc/protected-route";
+import AuthGuard from "@/assets/hoc/auth-guard";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -231,11 +233,11 @@ const PrescribeDrug = () => {
 }
 
 PrescribeDrug.getLayout = (page) => (
-    // <ProtectedRoute permission={'CAN_ACCESS_DOCTOR_DASHBOARD'}>
-    //   <AuthGuard>
+    <ProtectedRoute permission={'CAN_ACCESS_DOCTOR_DASHBOARD'}>
+      <AuthGuard>
         <DashboardLayout>{page}</DashboardLayout>
-    //   </AuthGuard>
-    // </ProtectedRoute>
+      </AuthGuard>
+    </ProtectedRoute>
   );
 
 export default PrescribeDrug;
