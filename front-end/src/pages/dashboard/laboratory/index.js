@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import LabResultDataGrid from "@/components/dashboard/laboratory/lab-results-datagrid";
 import LabNav from "@/components/dashboard/laboratory/LabNav";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const LabResults = () => {
   const dispatch = useDispatch();
@@ -30,9 +31,11 @@ const LabResults = () => {
 };
 
 LabResults.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_LABORATORY_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default LabResults;

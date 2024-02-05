@@ -73,13 +73,11 @@ const Admin = () => {
   );
 };
 Admin.getLayout = (page) => (
-  <>
-    {/* <ProtectedRoute permission={'CAN_ACCESS_ADMIN_DASHBOARD'}> */}
-    {/* <AuthGuard> */}
-    <CustomizedLayout>{page}</CustomizedLayout>
-    {/* </AuthGuard> */}
-    {/* </ProtectedRoute> */}
-  </>
+  <ProtectedRoute permission={'CAN_ACCESS_ADMIN_DASHBOARD'}>
+    <AuthGuard>
+      <CustomizedLayout>{page}</CustomizedLayout>
+    </AuthGuard> 
+  </ProtectedRoute> 
 );
 
 export default Admin;

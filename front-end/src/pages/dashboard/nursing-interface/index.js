@@ -4,6 +4,7 @@ import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Container } from "@mui/material";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import NursePatientDataGrid from '@/components/dashboard/nursing-interface';
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 
 const NursingInterface = () => {
@@ -15,9 +16,11 @@ const NursingInterface = () => {
 };
 
 NursingInterface.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_NURSING_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default NursingInterface;

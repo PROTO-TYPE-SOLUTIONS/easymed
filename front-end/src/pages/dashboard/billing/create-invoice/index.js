@@ -10,6 +10,7 @@ import AuthGuard from '@/assets/hoc/auth-guard';
 
 import BillingNav from '@/components/dashboard/billing/BillingNav';
 import NewInvoice from './NewInvoice';
+import ProtectedRoute from '@/assets/hoc/protected-route';
 
 const CreateNewInvoice = () => {
     const dispatch = useDispatch()
@@ -29,9 +30,11 @@ const CreateNewInvoice = () => {
 }
 
 CreateNewInvoice.getLayout = (page) => (
+  <ProtectedRoute permission={'CAN_ACCESS_BILLING_DASHBOARD'}>
     <AuthGuard>
       <DashboardLayout>{page}</DashboardLayout>;
     </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default CreateNewInvoice;

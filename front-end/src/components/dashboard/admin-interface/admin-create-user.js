@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { toast } from "react-toastify";
 import { getAllGroups } from "@/redux/features/auth";
+import SeachableSelect from "@/components/select/Searchable";
 
 const AdminCreateUser = () => {
   const [loading, setLoading] = useState(false);
@@ -39,13 +40,16 @@ const AdminCreateUser = () => {
     last_name: "",
     email: "",
     password: "",
+    phone: "",
+    role: "",
     group: null
   };
 
   const validationSchema = Yup.object().shape({
     first_name: Yup.string().required("First Name is required!"),
+    phone: Yup.number().required("Phone Number is required!"),
     last_name: Yup.string().required("Last Name is required!"),
-    group: Yup.string().required("Role is required!"),
+    group: Yup.object().required("Role is required!"),
     email: Yup.string()
       .email("This is not a valid email")
       .required("Email is required!"),
@@ -63,7 +67,8 @@ const AdminCreateUser = () => {
     try {
       const formData = {
         ...formValue,
-        role: "doctor",
+        role: (formValue.group.label).toLowerCase(),
+        group: formValue.group.value,
         profession: "",
       };
       setLoading(true);
@@ -107,6 +112,35 @@ const AdminCreateUser = () => {
               >
                 <Form className="w-full">
                   <section className="flex flex-col items-center justify-center space-y-4">
+                  <div className="w-full">
+                    <SeachableSelect
+                      label="Assign Role"
+                      name="group"
+                      options={groups.map((group) => ({ value: group.id, label: `${group?.name}` }))}
+                    />
+                    <ErrorMessage
+                      name="group"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                      {/* <Field
+                        as="select"
+                        className="block pr-9 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                        name="group"
+                      >
+                        <option value="">Assign Role</option>
+                        {groups.map((item) => (
+                          <option key={item?.id} value={item.id}>
+                            {item?.name}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage
+                        name="group"
+                        component="div"
+                        className="text-warning text-xs"
+                      /> */}
+                    </div>
                     <div className="w-full">
                       <Field
                         className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
@@ -149,31 +183,25 @@ const AdminCreateUser = () => {
                     <div className="w-full">
                       <Field
                         className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
-                        type="password"
-                        placeholder="Password"
-                        name="password"
+                        type="text"
+                        placeholder="Phone Number"
+                        name="phone"
                       />
                       <ErrorMessage
-                        name="password"
+                        name="phone"
                         component="div"
                         className="text-warning text-xs"
                       />
                     </div>
                     <div className="w-full">
                       <Field
-                        as="select"
-                        className="block pr-9 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
-                        name="group"
-                      >
-                        <option value="">Assign Role</option>
-                        {groups.map((item) => (
-                          <option key={item?.id} value={item.id}>
-                            {item?.name}
-                          </option>
-                        ))}
-                      </Field>
+                        className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                        type="password"
+                        placeholder="Password"
+                        name="password"
+                      />
                       <ErrorMessage
-                        name="group"
+                        name="password"
                         component="div"
                         className="text-warning text-xs"
                       />
