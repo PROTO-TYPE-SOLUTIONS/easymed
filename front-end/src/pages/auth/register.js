@@ -17,9 +17,12 @@ const SignUp = () => {
     password: "",
     first_name: "",
     last_name: "",
+    group: "PATIENTS",
+    phone: ""
   };
 
   const validationSchema = Yup.object().shape({
+    phone: Yup.number().required("Phone Number is required!"),
     first_name: Yup.string().required("First Name is required!"),
     last_name: Yup.string().required("Last Name is required!"),
     email: Yup.string()
@@ -42,7 +45,7 @@ const SignUp = () => {
         ...formValue,
         role: "patient",
         profession: "",
-        group: patientGroups[0]?.id,
+        group: 2
       };
       setLoading(true);
       await registerUser(formData).then(() => {
@@ -112,6 +115,19 @@ const SignUp = () => {
                 />
                 <ErrorMessage
                   name="email"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
+              <div className="w-full">
+                <Field
+                  className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                  type="text"
+                  placeholder="Phone Number"
+                  name="phone"
+                />
+                <ErrorMessage
+                  name="phone"
                   component="div"
                   className="text-warning text-xs"
                 />
