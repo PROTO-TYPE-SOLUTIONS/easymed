@@ -46,4 +46,6 @@ urlpatterns = [
     path('lab-test-result-panels-by-lab-test-result-id/<int:lab_test_result_id>/', LabTestResultPanelByLabTestResultId.as_view(), name='lab-test-result-panels'),
     path('lab-test-request-panels-by-lab-test-request-id/<int:lab_test_request_id>/', LabTestRequestPanelByLabTestRequestId.as_view(), name='lab-test-request-panels'),
     path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
+
+    path('labtestpanels-byprofile-id/<int:profile_id>/', LabTestPanelViewSet.as_view({'get': 'by_test_profile'}), name='labtestpanels-byprofile-id'),
 ]

@@ -10,32 +10,48 @@ from .models import (
 )
 # utils
 from .utils import (
-    json_to_hl7,
     send_through_rs232,
-    send_through_tcp
+    send_through_tcp,
+    create_hl7_message,
+
 )
 
 
 @receiver(post_save, sender=EquipmentTestRequest)
-def send_to_equipment(sender: EquipmentTestRequest, instance: EquipmentTestRequest, created: bool, **kwargs):
-    if not created:
-        return
-    test_request: LabTestRequest = instance.test_request
-    equipment: LabEquipment = instance.equipment
-    print("send to equipment signal firing")
-    if(equipment.data_format == "hl7"):
-        data = json_to_hl7(test_request)
-        if equipment.category == "rs32":
-            send_through_rs232(data=data)
-            print("Data is:" + data) 
-            
-        if equipment.category == 'tcp':
-            send_through_tcp(data=data)
-            print("Data is:" + data) 
+def send_to_equipment(sender, instance, created, **kwargs):
+    if created:  # Only proceed if the instance is newly created
+        test_request = instance.test_request
+        equipment = instance.equipment
+        print("Send to equipment signal firing")
+        print("Equipment Is:", equipment, test_request, equipment.data_format)
+
+        if equipment.data_format == "hl7":
+            data = create_hl7_message(test_request)
+            print("Data is HL7")
+            if equipment.category == "rs232":
+                send_through_rs232(data=data)
+                print("Data is: " + data)
+            elif equipment.category == 'tcp':
+                send_through_tcp(data=data)
+                print("Data is: " + data)
+
+        elif equipment.data_format == "astm":
+            data = json_to_astm(test_request)
+            print("Data is ASTM")
+            if equipment.category == "rs232":
+                send_through_rs232(data=data)
+                print("Data is: " + data)
+            elif equipment.category == 'tcp':
+                send_through_tcp(data=data)
+                print("Data is: " + data)
+
+        else:
+            print("Data not HL7")
 
 
 
-'''signal to fire up celery task to  to generated pdf once LabTestResult tale gets a new entry'''
+
+'''signal to fire up celery task to  to generated pdf once LabTestResult table gets a new entry'''
 @receiver(post_save, sender=LabTestResult)
 def generate_labtestresult(sender, instance, created, **kwargs):
     if created:
