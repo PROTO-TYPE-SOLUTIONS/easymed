@@ -6,6 +6,7 @@ import AuthGuard from '@/assets/hoc/auth-guard';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import PhamarcyNav from '@/components/dashboard/pharmacy/PhamarcyNav';
 import NewInvoice from '../../billing/create-invoice/NewInvoice';
+import ProtectedRoute from '@/assets/hoc/protected-route';
 
 const PharmacyCreateInvoice = () => {
   return (
@@ -17,9 +18,11 @@ const PharmacyCreateInvoice = () => {
 }
 
 PharmacyCreateInvoice.getLayout = (page) => (
-  <AuthGuard>
-      <DashboardLayout>{page}</DashboardLayout>;
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_PHARMACY_DASHBOARD'}>
+    <AuthGuard>
+        <DashboardLayout>{page}</DashboardLayout>;
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default PharmacyCreateInvoice

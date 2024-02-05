@@ -7,6 +7,7 @@ import AuthGuard from '@/assets/hoc/auth-guard';
 import CreateRequisition from '@/components/dashboard/inventory/CreateRequisition';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import PhamarcyNav from '@/components/dashboard/pharmacy/PhamarcyNav';
+import ProtectedRoute from '@/assets/hoc/protected-route';
 
 const PharmacyRequisition = () => {
     const router = useRouter();
@@ -20,9 +21,11 @@ const PharmacyRequisition = () => {
 }
 
 PharmacyRequisition.getLayout = (page) => (
+  <ProtectedRoute permission={'CAN_ACCESS_PHARMACY_DASHBOARD'}>
     <AuthGuard>
         <DashboardLayout>{page}</DashboardLayout>;
     </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default PharmacyRequisition;

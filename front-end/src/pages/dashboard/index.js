@@ -5,6 +5,7 @@ import DashboardLayout from "@/components/layout/dashboard-layout";
 import DashboardCards from "@/components/dashboard/dashboard-cards";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import { useSelector } from "react-redux";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const Dashboard = () => {
   const { userPermissions } = useSelector(( store ) => store.auth)
@@ -18,9 +19,11 @@ const Dashboard = () => {
 };
 
 Dashboard.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_GENERAL_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default Dashboard;
