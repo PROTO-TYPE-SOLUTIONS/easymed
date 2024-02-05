@@ -1,88 +1,87 @@
 import serial
 import hl7
 import socket
+# from astm import records
+from datetime import datetime
+
 
 from .models import LabTestRequest
 
 
-def json_to_hl7(test_request: LabTestRequest):
-    data = hl7.Message()
+def create_hl7_message(test_request):
+    patient = test_request.patient
+    hl7_message = (
+        "MSH|^~\&|Sender|Receiver|HL7APP|TEST|20240101000000||ORU^R01|MSG00001|P|2.4\r"
+        "PID|||{patient_id}||{patient_name}||{date_of_birth}|{gender}\r"
+        "OBR|1|||{test_id}||||||||||||||||"
+    ).format(
+        patient_id=patient.id,
+        patient_name=patient.first_name + " " + patient.second_name,
+        date_of_birth=patient.date_of_birth.strftime("%Y%m%d") if patient.date_of_birth else "",
+        gender=patient.gender,
+        test_id=test_request.id,
+    )
 
-    sending_app = 'MakeEasyHMIS'
-    sending_facility = 'Laboratory'
-    receiving_app = ''
-    receiving_facility = ''
+    return hl7_message
 
-    # MSH segment
-    data.MSH = "|".join([
-        "MSH",
-        "^~\&",
-        sending_app,
-        sending_facility,
-        receiving_app,
-        receiving_facility,
-    ])
 
-    # PID segment (Patient Identification)
-    pid_seg = ["PID", "1"]
-    if test_request.patient_ID:
-        pid_seg +=[str(test_request.patient_ID.pk),
-            test_request.patient_ID.first_name,
-            test_request.patient_ID.second_name,
-            str(test_request.patient_ID.age),
-            test_request.patient_ID.gender,]
-    
-    try:
-        data.PID = "|".join(pid_seg)
-    except Exception as e:
-        print(e)
+'''
+I'v had issues install astm.
+I keep getting  python setup.py egg_info did not run successfully.
+uncomment if you can sort it out
+'''
 
-    # OBR segment (Observation Request)
-    obr_seg = ["OBR", "1"]
-    if test_request.item_id:
-        obr_seg += [test_request.item_id.name,]
-    if test_request.test_profile_ID:
-        obr_seg += [test_request.test_profile_ID.name,]
-    obr_seg += [str(test_request.pk),]
-    try:
-        data.OBR = "|".join(obr_seg)
-    except Exception as e:
-        print(e)
+# def convert_to_astm(equipment_test_request):
+#     # Retrieve relevant information from the EquipmentTestRequest instance
+#     test_request = equipment_test_request.test_request
+#     patient = test_request.patient
+#     equipment = equipment_test_request.equipment
 
-    # ORC segment (Common Order)
-    
-    data.ORC = "|".join([
-        "ORC", "NW",
-    ])
+#     # Construct ASTM message
+#     message = records.Record()
+#     message.append(records.PatientIdentificationRecord(
+#         sequence_number=1,
+#         patient_id=str(patient.id),
+#         patient_name=f"{patient.first_name} {patient.second_name}",
+#         birthdate=datetime.strftime(patient.date_of_birth, "%Y%m%d") if patient.date_of_birth else '',
+#         sex=patient.gender,
+#         # Add more fields as needed
+#     ))
+#     message.append(records.Order(
+#         sequence_number=2,
+#         # Add more fields as needed
+#     ))
+#     # Add more records as needed
 
-    # NTE segment (Notes and Comments)
-    nte_seg = ["NTE", "1"]
-    if test_request.note:
-        nte_seg += [test_request.note,]
-    try:
-        data.NTE = "|".join(nte_seg)
-    except Exception as e:
-        print(e)
+#     # Convert the ASTM message to string
+#     astm_string = str(message)
 
-    return str(data)
+#     return astm_string
+
+
+
 
 
 def send_through_rs232(data: str, port='/dev/ttySO', baudrate=9600):
     try:
         ser = serial.Serial(port, baudrate)
         ser.write(data.encode())
+        print("sending through rs232..." + data)
         ser.close()
         return True
+        
     except Exception as e:
         print(e)
         return False
+        
 
 
-def send_through_tcp(data: str, host='localhost', port=12345):
+def send_through_tcp(data: str, host='127.0.0.1', port=6060):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serve:
             serve.connect((host, port))
             serve.sendall(data.encode())
+            print("sending through tcp..." + data)
             return True
     except Exception as e:
         print(e)

@@ -50,7 +50,6 @@ from authperms.permissions import (
 
 # utils
 from .utils import (
-    json_to_hl7,
     send_through_rs232,
     send_through_tcp
 )
@@ -85,8 +84,21 @@ class LabTestProfileViewSet(viewsets.ModelViewSet):
 class LabTestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestPanel.objects.all()
     serializer_class = LabTestPanelSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)    
- 
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    
+    @action(detail=False, methods=['get'], url_path='labtestpanels-byprofile-id/(?P<profile_id>[^/.]+)')
+    def by_test_profile(self, request, profile_id=None):
+        """
+        Retrieve LabTestPanel items by a given TestProfile ID.
+        """
+        try:
+            test_profile = LabTestProfile.objects.get(pk=profile_id)
+        except LabTestProfile.DoesNotExist:
+            return Response({"error": "Test Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        lab_test_panels = LabTestPanel.objects.filter(test_profile=test_profile)
+        serializer = LabTestPanelSerializer(lab_test_panels, many=True)
+        return Response(serializer.data)
 
 
 '''Lab Test Request and lab Test Request Panel'''
@@ -192,7 +204,7 @@ class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
 class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
 '''
