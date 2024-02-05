@@ -7,6 +7,7 @@ import AuthGuard from "@/assets/hoc/auth-guard";
 import { getAllPatientAppointments } from "@/redux/features/appointment";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const ReceptionInterface = () => {
   const { patientAppointments } = useSelector(( store ) => store.appointment)
@@ -26,9 +27,11 @@ const ReceptionInterface = () => {
 };
 
 ReceptionInterface.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_RECEPTION_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default ReceptionInterface;

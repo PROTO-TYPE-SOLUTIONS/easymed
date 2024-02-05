@@ -3,6 +3,7 @@ import CustomizedLayout from "@/components/layout/customized-layout";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Container, TextField, Button } from "@mui/material";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const Messages = () => {
   return (
@@ -13,9 +14,11 @@ const Messages = () => {
 };
 
 Messages.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_AI_ASSISTANT_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default Messages;

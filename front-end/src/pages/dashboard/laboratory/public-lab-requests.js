@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import LabNav from "@/components/dashboard/laboratory/LabNav";
 import PublicLabRequestDataGrid from "@/components/dashboard/laboratory/public-lab-requests-datagrid";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const PublicLabRequests = () => {
   const dispatch = useDispatch();
@@ -32,9 +33,11 @@ const PublicLabRequests = () => {
 };
 
 PublicLabRequests.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_LABORATORY_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default PublicLabRequests;

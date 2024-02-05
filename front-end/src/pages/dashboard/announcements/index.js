@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import ChannelCards from "@/components/announcement/ChannelCards";
 import { getAllAnnouncementsChannels } from "@/redux/features/announcements";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 const Schedule = () => {
   const auth = useAuth();
@@ -31,8 +32,10 @@ const Schedule = () => {
 };
 
 Schedule.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_ANNOUNCEMENT_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 export default Schedule;

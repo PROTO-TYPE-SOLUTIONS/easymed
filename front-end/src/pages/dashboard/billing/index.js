@@ -5,6 +5,8 @@ import { Container } from '@mui/material';
 import BilledDataGrid from './billed-datagrid';
 
 import BillingNav from '@/components/dashboard/billing/BillingNav';
+import ProtectedRoute from '@/assets/hoc/protected-route';
+import AuthGuard from '@/assets/hoc/auth-guard';
 
 
 const Billing = () => {
@@ -18,7 +20,11 @@ const Billing = () => {
 }
 
 Billing.getLayout = (page) => (
-  <DashboardLayout>{page}</DashboardLayout>
+  <ProtectedRoute permission={'CAN_ACCESS_BILLING_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 )
 
 export default Billing

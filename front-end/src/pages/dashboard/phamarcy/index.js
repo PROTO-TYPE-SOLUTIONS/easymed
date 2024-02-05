@@ -6,6 +6,7 @@ import AuthGuard from "@/assets/hoc/auth-guard";
 import PharmacyDataGrid from "@/components/dashboard/pharmacy";
 import { pharmacyDisplayStats } from "@/assets/menu";
 import PhamarcyNav from "@/components/dashboard/pharmacy/PhamarcyNav";
+import ProtectedRoute from "@/assets/hoc/protected-route";
 
 
 const Phamarcy = () => {
@@ -53,9 +54,11 @@ const Phamarcy = () => {
 };
 
 Phamarcy.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_PHARMACY_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default Phamarcy;
