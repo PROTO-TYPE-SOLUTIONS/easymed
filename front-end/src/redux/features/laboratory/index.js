@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchLabRequests, fetchLabResults,fetchLabEquipment, fetchLabTestProfile, fetchLabTestPanels, fetchPublicLabRequests } from "@/redux/service/laboratory";
+import { fetchLabRequests, fetchLabResults,fetchLabEquipment, fetchLabTestProfile, fetchLabTestPanels, fetchPublicLabRequests, fetchLabTestPanelsByProfileId } from "@/redux/service/laboratory";
 
 
 const initialState = {
   labResults: [],
   labResultItems: [],
   labTestPanels: [],
+  labTestPanelsById: [],
   labRequests: [],
   publicLabRequests: [],
   labEquipments: [],
@@ -34,6 +35,9 @@ const LaboratorySlice = createSlice({
     setLabTestPanels: (state, action) => {
       state.labTestPanels = action.payload;
     },
+    setLabTestPanelsById: (state, action) => {
+      state.labTestPanelsById = action.payload;
+    },
     clearLabResultItems: (state, action)=>{
       state.labResultItems = [];
     },
@@ -58,7 +62,7 @@ const LaboratorySlice = createSlice({
   },
 });
 
-export const { setLabResults,setLabRequests,setPublicLabRequests,setLabEquipments,setLabTestProfile, setLabResultItems, setLabResultItemsAfterRemovingItem, clearLabResultItems, setLabTestPanels } = LaboratorySlice.actions;
+export const { setLabResults,setLabRequests,setPublicLabRequests,setLabEquipments,setLabTestProfile, setLabResultItems, setLabResultItemsAfterRemovingItem, clearLabResultItems, setLabTestPanels, setLabTestPanelsById } = LaboratorySlice.actions;
 
 
 export const getAllLabResults = (auth) => async (dispatch) => {
@@ -112,6 +116,15 @@ export const getAllLabTestPanels = (auth) => async (dispatch) => {
     dispatch(setLabTestPanels(response));
   } catch (error) {
     console.log("LAB_TSEST_PANELS_ERROR ", error);
+  }
+};
+
+export const getAllLabTestPanelsByProfile = (profile_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchLabTestPanelsByProfileId(profile_id, auth);
+    dispatch(setLabTestPanelsById(response));
+  } catch (error) {
+    console.log("LAB_TEST_PANELS_BY_PROFILE_ID_ERROR ", error);
   }
 };
 

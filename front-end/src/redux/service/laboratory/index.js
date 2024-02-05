@@ -55,6 +55,37 @@ export const fetchLabTestPanels = (auth) =>{
     })
 }
 
+export const sendLabRequestsPanels = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_LAB_TEST_REQUEST_PANELS}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchLabTestPanelsByProfileId = (profile_id, auth) =>{
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_TEST_PANELS_BY_PROFILE_ID}`,{
+            params:{
+                profile_id: profile_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const sendLabRequests = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
