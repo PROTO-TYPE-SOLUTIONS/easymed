@@ -48,11 +48,10 @@ const LaboratorySlice = createSlice({
     setLabResultItems: (state, action) => {
 
       const labResultItem = state.labResultItems.find(item => item.test_panel === action.payload.test_panel );
-      console.log("REDUX_RESULT_ITEM", labResultItem)
       if (labResultItem) {
         // If labResultItem is found, update the existing item in the array
         state.labResultItems = state.labResultItems.map(item =>
-          item.test_panel === action.payload.test_panel ? { ...item, result:action.payload.result, lab_test_result:action.payload.lab_test_result, ref_value:action.payload.ref_value } : item
+          item.test_panel === action.payload.test_panel ? { ...item, result:action.payload.result, lab_test_result:action.payload.lab_test_result } : item
         );
       } else {
         // If labResultItem is not found, add the new item to the array

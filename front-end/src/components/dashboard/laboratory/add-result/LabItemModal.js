@@ -25,18 +25,14 @@ const AddResultItemModal = () => {
     setOpen(false);
   };
 
-
   const initialValues = {
     result: "",
     test_panel: "",
-    ref_value: "",
     lab_test_result: 0
   };
 
   const validationSchema = Yup.object().shape({
     test_panel: Yup.object().required("This field is required!"),
-    // lab_test_result: Yup.object().required("This field is required!"),
-    ref_value: Yup.string().required("This field is required!"),
     result: Yup.string().required("This field is required!"),
   });
 
@@ -46,8 +42,10 @@ const AddResultItemModal = () => {
     try {
       const formData = {
         ...formValue,
-        test_panel: formValue.test_panel.value
+        test_panel: formValue.test_panel.value,
       };
+
+      console.log("LAB TEST PANELS FORMDATA", formData)
 
       setLoading(true);    
       dispatch(addItemToLabResultsItems(formData))
@@ -70,7 +68,7 @@ const AddResultItemModal = () => {
   return (
     <section>
       <button onClick={handleClickOpen} className="bg-primary text-white text-sm rounded px-3 py-2">
-        Add Result Item
+        Add Result Panel
       </button>
       <Dialog
         fullWidth
@@ -81,7 +79,7 @@ const AddResultItemModal = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogContent>
-          <h3 className="text-xl my-4"> Add Lab Result Item </h3>
+          <h3 className="text-xl my-4"> Add Lab Result Panel </h3>
         <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -93,23 +91,10 @@ const AddResultItemModal = () => {
               <SeachableSelect
                 label="Select Test Panel"
                 name="test_panel"
-                options={labTestPanels.map((labTestPanel) => ({ value: labTestPanel.id, label: `${labTestPanel?.name}` }))}
+                options={labTestPanels.map((labTestPanel) => ({ ref_value:labTestPanel.ref_value, value: labTestPanel.id, label: `${labTestPanel?.name}` }))}
               />
               <ErrorMessage
                 name="test_panel"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item md={12} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Reference Value"
-                name="ref_value"
-              />
-              <ErrorMessage
-                name="ref_value"
                 component="div"
                 className="text-warning text-xs"
               />
