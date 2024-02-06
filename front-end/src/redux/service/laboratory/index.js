@@ -112,10 +112,10 @@ export const sendLabResults = (payload,auth) =>{
     })
 }
 
-export const addTestResultItem = (payload,auth) =>{
+export const addTestResultPanel = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.post(`${APP_API_URL.SEND_LAB_RESULTS_ITEMS}`,payload,auth)
+        axiosInstance.post(`${APP_API_URL.FETCH_LAB_TEST_RESULT_PANELS}`,payload,auth)
             .then((res) =>{
                 resolve(res.data)
             })
