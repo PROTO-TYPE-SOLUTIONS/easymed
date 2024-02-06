@@ -74,7 +74,7 @@ npm start
 Visit localhost 127.0.0.1:3000/dashboard
 
 ## Adding Permissions
-You need to create groups and associate permissions ie ``DOCTORS``,``PHARMACISTS``, ``SYS_ADMIN``, ``RECEPTIONISTS``, ``PATIENTS``, ``LAB_TECHS`` , ``NURSE``
+You need to create groups and associate permissions. make sure groups follow this order ``SYS_ADMIN``, ``PATIENT`` group then the rest ie ``DOCTOR``,``PHARMACIST``, ``RECEPTIONIST``, ``LAB_TECH`` , ``NURSE``
 Then create permissions below and link to the ``GROUPS``.
 
 Create super user then navigate to localhost:8080/admin and add permissions;
@@ -91,7 +91,7 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 * Inventory Dashboard => ``CAN_ACCESS_INVENTORY_DASHBOARD``
 * Billing Dashboard => ``CAN_ACCESS_BILLING_DASHBOARD``
 
-You will notice that we have a Role and a Group. A group is associated with permissions which determines which speccific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
+You will notice that we have a Role and a Group. A group is associated with permissions which determines which specific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
 
 
 ## Running celery
