@@ -17,7 +17,8 @@ module.exports = {
       card: '#146EB4',
       cardSecondary: '#0E4F82',
       gray: '#CCCCCC',
-      link: '#26A0F8'
+      link: '#26A0F8',
+      orange: '#FF7E54'
     },
     fontSize: {
       xxs: '0.6rem',
