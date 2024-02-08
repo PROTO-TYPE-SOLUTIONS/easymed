@@ -13,12 +13,12 @@ const OverviewNav = () => {
     const { patients } = useSelector((store) => store.patient);
     const loggedInPatient = patients.find((patient)=> patient.user === auth?.user_id)
 
-    const welcomingText = loggedInPatient ? "Levy Muguro" : "Update Your Profile First"
+    const welcomingText = loggedInPatient ? `${loggedInPatient.first_name} ${loggedInPatient.second_name}` : "Update Your Profile First"
 
   return (
     <div className='w-full h-[10vh] py-2 px-2 flex items-center justify-between'>
         <div className='flex items-center gap-2'>
-            <p className='font-bold text-xl text-primary'> Welcome Back , </p>
+            <p className='font-bold text-xl text-primary'> {`Welcome ${loggedInPatient ? 'Back' : ""} ,`} </p>
             <p className='font-semibold'> {welcomingText} </p>
         </div>
         <div className='flex items-center gap-4 hidden sm:flex'>
