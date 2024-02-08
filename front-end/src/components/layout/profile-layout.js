@@ -34,7 +34,7 @@ const menus = [
 
 const ProfileLayout = ({ children }) => {
   return (
-    <div className="md:flex md:h-screen h-auto overflow-hidden">
+    <div className="md:flex md:h-screen h-auto overflow-hidden bg-background">
       <div className="w-48 bg-white border border-gray shadow-xl md:block hidden px-4">
         <section className="h-[10vh] flex items-center justify-center border-b border-gray">
           <p className="">Logo</p>
