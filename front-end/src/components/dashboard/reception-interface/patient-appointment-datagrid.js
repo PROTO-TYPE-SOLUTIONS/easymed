@@ -9,6 +9,7 @@ import CreateAppointmentModal from "./create-appointment-modal";
 import { FaWheelchair } from "react-icons/fa";
 import AssignDoctorModal from "./assign-doctor-modal";
 import Link from "next/link";
+import AddPatientModal from "../patient/add-patient-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -138,7 +139,8 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
             Patient Appointments
           </h1>
         </div>
-        <div className="">
+        <div className="flex gap-4">
+        < AddPatientModal />
           <Link href="/dashboard/reception-interface/booked-appointments" className="bg-primary text-white rounded-xl px-3 py-2 text-sm">
             Booked Appointments
           </Link>
