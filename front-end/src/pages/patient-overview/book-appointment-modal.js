@@ -11,6 +11,7 @@ import { getAllOrderBills, getItems } from "@/redux/features/inventory";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { createAppointment } from "@/redux/service/appointment";
+import { getAllAppointmentsByPatientId } from "@/redux/features/appointment";
 
 const BookAppointmentModal = ({loggedInPatient}) => {
   const [loading, setLoading] = React.useState(false);
@@ -67,7 +68,7 @@ const BookAppointmentModal = ({loggedInPatient}) => {
         helpers.resetForm();
         toast.success("Appointment Created Successfully!");
         setLoading(false);
-        // dispatch(getAllPatients());
+        dispatch(dispatch(getAllAppointmentsByPatientId(formValue.patient)));
         handleClose();
       });
     } catch (err) {

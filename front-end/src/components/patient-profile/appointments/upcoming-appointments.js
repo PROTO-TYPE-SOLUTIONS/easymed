@@ -64,6 +64,10 @@ const UpcomingAppointments = ({patient, appointments, appointmentsByPatientsId})
         <Column 
           dataField="assigned_doctor"
           caption="Doctor" 
+          cellRender={(cellData) => {
+            let doctor = cellData.data.assigned_doctor
+            return doctor ? doctor : "waiting assignment"
+          }}
         />
         <Column 
           dataField="appointment_date_time"
