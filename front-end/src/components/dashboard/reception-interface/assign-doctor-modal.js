@@ -65,7 +65,8 @@ export default function AssignDoctorModal({
       setLoading(true);
       const formData = {
         ...formValue,
-        patient: selectedRowData.id,
+        id:selectedRowData.id,
+        patient: selectedRowData.patient,
         assigned_doctor: parseInt(formValue.assigned_doctor.value),
       };
       await assignDoctor(formData).then(() => {

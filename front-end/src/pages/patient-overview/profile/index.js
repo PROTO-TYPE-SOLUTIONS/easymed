@@ -12,7 +12,7 @@ const PatientProfile = () => {
         <OverviewNav/>
         <Grid container spacing={4}>
           <Grid item md={12} xs={12}>
-            <section className="my-8 space-y-8 ">
+            <section className="my-8 space-y-8 bg-white p-2 sm:p-4 rounded-lg">
               <section className="flex items-center justify-between">
                 <div>
                   <h1 className="text-xl text-primary">Personal Information</h1>

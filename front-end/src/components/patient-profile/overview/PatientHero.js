@@ -3,7 +3,7 @@ import { Grid } from '@mui/material'
 import { Item } from 'devextreme-react/cjs/data-grid'
 import BookAppointmentModal from '@/pages/patient-overview/book-appointment-modal'
 
-const PatientHero = () => {
+const PatientHero = ({loggedInPatient}) => {
   return (
     <Grid className='bg-primary text-white rounded-xl flex py-8 px-2 sm:px-8' spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
         <Grid className='w-full' item xs={6}>
@@ -15,7 +15,7 @@ const PatientHero = () => {
                 {/* <button className='bg-white text-primary p-4 rounded-lg'>
                     Book Appointment
                 </button> */}
-                <BookAppointmentModal />
+                <BookAppointmentModal loggedInPatient={loggedInPatient}/>
             </div>
         </Grid>
         <Grid className='w-full hidden sm:block flex flex-col gap-4' item xs={6}>

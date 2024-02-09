@@ -70,7 +70,7 @@ const PatientProfile = () => {
     <AuthGuard>
       <Container className="">
         <OverviewNav/>
-        <PatientHero/>
+        <PatientHero loggedInPatient={loggedInPatient}/>
         <Grid className="my-4" container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
           <Grid className="" item md={8} xs={12}>
               <UpcomingAppointments appointmentsByPatientsId={appointmentsByPatientsId} appointments={upcomingAppointments} patient = {loggedInPatient}/>

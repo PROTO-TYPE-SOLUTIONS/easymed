@@ -45,7 +45,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.put(`${API_URL.ASSIGN_DOCTOR}/${body.patient}/`,body, config)
+            await backendAxiosInstance.put(`${API_URL.ASSIGN_DOCTOR}/${body.id}/`,body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
