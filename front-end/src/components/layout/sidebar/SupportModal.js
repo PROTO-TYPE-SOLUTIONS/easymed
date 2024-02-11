@@ -180,8 +180,8 @@ const SupportModal = () => {
                     </div>
                 </div>
                 <div className="py-2">
-                    <h2 className="font-semibold mb-2">Social</h2>
-                    <div className="flex gap-8 items-center text-4xl mb-2">
+                    <h2 className="font-semibold mb-2">Socials</h2>
+                    <div className="flex justify-between items-center text-4xl mb-2">
                         <CiYoutube className="cursor-pointer"/>
                         <CiFacebook className="cursor-pointer" />
                         <CiLinkedin className="cursor-pointer" />
