@@ -10,6 +10,8 @@ import DeleteDoctorModal from "./delete-doctor-modal";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { Grid } from "@mui/material";
+import AdminCreateUser from "./admin-create-user";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -76,6 +78,21 @@ const AdminDoctorsDataGrid = () => {
 
   return (
     <section>
+      <Grid className="my-2 flex justify-between gap-4">
+        <Grid className="flex items-center rounded-lg bg-white px-2 w-full" item md={4} xs={4}>
+          <img className="h-4 w-4" src='/images/svgs/search.svg'/>
+          <input
+            className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery}
+            fullWidth
+            placeholder="Search by name"
+          />
+        </Grid>
+        <div className="w-full flex justify-end">
+          <AdminCreateUser />
+        </div>
+      </Grid>
       <DataGrid
         dataSource={doctors}
         allowColumnReordering={true}
