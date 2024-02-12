@@ -4,11 +4,8 @@ import { Container } from "@mui/material";
 import AdminUsersDataGrid from "@/components/dashboard/admin-interface/users-datagrid";
 import AdminPatientsDataGrid from "@/components/dashboard/admin-interface/patients-datagrid";
 import AdminDoctorsDataGrid from "@/components/dashboard/admin-interface/doctors-datagrid";
-import AddPatientModal from "@/components/dashboard/patient/add-patient-modal";
-import DashboardCards from "@/components/dashboard/dashboard-cards";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import ProtectedRoute from "@/assets/hoc/protected-route";
-import AdminCreateUser from "@/components/dashboard/admin-interface/admin-create-user";
 
 const Admin = () => {
   const [currentTab, setCurrentTab] = useState(0);
