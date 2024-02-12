@@ -11,8 +11,9 @@ import { getAllOrderBills, getItems } from "@/redux/features/inventory";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { createAppointment } from "@/redux/service/appointment";
+import { getAllAppointmentsByPatientId } from "@/redux/features/appointment";
 
-const BookAppointmentModal = () => {
+const BookAppointmentModal = ({loggedInPatient}) => {
   const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const dispatch = useDispatch();
@@ -37,21 +38,21 @@ const BookAppointmentModal = () => {
   }, []);
 
   const initialValues = {
-    patient: null,
+    patient: loggedInPatient?.id,
     appointment_date_time: "",
     status: "pending",
     reason: "",
-    fee: "",
-    assigned_doctor: null,
-    item_id: null,
+    // fee: "",
+    // assigned_doctor: null,
+    item: 1,
   };
 
   const validationSchema = Yup.object().shape({
     appointment_date_time: Yup.string().required("Date is required!"),
-    // reason: Yup.string().required("Prov is required!"),
-    fee: Yup.string().required("Fee is required!"),
-    assigned_doctor: Yup.string().required("Assign Doctor!"),
-    item_id: Yup.string().required("Select Item!"),
+    reason: Yup.string().required("Prov is required!"),
+    // fee: Yup.string().required("Fee is required!"),
+    // assigned_doctor: Yup.string().required("Assign Doctor!"),
+    // item_id: Yup.string().required("Select Item!"),
   });
 
   const handleCreateAppointment = async (formValue, helpers) => {
@@ -67,7 +68,7 @@ const BookAppointmentModal = () => {
         helpers.resetForm();
         toast.success("Appointment Created Successfully!");
         setLoading(false);
-        // dispatch(getAllPatients());
+        dispatch(dispatch(getAllAppointmentsByPatientId(formValue.patient)));
         handleClose();
       });
     } catch (err) {
@@ -78,9 +79,9 @@ const BookAppointmentModal = () => {
 
   return (
     <section>
-      <p onClick={handleClickOpen} className="text-sm">
-        Book Appointment
-      </p>
+      <button onClick={handleClickOpen} className='bg-white text-primary p-4 rounded-lg'>
+          Book Appointment
+      </button>
       <Dialog
         fullWidth
         maxWidth="sm"

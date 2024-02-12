@@ -6,13 +6,13 @@ import { getAllInsurance } from "@/redux/features/insurance";
 import { useDispatch, useSelector } from "react-redux";
 import { createPatient } from "@/redux/service/patients";
 import { toast } from "react-toastify";
-import { getPatientProfile } from "@/redux/features/patients";
+import { getAllPatients, getPatientProfile } from "@/redux/features/patients";
 import { useAuth } from "@/assets/hooks/use-auth";
 
 const PersonalDetails = () => {
   const { insurance } = useSelector((store) => store.insurance);
-  const { profileDetails } = useSelector((store) => store.patient);
-  console.log("PROFILE_DETAILS ", profileDetails);
+  const { userProfile } = useSelector((store) => store.user);
+  console.log("PROFILE_DETAILS ", userProfile);
   const dispatch = useDispatch();
   const [loading, setLoading] = React.useState(false);
   const auth = useAuth();
@@ -22,13 +22,14 @@ const PersonalDetails = () => {
   }, []);
 
   const initialValues = {
-    first_name: profileDetails.first_name ? profileDetails.first_name : "",
-    second_name: profileDetails.second_name ? profileDetails.second_name : "",
-    date_of_birth: profileDetails.date_of_birth
-      ? profileDetails.date_of_birth
+    first_name: userProfile.first_name ? userProfile.first_name : "",
+    second_name: userProfile.last_name ? userProfile.last_name : "",
+    date_of_birth: userProfile.date_of_birth
+      ? userProfile.date_of_birth
       : "",
-    gender: profileDetails.gender ? profileDetails.gender : "",
-    insurance: profileDetails.insurance ? profileDetails.insurance : null,
+    gender: userProfile.gender ? userProfile.gender : "",
+    insurance: userProfile.insurance ? userProfile.insurance : null,
+    user: auth?.user_id
   };
 
   const validationSchema = Yup.object().shape({
@@ -36,7 +37,7 @@ const PersonalDetails = () => {
     second_name: Yup.string().required("Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
-    user_id: Yup.number(),
+    user: Yup.number(),
   });
 
   const mapInsuranceToBackendFormat = (insuranceName, insuranceList) => {
@@ -51,16 +52,19 @@ const PersonalDetails = () => {
       const formData = {
         ...formValue,
         insurance: mapInsuranceToBackendFormat(formValue.insurance, insurance),
-        user_id: parseInt(formValue.user_id),
+        user: parseInt(formValue.user),
         appointment_date_time: "",
         reason: "",
       };
+
+      console.log("FORM DATA SAVING USER PATIENT", formData)
       setLoading(true);
       await createPatient(formData).then(() => {
         helpers.resetForm();
         toast.success("Profile Created Successfully!");
         setLoading(false);
         dispatch(getPatientProfile(auth.user_id));
+        dispatch(getAllPatients());
         handleClose();
       });
     } catch (err) {
@@ -88,13 +92,13 @@ const PersonalDetails = () => {
         onSubmit={handleCreatePatient}
       >
         <Form>
-          <section className="flex items-center gap-4">
-            <div>
+          <section className="grid grid-cols-2 items-center gap-4">
+            <div className="my-2">
               <label className="text-sm" htmlFor="first_name">
                 First Name
               </label>
               <Field
-                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-2"
+                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-4"
                 type="text"
                 placeholder="First Name"
                 name="first_name"
@@ -105,12 +109,12 @@ const PersonalDetails = () => {
                 className="text-warning text-xs"
               />
             </div>
-            <div>
+            <div className="my-2">
               <label className="text-sm" htmlFor="second_name">
                 Last Name
               </label>
               <Field
-                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-2"
+                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-4"
                 type="text"
                 placeholder="Second Name"
                 name="second_name"
@@ -121,12 +125,12 @@ const PersonalDetails = () => {
                 className="text-warning text-xs"
               />
             </div>
-            <div>
+            <div className="my-2">
               <label className="text-sm" htmlFor="email">
                 Date of Birth
               </label>
               <Field
-                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-2"
+                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-4"
                 type="date"
                 placeholder="Date of Birth"
                 name="date_of_birth"
@@ -137,19 +141,19 @@ const PersonalDetails = () => {
                 className="text-warning text-xs"
               />
             </div>
-            <div>
+            <div className="my-2">
               <label className="text-sm" htmlFor="email">
                 Gender
               </label>
               <Field
                 as="select"
-                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-2"
+                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-4"
                 type="text"
                 placeholder="gender"
                 name="gender"
                 value={
-                  profileDetails
-                    ? mapGenderToBackendFormat(profileDetails.gender)
+                  userProfile
+                    ? mapGenderToBackendFormat(userProfile.gender)
                     : ""
                 } // Map the gender value
               >
@@ -164,13 +168,13 @@ const PersonalDetails = () => {
                 className="text-warning text-xs"
               />
             </div>
-            <div>
+            <div className="my-2">
               <label className="text-sm" htmlFor="email">
                 Insurance
               </label>
               <Field
                 as="select"
-                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-2"
+                className="border text-sm border-gray w-full focus:outline-none rounded-xl px-4 py-4"
                 type="text"
                 name="insurance"
               >
@@ -179,12 +183,17 @@ const PersonalDetails = () => {
                   <option key={item?.id} value={item.name}>
                     {item?.name}
                   </option>
-                ))}
+                ))}py-2
+                py-2
+                py-2
+                py-2
+                py-2
+                py-2
               </Field>
             </div>
           </section>
-          <div className="flex items-center justify-start my-2">
-            <button className="bg-primary text-white shadow-xl px-4 text-sm py-2 rounded-xl">
+          <div className="flex items-center justify-start my-4">
+            <button className="bg-primary text-white shadow-xl px-4 text-sm py-4 rounded-xl">
               {loading && (
                 <svg
                   aria-hidden="true"
@@ -204,7 +213,7 @@ const PersonalDetails = () => {
                   ></path>
                 </svg>
               )}
-              Create Profile
+              Update Profile
             </button>
           </div>
         </Form>

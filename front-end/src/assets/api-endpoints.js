@@ -18,6 +18,7 @@ export const API_URL = {
   CREATE_APPOINTMENT: "/patients/appointments/",
   FETCH_APPOINTMENTS: "/patients/publicappointments/",
   FETCH_PATIENT_APPOINTMENTS: "/patients/appointments",
+  FETCH_PATIENT_APPOINTMENTS_BY_PATIENT_ID: "/patients/appointments/by_patient_id",
   FETCH_DOCTOR_APPOINTMENTS: "/patients/appointments/",
   FETCH_SERVICES: "/patients/services/",
   FETCH_INSURANCE: "/patients/insurance-companies/",
@@ -27,6 +28,7 @@ export const API_URL = {
   REFER_PATIENT: "/patients/referrals/",
   GET_PATIENT_PROFILE: "/patients/patients",
   PRESCRIBE_DRUG: "/patients/prescribed-drugs/",
+  PRESCRIBE_DRUG_BY_PATIENT_ID: "/patients/prescribed-drugs/by_patient_id",
   CREATE_PRESCRIPTION: "/patients/prescriptions/",
   GET_PATIENT_TRIAGE: "/patients/triage/",
 
@@ -115,6 +117,7 @@ export const APP_API_URL = {
   CREATE_APPOINTMENT: "/api/appointment/create-appointment",
   FETCH_APPOINTMENTS: "/api/appointment",
   FETCH_PATIENT_APPOINTMENTS: "/api/appointment/patient-appointment",
+  FETCH_PATIENT_APPOINTMENTS_BY_PATIENT_ID: "/api/appointment/appointments-by-patient-id/",
   FETCH_DOCTOR_APPOINTMENTS: "/api/appointment/get-appointment-by-doctor",
   FETCH_SERVICES: "/api/patient/fetch-services",
   FETCH_INSURANCE: "/api/insurance",
@@ -124,6 +127,7 @@ export const APP_API_URL = {
   REFER_PATIENT: "/api/patient/refer-patient",
   GET_PATIENT_PROFILE: "/api/patient/patient-profile",
   PRESCRIBE_DRUG: "/api/patient/prescribe-drug",
+  PRESCRIBE_DRUG_BY_PATIENT_ID: "/api/patient/prescribed-drugs-by-patient-id",
   CREATE_PRESCRIPTION: "/api/patient/create-prescription",
   GET_PATIENT_TRIAGE: "/api/patient/get-patient-triage",
 

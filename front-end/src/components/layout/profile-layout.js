@@ -1,27 +1,49 @@
 import React from "react";
-import { AiOutlineHome } from "react-icons/ai";
+import { RiAccountPinBoxLine } from "react-icons/ri";
+import { GoNote } from "react-icons/go";
+import { FaFirstAid } from "react-icons/fa";
+import { IoIosCloudOutline } from "react-icons/io";
 import Link from "next/link";
 
 const menus = [
   {
     id: 1,
-    icon: <AiOutlineHome />,
-    label: "Home",
-    link: '/',
+    icon: <IoIosCloudOutline />,
+    label: "Overview",
+    link: '/patient-overview',
+  },
+  {
+    id: 2,
+    icon: <GoNote />,
+    label: "Bookings",
+    link: '/patient-overview/bookings',
+  },
+  {
+    id: 3,
+    icon: <FaFirstAid />,
+    label: "Prescriptions",
+    link: '/patient-overview/prescriptions',
+  },
+  {
+    id: 4,
+    icon: <RiAccountPinBoxLine />,
+    label: "Profile",
+    link: '/patient-overview/profile',
   },
 ];
 
 const ProfileLayout = ({ children }) => {
   return (
-    <div className="md:flex md:h-screen h-auto overflow-hidden px-4 py-3">
-      <div className="w-28 bg-white border border-gray rounded-xl shadow-xl md:block hidden px-4">
-        <section className="h-[10vh] flex items-center justify-center">
+    <div className="md:flex md:h-screen h-auto overflow-hidden bg-background">
+      <div className="w-48 bg-white border border-gray shadow-xl md:block hidden px-4">
+        <section className="h-[10vh] flex items-center justify-center border-b border-gray">
           <p className="">Logo</p>
         </section>
         <section className="py-8 space-y-8">
           {menus.map((menu,index) => (
-            <Link key={index} href={menu.link} title={menu.label} className="flex items-center justify-center gap-2">
+            <Link key={index} href={menu.link} title={menu.label} className="flex items-center gap-2">
               <span className="text-2xl">{menu.icon}</span>
+              <span className="text-md">{menu.label}</span>
             </Link>
           ))}
         </section>
