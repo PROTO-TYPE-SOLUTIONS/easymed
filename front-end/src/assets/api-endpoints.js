@@ -92,7 +92,15 @@ export const API_URL = {
   FETCH_ANNOUNCEMENTS:"/announcement/announcements/",
 
   /***************** PDFs **********************/
-  DOWNLOAD_PDF: "/download"
+  DOWNLOAD_PDF: "/download",
+
+  /***************** PATIENTS USERS ENDPOINTS **********************/
+  /***************** LABORATORY **********************/
+  PATIENTLABTESTREQUEST: "/patientlabtestrequest",
+
+  /***************** PRESCRIPTION **********************/
+  PATIENTPRESCRIPTIONREQUEST: "/patientprescriptionrequest",
+
 
 };
 
@@ -191,7 +199,14 @@ export const APP_API_URL = {
   FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/",
 
   /***************** PDFs **********************/
-  DOWNLOAD_PDF: "/api/pdf/download_pdf"
+  DOWNLOAD_PDF: "/api/pdf/download_pdf",
+
+    /***************** PATIENTS USERS ENDPOINTS **********************/
+  /***************** LABORATORY **********************/
+  PATIENTLABTESTREQUEST: "/api/patient-profile/patientlabtestrequest",
+
+  /***************** PRESCRIPTION **********************/
+  PATIENTPRESCRIPTIONREQUEST: "/api/patient-profile/patientprescriptionrequest",
 
 };
 

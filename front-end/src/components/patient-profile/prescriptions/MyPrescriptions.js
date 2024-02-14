@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 
 import { getAllPatientPrescribedDrugs } from '@/redux/features/patients'
+import PatientPrescriptionRequest from './PatientPrescriptionRequest';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -37,6 +38,7 @@ const MyPrescriptions = ({patient}) => {
           <select className='p-1 rounded-lg focus:outline-none'>
             <option>Latest Prescriptions</option>
           </select>
+          <PatientPrescriptionRequest/>
         </div>
         <DataGrid
         dataSource={patientPrescribedDrugs}

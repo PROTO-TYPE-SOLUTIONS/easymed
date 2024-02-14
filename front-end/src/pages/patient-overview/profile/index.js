@@ -17,41 +17,6 @@ const PatientProfile = () => {
                 <div>
                   <h1 className="text-xl text-primary">Personal Information</h1>
                 </div>
-                {/* <div>
-                  <div
-                    onClick={handleClick}
-                    className="flex items-center cursor-pointer gap-2 bg-primary text-white rounded-xl p-2"
-                  >
-                    <p className="text-sm">Select Service</p>
-                    <IoChevronDownOutline className="font-bold cursor-pointer" />
-                  </div>
-                  <div>
-                    <Menu
-                      id="basic-menu"
-                      anchorEl={anchorEl}
-                      open={open}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                      transformOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                      MenuListProps={{
-                        "aria-labelledby": "basic-button",
-                      }}
-                    >
-                      <MenuItem>
-                        <BookAppointmentModal />
-                      </MenuItem>
-                      <MenuItem>
-                        <LabServiceModal />
-                      </MenuItem>
-                    </Menu>
-                  </div>
-                </div> */}
               </section>
               <PersonalDetails />
             </section>

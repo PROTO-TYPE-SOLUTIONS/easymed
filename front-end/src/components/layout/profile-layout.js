@@ -1,8 +1,9 @@
 import React from "react";
 import { RiAccountPinBoxLine } from "react-icons/ri";
 import { GoNote } from "react-icons/go";
-import { FaFirstAid } from "react-icons/fa";
 import { IoIosCloudOutline } from "react-icons/io";
+import { CiSquareQuestion } from "react-icons/ci";
+import { CiMedicalCase } from "react-icons/ci";
 import Link from "next/link";
 
 const menus = [
@@ -20,12 +21,18 @@ const menus = [
   },
   {
     id: 3,
-    icon: <FaFirstAid />,
+    icon: <CiMedicalCase />,
     label: "Prescriptions",
     link: '/patient-overview/prescriptions',
   },
   {
     id: 4,
+    icon: <CiSquareQuestion />,
+    label: "Lab Requests",
+    link: '/patient-overview/lab-requests',
+  },
+  {
+    id: 5,
     icon: <RiAccountPinBoxLine />,
     label: "Profile",
     link: '/patient-overview/profile',
