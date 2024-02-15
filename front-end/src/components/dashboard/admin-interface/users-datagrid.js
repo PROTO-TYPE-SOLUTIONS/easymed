@@ -7,6 +7,8 @@ import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
 import EditUserDetailsModal from "./edit-user-details-modal";
 import DeleteUserModal from "./delete-user-modal";
+import AdminCreateUser from "./admin-create-user";
+import { Grid } from "@mui/material";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -116,14 +118,21 @@ const AdminUsersDataGrid = () => {
 
   return (
     <section>
-      {/* <div className="flex items-center justify-start mb-3 mt-4 w-5/12">
-        <input
-          className="rounded-3xl shadow-xl py-3 px-4 focus:outline-none w-full"
-          onChange={(e) => setSearchQuery(e.target.value)}
-          value={searchQuery}
-          placeholder="Search..."
-        />
-      </div> */}
+      <Grid className="my-2 flex justify-between gap-4">
+        <Grid className="flex items-center rounded-lg bg-white px-2 w-full" item md={4} xs={4}>
+          <img className="h-4 w-4" src='/images/svgs/search.svg'/>
+          <input
+            className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery}
+            fullWidth
+            placeholder="Search by name"
+          />
+        </Grid>
+        <div className="w-full flex justify-end">
+          <AdminCreateUser />
+        </div>
+      </Grid>
       <DataGrid
         dataSource={filteredUser}
         allowColumnReordering={true}

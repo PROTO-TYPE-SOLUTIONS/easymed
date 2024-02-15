@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { menus } from "@/assets/menu";
 import MenuChild  from "./menu-children";
 import { IoMdSettings } from "react-icons/io";
-import { AiOutlineQuestionCircle } from "react-icons/ai";
 import Link from "next/link";
-import { BsFillExclamationCircleFill } from "react-icons/bs";
+import SupportModal from "./SupportModal";
+import VersionModal from "./VersionModal";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -27,14 +27,8 @@ const Sidebar = () => {
               <IoMdSettings className="" />
               <p>Settings</p>
             </Link>
-            <div className="flex items-center gap-2 text-xs">
-              <AiOutlineQuestionCircle className="" />
-              <p>Support</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <BsFillExclamationCircleFill className="" />
-              <p>Make - Easy HMIS v1.0</p>
-            </div>
+            <SupportModal/>
+            <VersionModal/>
           </div>
           </div>
         </section>

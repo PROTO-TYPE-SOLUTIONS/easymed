@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import { assignDoctor } from "@/redux/service/patients";
 import { getAllDoctors } from "@/redux/features/doctors";
@@ -14,6 +14,8 @@ import {
   getAllAppointments,
   getAllPatientAppointments,
 } from "@/redux/features/appointment";
+import FormikFieldDateTimePicker from "@/components/dateandtime/FormikFieldDateTimePicker";
+
 
 export default function AssignDoctorModal({
   selectedRowData,
@@ -25,6 +27,11 @@ export default function AssignDoctorModal({
   const { doctors } = useSelector((store) => store.doctor);
   const authUser = useAuth();
   console.log("SELECTED_ROW ", selectedRowData);
+
+  const timezoneList = {
+    nairobi: "Africa/Nairobi" // +3:00
+  };
+  const timezone = timezoneList.nairobi;
 
   const handleClickOpen = () => {
     setAssignOpen(true);
@@ -44,10 +51,10 @@ export default function AssignDoctorModal({
 
   const initialValues = {
     patient: null,
-    appointment_date_time: "",
-    status: "",
-    reason: "",
-    fee: "",
+    appointment_date_time: selectedRowData?.appointment_date_time,
+    status: selectedRowData?.status,
+    reason: selectedRowData?.reason,
+    fee: selectedRowData?.sale_price,
     assigned_doctor: null,
     item_id: null,
   };
@@ -65,7 +72,8 @@ export default function AssignDoctorModal({
       setLoading(true);
       const formData = {
         ...formValue,
-        patient: selectedRowData.id,
+        id:selectedRowData.id,
+        patient: selectedRowData.patient,
         assigned_doctor: parseInt(formValue.assigned_doctor.value),
       };
       await assignDoctor(formData).then(() => {
@@ -147,15 +155,18 @@ export default function AssignDoctorModal({
                 <Grid item md={12} xs={12}>
                   <label htmlFor="appointment_date_time">Appointment date</label>
                   <Field
-                    className="block mt-1 border border-gray rounded-md py-2 text-sm px-4 focus:outline-none w-full"
                     name="appointment_date_time"
-                    placeholder="Appointment date time"
-                    type="date"
+                    component={FormikFieldDateTimePicker}
+                    inputVariant="outlined"
+                    timezone={timezone}
+                    helperText="Timezone specified"
+                    clearable
+                    margin="dense"
                   />
                   <ErrorMessage
-                    name="appointment_date_time"
-                    component="div"
-                    className="text-warning text-xs"
+                      name="appointment_date_time"
+                      component="div"
+                      className="text-warning text-xs"
                   />
                 </Grid>
                 <Grid item md={12} xs={12}>

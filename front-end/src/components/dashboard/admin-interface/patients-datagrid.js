@@ -7,9 +7,10 @@ import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
 import DeletePatientModal from "./delete-patient-modal";
-import { Chip } from "@mui/material";
+import { Chip, Grid } from "@mui/material";
 import { getAllPatients } from "@/redux/features/patients";
 import { useSelector,useDispatch } from "react-redux";
+import AddPatientModal from "../patient/add-patient-modal";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -88,13 +89,28 @@ const AdminPatientsDataGrid = () => {
     }
   };
 
-  //   filter users based on search query
+  // filter users based on search query
   const filteredPatients = patients?.filter((user) => {
     return user.first_name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
     <section>
+      <Grid className="my-2 flex justify-between gap-4">
+        <Grid className="flex items-center rounded-lg bg-white px-2 w-full" item md={4} xs={4}>
+          <img className="h-4 w-4" src='/images/svgs/search.svg'/>
+          <input
+            className="py-2 w-full px-4 bg-transparent rounded-lg focus:outline-none placeholder-font font-thin text-sm"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery}
+            fullWidth
+            placeholder="Search by patient name"
+          />
+        </Grid>
+        <div className="w-full flex justify-end">
+         <AddPatientModal />
+        </div>
+      </Grid>
       <DataGrid
         dataSource={filteredPatients}
         allowColumnReordering={true}

@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
         email: email,
         password: password,
       });
+      console.log("RESPOSNSE AFTER LOGIN", response)
       if (response.status === 200) {
         const decodedUser = jwtDecode(response.data.access);
         setUser({ ...decodedUser, token: response.data.access });
@@ -41,9 +42,9 @@ export const AuthProvider = ({ children }) => {
           );
           console.log("I AM DECODED ", decodedUser);
           if (decodedUser?.role === "patient") {
-            router.push(`/patient-profile`);
+            router.push(`/patient-overview`);
           } else {
-            await dispatch(getAllUserPermissions(decodedUser?.user_id));
+            dispatch(getAllUserPermissions(decodedUser?.user_id));
             router.push("/dashboard");
           }
         } catch (error) {
