@@ -28,7 +28,7 @@ const PersonalisedDatedAppointments = ({upcomingAppointments}) => {
             <p className='text-2xl'>{dayOfMonth}</p>
         </div>
         <div className='w-1/2 flex flex-col justify-center gap-1'>
-            <p className='text-xl text-center'>{appointment.assigned_doctor}</p>
+            <p className='text-xl text-center'>{appointment.assigned_doctor ? appointment.assigned_doctor : "waiting assignment"}</p>
             <p className='text-xxs text-center'>Neural Surgeon</p>
             <div className={`p-1 rounded-lg justify-center items-center flex ${appointmentDayOfMonth > currentDayOfMonth ? "bg-primary text-white" : "bg-white text-primary" }`}><p>{appointmentTime}</p></div>            
         </div>

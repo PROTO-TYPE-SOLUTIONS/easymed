@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { createPatient } from "@/redux/service/patients";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,6 +12,9 @@ import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { createAppointment } from "@/redux/service/appointment";
 import { getAllAppointmentsByPatientId } from "@/redux/features/appointment";
+import FormikFieldDateTimePicker from "@/components/dateandtime/FormikFieldDateTimePicker";
+
+const mb = { marginBottom: 8 };
 
 const BookAppointmentModal = ({loggedInPatient}) => {
   const [loading, setLoading] = React.useState(false);
@@ -20,6 +23,11 @@ const BookAppointmentModal = ({loggedInPatient}) => {
   const { orderBills, item } = useSelector((store) => store.inventory);
   const { doctors } = useSelector((store) => store.doctor);
   const auth = useAuth();
+
+  const timezoneList = {
+    nairobi: "Africa/Nairobi" // +3:00
+  };
+  const timezone = timezoneList.nairobi;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -39,7 +47,7 @@ const BookAppointmentModal = ({loggedInPatient}) => {
 
   const initialValues = {
     patient: loggedInPatient?.id,
-    appointment_date_time: "",
+    appointment_date_time: new Date().toISOString(),
     status: "pending",
     reason: "",
     // fee: "",
@@ -47,9 +55,11 @@ const BookAppointmentModal = ({loggedInPatient}) => {
     item: 1,
   };
 
+  console.log("INITIAL VALUE", initialValues)
+
   const validationSchema = Yup.object().shape({
     appointment_date_time: Yup.string().required("Date is required!"),
-    reason: Yup.string().required("Prov is required!"),
+    reason: Yup.string().required("Reason is required!"),
     // fee: Yup.string().required("Fee is required!"),
     // assigned_doctor: Yup.string().required("Assign Doctor!"),
     // item_id: Yup.string().required("Select Item!"),
@@ -96,23 +106,29 @@ const BookAppointmentModal = ({loggedInPatient}) => {
             validationSchema={validationSchema}
             onSubmit={handleCreateAppointment}
           >
-            <Form>
+            {({ values, errors }) => (
+            <Form style={{ margin: 16 }}>
               <section className="space-y-1">
-                <Grid container spacing={2}>
-                  <Grid item md={12} xs={12}>
-                    <label htmlFor="first_name">Appointment Date</label>
-                    <Field
-                      className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
-                      type="date"
-                      placeholder="Appointment date time"
-                      name="appointment_date_time"
-                    />
-                    <ErrorMessage
+                <Grid container spacing={4} style={mb}>
+                <Grid item md={12} xs={12}>
+                  <Typography variant="subtitle1" gutterBottom style={mb}>
+                  Appointment Date and Time
+                  </Typography>
+                  <Field
+                    name="appointment_date_time"
+                    component={FormikFieldDateTimePicker}
+                    inputVariant="outlined"
+                    timezone={timezone}
+                    helperText="Timezone specified"
+                    clearable
+                    margin="dense"
+                  />
+                  <ErrorMessage
                       name="appointment_date_time"
                       component="div"
                       className="text-warning text-xs"
-                    />
-                  </Grid>
+                  />
+                </Grid>
                   
                 </Grid>
                 <Grid container spacing={2}>
@@ -170,6 +186,7 @@ const BookAppointmentModal = ({loggedInPatient}) => {
                 </div>
               </section>
             </Form>
+            )}
           </Formik>
         </DialogContent>
       </Dialog>
