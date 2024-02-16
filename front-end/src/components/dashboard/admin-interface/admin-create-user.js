@@ -11,13 +11,32 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import { toast } from "react-toastify";
 import { getAllGroups } from "@/redux/features/auth";
 import SeachableSelect from "@/components/select/Searchable";
+import { GoEye, GoEyeClosed } from "react-icons/go";
 
 const AdminCreateUser = () => {
+  const [password, setPassword]= useState("password");
+  const [passwordConfirmation, setPasswordConfirmation]= useState("password");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
   const { groups } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const authUser = useAuth();
+
+  const passwordVisibilityToggle = () => {
+    if(password === "password"){
+      setPassword("text")
+    }else{
+      setPassword("password")
+    }
+  }
+
+  const passwordConfirmationVisibilityToggle = () => {
+    if(passwordConfirmation === "password"){
+      setPasswordConfirmation("text")
+    }else{
+      setPasswordConfirmation("password")
+    }
+  }
 
 
   const handleClickOpen = () => {
@@ -40,6 +59,7 @@ const AdminCreateUser = () => {
     last_name: "",
     email: "",
     password: "",
+    password_confirmation:"",
     phone: "",
     role: "",
     group: null
@@ -61,6 +81,10 @@ const AdminCreateUser = () => {
           !val || (val.toString().length >= 6 && val.toString().length <= 40)
       )
       .required("Password is required!"),
+    password_confirmation: Yup
+    .string()
+    .required('Please confirm your password.')
+    .oneOf([Yup.ref('password')], 'Your passwords do not match.')
   });
 
   const handleCreateUser = async (formValue, helpers) => {
@@ -194,6 +218,38 @@ const AdminCreateUser = () => {
                       />
                     </div>
                     <div className="w-full">
+                      <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
+                        <Field
+                          className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
+                          type={password}
+                          placeholder="Password"
+                          name="password"
+                        />
+                        {password === "password" ? <GoEye onClick={passwordVisibilityToggle} className="cursor-pointer"/> : <GoEyeClosed onClick={passwordVisibilityToggle} className="cursor-pointer" />}
+                      </div>
+                      <ErrorMessage
+                        name="password"
+                        component="div"
+                        className="text-warning text-xs"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
+                        <Field
+                          className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
+                          type={passwordConfirmation}
+                          placeholder="Confirm Password"
+                          name="password_confirmation"
+                        />
+                        {passwordConfirmation === "password" ? <GoEye onClick={passwordConfirmationVisibilityToggle} className="cursor-pointer"/> : <GoEyeClosed onClick={passwordConfirmationVisibilityToggle} className="cursor-pointer" />}
+                      </div>
+                      <ErrorMessage
+                        name="password_confirmation"
+                        component="div"
+                        className="text-warning text-xs"
+                      />
+                    </div>
+                    {/* <div className="w-full">
                       <Field
                         className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                         type="password"
@@ -205,7 +261,7 @@ const AdminCreateUser = () => {
                         component="div"
                         className="text-warning text-xs"
                       />
-                    </div>
+                    </div> */}
                     <button
                       type="submit"
                       className="bg-primary w-full px-8 py-2 rounded-xl text-white"
