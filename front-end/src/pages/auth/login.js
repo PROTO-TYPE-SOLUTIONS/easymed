@@ -3,12 +3,24 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { authContext } from "@/components/use-context";
 import { useRouter } from "next/router";
+import Link from "next/link";
+import { GoEye, GoEyeClosed } from "react-icons/go";
 
 const Login = () => {
+  const [password, setPassword]= useState("password")
   const [loading, setLoading] = useState(false);
   const { loginUser, user } = useContext(authContext);
   console.log("USER_AUTH ",user);
   const router = useRouter();
+
+  const passwordVisibilityToggle = () => {
+    if(password === "password"){
+      setPassword("text")
+    }else{
+      setPassword("password")
+    }
+  }
+
   const initialValues = {
     email: "",
     password: "",
@@ -74,12 +86,15 @@ const Login = () => {
                 />
               </div>
               <div className="w-full">
-                <Field
-                  className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                  type="password"
-                  placeholder="Password"
-                  name="password"
-                />
+                <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
+                  <Field
+                    className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
+                    type={password}
+                    placeholder="Password"
+                    name="password"
+                  />
+                  {password === "password" ? <GoEye onClick={passwordVisibilityToggle} className="cursor-pointer"/> : <GoEyeClosed onClick={passwordVisibilityToggle} className="cursor-pointer" />}
+                </div>
                 <ErrorMessage
                   name="password"
                   component="div"
@@ -111,6 +126,10 @@ const Login = () => {
                 )}
                 Login
               </button>
+              <div className="flex gap-4">
+                <p>Do you have an account ? </p>
+                <span className="text-primary_light"><Link href="/auth/register"> SignUp </Link></span>
+              </div>
             </section>
           </Form>
         </Formik>
