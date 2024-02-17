@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import {
   Column,
@@ -14,7 +15,9 @@ import { useSelector, useDispatch } from "react-redux";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
 import { LuMoreHorizontal } from "react-icons/lu";
+import { BiEdit } from "react-icons/bi";
 import CreateAppointmentModal from "./create-appointment-modal";
+import EditPatientDetails from "../admin-interface/edit-patient-details-modal";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -30,6 +33,11 @@ const getActions = () => {
       label: "Create Appointment",
       icon: <MdAddCircle className="text-success text-xl mx-2" />,
     },
+    {
+      action: "update",
+      label: "Update Patient",
+      icon: <BiEdit className="text-success text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -41,6 +49,7 @@ const PatientsDataGrid = () => {
   const dispatch = useDispatch();
   const userActions = getActions();
   const [open,setOpen] = useState(false)
+  const [editOpen,setEditOpen] = useState(false)
   const [selectedRowData,setSelectedRowData] = useState({});
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
@@ -51,6 +60,9 @@ const PatientsDataGrid = () => {
     if (menu.action === "add") {
       setSelectedRowData(data);
       setOpen(true);
+    }else if(menu.action === "update"){
+      setSelectedRowData(data);
+      setEditOpen(true);      
     }
   };
 
@@ -100,6 +112,10 @@ const PatientsDataGrid = () => {
     }
   };
 
+  const patientFullName = (rowData) => {
+    return rowData.first_name + " " + rowData.second_name;
+  }
+
   useEffect(() => {
     dispatch(getAllPatients());
   }, []);
@@ -116,7 +132,7 @@ const PatientsDataGrid = () => {
         rowAlternationEnabled={true}
         showBorders={true}
         remoteOperations={true}
-        showColumnLines={true}
+        showColumnLines={false}
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={false}
@@ -133,20 +149,11 @@ const PatientsDataGrid = () => {
           showPageSizeSelector={showPageSizeSelector}
           showNavigationButtons={showNavButtons}
         />
-
-        <Column
-          dataField="first_name"
-          caption="First Name"
-          width={140}
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column
-          dataField="second_name"
-          caption="Last Name"
-          width={140}
-          allowFiltering={true}
-          allowSearch={true}
+        <Column 
+          dataField="" 
+          caption="Patient Name" 
+          width={180}
+          calculateCellValue={patientFullName}
         />
         <Column
           dataField="age"
@@ -154,24 +161,26 @@ const PatientsDataGrid = () => {
           width={100}
           // calculateCellValue={(data) => calculateAge(data.date_of_birth)}
         />
-        <Column dataField="gender" caption="Gender" width={140} />
-        <Column dataField="insurance" caption="Insurance" width={100} />
+        <Column dataField="gender" caption="Gender" width={100} />
+        <Column dataField="insurance" caption="Insurance" width={150} />
         <Column
           dataField=""
           caption="Status"
-          width={140}
+          width={150}
           cellRender={statusFunc}
         />
         <Column
           dataField=""
-          caption="Action"
-          width={140}
+          caption=""
+          width={100}
           cellRender={actionsFunc}
         />
       </DataGrid>
     </section>
 
     {open && <CreateAppointmentModal {...{setOpen,open,selectedRowData}} />}
+    <EditPatientDetails open={editOpen} setOpen={setEditOpen} selectedRowData={selectedRowData}  />
+
     </>
   );
 };
