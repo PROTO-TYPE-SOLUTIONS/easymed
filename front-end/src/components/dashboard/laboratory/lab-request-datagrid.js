@@ -34,7 +34,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
-
+  
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
   const filteredData = labRequests.filter((request) => {
@@ -65,6 +65,10 @@ const LabRequestDataGrid = ({ labRequests }) => {
       </>
     );
   };
+
+  const patientFullName = (rowData) => {
+    return rowData.patient_first_name + " " + rowData.patient_last_name;
+  }
 
 
   return (
@@ -115,7 +119,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
         rowAlternationEnabled={true}
         showBorders={true}
         remoteOperations={true}
-        showColumnLines={true}
+        showColumnLines={false}
         showRowLines={true}
         wordWrapEnabled={true}
         // allowPaging={true}
@@ -131,19 +135,27 @@ const LabRequestDataGrid = ({ labRequests }) => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
+        <Column dataField="sample" caption="Sample" width={100} />
+        <Column dataField="sample_collected" caption="Sample Collected" width={100} />
+        <Column dataField="test_profile_name" caption="Profile name" width={130} />
+        <Column 
+          dataField="" 
+          caption="Patient Name" 
+          width={100}
+          calculateCellValue={patientFullName}
+        />
         <Column dataField="note" caption="Note" width={180} />
-        <Column dataField="sample" caption="Sample" width={180} />
         <Column
           dataField="requested_name"
           caption="Requested By"
-          width={180}
+          width={130}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
-          dataField="number"
-          caption="Action"
-          width={80}
+          dataField=""
+          caption=""
+          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>
