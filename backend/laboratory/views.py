@@ -226,6 +226,8 @@ from .models import LabTestResult
 def download_labtestresult_pdf(request, labtestresult_id):
     labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
     labtestresultpanel= LabTestResultPanel.objects.filter(lab_test_result=labtestresult)
+
+
     html_template = get_template('labtestresult.html').render({
         'labtestresult': labtestresult,
         'labtestresultiem':labtestresultpanel

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,6 +57,7 @@
             <tr>
                 <th>Test Panel</th>
                 <th>Result</th>
+                <th>Flag</th>
                 <th>Reference Value</th>
             </tr>
         </thead>
@@ -64,9 +66,19 @@
             <tr>
                 <td>{{ result_item.test_panel.name }}</td>
                 <td>{{ result_item.result }}</td>
-                <td>{{ result_item.ref_value }}</td>
+
+                <td>
+                    {% if result_item.difference >= 1 and result_item.difference < 10 %}
+                        <span style="color: yellow;">Medium</span>
+                    {% elif result_item.difference >= 11 %}
+                        <span style="color: red;">Critical</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ result_item.test_panel.ref_value }}</td>
             </tr>
             {% endfor %}
+            <td>{{ difference_percentage }}</td>
         </tbody>
     </table>
 
