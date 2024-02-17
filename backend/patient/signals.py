@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Prescription
 
-from makeeasyhmis.celery_tasks import generate_prescription_pdf
+from makeeasyhmis.celery_tasks import generate_prescription_pdf, appointment_assign_notification
 
 # emails
 from django.core.mail import send_mail
@@ -27,4 +27,12 @@ def create_appointment(sender: Patient, instance: Patient, created: bool, **kwar
 def generate_precription(sender, instance, created, **kwargs):
     if created:
         generate_prescription_pdf.delay(instance.pk)
+
+
+
+''''signal to fire up the celery task to send assigned notifications'''
+@receiver(post_save, sender=Appointment)
+def appointment_assigned_signal(sender, instance, created, update_fields=None,**kwargs):
+    if created or (update_fields and 'assigned_doctor' in update_fields):
+        appointment_assign_notification.delay(instance.id)
 

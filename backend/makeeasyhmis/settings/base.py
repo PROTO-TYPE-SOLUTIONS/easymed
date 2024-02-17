@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt',
     'weasyprint',
+    'channels',
 
     # user apps
     'authperms.apps.AuthpermsConfig',
@@ -79,6 +80,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'makeeasyhmis.wsgi.application'
+ASGI_APPLICATION = 'makeeasyhmis.asgi.application'
 
 
 # Database
@@ -198,6 +200,15 @@ DATABASES = {
 }
 
 
+CHANNELS_ROUTING = 'patient.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('localhost', 6379)],
+        },
+    },
+}
 # DATABASES = {
 #     "default":{
 #         "ENGINE": "django.db.backends.postgresql",

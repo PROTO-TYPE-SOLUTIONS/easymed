@@ -1,6 +1,9 @@
 asgiref==3.7.2
 attrs==23.1.0
+channels==4.0.0
+channels_redis==4.2.0
 # Django==4.2.5
+
 Django
 django-filter==23.3
 django-guardian==2.4.0
@@ -29,4 +32,8 @@ pillow==10.1.0
 reportlab==4.0.8
 celery==5.3.6
 redis==5.0.1
+
+uvicorn==0.27.1
+uvicorn[standard]
+
 weasyprint==60.2
