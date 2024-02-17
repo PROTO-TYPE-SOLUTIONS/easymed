@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager,
+import { Column, Paging, Pager, Scrolling,
   HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
@@ -13,6 +13,8 @@ import EquipmentModal from "./equipment-modal";
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -29,6 +31,9 @@ const LabRequestDataGrid = ({ labRequests }) => {
   const userActions = getActions();
   const [open,setOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
@@ -117,14 +122,14 @@ const LabRequestDataGrid = ({ labRequests }) => {
         // height={"70vh"}
         className="w-full shadow"
       >
-        <Paging defaultPageSize={20} pageSize={20} />
-        <HeaderFilter visible={true} />
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={10} />
         <Pager
-          // visible={true}
-          displayMode={true}
-          showPageSizeSelector={false}
-          showInfo={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <Column dataField="note" caption="Note" width={180} />
         <Column dataField="sample" caption="Sample" width={180} />

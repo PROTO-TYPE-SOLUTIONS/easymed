@@ -125,7 +125,7 @@ const PatientsDataGrid = () => {
       >
         <HeaderFilter visible={true} />
         <Scrolling rowRenderingMode='virtual'></Scrolling>
-        <Paging defaultPageSize={5} />
+        <Paging defaultPageSize={10} />
         <Pager
           visible={true}
           showInfo={showInfo}
