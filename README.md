@@ -34,7 +34,7 @@ virtualenv venv
 source venv/bin/activate
 cd backend
 pip install -r requirements.txt
-python manage.py makemigrations
+python manage.py makemigrations customuser authperms patient pharmacy inventory laboratory receptions billing announcement
 python manage.py migrate
 python manage.py runserver
 ```
@@ -103,3 +103,13 @@ Run Redis: ``redis-cli -h 127.0.0.1 -p 6379``
 Generated PDFs
 ``http://127.0.0.1:8080/download_{service_name}_pdf/{id}``
 i.e ``http://127.0.0.1:8080/download_invoice_pdf/24``
+
+
+## Testing Socket connection for notifications
+Django's runserver does not support asgi
+run with uvicorn to have the notifications working
+``uvicorn --port 8080 makeeasyhmis.asgi:application``
+
+On a separate terminal
+``npm install -g wscat``
+``wscat -c ws://localhost:8080/ws/doctor_notifications/`` <-- appointment assigned notification will be seen here

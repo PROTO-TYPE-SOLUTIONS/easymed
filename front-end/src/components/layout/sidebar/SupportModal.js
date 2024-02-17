@@ -163,7 +163,7 @@ const SupportModal = () => {
                     <h2 className="font-semibold mb-2">Phone</h2>
                     <div className="flex gap-4 items-center text-xl mb-2">
                         <BsTelephoneOutbound />
-                        <span>0722 822595</span>
+                        <span>0722 123456</span>
                     </div>
                 </div>
                 <div className="py-2 border-b border-gray">
