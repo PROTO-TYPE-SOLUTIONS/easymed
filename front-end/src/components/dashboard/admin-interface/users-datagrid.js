@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
@@ -9,10 +9,16 @@ import EditUserDetailsModal from "./edit-user-details-modal";
 import DeleteUserModal from "./delete-user-modal";
 import AdminCreateUser from "./admin-create-user";
 import { Grid } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+
+import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllTheUsers } from "@/redux/features/users";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -32,59 +38,26 @@ const getActions = () => {
 };
 
 const AdminUsersDataGrid = () => {
+  const auth = useAuth();
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const [open, setOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
+  const users = useSelector((store)=> store.user.users);
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
 
-  const users = [
-    {
-      number: "1",
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      number: "2",
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "1234821",
-      name: "Jane Munyua",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      number: "3",
-      id_number: "70081234",
-      name: "Ann Kibet",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-    {
-      number: "4",
-      id_number: "1234821",
-      name: "Ann Ochieng",
-      country: "Rwanda",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-  ];
+  useEffect(()=> {
+    if (auth){
+      dispatch(getAllTheUsers(auth));
+    }
+
+  }, [auth])
+
+  console.log("ALL THE USERS", users)
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "delete") {
@@ -113,7 +86,7 @@ const AdminUsersDataGrid = () => {
 
   //   filter users based on search query
   const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
+    return user.first_name.toLocaleLowerCase().includes(searchQuery.toLowerCase()) || user.last_name.toLocaleLowerCase().includes(searchQuery.toLowerCase())
   });
 
   return (
@@ -139,35 +112,39 @@ const AdminUsersDataGrid = () => {
         rowAlternationEnabled={true}
         showBorders={true}
         remoteOperations={true}
-        showColumnLines={true}
+        showColumnLines={false}
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl"
         // height={"70vh"}
       >
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={10} />
         <Pager
-          visible={true}
-          // allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+            visible={true}
+            allowedPageSizes={allowedPageSizes}
+            showPageSizeSelector={showPageSizeSelector}
+            showInfo={showInfo}
+            showNavigationButtons={showNavButtons}
         />
-        <Column dataField="number" caption="NO" width={80} />
-        <Column dataField="id_number" caption="ID" width={140} />
+        <Column dataField="first_name" caption="First Name" width={100} />
+        <Column dataField="last_name" caption="Last Name" width={100} />
         <Column
-          dataField="name"
-          caption="Name"
+          dataField="email"
+          caption="Email"
           width={200}
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="country" caption="Country" width={200} />
-        <Column dataField="gender" caption="Gender" width={200} />
+        <Column dataField="age" caption="Age" width={100} />
+        <Column dataField="phone" caption="Phone Number" width={200} />
+        <Column dataField="profession" caption="Proffession" width={200} />
+        <Column dataField="role" caption="Role" width={140} />
         <Column
-          dataField="country"
-          caption="Action"
-          width={200}
+          dataField=""
+          caption=""
+          width={80}
           cellRender={actionsFunc}
         />
       </DataGrid>

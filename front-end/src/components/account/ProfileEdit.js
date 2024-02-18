@@ -58,6 +58,7 @@ const ProfileEdit = () => {
       setLoading(true);
       const formData = {
         ...formValue,
+        id: auth.user_id
       };
       console.log(formData)
       const response = await updateUser(formData, auth);
