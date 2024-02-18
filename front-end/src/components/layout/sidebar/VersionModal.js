@@ -18,7 +18,7 @@ const VersionModal = () => {
     <section>
         <div onClick={handleClickOpen} className="flex items-center gap-2 cursor-pointer">
             <BsFillExclamationCircleFill className="" />
-            <p>Make - Easy HMIS v1.0</p>
+            <p>About</p>
         </div>
         <Dialog
             fullWidth

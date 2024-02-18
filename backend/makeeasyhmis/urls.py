@@ -35,6 +35,10 @@ urlpatterns = [
     path('customuser/', include('customuser.urls')),
     # users
     path('users/', include('customuser.urls')),
+
+
+    # pharmacy
+    path('pharmacy/', include('pharmacy.urls')),
     # schemas
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularRedocView.as_view(url_name="schema"), name="redoc",),  
