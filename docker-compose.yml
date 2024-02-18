@@ -14,6 +14,7 @@ services:
         networks:
             - mks
         restart: unless-stopped
+
     redis:
         image: redis:7.0-alpine
         container_name: redis
@@ -25,11 +26,13 @@ services:
         networks:
             - mks
         restart: unless-stopped
+
     backend:
         build:
           context: ./backend
         container_name: backend
-        command: python manage.py runserver 0.0.0.0:8080
+        # command: python manage.py runserver 0.0.0.0:8080 
+        command: uvicorn --port 8080 makeeasyhmis.asgi:application # <- this works with async for sockets connection
         volumes:
             - ./mks/:/opt/mks
             - ./:/tmp/
@@ -43,6 +46,7 @@ services:
         networks:
             - mks
         restart: unless-stopped
+
     celery:
         build:
           context: ./backend

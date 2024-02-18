@@ -74,7 +74,7 @@ class LabEquipmentViewSet(viewsets.ModelViewSet):
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
     serializer_class = LabTestProfileSerializer
-    permission_classes = (IsAuthenticated)
+    # permission_classes = (IsAuthenticated)
 
 class LabTestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestPanel.objects.all()

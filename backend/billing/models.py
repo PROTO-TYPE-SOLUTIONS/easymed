@@ -55,6 +55,5 @@ class InvoiceItem(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # Recalculate invoice amount after saving the InvoiceItem
         self.invoice.calculate_invoice_amount()
         

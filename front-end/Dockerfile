@@ -11,7 +11,7 @@
 
 # CMD ["npm", "run", "dev"]
 
-
+# file below runs a production copy
 FROM node:18-alpine
 
 WORKDIR /app

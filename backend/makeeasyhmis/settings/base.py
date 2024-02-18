@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'receptions.apps.ReceptionsConfig',
     'billing.apps.BillingConfig',
     'announcement.apps.AnnouncementConfig',
-    'company'
+    'company',
+    'reports'
 ]
 
 MIDDLEWARE = [
@@ -150,7 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        # "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticated",
         ],
     "DEFAULT_AUTHENTICATION_CLASSES": [  
         "rest_framework_simplejwt.authentication.JWTAuthentication",
