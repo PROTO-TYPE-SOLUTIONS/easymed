@@ -3,6 +3,7 @@ attrs==23.1.0
 channels==4.0.0
 channels_redis==4.2.0
 # Django==4.2.5
+django-ledger==0.5.6.2
 
 Django
 django-filter==23.3

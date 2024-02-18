@@ -64,11 +64,6 @@ class LabReagentViewSet(viewsets.ModelViewSet):
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
-# class LabTestProfileViewSet(viewsets.ModelViewSet):
-#     queryset = LabReagent.objects.all()
-#     serializer_class = LabTestProfileSerializer
-#     permission_classes = (AllowAny,)
-
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
     serializer_class = LabEquipmentSerializer
@@ -226,6 +221,8 @@ from .models import LabTestResult
 def download_labtestresult_pdf(request, labtestresult_id):
     labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
     labtestresultpanel= LabTestResultPanel.objects.filter(lab_test_result=labtestresult)
+
+
     html_template = get_template('labtestresult.html').render({
         'labtestresult': labtestresult,
         'labtestresultiem':labtestresultpanel
