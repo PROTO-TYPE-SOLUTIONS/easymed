@@ -10,6 +10,7 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import { getUserById } from "@/redux/service/user";
 import { updateUser } from "@/redux/service/user";
 import { getCurrentUser } from '@/redux/features/users'
+import { VscAccount } from "react-icons/vsc";
 
 const ProfileEdit = () => {
   const [open, setOpen] = React.useState(false);
@@ -57,6 +58,7 @@ const ProfileEdit = () => {
       setLoading(true);
       const formData = {
         ...formValue,
+        id: auth.user_id
       };
       console.log(formData)
       const response = await updateUser(formData, auth);
@@ -97,21 +99,19 @@ const ProfileEdit = () => {
           <Grid container spacing={4}>
             <Grid item md={12} xs={12}>
               <div className="flex items-center gap-8">
-                <img
-                  className="h-20 w-20 rounded-full cursor-pointer"
-                  src="/images/doc.jpg"
-                  alt=""
-                />
+              <VscAccount 
+                className="h-20 w-20 rounded-full cursor-pointer"
+              />
                 <div className="bg-light px-4 py-2 rounded-xl cursor-pointer">
                   Change
                 </div>
               </div>
               
             </Grid>
-            <Grid className='flex flex-col gap-1' item md={6} xs={12}>
+            <Grid className='gap-1' item md={6} xs={12}>
               <label>First Name</label>
               <Field
-                className="p-1 border border-gray rounded"
+                className="p-2 w-full border border-gray rounded"
                 type="text" 
                 name="first_name" 
                 placeholder="First Name" 
@@ -122,10 +122,10 @@ const ProfileEdit = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid className='flex flex-col gap-1' item md={6} xs={12}>
+            <Grid className='gap-1' item md={6} xs={12}>
             <label>Last Name</label>
               <Field 
-                className="p-1 border border-gray rounded"
+                className="p-2 w-full border border-gray rounded"
                 type="text" 
                 name="last_name" 
                 placeholder="Last Name" 
@@ -136,10 +136,10 @@ const ProfileEdit = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid className='flex flex-col gap-1' item md={6} xs={12}>
+            <Grid className='gap-1' item md={6} xs={12}>
               <label>Email Address</label>
               <Field
-                className="p-1 border border-gray rounded"
+                className="p-2 w-full border border-gray rounded"
                 type="email" 
                 name="email" 
                 placeholder="Email" 
@@ -150,10 +150,10 @@ const ProfileEdit = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid className='flex flex-col gap-1' item md={6} xs={12}>
+            <Grid className='gap-1' item md={6} xs={12}>
             <label>Phone Number</label>
               <Field
-                className="p-1 border border-gray rounded"
+                className="p-2 w-full border border-gray rounded"
                 type="text" 
                 name="phone"
                 placeholder="Phone Number"
@@ -164,10 +164,10 @@ const ProfileEdit = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid className='flex flex-col gap-1' item md={6} xs={12}>
+            <Grid className='gap-1' item md={6} xs={12}>
             <label>Profession</label>
               <Field 
-                className="p-1 border border-gray rounded"
+                className="p-2 w-full border border-gray rounded"
                 type="text"
                 name="profession"
                 placeholder="Profession" 

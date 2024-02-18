@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager,
+import { Column, Paging, Pager, Scrolling,
   HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
@@ -13,6 +13,8 @@ import EquipmentModal from "./equipment-modal";
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
+
+const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
@@ -29,7 +31,10 @@ const LabRequestDataGrid = ({ labRequests }) => {
   const userActions = getActions();
   const [open,setOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
-
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
+  
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
   const filteredData = labRequests.filter((request) => {
@@ -60,6 +65,10 @@ const LabRequestDataGrid = ({ labRequests }) => {
       </>
     );
   };
+
+  const patientFullName = (rowData) => {
+    return rowData.patient_first_name + " " + rowData.patient_last_name;
+  }
 
 
   return (
@@ -110,35 +119,43 @@ const LabRequestDataGrid = ({ labRequests }) => {
         rowAlternationEnabled={true}
         showBorders={true}
         remoteOperations={true}
-        showColumnLines={true}
+        showColumnLines={false}
         showRowLines={true}
         wordWrapEnabled={true}
         // allowPaging={true}
         // height={"70vh"}
         className="w-full shadow"
       >
-        <Paging defaultPageSize={20} pageSize={20} />
-        <HeaderFilter visible={true} />
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={10} />
         <Pager
-          // visible={true}
-          displayMode={true}
-          showPageSizeSelector={false}
-          showInfo={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
+        />
+        <Column dataField="sample" caption="Sample" width={100} />
+        <Column dataField="sample_collected" caption="Sample Collected" width={100} />
+        <Column dataField="test_profile_name" caption="Profile name" width={130} />
+        <Column 
+          dataField="" 
+          caption="Patient Name" 
+          width={100}
+          calculateCellValue={patientFullName}
         />
         <Column dataField="note" caption="Note" width={180} />
-        <Column dataField="sample" caption="Sample" width={180} />
         <Column
           dataField="requested_name"
           caption="Requested By"
-          width={180}
+          width={130}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
-          dataField="number"
-          caption="Action"
-          width={80}
+          dataField=""
+          caption=""
+          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>

@@ -21,6 +21,9 @@ import Tooltip from '@mui/material/Tooltip';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
+import { VscAccount } from "react-icons/vsc";
+import { CiBellOn } from "react-icons/ci";
+
 
 const TopSection = () => {
   const { logoutUser } = useContext(authContext);
@@ -52,21 +55,19 @@ const TopSection = () => {
     <>
         <section className="flex items-center gap-4 sticky top-0 h-[10vh] bg-white z-40 md:bg-opacity-30 md:backdrop-filter md:backdrop-blur-lg p-2">
           {/* <span style={{fontSize: '8px'}} className="absolute top-0 left-0">22 Sept 2023</span> */}
-          <div className="flex items-center gap-4 border-r-2 border-primary">
+          <div className="flex items-center gap-4 border-r-2 pr-2 border-primary">
             <AiOutlineSearch
               onClick={handleClick2}
               className="text-2xl cursor-pointer"
             />
-            <RiMessage2Fill className="text-2xl cursor-pointer" />
-            <IoMdNotifications className="text-2xl cursor-pointer" />
+            {/* <RiMessage2Fill className="text-2xl cursor-pointer" /> */}
+            <CiBellOn className="text-3xl cursor-pointer" />
           </div>
           <div className="flex items-center gap-3">
             <div>
-              <img
+              <VscAccount 
                 onClick={handleClick}
                 className="h-8 w-8 rounded-full cursor-pointer"
-                src="/images/doc.jpg"
-                alt=""
               />
             </div>
             <div className="text-xs">
@@ -74,25 +75,6 @@ const TopSection = () => {
               {/* <p>Surgeon</p> */}
             </div>
           </div>
-          {/* <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            MenuListProps={{
-              "aria-labelledby": "basic-button",
-            }}
-            >
-            <MenuItem onClick={logoutUser}>Logout</MenuItem>
-          </Menu> */}
           <Menu
             anchorEl={anchorEl}
             id="account-menu"
@@ -145,12 +127,14 @@ const TopSection = () => {
               </ListItemIcon>
               Add another account
             </MenuItem>
-            <MenuItem onClick={handleClose}>
-              <ListItemIcon>
-                <Settings fontSize="small" />
-              </ListItemIcon>
-              Settings
-            </MenuItem>
+            <Link href='/dashboard/admin-interface'>
+              <MenuItem onClick={handleClose}>
+                <ListItemIcon>
+                  <Settings fontSize="small" />
+                </ListItemIcon>
+                Settings
+              </MenuItem>
+            </Link>
             <MenuItem onClick={logoutUser}>
               <ListItemIcon>
                 <Logout fontSize="small" />

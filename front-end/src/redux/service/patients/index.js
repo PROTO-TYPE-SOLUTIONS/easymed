@@ -74,7 +74,7 @@ export const createPatient = (payload) =>{
 
 export const editPatient = (payload) =>{
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.EDIT_PATIENT}`,payload)
+        axios.put(`${APP_API_URL.EDIT_PATIENT}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })

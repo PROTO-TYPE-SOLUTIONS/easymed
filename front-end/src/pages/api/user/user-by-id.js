@@ -47,10 +47,36 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            console.log("USERR BY ID ",body.body)
-            console.log("USERR BY ID_URL ",`${API_URL.FETCH_USER_BY_ID}/${body.user_id}`)
+            console.log("USERR BY ID_URL ",`${API_URL.FETCH_USER_BY_ID}/${body.body.id}`)
 
-            await backendAxiosInstance.put(`${API_URL.FETCH_USER_BY_ID}/${body.user_id}/`,body.body, config).then(response => {
+            await backendAxiosInstance.put(`${API_URL.FETCH_USER_BY_ID}/${body.body.id}/`,body.body, config).then(response => {
+                res.status(200).json(response.data);
+
+            }).catch(e => {
+                    res.status(e.response?.status ?? 500).json(e.response?.data)
+
+                }
+            )
+
+        } catch (e) {
+            res.status(500).json(e.message);
+        }
+    }
+    else if (req.method === API_METHODS.DELETE) {
+        try {
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
+            const data = req.query;
+
+            console.log("DELETE USERR BY ID_URL ",`${API_URL.FETCH_USER_BY_ID}/${data.user_id}`)
+
+            await backendAxiosInstance.delete(`${API_URL.FETCH_USER_BY_ID}/${data.user_id}/`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
