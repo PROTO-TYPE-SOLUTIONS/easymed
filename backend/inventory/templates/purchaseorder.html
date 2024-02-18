@@ -35,9 +35,9 @@
         <p>Phone: +1234567890 | Email: info@example.com</p>
     </div>
 
-    <h2>Purchase Order Form</h2>
-    <p>Purchase Order Nu: {{ purchaseorder.id }}</p>
-    <p>Purchase Date: {{ purchaseorder.id }}</p>
+    <h2>Purchase Order Note</h2>
+    <p>PO Number: {{ purchaseorder.id }}</p>
+    <p>Date Created: {{ purchaseorder.date_created }}</p>
 
     <table>
         <thead>
@@ -59,7 +59,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <p>Requested By: {{ purchase_order_item.purchase_order.requested_by }}</p>
+    <p>Requested By: {{ purchase_order.requested_by }}</p>
 
 </body>
 </html>

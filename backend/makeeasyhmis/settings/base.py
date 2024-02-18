@@ -3,6 +3,9 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -63,6 +66,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'makeeasyhmis.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -74,10 +78,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'makeeasyhmis.context_processors.custom_context', 
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'makeeasyhmis.wsgi.application'
 ASGI_APPLICATION = 'makeeasyhmis.asgi.application'

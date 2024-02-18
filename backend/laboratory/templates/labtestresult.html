@@ -58,7 +58,8 @@
                 <th>Test Panel</th>
                 <th>Result</th>
                 <th>Flag</th>
-                <th>Reference Value</th>
+                <th>Ref Value</th>
+                <th>Unit</th>
             </tr>
         </thead>
         <tbody>
@@ -76,9 +77,9 @@
                 </td>
 
                 <td>{{ result_item.test_panel.ref_value }}</td>
+                <td>{{ result_item.test_panel.unit }}</td>
             </tr>
             {% endfor %}
-            <td>{{ difference_percentage }}</td>
         </tbody>
     </table>
 

@@ -64,11 +64,6 @@ class LabReagentViewSet(viewsets.ModelViewSet):
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
-# class LabTestProfileViewSet(viewsets.ModelViewSet):
-#     queryset = LabReagent.objects.all()
-#     serializer_class = LabTestProfileSerializer
-#     permission_classes = (AllowAny,)
-
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
     serializer_class = LabEquipmentSerializer

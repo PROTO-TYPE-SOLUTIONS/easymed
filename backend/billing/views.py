@@ -36,7 +36,7 @@ from django.conf import settings
 from weasyprint import HTML
 
 
-from inventory.models import Inventory
+from inventory.models import Inventory, Item
 
 
 def download_invoice_pdf(request, invoice_id):
