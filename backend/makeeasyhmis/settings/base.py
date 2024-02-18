@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'billing.apps.BillingConfig',
     'announcement.apps.AnnouncementConfig',
     'company'
-
 ]
 
 MIDDLEWARE = [
