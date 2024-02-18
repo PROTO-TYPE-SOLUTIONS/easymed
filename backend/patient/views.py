@@ -264,13 +264,19 @@ import os
 
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from company.models import Company
 
 def download_prescription_pdf(request, prescription_id):
     prescription = get_object_or_404(Prescription, pk=prescription_id)
     prescribed_drugs = PrescribedDrug.objects.filter(prescription=prescription)
+    company = Company.objects.first()
 
     # Render the HTML template with the context
-    html = render_to_string('prescription.html', {'prescription': prescription, 'prescribed_drugs': prescribed_drugs})
+    html = render_to_string('prescription.html', {
+        'prescription': prescription,
+        'prescribed_drugs': prescribed_drugs,
+        'company': company
+        })
 
     # Use WeasyPrint to generate the PDF from the rendered HTML
     pdf_file = HTML(string=html).write_pdf()

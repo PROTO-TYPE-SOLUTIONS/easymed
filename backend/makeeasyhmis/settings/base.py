@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'laboratory.apps.LaboratoryConfig',
     'receptions.apps.ReceptionsConfig',
     'billing.apps.BillingConfig',
-    'announcement.apps.AnnouncementConfig'
+    'announcement.apps.AnnouncementConfig',
+    'company'
 
 ]
 
@@ -78,7 +79,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'makeeasyhmis.context_processors.custom_context', 
             ],
         },
     },

@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from patient.models import Patient
 from rest_framework import generics
 
@@ -74,7 +74,7 @@ class LabEquipmentViewSet(viewsets.ModelViewSet):
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
     serializer_class = LabTestProfileSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated)
 
 class LabTestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestPanel.objects.all()
@@ -217,15 +217,18 @@ from django.template.loader import get_template
 
 
 from .models import LabTestResult
+from company.models import Company
 
 def download_labtestresult_pdf(request, labtestresult_id):
     labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
     labtestresultpanel= LabTestResultPanel.objects.filter(lab_test_result=labtestresult)
+    company = Company.objects.first()
 
 
     html_template = get_template('labtestresult.html').render({
         'labtestresult': labtestresult,
-        'labtestresultiem':labtestresultpanel
+        'labtestresultiem':labtestresultpanel,
+        'company': company
     })
 
 

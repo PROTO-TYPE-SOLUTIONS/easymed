@@ -116,6 +116,7 @@ from django.conf import settings
 import os
 
 from .models import Requisition
+from company.models import Company
 
 def download_requisition_pdf(request, requisition_id):
     requisition = get_object_or_404(Requisition, pk=requisition_id)
@@ -132,10 +133,12 @@ def download_requisition_pdf(request, requisition_id):
 def download_purchaseorder_pdf(request, purchaseorder_id):
     purchase_order = get_object_or_404(PurchaseOrder, pk=purchaseorder_id)
     purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=purchase_order)
+    company = Company.objects.first()
 
     html_template = get_template('purchaseorder.html').render({
         'purchaseorder': purchase_order,
-        'purchaseorder_items': purchase_order_items
+        'purchaseorder_items': purchase_order_items,
+        'company': company
     })
     
     from weasyprint import HTML
