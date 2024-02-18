@@ -9,14 +9,29 @@ import { MdLocalPrintshop } from 'react-icons/md'
 import { getAllInvoices } from '@/redux/features/billing';
 import { downloadPDF } from '@/redux/service/pdfs';
 import { useAuth } from '@/assets/hooks/use-auth';
+import CmtDropdownMenu from '@/assets/DropdownMenu';
+import { LuMoreHorizontal } from 'react-icons/lu';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
-  });
-  
-  const allowedPageSizes = [5, 10, 'all'];
+});
+
+const allowedPageSizes = [5, 10, 'all'];
+
+const getActions = () => {
+    let actions = [
+        {
+        action: "print",
+        label: "Print",
+        icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+        },
+    ];
+
+    return actions;
+};
 
 const BilledDataGrid = () => {
+    const userActions = getActions();
     const dispatch = useDispatch();
     const auth = useAuth()
     const { invoices } = useSelector((store) => store.billing);
@@ -25,23 +40,9 @@ const BilledDataGrid = () => {
     const [showInfo, setShowInfo] = useState(true);
     const [showNavButtons, setShowNavButtons] = useState(true);
 
-    const renderGridCell = (rowData) => {
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span
-              style={{ marginLeft: '5px', cursor: 'pointer' }}
-              onClick={() => handlePrint(rowData)}
-            >
-              <MdLocalPrintshop />
-            </span>
-          </div>
-        );
-    };
-
     const handlePrint = async (data) => {
-        console.log(data.values[5]);
         try{
-            const response = await downloadPDF(data.values[5], "_invoice_pdf", auth)
+            const response = await downloadPDF(data.id, "_invoice_pdf", auth)
             window.open(response.link, '_blank');
             toast.success("got pdf successfully")
 
@@ -51,6 +52,30 @@ const BilledDataGrid = () => {
         }
         
     };
+
+    const onMenuClick = async (menu, data) => {
+        if (menu.action === "dispense") {
+          dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+          setSelectedRowData(data);
+          setOpen(true);
+        }else if (menu.action === "print"){
+          handlePrint(data);
+        }
+      };
+    
+      const actionsFunc = ({ data }) => {
+        return (
+            <CmtDropdownMenu
+              sx={{ cursor: "pointer" }}
+              items={userActions}
+              onItemClick={(menu) => onMenuClick(menu, data)}
+              TriggerComponent={
+                <LuMoreHorizontal className="cursor-pointer text-xl flex items-center" />
+              }
+            />
+        );
+      };
+    
 
     useEffect(()=> {
         if(auth){
@@ -74,7 +99,7 @@ const BilledDataGrid = () => {
                 // height={"70vh"}
             >
                 <Scrolling rowRenderingMode='virtual'></Scrolling>
-                <Paging defaultPageSize={5} />
+                <Paging defaultPageSize={10} />
                 <Pager
                     visible={true}
                     allowedPageSizes={allowedPageSizes}
@@ -99,11 +124,10 @@ const BilledDataGrid = () => {
                     dataField="status"
                     caption="Status"
                 />
-                <Column
-                    dataField="id"
+                <Column 
+                    dataField="" 
                     caption=""
-                    alignment="center"
-                    cellRender={(rowData) => renderGridCell(rowData)}
+                    cellRender={actionsFunc}
                 />
             </DataGrid>
         </section>

@@ -10,7 +10,7 @@ export const API_URL = {
 
   /***************** PATIENT APIS **********************/
   CREATE_PATIENT: "/patients/patients/",
-  EDIT_PATIENT: "/patients/patients/",
+  EDIT_PATIENT: "/patients/patients",
   DELETE_PATIENT: "/patients/patients/",
   FETCH_PATIENT: "/patients/patients/",
   SEARCH_PATIENT: "/patients/patients/",

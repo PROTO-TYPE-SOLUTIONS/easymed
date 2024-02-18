@@ -121,12 +121,12 @@ const LabResultDataGrid = ({ labResults }) => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
-        height={"70vh"}
+        // height={"70vh"}
         className="w-full shadow"
       >
         <HeaderFilter visible={true} />
         <Scrolling rowRenderingMode='virtual'></Scrolling>
-        <Paging defaultPageSize={5} />
+        <Paging defaultPageSize={10} />
         <Pager
           visible={true}
           allowedPageSizes={allowedPageSizes}

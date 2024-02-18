@@ -6,6 +6,7 @@ import ProfileEdit from './ProfileEdit'
 import { useAuth } from '@/assets/hooks/use-auth'
 import { getUserById } from '@/redux/service/user'
 import { getCurrentUser } from '@/redux/features/users'
+import { VscAccount } from 'react-icons/vsc'
 
 const AccountProfile = () => {
   const auth = useAuth();
@@ -27,11 +28,9 @@ const AccountProfile = () => {
       <Grid className='justify-center flex px-8' container>
         <Grid className='' xs={6}>
           <div className='flex items-center gap-4'>
-            <img
-              className="h-28 w-28 rounded-full cursor-pointer"
-              src="/images/doc.jpg"
-              alt=""
-            />
+              <VscAccount
+                className="h-28 w-28 rounded-full cursor-pointer"
+              />
             <div className='flex flex-col text-center gap-2'>
               <p className='text-xl font-semibold'>{`${currentUser.first_name} ${currentUser.last_name}`}</p>
               <p className='text-sm'>{`${currentUser.role}`}</p>
