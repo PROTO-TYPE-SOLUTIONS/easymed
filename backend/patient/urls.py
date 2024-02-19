@@ -9,7 +9,6 @@ from .views import (
     PrescriptionViewSet,
     PrescribedDrugViewSet,
     PublicAppointmentViewSet,
-    ServiceViewSet,
     ConsultationViewSet,
     ReferralViewSet,
     TriageViewSet,
@@ -26,7 +25,6 @@ router = DefaultRouter()
 router.register(r'insurance-companies', InsuranceCompanyViewSet)
 router.register(r'contact-details', ContactDetailsViewSet)
 router.register(r'patients', PatientViewSet)
-router.register(r'services', ServiceViewSet)
 router.register(r'next-of-kin', NextOfKinViewSet)
 
 router.register(r'publicappointments', PublicAppointmentViewSet)
@@ -37,7 +35,6 @@ router.register(r'referrals', ReferralViewSet)
 router.register(r'triage', TriageViewSet)
 router.register(r'appointments', AppointmentViewSet)
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
-# router.register(r'prescribed_drugs_by_prescription', PrescribedDrugByPrescriptionViewSet)
 
 
 

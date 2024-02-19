@@ -58,13 +58,6 @@ class NextOfKin(models.Model):
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
 
-class Service(models.Model):
-    name = models.TextField(max_length=300)
-
-    def __str__(self):
-        return self.name
-
-
 class Appointment(models.Model):
     class Meta:
         ordering = ("-date_created",)
@@ -85,9 +78,6 @@ class Appointment(models.Model):
     date_changed = models.DateTimeField(auto_now=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, default=22)
 
-
-    # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
-
     def __str__(self):
         return f"Appointment #{self.patient.first_name}"
 
@@ -104,7 +94,7 @@ class PublicAppointment(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, null=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=30, null=True, blank=True)

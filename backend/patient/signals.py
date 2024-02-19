@@ -41,3 +41,22 @@ def appointment_assigned_update_signal(sender, instance,  **kwargs):
     old_doctor = instance.assigned_doctor
     if old_doctor:
         appointment_assign_notification.delay(instance.id)
+
+
+
+'''send email on Appointment creation'''
+from makeeasyhmis.celery_tasks import send_appointment_status_email
+@receiver(post_save, sender=Appointment)
+def handle_appointment_status_change(sender, instance, created, **kwargs):
+    if created:
+        send_appointment_status_email.delay(instance.id)
+
+
+'''send email on Appointment status change'''
+@receiver(post_save, sender=Appointment)
+def handle_appointment_status_change(sender, instance, created, **kwargs):
+    if not created:
+        if instance.status != instance.status:
+            send_appointment_status_email.delay(instance.id)
+    instance._previous_status = instance.status
+    print("Email sent")

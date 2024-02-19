@@ -6,7 +6,18 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 
-from authperms.permissions import ( IsStaffUser, )
+# permissions
+from authperms.permissions import (
+    IsStaffUser,
+    IsDoctorUser,
+    IsLabTechUser,
+    IsNurseUser,
+    IsSystemsAdminUser,
+    IsPatientUser,
+    IsReceptionistUser,
+
+)
+
 
 from customuser.models import CustomUser
 from inventory.models import Item
@@ -19,7 +30,6 @@ from .models import (
     Prescription,
     PrescribedDrug,
     PublicAppointment,
-    Service,
     Consultation,
     Referral,
     Triage,
@@ -33,7 +43,6 @@ from .serializers import (
     PrescriptionSerializer,
     PrescribedDrugSerializer,
     PublicAppointmentSerializer,
-    ServiceSerializer,
     ConsultationSerializer,
     ReferralSerializer,
     TriageSerializer,
@@ -71,12 +80,7 @@ class ConsultationViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ConsultationFilter
     
-
-
-class ServiceViewSet(viewsets.ModelViewSet):
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
-
+    
 
 class ContactDetailsViewSet(viewsets.ModelViewSet):
     queryset = ContactDetails.objects.all()
