@@ -1,5 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchLabRequests, fetchLabResults,fetchLabEquipment, fetchLabTestProfile, fetchLabTestPanels, fetchPublicLabRequests, fetchLabTestPanelsByProfileId } from "@/redux/service/laboratory";
+import { fetchLabRequests, 
+    fetchLabResults,fetchLabEquipment, 
+    fetchLabTestProfile, fetchLabTestPanels, 
+    fetchPublicLabRequests, fetchSpecificPatientLabRequests,
+    fetchLabTestPanelsByProfileId } from "@/redux/service/laboratory";
 
 
 const initialState = {
@@ -11,6 +15,7 @@ const initialState = {
   publicLabRequests: [],
   labEquipments: [],
   labTestProfiles: [],
+  patientSpecificLabRequests: [],
 };
 
 const LaboratorySlice = createSlice({
@@ -25,6 +30,9 @@ const LaboratorySlice = createSlice({
     },
     setPublicLabRequests: (state, action) => {
       state.publicLabRequests = action.payload;
+    },
+    setSpecificPatientLabRequests: (state, action) => {
+      state.patientSpecificLabRequests = action.payload
     },
     setLabEquipments: (state, action) => {
       state.labEquipments = action.payload;
@@ -61,7 +69,12 @@ const LaboratorySlice = createSlice({
   },
 });
 
-export const { setLabResults,setLabRequests,setPublicLabRequests,setLabEquipments,setLabTestProfile, setLabResultItems, setLabResultItemsAfterRemovingItem, clearLabResultItems, setLabTestPanels, setLabTestPanelsById } = LaboratorySlice.actions;
+export const { setLabResults, 
+  setLabRequests, setPublicLabRequests, 
+  setLabEquipments,setLabTestProfile, setSpecificPatientLabRequests,
+  setLabResultItems, setLabResultItemsAfterRemovingItem, 
+  clearLabResultItems, setLabTestPanels, setLabTestPanelsById
+} = LaboratorySlice.actions;
 
 
 export const getAllLabResults = (auth) => async (dispatch) => {
@@ -90,6 +103,16 @@ export const getAllLabRequests = (auth) => async (dispatch) => {
     console.log("LAB_ERROR ", error);
   }
 };
+
+export const getAllSpecificPatientLabRequsts = (patient_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchSpecificPatientLabRequests(patient_id, auth);
+    dispatch(setSpecificPatientLabRequests(response));
+
+  }catch (error){
+    console.log("Specific Patient Lab Requests", error)
+  }
+}
 
 export const getAllPublicLabRequests = (auth) => async (dispatch) => {
   try {

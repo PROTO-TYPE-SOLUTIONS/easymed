@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Grid,Chip } from "@mui/material";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager,
@@ -8,6 +9,8 @@ import { LuMoreHorizontal } from "react-icons/lu";
 import { AiOutlineDownload } from 'react-icons/ai';
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import AddPatientLabReq from "./AddLabReq";
+import { getAllSpecificPatientLabRequsts } from "@/redux/features/laboratory";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -29,11 +32,22 @@ const PatientsLabRequestsGrid = () => {
     const userActions = getActions();
     const [open,setOpen] = useState(false);
     const [selectedRowData, setSelectedRowData] = React.useState({});
+    const dispatch = useDispatch();
+    const auth = useAuth();
+    const { patients } = useSelector((store) => store.patient);
+    const loggedInPatient = patients.find((patient)=> patient.user === auth?.user_id)
+    const patientSpecificLabRequests = useSelector((store)=> store.laboratory.patientSpecificLabRequests)
+
+    useEffect(()=> {
+      if (auth){
+        dispatch(getAllSpecificPatientLabRequsts(loggedInPatient?.id, auth))
+      }
+    }, [auth]);
 
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
   //CHANGE THE SAMPLE DATA
-  const filteredData = [{note:"star", sample: "sp-001"}, {note:"moon", sample:"sp-002"}].filter((request) => {
+  const filteredData = patientSpecificLabRequests.filter((request) => {
     return request?.note
       ?.toLocaleLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -101,8 +115,10 @@ const PatientsLabRequestsGrid = () => {
         showInfo={true}
         showNavigationButtons={true}
       />
+      <Column dataField="sample" caption="Sample" width={100} />
+      <Column dataField="test_profile_name" caption="Profile Name" width={150} />
+      <Column dataField="sale_price" caption="Price" width={100} />
       <Column dataField="note" caption="Note" width={180} />
-      <Column dataField="sample" caption="Sample" width={180} />
       <Column
         dataField="requested_name"
         caption="Requested By"

@@ -190,3 +190,19 @@ export const fetchLabTestProfile = () =>{
     })
 }
 
+export const fetchSpecificPatientLabRequests = (patient_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_REQUESTS_BY_PATIENT_ID}`,{
+            params: {
+                patient_id: patient_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
