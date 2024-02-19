@@ -20,7 +20,11 @@ from billing.models import InvoiceItem
 sample request
 
 curl -X POST http://localhost:8080/reports/sale_by_date   -H "Content-Type: application/json"   -d '{"start_date": "2024-02-01", "end_date": "2024-02-18"}'
+
+TO-DO
+consolidate get_invoice_items_by_date_range and serve_generated_pdf into one function
 '''
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 

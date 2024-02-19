@@ -74,7 +74,8 @@ class LabEquipmentViewSet(viewsets.ModelViewSet):
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
     serializer_class = LabTestProfileSerializer
-    # permission_classes = (IsAuthenticated)
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
 
 class LabTestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestPanel.objects.all()
@@ -107,7 +108,7 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(name='equipment', type=int,
-                             location=OpenApiParameter.PATH)
+                            location=OpenApiParameter.PATH)
         ],
     )
     @action(methods=['post'], detail=True)

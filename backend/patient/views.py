@@ -5,6 +5,9 @@ from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
 
+
+from authperms.permissions import ( IsStaffUser, )
+
 from customuser.models import CustomUser
 from inventory.models import Item
 from .models import (
@@ -193,7 +196,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AppointmentFilter
-
 
         
 class ConsultationViewSet(viewsets.ModelViewSet):
