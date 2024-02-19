@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.apps import apps
 from django.conf import settings
+from decouple import config
 
 from inventory.models import IncomingItem, Inventory, PurchaseOrder, Requisition
 from inventory.models import IncomingItem, Inventory
@@ -131,3 +132,30 @@ def appointment_assign_notification(appointment_id):
             'message':message
         }
     )
+
+
+
+
+
+'''Send email notifications on Appointment updated'''
+from django.core.mail import send_mail
+@shared_task
+def send_appointment_status_email(appointment_id):
+    appointment = Appointment.objects.get(id=appointment_id)
+    subject = f'Appointment #{appointment.id} Status Changed'
+    message = f'Your appointment status has been changed to {appointment.status}.'
+    from_email = config('EMAIL_HOST_USER')
+    to_email = appointment.patient.email
+    send_mail(subject, message, from_email, [to_email])
+
+
+'''Send email notifications on Appointment created'''
+@shared_task
+def send_appointment_status_email(appointment_id):
+    appointment = Appointment.objects.get(id=appointment_id)
+    subject = f'Appointment #{appointment.id} created'
+    # message = f'Your appointment status has been changed to {appointment.status}.'
+    message = f'Appointment has been created for #{appointment.appointment_date_time}. Reason #{appointment.reason}'
+    from_email = config('EMAIL_HOST_USER')
+    to_email = appointment.patient.email
+    send_mail(subject, message, from_email, [to_email])    

@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from .models import Prescription
 
@@ -32,7 +32,31 @@ def generate_precription(sender, instance, created, **kwargs):
 
 ''''signal to fire up the celery task to send assigned notifications'''
 @receiver(post_save, sender=Appointment)
-def appointment_assigned_signal(sender, instance, created, update_fields=None,**kwargs):
-    if created or (update_fields and 'assigned_doctor' in update_fields):
+def appointment_assigned_signal(sender, instance, created, **kwargs):
+    if created :
         appointment_assign_notification.delay(instance.id)
 
+@receiver(pre_save, sender=Appointment)
+def appointment_assigned_update_signal(sender, instance,  **kwargs):
+    old_doctor = instance.assigned_doctor
+    if old_doctor:
+        appointment_assign_notification.delay(instance.id)
+
+
+
+'''send email on Appointment creation'''
+from makeeasyhmis.celery_tasks import send_appointment_status_email
+@receiver(post_save, sender=Appointment)
+def handle_appointment_status_change(sender, instance, created, **kwargs):
+    if created:
+        send_appointment_status_email.delay(instance.id)
+
+
+'''send email on Appointment status change'''
+@receiver(post_save, sender=Appointment)
+def handle_appointment_status_change(sender, instance, created, **kwargs):
+    if not created:
+        if instance.status != instance.status:
+            send_appointment_status_email.delay(instance.id)
+    instance._previous_status = instance.status
+    print("Email sent")

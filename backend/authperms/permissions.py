@@ -10,6 +10,7 @@ from customuser.models import (
 )
 
 
+
 class IsDoctorUser(BasePermission):
     def has_permission(self, request, view):
         if request.user.is_superuser:
@@ -33,8 +34,9 @@ class IsLabTechUser(BasePermission):
 
 class IsSystemsAdminUser(BasePermission):
     def has_permission(self, request, view):
-        return bool((request.user and request.user.is_staff and request.user.role == CustomUser.BASE_ROLE) or (request.user and request.user.is_staff and request.user.is_superuser))
-
+        return bool(
+            (request.user and request.user.is_staff and request.user.role == CustomUser.BASE_ROLE) or
+            (request.user and request.user.is_staff and request.user.is_superuser))
 
 class IsPatientUser(BasePermission):
     def has_permission(self, request, view):

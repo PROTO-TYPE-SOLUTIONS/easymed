@@ -47,7 +47,7 @@ class Invoice(models.Model):
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='invoice_items')
-    service = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)
     payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
