@@ -37,15 +37,19 @@ from weasyprint import HTML
 
 
 from inventory.models import Inventory, Item
+from company.models import Company
 
 
-def download_invoice_pdf(request, invoice_id):
+def download_invoice_pdf(request, invoice_id,):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
     invoice_items = InvoiceItem.objects.filter(invoice=invoice)
+    company = Company.objects.first()
+
 
     html_template = get_template('invoice.html').render({
         'invoice': invoice,
-        'invoice_items': invoice_items
+        'invoice_items': invoice_items,
+        'company': company
     })
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')

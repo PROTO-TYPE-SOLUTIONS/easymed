@@ -113,3 +113,14 @@ run with uvicorn to have the notifications working
 On a separate terminal
 ``npm install -g wscat``
 ``wscat -c ws://localhost:8080/ws/doctor_notifications/`` <-- appointment assigned notification will be seen here
+
+
+# Financial Reporting
+To generate sales by given date, send sample request as shown below
+``curl -X POST http://localhost:8080/reports/sale_by_date/   -H "Content-Type: application/json"   -d '{"start_date": "2024-02-01", "end_date": "2024-02-18"}' > report-log.txt``
+
+The ``> report-log.txt`` just dumps the logs to the report-log.txt file for troubleshooting.
+
+If sending directly from frontend, just configure the payload and send to the endpoint ``http://localhost:8080/reports/sale_by_date/ ``
+You can access the generated report here
+``http://127.0.0.1:8080/sale_by_date/pdf/``

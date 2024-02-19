@@ -50,8 +50,9 @@ INSTALLED_APPS = [
     'laboratory.apps.LaboratoryConfig',
     'receptions.apps.ReceptionsConfig',
     'billing.apps.BillingConfig',
-    'announcement.apps.AnnouncementConfig'
-
+    'announcement.apps.AnnouncementConfig',
+    'company',
+    'reports'
 ]
 
 MIDDLEWARE = [
@@ -78,7 +79,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'makeeasyhmis.context_processors.custom_context', 
             ],
         },
     },
@@ -151,7 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        # "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticated",
         ],
     "DEFAULT_AUTHENTICATION_CLASSES": [  
         "rest_framework_simplejwt.authentication.JWTAuthentication",
