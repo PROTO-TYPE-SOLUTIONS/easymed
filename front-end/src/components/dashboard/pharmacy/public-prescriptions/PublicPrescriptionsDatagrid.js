@@ -29,7 +29,7 @@ const PublicPrescriptionsDatagrid = () => {
   },[auth])
 
   const patientNameRender = (cellData) => {
-    const patient = allPatients.find((patient) => cellData.data.patient);
+    const patient = allPatients.find((patient) => patient.id === cellData.data.patient);
     return patient ? `${patient.first_name} ${patient.second_name}` : ""
 
   }
