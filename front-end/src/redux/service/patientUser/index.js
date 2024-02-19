@@ -12,7 +12,7 @@ export const patientLabtestRequest = (payload) => {
     });
 }
 
-export const patientprescriptionRequest = (payload) => {
+export const patientPublicPrescriptionRequest = (payload) => {
     return new Promise ((resolve, reject)=> {
         axios.post(`${APP_API_URL.PATIENTPRESCRIPTIONREQUEST}`, payload)
         .then((res)=> {

@@ -80,6 +80,8 @@ export const API_URL = {
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
+  FETCH_PUBLIC_PRESCRIPTION: "/pharmacy/public-prescription-requests/",
+  PATIENTPRESCRIPTIONREQUEST: "/pharmacy/public-prescription-requests/",
   FETCH_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/",
   FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription",
 
@@ -98,9 +100,6 @@ export const API_URL = {
   /***************** PATIENTS USERS ENDPOINTS **********************/
   /***************** LABORATORY **********************/
   PATIENTLABTESTREQUEST: "/patientlabtestrequest",
-
-  /***************** PRESCRIPTION **********************/
-  PATIENTPRESCRIPTIONREQUEST: "/patientprescriptionrequest",
 
 
 };
@@ -188,6 +187,7 @@ export const APP_API_URL = {
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
+  FETCH_PUBLIC_PRESCRIPTION: "/api/pharmacy/fetch-public-prescriptions",
   FETCH_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescribed-drugs",
   FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug",
 

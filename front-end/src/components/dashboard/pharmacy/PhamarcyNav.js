@@ -8,7 +8,10 @@ const PhamarcyNav = () => {
   return (
     <div className="flex items-center gap-4 my-8">
         <Link href='/dashboard/phamarcy' className={`${pathName === '/dashboard/phamarcy' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-            Phamarcy
+            Prescriptions
+        </Link>
+        <Link href='/dashboard/phamarcy/public-prescriptions' className={`${pathName === '/dashboard/phamarcy/public-prescriptions' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+            Public Prescriptions
         </Link>
         <Link href='/dashboard/phamarcy/create-invoice' className={`${pathName === '/dashboard/phamarcy/create-invoice' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             New Invoice
