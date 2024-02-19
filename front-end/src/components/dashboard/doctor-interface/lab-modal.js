@@ -106,7 +106,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   useEffect(() => {
     dispatch(getPatientTriage(selectedRowData?.id));
-    dispatch(getAllLabTestProfiles());
+    dispatch(getAllLabTestProfiles(auth));
     if(testProfile){
       getTestPanelsByTheProfileId(testProfile, auth);
       dispatch(getAllLabTestPanelsByProfile(testProfile, auth));
