@@ -160,7 +160,8 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
             invoice_date: "2024-01-16",
             invoice_amount: appointmentSum + prescribedDrugsSum + labReqSum,
             status: "pending",
-            invoice_number: invoices.length + 1
+            invoice_number: invoices.length + 1,
+            patient:selectedOption?.id
             // invoice_file: "string"
           }
 
