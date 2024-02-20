@@ -40,6 +40,7 @@ export const API_URL = {
   FETCH_LAB_RESULTS: "/lab/lab-test-results/",
   SEND_LAB_RESULTS: "/lab/lab-test-results/",
   FETCH_LAB_REQUESTS: "/lab/lab-test-requests/",
+  FETCH_LAB_REQUESTS_BY_PATIENT_ID: "/lab/lab-test-request-by-patient-id",
   SEND_LAB_REQUESTS: "/lab/lab-test-requests/",
   FETCH_LAB_EQUIPMENT: "/lab/lab-equipment/",
   SEND_TO_EQUIPMENT: "/lab/equipment-test-request/",
@@ -79,6 +80,8 @@ export const API_URL = {
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
+  FETCH_PUBLIC_PRESCRIPTION: "/pharmacy/public-prescription-requests/",
+  PATIENTPRESCRIPTIONREQUEST: "/pharmacy/public-prescription-requests/",
   FETCH_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/",
   FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/patients/prescribed-drugs/by-prescription",
 
@@ -97,9 +100,6 @@ export const API_URL = {
   /***************** PATIENTS USERS ENDPOINTS **********************/
   /***************** LABORATORY **********************/
   PATIENTLABTESTREQUEST: "/patientlabtestrequest",
-
-  /***************** PRESCRIPTION **********************/
-  PATIENTPRESCRIPTIONREQUEST: "/patientprescriptionrequest",
 
 
 };
@@ -147,6 +147,7 @@ export const APP_API_URL = {
   FETCH_LAB_RESULTS: "/api/laboratory/get-lab-results",
   SEND_LAB_RESULTS: "/api/laboratory/get-lab-results",
   FETCH_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
+  FETCH_LAB_REQUESTS_BY_PATIENT_ID: "/api/laboratory/labRequestsByPatientId",
   SEND_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
   FETCH_LAB_EQUIPMENT: "/api/laboratory/get-lab-equipment",
   SEND_TO_EQUIPMENT: "/api/laboratory/send-to-equipment",
@@ -186,6 +187,7 @@ export const APP_API_URL = {
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
+  FETCH_PUBLIC_PRESCRIPTION: "/api/pharmacy/fetch-public-prescriptions",
   FETCH_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescribed-drugs",
   FETCH_PRESCRIPTIONS_PRESCRIBED_DRUGS: "/api/pharmacy/fetch-prescriptions-prescribed-drug",
 

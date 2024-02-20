@@ -30,10 +30,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
     sample_collected: null,
     patient: selectedRowData?.id,
     test_profile: null,
-    order_bill: null,
-    item: null,
     requested_by: auth?.user_id,
-    equipment: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -109,7 +106,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   useEffect(() => {
     dispatch(getPatientTriage(selectedRowData?.id));
-    dispatch(getAllLabTestProfiles());
+    dispatch(getAllLabTestProfiles(auth));
     if(testProfile){
       getTestPanelsByTheProfileId(testProfile, auth);
       dispatch(getAllLabTestPanelsByProfile(testProfile, auth));

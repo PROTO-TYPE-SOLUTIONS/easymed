@@ -11,6 +11,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { toast } from 'react-toastify'
 import { Grid } from "@mui/material";
 import { createPatient } from "@/redux/service/patients";
+import SeachableSelect from "@/components/select/Searchable";
 
 const ConvertToLabReq = ({ selectedRowData, open, setOpen }) => {
     const dispatch = useDispatch();
@@ -31,33 +32,25 @@ const ConvertToLabReq = ({ selectedRowData, open, setOpen }) => {
     }, [auth]);
   
     const initialValues = {
-        note: selectedRowData.reason,
+        note: "",
         sample_collected: true,
-        patient: 0,
-        test_profile: testProfile?.name,
+        patient: selectedRowData?.patient,
+        test_profile: {label:testProfile?.name, value:testProfile.id},
         requested_by: auth.user_id
     };
   
     const validationSchema = Yup.object().shape({
       note: Yup.string().required("This field is required!"),
-      test_profile: Yup.string().required("This field is required!"),
+      test_profile: Yup.object().required("This field is required!"),
     });
 
-    const saveNewPatientAndRequest = async (payload) => {
-        const patientInfo = {
-            first_name: selectedRowData.first_name,
-            second_name: selectedRowData.second_name,
-            date_of_birth: selectedRowData.date_of_birth,
-            gender: selectedRowData.gender,
-        }
+    const saveNewLabRequest = async (payload) => {
         try{
             setLoading(true);
-            const res = await createPatient(patientInfo)
-            const labReInfo = {
+            const labReqInfo = {
                 ...payload,
-                patient: res.id
             }
-            await sendLabRequests(labReInfo, auth)
+            await sendLabRequests(labReqInfo, auth)
             updatePublicLabReq()
             dispatch(getAllPublicLabRequests(auth));
             toast.success("Test Request Saved Successful!");
@@ -76,24 +69,33 @@ const ConvertToLabReq = ({ selectedRowData, open, setOpen }) => {
                 status:"confirmed"
             }
             await updatePublicLabRequest(updatePayload, auth)
-            toast("successfully updated public request");
+            toast.success("successfully updated public request");
         }catch(error){
             toast.error(error);
         }
     }
+
+    /**
+     * function that converts public lab test requests to lab test requests
+     * @param {*} formValue - The value of the form containing lab test request data.
+     * @param {*} helpers - Additional helper functions or objects.
+     * @returns {Promise} - A promise that resolves when the conversion is complete.
+     */
   
     const handleCovertReq = async (formValue, helpers) => {
       try {
         const formData = {
           ...formValue,
-          test_profile: testProfile.id,
+          test_profile:formValue.test_profile.value
         }
+
+        console.log("TEST PROFILE DATA BEFORE CONVERTING", formData)
         if (selectedRowData.status === "confirmed"){
             toast.error("Request already confirmed");
             return;
         }
 
-        saveNewPatientAndRequest(formData);        
+        saveNewLabRequest(formData);
       } catch (err) {
         toast.error(err);
         setLoading(false);
@@ -120,20 +122,19 @@ const ConvertToLabReq = ({ selectedRowData, open, setOpen }) => {
           <Grid container spacing={2}>
                 <Grid item md={12} xs={12}>
                 <section className="space-y-3">
-                    <div>
-                    <label>Test Profile</label>
-                    <Field
-                        className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
-                        name="test_profile"
-                    >
-                    </Field>
+                  <div>
+                    <SeachableSelect
+                      label="Test Profile"
+                      name="test_profile"
+                      options={labTestProfiles.map((labTestProfile) => ({ value: labTestProfile.id, label: `${labTestProfile?.name}` }))}                    
+                    />
                     <ErrorMessage
                         name="test_profile"
                         component="div"
                         className="text-warning text-xs"
                     />
-                    </div>
-                    <div>
+                  </div>
+                  <div>
                     <label>Reason</label>
                     <Field
                         as="textarea"
@@ -147,7 +148,7 @@ const ConvertToLabReq = ({ selectedRowData, open, setOpen }) => {
                         component="div"
                         className="text-warning text-xs"
                     />
-                    </div>
+                  </div>
                 </section>
                 </Grid>
             </Grid>

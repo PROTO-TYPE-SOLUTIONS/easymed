@@ -15,6 +15,19 @@ export const fetchPrescriptions = (auth) =>{
     })
 }
 
+export const fetchPublicPrescriptions = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_PUBLIC_PRESCRIPTION}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const fetchPrescribedDrugs = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
