@@ -1,16 +1,17 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from django.template.loader import get_template
-from .models import Invoice, InvoiceItem
+from .models import Invoice, InvoiceItem, PaymentMode
 
 from authperms.permissions import (
     IsStaffUser,
     IsDoctorUser,
     IsLabTechUser,
     IsNurseUser,
-    IsSystemsAdminUser
+    IsSystemsAdminUser,
+    IsReceptionistUser
 )
-from .serializers import (InvoiceItemSerializer, InvoiceSerializer)
+from .serializers import (InvoiceItemSerializer, InvoiceSerializer, PaymentModeSerializer,)
 
 class InvoiceViewset(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
@@ -23,6 +24,10 @@ class InvoiceItemViewset(viewsets.ModelViewSet):
         permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
+class PaymentModeViewset(viewsets.ModelViewSet):
+        queryset = PaymentMode.objects.all()
+        serializer_class = PaymentModeSerializer
+        permission_classes = (IsDoctorUser | IsNurseUser | IsReceptionistUser |  IsLabTechUser,)
 
 
 '''

@@ -9,12 +9,14 @@ from django.conf import settings
 from .views import (
     InvoiceViewset,
     InvoiceItemViewset,
+    PaymentModeViewset,
 )
 
 router = DefaultRouter()
 
 router.register(r'invoices', InvoiceViewset)
 router.register(r'invoice-items', InvoiceItemViewset)
+router.register(r'payment-modes', PaymentModeViewset)
 
 urlpatterns = [
     path('', include(router.urls)),

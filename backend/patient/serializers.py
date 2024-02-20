@@ -104,7 +104,7 @@ class PublicAppointmentSerializer(serializers.ModelSerializer):
         model = PublicAppointment
         fields = [
             "id",
-            'service',
+            'item',
             'first_name',
             'second_name',
             'date_of_birth',
