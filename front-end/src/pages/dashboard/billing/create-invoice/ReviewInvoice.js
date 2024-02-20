@@ -79,12 +79,12 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
 
     const saveEachAppointmentInvoiceItem = () => {
         selectedAppointments.forEach((appointment)=>{
-            console.log(appointment)
+            console.log("THESE ARE THE APPOINTMENTS",appointment)
             const payloadInvoiceItemData = {
                 item_name: appointment.item_name,
                 item_price: appointment.sale_price,
                 invoice: invoices.length + 1,
-                item: appointment.id
+                item: parseInt(appointment.item)
             }
             saveInvoiceItem(payloadInvoiceItemData);
 
@@ -101,7 +101,7 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
                 item_name: labREq.test_profile_name,
                 item_price: labREq.sale_price,
                 invoice: invoices.length + 1,
-                item: labREq.id
+                item: parseInt(labREq.item)
             }
             saveInvoiceItem(payloadInvoiceItemData);
 
@@ -118,7 +118,7 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
                 item_name: drug.item_name,
                 item_price: drug.sale_price,
                 invoice: invoices.length + 1,
-                item: drug.id
+                item: parseInt(drug.item)
             }
             saveInvoiceItem(payloadInvoiceItemData);
 
