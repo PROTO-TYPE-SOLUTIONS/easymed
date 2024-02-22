@@ -11,6 +11,8 @@ import { downloadPDF } from '@/redux/service/pdfs';
 import { useAuth } from '@/assets/hooks/use-auth';
 import CmtDropdownMenu from '@/assets/DropdownMenu';
 import { LuMoreHorizontal } from 'react-icons/lu';
+import { CiMoneyCheck1 } from "react-icons/ci";
+import InvoicePayModal from '@/components/dashboard/billing/invoicePayModal';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -21,9 +23,14 @@ const allowedPageSizes = [5, 10, 'all'];
 const getActions = () => {
     let actions = [
         {
-        action: "print",
-        label: "Print",
-        icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+            action: "print",
+            label: "Print",
+            icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+        },
+        {
+            action: "pay",
+            label: "Pay",
+            icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
         },
     ];
 
@@ -35,6 +42,8 @@ const BilledDataGrid = () => {
     const dispatch = useDispatch();
     const auth = useAuth()
     const { invoices } = useSelector((store) => store.billing);
+    const [open,setOpen] = useState(false)
+    const [selectedRowData, setSelectedRowData] = useState({})
 
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
     const [showInfo, setShowInfo] = useState(true);
@@ -54,8 +63,7 @@ const BilledDataGrid = () => {
     };
 
     const onMenuClick = async (menu, data) => {
-        if (menu.action === "dispense") {
-          dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+        if (menu.action === "pay") {
           setSelectedRowData(data);
           setOpen(true);
         }else if (menu.action === "print"){
@@ -130,6 +138,7 @@ const BilledDataGrid = () => {
                     cellRender={actionsFunc}
                 />
             </DataGrid>
+            {open && <InvoicePayModal {...{setOpen,open,selectedRowData}} />}
         </section>
     )
 }

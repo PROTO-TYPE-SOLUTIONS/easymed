@@ -74,15 +74,14 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            console.log("PATIENT_EDIT_BODY ",body)
-            console.log("PATIENT_EDIT_URL ",`${API_URL.EDIT_PATIENT}/${body.id}`)
+            console.log("PAY INVOICE BILL BODY ",body)
+            console.log("PAY INVOICE BILL URL ",`${API_URL.BILLING_INVOICES}/${body.id}/`)
 
-            await backendAxiosInstance.post(`${API_URL.EDIT_PATIENT}/${body.id}`,body, config).then(response => {
+            await backendAxiosInstance.put(`${API_URL.BILLING_INVOICES}${body.id}/`,body, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
                     res.status(e.response?.status ?? 500).json(e.response?.data)
-
                 }
             )
 
