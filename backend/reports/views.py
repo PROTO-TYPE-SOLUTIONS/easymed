@@ -45,7 +45,7 @@ def get_invoice_items_by_date_range(request):
                 serialized_invoice_items = [
                     {
                         'invoice_id': item.invoice.id,
-                        'service_id': item.service.id,
+                        'item_id': item.item.id,
                         'item_created_at': item.item_created_at,
                         'payment_mode_id': item.payment_mode.id if item.payment_mode else None
                     }

@@ -37,7 +37,7 @@ class Invoice(models.Model):
     def calculate_invoice_amount(self):
         if self.pk:
             total_amount = self.invoice_items.aggregate(
-                total_amount=Sum('service__inventory__sale_price'))['total_amount'] or 0
+                total_amount=Sum('item.inventory__sale_price'))['total_amount'] or 0
             self.invoice_amount = total_amount
 
     def save(self, *args, **kwargs):

@@ -120,12 +120,12 @@ class PublicAppointmentSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data["gender"] = instance.get_gender_display()
         data["status"] = instance.get_status_display()
-        if instance.service:
-            data["service"] = instance.service.name
+        if instance.item:
+            data["item"] = instance.item.name
         return data
 
-    def get_service_name(self, obj: PublicAppointment):
-        return obj.service.name
+    def get_item_name(self, obj: PublicAppointment):
+        return obj.item.name
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):
