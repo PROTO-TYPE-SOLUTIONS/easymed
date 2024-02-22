@@ -161,11 +161,11 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
             invoice_amount: appointmentSum + prescribedDrugsSum + labReqSum,
             status: "pending",
             invoice_number: invoices.length + 1,
-            patient:selectedOption?.id
+            patient:selectedOption?.value
             // invoice_file: "string"
           }
 
-          console.log(payloadData)
+          console.log("SAVE INVOICE PAYLOAD",payloadData)
 
         try {
             setLoading(true)
