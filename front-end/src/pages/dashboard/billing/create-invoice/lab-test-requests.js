@@ -27,9 +27,9 @@ const LabTestRequests = ({patient_id, setSelectedLabRequests}) => {
     }, [patient_id])
 
   return (
-    <Container className='my-4' maxWidth="xl">
+    <Container className='py-2' maxWidth="xl">
         <Grid item md={12} xs={4}>
-            <h2 className='text-xl px-4 rounded-lg text-primary'>Lab Test Requests</h2>
+            <h2 className='font-bold text-primary'>Lab Test Requests</h2>
         </Grid>
         <ul>
         {patientLabRequest.length > 0 ? patientLabRequest.map((testReq, index) => {
