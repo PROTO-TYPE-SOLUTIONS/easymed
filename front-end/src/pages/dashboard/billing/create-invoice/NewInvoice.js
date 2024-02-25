@@ -30,11 +30,10 @@ const NewInvoice = () => {
         setSelectedPrescribedDrugs([]);
     }, [selectedOption]);
   return (
-    <FormGroup>
-    <Grid container spacing={4}>
-      <Grid item md={4} xs={12}>
-        <Grid item md={12} xs={12}>
-            <h2 className='text-xl px-2 rounded-lg text-primary'>Select A Patient</h2>
+    <Grid container spacing={2}>
+      <Grid className='flex flex-col gap-4' item md={4} xs={12}>
+        <Grid className='flex flex-col justify-center' item md={12} xs={12}>
+            <h2 className='text-xl rounded-lg text-primary'>Select A Patient</h2>
             <Select
                   value={selectedOption}
                   isSearchable
@@ -45,16 +44,16 @@ const NewInvoice = () => {
           </Grid>
 
           {selectedOption ? (
-            <>
-              <Grid item md={12} xs={12}>
+            < >
+              <Grid className='w-full bg-white rounded-lg ' item md={12} xs={12}>
                 <Appointments setSelectedAppointments={setSelectedAppointments} patient_id={selectedOption?.value}/>
               </Grid>
 
-              <Grid item md={12} xs={12}>
+              <Grid className='w-full bg-white rounded-lg ' item md={12} xs={12}>
                 <LabTestRequests setSelectedLabRequests={setSelectedLabRequests} patient_id={selectedOption?.value}/>
               </Grid>
 
-              <Grid item md={12} xs={12}>
+              <Grid className='w-full bg-white rounded-lg ' item md={12} xs={12}>
                 <PrescribedDrug setSelectedPrescribedDrugs={setSelectedPrescribedDrugs} patient_id={selectedOption?.value}/>
               </Grid>
             </>
@@ -68,17 +67,19 @@ const NewInvoice = () => {
           
         
       </Grid>
-      <Grid item md={8} xs={12}>
+      <Grid className='h-[80vh]' item md={8} xs={12}>
         <ReviewInvoice 
           selectedOption={selectedOption} 
           selectedAppointments={selectedAppointments} 
           selectedLabRequests={selectedLabRequests}
           selectedPrescribedDrugs={selectedPrescribedDrugs}
+          setSelectedAppointments={setSelectedAppointments}
+          setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}
+          setSelectedLabRequests={setSelectedLabRequests}
         />
       </Grid>
 
     </Grid>
-  </FormGroup>
   )
 }
 
