@@ -10,17 +10,51 @@ import { getAllInvoices } from '@/redux/features/billing';
 import { useAuth } from '@/assets/hooks/use-auth'
 import { ErrorMessage, Field, Form, Formik, FormikProps } from 'formik';
 import * as Yup from "yup";
+import BillingViewSelectedPrescribedDrugs from '@/components/dashboard/billing/payOverview/BillingViewSelectedPrescribedDrugs';
+import BillingViewSelectedLabtests from '@/components/dashboard/billing/payOverview/BillingViewSelectedLabtests';
+import BillingViewSelectedAppointments from '@/components/dashboard/billing/payOverview/BillingViewSelectedAppointments';
 
-const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabRequests, selectedPrescribedDrugs, }) => {
+const ReviewInvoice = ({ 
+    selectedOption, 
+    selectedAppointments, 
+    selectedLabRequests, 
+    selectedPrescribedDrugs, 
+    setSelectedPrescribedDrugs,
+    setSelectedLabRequests,
+    setSelectedAppointments
+    }) => 
+    
+    {
     const [loading, setLoading] = useState(false)
+
     const [appointmentSum, setAppointmentSum] = useState(0);
+    const [appointmentMpesaSum, setAppointmentMpesaSum] = useState(0);
+    const [appointmentInsuranceSum, setAppointmentInsuranceSum] = useState(0);
+    const [appointmentCashSum, setAppointmentCashSum] = useState(0);
+
     const [prescribedDrugsSum, setPrescribedDrugsSum] = useState(0);
+    const [prescribedDrugsMpesaSum, setPrescribedDrugsMpesaSum] = useState(0);
+    const [prescribedDrugsInsuranceSum, setPrescribedDrugsInsuranceSum] = useState(0);
+    const [prescribedDrugsCashSum, setPrescribedDrugsCashSum] = useState(0);
+
+
     const [labReqSum, setLabReqSum] = useState(0);
+    const [labReqMpesaSum, setLabReqMpesaSum] = useState(0);
+    const [labReqInsuranceSum, setLabReqInsuranceSum] = useState(0);
+    const [labReqCashSum, setLabReqCashSum] = useState(0);
+
+
     const { invoices } = useSelector((store) => store.billing);
     const auth = useAuth()
     const invoiceRef = useRef();
     const router = useRouter();
     const dispatch = useDispatch();
+
+    const payMethods = {
+        "mpesa": 1,
+        "cash":2,
+        "insurance":3
+    }
 
     const validationSchema = Yup.object().shape({
         invoice_description: Yup.string().required("This field is required!"),
@@ -33,32 +67,72 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
       }
 
     const totalAppointmentSum = () => {
-        let fees = []
+        let totalFees = []
+        let cashFees = []
+        let mpesaFees = []
+        let insuranceFees = []
         selectedAppointments.forEach((item)=>{
-            fees.push(parseInt(item.sale_price))
+            totalFees.push(parseInt(item.sale_price))
+            if(item.payMethod === "mpesa"){
+                mpesaFees.push(item.sale_price)
+            }else if(item.payMethod === "insurance"){
+                insuranceFees.push(item.sale_price)
+            }else{
+                cashFees.push(item.sale_price)
+            }
         })
 
-        setAppointmentSum(sumArray(fees))
+        setAppointmentSum(sumArray(totalFees));
+        setAppointmentMpesaSum(sumArray(mpesaFees));
+        setAppointmentInsuranceSum(sumArray(insuranceFees));
+        setAppointmentCashSum(sumArray(cashFees));
 
     }
 
     const totalPrescribedDrugsSum = () => {
-        let fees = []
+        let totalFees = []
+        let cashFees = []
+        let mpesaFees = []
+        let insuranceFees = []
+
         selectedPrescribedDrugs.forEach((item)=>{
-            fees.push(parseInt(item.sale_price))
+            totalFees.push(parseInt(item.sale_price))
+            if(item.payMethod === "mpesa"){
+                mpesaFees.push(item.sale_price)
+            }else if(item.payMethod === "insurance"){
+                insuranceFees.push(item.sale_price)
+            }else{
+                cashFees.push(item.sale_price)
+            }
         })
 
-        setPrescribedDrugsSum(sumArray(fees))
+        setPrescribedDrugsSum(sumArray(totalFees));
+        setPrescribedDrugsMpesaSum(sumArray(mpesaFees));
+        setPrescribedDrugsInsuranceSum(sumArray(insuranceFees));
+        setPrescribedDrugsCashSum(sumArray(cashFees));
 
     }
 
     const totalLabReqSum = () => {
-        let fees = []
+        let totalFees = []
+        let cashFees = []
+        let mpesaFees = []
+        let insuranceFees = []        
         selectedLabRequests.forEach((item)=>{
-            fees.push(parseInt(item.sale_price))
+            totalFees.push(parseInt(item.sale_price))
+            if(item.payMethod === "mpesa"){
+                mpesaFees.push(item.sale_price)
+            }else if(item.payMethod === "insurance"){
+                insuranceFees.push(item.sale_price)
+            }else{
+                cashFees.push(item.sale_price)
+            }
         })
 
-        setLabReqSum(sumArray(fees))
+        setLabReqSum(sumArray(totalFees));
+        setLabReqMpesaSum(sumArray(mpesaFees));
+        setLabReqInsuranceSum(sumArray(insuranceFees));
+        setLabReqCashSum(sumArray(cashFees));
 
     }
 
@@ -75,51 +149,50 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
 
     }
 
-    // SERVICE ID SHOULD BE CHANGED
-
     const saveEachAppointmentInvoiceItem = () => {
         selectedAppointments.forEach((appointment)=>{
             console.log("THESE ARE THE APPOINTMENTS",appointment)
             const payloadInvoiceItemData = {
                 item_name: appointment.item_name,
+                payment_mode:appointment.payMethod ? payMethods[appointment.payMethod] : 2,
                 item_price: appointment.sale_price,
                 invoice: invoices.length + 1,
                 item: parseInt(appointment.item)
             }
+            console.log("THESE ARE APPOINTMENTS INVOICE ITEMS",appointment)
             saveInvoiceItem(payloadInvoiceItemData);
 
         })
 
     }
-
-    // SERVICE ID SHOULD BE CHANGED
 
     const saveEachLabReqInvoiceItem = () => {
         selectedLabRequests.forEach((labREq)=>{
             console.log(labREq)
             const payloadInvoiceItemData = {
                 item_name: labREq.test_profile_name,
+                payment_mode:labREq.payMethod ? payMethods[labREq.payMethod] : 2,
                 item_price: labREq.sale_price,
                 invoice: invoices.length + 1,
                 item: parseInt(labREq.item)
             }
+            console.log("THESE ARE LAB REQ INVOICE ITEMS",labREq)
             saveInvoiceItem(payloadInvoiceItemData);
 
         })
 
     }
 
-    // SERVICE ID SHOULD BE CHANGED
-
     const saveEachPrescribedDrugInvoiceItem = () => {
         selectedPrescribedDrugs.forEach((drug)=>{
-            console.log(drug)
             const payloadInvoiceItemData = {
                 item_name: drug.item_name,
+                payment_mode:drug.payMethod ? payMethods[drug.payMethod] : 2,
                 item_price: drug.sale_price,
                 invoice: invoices.length + 1,
                 item: parseInt(drug.item)
             }
+            console.log("THESE ARE DURG INVOICE ITEMS",drug)
             saveInvoiceItem(payloadInvoiceItemData);
 
         })
@@ -131,27 +204,6 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
         saveEachLabReqInvoiceItem();
         saveEachPrescribedDrugInvoiceItem();
     } 
-
-    const generatePdf = () => {
-        return new Promise((resolve) => {
-          const input = invoiceRef.current;  
-          console.log(input)
-        //   const table = input.children[2].children[0].children[5];
-          const pdfWidth = 210; 
-          const pdfHeight = 297;
-          const scale = 1; 
-      
-          html2canvas(input, { scale: scale }).then((canvas) => {
-            const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
-      
-            const imgWidth = pdf.internal.pageSize.getWidth();
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-      
-            resolve(pdf);
-          });
-        });
-    };
 
     const saveInvoice = async (formValue) => {
         
@@ -200,11 +252,11 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
 
   return (
     <Formik
-        initialValues={{ invoice_description: '', }}
+        initialValues={{ invoice_description: '', status:"pending" }}
         validationSchema={validationSchema}
         onSubmit={saveInvoice}
     >
-        <Form ref={invoiceRef} className="py-10 space-y-4 px-4 min-h-full flex flex-col justify-between">
+        <Form ref={invoiceRef} className="py-4 bg-white_light rounded-lg space-y-4 px-4 min-h-full flex flex-col justify-between">
             {selectedOption && 
             <>
             <div ref={invoiceRef} className='space-y-8'>
@@ -229,59 +281,46 @@ const ReviewInvoice = ({ selectedOption, selectedAppointments, selectedLabReques
                 </div>
             </div>
             {selectedAppointments.length > 0 && (
-                <div className='space-y-2'>
-                    <h2 className='text-primary'> Appointments </h2>
-                    <ul className='space-y-2'>
-                        {selectedAppointments.map(appointment=> (
-                            <li className='flex justify-between text-xs' key={appointment.id}> 
-                                <span>{appointment.item_name}</span> 
-                                <span>{`ksh ${appointment.sale_price}`}</span>
-                            </li>
-                            )
-                        )}
-                    </ul>
-                </div>
+                <BillingViewSelectedAppointments selectedAppointments={selectedAppointments} setSelectedAppointments={setSelectedAppointments}/>
             )}
             {selectedLabRequests.length > 0 && (
-                <div className='space-y-2'>
-                    <h2 className='text-primary'> Lab Test Requests </h2>
-                    <ul className='space-y-2'>
-                        {selectedLabRequests.map(testReq=> (
-                            <li className='flex justify-between text-xs' key={testReq.id}>
-                                <span>{testReq.test_profile_name}</span> 
-                                <span>{`ksh ${testReq.sale_price}`}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <BillingViewSelectedLabtests selectedLabRequests={selectedLabRequests} setSelectedLabRequests={setSelectedLabRequests}/>
             )}
             {selectedPrescribedDrugs.length > 0 && (
-                <div className='space-y-2'>
-                    <h2 className='text-primary'> Prescribed Drugs </h2>
-                    <ul className='space-y-2'>
-                        {selectedPrescribedDrugs.map(drug=> (
-                            <li className='flex justify-between text-xs' key={drug.id}>
-                                <span>{drug.item_name}</span> 
-                                <span>{`ksh ${drug.sale_price}`}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <BillingViewSelectedPrescribedDrugs selectedPrescribedDrugs={selectedPrescribedDrugs} setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}/>
             )}
             </div>
 
             <section className='mt-auto space-y-4 bottom-0'>
             <div className='space-y-2'>
-                <div className='flex justify-end'>
-                    <div className='border-b w-48 justify-between flex'>
-                        <h2 className='border-b w-full '>Total</h2>
-                        <h2 className='border-b w-24 '>{appointmentSum + prescribedDrugsSum + labReqSum}</h2>
+                <div className='flex justify-between gap-4'>
+
+                    <div className='flex justify-end'>
+                        <div className='border-b w-48 justify-between flex'>
+                            <h2 className='border-b w-full '>Mpesa</h2>
+                            <h2 className='border-b w-24 '>{appointmentMpesaSum + prescribedDrugsMpesaSum + labReqMpesaSum}</h2>
+                        </div>
+                    </div>
+                    <div className='flex justify-end'>
+                        <div className='border-b w-48 justify-between flex'>
+                            <h2 className='border-b w-full '>Cash</h2>
+                            <h2 className='border-b w-24 '>{appointmentCashSum + prescribedDrugsCashSum + labReqCashSum}</h2>
+                        </div>
                     </div>
                 </div>
-                <div className='flex justify-end'>
-                    <div className='border-b w-48 justify-between flex'>
-                        <h2 className='border-b w-full '>Payable</h2>
-                        <h2 className='border-b w-24 '>{appointmentSum + prescribedDrugsSum + labReqSum}</h2>
+
+                <div className='flex justify-between gap-4'>
+                    <div className='flex justify-end'>
+                        <div className='border-b w-48 justify-between flex'>
+                            <h2 className='border-b w-full '>Insurance</h2>
+                            <h2 className='border-b w-24 '>{appointmentInsuranceSum + prescribedDrugsInsuranceSum + labReqInsuranceSum}</h2>
+                        </div>
+                    </div>
+                    <div className='flex justify-end'>
+                        <div className='border-b w-48 justify-between flex'>
+                            <h2 className='border-b w-full '>Total</h2>
+                            <h2 className='border-b w-24 '>{appointmentSum + prescribedDrugsSum + labReqSum}</h2>
+                        </div>
                     </div>
                 </div>
             </div>
