@@ -26,9 +26,9 @@ const Appointments = ({patient_id, setSelectedAppointments}) => {
         dispatch(getAllPatientBillingAppointments(patient_id))
     }, [patient_id])
   return (
-    <Container className='my-4' maxWidth="xl">
+    <Container className='py-2' maxWidth="xl">
         <Grid item md={12} xs={4}>
-            <h2 className='text-xl px-4 rounded-lg text-primary'>Appointments</h2>
+            <h2 className='font-bold text-primary'>Appointments</h2>
         </Grid>
         <ul>
         {patientAppointment.length > 0 ? patientAppointment.map((appointment, index) => {

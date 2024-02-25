@@ -30,11 +30,10 @@ const NewInvoice = () => {
         setSelectedPrescribedDrugs([]);
     }, [selectedOption]);
   return (
-    <FormGroup>
-    <Grid container spacing={4}>
-      <Grid item md={4} xs={12}>
-        <Grid item md={12} xs={12}>
-            <h2 className='text-xl px-2 rounded-lg text-primary'>Select A Patient</h2>
+    <Grid container spacing={2}>
+      <Grid className='' item md={4} xs={12}>
+          <Grid className='my-2' item md={12} xs={12}>
+            <h2 className='text-xl rounded-lg text-primary'>Select A Patient</h2>
             <Select
                   value={selectedOption}
                   isSearchable
@@ -45,22 +44,22 @@ const NewInvoice = () => {
           </Grid>
 
           {selectedOption ? (
-            <>
-              <Grid item md={12} xs={12}>
+            < >
+              <Grid className='w-full bg-white rounded-lg my-2' item md={12} xs={12}>
                 <Appointments setSelectedAppointments={setSelectedAppointments} patient_id={selectedOption?.value}/>
               </Grid>
 
-              <Grid item md={12} xs={12}>
+              <Grid className='w-full bg-white rounded-lg my-2' item md={12} xs={12}>
                 <LabTestRequests setSelectedLabRequests={setSelectedLabRequests} patient_id={selectedOption?.value}/>
               </Grid>
 
-              <Grid item md={12} xs={12}>
+              <Grid className='w-full bg-white rounded-lg my-2' item md={12} xs={12}>
                 <PrescribedDrug setSelectedPrescribedDrugs={setSelectedPrescribedDrugs} patient_id={selectedOption?.value}/>
               </Grid>
             </>
 
           ): 
-          <Grid item md={12} xs={12} className='items-center h-full text-center justify-center flex'>
+          <Grid item md={12} xs={12} className=' my-2 h-full text-center justify-center flex'>
             <h2 className='text-2xl'> No Patient is Selected </h2>
           </Grid>
           }
@@ -68,17 +67,19 @@ const NewInvoice = () => {
           
         
       </Grid>
-      <Grid item md={8} xs={12}>
+      <Grid className='h-[80vh]' item md={8} xs={12}>
         <ReviewInvoice 
           selectedOption={selectedOption} 
           selectedAppointments={selectedAppointments} 
           selectedLabRequests={selectedLabRequests}
           selectedPrescribedDrugs={selectedPrescribedDrugs}
+          setSelectedAppointments={setSelectedAppointments}
+          setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}
+          setSelectedLabRequests={setSelectedLabRequests}
         />
       </Grid>
 
     </Grid>
-  </FormGroup>
   )
 }
 
