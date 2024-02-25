@@ -11,6 +11,7 @@ module.exports = {
       primary_light: "#43a3c7",
       light: "#daedf4",
       white: '#ffffff',
+      white_light:'#FAF9F6',
       background: '#F2F2F6',
       warning: '#FF3333',
       success: '#2E7D32',
