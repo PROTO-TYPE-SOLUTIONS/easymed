@@ -1,4 +1,5 @@
 import React from 'react'
+import MpesaPayModal from './MpesaPayModal'
 
 const PayAmountsDisplay = (
     {    
@@ -14,6 +15,7 @@ const PayAmountsDisplay = (
         appointmentSum,
         prescribedDrugsSum,
         labReqSum,
+        patient_id,
     }
 
     ) => {
@@ -22,9 +24,12 @@ const PayAmountsDisplay = (
         <div className='flex justify-between gap-4'>
 
             <div className='flex justify-end'>
-                <div className='border-b w-48 justify-between flex'>
-                    <h2 className='border-b w-full '>Mpesa</h2>
-                    <h2 className='border-b w-24 '>{appointmentMpesaSum + prescribedDrugsMpesaSum + labReqMpesaSum}</h2>
+                <div className='border-b-2 w-48 justify-between flex items-center'>
+                    <h2 className='w-full '>Mpesa</h2>
+                    <h2 className='w-24 '>{appointmentMpesaSum + prescribedDrugsMpesaSum + labReqMpesaSum}</h2>
+                    {(appointmentMpesaSum + prescribedDrugsMpesaSum + labReqMpesaSum) > 0 && (
+                        <MpesaPayModal patient_id={patient_id} amount={(appointmentMpesaSum + prescribedDrugsMpesaSum + labReqMpesaSum)}/>
+                    )}
                 </div>
             </div>
             <div className='flex justify-end'>

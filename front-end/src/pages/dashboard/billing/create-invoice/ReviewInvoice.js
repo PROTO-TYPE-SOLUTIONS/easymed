@@ -305,6 +305,7 @@ const ReviewInvoice = ({
                     appointmentSum={appointmentSum}
                     prescribedDrugsSum={prescribedDrugsSum}
                     labReqSum={labReqSum}
+                    patient_id={selectedOption.value}
                 />
 
                 <section className="flex items-center justify-end gap-2">
