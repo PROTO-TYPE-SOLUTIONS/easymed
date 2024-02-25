@@ -31,8 +31,8 @@ const NewInvoice = () => {
     }, [selectedOption]);
   return (
     <Grid container spacing={2}>
-      <Grid className='flex flex-col gap-4' item md={4} xs={12}>
-        <Grid className='flex flex-col justify-center' item md={12} xs={12}>
+      <Grid className='' item md={4} xs={12}>
+          <Grid className='my-2' item md={12} xs={12}>
             <h2 className='text-xl rounded-lg text-primary'>Select A Patient</h2>
             <Select
                   value={selectedOption}
@@ -45,21 +45,21 @@ const NewInvoice = () => {
 
           {selectedOption ? (
             < >
-              <Grid className='w-full bg-white rounded-lg ' item md={12} xs={12}>
+              <Grid className='w-full bg-white rounded-lg my-2' item md={12} xs={12}>
                 <Appointments setSelectedAppointments={setSelectedAppointments} patient_id={selectedOption?.value}/>
               </Grid>
 
-              <Grid className='w-full bg-white rounded-lg ' item md={12} xs={12}>
+              <Grid className='w-full bg-white rounded-lg my-2' item md={12} xs={12}>
                 <LabTestRequests setSelectedLabRequests={setSelectedLabRequests} patient_id={selectedOption?.value}/>
               </Grid>
 
-              <Grid className='w-full bg-white rounded-lg ' item md={12} xs={12}>
+              <Grid className='w-full bg-white rounded-lg my-2' item md={12} xs={12}>
                 <PrescribedDrug setSelectedPrescribedDrugs={setSelectedPrescribedDrugs} patient_id={selectedOption?.value}/>
               </Grid>
             </>
 
           ): 
-          <Grid item md={12} xs={12} className='items-center h-full text-center justify-center flex'>
+          <Grid item md={12} xs={12} className=' my-2 h-full text-center justify-center flex'>
             <h2 className='text-2xl'> No Patient is Selected </h2>
           </Grid>
           }
