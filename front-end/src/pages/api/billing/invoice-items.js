@@ -20,9 +20,8 @@ export default async function handler(req, res) {
                 }
             };
 
-            const body = req.query
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_PATIENT_BILLING_APPOINTMENTS}/?patient__id=${body.patient__id}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.BILLING_INVOICE_ITEMS}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
