@@ -286,21 +286,52 @@ export const pharmacyDisplayStats = [
   },
 ]
 
-export const inventoryDisplayStats = [
-  {
-    label: "Today's Sales",
-    icon: "/images/svgs/sales.svg",
-    figures: 320
-  },
-  {
-    label: "Purchases",
-    icon: "/images/svgs/purchases.svg",
-    figures: 28
-  },
-  {
-    label: "Slow Moving",
-    icon: "/images/svgs/slow-moving.svg",
-    figures: 3222
-  },
-]
+export const InventoryDisplayStats = () => {
+  const today = new Date();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth();
+  const todayDay = today.getDate();
+  const { purchaseOrders } = useSelector(({ inventory }) => inventory)
+  const { invoiceItems } = useSelector(({ billing }) => billing)
+
+  const todayPurchases = purchaseOrders.filter((purchase) => {
+    const purchaseDate = new Date(purchase.date_created);
+    const purchaseYear = purchaseDate.getFullYear();
+    const purchaseMonth = purchaseDate.getMonth();
+    const purchaseDay = purchaseDate.getDate();
+  
+    return todayYear === purchaseYear && todayMonth === purchaseMonth && todayDay === purchaseDay;
+  });
+
+  const todaySales = invoiceItems.filter((sale) => {
+    const saleDate = new Date(sale.item_created_at);
+    const saleYear = saleDate.getFullYear();
+    const saleMonth = saleDate.getMonth();
+    const saleDay = saleDate.getDate();
+  
+    return todayYear === saleYear && todayMonth === saleMonth && todayDay === saleDay;
+  });
+
+  console.log(invoiceItems)
+
+
+  return ([
+    {
+      label: "Today's Sales",
+      icon: "/images/svgs/sales.svg",
+      figures: todaySales.length
+    },
+    {
+      label: "Purchases",
+      icon: "/images/svgs/purchases.svg",
+      figures: todayPurchases.length
+    },
+    {
+      label: "Slow Moving",
+      icon: "/images/svgs/slow-moving.svg",
+      figures: 3222
+    },
+  ])
+
+}
 
