@@ -4,6 +4,7 @@ import {
   fetchPatientBillingAppointments,
   fetchPatientBillingLabRequest,
   fetchPatientBillingPrescribedDrug,
+  getBillingInvoiceItems,
 } from "@/redux/service/billing";
 
 const initialState = {
@@ -14,6 +15,7 @@ const initialState = {
   selectedLabRequests: [],
   selectedPrescribedDrugs: [],
   invoices: [],
+  invoiceItems:[]
 };
 
 const BillingSlice = createSlice({
@@ -41,6 +43,9 @@ const BillingSlice = createSlice({
     setInvoices: (state, action) => {
       state.invoices = action.payload;
     },
+    setInvoiceItems: (state, action) => {
+      state.invoiceItems = action.payload;
+    },
   },
 });
 
@@ -52,6 +57,7 @@ export const {
   setSelectedLabRequest,
   setSelectedPrescribedDrug,
   setInvoices,
+  setInvoiceItems,
 } = BillingSlice.actions;
 
 export const getAllPatientBillingAppointments =
@@ -90,6 +96,15 @@ export const getAllInvoices = (auth) => async (dispatch) => {
     dispatch(setInvoices(response));
   } catch (error) {
     console.log("BILLINGI_ERROR ", error);
+  }
+};
+
+export const getAllInvoiceItems = (auth) => async (dispatch) => {
+  try {
+    const response = await getBillingInvoiceItems(auth);
+    dispatch(setInvoiceItems(response));
+  } catch (error) {
+    console.log("BILLING_ITEMS_ERROR ", error);
   }
 };
 

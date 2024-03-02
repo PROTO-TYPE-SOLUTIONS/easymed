@@ -5,11 +5,12 @@ import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import Link from 'next/link';
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
-import { inventoryDisplayStats } from "@/assets/menu";
+import { InventoryDisplayStats } from "@/assets/menu";
 import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
-import { getAllInventories } from "@/redux/features/inventory";
+import { getAllInventories, getAllPurchaseOrders } from "@/redux/features/inventory";
 import { useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
+import { getAllInvoiceItems } from "@/redux/features/billing";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -29,13 +30,15 @@ const InventoryDataGrid = () => {
   useEffect(() => {
     if (auth) {
       dispatch(getAllInventories(auth));
+      dispatch(getAllInvoiceItems(auth));
+      dispatch(getAllPurchaseOrders(auth));
     }
   }, [auth]);
 
   console.log(item)
 
 
-  const inventorySummaryInfo = inventoryDisplayStats.map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
+  const inventorySummaryInfo = InventoryDisplayStats().map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
 
   return (
     <section className=" my-8">
