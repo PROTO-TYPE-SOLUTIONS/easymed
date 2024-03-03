@@ -196,7 +196,6 @@ class Referral(models.Model):
         ('surgeon', 'Surgeon'),
         ('physiotherapist', 'Physiotherapist'),
     )
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     referred_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -211,7 +210,6 @@ class Referral(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Only set referred_by when creating a new instance
             if not self.referred_by:
                 raise ValueError("You must set the 'referred_by' user before saving.")
         super().save(*args, **kwargs)
