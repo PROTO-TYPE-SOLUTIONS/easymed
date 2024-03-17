@@ -201,7 +201,7 @@ class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
 class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
-    # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (IsDoctorUser | IsPatientUser,)
 
 
 '''
