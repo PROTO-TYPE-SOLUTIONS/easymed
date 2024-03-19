@@ -20,8 +20,8 @@ services:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
             - HOST=db
-        networks:
-            - mks
+        # networks:
+        #     - mks
         restart: unless-stopped
 
     redis:
@@ -32,8 +32,8 @@ services:
             - ./redis/:/etc/redis/
         # ports:
         #     - 6379:6379
-        networks:
-            - mks
+        # networks:
+        #     - mks
         restart: unless-stopped
 
     backend:
@@ -50,8 +50,8 @@ services:
         depends_on:
             - db
         restart: unless-stopped
-        networks:
-            - mks
+        # networks:
+        #     - mks
 
     worker:
         restart: unless-stopped
@@ -72,8 +72,8 @@ services:
         depends_on:
             - backend
             - redis
-        networks:
-            - mks   
+        # networks:
+        #     - mks   
 
     frontend:
         build:
@@ -84,15 +84,15 @@ services:
             - 3000:3000
         depends_on:
             - backend
-        networks:
-            - mks    
+        # networks:
+        #     - mks    
 
 
 volumes:
     static_volume: {}
     postgres_data: {}
 
-networks:
-    mks:
-        name: mks
-        driver: bridge
+# networks:
+#     mks:
+#         name: mks
+#         driver: bridge

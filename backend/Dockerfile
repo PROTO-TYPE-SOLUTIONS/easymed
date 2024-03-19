@@ -12,7 +12,6 @@ RUN pip install -r requirements.txt
 # ADD  ./docker /app/backend/docker
 ADD . /app
 
-EXPOSE 8080
 
 RUN chmod 777 ./backend-entrypoint.sh
 RUN chmod +x ./backend-entrypoint.sh
@@ -20,4 +19,4 @@ RUN chmod +x ./backend-entrypoint.sh
 RUN chmod 777 ./backend-entrypoint.sh
 RUN chmod +x ./worker-entrypoint.sh
 
-
+EXPOSE 8080
