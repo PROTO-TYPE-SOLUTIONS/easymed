@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+    nginx:
+        restart: always
+        image: nginx:1.23-alpine
+        ports:
+            - 80:80
+        volumes:
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - static_volume:/app/backend/django_static
+
     db:
         image: postgres:10
         container_name: db
@@ -21,8 +30,8 @@ services:
         command: redis-server --appendonly yes --replica-read-only no
         volumes:
             - ./redis/:/etc/redis/
-        ports:
-            - 6379:6379
+        # ports:
+        #     - 6379:6379
         networks:
             - mks
         restart: unless-stopped
@@ -31,11 +40,9 @@ services:
         build:
           context: ./backend
         container_name: backend
-        # command: python manage.py runserver 0.0.0.0:8080 
-        command: uvicorn --port 8080 makeeasyhmis.asgi:application # <- this works with async for sockets connection
+        entrypoint: /app/backend/docker/backend-entrypoint.sh
+        # command: uvicorn --port 8080 makeeasyhmis.asgi:application # <- this works with async for sockets connection
         volumes:
-            - ./mks/:/opt/mks
-            - ./:/tmp/
             - ./backend:/code/
         ports:
             - 8080:8080
@@ -43,27 +50,33 @@ services:
             - ./.env
         depends_on:
             - db
-        networks:
-            - mks
         restart: unless-stopped
-
-    celery:
-        build:
-          context: ./backend
-        container_name: celery
-        restart: always
-        command: celery -A makeeasyhmis worker -B -l info
-        volumes:
-            - ./mks/:/opt/mks
-            - ./:/tmp/
-        env_file:
-            - ./.env
-        depends_on:
-            - db
-            - redis
-            - backend
         networks:
             - mks
+
+    worker:
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./docker/backend/Dockerfile
+        entrypoint: ./backend/docker/worker-entrypoint.sh
+        volumes:
+            - static_volume:/app/backend/django_static
+        environment:
+            DEBUG: "True"
+            CELERY_BROKER_URL: "redis://redis:6379/0"
+            CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+            DJANGO_DB: postgresql
+            POSTGRES_HOST: db
+            POSTGRES_NAME: postgres
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_PORT: 5432
+        depends_on:
+            - backend
+            - redis
+        networks:
+            - mks   
 
     frontend:
         build:
@@ -75,8 +88,12 @@ services:
         depends_on:
             - backend
         networks:
-            - mks
+            - mks    
 
+
+volumes:
+    static_volume: {}
+    postgres_data: {}
 
 networks:
     mks:

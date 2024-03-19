@@ -1,31 +1,17 @@
-# FROM python:3
-# ENV PYTHONDONTWRITEBYTECODE=1
-# ENV PYTHONUNBUFFERED=1
-# WORKDIR /code
-# COPY requirements.txt /code/
-# RUN pip install -r requirements.txt
-# COPY . /code/
+FROM python:3.11-alpine
 
-# pull official base image
-FROM python:3.12.0-slim-bookworm
+RUN apk update && apk add python3-dev gcc libc-dev
 
-# set work directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# install dependencies
 RUN pip install --upgrade pip
-COPY ./requirements.txt .
+RUN pip install gunicorn
+ADD ./requirements.txt /app/
 RUN pip install -r requirements.txt
 
-# Create a user with UID 1000 and GID 1000
-RUN groupadd -g 1000 appgroup && \
-    useradd -r -u 1000 -g appgroup appuser
-# Switch to this user
-USER 1000:1000
+ADD  ./docker /app/backend/docker
+ADD . /app/backend
 
-# copy project
-COPY . .
+
+RUN chmod +x /app/backend/docker/backend-entrypoint.sh
+RUN chmod +x /app/backend/docker/worker-entrypoint.sh
