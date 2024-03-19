@@ -124,3 +124,6 @@ The ``> report-log.txt`` just dumps the logs to the report-log.txt file for trou
 If sending directly from frontend, just configure the payload and send to the endpoint ``http://localhost:8080/reports/sale_by_date/ ``
 You can access the generated report here
 ``http://127.0.0.1:8080/sale_by_date/pdf/``
+
+
+The /preflight directory contains set up files for an LIS Host listener.

@@ -3,9 +3,12 @@ from django.core.validators import FileExtensionValidator
 
 class Company(models.Model):
     name = models.CharField(max_length=250)
-    address = models.CharField(max_length=250, null=True, blank=True)
-    phone = models.CharField(max_length=250, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
+    address1 = models.CharField(max_length=250, null=True, blank=True)
+    address2 = models.CharField(max_length=250, null=True, blank=True)
+    phone1 = models.CharField(max_length=250, null=True, blank=True)
+    phone2 = models.CharField(max_length=250, null=True, blank=True)
+    email1 = models.EmailField(null=True, blank=True)
+    email2 = models.EmailField(null=True, blank=True)
     logo = models.FileField(
         upload_to="Company/company-logo",
         max_length=254,

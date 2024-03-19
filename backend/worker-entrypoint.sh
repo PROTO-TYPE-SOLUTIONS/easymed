@@ -1,4 +1,5 @@
 #!/bin/sh
+echo "This script works......"
 
 until cd /app/backend
 do
