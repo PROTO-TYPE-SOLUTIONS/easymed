@@ -45,7 +45,8 @@ from authperms.permissions import (
     IsDoctorUser,
     IsLabTechUser,
     IsNurseUser,
-    IsSystemsAdminUser
+    IsSystemsAdminUser,
+    IsPatientUser
 )
 
 # utils
@@ -74,7 +75,7 @@ class LabEquipmentViewSet(viewsets.ModelViewSet):
 class LabTestProfileViewSet(viewsets.ModelViewSet):
     queryset = LabTestProfile.objects.all()
     serializer_class = LabTestProfileSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsPatientUser,)
 
 
 class LabTestPanelViewSet(viewsets.ModelViewSet):
@@ -200,7 +201,7 @@ class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
 class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
-    # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (IsDoctorUser | IsPatientUser,)
 
 
 '''

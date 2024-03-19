@@ -13,6 +13,7 @@ from .utils import (
     send_through_rs232,
     send_through_tcp,
     create_hl7_message,
+    create_astm_message,
 
 )
 
@@ -36,7 +37,7 @@ def send_to_equipment(sender, instance, created, **kwargs):
                 print("Data is: " + data)
 
         elif equipment.data_format == "astm":
-            data = json_to_astm(test_request)
+            data = create_astm_message(test_request)
             print("Data is ASTM")
             if equipment.category == "rs232":
                 send_through_rs232(data=data)

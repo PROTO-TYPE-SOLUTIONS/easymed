@@ -25,40 +25,22 @@ def create_hl7_message(test_request):
     return hl7_message
 
 
-'''
-I'v had issues install astm.
-I keep getting  python setup.py egg_info did not run successfully.
-uncomment if you can sort it out
-'''
+def create_astm_message(test_request):
+    patient = test_request.patient
+    astm_message = (
+        "H|\^&|||host^name||{timestamp}|||||P|1||||||||||\r"
+        "P|1|OBR|1|||{test_id}||||||||||||||{timestamp}\r"
+        "P|2|{patient_id}||{patient_name}||{date_of_birth}|{gender}\r"
+    ).format(
+        timestamp=datetime.now().strftime("%Y%m%d%H%M%S"),
+        patient_id=patient.id,
+        patient_name=patient.first_name + " " + patient.second_name,
+        date_of_birth=patient.date_of_birth.strftime("%Y%m%d") if patient.date_of_birth else "",
+        gender=patient.gender,
+        test_id=test_request.id,
+    )
 
-# def convert_to_astm(equipment_test_request):
-#     # Retrieve relevant information from the EquipmentTestRequest instance
-#     test_request = equipment_test_request.test_request
-#     patient = test_request.patient
-#     equipment = equipment_test_request.equipment
-
-#     # Construct ASTM message
-#     message = records.Record()
-#     message.append(records.PatientIdentificationRecord(
-#         sequence_number=1,
-#         patient_id=str(patient.id),
-#         patient_name=f"{patient.first_name} {patient.second_name}",
-#         birthdate=datetime.strftime(patient.date_of_birth, "%Y%m%d") if patient.date_of_birth else '',
-#         sex=patient.gender,
-#         # Add more fields as needed
-#     ))
-#     message.append(records.Order(
-#         sequence_number=2,
-#         # Add more fields as needed
-#     ))
-#     # Add more records as needed
-
-#     # Convert the ASTM message to string
-#     astm_string = str(message)
-
-#     return astm_string
-
-
+    return astm_message
 
 
 
@@ -76,7 +58,7 @@ def send_through_rs232(data: str, port='/dev/ttySO', baudrate=9600):
         
 
 
-def send_through_tcp(data: str, host='127.0.0.1', port=6060):
+def send_through_tcp(data: str, host='127.0.0.1', port=8090):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serve:
             serve.connect((host, port))
