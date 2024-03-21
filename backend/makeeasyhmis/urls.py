@@ -8,7 +8,7 @@ from billing.views import download_invoice_pdf
 from inventory.views import download_requisition_pdf, download_purchaseorder_pdf
 from laboratory.views import download_labtestresult_pdf
 from patient.views import download_prescription_pdf
-from reports.views import get_invoice_items_by_date_range, serve_generated_pdf
+from reports.views import get_invoice_items_by_date_range, serve_generated_pdf, serve_sales_by_item_id_pdf
 
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -60,8 +60,10 @@ urlpatterns = [
 
     path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
 
+    # Reports
     path('sale_by_date/', get_invoice_items_by_date_range, name='sale_by_date_pdf'),
     path('sale_by_date/pdf/', serve_generated_pdf, name='serve_generated_pdf'),
+    path('serve_sales_by_item_id_pdf/', serve_sales_by_item_id_pdf, name='serve_sales_by_item_id_pdf'),
 
 
 ]

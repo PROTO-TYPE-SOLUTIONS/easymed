@@ -16,6 +16,9 @@ class PaymentMode(models.Model):
     paymet_mode = models.CharField(max_length=20)
     payment_category = models.CharField(
         max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
+    
+    def __str__(self):
+        return self.payment_category + ' - ' + self.paymet_mode
 
 
 class Invoice(models.Model):
@@ -44,6 +47,8 @@ class Invoice(models.Model):
         self.calculate_invoice_amount()
         super().save(*args, **kwargs) 
 
+    def __str__(self):
+        return self.invoice_number
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='invoice_items')
@@ -56,4 +61,7 @@ class InvoiceItem(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.invoice.calculate_invoice_amount()
-        
+    
+    def __str__(self):
+        return self.item.name
+    

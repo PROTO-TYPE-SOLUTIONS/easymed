@@ -1,1 +1,0 @@
-{"pdf_file_path": "/home/mbadi/Desktop/make-easy-hmis/backend/makeeasyhmis/static/reports/invoice_items.pdf"}
