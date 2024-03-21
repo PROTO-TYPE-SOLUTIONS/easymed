@@ -1,35 +1,62 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup'
 import { Grid } from '@mui/material';
 import { ErrorMessage, Field, Form, Formik } from 'formik'
 
+import { getCompanyDetails } from '@/redux/features/company';
+import { updateCompanyInformation } from '@/redux/service/company';
+import { useAuth } from '@/assets/hooks/use-auth';
+import { toast } from 'react-toastify';
+
 const CompanyDetails = () => {
-    const [ loading, setLoading ] = useState('')
+    const dispatch = useDispatch();
+    const auth = useAuth();
+    const [ loading, setLoading ] = useState('');
+    const companyInfo = useSelector((store)=>store.company.companyDetails);
+
     const initialValues = {
-        first_name: "",
-        second_name: "",
-        date_of_birth: "",
-        gender: "",
-        insurance: null,
-        user_id: null,
+        name: companyInfo?.name,
+        address: companyInfo?.address,
+        phone: companyInfo?.phone,
+        email: companyInfo?.email,
+        logo: null,
     };
     
     const validationSchema = Yup.object().shape({
-        first_name: Yup.string().required("First Name is required!"),
-        second_name: Yup.string().required("Second Name is required!"),
-        date_of_birth: Yup.string().required("Date is required!"),
-        gender: Yup.string().required("Select gender!"),
+        name: Yup.string().required("First Name is required!"),
+        address: Yup.string().required("Second Name is required!"),
+        phone: Yup.number().required("Date is required!"),
+        email: Yup.string().required("Select gender!"),
     });
 
-    const handleCompany = () => {
+    const updateCompanyInfo = async (formValue) => {
+        setLoading(true)
+        try{
+
+            await updateCompanyInformation(formValue, auth);
+            toast.success("Successfully updated company information");
+            setLoading(false);
+
+        }catch(e){
+            setLoading(false);
+            toast.error("Failed to Update company information", e);
+        }
 
     }
+
+    useEffect(()=> {
+        if (auth){
+            dispatch(getCompanyDetails(auth));
+        }
+
+    }, [auth])
 
   return (
     <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleCompany}
+        onSubmit={updateCompanyInfo}
     >
         <Form>
             <section className="space-y-2 bg-white rounded-lg min-h-[80vh] p-2 flex flex-col gap-4 items-center justify-center">
@@ -41,10 +68,10 @@ const CompanyDetails = () => {
                                 className="block border border-gray py-3 px-4 focus:outline-none w-full"
                                 type="text"
                                 placeholder="Enter Company Name"
-                                name="company_name"
+                                name="name"
                             />
                             <ErrorMessage
-                                name="company_name"
+                                name="name"
                                 component="div"
                                 className="text-warning text-xs"
                             />
@@ -80,10 +107,10 @@ const CompanyDetails = () => {
                                 className="block border border-gray py-3 px-4 focus:outline-none w-full"
                                 type="number"
                                 placeholder="+254722666777"
-                                name="number"
+                                name="phone"
                             />
                             <ErrorMessage
-                                name="number"
+                                name="phone"
                                 component="div"
                                 className="text-warning text-xs"
                             />
