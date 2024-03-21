@@ -127,7 +127,7 @@ On a separate terminal
 `wscat -c ws://localhost:8080/ws/doctor_notifications/` <-- appointment assigned notification will be seen here
 
 # Financial Reporting
-
+## Sale by Date Range
 To generate sales by given date, send sample request as shown below
 `curl -X POST http://localhost:8080/reports/sale_by_date/   -H "Content-Type: application/json"   -d '{"start_date": "2024-02-01", "end_date": "2024-02-18"}' > report-log.txt`
 
@@ -137,6 +137,7 @@ If sending directly from frontend, just configure the payload and send to the en
 You can access the generated report here
 `http://127.0.0.1:8080/sale_by_date/pdf/`
 
+## Sale by Date Range and Item Id
 To generated sales report by date range and given item id;
 `curl -X POST http://localhost:8080/reports/sale_by_item_and_date/   -H "Content-Type: application/json"   -d '{"item_id": "1", "start_date": "2024-02-01", "end_date": "2024-02-10"}'`
 

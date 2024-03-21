@@ -45,7 +45,18 @@ def get_invoice_items_by_date_range(request):
                     }
                     for item in invoice_items
                 ]
-                html_string = render_to_string('sales_by_date.html', {'invoice_items': serialized_invoice_items})
+
+                company = Company.objects.first()
+
+                # Prepare the data for the template
+                context = {
+                    'invoice_items': invoice_items,
+                    'company': company
+                }
+
+
+                # html_string = render_to_string('sales_by_date.html', {'invoice_items': serialized_invoice_items})
+                html_string = render_to_string('sales_by_date.html', context)
                 pdf_file = HTML(string=html_string).write_pdf()
                 pdf_directory = os.path.join(BASE_DIR, 'makeeasyhmis/static', 'reports')
                 os.makedirs(pdf_directory, exist_ok=True)
@@ -100,7 +111,7 @@ def get_invoice_items_by_item_and_date_range(request):
                 # Prepare the data for the template
                 context = {
                     'invoice_items': invoice_items,
-                    'company_name': company.name if company else None
+                    'company': company
                 }
 
                 html_string = render_to_string('sales_by_item_id.html', context)
