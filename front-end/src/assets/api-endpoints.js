@@ -94,6 +94,9 @@ export const API_URL = {
   FETCH_ANNOUNCEMENTS_CHANNELS: "/announcement/channels/",
   FETCH_ANNOUNCEMENTS:"/announcement/announcements/",
 
+  /***************** Company **********************/
+  FETCH_COMPANY_INFO: "/company/company/",
+
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/download",
 
@@ -199,6 +202,9 @@ export const APP_API_URL = {
   /***************** Announcements **********************/
   FETCH_ANNOUNCEMENTS_CHANNELS: "/api/announcement/channels/",
   FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/",
+
+  /***************** Company **********************/
+  FETCH_COMPANY_INFO: "/api/company/company/",
 
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/api/pdf/download_pdf",
