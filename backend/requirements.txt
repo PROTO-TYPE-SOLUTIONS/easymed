@@ -23,6 +23,8 @@ PyYAML==6.0.1
 referencing==0.30.2
 rpds-py==0.10.3
 sqlparse==0.4.4
+
+pysmb==1.2.9.1
 typing_extensions==4.8.0
 tzdata==2023.3
 uritemplate==4.1.1

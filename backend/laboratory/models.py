@@ -12,6 +12,7 @@ class LabEquipment(models.Model):
         ("none", "None"),
         ("rs232", "RS232"),
         ("tcp", "TCP"),
+        ("netshare", "NETSHARE"),
     )
     FORMAT_CHOICE = (
         ("hl7", "HL7"),
