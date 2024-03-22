@@ -9,7 +9,6 @@ from .models import (
     Prescription,
     PrescribedDrug,
     PublicAppointment,
-    Service,
     Consultation,
     Referral,
     Triage,
@@ -22,12 +21,6 @@ from inventory.models import (
 class InsuranceCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = InsuranceCompany
-        fields = '__all__'
-
-
-class ServiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Service
         fields = '__all__'
 
 
@@ -111,7 +104,7 @@ class PublicAppointmentSerializer(serializers.ModelSerializer):
         model = PublicAppointment
         fields = [
             "id",
-            'service',
+            'item',
             'first_name',
             'second_name',
             'date_of_birth',
@@ -127,12 +120,12 @@ class PublicAppointmentSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data["gender"] = instance.get_gender_display()
         data["status"] = instance.get_status_display()
-        if instance.service:
-            data["service"] = instance.service.name
+        if instance.item:
+            data["item"] = instance.item.name
         return data
 
-    def get_service_name(self, obj: PublicAppointment):
-        return obj.service.name
+    def get_item_name(self, obj: PublicAppointment):
+        return obj.item.name
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):

@@ -7,6 +7,7 @@ import { useAuth } from '@/assets/hooks/use-auth';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import AnnouncementPosts from '@/components/announcement/AnnouncementPosts';
 import { getAllAnnouncements } from '@/redux/features/announcements';
+import ProtectedRoute from '@/assets/hoc/protected-route';
 
 const ChannelsByName = () => {
     const params = useParams()
@@ -30,9 +31,11 @@ const ChannelsByName = () => {
 }
 
 ChannelsByName.getLayout = (page) => (
-  <AuthGuard>
-    <DashboardLayout>{page}</DashboardLayout>
-  </AuthGuard>
+  <ProtectedRoute permission={'CAN_ACCESS_ANNOUNCEMENT_DASHBOARD'}>
+    <AuthGuard>
+      <DashboardLayout>{page}</DashboardLayout>
+    </AuthGuard>
+  </ProtectedRoute>
 );
 
 export default ChannelsByName

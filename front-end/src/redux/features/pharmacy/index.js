@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchPrescriptions, fetchPrescribedDrugs, fetchPrescriptionsPrescribedDrugs,  } from "@/redux/service/pharmacy";
+import { fetchPrescriptions, fetchPrescribedDrugs, fetchPrescriptionsPrescribedDrugs, fetchPublicPrescriptions } from "@/redux/service/pharmacy";
 
 
 const initialState = {
@@ -7,6 +7,7 @@ const initialState = {
   prescribedDrugs: [],
   searchedPrescriptions: [],
   prescriptionsPrescribed: [],
+  publicPrescriptions: [],
 };
 
 const PrescriptionSlice = createSlice({
@@ -15,6 +16,9 @@ const PrescriptionSlice = createSlice({
   reducers: {
     setPrescriptions: (state, action) => {
       state.prescriptions = action.payload;
+    },
+    setPublicPrescriptions: (state, action) => {
+      state.publicPrescriptions = action.payload
     },
     setPrescribedDrugs: (state, action) => {
       state.prescribedDrugs = action.payload;
@@ -32,7 +36,7 @@ const PrescriptionSlice = createSlice({
   },
 });
 
-export const { setPrescriptions,setSearchedPrescriptions, setPrescriptionsPrescribedDrugs, setPrescribedDrugs, setPrescriptionStatus } = PrescriptionSlice.actions;
+export const { setPrescriptions,setSearchedPrescriptions, setPrescriptionsPrescribedDrugs, setPrescribedDrugs, setPrescriptionStatus, setPublicPrescriptions } = PrescriptionSlice.actions;
 
 
 export const getAllPrescriptions = (auth) => async (dispatch) => {
@@ -41,6 +45,15 @@ export const getAllPrescriptions = (auth) => async (dispatch) => {
     dispatch(setPrescriptions(response));
   } catch (error) {
     console.log("PRESCRIPTIONS_ERROR ", error);
+  }
+};
+
+export const getAllPublicPrescriptions = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchPublicPrescriptions(auth);
+    dispatch(setPublicPrescriptions(response));
+  } catch (error) {
+    console.log("PUBLIC_PRESCRIPTIONS_ERROR ", error);
   }
 };
 

@@ -1,27 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
+import { Checkbox, Grid } from "@mui/material";
 import { toast } from "react-toastify";
-import { sendLabRequests } from "@/redux/service/laboratory";
+import { sendLabRequests, fetchLabTestPanelsByProfileId, sendLabRequestsPanels } from "@/redux/service/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getPatientProfile, getPatientTriage } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllLabTestProfiles } from "@/redux/features/laboratory";
+import { getAllLabTestProfiles, getAllLabTestPanelsByProfile } from "@/redux/features/laboratory";
 
-const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
-  const { labTestProfiles } = useSelector((store) => store.laboratory);
+const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
+  const { labTestProfiles, labTestPanelsById } = useSelector((store) => store.laboratory);
   const { patientTriage } = useSelector((store) => store.patient);
   const [loading, setLoading] = React.useState(false);
+  const [testProfile, setTestProfile]= useState(null)
+  const [selectedPanels, setSelectedPanels] = useState([]);
   const auth = useAuth();
   const dispatch = useDispatch();
 
-  console.log("ROW_DATA ", selectedRowData);
-
   const handleClose = () => {
     setLabOpen(false);
+    setTestProfile(null)
   };
 
   const initialValues = {
@@ -29,10 +30,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
     sample_collected: null,
     patient: selectedRowData?.id,
     test_profile: null,
-    order_bill: null,
-    item: null,
     requested_by: auth?.user_id,
-    equipment: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -40,12 +38,34 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
     test_profile:Yup.number().required("This field is required!"),
   });
 
+  const saveAllPanels = async (testReqPanelPayload) => {
+    try{
+      await sendLabRequestsPanels(testReqPanelPayload, auth)
+      console.log("PAYLOAD TO SAVE REQ PANEL",testReqPanelPayload)
+      toast.success("Lab Request Panels saved Successful!");
+    }catch(error){
+      console.log(error)
+      toast.error(error)
+    }
+  }
+
+  const savePanels = (reqId) => {
+    selectedPanels.forEach((panel)=> {
+      const testReqPanelPayload = {    
+        test_panel: panel.id,
+        lab_test_request: reqId      
+      }
+      saveAllPanels(testReqPanelPayload);
+    })
+  }
+
   const handleSendLabRequest = async (formValue, helpers) => {
     console.log("FORM_DATA ", formValue);
     try {
       setLoading(true);
-      await sendLabRequests(formValue, auth).then(() => {
+      await sendLabRequests(formValue, auth).then((res) => {
         helpers.resetForm();
+        savePanels(res.id)
         toast.success("Lab Request Successful!");
         setLoading(false);
         handleClose();
@@ -57,13 +77,41 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
     }
   };
 
-  useEffect(() => {
-    dispatch(getAllLabTestProfiles());
-  }, []);
+  const handleCheckboxChange = (panel) => {
+    setSelectedPanels((prevSelectedPanels) => {
+      const isSelected = prevSelectedPanels.find((panelItem=>panelItem.id === panel.id));
+
+      return isSelected
+        ? prevSelectedPanels.filter((item) => item.id !== panel.id)
+        : [...prevSelectedPanels, panel];
+    });
+  };
+
+  const handleSelectAllChange = () => {
+    setSelectedPanels((prevSelectedPanels) =>
+      prevSelectedPanels.length === labTestPanelsById.length
+        ? [] // Unselect all if all are currently selected
+        : labTestPanelsById.map((panel) => panel) // Select all if not all are currently selected
+    );
+  };
+
+  const getTestPanelsByTheProfileId = async (testProfile, auth) => {
+    try{
+      const response = await fetchLabTestPanelsByProfileId(testProfile, auth)
+      setSelectedPanels(response);
+    }catch(error){
+
+    }
+  }
 
   useEffect(() => {
     dispatch(getPatientTriage(selectedRowData?.id));
-  }, [selectedRowData]);
+    dispatch(getAllLabTestProfiles(auth));
+    if(testProfile){
+      getTestPanelsByTheProfileId(testProfile, auth);
+      dispatch(getAllLabTestPanelsByProfile(testProfile, auth));
+    }
+  }, [selectedRowData, testProfile]);
 
   return (
     <section>
@@ -81,6 +129,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
             validationSchema={validationSchema}
             onSubmit={handleSendLabRequest}
           >
+            {({ values, handleChange }) => (
             <Form>
               <section className="space-y-2">
                 <h1 className="">Triage Information</h1>
@@ -111,6 +160,10 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                         <Field
                           as="select"
                           className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                          onChange={(e) => {
+                            handleChange(e);
+                            setTestProfile(e.target.value);
+                          }}
                           name="test_profile"
                         >
                           <option value="">Select Test Profile</option>
@@ -126,6 +179,29 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                           className="text-warning text-xs"
                         />
                       </div>
+                      {testProfile && (
+                        <div>
+                          <label>Select Panels</label>
+                          <div className="flex items-center">
+                            <Checkbox
+                              checked={selectedPanels.length === labTestPanelsById.length}
+                              onChange={handleSelectAllChange}
+                            />
+                            <span>{selectedPanels.length === labTestPanelsById.length ? "unselect all" : "select all"}</span>
+                          </div>
+                          <Grid container spacing={4}>
+                            {labTestPanelsById.map((panel) => (
+                              <Grid className="flex items-center" key={panel.id} item xs={4}>
+                                <Checkbox
+                                  checked={selectedPanels.some((panelItem) => panelItem.id === panel.id)}
+                                  onChange={() => handleCheckboxChange(panel)}
+                                />
+                                <span>{panel.name}</span>
+                              </Grid>
+                            ))}
+                          </Grid>
+                        </div>
+                      )}
                       <div>
                         <Field
                           as="textarea"
@@ -180,6 +256,7 @@ const LabModal = ({ selectedRowData, labOpen, setLabOpen }) => {
                 </div>
               </section>
             </Form>
+            )}
           </Formik>
         </DialogContent>
       </Dialog>

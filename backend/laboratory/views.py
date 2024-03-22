@@ -3,8 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from patient.models import Patient
+from rest_framework import generics
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -15,26 +16,27 @@ from .models import (
     LabReagent,
     LabTestResult,
     LabTestRequest,
-    LabTestCategory,
     LabTestProfile,
     LabEquipment,
     EquipmentTestRequest,
     PublicLabTestRequest,
     LabTestPanel,
-    LabTestResultItem,
+    LabTestResultPanel,
+    LabTestRequestPanel,
 )
 # serializers
 from .serializers import (
     LabReagentSerializer,
     LabTestResultSerializer,
     LabTestRequestSerializer,
-    LabTestCategorySerializer,
+    # LabTestCategorySerializer,
     LabTestProfileSerializer,
     LabEquipmentSerializer,
     EquipmentTestRequestSerializer,
     PublicLabTestRequestSerializer,
     LabTestPanelSerializer,
-    LabTestResultItemSerializer,
+    LabTestResultPanelSerializer,
+    LabTestRequestPanelSerializer,
 )
 
 # permissions
@@ -43,12 +45,12 @@ from authperms.permissions import (
     IsDoctorUser,
     IsLabTechUser,
     IsNurseUser,
-    IsSystemsAdminUser
+    IsSystemsAdminUser,
+    IsPatientUser
 )
 
 # utils
 from .utils import (
-    json_to_hl7,
     send_through_rs232,
     send_through_tcp
 )
@@ -63,38 +65,40 @@ class LabReagentViewSet(viewsets.ModelViewSet):
     serializer_class = LabReagentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
-# class LabTestProfileViewSet(viewsets.ModelViewSet):
-#     queryset = LabReagent.objects.all()
-#     serializer_class = LabTestProfileSerializer
-#     permission_classes = (AllowAny,)
-
 class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
     serializer_class = LabEquipmentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+
+'''Lab Test Profile and Panel'''
+class LabTestProfileViewSet(viewsets.ModelViewSet):
+    queryset = LabTestProfile.objects.all()
+    serializer_class = LabTestProfileSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsPatientUser,)
+
+
 class LabTestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestPanel.objects.all()
     serializer_class = LabTestPanelSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    
+    @action(detail=False, methods=['get'], url_path='labtestpanels-byprofile-id/(?P<profile_id>[^/.]+)')
+    def by_test_profile(self, request, profile_id=None):
+        """
+        Retrieve LabTestPanel items by a given TestProfile ID.
+        """
+        try:
+            test_profile = LabTestProfile.objects.get(pk=profile_id)
+        except LabTestProfile.DoesNotExist:
+            return Response({"error": "Test Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class LabTestProfileViewSet(viewsets.ModelViewSet):
-    queryset = LabTestProfile.objects.all()
-    serializer_class = LabTestProfileSerializer
-    permission_classes = (AllowAny,)
-
-
-class LabTestResultViewSet(viewsets.ModelViewSet):
-    queryset = LabTestResult.objects.all()
-    serializer_class = LabTestResultSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
-
-class LabTestResultItemViewSet(viewsets.ModelViewSet):
-    queryset = LabTestResultItem.objects.all()
-    serializer_class = LabTestResultItemSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)    
+        lab_test_panels = LabTestPanel.objects.filter(test_profile=test_profile)
+        serializer = LabTestPanelSerializer(lab_test_panels, many=True)
+        return Response(serializer.data)
 
 
+'''Lab Test Request and lab Test Request Panel'''
 class LabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequest.objects.all()
     serializer_class = LabTestRequestSerializer
@@ -105,7 +109,7 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(name='equipment', type=int,
-                             location=OpenApiParameter.PATH)
+                            location=OpenApiParameter.PATH)
         ],
     )
     @action(methods=['post'], detail=True)
@@ -148,6 +152,38 @@ class LabTestRequestByPatientIdAPIView(APIView):
         serializer = LabTestRequestSerializer(prescribed_drugs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class LabTestRequestPanelViewSet(viewsets.ModelViewSet):
+    queryset = LabTestRequestPanel.objects.all()
+    serializer_class = LabTestRequestPanelSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)    
+
+
+class LabTestRequestPanelByLabTestRequestId(generics.ListAPIView):
+    serializer_class = LabTestRequestPanelSerializer
+
+    def get_queryset(self):
+        lab_test_request_id = self.kwargs['lab_test_request_id']
+        return LabTestRequestPanel.objects.filter(lab_test_request_id=lab_test_request_id)
+
+
+'''Lab Test Result and Test Result Panel'''
+class LabTestResultViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResult.objects.all()
+    serializer_class = LabTestResultSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+class LabTestResultPanelViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResultPanel.objects.all()
+    serializer_class = LabTestResultPanelSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)   
+
+
+class LabTestResultPanelByLabTestResultId(generics.ListAPIView):
+    serializer_class = LabTestResultPanelSerializer
+
+    def get_queryset(self):
+        lab_test_result_id = self.kwargs['lab_test_result_id']
+        return LabTestResultPanel.objects.filter(lab_test_result_id=lab_test_result_id)
 
 
 class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
@@ -156,16 +192,16 @@ class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
-class LabTestCategoryViewSet(viewsets.ModelViewSet):
-    queryset = LabTestCategory.objects.all()
-    serializer_class = LabTestCategorySerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+# class LabTestCategoryViewSet(viewsets.ModelViewSet):
+#     queryset = LabTestCategory.objects.all()
+#     serializer_class = LabTestCategorySerializer
+#     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
 class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
-    # permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (IsDoctorUser | IsPatientUser,)
 
 
 '''
@@ -183,13 +219,18 @@ from django.template.loader import get_template
 
 
 from .models import LabTestResult
+from company.models import Company
 
 def download_labtestresult_pdf(request, labtestresult_id):
     labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
-    labtestresultitem = LabTestResultItem.objects.filter(result_report=labtestresult)
+    labtestresultpanel= LabTestResultPanel.objects.filter(lab_test_result=labtestresult)
+    company = Company.objects.first()
+
+
     html_template = get_template('labtestresult.html').render({
         'labtestresult': labtestresult,
-        'labtestresultiem':labtestresultitem
+        'labtestresultiem':labtestresultpanel,
+        'company': company
     })
 
 

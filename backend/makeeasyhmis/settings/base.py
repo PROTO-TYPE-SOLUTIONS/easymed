@@ -3,6 +3,9 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +39,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt',
     'weasyprint',
+    'channels',
 
     # user apps
     'authperms.apps.AuthpermsConfig',
@@ -46,8 +50,9 @@ INSTALLED_APPS = [
     'laboratory.apps.LaboratoryConfig',
     'receptions.apps.ReceptionsConfig',
     'billing.apps.BillingConfig',
-    'announcement.apps.AnnouncementConfig'
-
+    'announcement.apps.AnnouncementConfig',
+    'company',
+    'reports'
 ]
 
 MIDDLEWARE = [
@@ -61,6 +66,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'makeeasyhmis.urls'
+
 
 TEMPLATES = [
     {
@@ -78,7 +84,9 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'makeeasyhmis.wsgi.application'
+ASGI_APPLICATION = 'makeeasyhmis.asgi.application'
 
 
 # Database
@@ -109,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
@@ -142,12 +150,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        # "rest_framework.permissions.IsAuthenticated",
-        ],
+    # "DEFAULT_PERMISSION_CLASSES": [
+    #     "rest_framework.permissions.IsAuthenticated",
+    #     ],
+
     "DEFAULT_AUTHENTICATION_CLASSES": [  
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
+    
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
@@ -182,6 +192,8 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str)
 
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+# #for docker
+# CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
@@ -196,13 +208,14 @@ DATABASES = {
 }
 
 
-# DATABASES = {
-#     "default":{
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": config("POSTGRES_DB"),
-#         "USER": config("POSTGRES_USER"),
-#         "PASSWORD": config("POSTGRES_PASSWORD"),
-#         "HOST": config("POSTGRES_HOST"),
-#         "PORT": config("POSTGRES_PORT"),
-#     }
-# }
+CHANNELS_ROUTING = 'patient.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('localhost', 6379)],
+        },
+    },
+}
+
+

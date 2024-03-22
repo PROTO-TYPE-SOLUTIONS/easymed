@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchServices,fetchPatient, fetchPatientProfile, fetchPatientTriage, searchPatients } from "@/redux/service/patients";
+import { fetchServices,fetchPatient, fetchPatientProfile, fetchPatientTriage, searchPatients, fetchPatientPrescribeDrugs } from "@/redux/service/patients";
 
 
 const initialState = {
   services: [],
   patients: [],
   prescriptionItems: [],
+  patientPrescribedDrugs: [],
   searchedPatients: [],
   profileDetails: {},
   patientTriage: {},
@@ -26,6 +27,9 @@ const PatientSlice = createSlice({
     },
     setProfile: (state, action) => {
       state.profileDetails = action.payload;
+    },
+    setPatientPrescribedDrugs: (state, action) => {
+      state.patientPrescribedDrugs = action.payload
     },
     setPatientTriage: (state, action) => {
       state.patientTriage = action.payload;
@@ -52,7 +56,7 @@ const PatientSlice = createSlice({
   },
 });
 
-export const { setServices,setPatients,setProfile,setPatientTriage,setSearchedPatients, removePrescriptionItem, setPatientPrescriptionItem, clearPrescriptionItems } = PatientSlice.actions;
+export const { setServices,setPatients,setProfile,setPatientTriage,setSearchedPatients, removePrescriptionItem, setPatientPrescriptionItem, clearPrescriptionItems, setPatientPrescribedDrugs } = PatientSlice.actions;
 
 
 export const getAllServices = () => async (dispatch) => {
@@ -97,6 +101,15 @@ export const getPatientTriage = (id) => async (dispatch) => {
     dispatch(setPatientTriage(response));
   } catch (error) {
     console.log("PROFILE_ERROR ", error);
+  }
+};
+
+export const getAllPatientPrescribedDrugs = (patient_id) => async (dispatch) => {
+  try {
+    const response = await fetchPatientPrescribeDrugs(patient_id);
+    dispatch(setPatientPrescribedDrugs(response));
+  } catch (error) {
+    console.log("PATIENT_PRESCRIBED_DRUGS_ERROR ", error);
   }
 };
 

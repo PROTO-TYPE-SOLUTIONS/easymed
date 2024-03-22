@@ -1,16 +1,17 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from django.template.loader import get_template
-from .models import Invoice, InvoiceItem
+from .models import Invoice, InvoiceItem, PaymentMode
 
 from authperms.permissions import (
     IsStaffUser,
     IsDoctorUser,
     IsLabTechUser,
     IsNurseUser,
-    IsSystemsAdminUser
+    IsSystemsAdminUser,
+    IsReceptionistUser
 )
-from .serializers import (InvoiceItemSerializer, InvoiceSerializer)
+from .serializers import (InvoiceItemSerializer, InvoiceSerializer, PaymentModeSerializer,)
 
 class InvoiceViewset(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
@@ -23,6 +24,10 @@ class InvoiceItemViewset(viewsets.ModelViewSet):
         permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
+class PaymentModeViewset(viewsets.ModelViewSet):
+        queryset = PaymentMode.objects.all()
+        serializer_class = PaymentModeSerializer
+        permission_classes = (IsDoctorUser | IsNurseUser | IsReceptionistUser |  IsLabTechUser,)
 
 
 '''
@@ -36,16 +41,20 @@ from django.conf import settings
 from weasyprint import HTML
 
 
-from inventory.models import Inventory
+from inventory.models import Inventory, Item
+from company.models import Company
 
 
-def download_invoice_pdf(request, invoice_id):
+def download_invoice_pdf(request, invoice_id,):
     invoice = get_object_or_404(Invoice, pk=invoice_id)
     invoice_items = InvoiceItem.objects.filter(invoice=invoice)
+    company = Company.objects.first()
+
 
     html_template = get_template('invoice.html').render({
         'invoice': invoice,
-        'invoice_items': invoice_items
+        'invoice_items': invoice_items,
+        'company': company
     })
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')

@@ -5,6 +5,20 @@ from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
 
+
+# permissions
+from authperms.permissions import (
+    IsStaffUser,
+    IsDoctorUser,
+    IsLabTechUser,
+    IsNurseUser,
+    IsSystemsAdminUser,
+    IsPatientUser,
+    IsReceptionistUser,
+
+)
+
+
 from customuser.models import CustomUser
 from inventory.models import Item
 from .models import (
@@ -16,7 +30,6 @@ from .models import (
     Prescription,
     PrescribedDrug,
     PublicAppointment,
-    Service,
     Consultation,
     Referral,
     Triage,
@@ -30,7 +43,6 @@ from .serializers import (
     PrescriptionSerializer,
     PrescribedDrugSerializer,
     PublicAppointmentSerializer,
-    ServiceSerializer,
     ConsultationSerializer,
     ReferralSerializer,
     TriageSerializer,
@@ -68,12 +80,7 @@ class ConsultationViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ConsultationFilter
     
-
-
-class ServiceViewSet(viewsets.ModelViewSet):
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
-
+    
 
 class ContactDetailsViewSet(viewsets.ModelViewSet):
     queryset = ContactDetails.objects.all()
@@ -194,7 +201,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = AppointmentFilter
 
-
         
 class ConsultationViewSet(viewsets.ModelViewSet):
     queryset = Consultation.objects.all()
@@ -264,13 +270,19 @@ import os
 
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from company.models import Company
 
 def download_prescription_pdf(request, prescription_id):
     prescription = get_object_or_404(Prescription, pk=prescription_id)
     prescribed_drugs = PrescribedDrug.objects.filter(prescription=prescription)
+    company = Company.objects.first()
 
     # Render the HTML template with the context
-    html = render_to_string('prescription.html', {'prescription': prescription, 'prescribed_drugs': prescribed_drugs})
+    html = render_to_string('prescription.html', {
+        'prescription': prescription,
+        'prescribed_drugs': prescribed_drugs,
+        'company': company
+        })
 
     # Use WeasyPrint to generate the PDF from the rendered HTML
     pdf_file = HTML(string=html).write_pdf()

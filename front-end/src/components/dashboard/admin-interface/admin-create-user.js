@@ -10,13 +10,33 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { toast } from "react-toastify";
 import { getAllGroups } from "@/redux/features/auth";
+import SeachableSelect from "@/components/select/Searchable";
+import { GoEye, GoEyeClosed } from "react-icons/go";
 
 const AdminCreateUser = () => {
+  const [password, setPassword]= useState("password");
+  const [passwordConfirmation, setPasswordConfirmation]= useState("password");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
   const { groups } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const authUser = useAuth();
+
+  const passwordVisibilityToggle = () => {
+    if(password === "password"){
+      setPassword("text")
+    }else{
+      setPassword("password")
+    }
+  }
+
+  const passwordConfirmationVisibilityToggle = () => {
+    if(passwordConfirmation === "password"){
+      setPasswordConfirmation("text")
+    }else{
+      setPasswordConfirmation("password")
+    }
+  }
 
 
   const handleClickOpen = () => {
@@ -39,13 +59,17 @@ const AdminCreateUser = () => {
     last_name: "",
     email: "",
     password: "",
+    password_confirmation:"",
+    phone: "",
+    role: "",
     group: null
   };
 
   const validationSchema = Yup.object().shape({
     first_name: Yup.string().required("First Name is required!"),
+    phone: Yup.number().required("Phone Number is required!"),
     last_name: Yup.string().required("Last Name is required!"),
-    group: Yup.string().required("Role is required!"),
+    group: Yup.object().required("Role is required!"),
     email: Yup.string()
       .email("This is not a valid email")
       .required("Email is required!"),
@@ -57,13 +81,18 @@ const AdminCreateUser = () => {
           !val || (val.toString().length >= 6 && val.toString().length <= 40)
       )
       .required("Password is required!"),
+    password_confirmation: Yup
+    .string()
+    .required('Please confirm your password.')
+    .oneOf([Yup.ref('password')], 'Your passwords do not match.')
   });
 
   const handleCreateUser = async (formValue, helpers) => {
     try {
       const formData = {
         ...formValue,
-        role: "doctor",
+        role: (formValue.group.label).toLowerCase(),
+        group: formValue.group.value,
         profession: "",
       };
       setLoading(true);
@@ -107,6 +136,35 @@ const AdminCreateUser = () => {
               >
                 <Form className="w-full">
                   <section className="flex flex-col items-center justify-center space-y-4">
+                  <div className="w-full">
+                    <SeachableSelect
+                      label="Assign Role"
+                      name="group"
+                      options={groups.map((group) => ({ value: group.id, label: `${group?.name}` }))}
+                    />
+                    <ErrorMessage
+                      name="group"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                      {/* <Field
+                        as="select"
+                        className="block pr-9 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                        name="group"
+                      >
+                        <option value="">Assign Role</option>
+                        {groups.map((item) => (
+                          <option key={item?.id} value={item.id}>
+                            {item?.name}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage
+                        name="group"
+                        component="div"
+                        className="text-warning text-xs"
+                      /> */}
+                    </div>
                     <div className="w-full">
                       <Field
                         className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
@@ -149,6 +207,51 @@ const AdminCreateUser = () => {
                     <div className="w-full">
                       <Field
                         className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                        type="text"
+                        placeholder="Phone Number"
+                        name="phone"
+                      />
+                      <ErrorMessage
+                        name="phone"
+                        component="div"
+                        className="text-warning text-xs"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
+                        <Field
+                          className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
+                          type={password}
+                          placeholder="Password"
+                          name="password"
+                        />
+                        {password === "password" ? <GoEye onClick={passwordVisibilityToggle} className="cursor-pointer"/> : <GoEyeClosed onClick={passwordVisibilityToggle} className="cursor-pointer" />}
+                      </div>
+                      <ErrorMessage
+                        name="password"
+                        component="div"
+                        className="text-warning text-xs"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
+                        <Field
+                          className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
+                          type={passwordConfirmation}
+                          placeholder="Confirm Password"
+                          name="password_confirmation"
+                        />
+                        {passwordConfirmation === "password" ? <GoEye onClick={passwordConfirmationVisibilityToggle} className="cursor-pointer"/> : <GoEyeClosed onClick={passwordConfirmationVisibilityToggle} className="cursor-pointer" />}
+                      </div>
+                      <ErrorMessage
+                        name="password_confirmation"
+                        component="div"
+                        className="text-warning text-xs"
+                      />
+                    </div>
+                    {/* <div className="w-full">
+                      <Field
+                        className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
                         type="password"
                         placeholder="Password"
                         name="password"
@@ -158,26 +261,7 @@ const AdminCreateUser = () => {
                         component="div"
                         className="text-warning text-xs"
                       />
-                    </div>
-                    <div className="w-full">
-                      <Field
-                        as="select"
-                        className="block pr-9 border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
-                        name="group"
-                      >
-                        <option value="">Assign Role</option>
-                        {groups.map((item) => (
-                          <option key={item?.id} value={item.id}>
-                            {item?.name}
-                          </option>
-                        ))}
-                      </Field>
-                      <ErrorMessage
-                        name="group"
-                        component="div"
-                        className="text-warning text-xs"
-                      />
-                    </div>
+                    </div> */}
                     <button
                       type="submit"
                       className="bg-primary w-full px-8 py-2 rounded-xl text-white"

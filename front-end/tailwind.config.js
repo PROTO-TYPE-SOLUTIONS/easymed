@@ -11,13 +11,15 @@ module.exports = {
       primary_light: "#43a3c7",
       light: "#daedf4",
       white: '#ffffff',
+      white_light:'#FAF9F6',
       background: '#F2F2F6',
       warning: '#FF3333',
       success: '#2E7D32',
       card: '#146EB4',
       cardSecondary: '#0E4F82',
       gray: '#CCCCCC',
-      link: '#26A0F8'
+      link: '#26A0F8',
+      orange: '#FF7E54'
     },
     fontSize: {
       xxs: '0.6rem',

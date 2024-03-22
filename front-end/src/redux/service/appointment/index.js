@@ -67,3 +67,19 @@ export const fetchPatientAppointments = () =>{
             })
     })
 }
+
+export const fetchAppointmentsByPatientId = (patient_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_PATIENT_APPOINTMENTS_BY_PATIENT_ID}`, {
+            params : {
+                patient_id: patient_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

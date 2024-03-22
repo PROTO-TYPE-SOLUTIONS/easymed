@@ -5,21 +5,46 @@ import { registerUser } from "@/redux/service/auth";
 import { useRouter } from "next/router";
 import { getAllPatientGroups } from "@/redux/features/auth";
 import { useSelector, useDispatch } from "react-redux";
+import { GoEye, GoEyeClosed } from "react-icons/go";
+import Link from "next/link";
 
 const SignUp = () => {
+  const [password, setPassword]= useState("password")
+  const [passwordConfirmation, setPasswordConfirmation]= useState("password")
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const { patientGroups } = useSelector((store) => store.auth);
   console.log("GROUPS ", patientGroups);
   const router = useRouter();
+
+  const passwordVisibilityToggle = () => {
+    if(password === "password"){
+      setPassword("text")
+    }else{
+      setPassword("password")
+    }
+  }
+
+  const passwordConfirmationVisibilityToggle = () => {
+    if(passwordConfirmation === "password"){
+      setPasswordConfirmation("text")
+    }else{
+      setPasswordConfirmation("password")
+    }
+  }
+
   const initialValues = {
     email: "",
     password: "",
+    password_confirmation: "",
     first_name: "",
     last_name: "",
+    group: "PATIENTS",
+    phone: ""
   };
 
   const validationSchema = Yup.object().shape({
+    phone: Yup.number().required("Phone Number is required!"),
     first_name: Yup.string().required("First Name is required!"),
     last_name: Yup.string().required("Last Name is required!"),
     email: Yup.string()
@@ -33,6 +58,10 @@ const SignUp = () => {
           !val || (val.toString().length >= 6 && val.toString().length <= 40)
       )
       .required("Password is required!"),
+      password_confirmation: Yup
+      .string()
+      .required('Please confirm your password.')
+      .oneOf([Yup.ref('password')], 'Your passwords do not match.')
     // role: Yup.string().required("Role is required!"),
   });
 
@@ -42,7 +71,7 @@ const SignUp = () => {
         ...formValue,
         role: "patient",
         profession: "",
-        group: patientGroups[0]?.id,
+        group: 2
       };
       setLoading(true);
       await registerUser(formData).then(() => {
@@ -118,30 +147,49 @@ const SignUp = () => {
               </div>
               <div className="w-full">
                 <Field
-                  className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                  type="password"
-                  placeholder="Password"
-                  name="password"
+                  className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                  type="text"
+                  placeholder="Phone Number"
+                  name="phone"
                 />
+                <ErrorMessage
+                  name="phone"
+                  component="div"
+                  className="text-warning text-xs"
+                />
+              </div>
+              <div className="w-full">
+                <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
+                  <Field
+                    className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
+                    type={password}
+                    placeholder="Password"
+                    name="password"
+                  />
+                  {password === "password" ? <GoEye onClick={passwordVisibilityToggle} className="cursor-pointer"/> : <GoEyeClosed onClick={passwordVisibilityToggle} className="cursor-pointer" />}
+                </div>
                 <ErrorMessage
                   name="password"
                   component="div"
                   className="text-warning text-xs"
                 />
               </div>
-              {/* <div className="w-full">
-                <Field
-                  className="block border border-gray py-3 px-4 focus:outline-none w-full"
-                  type="text"
-                  placeholder="Role"
-                  name="role"
-                />
+              <div className="w-full">
+                <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
+                  <Field
+                    className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
+                    type={passwordConfirmation}
+                    placeholder="Confirm Password"
+                    name="password_confirmation"
+                  />
+                  {passwordConfirmation === "password" ? <GoEye onClick={passwordConfirmationVisibilityToggle} className="cursor-pointer"/> : <GoEyeClosed onClick={passwordConfirmationVisibilityToggle} className="cursor-pointer" />}
+                </div>
                 <ErrorMessage
-                  name="role"
+                  name="password_confirmation"
                   component="div"
                   className="text-warning text-xs"
                 />
-              </div> */}
+              </div>
               <button
                 type="submit"
                 className="bg-primary w-full rounded-xl text-sm px-8 py-3 text-white"
@@ -167,6 +215,10 @@ const SignUp = () => {
                 )}
                 SignUp
               </button>
+              <div className="flex gap-4">
+                <p>Already have an account ? </p>
+                <span className="text-primary_light"><Link href="/auth/login">login</Link></span>
+              </div>
             </section>
           </Form>
         </Formik>

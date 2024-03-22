@@ -58,13 +58,6 @@ class NextOfKin(models.Model):
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
 
-class Service(models.Model):
-    name = models.TextField(max_length=300)
-
-    def __str__(self):
-        return self.name
-
-
 class Appointment(models.Model):
     class Meta:
         ordering = ("-date_created",)
@@ -73,6 +66,7 @@ class Appointment(models.Model):
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
     )
     appointment_date_time = models.DateTimeField(null=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -84,9 +78,6 @@ class Appointment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, default=22)
-
-
-    # changed_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Appointment #{self.patient.first_name}"
@@ -104,7 +95,7 @@ class PublicAppointment(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, null=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=30, null=True, blank=True)
@@ -205,7 +196,6 @@ class Referral(models.Model):
         ('surgeon', 'Surgeon'),
         ('physiotherapist', 'Physiotherapist'),
     )
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     referred_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -220,7 +210,6 @@ class Referral(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            # Only set referred_by when creating a new instance
             if not self.referred_by:
                 raise ValueError("You must set the 'referred_by' user before saving.")
         super().save(*args, **kwargs)

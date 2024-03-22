@@ -55,6 +55,37 @@ export const fetchLabTestPanels = (auth) =>{
     })
 }
 
+export const sendLabRequestsPanels = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_LAB_TEST_REQUEST_PANELS}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchLabTestPanelsByProfileId = (profile_id, auth) =>{
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_TEST_PANELS_BY_PROFILE_ID}`,{
+            params:{
+                profile_id: profile_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const sendLabRequests = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -81,10 +112,10 @@ export const sendLabResults = (payload,auth) =>{
     })
 }
 
-export const addTestResultItem = (payload,auth) =>{
+export const addTestResultPanel = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.post(`${APP_API_URL.SEND_LAB_RESULTS_ITEMS}`,payload,auth)
+        axiosInstance.post(`${APP_API_URL.FETCH_LAB_TEST_RESULT_PANELS}`,payload,auth)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -108,6 +139,8 @@ export const sendToEquipment = (payload,auth) =>{
 }
 
 export const publicLabRequest = (payload) =>{
+
+    console.log("THIS IS THE PAYLOAD", payload)
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.PUBLIC_LAB_REQUEST}`,payload)
             .then((res) =>{
@@ -157,3 +190,19 @@ export const fetchLabTestProfile = () =>{
     })
 }
 
+export const fetchSpecificPatientLabRequests = (patient_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_REQUESTS_BY_PATIENT_ID}`,{
+            params: {
+                patient_id: patient_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

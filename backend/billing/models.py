@@ -7,15 +7,29 @@ from django.db.models import Sum
 def invoice_file_path(instance, filename):
     return f'invoices/{instance.invoice_number}/{filename}'
 
+class PaymentMode(models.Model):
+    PAYMENT_CATEGORY_CHOICES = (
+        ('cash', 'Cash'),
+        ('insurance', 'Insurance'),
+        ('mpesa', 'MPesa'),
+    )
+    paymet_mode = models.CharField(max_length=20)
+    payment_category = models.CharField(
+        max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
+    
+    def __str__(self):
+        return self.payment_category + ' - ' + self.paymet_mode
+
+
 class Invoice(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('paid', 'Paid'),
     )
-    patient = models.ForeignKey(Patient, on_delete = models.SET_NULL, null=True)
+    patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True)
     invoice_number = models.CharField(max_length=50)
     invoice_date = models.DateField()
-    invoice_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    invoice_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
     invoice_description = models.CharField(max_length=200)
@@ -24,22 +38,31 @@ class Invoice(models.Model):
     invoice_updated_at = models.DateTimeField(auto_now=True)
 
     def calculate_invoice_amount(self):
-        # Sum up the total sale price of all related invoice items
-        total_amount = self.invoiceitem_set.aggregate(
-            total_amount=Sum('service__inventory__sale_price'))['total_amount'] or 0
-        self.invoice_amount = total_amount
-        self.save()
+        if self.pk:
+            total_amount = self.invoice_items.aggregate(
+                total_amount=Sum('item__inventory__sale_price'))['total_amount'] or 0
+            self.invoice_amount = total_amount
 
+    def save(self, *args, **kwargs):
+        self.calculate_invoice_amount()
+        super().save(*args, **kwargs) 
 
+    def __str__(self):
+        return self.invoice_number
 
 class InvoiceItem(models.Model):
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
-    service = models.ForeignKey(Item, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='invoice_items')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)
-    # quantity = models.CharField(max_length=50, null=True)  
+    payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
+
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # Recalculate invoice amount after saving the InvoiceItem
         self.invoice.calculate_invoice_amount()
+    
+    def __str__(self):
+        return self.item.name
+    
+    

@@ -2,15 +2,19 @@ import os
 from celery import shared_task
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from inventory.models import IncomingItem, Inventory
-from billing.models import Invoice, InvoiceItem
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.apps import apps
 from django.conf import settings
+from decouple import config
 
-from celery import shared_task
 from inventory.models import IncomingItem, Inventory, PurchaseOrder, Requisition
+from inventory.models import IncomingItem, Inventory
+from billing.models import Invoice, InvoiceItem
+from patient.models import Appointment
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 """Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
@@ -113,14 +117,45 @@ def generate_purchaseorder_pdf(purchaseorder_id):
 
     purchaseorder.save()
 
+    
 
-# @shared_task
-# def generate_purchaseorder_pdf(purchaseorder_id):
-#     purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
-#     purchaseorder_items = purchaseorder.purchaseorderitem_set.all()  # Fetch related PurchaseOrderItems
-#     html_content = render_to_string('purchaseorder.html', {'purchaseorder': purchaseorder, 'purchaseorder_items': purchaseorder_items})
-#     pdf_file_path = os.path.join('./makeeasyhmis/static/purchaseorder/', f'{purchaseorder.id}.pdf')
-#     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
-#     HTML(string=html_content).write_pdf(pdf_file_path)
+'''task to send the appointment assigned notification'''
+@shared_task
+def appointment_assign_notification(appointment_id):
+    appointment = Appointment.objects.get(id=appointment_id)
+    message = f"You have been assigned appointment {appointment.appointment_date_time}."
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "doctor_notifications",
+        {
+            'type': 'send_notification',
+            'message':message
+        }
+    )
 
-#     purchaseorder.save()
+
+
+
+
+'''Send email notifications on Appointment updated'''
+from django.core.mail import send_mail
+@shared_task
+def send_appointment_status_email(appointment_id):
+    appointment = Appointment.objects.get(id=appointment_id)
+    subject = f'Appointment #{appointment.id} Status Changed'
+    message = f'Your appointment status has been changed to {appointment.status}.'
+    from_email = config('EMAIL_HOST_USER')
+    to_email = appointment.patient.email
+    send_mail(subject, message, from_email, [to_email])
+
+
+'''Send email notifications on Appointment created'''
+@shared_task
+def send_appointment_status_email(appointment_id):
+    appointment = Appointment.objects.get(id=appointment_id)
+    subject = f'Appointment #{appointment.id} created'
+    # message = f'Your appointment status has been changed to {appointment.status}.'
+    message = f'Appointment has been created for #{appointment.appointment_date_time}. Reason #{appointment.reason}'
+    from_email = config('EMAIL_HOST_USER')
+    to_email = appointment.patient.email
+    send_mail(subject, message, from_email, [to_email])    

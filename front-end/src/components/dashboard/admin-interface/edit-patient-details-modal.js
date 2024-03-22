@@ -8,6 +8,7 @@ import { useSelector,useDispatch } from "react-redux";
 import { getAllInsurance } from "@/redux/features/insurance";
 import { editPatient } from "@/redux/service/patients";
 import { toast } from 'react-toastify'
+import { getAllPatients } from "@/redux/features/patients";
 
 const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
@@ -22,11 +23,21 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     setOpen(false);
   };
 
+  const getGenderValue = () =>{
+    if(selectedRowData?.gender?.toLowerCase() === "male"){
+      return "M"
+    }else if(selectedRowData?.gender?.toLowerCase() === "female"){
+      return "F"
+    }else{
+      return null
+    }
+  }
+
   const initialValues = {
     first_name: selectedRowData?.first_name || "",
     second_name: selectedRowData?.second_name || "",
     date_of_birth: selectedRowData?.date_of_birth || "",
-    gender: selectedRowData?.gender || "",
+    gender: getGenderValue() || "",
     insurance: selectedRowData?.insurance || null,
     user_id: selectedRowData?.user_id || null,
   };
@@ -36,8 +47,8 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     second_name: Yup.string().required("Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
-    insurance: Yup.number(),
-    user_id: Yup.number(),
+    // insurance: Yup.number(),
+    // user_id: Yup.number(),
   });
 
   const handleEditPatient = async (formValue, helpers) => {
@@ -45,8 +56,9 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     try {
       const formData = {
         ...formValue,
-        insurance: parseInt(formValue.insurance),
-        user_id: parseInt(formValue.user_id),
+        id:selectedRowData?.id,
+        // insurance: parseInt(formValue.insurance),
+        // user_id: parseInt(formValue.user_id),
       };
       setLoading(true);
       await editPatient(formData).then(() => {
@@ -129,8 +141,8 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
                       name="gender"
                     >
                       <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
+                      <option value="M">Male</option>
+                      <option value="F">Female</option>
                     </Field>
                     <ErrorMessage
                       name="gender"
@@ -186,12 +198,6 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
                         </svg>
                       )}
                       Edit Patient
-                    </button>
-                    <button
-                      onClick={handleClose}
-                      className="border border-warning px-4 py-2 text-[#02273D]"
-                    >
-                      Cancel
                     </button>
                   </div>
                 </div>

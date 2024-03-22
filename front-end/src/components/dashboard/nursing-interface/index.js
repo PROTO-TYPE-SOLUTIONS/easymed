@@ -104,10 +104,10 @@ const NursePatientDataGrid = () => {
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl w-full"
-        height={"70vh"}
+        // height={"70vh"}
       >
         <Scrolling rowRenderingMode='virtual'></Scrolling>
-        <Paging defaultPageSize={5} />
+        <Paging defaultPageSize={10} />
         <Pager
           visible={true}
           allowedPageSizes={allowedPageSizes}

@@ -16,7 +16,7 @@ import LabItemModal from './LabItemModal';
 
 import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests } from '@/redux/features/laboratory';
 import SeachableSelect from '@/components/select/Searchable';
-import { sendLabResults, addTestResultItem } from '@/redux/service/laboratory';
+import { sendLabResults, addTestResultPanel } from '@/redux/service/laboratory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -91,13 +91,13 @@ const AddTestResults = () => {
 
     const payloadData = {
       ...item,
-      result_report: payload.id
+      lab_test_result: payload.id
     }
 
     console.log("PAYLOAD LAB RESULTS" , payloadData)
 
     try {
-      await addTestResultItem(payloadData, auth).then(()=>{
+      await addTestResultPanel(payloadData, auth).then(()=>{
         toast.success("Test REsult Item Added Successfully!");
       })
 
@@ -163,7 +163,7 @@ const AddTestResults = () => {
       <Grid container spacing={2} className='my-2'>
         <Grid item md={4} xs={4}>
           <SeachableSelect
-            label="test request"
+            label="test request ( sample id )"
             name="lab_test_request"
             options={labRequests.map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
           />
@@ -206,20 +206,16 @@ const AddTestResults = () => {
           showNavigationButtons={true}
         />
         <Column 
-          dataField="result" 
-          caption="Result" 
-        />
-        <Column 
-          dataField="ref_value" 
-          caption="Reference Value"     
-        />
-        <Column 
           dataField="test_panel"
           caption="Test Panel" 
           cellRender={(cellData) => {
             const testPanel = labTestPanels.find(item => item.id === cellData.data.test_panel);
             return testPanel ? `${testPanel.name}` : 'null';
           }}
+        />
+        <Column 
+          dataField="result" 
+          caption="Result" 
         />
         <Column 
           dataField="" 
