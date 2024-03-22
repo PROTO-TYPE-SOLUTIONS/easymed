@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev-moses ]
+
 
 jobs:
   build-and-push:
