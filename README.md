@@ -130,7 +130,7 @@ On a separate terminal
 ## Sale by Date Range
 To generate sales by given date, send sample request as shown below
 `curl -X POST http://localhost:8080/reports/sale_by_date/   -H "Content-Type: application/json"   -d '{"start_date": "2024-02-01", "end_date": "2024-02-18"}' > report-log.txt`
-
+curl
 The `> report-log.txt` just dumps the logs to the report-log.txt file for troubleshooting.
 
 If sending directly from frontend, just configure the payload and send to the endpoint `http://localhost:8080/reports/sale_by_date/ `
@@ -141,9 +141,12 @@ You can access the generated report here
 To generated sales report by date range and given item id;
 `curl -X POST http://localhost:8080/reports/sale_by_item_and_date/   -H "Content-Type: application/json"   -d '{"item_id": "1", "start_date": "2024-02-01", "end_date": "2024-02-10"}'`
 
-You can access the generated pdf here ``http://localhost:8080/serve_sales_by_item_id_pdf/``
+You can access the generated pdf here ``/serve_sales_by_item_id_pdf/``
 
-
+## sales by payment mode
+Send POST request to the endpoint below, teh response will have the total amount 
+for a given payment mode
+```/reports/total_payment_mode_amount/?payment_mode=insurance&date=2024-02-18```
 
 
 The /preflight directory contains set up files for an LIS Host listener.
