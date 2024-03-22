@@ -20,11 +20,11 @@ jobs:
       - name: Build and push backend image
         run: |
           cd backend
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+          docker build -t mkhmis/backend:latest .
+          docker push mkhmis/backend:latest
 
       - name: Build and push frontend image
         run: |
           cd frontend
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+          docker build -t mkhmis/frontend:latest .
+          docker push mkhmis/frontend:latest
