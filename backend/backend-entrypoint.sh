@@ -19,8 +19,8 @@ python manage.py collectstatic --noinput
 
 # python manage.py createsuperuser --noinput
 
-python manage.py runserver 0.0.0.0:8080
-# uvicorn --host localhost  --port 8080 makeeasyhmis.asgi:application
+# python manage.py runserver 0.0.0.0:8080
+uvicorn --host 0.0.0.0 --port 8080 makeeasyhmis.asgi:application
 # gunicorn backend.wsgi --bind 0.0.0.0:8000 --workers 4 --threads 4
 
 
