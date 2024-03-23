@@ -15,11 +15,13 @@ services:
         container_name: db
         volumes:
             - ./data/db:/pgdata
-        environment:
-            - POSTGRES_DB=postgres
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-            - HOST=db
+        env_file:
+            - ./.env      
+        # environment:
+        #     - POSTGRES_DB=postgres
+        #     - POSTGRES_USER=postgres
+        #     - POSTGRES_PASSWORD=postgres
+        #     - HOST=db
         # networks:
         #     - mks
         restart: unless-stopped
@@ -59,16 +61,18 @@ services:
             context: ./backend
         volumes:
             - static_volume:/app/backend/django_static
-        environment:
-            DEBUG: "True"
-            CELERY_BROKER_URL: "redis://redis:6379/0"
-            CELERY_RESULT_BACKEND: "redis://redis:6379/0"
-            DJANGO_DB: postgresql
-            POSTGRES_HOST: db
-            POSTGRES_NAME: postgres
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_PORT: 5432
+        env_file:
+            - ./.env    
+        # environment:
+        #     DEBUG: "True"
+        #     CELERY_BROKER_URL: "redis://redis:6379/0"
+        #     CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+        #     DJANGO_DB: postgresql
+        #     POSTGRES_HOST: db
+        #     POSTGRES_NAME: postgres
+        #     POSTGRES_USER: postgres
+        #     POSTGRES_PASSWORD: postgres
+        #     POSTGRES_PORT: 5432
         depends_on:
             - backend
             - redis
