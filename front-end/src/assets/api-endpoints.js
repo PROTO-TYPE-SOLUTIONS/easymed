@@ -101,6 +101,13 @@ export const API_URL = {
 
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/download",
+  SALE_BY_DATE_RANGE_PDF: "/sale_by_date/pdf/",
+  SALE_BY_DATE_RANGE_AND_ITEM_PDF: "/serve_sales_by_item_id_pdf/",
+
+  /***************** REPORTS **********************/
+  SALE_BY_DATE_RANGE_GENERATE_REPORTS: "/reports/sale_by_date/",
+  SALE_BY_DATE_RANGE_AND_ITEM_ID_GENERATE_REPORTS: "/reports/sale_by_item_and_date/",
+
 
   /***************** PATIENTS USERS ENDPOINTS **********************/
   /***************** LABORATORY **********************/
@@ -212,8 +219,14 @@ export const APP_API_URL = {
 
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/api/pdf/download_pdf",
+  SALE_BY_DATE_RANGE_PDF: "/api/pdf/sale-by-date-range-report-pdf",
+  SALE_BY_DATE_RANGE_AND_ITEM_PDF: "/api/pdf/sale-by-date-range-and-item-report-pdf",
 
-    /***************** PATIENTS USERS ENDPOINTS **********************/
+  /***************** REPORTS **********************/
+  SALE_BY_DATE_RANGE_GENERATE_REPORTS: "/api/reports/sale-by-date-range/",
+  SALE_BY_DATE_RANGE_AND_ITEM_ID_GENERATE_REPORTS: "/api/reports/sale-by-date-range-and-item",
+
+  /***************** PATIENTS USERS ENDPOINTS **********************/
   /***************** LABORATORY **********************/
   PATIENTLABTESTREQUEST: "/api/patient-profile/patientlabtestrequest",
 
