@@ -15,13 +15,11 @@ services:
         container_name: db
         volumes:
             - ./data/db:/pgdata
-        env_file:
-            - ./.env    
-        # environment:
-        #     - POSTGRES_DB=postgres
-        #     - POSTGRES_USER=postgres
-        #     - POSTGRES_PASSWORD=postgres
-        #     - HOST=db
+        environment:
+            - POSTGRES_DB=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - HOST=db
         # networks:
         #     - mks
         restart: unless-stopped
@@ -39,7 +37,8 @@ services:
         restart: unless-stopped
 
     backend:
-        image: mosesmbadi/mkhmisbackend
+        build:
+          context: ./backend
         container_name: backend
         command: ./backend-entrypoint.sh
         volumes:
@@ -56,12 +55,20 @@ services:
 
     worker:
         restart: unless-stopped
-        image: mosesmbadi/mkhmisbackend
+        build:
+            context: ./backend
         volumes:
             - static_volume:/app/backend/django_static
-        env_file:
-          - .env
-
+        environment:
+            DEBUG: "True"
+            CELERY_BROKER_URL: "redis://redis:6379/0"
+            CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+            DJANGO_DB: postgresql
+            POSTGRES_HOST: db
+            POSTGRES_NAME: postgres
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_PORT: 5432
         depends_on:
             - backend
             - redis
@@ -69,7 +76,8 @@ services:
         #     - mks   
 
     frontend:
-        image: mosesmbadi/mkhmisfrontend
+        build:
+            context: ./front-end
         container_name: front-end
         restart: unless-stopped
         ports:
