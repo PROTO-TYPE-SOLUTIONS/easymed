@@ -20,3 +20,27 @@ export const downloadPDF = (item_id, item_name, auth) =>{
         })
     })
 }
+
+export const saleByDateRangePdf = () =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.SALE_BY_DATE_RANGE_PDF}`)
+        .then((res) =>{
+            resolve(res.data)
+        })
+        .catch((err) =>{
+            reject(err.message)
+        })
+    })
+}
+
+export const saleByDateRangeAndItemPdf = () =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.SALE_BY_DATE_RANGE_AND_ITEM_PDF}`)
+        .then((res) =>{
+            resolve(res.data)
+        })
+        .catch((err) =>{
+            reject(err.message)
+        })
+    })
+}
