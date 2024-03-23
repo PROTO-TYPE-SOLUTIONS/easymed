@@ -1,0 +1,16 @@
+# Exclude node_modules directory
+node_modules
+
+# Exclude build output directories
+out
+.next
+
+# Exclude development and local configuration files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Exclude version control files and directories
+.git
+.gitignore
