@@ -6,8 +6,8 @@ import AuthGuard from "@/assets/hoc/auth-guard";
 import ProtectedRoute from "@/assets/hoc/protected-route";
 import MembersNav from "@/components/dashboard/admin-interface/members/MembersNav";
 import MainSettingsNav from "@/components/dashboard/admin-interface/members/MainSettingsNav";
-import CompanyDetails from "@/components/dashboard/company/CompanyDetails";
-import Permissions from "@/components/dashboard/permissions/Permissions";
+import CompanyDetails from "@/components/dashboard/admin-interface/company/CompanyDetails";
+import Permissions from "@/components/dashboard/admin-interface/permissions/Permissions";
 
 const Admin = () => {
   const [ selectedRoute, setSelectedRoute ] = useState("members")
