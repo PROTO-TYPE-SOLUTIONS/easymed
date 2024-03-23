@@ -9,7 +9,7 @@ services:
             - 80:80
         volumes:
             - ./nginx/:/etc/nginx/
-            # - static_volume:/app/backend/django_static
+            - ./static_files:/app/makeeasyhmis/static
         networks:
             - mks
     db:
@@ -61,8 +61,8 @@ services:
         restart: unless-stopped
         build:
             context: ./backend
-        # volumes:
-        #     - static_volume:/app/backend/django_static
+        volumes:
+            - ./static_files:/app/makeeasyhmis/static
         env_file:
             - ./.env    
         depends_on:
@@ -82,11 +82,6 @@ services:
             - backend
         networks:
             - mks    
-
-
-# volumes:
-#     static_volume: {}
-#     postgres_data: {}
 
 networks:
     mks:

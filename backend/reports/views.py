@@ -60,7 +60,9 @@ def get_invoice_items_by_date_range(request):
                 # Prepare the data for the template
                 context = {
                     'invoice_items': invoice_items,
-                    'company': company
+                    'company': company,
+                    'start_date': start_date,
+                    'end_date': end_date
                 }
 
 
@@ -120,7 +122,9 @@ def get_invoice_items_by_item_and_date_range(request):
                 # Prepare the data for the template
                 context = {
                     'invoice_items': invoice_items,
-                    'company': company
+                    'company': company,
+                    'start_date': start_date,
+                    'end_date': end_date
                 }
 
                 html_string = render_to_string('sales_by_item_id.html', context)

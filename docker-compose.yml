@@ -1,3 +1,4 @@
+
 version: "3.9"
 
 services:
@@ -7,23 +8,24 @@ services:
         ports:
             - 80:80
         volumes:
-            # - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-            - static_volume:/app/backend/django_static
-
+            - ./nginx/:/etc/nginx/
+            - ./static_files:/app/makeeasyhmis/static
+        networks:
+            - mks
     db:
         image: postgres:14
         container_name: db
         volumes:
             - ./data/db:/pgdata
         env_file:
-            - ./.env    
-        # environment:
-        #     - POSTGRES_DB=postgres
-        #     - POSTGRES_USER=postgres
-        #     - POSTGRES_PASSWORD=postgres
-        #     - HOST=db
-        # networks:
-        #     - mks
+            - ./.env      
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_HOST=${POSTGRES_HOST}
+        networks:
+            - mks
         restart: unless-stopped
 
     redis:
@@ -32,10 +34,10 @@ services:
         command: redis-server --appendonly yes --replica-read-only no
         volumes:
             - ./redis/:/etc/redis/
-        # ports:
-        #     - 6379:6379
-        # networks:
-        #     - mks
+        ports:
+            - 6379:6379
+        networks:
+            - mks
         restart: unless-stopped
 
     backend:
@@ -51,22 +53,22 @@ services:
         depends_on:
             - db
         restart: unless-stopped
-        # networks:
-        #     - mks
+        networks:
+            - mks
 
     worker:
         restart: unless-stopped
         image: mosesmbadi/mkhmisbackend
+        container_name: worker
         volumes:
-            - static_volume:/app/backend/django_static
+            - ./static_files:/app/makeeasyhmis/static
         env_file:
-          - .env
-
+            - ./.env    
         depends_on:
             - backend
             - redis
-        # networks:
-        #     - mks   
+        networks:
+            - mks   
 
     frontend:
         image: mosesmbadi/mkhmisfrontend
@@ -76,15 +78,10 @@ services:
             - 3000:3000
         depends_on:
             - backend
-        # networks:
-        #     - mks    
+        networks:
+            - mks    
 
-
-volumes:
-    static_volume: {}
-    postgres_data: {}
-
-# networks:
-#     mks:
-#         name: mks
-#         driver: bridge
+networks:
+    mks:
+        name: mks
+        driver: bridge
