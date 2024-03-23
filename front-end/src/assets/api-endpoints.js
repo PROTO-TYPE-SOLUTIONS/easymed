@@ -7,6 +7,8 @@ export const API_URL = {
   REFRESH_TOKEN: "/api/token/refresh/",
   GET_USER_PERMISSIONS: "/authperms/permissions/user",
   FETCH_GROUP: "/authperms/groups",
+  FETCH_ALL_PERMISSIONS: "/authperms/permissions",
+  FETCH_GROUP_PERMISSIONS: "/authperms/groups/",
 
   /***************** PATIENT APIS **********************/
   CREATE_PATIENT: "/patients/patients/",
@@ -94,6 +96,9 @@ export const API_URL = {
   FETCH_ANNOUNCEMENTS_CHANNELS: "/announcement/channels/",
   FETCH_ANNOUNCEMENTS:"/announcement/announcements/",
 
+  /***************** Company **********************/
+  FETCH_COMPANY_INFO: "/company/company/",
+
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/download",
 
@@ -114,6 +119,8 @@ export const APP_API_URL = {
   GET_USER_PERMISSIONS: "/api/auth/user-permissions",
   FETCH_GROUP: "/api/groups",
   FETCH_PATIENT_GROUP: "/api/auth/get-group",
+  FETCH_ALL_PERMISSIONS: "/api/groups/fetchPermissions",
+  FETCH_GROUP_PERMISSIONS: "/api/groups/fetchGroupPermissions",
 
   /***************** PATIENT APIS **********************/
   CREATE_PATIENT: "/api/patient",
@@ -199,6 +206,9 @@ export const APP_API_URL = {
   /***************** Announcements **********************/
   FETCH_ANNOUNCEMENTS_CHANNELS: "/api/announcement/channels/",
   FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/",
+
+  /***************** Company **********************/
+  FETCH_COMPANY_INFO: "/api/company/company/",
 
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/api/pdf/download_pdf",
