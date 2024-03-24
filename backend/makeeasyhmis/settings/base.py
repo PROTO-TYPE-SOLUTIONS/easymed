@@ -212,21 +212,26 @@ CHANNEL_LAYERS = {
     },
 }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
+''''
+For some reason, docker is not able to differentiate db configs 
+'''
 # DATABASES = {
-#     "default":{
-#         "ENGINE": config("DB_ENGINE"),
-#         "NAME": config("POSTGRES_DB"),
-#         "USER": config("POSTGRES_USER"),
-#         "PASSWORD": config("POSTGRES_PASSWORD"),
-#         "HOST": config("POSTGRES_HOST"),
-#         "PORT": config("POSTGRES_PORT"),
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+
+DATABASES = {
+    "default":{
+        "ENGINE": config("DB_ENGINE"),
+        "NAME": config("POSTGRES_DB"),
+        "USER": config("POSTGRES_USER"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "HOST": config("POSTGRES_HOST"),
+        "PORT": config("POSTGRES_PORT"),
+    }
+}

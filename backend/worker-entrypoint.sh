@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "This script works......"
 
-until cd /app/backend
+until cd /app
 do
     echo "Waiting for server volume..."
 done
