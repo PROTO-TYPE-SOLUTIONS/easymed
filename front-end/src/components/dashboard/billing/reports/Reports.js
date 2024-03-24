@@ -14,7 +14,7 @@ function Reports() {
     const dispatch =  useDispatch()
     const [ loading, setLoading ] = useState();
     const [checked, setChecked] = useState("Sale by Date Range");
-    const { item } = useSelector((store) => store.inventory);
+    const { items } = useSelector((store) => store.inventory);
 
     const initialValues =  {
         item_id: "",
@@ -126,7 +126,7 @@ function Reports() {
                     <SeachableSelect
                     label="Select Item"
                     name="item_id"
-                    options={item.map((item) => ({ value: item.id, label: `${item?.name}` }))}
+                    options={items.map((item) => ({ value: item.id, label: `${item?.name}` }))}
                     />
                     <ErrorMessage
                     name="item_id"
