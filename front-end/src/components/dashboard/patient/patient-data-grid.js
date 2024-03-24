@@ -8,16 +8,20 @@ import {
   HeaderFilter,
   Scrolling,
 } from "devextreme-react/data-grid";
+import { useRouter } from 'next/navigation'
 import AddPatientModal from "./add-patient-modal";
 import { Chip } from "@mui/material";
 import { getAllPatients } from "@/redux/features/patients";
 import { useSelector, useDispatch } from "react-redux";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
+import { MdOutlineContactSupport } from "react-icons/md";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { BiEdit } from "react-icons/bi";
 import CreateAppointmentModal from "./create-appointment-modal";
 import EditPatientDetails from "../admin-interface/edit-patient-details-modal";
+import { GiMedicinePills } from "react-icons/gi";
+import LabModal from "../doctor-interface/lab-modal";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -38,6 +42,16 @@ const getActions = () => {
       label: "Update Patient",
       icon: <BiEdit className="text-success text-xl mx-2" />,
     },
+    {
+      action: "prescribe",
+      label: "Prescribe",
+      icon: <GiMedicinePills className="text-card text-xl mx-2" />,
+    },
+    {
+      action: "send to lab",
+      label: "Send To Lab",
+      icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -54,7 +68,8 @@ const PatientsDataGrid = () => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
-
+  const [labOpen, setLabOpen] = useState(false);
+  const router = useRouter()
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "add") {
@@ -63,6 +78,11 @@ const PatientsDataGrid = () => {
     }else if(menu.action === "update"){
       setSelectedRowData(data);
       setEditOpen(true);      
+    }else if (menu.action === "prescribe") {
+      router.push(`/dashboard/patients/prescribe/${data.id}`);
+    } else if(menu.action === "send to lab"){
+      setSelectedRowData(data);
+      setLabOpen(true);
     }
   };
 
@@ -180,6 +200,9 @@ const PatientsDataGrid = () => {
 
     {open && <CreateAppointmentModal {...{setOpen,open,selectedRowData}} />}
     <EditPatientDetails open={editOpen} setOpen={setEditOpen} selectedRowData={selectedRowData}  />
+    <LabModal
+        {...{ labOpen, setLabOpen, selectedRowData }}
+      />
 
     </>
   );
