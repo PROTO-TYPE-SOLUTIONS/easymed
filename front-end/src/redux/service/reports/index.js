@@ -25,3 +25,21 @@ export const saleByDateRangeAndItem = (payload) =>{
         })
     })
 }
+
+export const dayTransaction = (payload) =>{
+
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.TOTALS_OF_THE_DAY}`, {
+            params: {
+                payment_method: payload.payment_method,
+                date: payload.date
+            }
+        })
+        .then((res) =>{
+            resolve(res.data)
+        })
+        .catch((err) =>{
+            reject(err.message)
+        })
+    })
+}

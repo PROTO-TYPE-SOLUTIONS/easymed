@@ -79,6 +79,7 @@ export const API_URL = {
   BILLING_INVOICE_ITEMS: "/billing/invoice-items/",
   BILLING_INVOICES: "/billing/invoices/",
   FETCH_INVOICES: "/billing/invoices/",
+  TOTALS_OF_THE_DAY: "/reports/total_payment_mode_amount/",
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
@@ -198,6 +199,8 @@ export const APP_API_URL = {
   BILLING_INVOICE_ITEMS: "/api/billing/invoice-items",
   BILLING_INVOICES: "/api/billing/billing-invoices",
   FETCH_INVOICES: "/api/billing/fetch-invoices",
+  TOTALS_OF_THE_DAY: "/api/billing/transactionAday/",
+
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
