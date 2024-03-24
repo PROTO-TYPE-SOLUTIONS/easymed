@@ -16,8 +16,8 @@ services:
         image: postgres:14
         container_name: db
         volumes:
-            - ./data/db:/pgdata
-            - ./preflight/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+            - ./volumes/data/db:/var/lib/postgresql/data
+            - ./preflight/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
         env_file:
             - ./.env      
         environment:
@@ -34,7 +34,7 @@ services:
         container_name: redis2
         command: redis-server --appendonly yes --replica-read-only no
         volumes:
-            - ./redis/:/etc/redis/
+            - ./volumes/redis/:/etc/redis/
         ports:
             - 6379:6379
         networks:
@@ -46,13 +46,20 @@ services:
         container_name: backend
         command: ./backend-entrypoint.sh
         volumes:
-            - ./backend:/code/
+            - ./volumes/backend:/code/
         ports:
             - 8080:8080
         env_file:
             - ./.env
         depends_on:
-            - db  
+            - db
+        environment:
+            - PG_INIT_WAIT_SQL=SELECT 1 FROM pg_stat_activity WHERE datname='${POSTGRES_DB}' AND state='idle' AND pid <> pg_backend_pid();
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+            interval: 5s
+            timeout: 10s
+            retries: 10
         restart: unless-stopped
         networks:
             - mks
@@ -63,7 +70,7 @@ services:
         container_name: worker
         command: ./worker-entrypoint.sh
         volumes:
-            - ./static_files:/app/makeeasyhmis/static
+            - ./volumes/static_files:/app/makeeasyhmis/static
         env_file:
             - ./.env    
         depends_on:

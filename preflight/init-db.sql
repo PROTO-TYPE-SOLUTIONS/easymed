@@ -1,6 +1,6 @@
 
-CREATE SCHEMA IF NOT EXISTS authperms;
-DROP TABLE IF EXISTS authperms.permissions;
+CREATE SCHEMA IF NOT EXISTS public;
+DROP TABLE IF EXISTS authperms_permissions;
 
 CREATE TABLE IF NOT EXISTS authperms.permissions (
   id SERIAL PRIMARY KEY,
@@ -39,8 +39,8 @@ VALUES
 
 
 
-CREATE SCHEMA IF NOT EXISTS customuser;
-DROP TABLE IF EXISTS customuser.customuser;
+CREATE SCHEMA IF NOT EXISTS public;
+DROP TABLE IF EXISTS customuser_customuser;
 
 CREATE TABLE IF NOT EXISTS customuser.customuser (
   id SERIAL PRIMARY KEY,
@@ -48,16 +48,16 @@ CREATE TABLE IF NOT EXISTS customuser.customuser (
   last_login TIMESTAMP(6) NULL,
   is_superuser BOOLEAN NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
-  phone VARCHAR(255) NULL,  -- Matches the model field
+  phone VARCHAR(255) NULL,
   is_staff BOOLEAN NOT NULL,
   is_active BOOLEAN NOT NULL,
   date_joined TIMESTAMP(6) NOT NULL,
-  first_name VARCHAR(150) NOT NULL,  -- Updated to NOT NULL based on model
-  last_name VARCHAR(150) NOT NULL,  -- Updated to NOT NULL based on model
-  username VARCHAR(150) NULL,  -- Can be null as per model definition
-  date_of_birth DATE NULL,  -- Added based on model field
-  profession VARCHAR(50) NULL,  -- Added based on model field
-  role CHAR(20) CHECK (role IN ('patient', 'doctor', 'nurse', 'labtech', 'receptionist', 'sysadmin')),  -- Updated data type and added check constraint
+  first_name VARCHAR(150) NOT NULL,
+  last_name VARCHAR(150) NOT NULL,
+  username VARCHAR(150) NULL,
+  date_of_birth DATE NULL,
+  profession VARCHAR(50) NULL, 
+  role CHAR(20) CHECK (role IN ('patient', 'doctor', 'nurse', 'labtech', 'receptionist', 'sysadmin')),
   groups_id INTEGER REFERENCES authperms.group(id) ON DELETE SET NULL,
   permissions_id INTEGER REFERENCES authperms.permissions(id) ON DELETE SET NULL
 );
