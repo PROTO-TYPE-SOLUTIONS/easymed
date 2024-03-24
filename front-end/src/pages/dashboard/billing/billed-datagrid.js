@@ -15,6 +15,7 @@ import { CiMoneyCheck1 } from "react-icons/ci";
 import InvoicePayModal from '@/components/dashboard/billing/invoicePayModal';
 
 import { dayTransaction } from '@/redux/service/reports';
+import DayTotalsPerPayMode from '@/components/dashboard/billing/DayTotalsPerPayMode';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -29,11 +30,11 @@ const getActions = () => {
             label: "Print",
             icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
         },
-        // {
-        //     action: "pay",
-        //     label: "Pay",
-        //     icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
-        // },
+        {
+            action: "pay",
+            label: "Pay",
+            icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
+        },
     ];
 
     return actions;
@@ -45,7 +46,9 @@ const BilledDataGrid = () => {
     const auth = useAuth()
     const { invoices } = useSelector((store) => store.billing);
     const [open,setOpen] = useState(false)
+    const [totalsViewOPen, setTotalsViewOPen] = useState(false)
     const [selectedRowData, setSelectedRowData] = useState({})
+    const [infoAsPerPayMode, setInfoAsPerPayMode] = useState({})
     const [selectedPayMethod, setSelectedPayMethod] = useState('')
 
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -92,7 +95,7 @@ const BilledDataGrid = () => {
         
         try {
             setSelectedPayMethod(payment_method)
-            setOpen(true)
+            setTotalsViewOPen(true)
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -105,7 +108,7 @@ const BilledDataGrid = () => {
             }
             await dayTransaction(payload).then((res)=> {
                 console.log("PAY FOR THE DAY", res)
-                setSelectedRowData(res)
+                setInfoAsPerPayMode(res)
             })
         }catch(e){
             console.log("Error", e)
@@ -184,8 +187,8 @@ const BilledDataGrid = () => {
                     </button>
                 </div>
             </div>
-            {open && <InvoicePayModal {...{setOpen,open,selectedRowData, selectedPayMethod}} />}
-
+            {open && <InvoicePayModal {...{setOpen,open,selectedRowData}} />}
+            {totalsViewOPen &&  <DayTotalsPerPayMode {...{setTotalsViewOPen, totalsViewOPen, infoAsPerPayMode, selectedPayMethod}} />}
         </section>
     )
 }
