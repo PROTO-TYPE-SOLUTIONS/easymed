@@ -17,17 +17,23 @@ const CompanyDetails = () => {
 
     const initialValues = {
         name: companyInfo?.name,
-        address: companyInfo?.address,
-        phone: companyInfo?.phone,
-        email: companyInfo?.email,
+        address1: companyInfo?.address1,
+        address2: companyInfo?.address2,
+        phone1: companyInfo?.phone1,
+        phone2: companyInfo?.phone2,
+        email1: companyInfo?.email1,
+        email2: companyInfo?.email2,
         logo: null,
     };
     
     const validationSchema = Yup.object().shape({
         name: Yup.string().required("First Name is required!"),
-        address: Yup.string().required("Second Name is required!"),
-        phone: Yup.number().required("Date is required!"),
-        email: Yup.string().required("Select gender!"),
+        address1: Yup.string().required("Address 1 is required!"),
+        address2: Yup.string(),
+        phone1: Yup.number().required("Phone is required!"),
+        phone2: Yup.number(),
+        email1: Yup.string().required("Email gender!"),
+        email2: Yup.string(),
     });
 
     const updateCompanyInfo = async (formValue) => {
@@ -93,11 +99,24 @@ const CompanyDetails = () => {
                             <Field
                                 className="block border border-gray py-3 px-4 focus:outline-none w-full"
                                 type="email"
-                                placeholder="info@company.co.ke"
-                                name="email"
+                                placeholder="email 1"
+                                name="email1"
                             />
                             <ErrorMessage
-                                name="email"
+                                name="email1"
+                                component="div"
+                                className="text-warning text-xs"
+                            />
+                        </Grid>
+                        <Grid item md={6} xs={12}>
+                            <Field
+                                className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                                type="email"
+                                placeholder="email 2"
+                                name="email2"
+                            />
+                            <ErrorMessage
+                                name="email2"
                                 component="div"
                                 className="text-warning text-xs"
                             />
@@ -106,11 +125,24 @@ const CompanyDetails = () => {
                             <Field
                                 className="block border border-gray py-3 px-4 focus:outline-none w-full"
                                 type="number"
-                                placeholder="+254722666777"
-                                name="phone"
+                                placeholder="phone 1"
+                                name="phone1"
                             />
                             <ErrorMessage
-                                name="phone"
+                                name="phone1"
+                                component="div"
+                                className="text-warning text-xs"
+                            />
+                        </Grid>
+                        <Grid item md={6} xs={12}>
+                            <Field
+                                className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                                type="number"
+                                placeholder="phone 2"
+                                name="phone2"
+                            />
+                            <ErrorMessage
+                                name="phone2"
                                 component="div"
                                 className="text-warning text-xs"
                             />
@@ -163,11 +195,24 @@ const CompanyDetails = () => {
                             <Field
                                 className="block border border-gray py-3 px-4 focus:outline-none w-full"
                                 type="text"
-                                placeholder="Address"
-                                name="address"
+                                placeholder="Address 1"
+                                name="address1"
                             />
                             <ErrorMessage
-                                name="address"
+                                name="address1"
+                                component="div"
+                                className="text-warning text-xs"
+                            />
+                        </Grid>
+                        <Grid item md={6} xs={12}>
+                            <Field
+                                className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                                type="text"
+                                placeholder="Address 2"
+                                name="address2"
+                            />
+                            <ErrorMessage
+                                name="address2"
                                 component="div"
                                 className="text-warning text-xs"
                             />
