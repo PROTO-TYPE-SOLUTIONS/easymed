@@ -17,6 +17,7 @@ services:
         container_name: db
         volumes:
             - ./data/db:/pgdata
+            - ./preflight/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
         env_file:
             - ./.env      
         environment:
