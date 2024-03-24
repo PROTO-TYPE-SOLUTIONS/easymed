@@ -90,9 +90,9 @@ const InventorySlice = createSlice({
 export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf, setIncoming } = InventorySlice.actions;
 
 
-export const getAllItems = (name) => async (dispatch) => {
+export const getAllItems = () => async (dispatch) => {
   try {
-    const response = await fetchItems(name);
+    const response = await fetchItems();
     dispatch(setItems(response));
   } catch (error) {
     console.log("ITEMS_ERROR ", error);
