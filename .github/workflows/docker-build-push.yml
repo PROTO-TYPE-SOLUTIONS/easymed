@@ -25,11 +25,11 @@ jobs:
       - name: Build and push backend image
         run: |
           cd ./backend
-          docker build -t mosesmbadi/mkhmisbackend:latest .
-          docker push mosesmbadi/mkhmisbackend:latest
+          docker build -t mosesmbadi/easymedbackend:latest .
+          docker push mosesmbadi/easymedbackend:latest
 
       - name: Build and push frontend image
         run: |
           cd ./front-end
-          docker build -t mosesmbadi/mkhmisfrontend:latest .
-          docker push mosesmbadi/mkhmisfrontend:latest
+          docker build -t mosesmbadi/easymedfrontend:latest .
+          docker push mosesmbadi/easymedfrontend:latest

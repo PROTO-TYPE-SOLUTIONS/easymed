@@ -39,7 +39,7 @@ class CompanyBranch(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = "company"
+        verbose_name_plural = "Company Branch"
 
 
     def __str__(self):

@@ -23,6 +23,10 @@ from .models import (
     LabTestPanel,
     LabTestResultPanel,
     LabTestRequestPanel,
+
+    LabTestResultQualitative,
+    LabTestResultPanelQualitative
+    
 )
 # serializers
 from .serializers import (
@@ -178,6 +182,20 @@ class LabTestResultPanelViewSet(viewsets.ModelViewSet):
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)   
 
 
+
+
+class LabTestResultQualitativeViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResult.objects.all()
+    serializer_class = LabTestResultSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+class LabTestResultPanelQualitativeViewSet(viewsets.ModelViewSet):
+    queryset = LabTestResultPanel.objects.all()
+    serializer_class = LabTestResultPanelSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)   
+
+
+
 class LabTestResultPanelByLabTestResultId(generics.ListAPIView):
     serializer_class = LabTestResultPanelSerializer
 
@@ -228,6 +246,29 @@ def download_labtestresult_pdf(request, labtestresult_id):
 
 
     html_template = get_template('labtestresult.html').render({
+        'labtestresult': labtestresult,
+        'labtestresultiem':labtestresultpanel,
+        'company': company
+    })
+
+
+    pdf_file = HTML(string=html_template).write_pdf()
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="invoice_report_{labtestresult_id}.pdf"'
+
+    return response
+
+
+
+def download_qualitative_labtestresult_pdf(request, labtestresult_id):
+    labtestresult = get_object_or_404(LabTestResultQualitative, pk=labtestresult_id)
+    labtestresultpanel= LabTestResultPanelQualitative.objects.filter(lab_test_result=labtestresult)
+    company = Company.objects.first()
+
+    print("labtestresult",labtestresult, labtestresultpanel)
+
+
+    html_template = get_template('labtestresultqualitative.html').render({
         'labtestresult': labtestresult,
         'labtestresultiem':labtestresultpanel,
         'company': company

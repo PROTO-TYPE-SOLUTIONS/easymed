@@ -2,16 +2,6 @@
 version: "3.9"
 
 services:
-    # nginx:
-    #     restart: unless-stopped
-    #     image: nginx:1.23-alpine
-    #     ports:
-    #         - 80:80
-    #     volumes:
-    #         # - ./nginx/:/etc/nginx/
-    #         - ./static_files:/app/easymed/static
-    #     networks:
-    #         - mks
     db:
         image: postgres:14
         container_name: db
@@ -42,7 +32,7 @@ services:
         restart: unless-stopped
 
     backend:
-        image: mosesmbadi/mkhmisbackend
+        image: mosesmbadi/easymedbackend
         container_name: backend
         command: ./backend-entrypoint.sh
         volumes:
@@ -66,7 +56,7 @@ services:
 
     worker:
         restart: unless-stopped
-        image: mosesmbadi/mkhmisbackend
+        image: mosesmbadi/easymedbackend
         container_name: worker
         command: ./worker-entrypoint.sh
         volumes:
@@ -80,7 +70,7 @@ services:
             - mks   
 
     frontend:
-        image: mosesmbadi/mkhmisfrontend
+        image: mosesmbadi/easymedfrontend
         container_name: front-end
         restart: unless-stopped
         ports:
