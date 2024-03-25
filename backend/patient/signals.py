@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from .models import Prescription
 
-from makeeasyhmis.celery_tasks import generate_prescription_pdf, appointment_assign_notification
+from easymed.celery_tasks import generate_prescription_pdf, appointment_assign_notification
 
 # emails
 from django.core.mail import send_mail
@@ -45,7 +45,7 @@ def appointment_assigned_update_signal(sender, instance,  **kwargs):
 
 
 '''send email on Appointment creation'''
-from makeeasyhmis.celery_tasks import send_appointment_status_email
+from easymed.celery_tasks import send_appointment_status_email
 @receiver(post_save, sender=Appointment)
 def handle_appointment_status_change(sender, instance, created, **kwargs):
     if created:

@@ -1,4 +1,4 @@
-# 1.0.0 make-easy-hmis
+# 1.0.0 easymed
 
 Repository for Make-Easy HMIS
 
@@ -109,7 +109,7 @@ You will notice that we have a Role and a Group. A group is associated with perm
 
 If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
 `pip install celery redis`
-Run Celery: `celery -A makeeasyhmis worker --loglevel=INFO`
+Run Celery: `celery -A easymed worker --loglevel=INFO`
 Run Redis: `redis-cli -h 127.0.0.1 -p 6379`
 
 Generated PDFs
@@ -120,7 +120,7 @@ i.e `http://127.0.0.1:8080/download_invoice_pdf/24`
 
 Django's runserver does not support asgi
 run with uvicorn to have the notifications working
-`uvicorn --port 8080 makeeasyhmis.asgi:application`
+`uvicorn --port 8080 easymed.asgi:application`
 
 On a separate terminal
 `npm install -g wscat`
@@ -150,3 +150,10 @@ for a given payment mode
 
 
 The /preflight directory contains set up files for an LIS Host listener.
+
+
+
+Minimum system specifications
+RAM 8GB
+Disk SSD 250GB
+CPU 3-10th Gen

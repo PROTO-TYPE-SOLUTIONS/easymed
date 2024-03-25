@@ -65,7 +65,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'makeeasyhmis.urls'
+ROOT_URLCONF = 'easymed.urls'
 
 
 TEMPLATES = [
@@ -85,8 +85,8 @@ TEMPLATES = [
 ]
 
 
-WSGI_APPLICATION = 'makeeasyhmis.wsgi.application'
-ASGI_APPLICATION = 'makeeasyhmis.asgi.application'
+WSGI_APPLICATION = 'easymed.wsgi.application'
+ASGI_APPLICATION = 'easymed.asgi.application'
 
 
 # Database
@@ -191,9 +191,6 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str)
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str)
 
 
-# CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
-# #for docker
-# CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
@@ -213,3 +210,24 @@ CHANNEL_LAYERS = {
 }
 
 
+''''
+For some reason, docker is not able to differentiate db configs 
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+
+# DATABASES = {
+#     "default":{
+#         "ENGINE": config("DB_ENGINE"),
+#         "NAME": config("POSTGRES_DB"),
+#         "USER": config("POSTGRES_USER"),
+#         "PASSWORD": config("POSTGRES_PASSWORD"),
+#         "HOST": config("POSTGRES_HOST"),
+#         "PORT": config("POSTGRES_PORT"),
+#     }
+# }

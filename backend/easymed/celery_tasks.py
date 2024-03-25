@@ -52,7 +52,7 @@ def generate_invoice_pdf(invoice_id):
     invoice = Invoice.objects.get(pk=invoice_id)
     app_template_dir = apps.get_app_config('billing').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'invoice.html', {'invoice': invoice})
-    pdf_file_path = os.path.join('./makeeasyhmis/static/invoices/', f'{invoice.invoice_number}.pdf')
+    pdf_file_path = os.path.join('./easymed/static/invoices/', f'{invoice.invoice_number}.pdf')
 
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
     HTML(string=html_content).write_pdf(pdf_file_path)
@@ -66,7 +66,7 @@ def generate_requisition_pdf(requisition_id):
     requisition = Requisition.objects.get(pk=requisition_id)
     app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'requisition.html', {'requisition': requisition})
-    pdf_file_path = os.path.join('./makeeasyhmis/static/requisitions/', f'{requisition.id}.pdf')
+    pdf_file_path = os.path.join('./easymed/static/requisitions/', f'{requisition.id}.pdf')
 
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
     HTML(string=html_content).write_pdf(pdf_file_path)
@@ -81,7 +81,7 @@ def generate_labtestresult_pdf(labtestresult_id):
     labtestresult = LabTestResult.objects.get(pk=labtestresult_id)
     app_template_dir  = apps.get_app_config('laboratory').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'labtestresult.html', {'labtestresult': labtestresult})
-    pdf_file_path = os.path.join('./makeeasyhmis/static/labtestresult/', f'{labtestresult.id}.pdf')
+    pdf_file_path = os.path.join('./easymed/static/labtestresult/', f'{labtestresult.id}.pdf')
 
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
     HTML(string=html_content).write_pdf(pdf_file_path)
@@ -97,7 +97,7 @@ def generate_prescription_pdf(prescription_id):
     prescription = Prescription.objects.get(pk=prescription_id)
     app_template_dir  = apps.get_app_config('patient').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'prescription.html', {'prescription': prescription})
-    pdf_file_path = os.path.join('./makeeasyhmis/static/prescription/', f'{prescription.id}.pdf')
+    pdf_file_path = os.path.join('./easymed/static/prescription/', f'{prescription.id}.pdf')
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
     HTML(string=html_content).write_pdf(pdf_file_path)
 
@@ -111,7 +111,7 @@ def generate_purchaseorder_pdf(purchaseorder_id):
     purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
     app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchaseorder': purchaseorder})
-    pdf_file_path = os.path.join('./makeeasyhmis/static/purchaseorder/', f'{purchaseorder.id}.pdf')
+    pdf_file_path = os.path.join('./easymed/static/purchaseorder/', f'{purchaseorder.id}.pdf')
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
     HTML(string=html_content).write_pdf(pdf_file_path)
 

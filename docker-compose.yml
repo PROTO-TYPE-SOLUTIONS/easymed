@@ -1,29 +1,32 @@
-version: "3.8"
+
+version: "3.9"
 
 services:
-    nginx:
-        restart: always
-        image: nginx:1.23-alpine
-        ports:
-            - 80:80
-        volumes:
-            # - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-            - static_volume:/app/backend/django_static
-
+    # nginx:
+    #     restart: unless-stopped
+    #     image: nginx:1.23-alpine
+    #     ports:
+    #         - 80:80
+    #     volumes:
+    #         # - ./nginx/:/etc/nginx/
+    #         - ./static_files:/app/easymed/static
+    #     networks:
+    #         - mks
     db:
-        image: postgres:10
+        image: postgres:14
         container_name: db
         volumes:
-            - ./data/db:/pgdata
+            - ./volumes/data/db:/var/lib/postgresql/data
+            - ./preflight/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
         env_file:
-            - ./.env    
-        # environment:
-        #     - POSTGRES_DB=postgres
-        #     - POSTGRES_USER=postgres
-        #     - POSTGRES_PASSWORD=postgres
-        #     - HOST=db
-        # networks:
-        #     - mks
+            - ./.env      
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_HOST=${POSTGRES_HOST}
+        networks:
+            - mks
         restart: unless-stopped
 
     redis:
@@ -31,11 +34,11 @@ services:
         container_name: redis2
         command: redis-server --appendonly yes --replica-read-only no
         volumes:
-            - ./redis/:/etc/redis/
-        # ports:
-        #     - 6379:6379
-        # networks:
-        #     - mks
+            - ./volumes/redis/:/etc/redis/
+        ports:
+            - 6379:6379
+        networks:
+            - mks
         restart: unless-stopped
 
     backend:
@@ -43,30 +46,38 @@ services:
         container_name: backend
         command: ./backend-entrypoint.sh
         volumes:
-            - ./backend:/code/
+            - ./volumes/backend:/code/
         ports:
             - 8080:8080
         env_file:
             - ./.env
         depends_on:
             - db
+        environment:
+            - PG_INIT_WAIT_SQL=SELECT 1 FROM pg_stat_activity WHERE datname='${POSTGRES_DB}' AND state='idle' AND pid <> pg_backend_pid();
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+            interval: 5s
+            timeout: 10s
+            retries: 10
         restart: unless-stopped
-        # networks:
-        #     - mks
+        networks:
+            - mks
 
     worker:
         restart: unless-stopped
         image: mosesmbadi/mkhmisbackend
+        container_name: worker
+        command: ./worker-entrypoint.sh
         volumes:
-            - static_volume:/app/backend/django_static
+            - ./volumes/static_files:/app/easymed/static
         env_file:
-          - .env
-
+            - ./.env    
         depends_on:
             - backend
             - redis
-        # networks:
-        #     - mks   
+        networks:
+            - mks   
 
     frontend:
         image: mosesmbadi/mkhmisfrontend
@@ -76,15 +87,10 @@ services:
             - 3000:3000
         depends_on:
             - backend
-        # networks:
-        #     - mks    
+        networks:
+            - mks    
 
-
-volumes:
-    static_volume: {}
-    postgres_data: {}
-
-# networks:
-#     mks:
-#         name: mks
-#         driver: bridge
+networks:
+    mks:
+        name: mks
+        driver: bridge

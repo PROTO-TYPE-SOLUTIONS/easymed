@@ -11,7 +11,7 @@ DEBUG = True
 
 DATABASES = {
     "default":{
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": config("DB_ENGINE"),
         "NAME": config("POSTGRES_DB"),
         "USER": config("POSTGRES_USER"),
         "PASSWORD": config("POSTGRES_PASSWORD"),

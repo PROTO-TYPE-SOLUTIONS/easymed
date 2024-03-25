@@ -296,4 +296,4 @@ fabric.properties
 # End of https://www.toptal.com/developers/gitignore/api/django
 
 
-backend/makeeasyhmis/static/
+backend/easymed/static/
