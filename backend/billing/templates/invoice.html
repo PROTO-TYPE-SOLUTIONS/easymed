@@ -57,8 +57,7 @@
     <table>
         <thead>
             <tr>
-                <th>Item</th>
-                <th>QTY</th>
+                <th>Item Name</th>
                 <th>Price</th>
                 <th>Category</th>
                 <th>Date Created</th>
@@ -67,17 +66,15 @@
         <tbody>
             {% for invoice_item in invoice_items %}
             <tr>
-                <td>{{ invoice_item.service.name }}</td>
-                <td>{{ invoice_item.quantity_purchased }}</td>
-
-                <td>{{ invoice_item.service.item.inventory.sale_price }}</td>
-                
+                <td>{{ invoice_item.item.name }}</td>
+                <td>{{ invoice_item.item.inventory.incoming_item.sale_price|floatformat:2 }}</td>
                 <td>{{ invoice_item.service.category }}</td>
                 <td>{{ invoice_item.item_created_at }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
 
     <p>Total Amount: {{ invoice.invoice_amount }}</p>
 

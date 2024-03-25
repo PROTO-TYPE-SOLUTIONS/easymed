@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from .models import Invoice
 from company.models import Company
-from makeeasyhmis.celery_tasks import generate_invoice_pdf
+from easymed.celery_tasks import generate_invoice_pdf
 
 
 

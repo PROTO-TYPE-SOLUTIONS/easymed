@@ -14,15 +14,15 @@ def main():
 
     if "docker" in args:
         os.environ.setdefault(
-            "DJANGO_SETTINGS_MODULE", "makeeasyhmis.settings.production"
+            "DJANGO_SETTINGS_MODULE", "easymed.settings.production"
         )
     elif "test" in args or "pytest" in args:
         os.environ.setdefault(
-            "DJANGO_SETTINGS_MODULE", "makeeasyhmis.settings.testing"
+            "DJANGO_SETTINGS_MODULE", "easymed.settings.testing"
         )
     else:
         os.environ.setdefault(
-            "DJANGO_SETTINGS_MODULE", "makeeasyhmis.settings.development"
+            "DJANGO_SETTINGS_MODULE", "easymed.settings.development"
         )
 
     try:
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
 # def main():
 #     """Run administrative tasks."""
-#     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'makeeasyhmis.settings')
+#     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'easymed.settings')
 #     try:
 #         from django.core.management import execute_from_command_line
 #     except ImportError as exc:

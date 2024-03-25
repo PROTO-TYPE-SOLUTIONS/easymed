@@ -1,5 +1,5 @@
 """
-ASGI config for makeeasyhmis project.
+ASGI config for easymed project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,7 +11,7 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'makeeasyhmis.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'easymed.settings')
 
 application = get_asgi_application()
 

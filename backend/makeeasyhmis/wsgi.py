@@ -1,5 +1,5 @@
 """
-WSGI config for makeeasyhmis project.
+WSGI config for easymed project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'makeeasyhmis.settings.production')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'easymed.settings.production')
 
 application = get_wsgi_application()

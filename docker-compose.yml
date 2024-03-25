@@ -9,7 +9,7 @@ services:
     #         - 80:80
     #     volumes:
     #         # - ./nginx/:/etc/nginx/
-    #         - ./static_files:/app/makeeasyhmis/static
+    #         - ./static_files:/app/easymed/static
     #     networks:
     #         - mks
     db:
@@ -70,7 +70,7 @@ services:
         container_name: worker
         command: ./worker-entrypoint.sh
         volumes:
-            - ./volumes/static_files:/app/makeeasyhmis/static
+            - ./volumes/static_files:/app/easymed/static
         env_file:
             - ./.env    
         depends_on:

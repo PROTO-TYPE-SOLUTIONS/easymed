@@ -1,8 +1,12 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-# from makeeasyhmis.celery_tasks import create_or_update_inventory_record
+# from easymed.celery_tasks import create_or_update_inventory_record
 from .models import Requisition, PurchaseOrder, IncomingItem, Inventory
-from makeeasyhmis.celery_tasks import generate_requisition_pdf, generate_purchaseorder_pdf
+from easymed.celery_tasks import (
+    generate_requisition_pdf,
+    generate_purchaseorder_pdf,
+    create_or_update_inventory_record
+)
 
 
 @receiver(post_save, sender=IncomingItem)

@@ -8,7 +8,7 @@ services:
     #         - 80:80
     #     volumes:
     #         - ./nginx/:/mnt
-    #         - ./static_files:/app/makeeasyhmis/static
+    #         - ./static_files:/app/easymed/static
     #     networks:
     #         - mks
     db:
@@ -62,7 +62,7 @@ services:
         build:
             context: ./backend
         volumes:
-            - ./static_files:/app/makeeasyhmis/static
+            - ./static_files:/app/easymed/static
         env_file:
             - ./.env    
         depends_on:
