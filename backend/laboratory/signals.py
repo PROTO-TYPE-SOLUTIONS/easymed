@@ -1,12 +1,13 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from easymed.celery_tasks import generate_labtestresult_pdf
+from easymed.celery_tasks import generate_labtestresult_pdf, generate_qualitative_labtestresult_pdf
 # models
 from .models import (
     EquipmentTestRequest,
     LabTestRequest,
     LabEquipment,
     LabTestResult,
+    LabTestResultQualitative,
 )
 # utils
 from .utils import (
@@ -66,6 +67,13 @@ def send_to_equipment(sender, instance, created, **kwargs):
 def generate_labtestresult(sender, instance, created, **kwargs):
     if created:
         generate_labtestresult_pdf.delay(instance.pk)
+
+
+@receiver(post_save, sender=LabTestResultQualitative)
+def generate_qualitative_labtestresult(sender, instance, created, **kwargs):
+    if created:
+        generate_qualitative_labtestresult_pdf.delay(instance.pk)
+
 
 
 '''

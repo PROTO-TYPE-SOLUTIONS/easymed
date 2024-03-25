@@ -17,6 +17,9 @@ from .views import (
     LabTestResultPanelByLabTestResultId,
     LabTestRequestPanelByLabTestRequestId,
     download_labtestresult_pdf,
+    download_qualitative_labtestresult_pdf, 
+    LabTestResultPanelQualitativeViewSet,
+    LabTestResultQualitativeViewSet,
 )
 
 router = DefaultRouter()
@@ -28,6 +31,9 @@ router.register(r'lab-test-panel', LabTestPanelViewSet)
 
 router.register(r'lab-test-results', LabTestResultViewSet)
 router.register(r'lab-test-results-panel', LabTestResultPanelViewSet)
+
+router.register(r'lab-test-results-qualitative', LabTestResultQualitativeViewSet)
+router.register(r'lab-test-results-panel-qualitative', LabTestResultPanelQualitativeViewSet)
 
 router.register(r'lab-test-requests', LabTestRequestViewSet)
 router.register(r'lab-test-requests-panel', LabTestRequestPanelViewSet)
@@ -44,6 +50,9 @@ urlpatterns = [
     path('lab-test-request-by-patient-id/<int:patient_id>/', LabTestRequestByPatientIdAPIView.as_view()),
     path('lab-test-result-panels-by-lab-test-result-id/<int:lab_test_result_id>/', LabTestResultPanelByLabTestResultId.as_view(), name='lab-test-result-panels'),
     path('lab-test-request-panels-by-lab-test-request-id/<int:lab_test_request_id>/', LabTestRequestPanelByLabTestRequestId.as_view(), name='lab-test-request-panels'),
+
+    path('download_qualitative_labtestresult_pdf/<int:labtestresult_id>/', download_qualitative_labtestresult_pdf, name='download_qualitative_labtestresult_pdf'),
+
     path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
 
     path('labtestpanels-byprofile-id/<int:profile_id>/', LabTestPanelViewSet.as_view({'get': 'by_test_profile'}), name='labtestpanels-byprofile-id'),

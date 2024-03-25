@@ -15,3 +15,6 @@ admin.site.register(LabTestResultPanel)
 
 admin.site.register(LabEquipment)
 admin.site.register(EquipmentTestRequest)
+
+admin.site.register(LabTestResultQualitative)
+admin.site.register(LabTestResultPanelQualitative)

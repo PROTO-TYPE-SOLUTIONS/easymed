@@ -142,3 +142,23 @@ class PublicLabTestRequest(models.Model):
             patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
             return patient_age
         return None
+    
+
+
+class LabTestResultQualitative(models.Model):
+    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    title = models.CharField(max_length=45)
+    date_created = models.DateField(auto_now_add=True)
+    recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.title  
+
+class LabTestResultPanelQualitative(models.Model):
+    lab_test_result= models.ForeignKey(LabTestResultQualitative, on_delete=models.CASCADE)
+    test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET_NULL, null=True, blank=True )
+    result = models.CharField(max_length=45)
+
+    
+    def __str__(self):
+        return f"{self.test_panel.name}"

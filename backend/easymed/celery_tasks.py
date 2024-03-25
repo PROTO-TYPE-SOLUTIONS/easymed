@@ -9,7 +9,6 @@ from django.conf import settings
 from decouple import config
 
 from inventory.models import IncomingItem, Inventory, PurchaseOrder, Requisition
-from inventory.models import IncomingItem, Inventory
 from billing.models import Invoice, InvoiceItem
 from patient.models import Appointment
 
@@ -81,6 +80,21 @@ def generate_labtestresult_pdf(labtestresult_id):
     labtestresult = LabTestResult.objects.get(pk=labtestresult_id)
     app_template_dir  = apps.get_app_config('laboratory').path + '/templates/'
     html_content = render_to_string(app_template_dir + 'labtestresult.html', {'labtestresult': labtestresult})
+    pdf_file_path = os.path.join('./easymed/static/labtestresult/', f'{labtestresult.id}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    labtestresult.save()
+
+
+
+@shared_task
+def generate_qualitative_labtestresult_pdf(labtestresult_id):
+    from laboratory.models import LabTestResultQualitative
+    labtestresult = LabTestResultQualitative.objects.get(pk=labtestresult_id)
+    app_template_dir  = apps.get_app_config('laboratory').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'labtestresultqualitative.html', {'labtestresult': labtestresult})
     pdf_file_path = os.path.join('./easymed/static/labtestresult/', f'{labtestresult.id}.pdf')
 
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
