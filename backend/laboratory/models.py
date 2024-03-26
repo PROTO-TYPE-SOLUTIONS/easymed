@@ -62,6 +62,7 @@ class LabTestRequest(models.Model):
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     sample_collected = models.BooleanField(default=False, null=True)
     sample = models.CharField(max_length=100, null=True, blank=True)
+    requested_on = models.TimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return str(self.id)
@@ -113,22 +114,6 @@ class LabTestResultPanel(models.Model):
             except ValueError:
                 pass 
         super().save(*args, **kwargs)
-
-
-
-    # def save(self, *args, **kwargs):
-    #     if self.test_panel and self.result:
-    #         try:
-    #             ref_value_low = self.test_panel.ref_value_low
-    #             ref_value_high = self.test_panel.ref_value_high
-    #             result_value = float(self.result)
-    #             if result_value < ref_value_low:
-    #                 self.difference = -round(ref_value_low - result_value, 2)
-    #             elif result_value > ref_value_high:
-    #                 self.difference = round(result_value - ref_value_high, 2)
-    #         except (TypeError, ValueError):
-    #             pass 
-    #     super().save(*args, **kwargs)
 
 
 class PublicLabTestRequest(models.Model):

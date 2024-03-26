@@ -35,8 +35,11 @@ def send_to_equipment(sender, instance, created, **kwargs):
                 send_through_rs232(data=data)
                 print("Data is: " + data)
             elif equipment.category == 'tcp':
-                send_through_tcp(data=data)
-                print("Data is: " + data)
+                success = send_through_tcp(data=data, equipment=equipment)
+                # if success:
+                #     print("Data to be sent through tcp: " + data)
+                # else:
+                #     print("Failed to send data to tcp: " + data)
             elif equipment.category == "netshare":
                 send_to_network_folder(data=data)
                 print("Data is: " + data)    
@@ -49,8 +52,11 @@ def send_to_equipment(sender, instance, created, **kwargs):
                 send_through_rs232(data=data)
                 print("Data is: " + data)
             elif equipment.category == 'tcp':
-                send_through_tcp(data=data)
-                print("Data is: " + data)
+                success = send_through_tcp(data=data)
+                if success:
+                    print("Data is: " + data)
+                else:
+                    print("Failed to send data to tcp: " + data)
             elif equipment.category == "netshare":
                 send_to_network_folder(data=data)
                 print("Data is: " + data)    

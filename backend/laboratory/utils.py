@@ -8,24 +8,43 @@ from smb.SMBConnection import SMBConnection
 import os
 
 
-from .models import LabTestRequest
+from .models import LabTestRequest, LabEquipment,LabTestRequestPanel
+
 
 
 def create_hl7_message(test_request):
     patient = test_request.patient
+    lab_test_request_panels = LabTestRequestPanel.objects.filter(lab_test_request=test_request)
+    
+    # Generate HL7 message
     hl7_message = (
-        "MSH|^~\&|Sender|Receiver|HL7APP|TEST|20240101000000||ORU^R01|MSG00001|P|2.4\r"
-        "PID|||{patient_id}||{patient_name}||{date_of_birth}|{gender}\r"
-        "OBR|1|||{test_id}||||||||||||||||"
+        "MSH|^~\&|EASYMED|LABNAME|20240101000000||ADT^A01|MSG00001|P|2.4\r"  # basic information about an HL7 message
+        "PID|1||{patient_id}^^^^MR||{patient_name}||{date_of_birth}|{gender}\r" #patient identification (PID) segment
+        "PV1|1|Demoinfo|Demoinfo^1^2|||||||||||||||||Demoinfo\r" #medical information about a patient.
     ).format(
         patient_id=patient.id,
         patient_name=patient.first_name + " " + patient.second_name,
         date_of_birth=patient.date_of_birth.strftime("%Y%m%d") if patient.date_of_birth else "",
         gender=patient.gender,
-        test_id=test_request.id,
     )
 
+    for panel in lab_test_request_panels:
+        lab_test_panel = panel.test_panel
+        hl7_message += (
+            "OBR|1|||{sample}|{test_name}||||||||{ordering_physician}||||||||{specimen_collection_date_time}||||||{test_profile}||||\r" # test report.
+        ).format(
+            sample=test_request.sample,
+            test_id=test_request.id,
+            test_name=lab_test_panel.name,
+            ordering_physician=test_request.requested_by.first_name,
+            specimen_collection_date_time=test_request.requested_on,
+            test_proflile = "Hematology"
+        )
+
+    print("Generated data:", hl7_message)
+
     return hl7_message
+
 
 
 ''''
@@ -64,12 +83,16 @@ def send_through_rs232(data: str, port='/dev/ttySO', baudrate=9600):
         
 
 
-def send_through_tcp(data: str, host='127.0.0.1', port=8090):
+def send_through_tcp(data: str, equipment, host=None, port=None):
+    if host is None:
+        host = equipment.ip_address
+    if port is None:
+        port = int(equipment.port)
+    print(host, port)
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serve:
             serve.connect((host, port))
             serve.sendall(data.encode())
-            print("sending through tcp..." + data)
             return True
     except Exception as e:
         print(e)

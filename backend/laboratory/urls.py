@@ -57,3 +57,4 @@ urlpatterns = [
 
     path('labtestpanels-byprofile-id/<int:profile_id>/', LabTestPanelViewSet.as_view({'get': 'by_test_profile'}), name='labtestpanels-byprofile-id'),
 ]
+
