@@ -18,27 +18,30 @@ def create_hl7_message(test_request):
     
     # Generate HL7 message
     hl7_message = (
-        "MSH|^~\&|EASYMED|LABNAME|20240101000000||ADT^A01|MSG00001|P|2.4\r"  # basic information about an HL7 message
-        "PID|1||{patient_id}^^^^MR||{patient_name}||{date_of_birth}|{gender}\r" #patient identification (PID) segment
-        "PV1|1|Demoinfo|Demoinfo^1^2|||||||||||||||||Demoinfo\r" #medical information about a patient.
+        "MSH|^~\&|EASYMED|LABNAME|20240101000000||ADT^O01^ADTOBR|MSG00001|P|2.4\r"  # basic information about an HL7 message
+        "PID|1||{patient_id}||{patient_name}^^^^PI||{date_of_birth}|{gender}^||{address}^^Postal^Jones^Mary||||||||||||||||||||||||||||\r" #patient identification (PID) segment
     ).format(
         patient_id=patient.id,
-        patient_name=patient.first_name + " " + patient.second_name,
+        patient_name=patient.first_name + "^" + patient.second_name,
         date_of_birth=patient.date_of_birth.strftime("%Y%m%d") if patient.date_of_birth else "",
         gender=patient.gender,
+        address="address",
     )
 
+    obr_sequence = +1
     for panel in lab_test_request_panels:
         lab_test_panel = panel.test_panel
+        obr_sequence += 1
         hl7_message += (
-            "OBR|1|||{sample}|{test_name}||||||||{ordering_physician}||||||||{specimen_collection_date_time}||||||{test_profile}||||\r" # test report.
+            "OBR|{obr_sequence}|||{sample}|{test_name}||||||||{ordering_physician}||||||||{specimen_collection_date_time}||||||{test_profile}||||\r" # test report.
         ).format(
+            obr_sequence=obr_sequence,
             sample=test_request.sample,
             test_id=test_request.id,
             test_name=lab_test_panel.name,
             ordering_physician=test_request.requested_by.first_name,
             specimen_collection_date_time=test_request.requested_on,
-            test_proflile = "Hematology"
+            test_profile = "Hematology"
         )
 
     print("Generated data:", hl7_message)
@@ -52,20 +55,56 @@ Let's get the test request and convert to ASTM format
 '''
 def create_astm_message(test_request):
     patient = test_request.patient
+    lab_test_request_panels = LabTestRequestPanel.objects.filter(lab_test_request=test_request)
+
+    # Generate ASTM message
     astm_message = (
-        "H|\^&|||host^name||{timestamp}|||||P|1||||||||||\r"
-        "P|1|OBR|1|||{test_id}||||||||||||||{timestamp}\r"
-        "P|2|{patient_id}||{patient_name}||{date_of_birth}|{gender}\r"
+        "H|\^&|{timestamp}|{facility_id}|{patient_id}|{patient_name}||{gender}|{order_date_time}||P|1|{test_id}||||||||\r"
     ).format(
         timestamp=datetime.now().strftime("%Y%m%d%H%M%S"),
+        facility_id="FACILITY",
         patient_id=patient.id,
         patient_name=patient.first_name + " " + patient.second_name,
-        date_of_birth=patient.date_of_birth.strftime("%Y%m%d") if patient.date_of_birth else "",
         gender=patient.gender,
+        order_date_time=test_request.requested_on.strftime("%Y%m%d%H%M%S"),
         test_id=test_request.id,
     )
 
+    for panel in lab_test_request_panels:
+        lab_test_panel = panel.test_panel
+        astm_message += (
+            "O|{test_name}|{test_id}|{test_type}|||{ordering_physician}||{result_status}||{sample_collection_date_time}||{result_date_time}||||\r"
+        ).format(
+            test_name=lab_test_panel.name,
+            test_id=test_request.id,
+            test_type="A",
+            ordering_physician=test_request.requested_by.first_name,
+            result_status="F",  # waiting for results
+            sample_collection_date_time=test_request.requested_on.strftime("%Y%m%d%H%M%S"),
+            result_date_time=test_request.requested_on.strftime("%Y%m%d%H%M%S"),
+        )
+
+    print("Generated data:", astm_message)
+
     return astm_message
+# def create_astm_message(test_request):
+#     patient = test_request.patient
+#     astm_message = (
+#         "H|\^&|||host^name||{timestamp}|||||P|1||||||||||\r"
+#         "P|1|OBR|1|||{test_id}||||||||||||||{timestamp}\r"
+#         "P|2|{patient_id}||{patient_name}||{date_of_birth}|{gender}\r"
+#     ).format(
+#         timestamp=datetime.now().strftime("%Y%m%d%H%M%S"),
+#         patient_id=patient.id,
+#         patient_name=patient.first_name + " " + patient.second_name,
+#         date_of_birth=patient.date_of_birth.strftime("%Y%m%d") if patient.date_of_birth else "",
+#         gender=patient.gender,
+#         test_id=test_request.id,
+#     )
+
+#     return astm_message
+
+
 
 
 
