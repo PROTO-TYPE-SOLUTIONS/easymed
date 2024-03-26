@@ -152,6 +152,22 @@ for a given payment mode
 The /preflight directory contains set up files for an LIS Host listener.
 
 
+## Qualitative reports;
+If a Lab results is selected as qualitative, use this endpoint
+``/lab/lab-test-results-qualitative/``
+and the results for the test panels should be sent here
+``lab/lab-test-results-panel-qualitative``
+Generated report can be gotten here
+``/lab/download_qualitative_labtestresult_pdf/<int:labtestresult_id>/``
+
+By default, or when explicitly specified, all lab test will be quantitative and will use the following endpoints.  In the same order, create a report, add test-panel-results to that report
+then generate the pdf report
+``/lab/lab-test-results/``
+``/lab/lab-test-results-panel/``
+``/download_labtestresult_pdf/<int:labtestresult_id>/``
+
+
+
 
 Minimum system specifications
 RAM 8GB
