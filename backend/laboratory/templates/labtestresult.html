@@ -98,14 +98,14 @@
                 <td>{{ result_item.result }}</td>
 
                 <td>
-                    {% if result_item.difference >= 1 and result_item.difference < 10 %}
-                        <span style="color: yellow;">Medium</span>
-                    {% elif result_item.difference >= 11 %}
-                        <span style="color: red;">Critical</span>
+                    {% if result_item.difference and result_item.difference < 0 %}
+                        <span style="color: yellow;">Low</span>
+                    {% elif result_item.difference and result_item.difference >= 0 %}
+                        <span style="color: red;">High</span>
                     {% endif %}
                 </td>
 
-                <td>{{ result_item.test_panel.ref_value }}</td>
+                <td>{{ result_item.test_panel.ref_value_low }} - {{ result_item.test_panel.ref_value_high }}</td>
                 <td>{{ result_item.test_panel.unit }}</td>
             </tr>
             {% endfor %}

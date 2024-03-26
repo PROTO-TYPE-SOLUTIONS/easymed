@@ -48,10 +48,11 @@ class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=255)
-    ref_value = models.CharField(max_length=45)
+    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} - {self.ref_value} - {self.unit}"
+        return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.unit}"
 
 
 class LabTestRequest(models.Model):
@@ -85,6 +86,7 @@ class LabTestResult(models.Model):
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    note = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.title  
@@ -95,20 +97,38 @@ class LabTestResultPanel(models.Model):
     result = models.CharField(max_length=45)
     difference = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
-    
     def __str__(self):
-        return f"{self.test_panel.name} - {self.test_panel.ref_value}"
+        return f"{self.test_panel.name} - {self.test_panel.ref_value_low}"
 
     def save(self, *args, **kwargs):
         if self.test_panel and self.result:
             try:
-                ref_value = float(self.test_panel.ref_value)
+                ref_value_low = float(self.test_panel.ref_value_low)
+                ref_value_high = float(self.test_panel.ref_value_high)
                 result_value = float(self.result)
-                self.difference = round(result_value - ref_value, 2)
+                if result_value < ref_value_low:
+                    self.difference = -round(ref_value_low - result_value, 2)
+                elif result_value > ref_value_high:
+                    self.difference = round(result_value - ref_value_high, 2)
             except ValueError:
                 pass 
         super().save(*args, **kwargs)
 
+
+
+    # def save(self, *args, **kwargs):
+    #     if self.test_panel and self.result:
+    #         try:
+    #             ref_value_low = self.test_panel.ref_value_low
+    #             ref_value_high = self.test_panel.ref_value_high
+    #             result_value = float(self.result)
+    #             if result_value < ref_value_low:
+    #                 self.difference = -round(ref_value_low - result_value, 2)
+    #             elif result_value > ref_value_high:
+    #                 self.difference = round(result_value - ref_value_high, 2)
+    #         except (TypeError, ValueError):
+    #             pass 
+    #     super().save(*args, **kwargs)
 
 
 class PublicLabTestRequest(models.Model):
