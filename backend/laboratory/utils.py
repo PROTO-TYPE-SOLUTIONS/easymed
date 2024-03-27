@@ -106,7 +106,10 @@ def create_astm_message(test_request):
 
 
 
-
+''''
+The system uses TCP/IP as primary means of coms
+The function below has not been tasted and will be retired
+'''
 
 def send_through_rs232(data: str, port='/dev/ttySO', baudrate=9600):
     try:
@@ -121,7 +124,9 @@ def send_through_rs232(data: str, port='/dev/ttySO', baudrate=9600):
         return False
         
 
-
+''''
+This is the primary means of coms
+'''
 def send_through_tcp(data: str, equipment, host=None, port=None):
     if host is None:
         host = equipment.ip_address

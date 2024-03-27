@@ -83,11 +83,16 @@ class EquipmentTestRequest(models.Model):
     
     
 class LabTestResult(models.Model):
+    CATEGORY_CHOICE = (
+        ("quantitative", "  QUANTITATIVE"),
+        ("qualitative", "QUALITATIVE"),
+    )
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     note = models.CharField(max_length=255, null=True, blank=True)
+    category = models.CharField(max_length=20, default="quantitative", choices=CATEGORY_CHOICE,)
 
     def __str__(self):
         return self.title  
