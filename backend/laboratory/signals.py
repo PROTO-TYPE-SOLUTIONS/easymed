@@ -19,51 +19,78 @@ from .utils import (
 
 )
 
-
 @receiver(post_save, sender=EquipmentTestRequest)
-def send_to_equipment(sender, instance, created, **kwargs):
-    if created:  # Only proceed if the instance is newly created
+def send_to_mirth(sender, instance, created, **kwargs):
+    if created:
         test_request = instance.test_request
         equipment = instance.equipment
-        print("Send to equipment signal firing")
-        print("Equipment Is:", equipment, test_request, equipment.data_format)
-
         if equipment.data_format == "hl7":
-            data = create_hl7_message(test_request)
-            print("Data is HL7")
-            if equipment.category == "rs232":
-                send_through_rs232(data=data)
-                print("Data is: " + data)
-            elif equipment.category == 'tcp':
-                success = send_through_tcp(data=data, equipment=equipment)
-                # if success:
-                #     print("Data to be sent through tcp: " + data)
-                # else:
-                #     print("Failed to send data to tcp: " + data)
-            elif equipment.category == "netshare":
-                send_to_network_folder(data=data)
-                print("Data is: " + data)    
+            data = test_request
+            send_to_mirth(data, equipment)
+
+def send_to_mirth(data : str, equipment, host=None, port=None):
+        import socket
+        if host is None:
+            host = equipment.ip_address
+        if port is None:
+            port = int(equipment.port)
+        print(host, port)
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serve:
+                serve.connect((host, port))
+                serve.sendall(data.encode())
+                return True
+        except Exception as e:
+            print(e)
+            return False
+
+
+
+
+# @receiver(post_save, sender=EquipmentTestRequest)
+# def send_to_equipment(sender, instance, created, **kwargs):
+#     if created:  # Only proceed if the instance is newly created
+#         test_request = instance.test_request
+#         equipment = instance.equipment
+#         print("Send to equipment signal firing")
+#         print("Equipment Is:", equipment, test_request, equipment.data_format)
+
+#         if equipment.data_format == "hl7":
+#             data = create_hl7_message(test_request)
+#             print("Data is HL7")
+#             if equipment.category == "rs232":
+#                 send_through_rs232(data=data)
+#                 print("Data is: " + data)
+#             elif equipment.category == 'tcp':
+#                 success = send_through_tcp(data=data, equipment=equipment)
+#                 # if success:
+#                 #     print("Data to be sent through tcp: " + data)
+#                 # else:
+#                 #     print("Failed to send data to tcp: " + data)
+#             elif equipment.category == "netshare":
+#                 send_to_network_folder(data=data)
+#                 print("Data is: " + data)    
            
 
-        elif equipment.data_format == "astm":
-            data = create_astm_message(test_request)
-            print("Data is ASTM")
-            if equipment.category == "rs232":
-                send_through_rs232(data=data)
-                print("Data is: " + data)
-            elif equipment.category == 'tcp':
-                success = send_through_tcp(data=data)
-                if success:
-                    print("Data is: " + data)
-                else:
-                    print("Failed to send data to tcp: " + data)
-            elif equipment.category == "netshare":
-                send_to_network_folder(data=data)
-                print("Data is: " + data)    
+#         elif equipment.data_format == "astm":
+#             data = create_astm_message(test_request)
+#             print("Data is ASTM")
+#             if equipment.category == "rs232":
+#                 send_through_rs232(data=data)
+#                 print("Data is: " + data)
+#             elif equipment.category == 'tcp':
+#                 success = send_through_tcp(data=data, equipment=equipment)
+#                 # if success:
+#                 #     print("Data is: " + data)
+#                 # else:
+#                 #     print("Failed to send data to tcp: " + data)
+#             elif equipment.category == "netshare":
+#                 send_to_network_folder(data=data)
+#                 print("Data is: " + data)    
            
 
-        else:
-            print("Data not HL7")
+#         else:
+#             print("Data not HL7")
 
 
 

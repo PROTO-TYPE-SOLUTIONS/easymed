@@ -173,3 +173,10 @@ Minimum system specifications
 RAM 8GB
 Disk SSD 250GB
 CPU 3-10th Gen
+
+Other requirements;
+The system uses TCP to primarily integret with Equipment.
+For equipment with any other form of coms other than TCP/Ethernet,
+will need to be configured with additional hardware that converts
+the coms to TCP
+A device such us [this](https://www.whizz.co.ke/product/1443079/usr-tcp232-302-tiny-size-rs232-to-tcp-ip-converter-serial-rs232-to-ethernet-server-module-ethernet-converter-support-dhcp-dns/), can work.
