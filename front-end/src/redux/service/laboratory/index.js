@@ -178,9 +178,10 @@ export const updatePublicLabRequest = (payload, auth) =>{
     })
 }
 
-export const fetchLabTestProfile = () =>{
+export const fetchLabTestProfile = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_LAB_TEST_PROFILE}`)
+        axiosInstance.get(`${APP_API_URL.FETCH_LAB_TEST_PROFILE}`)
             .then((res) =>{
                 resolve(res.data)
             })
