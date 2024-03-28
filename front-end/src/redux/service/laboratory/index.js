@@ -112,10 +112,36 @@ export const sendLabResults = (payload,auth) =>{
     })
 }
 
+export const sendLabResultQualitative = (payload,auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.QUALITATIVE_LAB_TEST_RESULTS}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const addTestResultPanel = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.post(`${APP_API_URL.FETCH_LAB_TEST_RESULT_PANELS}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const addQualitativeTestResultPanel = (payload,auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.QUALITATIVE_LAB_TEST_RESULTS_PANEL_ITEM}`,payload,auth)
             .then((res) =>{
                 resolve(res.data)
             })
