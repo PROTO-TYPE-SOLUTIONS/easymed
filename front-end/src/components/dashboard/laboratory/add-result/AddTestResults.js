@@ -16,7 +16,7 @@ import LabItemModal from './LabItemModal';
 
 import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests } from '@/redux/features/laboratory';
 import SeachableSelect from '@/components/select/Searchable';
-import { sendLabResults, addTestResultPanel } from '@/redux/service/laboratory';
+import { sendLabResults, addTestResultPanel, sendLabResultQualitative, addQualitativeTestResultPanel } from '@/redux/service/laboratory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -56,12 +56,14 @@ const AddTestResults = () => {
   const initialValues = {
     title: "",
     lab_test_request: null,
+    qualitative: null    
   };
 
   console.log("LAB_RESULTS_ITEMS ", labRequests)
 
   const validationSchema = Yup.object().shape({
     lab_test_request: Yup.object().required("This field is required!"),
+    qualitative: Yup.object().required("This field is required!"),
     title: Yup.string().required("This field is required!"),
   });
 
@@ -107,8 +109,33 @@ const AddTestResults = () => {
     } 
   }
 
-  const sendEachItemToDb = (payload) => {
-    labResultItems.forEach(item => saveLabResultsItem(item, payload))
+  const saveQualitativeLabResultsItem = async (item, payload) => {
+    const payloadData = {
+      ...item,
+      lab_test_result: payload.id
+    }
+
+    console.log("QUALITATIVE PAYLOAD LAB RESULTS" , payloadData)
+
+    try {
+      await addQualitativeTestResultPanel(payloadData, auth).then(()=>{
+        toast.success("Qualitative Test REsult Item Added Successfully!");
+      })
+
+    } catch(err) {
+      toast.error(err);
+      setLoading(false);
+    } 
+  }
+
+  const sendEachItemToDb = (payload, formValue) => {
+    if(formValue.qualitative.value === "qualitative"){
+
+      labResultItems.forEach(item => saveQualitativeLabResultsItem(item, payload));
+
+    }else{
+      labResultItems.forEach(item => saveLabResultsItem(item, payload));
+    }
   }
 
   const saveLabResults = async (formValue, helpers) => {
@@ -121,23 +148,46 @@ const AddTestResults = () => {
       }      
     
       setLoading(true);
-    
-      const payload = {
-        ...formValue,
-        lab_test_request: formValue.lab_test_request.value
-      }
 
-      console.log(payload);
-    
-      await sendLabResults(payload, auth).then((res) => {
-        console.log(res)
-        sendEachItemToDb(res)
-        toast.success("Requisition Added Successfully!");
-        setLoading(false);
-        dispatch(clearItemsToLabResultsItems());
-        
-        router.push('/dashboard/laboratory');
-      });
+      // save from here if qualitative
+      if(formValue.qualitative.value === "qualitative"){
+
+        const payload = {
+          ...formValue,
+          lab_test_request: formValue.lab_test_request.value,
+          category: formValue.qualitative.value
+        }
+
+        await sendLabResultQualitative(payload, auth).then((res)=> {
+          console.log(res)
+          sendEachItemToDb(res, formValue)
+          toast.success("Result Added Successfully!");
+          setLoading(false);
+          dispatch(clearItemsToLabResultsItems());
+          
+          router.push('/dashboard/laboratory');
+        })
+
+      }else{
+
+        const payload = {
+          ...formValue,
+          lab_test_request: formValue.lab_test_request.value
+        }
+  
+        console.log(payload);
+      
+        await sendLabResults(payload, auth).then((res) => {
+          console.log(res)
+          sendEachItemToDb(res, formValue)
+          toast.success("Result Added Successfully!");
+          setLoading(false);
+          dispatch(clearItemsToLabResultsItems());
+          
+          router.push('/dashboard/laboratory');
+        });
+
+      }
     } catch (err) {
       toast.error(err);
       setLoading(false);
@@ -160,7 +210,7 @@ const AddTestResults = () => {
         onSubmit={saveLabResults}
       >
       <Form className="">
-      <Grid container spacing={2} className='my-2'>
+      <Grid container spacing={2} className='my-2 flex items-center'>
         <Grid item md={4} xs={4}>
           <SeachableSelect
             label="test request ( sample id )"
@@ -169,6 +219,18 @@ const AddTestResults = () => {
           />
           <ErrorMessage
             name="lab_test_request"
+            component="div"
+            className="text-warning text-xs"
+          />      
+        </Grid>
+        <Grid item md={4} xs={4}>
+          <SeachableSelect
+            label="Is Qualitative"
+            name="qualitative"
+            options={[{value: 'qualitative', label: "Qualitative"}, {value: "qauntitative", label: "Quantitative"}].map((item) => ({ value: item.value, label: `${item?.label}` }))}
+          />
+          <ErrorMessage
+            name="qualitative"
             component="div"
             className="text-warning text-xs"
           />      
