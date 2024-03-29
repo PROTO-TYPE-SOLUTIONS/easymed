@@ -167,8 +167,12 @@ then generate the pdf report
 ``/download_labtestresult_pdf/<int:labtestresult_id>/``
 
 
+## Laboratory Integration
+When you click Send to Equipment and select the equiment in the dashboard, the test request gets converted to HL7 or ASTM and sent to the equipment.
 
+The laboratory>addons>lis_list2.py will listen for any incoming data, then check the format, convert that format to json then send to the results endpoint
 
+## System Requirements
 Minimum system specifications
 RAM 8GB
 Disk SSD 250GB
