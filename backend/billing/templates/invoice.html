@@ -54,21 +54,23 @@
     <p>Invoiced to: {{ invoice.patient.first_name }}</p>
 
 
+    <p>Total Amount: {{ invoice.invoice_amount }}</p>
+
     <table>
         <thead>
             <tr>
                 <th>Item Name</th>
                 <th>Price</th>
                 <th>Category</th>
-                <th>Date Created</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
             {% for invoice_item in invoice_items %}
             <tr>
                 <td>{{ invoice_item.item.name }}</td>
-                <td>{{ invoice_item.item.inventory.incoming_item.sale_price|floatformat:2 }}</td>
-                <td>{{ invoice_item.service.category }}</td>
+                <td>{{ invoice_item.sale_price|floatformat:2 }}</td>
+                <td>{{ invoice_item.item.category }}</td>
                 <td>{{ invoice_item.item_created_at }}</td>
             </tr>
             {% endfor %}
