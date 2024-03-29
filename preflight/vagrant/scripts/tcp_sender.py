@@ -4,7 +4,10 @@ HOST = "127.0.0.1"
 PORT = 8090
 
 # Data to send (convert to bytes before sending)
-data = "This is some test data to send through TCP."
+data = (
+  "MSH|^~\&|EASYMED|LABNAME|20240101000000||ADT^O01^ADTOBR|MSG00001|P|2.4\r"
+  "PID|1||{patient_id}||{patient_name}^^^^PI||{date_of_birth}|{gender}^||{address}^^Postal^Jones^Mary||||||||||||||||||||||||||||\r"
+  "OBR|{obr_sequence}|||{sample}|{test_name}||||||||{ordering_physician}||||||||{specimen_collection_date_time}||||||{test_profile}||||\r")
 data_to_send = data.encode()
 
 try:

@@ -176,13 +176,21 @@ class LabTestResultViewSet(viewsets.ModelViewSet):
     serializer_class = LabTestResultSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+
 class LabTestResultPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestResultPanel.objects.all()
     serializer_class = LabTestResultPanelSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)   
 
+    # @classmethod
+    # def create(cls, data, lab_test_result):
+    #     lab_test_result_panel = LabTestResultPanel.objects.create(
+    #         lab_test_result=lab_test_result,
+    #         test_name=data['OBR']['4']['1']['1'],
+    #         value=data['OBX']['5']['1']
+    #     )
 
-
+    #     return lab_test_result_panel
 
 class LabTestResultQualitativeViewSet(viewsets.ModelViewSet):
     queryset = LabTestResult.objects.all()

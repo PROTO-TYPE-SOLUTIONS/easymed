@@ -12,6 +12,7 @@ from .models import LabTestRequest, LabEquipment,LabTestRequestPanel
 
 
 
+
 def create_hl7_message(test_request):
     patient = test_request.patient
     lab_test_request_panels = LabTestRequestPanel.objects.filter(lab_test_request=test_request)
@@ -47,8 +48,6 @@ def create_hl7_message(test_request):
     print("Generated data:", hl7_message)
 
     return hl7_message
-
-
 
 ''''
 Let's get the test request and convert to ASTM format
