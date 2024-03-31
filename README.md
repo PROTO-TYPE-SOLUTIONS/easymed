@@ -156,7 +156,7 @@ The /preflight directory contains set up files for an LIS Host listener.
 If a Lab results is selected as qualitative, use this endpoint
 ``/lab/lab-test-results-qualitative/``
 and the results for the test panels should be sent here
-``lab/lab-test-results-panel-qualitative``
+``/lab/lab-test-results-panel-qualitative``
 Generated report can be gotten here
 ``/lab/download_qualitative_labtestresult_pdf/<int:labtestresult_id>/``
 
