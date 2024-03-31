@@ -1,3 +1,4 @@
+
 import os
 from celery import shared_task
 from django.db.models.signals import post_save
@@ -14,6 +15,12 @@ from patient.models import Appointment
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+
+
+
+from celery import chain
+
+
 
 """Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
@@ -148,9 +155,6 @@ def appointment_assign_notification(appointment_id):
     )
 
 
-
-
-
 '''Send email notifications on Appointment updated'''
 from django.core.mail import send_mail
 @shared_task
@@ -168,8 +172,52 @@ def send_appointment_status_email(appointment_id):
 def send_appointment_status_email(appointment_id):
     appointment = Appointment.objects.get(id=appointment_id)
     subject = f'Appointment #{appointment.id} created'
-    # message = f'Your appointment status has been changed to {appointment.status}.'
     message = f'Appointment has been created for #{appointment.appointment_date_time}. Reason #{appointment.reason}'
     from_email = config('EMAIL_HOST_USER')
     to_email = appointment.patient.email
+    send_mail(subject, message, from_email, [to_email])    
+
+
+
+''''
+This task sends Invoice creation or status update emails with a generated PDF attachment
+'''  
+from company.models import Company
+from django.template.loader import get_template
+import tempfile
+from django.core.mail import EmailMultiAlternatives
+from logging import Logger
+
+
+
+
+@shared_task
+def send_invoice_created_email(invoice_id):
+    invoice = Invoice.objects.get(id=invoice_id)
+    subject = f'Invoice #{invoice} {invoice.status}'
+    message = f'''
+    Invoice #{invoice.invoice_number} created at {invoice.invoice_date} 
+    Status: {invoice.status}
+    Total amount: {invoice.invoice_amount}
+    Description: {invoice.invoice_description}
+    Invoice Items:
+    '''
+    for item in invoice.invoice_items.all():
+        message += f'''
+        - {item.item.name} - {item.item.inventory.sale_price}
+        '''
+    from_email = config('EMAIL_HOST_USER')
+    to_email = invoice.patient.email
+    send_mail(subject, message, from_email, [to_email])   
+
+
+
+
+@shared_task
+def send_invoice_updated_email(invoice_id):
+    invoice = Invoice.objects.get(id=invoice_id)
+    subject = f'Invoice #{invoice} {invoice.status}'
+    message = f'Your invoice #{invoice.invoice_number} has been updated to {invoice.status}.'
+    from_email = config('EMAIL_HOST_USER')
+    to_email = invoice.patient.email
     send_mail(subject, message, from_email, [to_email])    

@@ -12,7 +12,10 @@ from .models import (
     PublicLabTestRequest, 
     LabTestPanel, 
     LabTestResultPanel,
-     LabTestRequestPanel,
+    LabTestRequestPanel,
+    LabTestResultQualitative,
+    LabTestResultPanelQualitative
+
     )
 
 
@@ -65,6 +68,15 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
         model = LabTestRequestPanel
         fields = '__all__'
 
+class LabTestResultQualitativeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LabTestResultQualitative
+        fields = '__all__'
+
+class LabTestResultPanelQualitativeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LabTestResultPanelQualitative
+        fields = '__all__'
 
 class EquipmentTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
