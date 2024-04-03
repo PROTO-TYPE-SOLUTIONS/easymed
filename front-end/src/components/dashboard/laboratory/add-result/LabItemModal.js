@@ -10,13 +10,13 @@ import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from "@/assets/hooks/use-auth";
 
-const AddResultItemModal = () => {
-  const [open, setOpen] = React.useState(false);
+const AddResultItemModal = ({open, setOpen, selected}) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
   const { labTestPanels  } = useSelector((store) => store.laboratory);
-
+  const selectedPanel = labTestPanels.find((panel)=> panel.id ===selected?.test_panel)
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -27,7 +27,7 @@ const AddResultItemModal = () => {
 
   const initialValues = {
     result: "",
-    test_panel: "",
+    test_panel: selectedPanel ? {value:selectedPanel.id, label: selectedPanel.name} : "",
     lab_test_result: 0
   };
 
