@@ -14,7 +14,7 @@ import { SlMinus } from 'react-icons/sl';
 import { useAuth } from '@/assets/hooks/use-auth';
 import LabItemModal from './LabItemModal';
 
-import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests } from '@/redux/features/laboratory';
+import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests, getAllLabTestPanelsByTestRequest } from '@/redux/features/laboratory';
 import SeachableSelect from '@/components/select/Searchable';
 import { sendLabResults, addTestResultPanel, sendLabResultQualitative, addQualitativeTestResultPanel } from '@/redux/service/laboratory';
 
@@ -29,6 +29,11 @@ const getActions = () => {
       label: "Remove",
       icon: <SlMinus className="text-success text-xl mx-2" />,
     },
+    {
+      action: "add-result",
+      label: "Add Results",
+      icon: <SlMinus className="text-success text-xl mx-2" />,
+    },
   ];
   
   return actions;
@@ -38,7 +43,10 @@ const AddTestResults = () => {
 
   const router = useRouter()
   const userActions = getActions();
+  const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
+  const [selected, setSelectedItem] = useState(null)
+  const [selectedOption, setSelectedOPtion] = useState(null)
   const dispatch = useDispatch();
   const { labResultItems  } = useSelector((store) => store.laboratory);
   const { labTestPanels  } = useSelector((store) => store.laboratory);
@@ -46,21 +54,22 @@ const AddTestResults = () => {
   const { labRequests } = useSelector((store) => store.laboratory);
 
   const token = useAuth();
-
-  useEffect(() => {
-    if (token) {
-      dispatch(getAllLabRequests(token));
-    }
-  }, [token]);
-  
   const initialValues = {
     title: "",
     lab_test_request: null,
     qualitative: null    
   };
 
-  console.log("LAB_RESULTS_ITEMS ", labRequests)
 
+  useEffect(() => {
+    if (token) {
+      dispatch(getAllLabRequests(token));
+      if(selected){
+        dispatch(getAllLabTestPanelsByTestRequest(selected.value, token));
+      }
+    }
+  }, [token, selected]);
+  
   const validationSchema = Yup.object().shape({
     lab_test_request: Yup.object().required("This field is required!"),
     qualitative: Yup.object().required("This field is required!"),
@@ -71,6 +80,9 @@ const AddTestResults = () => {
     console.log(data)
     if (menu.action === "remove") {
       dispatch(removeItemToLabResultsItems(data))
+    }else if(menu.action === "add-result"){
+      setOpen(true);
+      setSelectedOPtion(data)
     }
   };
 
@@ -201,7 +213,7 @@ const AddTestResults = () => {
           <h3 className="text-xl"> Lab Result entry </h3>
       </div>
       <div className='flex justify-end'>
-       <LabItemModal />
+        <LabItemModal open={open} setOpen={setOpen} selected={selectedOption}/>
       </div>     
 
       <Formik
@@ -215,13 +227,18 @@ const AddTestResults = () => {
           <SeachableSelect
             label="test request ( sample id )"
             name="lab_test_request"
+            setSelectedItem={setSelectedItem}
             options={labRequests.map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
+            onChange={(selectedOption) => {
+              console.log("VALUE CHANGED");
+              console.log("Selected option:", selectedOption);
+            }}
           />
           <ErrorMessage
             name="lab_test_request"
             component="div"
             className="text-warning text-xs"
-          />      
+          />  
         </Grid>
         <Grid item md={4} xs={4}>
           <SeachableSelect
