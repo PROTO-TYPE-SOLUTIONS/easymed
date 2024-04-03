@@ -233,3 +233,22 @@ export const fetchSpecificPatientLabRequests = (patient_id, auth) =>{
             })
     })
 }
+
+
+export const fetchLabTestPanelsByTestRequestId = (test_request_id, auth) =>{
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID}`,{
+            params:{
+                test_request_id: test_request_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
