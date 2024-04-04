@@ -15,6 +15,8 @@ import { FaProductHunt, FaLock, FaUser } from 'react-icons/fa'
 import { TbBrandBandlab } from 'react-icons/tb'
 import { FaMoneyBillWave } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { BsCapsule } from "react-icons/bs";
+import { GiMicroscope } from "react-icons/gi";
 
 export const menus = [
   {
@@ -47,7 +49,7 @@ export const menus = [
   {
     label: "Laboratory",
     href: "/dashboard/laboratory",
-    icon: <TbBrandBandlab className="text-xl" />,
+    icon: <GiMicroscope className="text-xl" />,
     // children: [
     //   {
     //     label: "Lab Results",
@@ -96,7 +98,7 @@ export const menus = [
   {
     label: "Phamarcy",
     href: "/dashboard/phamarcy",
-    icon: <MdLocalPharmacy className="text-xl" />,
+    icon: <BsCapsule className="text-xl" />,
   },
   {
     label: "Inventory",
