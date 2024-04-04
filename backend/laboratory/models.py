@@ -38,8 +38,13 @@ class LabReagent(models.Model):
         return self.name
 
 class LabTestProfile(models.Model):
+    CATEGORY_CHOICE = (
+        ("quantitative", "  QUANTITATIVE"),
+        ("qualitative", "QUALITATIVE"),
+    )
     name = models.CharField(max_length=255)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    category = models.CharField(max_length=20, default="quantitative", choices=CATEGORY_CHOICE,)
 
     def __str__(self):
         return self.name    
@@ -63,6 +68,7 @@ class LabTestRequest(models.Model):
     sample_collected = models.BooleanField(default=False, null=True)
     sample = models.CharField(max_length=100, null=True, blank=True)
     requested_on = models.TimeField(auto_now_add=True, null=True, blank=True)
+
 
     def __str__(self):
         return str(self.id)

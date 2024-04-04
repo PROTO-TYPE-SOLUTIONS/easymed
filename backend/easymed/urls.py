@@ -18,32 +18,17 @@ from drf_spectacular.views import (
 
 
 urlpatterns = [
-    # announcement
     path('announcement/', include('announcement.urls')),
-
     path('admin/', admin.site.urls),
-    # patients
     path('patients/', include('patient.urls')),
-    # lab
     path('lab/', include('laboratory.urls')),
-    # billing
     path('billing/', include('billing.urls')),
-    # inventory
     path('inventory/', include('inventory.urls')),
-    # authperms/sysadmin
     path('authperms/', include('authperms.urls')),
-    # customuser
     path('customuser/', include('customuser.urls')),
-    # users
     path('users/', include('customuser.urls')),
-
-    # reports
     path('reports/', include('reports.urls')),
-
-    # pharmacy
     path('pharmacy/', include('pharmacy.urls')),
-
-    # company
     path('company/', include('company.urls')),
 
     # schemas
