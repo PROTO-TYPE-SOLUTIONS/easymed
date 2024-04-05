@@ -54,6 +54,7 @@ export const API_URL = {
   FETCH_LAB_TEST_RESULT_PANELS: "/lab/lab-test-results-panel/",
   QUALITATIVE_LAB_TEST_RESULTS:"/lab/lab-test-results-qualitative/",
   QUALITATIVE_LAB_TEST_RESULTS_PANEL_ITEM: "/lab/lab-test-results-panel-qualitative/",
+  GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID: "lab/lab-test-request-panels-by-lab-test-request-id/",
   SEND_LAB_RESULTS_ITEMS: "/lab/lab-test-result-item/",
 
   /***************** INVENTORY APIS **********************/
@@ -177,6 +178,7 @@ export const APP_API_URL = {
   FETCH_LAB_TEST_RESULT_PANELS: "/api/laboratory/lab-test-results-panel/",
   QUALITATIVE_LAB_TEST_RESULTS:"/api/laboratory/lab-test-results-qualitative/",
   QUALITATIVE_LAB_TEST_RESULTS_PANEL_ITEM: "/api/laboratory/lab-test-results-panel-qualitative/",
+  GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID: "/api/laboratory/lab-test-request-panels-by-lab-test-request-id/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",

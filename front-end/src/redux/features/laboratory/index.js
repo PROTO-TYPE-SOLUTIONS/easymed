@@ -3,7 +3,9 @@ import { fetchLabRequests,
     fetchLabResults,fetchLabEquipment, 
     fetchLabTestProfile, fetchLabTestPanels, 
     fetchPublicLabRequests, fetchSpecificPatientLabRequests,
-    fetchLabTestPanelsByProfileId } from "@/redux/service/laboratory";
+    fetchLabTestPanelsByProfileId,
+    fetchLabTestPanelsByTestRequestId 
+  } from "@/redux/service/laboratory";
 
 
 const initialState = {
@@ -145,6 +147,18 @@ export const getAllLabTestPanelsByProfile = (profile_id, auth) => async (dispatc
   try {
     const response = await fetchLabTestPanelsByProfileId(profile_id, auth);
     dispatch(setLabTestPanelsById(response));
+  } catch (error) {
+    console.log("LAB_TEST_PANELS_BY_PROFILE_ID_ERROR ", error);
+  }
+};
+
+export const getAllLabTestPanelsByTestRequest = (test_request_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchLabTestPanelsByTestRequestId(test_request_id, auth);
+    dispatch(clearItemsToLabResultsItems())
+    response.forEach((item)=> {
+      dispatch(addItemToLabResultsItems(item));
+    })
   } catch (error) {
     console.log("LAB_TEST_PANELS_BY_PROFILE_ID_ERROR ", error);
   }

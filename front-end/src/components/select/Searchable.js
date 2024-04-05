@@ -2,12 +2,13 @@ import React from 'react';
 import Select from 'react-select';
 import { useField, ErrorMessage } from 'formik';
 
-const SeachableSelect = ({ label, name, options, ...props }) => {
+const SeachableSelect = ({ setSelectedItem, label, name, options, ...props }) => {
   const [field, meta, helpers] = useField({ ...props, name: name });
   const { setValue } = helpers;
 
   const handleChange = (selectedOption) => {
     setValue(selectedOption);
+    setSelectedItem(selectedOption)
   };
 
   return (
