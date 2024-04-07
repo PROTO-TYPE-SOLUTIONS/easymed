@@ -32,7 +32,7 @@ const getActions = () => {
   return actions;
 };
 
-const LabResultDataGrid = ({ labResults }) => {
+const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const auth = useAuth();
@@ -111,8 +111,50 @@ const LabResultDataGrid = ({ labResults }) => {
       </Grid>
 
       {/* DATAGRID STARTS HERE */}
+      <h2 className='text-xl my-4 text-orange'>Quantitative Results</h2>
       <DataGrid
         dataSource={labResults}
+        allowColumnReordering={true}
+        rowAlternationEnabled={true}
+        showBorders={true}
+        remoteOperations={true}
+        showColumnLines={true}
+        showRowLines={true}
+        wordWrapEnabled={true}
+        allowPaging={true}
+        // height={"70vh"}
+        className="w-full shadow"
+      >
+        <HeaderFilter visible={true} />
+        <Scrolling rowRenderingMode='virtual'></Scrolling>
+        <Paging defaultPageSize={10} />
+        <Pager
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
+        />
+        <Column dataField="id" caption="Result ID" />
+        <Column dataField="title" caption="Title"  />
+        <Column dataField="date_created" caption="Date Created" />
+        <Column
+          dataField="lab_test_request"
+          caption="Test Request"
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column 
+          dataField="" 
+          caption=""
+          cellRender={actionsFunc}
+        />
+      </DataGrid>
+
+      <h2 className='text-xl my-4 text-orange'>Qualitative Results</h2>
+
+      <DataGrid
+        dataSource={qualitativeLabResults}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}

@@ -57,7 +57,7 @@ const AddTestResults = () => {
   const initialValues = {
     title: "",
     lab_test_request: null,
-    qualitative: null    
+    qualitative:  null
   };
 
 
@@ -184,7 +184,8 @@ const AddTestResults = () => {
 
         const payload = {
           ...formValue,
-          lab_test_request: formValue.lab_test_request.value
+          lab_test_request: formValue.lab_test_request.value,
+          category: formValue.qualitative.value
         }
   
         console.log(payload);
@@ -221,18 +222,22 @@ const AddTestResults = () => {
         validationSchema={validationSchema}
         onSubmit={saveLabResults}
       >
+        {({ values, setFieldValue }) => (
       <Form className="">
       <Grid container spacing={2} className='my-2 flex items-center'>
         <Grid item md={4} xs={4}>
           <SeachableSelect
             label="test request ( sample id )"
             name="lab_test_request"
-            setSelectedItem={setSelectedItem}
-            options={labRequests.map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
-            onChange={(selectedOption) => {
-              console.log("VALUE CHANGED");
-              console.log("Selected option:", selectedOption);
+            // setSelectedItem={setSelectedItem}
+            setSelectedItem={(selectedOption) => {
+              console.log("THZ IZ ZELECTED", selectedOption)
+              setSelectedItem(selectedOption);
+              const selectedReq = labRequests.find((req)=> req.id === selectedOption?.value)
+
+              setFieldValue('qualitative', selectedReq ? {value:selectedReq.category, label: selectedReq?.category} : null );
             }}
+            options={labRequests.map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
           />
           <ErrorMessage
             name="lab_test_request"
@@ -244,7 +249,7 @@ const AddTestResults = () => {
           <SeachableSelect
             label="Is Qualitative"
             name="qualitative"
-            options={[{value: 'qualitative', label: "Qualitative"}, {value: "qauntitative", label: "Quantitative"}].map((item) => ({ value: item.value, label: `${item?.label}` }))}
+            options={[{value: 'qualitative', label: "qualitative"}, {value: "quantitative", label: "quantitative"}].map((item) => ({ value: item.value, label: `${item.label}` }))}
           />
           <ErrorMessage
             name="qualitative"
@@ -332,7 +337,7 @@ const AddTestResults = () => {
         </div>
       </Grid>
 
-      </Form>
+      </Form>)}
       </Formik>
     </section>
   )
