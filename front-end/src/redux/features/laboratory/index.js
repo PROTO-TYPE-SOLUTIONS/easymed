@@ -4,12 +4,14 @@ import { fetchLabRequests,
     fetchLabTestProfile, fetchLabTestPanels, 
     fetchPublicLabRequests, fetchSpecificPatientLabRequests,
     fetchLabTestPanelsByProfileId,
-    fetchLabTestPanelsByTestRequestId 
+    fetchLabTestPanelsByTestRequestId,
+    fetchQualitativeLabRequests
   } from "@/redux/service/laboratory";
 
 
 const initialState = {
   labResults: [],
+  qualitativeLabResults: [],
   labResultItems: [],
   labTestPanels: [],
   labTestPanelsById: [],
@@ -26,6 +28,9 @@ const LaboratorySlice = createSlice({
   reducers: {
     setLabResults: (state, action) => {
       state.labResults = action.payload;
+    },
+    setQualitativeLabResults: (state, action) => {
+      state.qualitativeLabResults = action.payload;
     },
     setLabRequests: (state, action) => {
       state.labRequests = action.payload;
@@ -75,7 +80,7 @@ export const { setLabResults,
   setLabRequests, setPublicLabRequests, 
   setLabEquipments,setLabTestProfile, setSpecificPatientLabRequests,
   setLabResultItems, setLabResultItemsAfterRemovingItem, 
-  clearLabResultItems, setLabTestPanels, setLabTestPanelsById
+  clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults
 } = LaboratorySlice.actions;
 
 
@@ -85,6 +90,15 @@ export const getAllLabResults = (auth) => async (dispatch) => {
     dispatch(setLabResults(response));
   } catch (error) {
     console.log("LAB_ERROR ", error);
+  }
+};
+
+export const getAllQualitativeLabResults = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchQualitativeLabRequests(auth);
+    dispatch(setQualitativeLabResults(response));
+  } catch (error) {
+    console.log("QUALITATIVE_RESULTS_LAB_ERROR ", error);
   }
 };
 
