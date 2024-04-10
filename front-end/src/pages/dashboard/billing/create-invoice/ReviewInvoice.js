@@ -13,6 +13,7 @@ import BillingViewSelectedLabtests from '@/components/dashboard/billing/payOverv
 import BillingViewSelectedAppointments from '@/components/dashboard/billing/payOverview/BillingViewSelectedAppointments';
 import FormButton from '@/components/common/button/FormButton';
 import PayAmountsDisplay from '@/components/dashboard/billing/payOverview/PayAmountsDisplay';
+import { getAllLabTestProfiles } from '@/redux/features/laboratory';
 
 const ReviewInvoice = ({ 
     selectedOption, 
@@ -45,6 +46,7 @@ const ReviewInvoice = ({
 
 
     const { invoices } = useSelector((store) => store.billing);
+    const { labTestProfiles } = useSelector((store) => store.laboratory);
     const auth = useAuth()
     const invoiceRef = useRef();
     const router = useRouter();
@@ -168,17 +170,22 @@ const ReviewInvoice = ({
 
     const saveEachLabReqInvoiceItem = (savedInvoice) => {
         selectedLabRequests.forEach((labREq)=>{
-            console.log(labREq)
-            const payloadInvoiceItemData = {
-                item_name: labREq.test_profile_name,
-                payment_mode:labREq.payMethod ? payMethods[labREq.payMethod] : 2,
-                item_price: labREq.sale_price,
-                invoice: savedInvoice.id,
-                item: parseInt(labREq.item)
-            }
-            console.log("THESE ARE LAB REQ INVOICE ITEMS",labREq)
-            saveInvoiceItem(payloadInvoiceItemData);
+            const item_ID = labTestProfiles.find((profile)=> profile.id === labREq.test_profile)
 
+            if(item_ID){
+
+                const payloadInvoiceItemData = {
+                    item_name: labREq.test_profile_name,
+                    payment_mode:labREq.payMethod ? payMethods[labREq.payMethod] : 2,
+                    item_price: labREq.sale_price,
+                    invoice: savedInvoice.id,
+                    item: parseInt(item_ID.item)
+                }
+                saveInvoiceItem(payloadInvoiceItemData);
+
+            }else(
+                toast.error("Item not Found")
+            )
         })
 
     }
@@ -247,6 +254,7 @@ const ReviewInvoice = ({
             totalPrescribedDrugsSum();
             totalLabReqSum();
             dispatch(getAllInvoices(auth));
+            dispatch(getAllLabTestProfiles(auth))
         }
     },[selectedOption, selectedAppointments, selectedLabRequests, selectedPrescribedDrugs, auth])
 
