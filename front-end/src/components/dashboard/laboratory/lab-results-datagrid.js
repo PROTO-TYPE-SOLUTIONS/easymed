@@ -48,8 +48,9 @@ const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
   });
 
   const handlePrint = async (data) => {
+    const pdf_endpoint = data.category ?  "_labtestresult_pdf" : "_qualitative_labtestresult_pdf"
       try{
-          const response = await downloadPDF(data.id, "_labtestresult_pdf", auth)
+          const response = await downloadPDF(data.id, `${pdf_endpoint}`, auth)
           window.open(response.link, '_blank');
           toast.success("got pdf successfully")
 
