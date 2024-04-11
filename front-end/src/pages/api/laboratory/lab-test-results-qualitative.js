@@ -9,7 +9,30 @@ export const config = {
     }
 }
 export default async function handler(req, res) {
-    if (req.method === API_METHODS.POST) {
+    if (req.method === API_METHODS.GET) {
+        try {
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
+            await backendAxiosInstance.get(`${API_URL.QUALITATIVE_LAB_TEST_RESULTS}`,config)
+                .then(response => {
+                    res.status(200).json(response.data);
+                })
+                .catch(e => {
+                        res.status(e.response?.status ?? 500).json(e.response?.data)
+                    }
+                )
+
+        } catch (e) {
+            res.status(500).json(e.message);
+        }
+    }
+    else if (req.method === API_METHODS.POST) {
         try {
             if (!req.headers?.authorization){
                 res.status(401).send('Unauthorized');

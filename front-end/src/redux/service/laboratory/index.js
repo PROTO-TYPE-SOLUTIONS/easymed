@@ -29,6 +29,19 @@ export const fetchLabRequests = (auth) =>{
     })
 }
 
+export const fetchQualitativeLabRequests = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.QUALITATIVE_LAB_TEST_RESULTS}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const fetchLabEquipment = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
