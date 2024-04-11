@@ -70,6 +70,9 @@ const LabRequestDataGrid = ({ labRequests }) => {
     return rowData.patient_first_name + " " + rowData.patient_last_name;
   }
 
+  const sampleCollectedTemplate = (cellData) => {
+    return cellData.value ? 'Collected' : 'Not Collected';
+  };
 
   return (
     <>
@@ -136,7 +139,12 @@ const LabRequestDataGrid = ({ labRequests }) => {
           showNavigationButtons={showNavButtons}
         />
         <Column dataField="sample" caption="Sample" width={100} />
-        <Column dataField="sample_collected" caption="Sample Collected" width={100} />
+        <Column 
+          dataField="" 
+          caption="Sample Collected" 
+          width={100} 
+          customizeText={sampleCollectedTemplate}
+        />
         <Column dataField="test_profile_name" caption="Profile name" width={130} />
         <Column 
           dataField="" 
