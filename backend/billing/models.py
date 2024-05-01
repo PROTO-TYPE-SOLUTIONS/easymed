@@ -1,6 +1,6 @@
 from django.db import models
 from inventory.models import Item
-from patient.models import Patient
+# from patient.models import Patient
 from django.db.models import Sum
 
 
@@ -26,7 +26,7 @@ class Invoice(models.Model):
         ('pending', 'Pending'),
         ('paid', 'Paid'),
     )
-    patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True)
+    # patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True)
     invoice_number = models.CharField(max_length=50)
     invoice_date = models.DateField()
     invoice_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)

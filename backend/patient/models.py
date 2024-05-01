@@ -3,8 +3,10 @@ from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item
+from billing.models import Invoice, InvoiceItem
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 # User = get_user_model()
 
@@ -124,12 +126,15 @@ class PublicAppointment(models.Model):
 
 class Triage(models.Model):
     created_by = models.CharField(max_length=45)
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     temperature = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     weight = models.IntegerField()
     pulse = models.PositiveIntegerField()
+    diastolic = models.PositiveIntegerField()
+    systolic = models.PositiveIntegerField()
+    bmi = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.CharField(max_length=300, blank=True)
 
@@ -213,4 +218,23 @@ class Referral(models.Model):
             if not self.referred_by:
                 raise ValueError("You must set the 'referred_by' user before saving.")
         super().save(*args, **kwargs)
+
+class AttendanceProcess(models.Model):
+    invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE)
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    @classmethod
+    def create_attendance_process(cls, appointment_id):
+        # Get or create Invoice
+        invoice = Invoice.objects.create(amount=0)
+        InvoiceItem.objects.create(invoice=invoice.id, item=appointment.id)
+
+        # Get Appointment instance by id
+        appointment = Appointment.objects.get(pk=appointment_id)
+
+        # Create AttendanceProcess
+        attendance_process = cls.objects.create(invoice=invoice, appointment=appointment)
+
+        return attendance_process
 
