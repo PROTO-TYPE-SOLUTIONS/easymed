@@ -1,8 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchServices,fetchPatient, fetchPatientProfile, fetchPatientTriage, searchPatients, fetchPatientPrescribeDrugs } from "@/redux/service/patients";
+import { 
+  fetchServices,
+  fetchPatient, 
+  fetchPatientProfile, 
+  fetchPatientTriage, 
+  searchPatients, 
+  fetchPatientPrescribeDrugs, 
+  fetchAllAttendanceProcesses
+} from "@/redux/service/patients";
 
 
 const initialState = {
+  processes: [],
   services: [],
   patients: [],
   prescriptionItems: [],
@@ -16,6 +25,9 @@ const PatientSlice = createSlice({
   name: "patients",
   initialState,
   reducers: {
+    setProcesses: (state, action) => {
+      state.processes = action.payload;
+    },
     setServices: (state, action) => {
       state.services = action.payload;
     },
@@ -56,7 +68,27 @@ const PatientSlice = createSlice({
   },
 });
 
-export const { setServices,setPatients,setProfile,setPatientTriage,setSearchedPatients, removePrescriptionItem, setPatientPrescriptionItem, clearPrescriptionItems, setPatientPrescribedDrugs } = PatientSlice.actions;
+export const { 
+  setServices,
+  setPatients,
+  setProfile,
+  setPatientTriage,
+  setSearchedPatients, 
+  removePrescriptionItem, 
+  setPatientPrescriptionItem, 
+  clearPrescriptionItems, 
+  setPatientPrescribedDrugs,
+  setProcesses,
+} = PatientSlice.actions;
+
+export const getAllProcesses = () => async (dispatch) => {
+  try {
+    const response = await fetchAllAttendanceProcesses();
+    dispatch(setProcesses(response));
+  } catch (error) {
+    console.log("ATTENDANCE_PROCESSES_ERROR ", error);
+  }
+};
 
 
 export const getAllServices = () => async (dispatch) => {

@@ -1,40 +1,83 @@
-import React from 'react'
-import { Grid } from '@mui/material'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux';
+import { Dialog, DialogContent, Grid } from '@mui/material'
+import appointment from '@/redux/features/appointment';
+import AssignDoctorModal from '../reception-interface/assign-doctor-modal';
+
+import { LiaUserNurseSolid } from "react-icons/lia";
+import { FaUserDoctor } from "react-icons/fa6";
+import { BsCapsule } from "react-icons/bs";
+import { GiMicroscope } from "react-icons/gi";
+import { Form, Formik } from 'formik';
 
 
-const AppointmentCard = ({ appointments }) => {
+const AppointmentCard = ({ appointments, processes }) => {
+    const [assignOpen, setAssignOpen]=useState(false)
+    const [selectedData, setSelectedData] = useState({})
+    const {patients} =  useSelector((store)=> store.patient)
 
-    const displayAppointments = appointments.map((appointment)=>{
-        const timestamp = appointment.appointment_date_time;
-        const dateTime = new Date(timestamp);
-    
-        // Get the numeric time of the day (e.g., '16:20')    
-        const appointmentTime = dateTime.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-        return (
-        <Grid key={`appointments_${appointment.id}`} item xs={4} className='bg-white py-4 px-2 rounded-lg'>
-            <div className='border-b border-gray py-2 flex flex-col gap-2'>
-                <h5 className={`${appointment.assigned_doctor ? "font-semibold text-lg text-primary" : "text-warning" } `}>{appointment.assigned_doctor ? appointment.assigned_doctor : "waiting assignment"}</h5>
-                <span className='text-xxs'>neural surgeon</span>
-                <div className='flex justify-between items-center'>
-                    <span className='text-xs text-primary_light'>{timestamp.split("T")[0]}</span>
-                    <span className='text-xs text-white bg-primary px-2 py-1 rounded-lg '>{appointmentTime}</span>
-                </div>
-            </div>
-            <div className='border-b border-gray py-2 flex flex-col gap-4'>
-                <h5 className='font-semibold text-lg text-primary'>{`${appointment.first_name} ${appointment.second_name}`}</h5>
-                <span className=''>{appointment.reason}</span>
-            </div>
-            <div className='flex items-center justify-center py-4 px-2'>
-                <button className='w-full py-2 rounded-lg bg-primary_light text-white'>reschedule</button>
-            </div>
-        </Grid>
-    )
+    const handleClose = () => {
+        setAssignOpen(false);
+    };
+
+    const sendForTriage = (patient, process) => {
+        const selectedData = {
+            ...process,
+            patient_name: patient.first_name + " " + patient.second_name
+        }
+        console.log(selectedData)
+        setSelectedData(selectedData)
+        setAssignOpen(true)
+    }
+
+    const displayInitiatedAttendanceProcesses = processes.filter((process)=> process.track === "reception").map((process)=> {
+
+        const linkedPatient = patients.find((patient)=> patient.id === process.patient)
+        console.log("APPOINTMENT FOUND", linkedPatient)
+        if(linkedPatient){   
+            return (
+                <Grid key={`appointments_${process.id}`} item xs={4} className='bg-white py-4 px-2 rounded-lg'>
+                    <div className='flex flex-col gap-2'>
+                        <div className='py-2 flex flex-col gap-2'>
+                            <div className='flex justify-between items-center'>
+                                <LiaUserNurseSolid onClick={()=>sendForTriage(linkedPatient, process)} className='h-10 w-10 cursor-pointer'/>
+                                {/* <FaUserDoctor  className='h-10 w-10 cursor-pointer'/> */}
+                                <GiMicroscope className='h-10 w-10 cursor-pointer'/>
+                                <BsCapsule className='h-10 w-10 cursor-pointer'/>
+                            </div>
+                        </div>
+                        <div className='border-b border-gray py-2 flex flex-col gap-2'>
+                            <div className=''>
+                                {/* <h5 className='font-semibold text-sm text-warning'>{`${process.track}`}</h5> */}
+                                <h5 className='font-medium text-xxs text-warning'>{`${process.track_number}`}</h5>
+                            </div>
+                            <div className='flex justify-between items-center'>
+                                <h5 className='font-semibold text-sm text-primary'>{`${linkedPatient.first_name} ${linkedPatient.second_name}`}</h5>
+                                <h5 className='font-semibold text-sm text-primary'>{`${linkedPatient.age}`}</h5>
+                            </div>
+                            <div className='flex justify-between items-center'>
+                                <h5 className='font-semibold text-sm text-primary'>{`${linkedPatient.phone}`}</h5>
+                                <h5 className='font-semibold text-sm text-primary'>{`${linkedPatient.gender}`}</h5>
+                            </div>
+                            <span className=''>{process.reason}</span>
+                        </div>
+                    </div>
+                </Grid>
+            )
+
+        }
+
+
     })
 
   return (
-    <div className='grid grid-cols-3 gap-4'>
-        {displayAppointments}
-    </div>
+    <>
+        <div className='grid grid-cols-3 gap-4'>
+            {displayInitiatedAttendanceProcesses}
+        </div>
+        <AssignDoctorModal {...{ assignOpen, setAssignOpen, selectedData }} />
+    </>
+
   )
 }
 

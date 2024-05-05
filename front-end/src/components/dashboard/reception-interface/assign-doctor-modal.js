@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid, Typography } from "@mui/material";
+import { DialogTitle, Grid, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import { assignDoctor } from "@/redux/service/patients";
 import { getAllDoctors } from "@/redux/features/doctors";
@@ -15,18 +15,19 @@ import {
   getAllPatientAppointments,
 } from "@/redux/features/appointment";
 import FormikFieldDateTimePicker from "@/components/dateandtime/FormikFieldDateTimePicker";
+import { updateAttendanceProcesses } from "@/redux/service/patients";
 
 
 export default function AssignDoctorModal({
-  selectedRowData,
   assignOpen,
   setAssignOpen,
+  selectedData,
 }) {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const { doctors } = useSelector((store) => store.doctor);
   const authUser = useAuth();
-  console.log("SELECTED_ROW ", selectedRowData);
+  console.log("SELECTED_ROW ", selectedData);
 
   const timezoneList = {
     nairobi: "Africa/Nairobi" // +3:00
@@ -50,18 +51,11 @@ export default function AssignDoctorModal({
   const status = ["pending", "confirmed", "cancelled"];
 
   const initialValues = {
-    patient: null,
-    appointment_date_time: selectedRowData?.appointment_date_time,
-    status: selectedRowData?.status,
-    reason: selectedRowData?.reason,
-    fee: selectedRowData?.sale_price,
-    assigned_doctor: null,
-    item_id: null,
+    doctor: null,
   };
 
   const validationSchema = Yup.object().shape({
-    assigned_doctor: Yup.object().required("Select a doctor!"),
-    status: "",
+    doctor: Yup.object().required("Select a doctor!"),
   });
 
   const handleAssignDoctor = async (formValue, helpers) => {
@@ -72,15 +66,13 @@ export default function AssignDoctorModal({
       setLoading(true);
       const formData = {
         ...formValue,
-        id:selectedRowData.id,
-        patient: selectedRowData.patient,
-        assigned_doctor: parseInt(formValue.assigned_doctor.value),
+        doctor: parseInt(formValue.doctor.value),
+        track: "triage"
       };
-      await assignDoctor(formData).then(() => {
+      await updateAttendanceProcesses(formData, selectedData?.id).then(() => {
         helpers.resetForm();
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
-        dispatch(getAllPatientAppointments());
         handleClose();
       });
     } catch (err) {
@@ -97,8 +89,10 @@ export default function AssignDoctorModal({
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
+        <DialogTitle>
+        <p className="text-sm font-semibold">{`send ${selectedData.patient_name} for Triage`}</p>
+        </DialogTitle>
         <DialogContent>
-          <p>Are you sure you want to assign a doctor to selected patient?</p>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -109,78 +103,15 @@ export default function AssignDoctorModal({
               <Grid container spacing={2}>
                 <Grid item md={12} xs={12}>
                 <SeachableSelect
-                  label="Assign Doctor"
-                  name="assigned_doctor"
+                  label="Assign A Doctor"
+                  name="doctor"
                   options={doctors.map((item) => ({ value: item.id, label: `${item?.first_name} ${item?.last_name}` }))}
                 />
                 <ErrorMessage
-                  name="assigned_doctor"
+                  name="doctor"
                   component="div"
                   className="text-warning text-xs"
                 />
-                </Grid>
-                <Grid item md={12} xs={12}>
-                <label htmlFor="status">Select Status</label>
-                <Field
-                  as="select"
-                  className="block mt-1 border border-gray rounded-md py-2 text-sm px-4 focus:outline-none w-full"
-                  name="status"
-                >
-                  <option value="">Select Status</option>
-                  {status.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </Field>
-                <ErrorMessage
-                  name="status"
-                  component="div"
-                  className="text-warning text-xs"
-                />
-                </Grid>
-                <Grid item md={12} xs={12}>
-                  <label htmlFor="fee-entered">Fees</label>
-                  <Field
-                    className="block mt-1 border border-gray rounded-md py-2 text-sm px-4 focus:outline-none w-full"
-                    name="fee"
-                    placeholder="Enter Fee"
-                  />
-                  <ErrorMessage
-                    name="fee"
-                    component="div"
-                    className="text-warning text-xs"
-                  />
-                </Grid>
-                <Grid item md={12} xs={12}>
-                  <label htmlFor="appointment_date_time">Appointment date</label>
-                  <Field
-                    name="appointment_date_time"
-                    component={FormikFieldDateTimePicker}
-                    inputVariant="outlined"
-                    timezone={timezone}
-                    helperText="Timezone specified"
-                    clearable
-                    margin="dense"
-                  />
-                  <ErrorMessage
-                      name="appointment_date_time"
-                      component="div"
-                      className="text-warning text-xs"
-                  />
-                </Grid>
-                <Grid item md={12} xs={12}>
-                <label htmlFor="reason">Reason</label>
-                  <Field
-                    className="block mt-1 border border-gray rounded-md py-2 text-sm px-4 focus:outline-none w-full"
-                    name="reason"
-                    placeholder="Reason"
-                  />
-                  <ErrorMessage
-                    name="reason"
-                    component="div"
-                    className="text-warning text-xs"
-                  />
                 </Grid>
                 <Grid item md={12} xs={12}>
                   <div className="flex items-center gap-2 justify-end mt-3">
@@ -207,7 +138,7 @@ export default function AssignDoctorModal({
                           ></path>
                         </svg>
                       )}
-                      Proceed
+                      Proceed for Triage
                     </button>
                     <p
                       className="border border-warning text-sm rounded-xl px-3 py-2 cursor-pointer"

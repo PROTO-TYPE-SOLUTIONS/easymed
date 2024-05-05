@@ -1,5 +1,5 @@
 from django.db import models
-from patient.models import Patient
+# from patient.models import Patient
 from django.conf import settings
 from customuser.models import CustomUser
 from inventory.models import Item
@@ -61,9 +61,9 @@ class LabTestPanel(models.Model):
 
 
 class LabTestRequest(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
-    note = models.TextField()
+    #note = models.TextField(null=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     sample_collected = models.BooleanField(default=False, null=True)
     sample = models.CharField(max_length=100, null=True, blank=True)
@@ -133,7 +133,7 @@ class PublicLabTestRequest(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
     )
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     appointment_date = models.DateField()
     status = models.CharField( max_length=10, choices=STATUS_CHOICES, default='pending')
     date_created = models.DateField(auto_now_add=True)
@@ -149,15 +149,15 @@ class PublicLabTestRequest(models.Model):
     sample_collected = models.BooleanField(default=False,null=True, blank=True)
     sample_id = models.CharField(max_length=100, null=True, blank=True)
 
-    def __str__(self):
-        return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
+    # def __str__(self):
+    #     return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
     
-    @property
-    def age(self):
-        if self.patient.date_of_birth:
-            patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
-            return patient_age
-        return None
+    # @property
+    # def age(self):
+    #     if self.patient.date_of_birth:
+    #         patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
+    #         return patient_age
+    #     return None
     
 
 

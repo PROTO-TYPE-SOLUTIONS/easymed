@@ -34,24 +34,24 @@ const getActions = () => {
   let actions = [
     {
       action: "add",
-      label: "Create Appointment",
+      label: "New Visit",
       icon: <MdAddCircle className="text-success text-xl mx-2" />,
     },
-    {
-      action: "update",
-      label: "Update Patient",
-      icon: <BiEdit className="text-success text-xl mx-2" />,
-    },
-    {
-      action: "prescribe",
-      label: "Prescribe",
-      icon: <GiMedicinePills className="text-card text-xl mx-2" />,
-    },
-    {
-      action: "send to lab",
-      label: "Send To Lab",
-      icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
-    },
+    // {
+    //   action: "update",
+    //   label: "Update Patient",
+    //   icon: <BiEdit className="text-success text-xl mx-2" />,
+    // },
+    // {
+    //   action: "prescribe",
+    //   label: "Prescribe",
+    //   icon: <GiMedicinePills className="text-card text-xl mx-2" />,
+    // },
+    // {
+    //   action: "send to lab",
+    //   label: "Send To Lab",
+    //   icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
+    // },
   ];
 
   return actions;

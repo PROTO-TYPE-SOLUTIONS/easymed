@@ -9,6 +9,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { updatePrescriptionStatus } from "@/redux/features/pharmacy";
 import { updatePrescription } from "@/redux/service/pharmacy";
+import { updateAttendanceProcesses } from "@/redux/service/patients";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -17,13 +18,14 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { prescriptionsPrescribed } = useSelector((store) => store.prescription);
+  const { prescriptionsPrescribed, prescriptions } = useSelector((store) => store.prescription);
   const { doctors } = useSelector((store) => store.doctor);
   const { patients } = useSelector((store) => store.patient);
   const auth = useAuth();
-  const doc = doctors.find( doc => doc.id === selectedRowData.created_by);
-  const patient_id = prescriptionsPrescribed[0]?.patient
-  const patient = patients .find (patient => patient.id === patient_id)
+  const doc = doctors.find( doc => doc.id === selectedRowData.doctor);
+  const patient = patients.find (patient => patient.id === selectedRowData.patient)
+  const prescription = prescriptions.find((prescription)=> prescription.id === selectedRowData.prescription)
+  console.log("SELECTED ROW DATA", auth)
 
   const handleClose = () => {
     setOpen(false);
@@ -40,7 +42,8 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
       await updatePrescription( payload, auth).then(() => {
 
           setLoading(true);
-          dispatch(updatePrescriptionStatus(selectedRowData.id))
+          updateAttendanceProcesses({ pharmacist: auth.user_id }, payload.id)
+          dispatch(updatePrescriptionStatus(selectedRowData.prescription))
           toast.success("successfully updated status")
           setOpen(false);
           setLoading(false);
@@ -84,8 +87,8 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
         <Grid item xs={4}>
           <div>
             <p className="text-primary text-xl uppercase">created</p>
-            <p>{selectedRowData.start_date}</p>
-            <p className={`${selectedRowData.status}` === 'pending' ? "text-warning" : "text-success"} >{selectedRowData.status}</p>            
+            <p>{prescription.start_date}</p>
+            <p className={`${prescription.status}` === 'pending' ? "text-warning" : "text-success"} >{prescription.status}</p>            
           </div>
         </Grid>
 
@@ -143,7 +146,7 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
           <button
             onClick={handleDispense}
             className="bg-primary rounded-xl text-sm px-4 py-2 text-white"
-            disabled={`${selectedRowData.status}` === 'dispensed' }
+            disabled={`${prescription.status}` === 'dispensed' }
           >
             {loading && (
               <svg

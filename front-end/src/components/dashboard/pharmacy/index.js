@@ -9,8 +9,9 @@ import { getAllPrescriptions, getAllPrescribedDrugs, getAllPrescriptionsPrescrib
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getAllPatients } from "@/redux/features/patients";
 import { downloadPDF } from '@/redux/service/pdfs';
+import { getAllPatients, getAllProcesses } from "@/redux/features/patients";
+
 
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
@@ -45,11 +46,25 @@ const PharmacyDataGrid = () => {
   const userActions = getActions();
   const [open,setOpen] = useState(false)
   const prescriptionsData = useSelector((store)=>store.prescription)
-  const doctorsData = useSelector((store)=>store.doctor.doctors)
+  const { doctors } = useSelector((store)=>store.doctor)
   const [selectedRowData,setSelectedRowData] = useState({});
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const { processes, patients } = useSelector((store)=> store.patient)
+  const filteredProcesses = processes.filter((process) => process.track === "pharmacy");
+
+  console.log("FILTERED PROCESSES TRIAGE", filteredProcesses)
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
+
+  const doctorNameRender = (cellData) => {
+    const doctor = doctors.find((doctor) => doctor.id === cellData.data.doctor);
+    return doctor ? `${doctor.first_name} ${doctor.last_name}` : ""
+  }
 
   const dispatch = useDispatch();
   const auth = useAuth();
@@ -74,12 +89,13 @@ const PharmacyDataGrid = () => {
       dispatch(getAllPrescribedDrugs(auth));
       dispatch(getAllDoctors(auth));
       dispatch(getAllPatients())
+      dispatch(getAllProcesses())
     }
   }, [auth]);
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "dispense") {
-      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+      dispatch(getAllPrescriptionsPrescribedDrugs(data.prescription, auth))
       setSelectedRowData(data);
       setOpen(true);
     }else if (menu.action === "print"){
@@ -122,7 +138,7 @@ const PharmacyDataGrid = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={prescriptionsData.prescriptions}
+        dataSource={filteredProcesses}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -143,24 +159,16 @@ const PharmacyDataGrid = () => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column dataField="id" caption="No" />
+        <Column width={320} dataField="track_number" caption="Process ID" />
         <Column 
-          dataField="start_date" 
-          caption="Start Date" 
+          dataField="patient" 
+          caption="Patient Name"
+          cellRender={patientNameRender} 
         />
         <Column 
-          dataField="created_by" 
+          dataField="doctor" 
           caption="Doctor"
-          cellRender={(cellData) => {
-            const prescription = prescriptionsData.prescriptions.find(prescription => prescription.id === cellData.data.created_by);
-            const doctor = doctorsData.find(doc => doc.id === prescription?.created_by);
-            return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
-        
-          }}        
-        />
-        <Column 
-          dataField="status" 
-          caption="Status"
+          cellRender={doctorNameRender}        
         />
         <Column 
           dataField="" 

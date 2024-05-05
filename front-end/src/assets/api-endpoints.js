@@ -34,6 +34,8 @@ export const API_URL = {
   CREATE_PRESCRIPTION: "/patients/prescriptions/",
   GET_PATIENT_TRIAGE: "/patients/triage/",
 
+  PATIENT_ATTENDANCE_PROCESS: "/patients/initiate-attendance-process/",
+
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/accounts/register/",
   FETCH_DOCTOR: "/users/doctors/",
@@ -156,6 +158,9 @@ export const APP_API_URL = {
   PRESCRIBE_DRUG_BY_PATIENT_ID: "/api/patient/prescribed-drugs-by-patient-id",
   CREATE_PRESCRIPTION: "/api/patient/create-prescription",
   GET_PATIENT_TRIAGE: "/api/patient/get-patient-triage",
+
+  PATIENT_ATTENDANCE_PROCESS: "/api/patient/attendance-process",
+
 
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/api/doctor/create-doctor",

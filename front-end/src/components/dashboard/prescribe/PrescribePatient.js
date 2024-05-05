@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
 import { Grid, Container } from "@mui/material";
-import { createPrescription } from "@/redux/service/patients";
+import { createPrescription, updatePrescription } from "@/redux/service/patients";
 import { prescribeDrug } from "@/redux/service/patients";
 import { clearAllPrescriptionItems } from "@/redux/features/patients";
 import { removeAPrescriptionItem } from "@/redux/features/patients";
@@ -86,7 +86,7 @@ const PrescribePatient = () => {
 
     const payloadData = {
       ...item,
-      patient: parseInt(item.patient),
+      // patient: parseInt(item.patient),
       prescription:payload.id
     }
 
@@ -102,6 +102,7 @@ const PrescribePatient = () => {
   }
 
   const sendEachPrescriptionItemToDb = (payload) => {
+    console.log("RESPONSE AFTER UPDATE", payload)
     prescriptionItems.forEach(item => savePrescribedDrug(item, payload))
   }
 
@@ -122,7 +123,7 @@ const PrescribePatient = () => {
 
       console.log(payload)
     
-      await createPrescription(payload).then((res) => {
+      await updatePrescription(params.prescription_id, payload,  auth).then((res) => {
         sendEachPrescriptionItemToDb(res)
         toast.success("Prescription Saved Successfully!");
         setLoading(false);

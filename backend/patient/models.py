@@ -1,9 +1,11 @@
 from datetime import datetime
+from uuid import uuid4
 from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item
 from billing.models import Invoice, InvoiceItem
+from laboratory.models import LabTestRequest
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -128,15 +130,15 @@ class Triage(models.Model):
     created_by = models.CharField(max_length=45)
     # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    temperature = models.DecimalField(max_digits=5, decimal_places=2)
-    height = models.DecimalField(max_digits=5, decimal_places=2)
-    weight = models.IntegerField()
-    pulse = models.PositiveIntegerField()
-    diastolic = models.PositiveIntegerField()
-    systolic = models.PositiveIntegerField()
-    bmi = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    height = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    weight = models.IntegerField(null=True)
+    pulse = models.PositiveIntegerField(null=True)
+    diastolic = models.PositiveIntegerField(null=True)
+    systolic = models.PositiveIntegerField(null=True)
+    bmi = models.DecimalField(max_digits=10, decimal_places=1, null=True)
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    notes = models.CharField(max_length=300, blank=True)
+    notes = models.CharField(max_length=300, blank=True, null=True)
 
 
 class Consultation(models.Model):
@@ -165,8 +167,8 @@ class Prescription(models.Model):
         ('dispensed', 'Dispensed'),
     )
     date_created = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateField()
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    start_date = models.DateField(null=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
 
@@ -177,7 +179,7 @@ class Prescription(models.Model):
 class PrescribedDrug(models.Model):
     class Meta:
         unique_together = ("prescription_id", "item")
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
@@ -220,21 +222,47 @@ class Referral(models.Model):
         super().save(*args, **kwargs)
 
 class AttendanceProcess(models.Model):
-    invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE)
-    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
+    TRACK = (
+        ('reception', 'Reception'),
+        ('triage', 'Triage'),
+        ('doctor', 'Doctor'),
+        ('pharmacy', 'Pharmacy'),
+        ('lab', 'Lab'),
+        ('awaiting result', 'Result'),
+        ('impatient', 'Impatient'),
+        ('billing', 'Billing'),
+        ('complete', 'Complete'),
+    )
+    track_number = models.CharField(max_length=50, null=True)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctor_attendance_processes')
+    labTech = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='labTech_attendance_processes')
+    pharmacist = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='pharmacist_attendance_processes')
+    reason = models.TextField(max_length=300)
+    invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE, null=True)
+    labTest = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE, null=True)
+    #appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
+    prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, null=True)
+    triage = models.OneToOneField(Triage, on_delete=models.CASCADE, null=True)
+    track = models.CharField(max_length=50, choices=TRACK, default='reception')
     created_at = models.DateTimeField(default=timezone.now)
 
-    @classmethod
-    def create_attendance_process(cls, appointment_id):
-        # Get or create Invoice
-        invoice = Invoice.objects.create(amount=0)
-        InvoiceItem.objects.create(invoice=invoice.id, item=appointment.id)
+    def save(self, *args, **kwargs):
+        # Check if the attendance process is being created for the first time
+        if not self.pk:
 
-        # Get Appointment instance by id
-        appointment = Appointment.objects.get(pk=appointment_id)
+            # Generate a unique track number
+            self.track_number = str(uuid4())
 
-        # Create AttendanceProcess
-        attendance_process = cls.objects.create(invoice=invoice, appointment=appointment)
+            # Create a new invoice with a default amount of 0
+            self.invoice = Invoice.objects.create(invoice_amount=0)
+            self.labTest = LabTestRequest.objects.create()
+            self.triage = Triage.objects.create()
+            self.prescription = Prescription.objects.create()
 
-        return attendance_process
+        super().save(*args, **kwargs)
+
 
