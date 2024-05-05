@@ -95,7 +95,7 @@ const DoctorPatientDataGrid = () => {
       setSelectedRowData(data);
       setConsultOpen(true);
     } else if (menu.action === "prescribe") {
-      router.push(`/dashboard/doctor-interface/prescribe/${data.prescription}`);
+      router.push(`/dashboard/doctor-interface/${data.id}/${data.prescription}`);
     } else if(menu.action === "send to lab"){
       setSelectedRowData(data);
       setLabOpen(true);

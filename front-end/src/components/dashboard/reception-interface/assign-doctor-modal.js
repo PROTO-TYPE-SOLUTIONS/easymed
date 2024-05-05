@@ -90,7 +90,7 @@ export default function AssignDoctorModal({
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle>
-        <p className="text-sm font-semibold">{`send ${selectedData.patient_name} for Triage`}</p>
+        <p className="text-sm font-semibold">{`send ${selectedData?.patient_name} for Triage`}</p>
         </DialogTitle>
         <DialogContent>
           <Formik

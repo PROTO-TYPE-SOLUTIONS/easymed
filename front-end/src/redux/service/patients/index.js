@@ -262,7 +262,7 @@ export const initiateNewAttendanceProcesses = (payload) =>{
 }
 
 export const updateAttendanceProcesses = (payload, process_id) => {
-    console.log(payload)
+    console.log("PPPPPPPPPPPPPPPPPPPP",process_id)
     return new Promise((resolve,reject) =>{
         axios.patch(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload, {
             params: {

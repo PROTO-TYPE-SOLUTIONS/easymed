@@ -60,7 +60,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
 
   }
 
-  const newAppointments = patientAppointments.filter((appointment)=> appointment.status !== "confirmed")
+  const newAppointments = [].filter((appointment)=> appointment.status !== "confirmed")
 
   const onMenuClick = async (menu, data) => {
     console.log("I WANT THE ID OF APP", data)

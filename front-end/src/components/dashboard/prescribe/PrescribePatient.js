@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
 import { Grid, Container } from "@mui/material";
-import { createPrescription, updatePrescription } from "@/redux/service/patients";
+import { createPrescription, updateAttendanceProcesses, updatePrescription } from "@/redux/service/patients";
 import { prescribeDrug } from "@/redux/service/patients";
 import { clearAllPrescriptionItems } from "@/redux/features/patients";
 import { removeAPrescriptionItem } from "@/redux/features/patients";
@@ -124,6 +124,7 @@ const PrescribePatient = () => {
       console.log(payload)
     
       await updatePrescription(params.prescription_id, payload,  auth).then((res) => {
+        updateAttendanceProcesses({track: "pharmacy"}, params.process_id)
         sendEachPrescriptionItemToDb(res)
         toast.success("Prescription Saved Successfully!");
         setLoading(false);
