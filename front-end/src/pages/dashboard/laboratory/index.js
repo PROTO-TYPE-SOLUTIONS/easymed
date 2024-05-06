@@ -11,6 +11,7 @@ import LabNav from "@/components/dashboard/laboratory/LabNav";
 import ProtectedRoute from "@/assets/hoc/protected-route";
 import { sortByLatest } from "@/functions/tables";
 import LabRequestDataGrid from "@/components/dashboard/laboratory/lab-request-datagrid";
+import { getAllProcesses } from "@/redux/features/patients";
 
 const LabResults = () => {
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ const LabResults = () => {
       dispatch(getAllQualitativeLabResults(token));
       dispatch(getAllLabResults(token));
       dispatch(getAllLabRequests(token));
+      dispatch(getAllProcesses())
 
     }
   }, [token]);

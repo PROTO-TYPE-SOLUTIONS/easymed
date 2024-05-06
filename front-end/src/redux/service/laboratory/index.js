@@ -112,6 +112,24 @@ export const sendLabRequests = (payload,auth) =>{
     })
 }
 
+export const updateLabRequest = (test_req_id, payload,auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.SEND_LAB_REQUESTS}`,payload,{
+            params: {
+                test_id:test_req_id
+            }
+        }
+        )
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const sendLabResults = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
