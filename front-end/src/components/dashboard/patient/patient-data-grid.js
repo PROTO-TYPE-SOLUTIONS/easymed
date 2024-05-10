@@ -37,21 +37,11 @@ const getActions = () => {
       label: "New Visit",
       icon: <MdAddCircle className="text-success text-xl mx-2" />,
     },
-    // {
-    //   action: "update",
-    //   label: "Update Patient",
-    //   icon: <BiEdit className="text-success text-xl mx-2" />,
-    // },
-    // {
-    //   action: "prescribe",
-    //   label: "Prescribe",
-    //   icon: <GiMedicinePills className="text-card text-xl mx-2" />,
-    // },
-    // {
-    //   action: "send to lab",
-    //   label: "Send To Lab",
-    //   icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
-    // },
+    {
+      action: "update",
+      label: "Update Patient",
+      icon: <BiEdit className="text-success text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -176,23 +166,27 @@ const PatientsDataGrid = () => {
           calculateCellValue={patientFullName}
         />
         <Column
+          dataField="phone"
+          caption="Phone"
+          width={100}
+        />
+        <Column
+          dataField="email"
+          caption="Email"
+          width={150}
+        />
+        <Column
           dataField="age"
           caption="Age"
-          width={100}
+          width={80}
           // calculateCellValue={(data) => calculateAge(data.date_of_birth)}
         />
         <Column dataField="gender" caption="Gender" width={100} />
-        <Column dataField="insurance" caption="Insurance" width={150} />
-        <Column
-          dataField=""
-          caption="Status"
-          width={150}
-          cellRender={statusFunc}
-        />
+        <Column dataField="insurance" caption="Insurance" width={100} />
         <Column
           dataField=""
           caption=""
-          width={100}
+          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>
@@ -200,10 +194,6 @@ const PatientsDataGrid = () => {
 
     {open && <CreateAppointmentModal {...{setOpen,open,selectedRowData}} />}
     <EditPatientDetails open={editOpen} setOpen={setEditOpen} selectedRowData={selectedRowData}  />
-    <LabModal
-        {...{ labOpen, setLabOpen, selectedRowData }}
-      />
-
     </>
   );
 };

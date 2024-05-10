@@ -262,7 +262,6 @@ export const initiateNewAttendanceProcesses = (payload) =>{
 }
 
 export const updateAttendanceProcesses = (payload, process_id) => {
-    console.log("PPPPPPPPPPPPPPPPPPPP",process_id)
     return new Promise((resolve,reject) =>{
         axios.patch(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload, {
             params: {
@@ -278,3 +277,26 @@ export const updateAttendanceProcesses = (payload, process_id) => {
     })
 }
 
+export const patientNextOfKin = (payload) => {
+    return new Promise ((resolve, reject) => {
+        axios.post(`${APP_API_URL.PATIENT_KIN}`, payload)
+        .then((res)=> {
+            resolve(res.data)
+        })
+        .catch((err)=> {
+            reject(err.message)
+        })
+    })
+}
+
+export const patientNextOfKinContact = (payload) => {
+    return new Promise ((resolve, reject) => {
+        axios.post(`${APP_API_URL.PATIENT_KIN_CONTACT}`, payload)
+        .then((res)=> {
+            resolve(res.data)
+        })
+        .catch((err)=> {
+            reject(err.message)
+        })
+    })
+}

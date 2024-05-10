@@ -85,6 +85,7 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
 
   const initiateVisit = async (formValue, helpers) => {
     console.log("CALLED WITH", formValue)
+    setLoading(true)
 
     try{
       const payload = {
@@ -93,9 +94,13 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
       }
       const response = await initiateNewAttendanceProcesses(payload)
       console.log(response)
+      setLoading(false)
+      handleClose()
 
     }catch(error){
       console.log("ERROR INITIATING NEW VISIT",error)
+      setLoading(false)
+      handleClose()
     }
   }
 

@@ -1,15 +1,141 @@
-import React, { useState } from 'react'
-import { Grid,Chip, Dialog, DialogTitle, DialogContent } from "@mui/material";
-import { Form, Formik } from "formik";
+import React, { useState, useEffect } from 'react'
+import { Grid,Chip, Dialog, DialogTitle, DialogContent, Checkbox } from "@mui/material";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import { fetchLabRequestsDetails, fetchLabTestPanelsByTestRequestId, sendLabRequestsPanels, updateLabRequest } from '@/redux/service/laboratory';
+import { useAuth } from '@/assets/hooks/use-auth';
+import { getAllLabTestPanels, getAllLabTestPanelsByProfile, getAllLabTestPanelsByTestRequest } from '@/redux/features/laboratory';
+import { useSelector, useDispatch } from 'react-redux';
 
 const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}) => {
     const [loading, setLoading] = useState(false);
+    const { labTestProfiles, labTestPanelsById } = useSelector((store) => store.laboratory);
+    const [labTest, setLabTest]=useState({})
+    const [testProfile, setTestProfile]= useState(null)
+    const [selectedPanels, setSelectedPanels] = useState([]);
+
+    const auth = useAuth();
+    const dispatch = useDispatch();
+    const { labResultItems, labTestPanels } = useSelector((store)=> store.laboratory)
 
     console.log("ROW DATA IS THE FOLLOWING", selectedRowData)
+    console.log("PANELS FOR A LAB REQUEST", labResultItems)
+    console.log("ALL THE PANELS", labTestPanels)
+    console.log("THIS IS THE TEST", labTest)
+
+    const initialValues = {
+        sample: "",
+        test_profile: null,
+    }
+
+    const validationSchema = Yup.object().shape({
+      sample: Yup.string().required("This field is required!"),
+      test_profile:Yup.number().required("This field is required!"),
+    });
+    const sampleOnlyValidationSchema = Yup.object().shape({
+        sample: Yup.string().required("This field is required!"),
+    });
 
     const handleClose = () => {
         setRequestInfoOpen(false);
     };
+
+    const saveAllPanels = async (testReqPanelPayload) => {
+        try{
+          await sendLabRequestsPanels(testReqPanelPayload, auth)
+          toast.success("Lab Request Panels saved Successful!");
+        }catch(error){
+          console.log(error)
+          toast.error(error)
+        }
+    }
+
+    const savePanels = (reqId) => {
+        selectedPanels.forEach((panel)=> {
+          const testReqPanelPayload = {    
+            test_panel: panel.id,
+            lab_test_request: reqId      
+          }
+          saveAllPanels(testReqPanelPayload);
+        })
+    }
+
+    const updateTestRequest = async (formValue) => {
+        const payload = {
+            ...formValue,
+            sample_collected: true
+        }
+        setLoading(true)
+        try{
+            await updateLabRequest(selectedRowData.labTest,payload, auth )
+            toast.success("successfully saved test")
+            savePanels(selectedRowData.labTest)
+            setLoading(false)
+            handleClose()
+        }catch(error){
+            toast.error("error updating test")
+            setLoading(false)
+        }
+    }
+
+
+
+    const handleCheckboxChange = (panel) => {
+        setSelectedPanels((prevSelectedPanels) => {
+          const isSelected = prevSelectedPanels.find((panelItem=>panelItem.id === panel.id));
+    
+          return isSelected
+            ? prevSelectedPanels.filter((item) => item.id !== panel.id)
+            : [...prevSelectedPanels, panel];
+        });
+    };
+
+    const handleSelectAllChange = () => {
+        setSelectedPanels((prevSelectedPanels) =>
+          prevSelectedPanels.length === labTestPanelsById.length
+            ? [] // Unselect all if all are currently selected
+            : labTestPanelsById.map((panel) => panel) // Select all if not all are currently selected
+        );
+    };
+
+    const getTestPanelsByTheProfileId = async (testProfile, auth) => {
+        try{
+        const response = await fetchLabTestPanelsByProfileId(testProfile, auth)
+        setSelectedPanels(response);
+        }catch(error){
+
+        }
+    }
+
+    const labTestDetails = async (test_id, auth) => {
+        try{
+            const response = await fetchLabRequestsDetails(test_id, auth)
+            setLabTest(response)
+            
+        }catch(error){
+            console.log("ERROR GETTING LABTEST DETAILS", error)
+        }
+    }
+
+    const labTestPanelsForSpecificTest = async (test_id, auth) => {
+        try{
+            dispatch(getAllLabTestPanelsByTestRequest (test_id, auth))          
+        }catch(error){
+            console.log("ERROR GETTING LABTEST DETAILS", error)
+        }
+    }
+
+    useEffect(()=> {
+        if(auth){
+            dispatch(getAllLabTestPanels(auth))
+            labTestDetails(selectedRowData?.labTest, auth)
+            labTestPanelsForSpecificTest(selectedRowData?.labTest, auth)}
+            if(testProfile){
+                getTestPanelsByTheProfileId(testProfile, auth);
+                dispatch(getAllLabTestPanelsByProfile(testProfile, auth));
+              }
+    }, [selectedRowData, testProfile])
 
   return (
     <div>
@@ -21,14 +147,119 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
-            <DialogTitle id="alert-dialog-title">{"Select Equipment"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">
+                <div className='flex items-center min-h-6 justify-between px-2 bg-yellow-200 py-2'>
+                    <p className='font-semibold'>{`${labTest.test_profile ? labTest.test_profile_name: "Add"} Profile`}</p>
+                    <p className='font-semibold'>{`requested by: ${labTest.requested_name}`}</p>
+                </div>
+            </DialogTitle>
             <DialogContent>
-            <Formik
-                // initialValues={initialValues}
-                // validationSchema={validationSchema}
-                // onSubmit={handleSendEquipment}
+            {labResultItems.length>0 && (<div>
+            <h2 className='text-sm font-bold text-primary w-1/3 mb-4 border-gray border-b px-4'>Requested Tests</h2>
+            <ul className='flex gap-3 flex-col px-4'>
+                <li className='flex justify-between '>
+                    <span className='text-primary w-full'>panel name</span>
+                    <span className='text-primary w-full'>unit</span>
+                    <span className='text-primary w-full'>Ref Val High</span>
+                    <span className='text-primary w-full'>Ref Val Low</span>
+                </li>
+                {labResultItems.map((item)=> {                
+                    const foundPanel = labTestPanels.find((panel)=>panel.id === item.test_panel)
+                    if(foundPanel){
+                        return(
+                            <li key={`${foundPanel.id}_panel`} className='flex justify-between '>
+                                <span className='w-full'>{foundPanel.name}</span>
+                                <span className='w-full'>{foundPanel.unit}</span>
+                                <span className='w-full'>127</span>
+                                <span className='w-full'>110</span>
+                            </li>
+                        )
+                    }
+
+                })}
+            </ul>
+            </div>)}
+            {labTest.sample_collected && (<div className='border-gray border-b flex justify-between items-center px-4 my-4 py-1'>
+                <h2 className='text-sm text-primary font-bold '>Collected Samples</h2>
+                <button className='w-8 h-8 rounded-full bg-background hover:bg-white'>+</button>
+            </div>)}
+            <div className='px-4'>
+                { labTest.sample_collected && (`blood`)}
+            </div>
+            {!labTest.sample_collected && (<Formik
+                initialValues={initialValues}
+                validationSchema={labResultItems.length<=0 ? validationSchema : sampleOnlyValidationSchema}
+                onSubmit={updateTestRequest}
             >
+                {({ values, handleChange }) => (
                 <Form>
+
+                <Grid container spacing={2} className='my-2 flex items-center'>
+                {labResultItems.length<=0 && (<Grid item md={12} xs={12}>
+                        <section className="space-y-3">
+                        <div>
+                            <Field
+                            as="select"
+                            className="block text-sm pr-9 border border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                            onChange={(e) => {
+                                handleChange(e);
+                                setTestProfile(e.target.value);
+                            }}
+                            name="test_profile"
+                            >
+                            <option value="">Select Test Profile</option>
+                            {labTestProfiles.map((test, index) => (
+                                <option key={index} value={test.id}>
+                                {test?.name}
+                                </option>
+                            ))}
+                            </Field>
+                            <ErrorMessage
+                            name="test_profile"
+                            component="div"
+                            className="text-warning text-xs"
+                            />
+                        </div>
+                        {testProfile && (
+                            <div>
+                            <label>Select Panels</label>
+                            <div className="flex items-center">
+                                <Checkbox
+                                checked={selectedPanels.length === labTestPanelsById.length}
+                                onChange={handleSelectAllChange}
+                                />
+                                <span>{selectedPanels.length === labTestPanelsById.length ? "unselect all" : "select all"}</span>
+                            </div>
+                            <Grid container spacing={4}>
+                                {labTestPanelsById.map((panel) => (
+                                <Grid className="flex items-center" key={panel.id} item xs={4}>
+                                    <Checkbox
+                                    checked={selectedPanels.some((panelItem) => panelItem.id === panel.id)}
+                                    onChange={() => handleCheckboxChange(panel)}
+                                    />
+                                    <span>{panel.name}</span>
+                                </Grid>
+                                ))}
+                            </Grid>
+                            </div>
+                        )}
+                        </section>
+                    </Grid>)}
+                    <Grid item md={12} xs={12}>
+                    <label>sample name</label>
+                    <Field
+                        className="block border rounded-lg text-sm border-gray py-2 px-4 focus:outline-card w-full"
+                        maxWidth="sm"
+                        placeholder="Sample Name"
+                        name="sample"
+                    />
+                    <ErrorMessage
+                        name="sample"
+                        component="div"
+                        className="text-warning text-xs"
+                    />  
+                    </Grid>
+                </Grid>
 
                 <button
                     type="submit"
@@ -53,10 +284,11 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
                         ></path>
                     </svg>
                     )}
-                    Send To Lab
+                    
+                    {labResultItems.length > 0 ? "collect sample" : "update test"}
                 </button>
-                </Form>
-            </Formik>
+                </Form>)}
+            </Formik>)}
             </DialogContent>
         </Dialog>      
     </div>

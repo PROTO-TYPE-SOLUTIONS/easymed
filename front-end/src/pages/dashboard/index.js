@@ -18,10 +18,6 @@ const Dashboard = () => {
   const { processes } = useSelector((store)=>store.patient);
   const [appointmentState, setAppointmentState] = useState("confirmed");
 
-  console.log("AVAILABLE PATIENT PROCESSES", processes)
-
-  const appointments = patientAppointments.filter((appointment)=> appointment.status === appointmentState )
-
   useEffect(()=>{
       dispatch(getAllPatientAppointments());
       dispatch(getAllProcesses())
@@ -31,16 +27,10 @@ const Dashboard = () => {
   return (
     <Container maxWidth="xl">
       {/* <PatientsDataGrid /> */}
-      <h2 className="text-2xl py-2">Appointments</h2>
-
-      <div className="w-full flex gap-8">
-        {/* <p onClick={()=>setAppointmentState("pending")} className={`px-4 py-1 ${appointmentState === "pending" ? "border-b-2 text-primary_light border-primary_light": ""} text-lg cursor-pointer`}>Upcoming</p> */}
-        <p onClick={()=>setAppointmentState("confirmed")} className={`px-4 py-1 ${appointmentState === "confirmed" ? "border-b-2 text-primary_light border-primary_light": ""} text-lg cursor-pointer`}>Confirmed</p>
-        <p onClick={()=>setAppointmentState("cancelled")} className={`px-4 py-1 ${appointmentState === "cancelled" ? "border-b-2 text-primary_light border-primary_light": ""} text-lg cursor-pointer`}>Cancelled</p>
-      </div>
+      <h2 className="text-2xl py-2">New Visits</h2>
       <hr class="h-px mb-8 bg-gray border-0 dark:bg-gray"></hr>
 
-      <AppointmentCard processes={processes} appointments={appointments}/>
+      <AppointmentCard processes={processes}/>
     </Container>
   );
 };

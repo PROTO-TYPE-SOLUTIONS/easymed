@@ -16,6 +16,7 @@ import {
 } from "@/redux/features/appointment";
 import FormikFieldDateTimePicker from "@/components/dateandtime/FormikFieldDateTimePicker";
 import { updateAttendanceProcesses } from "@/redux/service/patients";
+import { getAllProcesses } from "@/redux/features/patients";
 
 
 export default function AssignDoctorModal({
@@ -71,6 +72,7 @@ export default function AssignDoctorModal({
       };
       await updateAttendanceProcesses(formData, selectedData?.id).then(() => {
         helpers.resetForm();
+        dispatch(getAllProcesses())
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
         handleClose();

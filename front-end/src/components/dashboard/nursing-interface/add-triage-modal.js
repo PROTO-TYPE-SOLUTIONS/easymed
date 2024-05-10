@@ -8,7 +8,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { toast } from "react-toastify";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { createTriage } from "@/redux/service/nursing";
-import { getPatientTriage } from "@/redux/features/patients";
+import { getAllProcesses, getPatientTriage } from "@/redux/features/patients";
 import { updateAttendanceProcesses, updatePatientTriage } from "@/redux/service/patients";
 
 export default function AddTriageModal({
@@ -68,6 +68,7 @@ export default function AddTriageModal({
   const sendToDoc = async (payload, process_id)=> {
     try{
       const response = await updateAttendanceProcesses(payload, process_id)
+      dispatch(getAllProcesses())
       console.log("SUCCESSFULLY SENT TO DOC", response)
 
     }catch(error){

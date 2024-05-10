@@ -29,6 +29,24 @@ export const fetchLabRequests = (auth) =>{
     })
 }
 
+export const fetchLabRequestsDetails = (test_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_ONE_LAB_REQUESTS}`,{
+            params: {
+                test_id: test_id
+            }
+        },auth)
+        .then((res) =>{
+            resolve(res.data)
+        })
+        .catch((err) =>{
+            reject(err.message)
+        })
+    })
+}
+
+
 export const fetchQualitativeLabRequests = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{

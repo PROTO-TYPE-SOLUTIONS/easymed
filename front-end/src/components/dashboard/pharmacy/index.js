@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/router";
 import { MdLocalPrintshop } from 'react-icons/md'
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
@@ -17,6 +18,7 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
 import { LuMoreHorizontal } from "react-icons/lu";
 import ViewPrescribedDrugsModal from "./view-prescribed-drugs-modal";
+import { GiMedicinePills } from "react-icons/gi";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -26,6 +28,11 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
+    {
+      action: "prescribe",
+      label: "Prescribe",
+      icon: <GiMedicinePills className="text-card text-xl mx-2" />,
+    },
     {
       action: "dispense",
       label: "Dispense",
@@ -44,6 +51,7 @@ const getActions = () => {
 const PharmacyDataGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const userActions = getActions();
+  const router = useRouter();
   const [open,setOpen] = useState(false)
   const prescriptionsData = useSelector((store)=>store.prescription)
   const { doctors } = useSelector((store)=>store.doctor)
@@ -100,6 +108,8 @@ const PharmacyDataGrid = () => {
       setOpen(true);
     }else if (menu.action === "print"){
       handlePrint(data);
+    }else if (menu.action === "prescribe") {
+      router.push(`/dashboard/doctor-interface/${data.id}/${data.prescription}`);
     }
   };
 
