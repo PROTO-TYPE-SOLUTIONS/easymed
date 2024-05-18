@@ -51,29 +51,29 @@ export const menus = [
   //   ],
   // },
   {
-    label: "General Dashboard",
-    href: "/dashboard",
-    icon: <BiSolidDashboard className="" />,
-  },
-  {
     label: "Patients",
     href: "/dashboard/patients",
     icon: <HiUsers className="text-xl" />,
   },
   {
     label: "Reception",
-    href: "/dashboard/reception-interface",
-    icon: <BsReception4 className="" />,
+    href: "/dashboard",
+    icon: <BiSolidDashboard className="text-xl" />,
   },
+  // {
+  //   label: "Reception",
+  //   href: "/dashboard/reception-interface",
+  //   icon: <BsReception4 className="" />,
+  // },
   {
     label: "Nursing",
     href: "/dashboard/nursing-interface",
-    icon: <LiaUserNurseSolid className="" />,
+    icon: <LiaUserNurseSolid className="text-xl" />,
   },
   {
     label: "Doctor",
     href: "/dashboard/doctor-interface",
-    icon: <FaUserDoctor className="" />,
+    icon: <FaUserDoctor className="text-xl" />,
   },
   {
     label: "Laboratory",

@@ -17,6 +17,8 @@ import {
 import FormikFieldDateTimePicker from "@/components/dateandtime/FormikFieldDateTimePicker";
 import { updateAttendanceProcesses } from "@/redux/service/patients";
 import { getAllProcesses } from "@/redux/features/patients";
+import { getItems } from "@/redux/features/inventory";
+import { billingInvoiceItems } from "@/redux/service/billing";
 
 
 export default function AssignDoctorModal({
@@ -26,9 +28,12 @@ export default function AssignDoctorModal({
 }) {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth();
   const { doctors } = useSelector((store) => store.doctor);
+  const { item, } = useSelector(({ inventory }) => inventory);
+
   const authUser = useAuth();
-  console.log("SELECTED_ROW ", selectedData);
+  console.log("SELECTED_ROW ", item);
 
   const timezoneList = {
     nairobi: "Africa/Nairobi" // +3:00
@@ -46,6 +51,7 @@ export default function AssignDoctorModal({
   useEffect(() => {
     if (authUser) {
       dispatch(getAllDoctors(authUser));
+      dispatch(getItems())
     }
   }, [authUser]);
 
@@ -53,17 +59,28 @@ export default function AssignDoctorModal({
 
   const initialValues = {
     doctor: null,
+    item: null,
   };
 
   const validationSchema = Yup.object().shape({
     doctor: Yup.object().required("Select a doctor!"),
+    item: Yup.object().required("Select an item!"),
   });
 
-  const handleAssignDoctor = async (formValue, helpers) => {
-    try {
-      console.log("FORMDATA ", formValue);
-      
+  const saveInvoiceItem = async (invoice, item)=> {
+    const payload = {
+      invoice: invoice,
+      item:item
+    }
+    try{
+      billingInvoiceItems(auth, payload);
+    }catch(error){
+      console.log("FAILED SAVING ITEM",  error)
+    }
+  }
 
+  const handleAssignDoctor = async (formValue, helpers) => {
+    try {   
       setLoading(true);
       const formData = {
         ...formValue,
@@ -72,6 +89,7 @@ export default function AssignDoctorModal({
       };
       await updateAttendanceProcesses(formData, selectedData?.id).then(() => {
         helpers.resetForm();
+        saveInvoiceItem(selectedData.invoice, parseInt(formValue.item.value))
         dispatch(getAllProcesses())
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
@@ -103,18 +121,30 @@ export default function AssignDoctorModal({
             <Form className="py-4">
             <section className="space-y-1">
               <Grid container spacing={2}>
-                <Grid item md={12} xs={12}>
+              <Grid item md={12} xs={12}>
                 <SeachableSelect
-                  label="Assign A Doctor"
-                  name="doctor"
-                  options={doctors.map((item) => ({ value: item.id, label: `${item?.first_name} ${item?.last_name}` }))}
+                  label="Select Appointment Item"
+                  name="item"
+                  options={item.filter((drug)=> (drug.category === "Specialized item") || (drug.category === "General Appointment") || (drug.category === "General")).map((item) => ({ value: item.id, label: `${item?.name}` }))}
                 />
                 <ErrorMessage
-                  name="doctor"
+                  name="item"
                   component="div"
                   className="text-warning text-xs"
                 />
-                </Grid>
+              </Grid>
+              <Grid item md={12} xs={12}>
+              <SeachableSelect
+                label="Assign A Doctor"
+                name="doctor"
+                options={doctors.map((item) => ({ value: item.id, label: `${item?.first_name} ${item?.last_name}` }))}
+              />
+              <ErrorMessage
+                name="doctor"
+                component="div"
+                className="text-warning text-xs"
+              />
+              </Grid>
                 <Grid item md={12} xs={12}>
                   <div className="flex items-center gap-2 justify-end mt-3">
                     <button

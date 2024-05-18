@@ -8,7 +8,7 @@ const LabNav = () => {
   return (
     <div className="flex items-center gap-8 my-4">
         <Link href="/dashboard/laboratory" className={`${ pathName === "/dashboard/laboratory"  ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-            Flebotomy
+            Phlebotomy
         </Link>
         {/* <Link href="/dashboard/laboratory/public-lab-requests" className={`${ pathName === "/dashboard/laboratory/public-lab-requests"  ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             Public Lab Requests

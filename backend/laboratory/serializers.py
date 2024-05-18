@@ -94,7 +94,7 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestRequest
         fields = "__all__"
-        read_only_fields = ("id", "sample")
+        #Removed id and sample as they were readonly
 
     def get_sale_price(self, instance):
         if instance.test_profile and instance.test_profile.item:
@@ -114,17 +114,28 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         return sp_id
     
     
-    def create(self, validated_data: dict):
-        sp_id = ""
-        while True:
-            random_number = "".join([str(randrange(0,9)) for _ in range(4) ])
-            sp_id = f"SP-{random_number}"
-            lab_req = LabTestRequest.objects.filter(sample=sp_id)
-            if not lab_req.exists():
-                break
+    def generate_sample_code(self):
+            sp_id = ""
+            while True:
+                random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
+                sp_id = f"SP-{random_number}"
+                lab_req = LabTestRequest.objects.filter(sample=sp_id)
+                if not lab_req.exists():
+                    break
+            return sp_id
 
-        validated_data["sample"] = sp_id
+    def create(self, validated_data: dict):
+        validated_data["sample"] = self.generate_sample_code()
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # If sample code is not provided, generate one
+        print(f"Updating data: {validated_data}")
+
+        if 'sample' in validated_data and validated_data['sample'] is not None:
+            validated_data["sample"] = validated_data["sample"] + "-" + self.generate_sample_code()
+
+        return super().update(instance, validated_data)
 
 
     def to_representation(self, instance: LabTestRequest):

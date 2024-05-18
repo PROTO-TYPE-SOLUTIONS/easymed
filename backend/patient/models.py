@@ -229,6 +229,7 @@ class AttendanceProcess(models.Model):
         ('pharmacy', 'Pharmacy'),
         ('lab', 'Lab'),
         ('awaiting result', 'Result'),
+        ('added result', 'Resulted'),
         ('impatient', 'Impatient'),
         ('billing', 'Billing'),
         ('complete', 'Complete'),

@@ -29,6 +29,10 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
         test_profile: null,
     }
 
+    const sampleOnlyInitialValues = {
+        sample: "",
+    }
+
     const validationSchema = Yup.object().shape({
       sample: Yup.string().required("This field is required!"),
       test_profile:Yup.number().required("This field is required!"),
@@ -184,10 +188,10 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
                 <button className='w-8 h-8 rounded-full bg-background hover:bg-white'>+</button>
             </div>)}
             <div className='px-4'>
-                { labTest.sample_collected && (`blood`)}
+                { labTest.sample_collected && (labTest.sample)}
             </div>
             {!labTest.sample_collected && (<Formik
-                initialValues={initialValues}
+                initialValues={labResultItems.length <=0 ? initialValues : sampleOnlyInitialValues}
                 validationSchema={labResultItems.length<=0 ? validationSchema : sampleOnlyValidationSchema}
                 onSubmit={updateTestRequest}
             >

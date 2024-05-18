@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { fetchPrescriptionsPrescribedDrugs } from "@/redux/service/pharmacy";
 import { 
   fetchServices,
   fetchPatient, 
@@ -6,7 +7,7 @@ import {
   fetchPatientTriage, 
   searchPatients, 
   fetchPatientPrescribeDrugs, 
-  fetchAllAttendanceProcesses
+  fetchAllAttendanceProcesses,
 } from "@/redux/service/patients";
 
 
@@ -46,6 +47,10 @@ const PatientSlice = createSlice({
     setPatientTriage: (state, action) => {
       state.patientTriage = action.payload;
     },
+    setPrescriptionItem: (state, action) => {
+      state.prescriptionItems = action.payload
+
+    },
     setPatientPrescriptionItem: (state, action) => {
       const prescriptionItem = state.prescriptionItems.find(item => item.item === action.payload.item );
       if (prescriptionItem) {
@@ -79,6 +84,7 @@ export const {
   clearPrescriptionItems, 
   setPatientPrescribedDrugs,
   setProcesses,
+  setPrescriptionItem,
 } = PatientSlice.actions;
 
 export const getAllProcesses = () => async (dispatch) => {
@@ -142,6 +148,15 @@ export const getAllPatientPrescribedDrugs = (patient_id) => async (dispatch) => 
     dispatch(setPatientPrescribedDrugs(response));
   } catch (error) {
     console.log("PATIENT_PRESCRIBED_DRUGS_ERROR ", error);
+  }
+};
+
+export const getAllPrescribedDrugsByPrescription = (prescription_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchPrescriptionsPrescribedDrugs(prescription_id, auth);
+    dispatch(setPrescriptionItem(response));
+  } catch (error) {
+    console.log("PRESCRIPTIONS_PRESCRIBED_DRUGS_ERROR ", error);
   }
 };
 

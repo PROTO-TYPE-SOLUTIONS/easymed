@@ -66,9 +66,9 @@ class LabTestRequest(models.Model):
     #note = models.TextField(null=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     sample_collected = models.BooleanField(default=False, null=True)
-    sample = models.CharField(max_length=100, null=True, blank=True)
+    sample = models.CharField(max_length=100, null=True)
     requested_on = models.TimeField(auto_now_add=True, null=True, blank=True)
-
+    has_result = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
@@ -93,15 +93,22 @@ class LabTestResult(models.Model):
         ("quantitative", "  QUANTITATIVE"),
         ("qualitative", "QUALITATIVE"),
     )
-    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
-    recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name="recorded_by")
     note = models.CharField(max_length=255, null=True, blank=True)
     category = models.CharField(max_length=20, default="quantitative", choices=CATEGORY_CHOICE,)
+    approved = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.title  
+        return self.title
+
+class ResultsVerification(models.Model):
+    lab_results = models.OneToOneField(LabTestResult, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
+    approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)
+
 
 class LabTestResultPanel(models.Model):
     lab_test_result= models.ForeignKey(LabTestResult, on_delete=models.CASCADE)
@@ -162,7 +169,7 @@ class PublicLabTestRequest(models.Model):
 
 
 class LabTestResultQualitative(models.Model):
-    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
