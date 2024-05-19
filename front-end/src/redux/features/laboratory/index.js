@@ -5,12 +5,15 @@ import { fetchLabRequests,
     fetchPublicLabRequests, fetchSpecificPatientLabRequests,
     fetchLabTestPanelsByProfileId,
     fetchLabTestPanelsByTestRequestId,
-    fetchQualitativeLabRequests
+    fetchQualitativeLabRequests,
+    fetchResultPanelsByResultsId,
+    fetchQualitativeResultPanelsByResultsId,
   } from "@/redux/service/laboratory";
 
 
 const initialState = {
   labResults: [],
+  resultPanels: [],
   qualitativeLabResults: [],
   labResultItems: [],
   labTestPanels: [],
@@ -53,6 +56,9 @@ const LaboratorySlice = createSlice({
     setLabTestPanelsById: (state, action) => {
       state.labTestPanelsById = action.payload;
     },
+    setResultPanelsByResultId: (state, action) => {
+      state.resultPanels = action.payload;
+    },
     clearLabResultItems: (state, action)=>{
       state.labResultItems = [];
     },
@@ -79,7 +85,7 @@ const LaboratorySlice = createSlice({
 export const { setLabResults, 
   setLabRequests, setPublicLabRequests, 
   setLabEquipments,setLabTestProfile, setSpecificPatientLabRequests,
-  setLabResultItems, setLabResultItemsAfterRemovingItem, 
+  setLabResultItems, setLabResultItemsAfterRemovingItem, setResultPanelsByResultId,
   clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults
 } = LaboratorySlice.actions;
 
@@ -163,6 +169,24 @@ export const getAllLabTestPanelsByProfile = (profile_id, auth) => async (dispatc
     dispatch(setLabTestPanelsById(response));
   } catch (error) {
     console.log("LAB_TEST_PANELS_BY_PROFILE_ID_ERROR ", error);
+  }
+};
+
+export const getAllResultPanelsByResult = (result_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchResultPanelsByResultsId(result_id, auth);
+    dispatch(setResultPanelsByResultId(response));
+  } catch (error) {
+    console.log("LAB_RESULT_PANELS_BY_RESULT_ID_ERROR ", error);
+  }
+};
+
+export const getAllQualitativeResultPanelsByResult = (result_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchQualitativeResultPanelsByResultsId(result_id, auth);
+    dispatch(setResultPanelsByResultId(response));
+  } catch (error) {
+    console.log("LAB_RESULT_PANELS_BY_RESULT_ID_ERROR ", error);
   }
 };
 

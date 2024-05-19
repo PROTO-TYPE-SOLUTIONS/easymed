@@ -57,8 +57,11 @@ const AddTestResults = () => {
   const initialValues = {
     title: "",
     lab_test_request: null,
-    qualitative:  null
+    qualitative:  null,
+    recorded_by:token.user_id,
   };
+
+  console.log("YTFGVTFVT", token)
 
 
   useEffect(() => {
@@ -237,7 +240,7 @@ const AddTestResults = () => {
 
               setFieldValue('qualitative', selectedReq ? {value:selectedReq.category, label: selectedReq?.category} : null );
             }}
-            options={labRequests.map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
+            options={labRequests.filter((req)=>req.has_result === false && req.sample !== null).map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
           />
           <ErrorMessage
             name="lab_test_request"

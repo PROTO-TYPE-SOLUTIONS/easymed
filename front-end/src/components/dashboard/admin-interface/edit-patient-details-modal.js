@@ -15,6 +15,8 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
   const { insurance } = useSelector((store) => store.insurance);
   const dispatch = useDispatch();
 
+  console.log("SELECTED ROW DATA", selectedRowData)
+
   useEffect(() =>{
     dispatch(getAllInsurance());
   },[])
@@ -40,6 +42,8 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     gender: getGenderValue() || "",
     insurance: selectedRowData?.insurance || null,
     user_id: selectedRowData?.user_id || null,
+    phone: selectedRowData?.phone || null,
+    email: selectedRowData?.email || null
   };
 
   const validationSchema = Yup.object().shape({
@@ -47,6 +51,9 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     second_name: Yup.string().required("Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
+    phone: Yup.string().required("Phone NUmber is Required!"),
+    email: Yup.string().required("Email Address is Required!"),
+
     // insurance: Yup.number(),
     // user_id: Yup.number(),
   });
@@ -78,7 +85,7 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     <section>
       <Dialog
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -93,7 +100,7 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
             <Form>
               <section className="space-y-2">
                 <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={4} xs={12}>
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="text"
@@ -106,7 +113,7 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={4} xs={12}>
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="text"
@@ -119,9 +126,7 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={4} xs={12}>
                     <Field
                       className="block border border-gray py-3 px-4 focus:outline-none w-full"
                       type="date"
@@ -134,7 +139,7 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={4} xs={12}>
                     <Field
                       as="select"
                       className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
@@ -150,9 +155,33 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={4} xs={12}>
+                    <Field
+                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="Phone Number"
+                      name="phone"
+                    />
+                    <ErrorMessage
+                      name="phone"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                    <Field
+                      className="block border border-gray py-3 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="Email"
+                      name="email"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
                     <Field
                       as="select"
                       className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"

@@ -11,18 +11,17 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === API_METHODS.GET) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
-
-            console.log("PRESCRIPTION_HEADERS ",config);
     
-            await backendAxiosInstance.get(`${API_URL.FETCH_PRESCRIPTION}/`, config).then(response => {
+
+            await backendAxiosInstance.get(`${API_URL.FETCH_PATIENT}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -33,9 +32,33 @@ export default async function handler(req, res) {
         } catch (e) {
             res.status(500).json(e.message);
         }
-        
     }
-    else if (req.method === API_METHODS.PATCH) {
+    else if (req.method === API_METHODS.POST) {
+        try {
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
+            const body = req.body;
+
+            await backendAxiosInstance.post(`${API_URL.PATIENT_KIN}`,body,config)
+                .then(response => {
+                    res.status(200).json(response.data);
+                })
+                .catch(e => {
+                        res.status(e.response?.status ?? 500).json(e.response?.data)
+                    }
+                )
+
+        } catch (e) {
+            res.status(500).json(e.message);
+        }
+    }
+    else if (req.method === API_METHODS.PUT) {
         try {
             if (!req.headers?.authorization){
                 res.status(401).send('Unauthorized');
@@ -46,13 +69,13 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-            const query = req.query
 
-            await backendAxiosInstance.patch(`${API_URL.FETCH_PRESCRIPTION}/${query.prescription_id}/`,body, config).then(response => {
+            await backendAxiosInstance.post(`${API_URL.DELETE_DEPARTMENT}/${body.id}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
                     res.status(e.response?.status ?? 500).json(e.response?.data)
+
                 }
             )
 

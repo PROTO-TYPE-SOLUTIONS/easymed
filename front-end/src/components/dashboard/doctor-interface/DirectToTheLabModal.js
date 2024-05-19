@@ -7,12 +7,12 @@ import { Checkbox, DialogTitle, Grid } from "@mui/material";
 import { toast } from "react-toastify";
 import { sendLabRequests, fetchLabTestPanelsByProfileId, sendLabRequestsPanels, updateLabRequest } from "@/redux/service/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getPatientProfile, getPatientTriage, getAllPatients } from "@/redux/features/patients";
+import { getPatientProfile, getPatientTriage, getAllPatients, getAllProcesses } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllLabTestProfiles, getAllLabTestPanelsByProfile } from "@/redux/features/laboratory";
 import { updateAttendanceProcesses } from "@/redux/service/patients";
 
-const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
+const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
   const { labTestProfiles, labTestPanelsById } = useSelector((store) => store.laboratory);
   const { patientTriage, patients } = useSelector((store) => store.patient);
   const [loading, setLoading] = React.useState(false);
@@ -21,9 +21,9 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   const auth = useAuth();
   const dispatch = useDispatch();
 
-  const patient = patients.find((patient)=> patient.id === selectedRowData.patient)
+  const patient = patients.find((patient)=> patient.id === selectedData.patient)
 
-  console.log("ROW DATA IS ",selectedRowData)
+  console.log("ROW DATA IS ",selectedData)
 
   const handleClose = () => {
     setLabOpen(false);
@@ -33,20 +33,20 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   const initialValues = {
     note: "",
     sample_collected: null,
-    patient: selectedRowData?.id,
+    patient: selectedData?.id,
     test_profile: null,
     requested_by: auth?.user_id,
   };
 
   const validationSchema = Yup.object().shape({
     note: Yup.string().required("This field is required!"),
-    test_profile:Yup.number().required("This field is required!"),
   });
 
   const saveAllPanels = async (testReqPanelPayload) => {
     try{
       await sendLabRequestsPanels(testReqPanelPayload, auth)
       toast.success("Lab Request Panels saved Successful!");
+      dispatch(getAllProcesses())
     }catch(error){
       console.log(error)
       toast.error(error)
@@ -67,11 +67,12 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
     console.log("FORM_DATA ", formValue);
     try {
       setLoading(true);
-      await updateLabRequest(selectedRowData.labTest, formValue, auth).then((res) => {
+      await updateLabRequest(selectedData.labTest, formValue, auth).then((res) => {
         helpers.resetForm();
-        updateAttendanceProcesses({track: "lab"}, selectedRowData.id)
+        updateAttendanceProcesses({track: "lab"}, selectedData.id)
         savePanels(res.id)
         toast.success("Lab Request Successful!");
+        dispatch(getAllProcesses())
         setLoading(false);
         handleClose();
       });
@@ -110,13 +111,13 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   useEffect(() => {
     dispatch(getAllPatients());
-    dispatch(getPatientTriage(selectedRowData?.triage));
+    dispatch(getPatientTriage(selectedData?.triage));
     dispatch(getAllLabTestProfiles(auth));
     if(testProfile){
       getTestPanelsByTheProfileId(testProfile, auth);
       dispatch(getAllLabTestPanelsByProfile(testProfile, auth));
     }
-  }, [selectedRowData, testProfile]);
+  }, [selectedData, testProfile]);
 
   return (
     <section>
@@ -276,4 +277,4 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   );
 };
 
-export default LabModal;
+export default DirectToTheLabModal;
