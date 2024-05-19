@@ -13,6 +13,7 @@ import { downloadPDF } from "@/redux/service/pdfs";
 import { useAuth } from "@/assets/hooks/use-auth";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
+import ApproveResults from "./add-result/ApproveResults";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -22,6 +23,11 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
+    {
+      action: "approve",
+      label: "Approve Results",
+      icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+    },
     {
       action: "print",
       label: "Print",
@@ -37,6 +43,8 @@ const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
   const userActions = getActions();
   const auth = useAuth();
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [approveOpen ,setApproveOpen] = useState(false)
+  const [selectedData, setSelectedData] = useState(null)
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   
@@ -68,6 +76,9 @@ const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
       setOpen(true);
     }else if (menu.action === "print"){
       handlePrint(data);
+    }else if (menu.action === "approve"){
+      setSelectedData(data);
+      setApproveOpen(true)
     }
   };
 
@@ -192,6 +203,7 @@ const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
           cellRender={actionsFunc}
         />
       </DataGrid>
+      {approveOpen && (<ApproveResults selectedData={selectedData} approveOpen={approveOpen} setApproveOpen={setApproveOpen}/>)}
     </>
   );
 };

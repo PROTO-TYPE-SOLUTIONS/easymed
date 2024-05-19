@@ -18,3 +18,6 @@ admin.site.register(EquipmentTestRequest)
 
 admin.site.register(LabTestResultQualitative)
 admin.site.register(LabTestResultPanelQualitative)
+
+admin.site.register(ResultsVerification)
+admin.site.register(QualitativeResultsVerification)

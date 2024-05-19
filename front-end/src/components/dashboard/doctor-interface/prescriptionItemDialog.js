@@ -15,7 +15,8 @@ const PrescriptionItemDialog = ({patient_id}) => {
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const { item, } = useSelector(({ inventory }) => inventory);
-    const { prescriptionItems } = useSelector(({ patient }) => patient);    
+    const { prescriptionItems } = useSelector(({ patient }) => patient);
+    console.log(item)
   
     const handleClickOpen = () => {
       setOpen(true);
@@ -92,7 +93,7 @@ const PrescriptionItemDialog = ({patient_id}) => {
             <SeachableSelect
               label="Select Item"
               name="item"
-              options={item.map((item) => ({ value: item.id, label: `${item?.name}` }))}
+              options={item.filter((drug)=> drug.category === "Drug").map((item) => ({ value: item.id, label: `${item?.name}` }))}
             />
             <ErrorMessage
               name="item"

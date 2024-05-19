@@ -1,4 +1,4 @@
-import React, { useState, } from "react";
+import React, { useEffect, useState, } from "react";
 import { useParams } from 'next/navigation';
 import { usePathname } from 'next/navigation'
 import { useSelector, useDispatch } from "react-redux";
@@ -8,9 +8,9 @@ import { useRouter } from 'next/navigation'
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
 import { Grid, Container } from "@mui/material";
-import { createPrescription } from "@/redux/service/patients";
+import { createPrescription, updateAttendanceProcesses, updatePrescription } from "@/redux/service/patients";
 import { prescribeDrug } from "@/redux/service/patients";
-import { clearAllPrescriptionItems } from "@/redux/features/patients";
+import { clearAllPrescriptionItems, getAllProcesses } from "@/redux/features/patients";
 import { removeAPrescriptionItem } from "@/redux/features/patients";
 import { toast } from "react-toastify";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
@@ -20,6 +20,7 @@ import DashboardLayout from '@/components/layout/dashboard-layout';
 import PrescriptionItemDialog from "@/components/dashboard/doctor-interface/prescriptionItemDialog";
 import ProtectedRoute from "@/assets/hoc/protected-route";
 import AuthGuard from "@/assets/hoc/auth-guard";
+import { billingInvoiceItems } from "@/redux/service/billing";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -46,6 +47,9 @@ const PrescribePatient = () => {
   const dispatch = useDispatch();
   const { item, } = useSelector(({ inventory }) => inventory);
   const { prescriptionItems } = useSelector(({ patient }) => patient);
+  const { prescriptionsPrescribed, prescriptions } = useSelector((store) => store.prescription);
+  const { processes, patients } = useSelector((store)=> store.patient);
+  const thisProcess = processes.find((process)=> process.id === parseInt(params.process_id))
   const auth = useAuth();
   let currentDate = new Date();
   let year = currentDate.getFullYear();
@@ -64,6 +68,12 @@ const PrescribePatient = () => {
     }
   };
 
+  useEffect(()=> {
+    if(auth){
+      getAllProcesses()
+    }
+  }, [])
+
   console.log("THE PATH HERE IS", pathname)
 
   const actionsFunc = ({ data }) => {
@@ -81,17 +91,22 @@ const PrescribePatient = () => {
     );
   };
 
-
   const savePrescribedDrug = async (item, payload) => {
 
     const payloadData = {
       ...item,
-      patient: parseInt(item.patient),
+      // patient: parseInt(item.patient),
       prescription:payload.id
+    }
+
+    const invoiceItemPayload = {
+      item: parseInt(item.item),
+      invoice: parseInt(thisProcess.invoice)
     }
 
     try {
       await prescribeDrug(payloadData).then(()=>{
+        billingInvoiceItems(auth, invoiceItemPayload)
         toast.success("Prescribed Drug Added Successfully!");
       })
 
@@ -102,6 +117,7 @@ const PrescribePatient = () => {
   }
 
   const sendEachPrescriptionItemToDb = (payload) => {
+    console.log("RESPONSE AFTER UPDATE", payload)
     prescriptionItems.forEach(item => savePrescribedDrug(item, payload))
   }
 
@@ -122,7 +138,8 @@ const PrescribePatient = () => {
 
       console.log(payload)
     
-      await createPrescription(payload).then((res) => {
+      await updatePrescription(params.prescription_id, payload,  auth).then((res) => {
+        updateAttendanceProcesses({track: "pharmacy"}, params.process_id)
         sendEachPrescriptionItemToDb(res)
         toast.success("Prescription Saved Successfully!");
         setLoading(false);

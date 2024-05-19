@@ -15,6 +15,8 @@ export const API_URL = {
   EDIT_PATIENT: "/patients/patients",
   DELETE_PATIENT: "/patients/patients/",
   FETCH_PATIENT: "/patients/patients/",
+  PATIENT_KIN: "/patients/next-of-kin/",
+  PATIENT_KIN_CONTACT: "/patients/contact-details/",
   SEARCH_PATIENT: "/patients/patients/",
   BOOK_APPOINTMENT: "/patients/publicappointments/",
   CREATE_APPOINTMENT: "/patients/appointments/",
@@ -34,6 +36,8 @@ export const API_URL = {
   CREATE_PRESCRIPTION: "/patients/prescriptions/",
   GET_PATIENT_TRIAGE: "/patients/triage/",
 
+  PATIENT_ATTENDANCE_PROCESS: "/patients/initiate-attendance-process/",
+
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/accounts/register/",
   FETCH_DOCTOR: "/users/doctors/",
@@ -42,6 +46,7 @@ export const API_URL = {
   FETCH_LAB_RESULTS: "/lab/lab-test-results/",
   SEND_LAB_RESULTS: "/lab/lab-test-results/",
   FETCH_LAB_REQUESTS: "/lab/lab-test-requests/",
+  FETCH_ONE_LAB_REQUESTS: "/lab/lab-test-requests/",
   FETCH_LAB_REQUESTS_BY_PATIENT_ID: "/lab/lab-test-request-by-patient-id",
   SEND_LAB_REQUESTS: "/lab/lab-test-requests/",
   FETCH_LAB_EQUIPMENT: "/lab/lab-equipment/",
@@ -51,11 +56,15 @@ export const API_URL = {
   FETCH_LAB_TEST_PANELS: "/lab/lab-test-panel/",
   FETCH_LAB_TEST_PANELS_BY_PROFILE_ID: "/lab/lab-test-panel/labtestpanels-byprofile-id",
   FETCH_LAB_TEST_REQUEST_PANELS: "/lab/lab-test-requests-panel/",
+  FETCH_PANELS_BY_RESULT:"/lab/lab-test-result-panels-by-lab-test-result-id/",
+  FETCH_QUALITATIVE_PANELS_BY_RESULT:"/lab/qualitative-lab-test-result-panels-by-lab-test-result-id/",
   FETCH_LAB_TEST_RESULT_PANELS: "/lab/lab-test-results-panel/",
   QUALITATIVE_LAB_TEST_RESULTS:"/lab/lab-test-results-qualitative/",
   QUALITATIVE_LAB_TEST_RESULTS_PANEL_ITEM: "/lab/lab-test-results-panel-qualitative/",
   GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID: "lab/lab-test-request-panels-by-lab-test-request-id/",
   SEND_LAB_RESULTS_ITEMS: "/lab/lab-test-result-item/",
+  APPROVE_LAB_RESULTS: "/lab/approve-results/",
+  APPROVE_QUALITATIVE_LAB_RESULTS: "/lab/approve-qualitative-results/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -138,6 +147,8 @@ export const APP_API_URL = {
   EDIT_PATIENT: "/api/patient/edit-patient",
   DELETE_PATIENT: "/api/patient/delete-patient",
   FETCH_PATIENT: "/api/patient",
+  PATIENT_KIN: "/api/patient/patientKin",
+  PATIENT_KIN_CONTACT: "/api/patient/next-of-kin-contact/",
   SEARCH_PATIENT: "/api/billing/search-patients",
   BOOK_APPOINTMENT: "/api/appointment",
   CREATE_APPOINTMENT: "/api/appointment/create-appointment",
@@ -157,6 +168,9 @@ export const APP_API_URL = {
   CREATE_PRESCRIPTION: "/api/patient/create-prescription",
   GET_PATIENT_TRIAGE: "/api/patient/get-patient-triage",
 
+  PATIENT_ATTENDANCE_PROCESS: "/api/patient/attendance-process",
+
+
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/api/doctor/create-doctor",
   FETCH_DOCTOR: "/api/doctor/fetch-doctor",
@@ -165,6 +179,7 @@ export const APP_API_URL = {
   FETCH_LAB_RESULTS: "/api/laboratory/get-lab-results",
   SEND_LAB_RESULTS: "/api/laboratory/get-lab-results",
   FETCH_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
+  FETCH_ONE_LAB_REQUESTS: "/api/laboratory/getOneTestRequest",
   FETCH_LAB_REQUESTS_BY_PATIENT_ID: "/api/laboratory/labRequestsByPatientId",
   SEND_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
   FETCH_LAB_EQUIPMENT: "/api/laboratory/get-lab-equipment",
@@ -175,10 +190,14 @@ export const APP_API_URL = {
   FETCH_LAB_TEST_PANELS_BY_PROFILE_ID: "/api/laboratory/labtestpanels-byprofile-id",
   SEND_LAB_RESULTS_ITEMS: "/api/laboratory/get-lab-test-result-item",
   FETCH_LAB_TEST_REQUEST_PANELS: "/api/laboratory/lab-test-requests-panel/",
+  FETCH_PANELS_BY_RESULT:"/api/laboratory/lab-test-result-panels-by-lab-test-result-id/",
+  FETCH_QUALITATIVE_PANELS_BY_RESULT:"/api/laboratory/qualitative-lab-test-result-panels-by-lab-test-result-id/",
   FETCH_LAB_TEST_RESULT_PANELS: "/api/laboratory/lab-test-results-panel/",
   QUALITATIVE_LAB_TEST_RESULTS:"/api/laboratory/lab-test-results-qualitative/",
   QUALITATIVE_LAB_TEST_RESULTS_PANEL_ITEM: "/api/laboratory/lab-test-results-panel-qualitative/",
   GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID: "/api/laboratory/lab-test-request-panels-by-lab-test-request-id/",
+  APPROVE_LAB_RESULTS: "/api/laboratory/approve-results/",
+  APPROVE_QUALITATIVE_LAB_RESULTS: "/api/laboratory/approve-qualitative-results/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",

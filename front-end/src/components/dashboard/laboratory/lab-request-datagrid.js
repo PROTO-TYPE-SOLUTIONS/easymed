@@ -1,14 +1,17 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling,
   HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
-import { Grid,Chip } from "@mui/material";
+import { Grid } from "@mui/material";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { AiOutlineDownload } from 'react-icons/ai';
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import EquipmentModal from "./equipment-modal";
+
+import RequestInfoModal from "./RequestInfoModal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -18,6 +21,7 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
+    { action: "view", label: "Request Information", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "sample", label: "Confirm Sample Collection", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "equipment", label: "Send to equipment", icon: <AiOutlineDownload className="text-card text-xl" /> },
   ];
@@ -30,10 +34,20 @@ const LabRequestDataGrid = ({ labRequests }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const [open,setOpen] = useState(false);
+  const [requestInfoOpen,setRequestInfoOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+
+  const { processes, patients } = useSelector((store)=> store.patient)
+
+  const labTestsSchedules = processes.filter((process)=> process.track==="lab")
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
   
 
   //   FILTER PATIENTS BASED ON SEARCH QUERY
@@ -50,6 +64,9 @@ const LabRequestDataGrid = ({ labRequests }) => {
     }else if(menu.action === 'equipment'){
         setSelectedRowData(data)
         setOpen(true)
+    }else if(menu.action === 'view'){
+      setSelectedRowData(data)
+      setRequestInfoOpen(true)
     }
   };
 
@@ -117,7 +134,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={filteredData}
+        dataSource={labTestsSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -138,27 +155,16 @@ const LabRequestDataGrid = ({ labRequests }) => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column dataField="sample" caption="Sample" width={100} />
         <Column 
-          dataField="" 
-          caption="Sample Collected" 
-          width={100} 
-          customizeText={sampleCollectedTemplate}
+          dataField="track_number" 
+          caption="Process Id" 
+          width={320} 
         />
-        <Column dataField="test_profile_name" caption="Profile name" width={130} />
         <Column 
-          dataField="" 
+          dataField="patient" 
           caption="Patient Name" 
-          width={100}
-          calculateCellValue={patientFullName}
-        />
-        <Column dataField="note" caption="Note" width={180} />
-        <Column
-          dataField="requested_name"
-          caption="Requested By"
-          width={130}
-          allowFiltering={true}
-          allowSearch={true}
+          width={200}
+          cellRender={patientNameRender}
         />
         <Column
           dataField=""
@@ -168,6 +174,9 @@ const LabRequestDataGrid = ({ labRequests }) => {
         />
       </DataGrid>
       {open && <EquipmentModal {...{open,setOpen,selectedRowData}} />}
+      {requestInfoOpen && (
+        <RequestInfoModal {...{requestInfoOpen, setRequestInfoOpen, selectedRowData}}/>
+      )}
     </>
   );
 };

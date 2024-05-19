@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -7,6 +8,8 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { toast } from "react-toastify";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { createTriage } from "@/redux/service/nursing";
+import { getAllProcesses, getPatientTriage } from "@/redux/features/patients";
+import { updateAttendanceProcesses, updatePatientTriage } from "@/redux/service/patients";
 
 export default function AddTriageModal({
   triageOpen,
@@ -15,36 +18,76 @@ export default function AddTriageModal({
 }) {
   const [loading, setLoading] = useState(false);
   const auth = useAuth();
+  const dispatch = useDispatch();
+  const { patientTriage, patients } = useSelector((store) => store.patient )
+
+  const triagePatient = patients.find((patient)=> patient.id === selectedRowData?.patient)
+
+
+  useEffect(()=> {
+    if(auth && selectedRowData){
+      fetchPatientTriage(selectedRowData.triage)
+    }
+  }, [triageOpen])
+
+  const fetchPatientTriage = async (triage_id)=> {
+    try{
+      dispatch(getPatientTriage(triage_id))
+    }catch(error){
+
+    }
+  }
 
   const handleClose = () => {
     setTriageOpen(false);
   };
 
   const initialValues = {
-    temperature: "",
-    height: "",
-    weight: null,
-    pulse: null,
-    notes: "",
+    temperature: patientTriage?.temperature,
+    height: patientTriage?.height ? patientTriage?.height : "",
+    weight: patientTriage?.weight ? patientTriage?.weight : "",
+    pulse: patientTriage?.pulse ? patientTriage?.pulse : "",
+    systolic:patientTriage?.systolic ? patientTriage?.systolic : "",
+    diastolic: patientTriage?.diastolic ? patientTriage?.diastolic : "",
+    bmi:patientTriage?.bmi ? patientTriage?.bmi : "",
+    notes: patientTriage?.notes ? patientTriage?.notes : "",
   };
+
+  console.log("SELECTED ROW INITIAL VALS", initialValues)
 
   const validationSchema = Yup.object().shape({
     temperature: Yup.number().required("Temperature is required!"),
     height: Yup.number().required("Height is required!"),
     weight: Yup.number().required("Weight is required!"),
     pulse: Yup.number().required("Pulse is required!"),
+    systolic: Yup.number().required("Systolic is required!"),
+    diastolic: Yup.number().required("Diastolic is required!"),
+    notes: Yup.string().required("Notes is required!"),
   });
 
-  const handleAddTriage = async (formValue, helpers) => {
+  const sendToDoc = async (payload, process_id)=> {
+    try{
+      const response = await updateAttendanceProcesses(payload, process_id)
+      dispatch(getAllProcesses())
+      console.log("SUCCESSFULLY SENT TO DOC", response)
+
+    }catch(error){
+      console.log("FAILED SENDING TO DOCTOR", error)
+
+    }
+
+  }
+
+  const handleUpdateTriage = async (formValue, helpers) => {
     try {
       const formData = {
         ...formValue,
         created_by: auth?.user_id,
-        patient: selectedRowData?.id,
       };
       setLoading(true);
-      await createTriage(formData, auth).then(() => {
+      await updatePatientTriage(selectedRowData?.triage, formData, auth).then(() => {
         helpers.resetForm();
+        sendToDoc({track:"doctor"}, selectedRowData?.id)
         setLoading(false);
         handleClose();
         toast.success("Triage Created Successfully!");
@@ -65,16 +108,25 @@ export default function AddTriageModal({
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Add Triage"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          <div className="flex justify-between items-center">
+            <p>{`${triagePatient?.first_name} ${triagePatient?.second_name}`}</p>
+            <p>{`Gender: ${triagePatient?.gender}`}</p>
+            <p>{`Age: ${triagePatient?.age}`}</p>
+
+          </div>          
+        </DialogTitle>
         <DialogContent>
+          <h2 className="py-2 text-sm font-semibold">{"Update Vital Signs"}</h2>
           <Formik
+            key={JSON.stringify(initialValues)}
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={handleAddTriage}
+            onSubmit={handleUpdateTriage}
           >
             <Form className="w-full">
-              <section className="flex items-center justify-between gap-4">
-                <section className="space-y-2 w-full">
+              <section className="">
+                <section className="flex items-center justify-between gap-2 py-2 w-full">
                   <div className="w-full">
                     <Field
                       className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
@@ -101,8 +153,6 @@ export default function AddTriageModal({
                       className="text-warning text-xs"
                     />
                   </div>
-                </section>
-                <section className="space-y-2 w-full">
                   <div className="w-full">
                     <Field
                       className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
@@ -116,6 +166,8 @@ export default function AddTriageModal({
                       className="text-warning text-xs"
                     />
                   </div>
+                </section>
+                <section className="flex items-center justify-between gap-2 py-2 w-full">
                   <div className="w-full">
                     <Field
                       className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
@@ -125,6 +177,32 @@ export default function AddTriageModal({
                     />
                     <ErrorMessage
                       name="pulse"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </div>
+                  <div className="w-full">
+                    <Field
+                      className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="Systolic"
+                      name="systolic"
+                    />
+                    <ErrorMessage
+                      name="systolic"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </div>
+                  <div className="w-full">
+                    <Field
+                      className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="diastolic"
+                      name="diastolic"
+                    />
+                    <ErrorMessage
+                      name="diastolic"
                       component="div"
                       className="text-warning text-xs"
                     />
