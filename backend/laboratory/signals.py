@@ -9,7 +9,8 @@ from .models import (
     LabEquipment,
     LabTestResult,
     LabTestResultQualitative,
-    LabTestResult, LabTestResultQualitative,ResultsVerification
+    LabTestResult, LabTestResultQualitative,ResultsVerification,
+    QualitativeResultsVerification
 )
 # utils
 from .utils import (
@@ -133,11 +134,34 @@ def approve_lab_test_result(sender, instance, **kwargs):
         lab_results.save()
     
     if instance. lab_test_request:
+        lab_test_request = instance.lab_test_request
+        try:
+            process = AttendanceProcess.objects.get(labTest=lab_test_request)
+            # Print the process for debugging purposes
+            process.track = "added result"
+            process.labResult = lab_results
+            process.labTech = lab_results.recorded_by
+            process.save()
+            print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')
+        except AttendanceProcess.DoesNotExist:
+            print('No AttendanceProcess found for the given lab test request.')
+
+@receiver(post_save, sender=QualitativeResultsVerification)
+def approve_qualitative_lab_test_result(sender, instance, **kwargs):
+    # Check if the QualitativeResultsVerification instance has a lab_test_result associated with it
+    if instance.lab_results:
+        lab_results = instance.lab_results
+        # Update the LabTestResult to indicate that it has been approved
+        lab_results.approved = True
+        lab_results.save()
+    
+    if instance. lab_test_request:
         lab_test_request = instance. lab_test_request
         try:
             process = AttendanceProcess.objects.get(labTest=lab_test_request)
             # Print the process for debugging purposes
             process.track = "added result"
+            process.qualitativeLabTest=lab_results
             process.labTech = lab_results.recorded_by
             process.save()
             print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')

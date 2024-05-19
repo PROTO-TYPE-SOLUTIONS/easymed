@@ -32,7 +32,8 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
     const sampleOnlyInitialValues = {
         sample: "",
     }
-
+    const initials = labResultItems.length <=0 ? initialValues : sampleOnlyInitialValues
+    console.log("THZ ARE THE INITILAS", initials)
     const validationSchema = Yup.object().shape({
       sample: Yup.string().required("This field is required!"),
       test_profile:Yup.number().required("This field is required!"),
@@ -40,6 +41,8 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
     const sampleOnlyValidationSchema = Yup.object().shape({
         sample: Yup.string().required("This field is required!"),
     });
+    const schema = labResultItems.length<=0 ? validationSchema : sampleOnlyValidationSchema
+    console.log("THIS IS THE SCHEMA", schema)
 
     const handleClose = () => {
         setRequestInfoOpen(false);
@@ -66,13 +69,23 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
     }
 
     const updateTestRequest = async (formValue) => {
+        console.log("THE FORMVALUE TO DB", formValue)
         const payload = {
             ...formValue,
             sample_collected: true
         }
+
+        const sampleOnly = {
+            sample: formValue.sample,
+            sample_collected: true
+        }
+
+        const payloadSent = formValue.test_profile ? payload : sampleOnly
+
+        console.log("THE PAYLOAD TO DB", payloadSent)
         setLoading(true)
         try{
-            await updateLabRequest(selectedRowData.labTest,payload, auth )
+            await updateLabRequest(selectedRowData.labTest,payloadSent, auth )
             toast.success("successfully saved test")
             savePanels(selectedRowData.labTest)
             setLoading(false)
@@ -191,8 +204,8 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
                 { labTest.sample_collected && (labTest.sample)}
             </div>
             {!labTest.sample_collected && (<Formik
-                initialValues={labResultItems.length <=0 ? initialValues : sampleOnlyInitialValues}
-                validationSchema={labResultItems.length<=0 ? validationSchema : sampleOnlyValidationSchema}
+                initialValues={initials}
+                validationSchema={schema}
                 onSubmit={updateTestRequest}
             >
                 {({ values, handleChange }) => (

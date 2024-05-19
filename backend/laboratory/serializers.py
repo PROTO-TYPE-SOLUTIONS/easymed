@@ -14,7 +14,9 @@ from .models import (
     LabTestResultPanel,
     LabTestRequestPanel,
     LabTestResultQualitative,
-    LabTestResultPanelQualitative
+    LabTestResultPanelQualitative,
+    ResultsVerification,
+    QualitativeResultsVerification
 
     )
 
@@ -157,3 +159,14 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = LabTestCategory
 #         fields = '__all__'
+
+class ResultsVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResultsVerification
+        fields = '__all__'
+
+class QualitativeResultsVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QualitativeResultsVerification
+        fields = '__all__'
+

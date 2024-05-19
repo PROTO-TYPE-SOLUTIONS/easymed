@@ -20,6 +20,7 @@ import { BiSupport } from 'react-icons/bi'
 import { GiMedicinePills } from 'react-icons/gi'
 import { useRouter } from "next/router";
 import LabModal from "./lab-modal";
+import ViewAddedResults from "./ViewAddedResults";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -49,6 +50,11 @@ const getActions = () => {
       label: "Send To Lab",
       icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
     },
+    {
+      action: "results",
+      label: "View results",
+      icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -59,6 +65,7 @@ const DoctorPatientDataGrid = () => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const [open, setOpen] = useState(false);
+  const [resultOpen, setResultOpen]=useState(false)
   const [consultOpen, setConsultOpen] = useState(false);
   const [prescribeOpen, setPrescribeOpen] = useState(false);
   const [labOpen, setLabOpen] = useState(false);
@@ -71,8 +78,11 @@ const DoctorPatientDataGrid = () => {
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const { processes, patients } = useSelector((store)=> store.patient)
+  const [processTrack, setProcessTrack] = useState("doctor")
+  const actionsWhenOnDoctorTrack = userActions.filter((action)=> action.action !== "results")
+  const actionsWhenOnResultedTrack = userActions.filter((action)=> action.action !== "send to lab")
 
-  const doctorsSchedules = processes.filter((process)=> process.track==="doctor")
+  const doctorsSchedules = processes.filter((process)=> process.track===processTrack)
 
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
@@ -99,6 +109,9 @@ const DoctorPatientDataGrid = () => {
     } else if(menu.action === "send to lab"){
       setSelectedRowData(data);
       setLabOpen(true);
+    }else if(menu.action === "results"){
+      setSelectedRowData(data);
+      setResultOpen(true);
     }
   };
 
@@ -107,7 +120,7 @@ const DoctorPatientDataGrid = () => {
       <>
         <CmtDropdownMenu
           sx={{ cursor: "pointer" }}
-          items={userActions}
+          items={processTrack === 'doctor' ? actionsWhenOnDoctorTrack : actionsWhenOnResultedTrack }
           onItemClick={(menu) => onMenuClick(menu, data)}
           TriggerComponent={
             <LuMoreHorizontal className="cursor-pointer text-xl" />
@@ -161,6 +174,10 @@ const DoctorPatientDataGrid = () => {
 
   return (
     <section>
+      <div className="capitalize flex gap-4 py-4">
+        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("doctor")}>new appointments</p>
+        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("added result")}>from the lab</p>
+      </div>
       <DataGrid
         dataSource={doctorsSchedules}
         allowColumnReordering={true}
@@ -224,6 +241,8 @@ const DoctorPatientDataGrid = () => {
       <LabModal
         {...{ labOpen, setLabOpen, selectedRowData }}
       />
+      {resultOpen && (<ViewAddedResults resultOpen={resultOpen} setResultOpen={setResultOpen} selectedData={selectedRowData}
+      />)}
     </section>
   );
 };

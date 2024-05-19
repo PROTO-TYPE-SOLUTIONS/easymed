@@ -25,8 +25,9 @@ from .models import (
     LabTestRequestPanel,
 
     LabTestResultQualitative,
-    LabTestResultPanelQualitative
-    
+    LabTestResultPanelQualitative,
+    ResultsVerification,
+    QualitativeResultsVerification
 )
 # serializers
 from .serializers import (
@@ -42,8 +43,9 @@ from .serializers import (
     LabTestResultPanelSerializer,
     LabTestRequestPanelSerializer,
     LabTestResultQualitativeSerializer,
-    LabTestResultPanelQualitativeSerializer
-
+    LabTestResultPanelQualitativeSerializer,
+    ResultsVerificationSerializer,
+    QualitativeResultsVerificationSerializer
 )
 
 # permissions
@@ -204,6 +206,13 @@ class LabTestResultPanelByLabTestResultId(generics.ListAPIView):
         lab_test_result_id = self.kwargs['lab_test_result_id']
         return LabTestResultPanel.objects.filter(lab_test_result_id=lab_test_result_id)
 
+class QualitativeLabTestResultPanelByLabTestResultId(generics.ListAPIView):
+    serializer_class = LabTestResultPanelQualitativeSerializer
+
+    def get_queryset(self):
+        lab_test_result_id = self.kwargs['lab_test_result_id']
+        return LabTestResultPanelQualitative.objects.filter(lab_test_result_id=lab_test_result_id)
+
 
 class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
     queryset = EquipmentTestRequest.objects.all()
@@ -216,6 +225,14 @@ class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsPatientUser,)
+
+class ResultsVerificationViewSet(viewsets.ModelViewSet):
+    queryset = ResultsVerification.objects.all()
+    serializer_class = ResultsVerificationSerializer
+
+class QualitativeResultsVerificationViewSet(viewsets.ModelViewSet):
+    queryset = QualitativeResultsVerification.objects.all()
+    serializer_class = QualitativeResultsVerificationSerializer
 
 
 '''

@@ -173,6 +173,7 @@ class LabTestResultQualitative(models.Model):
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    approved = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title  
@@ -185,3 +186,8 @@ class LabTestResultPanelQualitative(models.Model):
     
     def __str__(self):
         return f"{self.test_panel.name}"
+
+class QualitativeResultsVerification(models.Model):
+    lab_results = models.OneToOneField(LabTestResultQualitative, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
+    approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)

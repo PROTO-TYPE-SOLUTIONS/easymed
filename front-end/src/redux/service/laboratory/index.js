@@ -301,3 +301,69 @@ export const fetchLabTestPanelsByTestRequestId = (test_request_id, auth) =>{
             })
     })
 }
+
+
+export const fetchResultPanelsByResultsId = (result_id, auth) =>{
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_PANELS_BY_RESULT}`,{
+            params:{
+                result_id: result_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchQualitativeResultPanelsByResultsId = (result_id, auth) =>{
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_QUALITATIVE_PANELS_BY_RESULT}`,{
+            params:{
+                result_id: result_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const approveLabResult = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.APPROVE_LAB_RESULTS}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
+}
+
+export const approveQualitativeLabResult = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.APPROVE_QUALITATIVE_LAB_RESULTS}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
