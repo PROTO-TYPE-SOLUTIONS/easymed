@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save
 from patient.models import AttendanceProcess
+from billing.models import InvoiceItem
 from django.dispatch import receiver
 from easymed.celery_tasks import generate_labtestresult_pdf, generate_qualitative_labtestresult_pdf
 # models
@@ -19,7 +20,7 @@ from .utils import (
     create_hl7_message,
     create_astm_message,
     send_to_network_folder,
-)
+) 
 
 
 
@@ -138,10 +139,12 @@ def approve_lab_test_result(sender, instance, **kwargs):
         try:
             process = AttendanceProcess.objects.get(labTest=lab_test_request)
             # Print the process for debugging purposes
+            test_profile = lab_test_request.test_profile.item
             process.track = "added result"
             process.labResult = lab_results
             process.labTech = lab_results.recorded_by
             process.save()
+            InvoiceItem.objects.create(invoice=process.invoice, item=test_profile)
             print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')
         except AttendanceProcess.DoesNotExist:
             print('No AttendanceProcess found for the given lab test request.')
@@ -155,15 +158,17 @@ def approve_qualitative_lab_test_result(sender, instance, **kwargs):
         lab_results.approved = True
         lab_results.save()
     
-    if instance. lab_test_request:
+    if instance.lab_test_request:
         lab_test_request = instance. lab_test_request
         try:
             process = AttendanceProcess.objects.get(labTest=lab_test_request)
             # Print the process for debugging purposes
+            test_profile = lab_test_request.test_profile.item
             process.track = "added result"
             process.qualitativeLabTest=lab_results
             process.labTech = lab_results.recorded_by
             process.save()
+            InvoiceItem.objects.create(invoice=process.invoice, item=test_profile)
             print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')
         except AttendanceProcess.DoesNotExist:
             print('No AttendanceProcess found for the given lab test request.')
