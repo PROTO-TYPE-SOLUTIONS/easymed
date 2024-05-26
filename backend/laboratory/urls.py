@@ -22,7 +22,9 @@ from .views import (
     LabTestResultPanelQualitativeViewSet,
     LabTestResultQualitativeViewSet,
     ResultsVerificationViewSet,
-    QualitativeResultsVerificationViewSet
+    QualitativeResultsVerificationViewSet,
+    ProcessTestRequestViewSet,
+    LabTestRequestByProcessId
 )
 
 router = DefaultRouter()
@@ -45,6 +47,7 @@ router.register(r'lab-test-requests-panel', LabTestRequestPanelViewSet)
 router.register(r'lab-equipment', LabEquipmentViewSet)
 router.register(r'equipment-test-request', EquipmentTestRequestViewSet)
 router.register(r'public-lab-test-request', PublicLabTestRequestViewSet)
+router.register(r'process-test-request', ProcessTestRequestViewSet)
 
 router.register(r'approve-results', ResultsVerificationViewSet)
 router.register(r'approve-qualitative-results', QualitativeResultsVerificationViewSet)
@@ -57,6 +60,7 @@ urlpatterns = [
     path('lab-test-result-panels-by-lab-test-result-id/<int:lab_test_result_id>/', LabTestResultPanelByLabTestResultId.as_view(), name='lab-test-result-panels'),
     path('qualitative-lab-test-result-panels-by-lab-test-result-id/<int:lab_test_result_id>/', QualitativeLabTestResultPanelByLabTestResultId.as_view(), name='qualitative-lab-test-result-panels'),
     path('lab-test-request-panels-by-lab-test-request-id/<int:lab_test_request_id>/', LabTestRequestPanelByLabTestRequestId.as_view(), name='lab-test-request-panels'),
+    path('lab-test-request-by-process-id/<int:process_id>/', LabTestRequestByProcessId.as_view(), name='lab-test-request-panels'),
 
     path('download_qualitative_labtestresult_pdf/<int:labtestresult_id>/', download_qualitative_labtestresult_pdf, name='download_qualitative_labtestresult_pdf'),
 

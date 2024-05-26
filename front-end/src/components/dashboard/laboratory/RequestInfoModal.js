@@ -5,15 +5,18 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { fetchLabRequestsDetails, fetchLabTestPanelsByTestRequestId, sendLabRequestsPanels, updateLabRequest } from '@/redux/service/laboratory';
 import { useAuth } from '@/assets/hooks/use-auth';
-import { getAllLabTestPanels, getAllLabTestPanelsByProfile, getAllLabTestPanelsByTestRequest } from '@/redux/features/laboratory';
+import { getAllLabTestByProcessId, getAllLabTestPanels, getAllLabTestPanelsByProfile, getAllLabTestPanelsByTestRequest } from '@/redux/features/laboratory';
 import { useSelector, useDispatch } from 'react-redux';
+import TestsAccordion from './TestsAccordion';
+import { fetchPatientById } from '@/redux/service/patients';
 
 const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}) => {
     const [loading, setLoading] = useState(false);
-    const { labTestProfiles, labTestPanelsById } = useSelector((store) => store.laboratory);
+    const { labTestProfiles, labTestPanelsById, labRequestsByProcess } = useSelector((store) => store.laboratory);
     const [labTest, setLabTest]=useState({})
     const [testProfile, setTestProfile]= useState(null)
     const [selectedPanels, setSelectedPanels] = useState([]);
+    const [testPatient, setTestPatient]=useState({})
 
     const auth = useAuth();
     const dispatch = useDispatch();
@@ -21,8 +24,8 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
 
     console.log("ROW DATA IS THE FOLLOWING", selectedRowData)
     console.log("PANELS FOR A LAB REQUEST", labResultItems)
-    console.log("ALL THE PANELS", labTestPanels)
-    console.log("THIS IS THE TEST", labTest)
+    console.log("ALL THE PANELS", testPatient)
+    console.log("THIS ARE THE TESTS", selectedRowData)
 
     const initialValues = {
         sample: "",
@@ -47,6 +50,15 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
     const handleClose = () => {
         setRequestInfoOpen(false);
     };
+
+    const getPatientDetailsForThisTestRequest = async () => {
+        try{
+            const response = await fetchPatientById(selectedRowData?.patient)
+            setTestPatient(response);
+        }catch(error){
+            console.log("ERROR GETTING PATIENT")
+        }
+    }
 
     const saveAllPanels = async (testReqPanelPayload) => {
         try{
@@ -147,7 +159,10 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
         if(auth){
             dispatch(getAllLabTestPanels(auth))
             labTestDetails(selectedRowData?.labTest, auth)
-            labTestPanelsForSpecificTest(selectedRowData?.labTest, auth)}
+            dispatch(getAllLabTestByProcessId(selectedRowData?.labTest, auth)) 
+            getPatientDetailsForThisTestRequest()
+            // labTestPanelsForSpecificTest(selectedRowData?.labTest, auth)
+        }
             if(testProfile){
                 getTestPanelsByTheProfileId(testProfile, auth);
                 dispatch(getAllLabTestPanelsByProfile(testProfile, auth));
@@ -166,11 +181,23 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
         >
             <DialogTitle id="alert-dialog-title">
                 <div className='flex items-center min-h-6 justify-between px-2 bg-yellow-200 py-2'>
-                    <p className='font-semibold'>{`${labTest.test_profile ? labTest.test_profile_name: "Add"} Profile`}</p>
-                    <p className='font-semibold'>{`requested by: ${labTest.requested_name}`}</p>
+                    <div>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.first_name} ${testPatient.second_name}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.email}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.phone}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.gender}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.age}`}</p>
+                    </div>
+                    <div>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.first_name} ${testPatient.second_name}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.email}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.phone}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.gender}`}</p>
+                        <p className='text-xs font-semibold'>{`-- ${testPatient.age}`}</p>
+                    </div>
                 </div>
             </DialogTitle>
-            <DialogContent>
+            {/* <DialogContent>
             {labResultItems.length>0 && (<div>
             <h2 className='text-sm font-bold text-primary w-1/3 mb-4 border-gray border-b px-4'>Requested Tests</h2>
             <ul className='flex gap-3 flex-col px-4'>
@@ -306,6 +333,10 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
                 </button>
                 </Form>)}
             </Formik>)}
+            </DialogContent> */}
+            <DialogContent>
+                <h2 className='text-sm font-bold text-primary w-1/3 mb-4 border-gray border-b px-4'>Requested Tests</h2>
+                <TestsAccordion/>
             </DialogContent>
         </Dialog>      
     </div>

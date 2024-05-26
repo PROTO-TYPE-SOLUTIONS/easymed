@@ -27,7 +27,8 @@ from .models import (
     LabTestResultQualitative,
     LabTestResultPanelQualitative,
     ResultsVerification,
-    QualitativeResultsVerification
+    QualitativeResultsVerification,
+    ProcessTestRequest
 )
 # serializers
 from .serializers import (
@@ -45,7 +46,8 @@ from .serializers import (
     LabTestResultQualitativeSerializer,
     LabTestResultPanelQualitativeSerializer,
     ResultsVerificationSerializer,
-    QualitativeResultsVerificationSerializer
+    QualitativeResultsVerificationSerializer,
+    ProcessTestRequestSerializer
 )
 
 # permissions
@@ -174,6 +176,12 @@ class LabTestRequestPanelByLabTestRequestId(generics.ListAPIView):
         lab_test_request_id = self.kwargs['lab_test_request_id']
         return LabTestRequestPanel.objects.filter(lab_test_request_id=lab_test_request_id)
 
+class LabTestRequestByProcessId(generics.ListAPIView):
+    serializer_class = LabTestRequestSerializer
+
+    def get_queryset(self):
+        process_id = self.kwargs['process_id']
+        return LabTestRequest.objects.filter(process_id=process_id)
 
 '''Lab Test Result and Test Result Panel'''
 class LabTestResultViewSet(viewsets.ModelViewSet):
@@ -233,6 +241,10 @@ class ResultsVerificationViewSet(viewsets.ModelViewSet):
 class QualitativeResultsVerificationViewSet(viewsets.ModelViewSet):
     queryset = QualitativeResultsVerification.objects.all()
     serializer_class = QualitativeResultsVerificationSerializer
+
+class ProcessTestRequestViewSet(viewsets.ModelViewSet):
+    queryset = ProcessTestRequest.objects.all()
+    serializer_class = ProcessTestRequestSerializer
 
 
 '''

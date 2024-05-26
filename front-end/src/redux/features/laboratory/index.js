@@ -8,6 +8,7 @@ import { fetchLabRequests,
     fetchQualitativeLabRequests,
     fetchResultPanelsByResultsId,
     fetchQualitativeResultPanelsByResultsId,
+    fetchLabTestByProcessId,
   } from "@/redux/service/laboratory";
 
 
@@ -19,10 +20,12 @@ const initialState = {
   labTestPanels: [],
   labTestPanelsById: [],
   labRequests: [],
+  labRequestsByProcess: [],
   publicLabRequests: [],
   labEquipments: [],
   labTestProfiles: [],
   patientSpecificLabRequests: [],
+  processAllTestRequest: []
 };
 
 const LaboratorySlice = createSlice({
@@ -37,6 +40,12 @@ const LaboratorySlice = createSlice({
     },
     setLabRequests: (state, action) => {
       state.labRequests = action.payload;
+    },
+    setProcessLabRequests: (state, action) => {
+      state.labRequestsByProcess = action.payload;
+    },
+    clearProcessLabRequests: (state, action)=>{
+      state.labRequestsByProcess = [];
     },
     setPublicLabRequests: (state, action) => {
       state.publicLabRequests = action.payload;
@@ -79,6 +88,9 @@ const LaboratorySlice = createSlice({
         state.labResultItems = [...state.labResultItems, action.payload];
       }
     },
+    setProcessAllTestRequest: (state, action) => {
+      state.processAllTestRequest = [...state.processAllTestRequest, action.payload]
+    }
   },
 });
 
@@ -86,7 +98,8 @@ export const { setLabResults,
   setLabRequests, setPublicLabRequests, 
   setLabEquipments,setLabTestProfile, setSpecificPatientLabRequests,
   setLabResultItems, setLabResultItemsAfterRemovingItem, setResultPanelsByResultId,
-  clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults
+  clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults,
+  setProcessLabRequests, clearProcessLabRequests, setProcessAllTestRequest
 } = LaboratorySlice.actions;
 
 
@@ -199,6 +212,17 @@ export const getAllLabTestPanelsByTestRequest = (test_request_id, auth) => async
     })
   } catch (error) {
     console.log("LAB_TEST_PANELS_BY_PROFILE_ID_ERROR ", error);
+  }
+};
+
+export const getAllLabTestByProcessId = (process_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchLabTestByProcessId(process_id, auth);
+    dispatch(clearProcessLabRequests())
+      dispatch(setProcessLabRequests(response));
+
+  } catch (error) {
+    console.log("LAB_TEST_REQ_BY_PROCESS_ID_ERROR ", error);
   }
 };
 

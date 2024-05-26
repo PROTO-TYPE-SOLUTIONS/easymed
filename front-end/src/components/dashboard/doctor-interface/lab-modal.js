@@ -32,8 +32,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   const initialValues = {
     note: "",
-    sample_collected: null,
-    patient: selectedRowData?.id,
+    process: selectedRowData?.labTest,
     test_profile: null,
     requested_by: auth?.user_id,
   };
@@ -67,7 +66,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
     console.log("FORM_DATA ", formValue);
     try {
       setLoading(true);
-      await updateLabRequest(selectedRowData.labTest, formValue, auth).then((res) => {
+      await sendLabRequests(formValue, auth).then((res) => {
         helpers.resetForm();
         updateAttendanceProcesses({track: "lab"}, selectedRowData.id)
         savePanels(res.id)
