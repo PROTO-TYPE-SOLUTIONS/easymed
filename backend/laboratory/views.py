@@ -27,7 +27,10 @@ from .models import (
     LabTestResultQualitative,
     LabTestResultPanelQualitative,
     ResultsVerification,
-    QualitativeResultsVerification
+    QualitativeResultsVerification,
+    ProcessTestRequest,
+    Phlebotomy,
+    PatientSample
 )
 # serializers
 from .serializers import (
@@ -45,7 +48,10 @@ from .serializers import (
     LabTestResultQualitativeSerializer,
     LabTestResultPanelQualitativeSerializer,
     ResultsVerificationSerializer,
-    QualitativeResultsVerificationSerializer
+    QualitativeResultsVerificationSerializer,
+    ProcessTestRequestSerializer,
+    PhlebotomySerializer,
+    PatientSampleSerializer
 )
 
 # permissions
@@ -173,7 +179,27 @@ class LabTestRequestPanelByLabTestRequestId(generics.ListAPIView):
     def get_queryset(self):
         lab_test_request_id = self.kwargs['lab_test_request_id']
         return LabTestRequestPanel.objects.filter(lab_test_request_id=lab_test_request_id)
+    
+class PhlebotomyPanelByPatientSampleId(generics.ListAPIView):
+    serializer_class = LabTestRequestPanelSerializer
 
+    def get_queryset(self):
+        sample_id = self.kwargs['sample_id']
+        return LabTestRequestPanel.objects.filter(sample_id=sample_id)
+    
+class PatientSampleByProcessId(generics.ListAPIView):
+    serializer_class = PatientSampleSerializer 
+
+    def get_queryset(self):
+        process_id = self.kwargs['process_id']
+        return PatientSample.objects.filter(process_test_request_id=process_id)
+
+class LabTestRequestByProcessId(generics.ListAPIView):
+    serializer_class = LabTestRequestSerializer
+
+    def get_queryset(self):
+        process_id = self.kwargs['process_id']
+        return LabTestRequest.objects.filter(process_id=process_id)
 
 '''Lab Test Result and Test Result Panel'''
 class LabTestResultViewSet(viewsets.ModelViewSet):
@@ -233,6 +259,10 @@ class ResultsVerificationViewSet(viewsets.ModelViewSet):
 class QualitativeResultsVerificationViewSet(viewsets.ModelViewSet):
     queryset = QualitativeResultsVerification.objects.all()
     serializer_class = QualitativeResultsVerificationSerializer
+
+class ProcessTestRequestViewSet(viewsets.ModelViewSet):
+    queryset = ProcessTestRequest.objects.all()
+    serializer_class = ProcessTestRequestSerializer
 
 
 '''

@@ -8,6 +8,8 @@ import { fetchLabRequests,
     fetchQualitativeLabRequests,
     fetchResultPanelsByResultsId,
     fetchQualitativeResultPanelsByResultsId,
+    fetchLabTestByProcessId,
+    fetchSamplesForSpecificProcess,
   } from "@/redux/service/laboratory";
 
 
@@ -19,10 +21,13 @@ const initialState = {
   labTestPanels: [],
   labTestPanelsById: [],
   labRequests: [],
+  labRequestsByProcess: [],
+  labSamplesByProcess: [],
   publicLabRequests: [],
   labEquipments: [],
   labTestProfiles: [],
   patientSpecificLabRequests: [],
+  processAllTestRequest: []
 };
 
 const LaboratorySlice = createSlice({
@@ -37,6 +42,18 @@ const LaboratorySlice = createSlice({
     },
     setLabRequests: (state, action) => {
       state.labRequests = action.payload;
+    },
+    setProcessLabRequests: (state, action) => {
+      state.labRequestsByProcess = action.payload;
+    },
+    clearProcessLabRequests: (state, action)=>{
+      state.labRequestsByProcess = [];
+    },
+    setProcessesSamples: (state, action) => {
+      state.labSamplesByProcess = action.payload;
+    },
+    clearProcessesSamples: (state, action)=>{
+      state.labSamplesByProcess = [];
     },
     setPublicLabRequests: (state, action) => {
       state.publicLabRequests = action.payload;
@@ -79,6 +96,12 @@ const LaboratorySlice = createSlice({
         state.labResultItems = [...state.labResultItems, action.payload];
       }
     },
+    setProcessAllTestRequest: (state, action) => {
+      state.processAllTestRequest = [...state.processAllTestRequest, action.payload]
+    },
+    clearProcessAllTestRequest: (state, action) => {
+      state.processAllTestRequest = []
+    }
   },
 });
 
@@ -86,7 +109,9 @@ export const { setLabResults,
   setLabRequests, setPublicLabRequests, 
   setLabEquipments,setLabTestProfile, setSpecificPatientLabRequests,
   setLabResultItems, setLabResultItemsAfterRemovingItem, setResultPanelsByResultId,
-  clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults
+  clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults,
+  setProcessLabRequests, clearProcessLabRequests, setProcessAllTestRequest,
+  clearProcessAllTestRequest, setProcessesSamples, clearProcessesSamples
 } = LaboratorySlice.actions;
 
 
@@ -199,6 +224,28 @@ export const getAllLabTestPanelsByTestRequest = (test_request_id, auth) => async
     })
   } catch (error) {
     console.log("LAB_TEST_PANELS_BY_PROFILE_ID_ERROR ", error);
+  }
+};
+
+export const getAllLabTestByProcessId = (process_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchLabTestByProcessId(process_id, auth);
+    dispatch(clearProcessLabRequests())
+      dispatch(setProcessLabRequests(response));
+
+  } catch (error) {
+    console.log("LAB_TEST_REQ_BY_PROCESS_ID_ERROR ", error);
+  }
+};
+
+export const getAllSamplesForProcessId = (process_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchSamplesForSpecificProcess(process_id, auth);
+    dispatch(clearProcessesSamples())
+    dispatch(setProcessesSamples(response));
+
+  } catch (error) {
+    console.log("SAMPLES_BY_PROCESS_ID_ERROR ", error);
   }
 };
 

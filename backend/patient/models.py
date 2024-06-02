@@ -5,7 +5,7 @@ from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item
 from billing.models import Invoice, InvoiceItem
-from laboratory.models import LabTestRequest, LabTestResultQualitative, LabTestResult
+from laboratory.models import ProcessTestRequest, LabTestResultQualitative, LabTestResult
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -244,7 +244,7 @@ class AttendanceProcess(models.Model):
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='pharmacist_attendance_processes')
     reason = models.TextField(max_length=300)
     invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE, null=True)
-    labTest = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE, null=True)
+    labTest = models.OneToOneField(ProcessTestRequest, on_delete=models.CASCADE, null=True)
     labResult = models.OneToOneField(LabTestResult, on_delete=models.CASCADE, null=True)
     qualitativeLabTest = models.OneToOneField(LabTestResultQualitative, on_delete=models.CASCADE, null=True)
 
@@ -263,7 +263,7 @@ class AttendanceProcess(models.Model):
 
             # Create a new invoice with a default amount of 0
             self.invoice = Invoice.objects.create(invoice_amount=0)
-            self.labTest = LabTestRequest.objects.create()
+            self.labTest = ProcessTestRequest.objects.create(reference=self.track_number)
             self.triage = Triage.objects.create()
             self.prescription = Prescription.objects.create()
 
