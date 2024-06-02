@@ -19,7 +19,7 @@ def create_hl7_message(test_request):
     
     # Generate HL7 message
     hl7_message = (
-        "MSH|^~\&|EASYMED|LABNAME|20240101000000||ADT^O01^ADTOBR|MSG00001|P|2.4\r"  # basic information about an HL7 message
+        "MSH|^~\&|EASYMED|LABNAME|20240101000000||ADT^O01^ADTOBR|MSG00001|P|2.4\r"
         "PID|1||{patient_id}||{patient_name}^^^^PI||{date_of_birth}|{gender}^||{address}^^Postal^Jones^Mary||||||||||||||||||||||||||||\r" #patient identification (PID) segment
     ).format(
         patient_id=patient.id,

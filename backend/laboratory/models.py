@@ -56,7 +56,7 @@ class Specimen(models.Model):
 
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
-    specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE)
+    specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=255)
     ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -70,7 +70,7 @@ class ProcessTestRequest(models.Model):
     reference = models.CharField(max_length=40)
 
 class LabTestRequest(models.Model):
-    process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE)
+    process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
     note = models.TextField(null=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
