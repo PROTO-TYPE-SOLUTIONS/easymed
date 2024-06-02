@@ -1,4 +1,4 @@
-import React, { useState, } from "react";
+import React, { useEffect, useState, } from "react";
 import { useParams } from 'next/navigation';
 import { useSelector, useDispatch } from "react-redux";
 import { Formik, Form, } from "formik";
@@ -9,7 +9,7 @@ import { Column, Pager } from "devextreme-react/data-grid";
 import { Grid, Container } from "@mui/material";
 import { createPrescription } from "@/redux/service/patients";
 import { prescribeDrug } from "@/redux/service/patients";
-import { clearAllPrescriptionItems } from "@/redux/features/patients";
+import { clearAllPrescriptionItems, getAllPrescribedDrugsByPrescription } from "@/redux/features/patients";
 import { removeAPrescriptionItem } from "@/redux/features/patients";
 import { toast } from "react-toastify";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
@@ -20,6 +20,7 @@ import PrescriptionItemDialog from "@/components/dashboard/doctor-interface/pres
 import ProtectedRoute from "@/assets/hoc/protected-route";
 import AuthGuard from "@/assets/hoc/auth-guard";
 import PrescribePatient from "@/components/dashboard/prescribe/PrescribePatient";
+import { getAllPrescriptionsPrescribedDrugs } from "@/redux/features/pharmacy";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -132,6 +133,12 @@ const PrescribeDrug = () => {
       setLoading(false);
     }
   };
+
+  useEffect(()=> {
+    if(auth){
+      dispatch(getAllPrescribedDrugsByPrescription(params.prescription_id, auth))
+    }
+  }, [])
 
   return (
     <PrescribePatient/>

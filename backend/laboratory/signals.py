@@ -1,4 +1,7 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
+import pdb
+from patient.models import AttendanceProcess
+from billing.models import InvoiceItem
 from django.dispatch import receiver
 from easymed.celery_tasks import generate_labtestresult_pdf, generate_qualitative_labtestresult_pdf
 # models
@@ -8,6 +11,11 @@ from .models import (
     LabEquipment,
     LabTestResult,
     LabTestResultQualitative,
+    LabTestResult, LabTestResultQualitative,ResultsVerification,
+    QualitativeResultsVerification,
+    LabTestRequestPanel,
+    PatientSample,
+    Phlebotomy
 )
 # utils
 from .utils import (
@@ -16,7 +24,7 @@ from .utils import (
     create_hl7_message,
     create_astm_message,
     send_to_network_folder,
-)
+) 
 
 
 
@@ -101,4 +109,83 @@ HumaStar 100 uses network shared files
         #         print("Equipment not Network shared")
 
         # elif equipment.data_format != 'astm':
-        #         print("Data not AST format")      
+        #         print("Data not AST format")    
+
+@receiver(post_save, sender=LabTestResult)
+def update_lab_test_request(sender, instance, **kwargs):
+    # Check if the LabTestResult instance has a lab_test_request associated with it
+    if instance.lab_test_request:
+        lab_test_request = instance.lab_test_request
+        # Update the LabTestRequest to indicate that it has a result
+        lab_test_request.has_result = True
+        lab_test_request.save()
+
+@receiver(post_save, sender=LabTestResultQualitative)
+def update_lab_test_request(sender, instance, **kwargs):
+    # Check if the LabTestResultQualitative instance has a lab_test_request associated with it
+    if instance.lab_test_request:
+        lab_test_request = instance.lab_test_request
+        # Update the LabTestRequest to indicate that it has a result
+        lab_test_request.has_result = True
+        lab_test_request.save()
+
+@receiver(post_save, sender=ResultsVerification)
+def approve_lab_test_result(sender, instance, **kwargs):
+    # Check if the ResultsVerification instance has a lab_test_result associated with it
+    if instance.lab_results:
+        lab_results = instance.lab_results
+        # Update the LabTestResult to indicate that it has been approved
+        lab_results.approved = True
+        lab_results.save()
+    
+    if instance. lab_test_request:
+        lab_test_request = instance.lab_test_request
+        try:
+            process = AttendanceProcess.objects.get(labTest=lab_test_request)
+            # Print the process for debugging purposes
+            test_profile = lab_test_request.test_profile.item
+            process.track = "added result"
+            process.labResult = lab_results
+            process.labTech = lab_results.recorded_by
+            process.save()
+            InvoiceItem.objects.create(invoice=process.invoice, item=test_profile)
+            print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')
+        except AttendanceProcess.DoesNotExist:
+            print('No AttendanceProcess found for the given lab test request.')
+
+@receiver(post_save, sender=QualitativeResultsVerification)
+def approve_qualitative_lab_test_result(sender, instance, **kwargs):
+    # Check if the QualitativeResultsVerification instance has a lab_test_result associated with it
+    if instance.lab_results:
+        lab_results = instance.lab_results
+        # Update the LabTestResult to indicate that it has been approved
+        lab_results.approved = True
+        lab_results.save()
+    
+    if instance.lab_test_request:
+        lab_test_request = instance. lab_test_request
+        try:
+            process = AttendanceProcess.objects.get(labTest=lab_test_request)
+            # Print the process for debugging purposes
+            test_profile = lab_test_request.test_profile.item
+            process.track = "added result"
+            process.qualitativeLabTest=lab_results
+            process.labTech = lab_results.recorded_by
+            process.save()
+            InvoiceItem.objects.create(invoice=process.invoice, item=test_profile)
+            print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')
+        except AttendanceProcess.DoesNotExist:
+            print('No AttendanceProcess found for the given lab test request.')
+
+
+@receiver(pre_save, sender=LabTestRequestPanel)
+def group_panels_with_specimen(sender, instance, **kwargs):
+        sample, created = PatientSample.objects.get_or_create(
+            specimen=instance.test_panel.specimen,
+            process_test_request=instance.lab_test_request.process,
+            test_req=instance.lab_test_request
+        )
+        
+        instance.sample = sample
+        sample.specimen_name = instance.test_panel.specimen.name
+        sample.save()

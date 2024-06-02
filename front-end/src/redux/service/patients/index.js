@@ -26,6 +26,22 @@ export const fetchPatient = () =>{
     })
 }
 
+export const fetchPatientById = (patient_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_PATIENT_BY_ID}`, {
+            params: {
+                patient_id: patient_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 
 export const searchPatients = (first_name) =>{
     return new Promise((resolve,reject) =>{
@@ -172,12 +188,45 @@ export const createPrescription = (payload) =>{
     })
 }
 
+export const updatePrescription = (prescription_id, payload, auth) =>{
+    return new Promise((resolve,reject) =>{
+        axios.patch(`${APP_API_URL.CREATE_PRESCRIPTION}`,payload, {
+            params: {
+                prescription_id: prescription_id
+            }, auth
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const fetchPatientTriage = (id) =>{
     return new Promise((resolve,reject) =>{
         axios.get(`${APP_API_URL.GET_PATIENT_TRIAGE}`,{
             params:{
                 id: id
             }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updatePatientTriage = (id, payload, auth) =>{
+    console.log(id)
+    return new Promise((resolve,reject) =>{
+        axios.put(`${APP_API_URL.GET_PATIENT_TRIAGE}`,payload,{
+            params:{
+                id: id
+            }, auth
         })
             .then((res) =>{
                 resolve(res.data)
@@ -204,3 +253,66 @@ export const fetchPatientPrescribeDrugs = (patient_id) =>{
     })
 }
 
+export const fetchAllAttendanceProcesses = () =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const initiateNewAttendanceProcesses = (payload) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateAttendanceProcesses = (payload, process_id) => {
+    return new Promise((resolve,reject) =>{
+        axios.patch(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload, {
+            params: {
+                process_id: process_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const patientNextOfKin = (payload) => {
+    return new Promise ((resolve, reject) => {
+        axios.post(`${APP_API_URL.PATIENT_KIN}`, payload)
+        .then((res)=> {
+            resolve(res.data)
+        })
+        .catch((err)=> {
+            reject(err.message)
+        })
+    })
+}
+
+export const patientNextOfKinContact = (payload) => {
+    return new Promise ((resolve, reject) => {
+        axios.post(`${APP_API_URL.PATIENT_KIN_CONTACT}`, payload)
+        .then((res)=> {
+            resolve(res.data)
+        })
+        .catch((err)=> {
+            reject(err.message)
+        })
+    })
+}

@@ -1,5 +1,6 @@
-from random import randrange
+from random import randrange, choices
 from rest_framework import serializers
+import pdb
 
 from customuser.models import CustomUser
 from .models import (
@@ -14,7 +15,12 @@ from .models import (
     LabTestResultPanel,
     LabTestRequestPanel,
     LabTestResultQualitative,
-    LabTestResultPanelQualitative
+    LabTestResultPanelQualitative,
+    ResultsVerification,
+    QualitativeResultsVerification,
+    ProcessTestRequest,
+    PatientSample,
+    Phlebotomy
 
     )
 
@@ -33,6 +39,11 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
 class LabTestPanelSerializer (serializers.ModelSerializer):
     class Meta:
         model = LabTestPanel
+        fields = '__all__'
+
+class PhlebotomySerializer (serializers.ModelSerializer):
+    class Meta:
+        model = Phlebotomy
         fields = '__all__'
      
 
@@ -82,7 +93,6 @@ class EquipmentTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = EquipmentTestRequest
         fields = '__all__'
-
 class LabTestRequestSerializer(serializers.ModelSerializer):
     patient_first_name = serializers.ReadOnlyField(source='patient.first_name')
     patient_last_name = serializers.ReadOnlyField(source='patient.second_name')
@@ -94,7 +104,7 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestRequest
         fields = "__all__"
-        read_only_fields = ("id", "sample")
+        #Removed id and sample as they were readonly
 
     def get_sale_price(self, instance):
         if instance.test_profile and instance.test_profile.item:
@@ -114,17 +124,28 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         return sp_id
     
     
-    def create(self, validated_data: dict):
-        sp_id = ""
-        while True:
-            random_number = "".join([str(randrange(0,9)) for _ in range(4) ])
-            sp_id = f"SP-{random_number}"
-            lab_req = LabTestRequest.objects.filter(sample=sp_id)
-            if not lab_req.exists():
-                break
+    def generate_sample_code(self):
+            sp_id = ""
+            while True:
+                random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
+                sp_id = f"SP-{random_number}"
+                lab_req = LabTestRequest.objects.filter(sample=sp_id)
+                if not lab_req.exists():
+                    break
+            return sp_id
 
-        validated_data["sample"] = sp_id
+    def create(self, validated_data: dict):
+        validated_data["sample"] = self.generate_sample_code()
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # If sample code is not provided, generate one
+        print(f"Updating data: {validated_data}")
+
+        if 'sample' in validated_data and validated_data['sample'] is not None:
+            validated_data["sample"] = validated_data["sample"] + "-" + self.generate_sample_code()
+
+        return super().update(instance, validated_data)
 
 
     def to_representation(self, instance: LabTestRequest):
@@ -146,3 +167,26 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = LabTestCategory
 #         fields = '__all__'
+
+class ResultsVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResultsVerification
+        fields = '__all__'
+
+class QualitativeResultsVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QualitativeResultsVerification
+        fields = '__all__'
+
+class ProcessTestRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProcessTestRequest
+        fields = '__all__'
+
+
+class PatientSampleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PatientSample
+        fields = "__all__"
+
+

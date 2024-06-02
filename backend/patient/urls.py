@@ -18,7 +18,8 @@ from .views import (
     AppointmentsByPatientIdAPIView,
     PrescribedDrugByPatinetIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
-    download_prescription_pdf
+    download_prescription_pdf,
+    AttendanceProcessViewSet
 )
 
 router = DefaultRouter()
@@ -35,6 +36,7 @@ router.register(r'referrals', ReferralViewSet)
 router.register(r'triage', TriageViewSet)
 router.register(r'appointments', AppointmentViewSet)
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
+router.register(r'initiate-attendance-process', AttendanceProcessViewSet)
 
 
 

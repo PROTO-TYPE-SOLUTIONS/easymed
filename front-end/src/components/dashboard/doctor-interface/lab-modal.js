@@ -3,22 +3,27 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Checkbox, Grid } from "@mui/material";
+import { Checkbox, DialogTitle, Grid } from "@mui/material";
 import { toast } from "react-toastify";
-import { sendLabRequests, fetchLabTestPanelsByProfileId, sendLabRequestsPanels } from "@/redux/service/laboratory";
+import { sendLabRequests, fetchLabTestPanelsByProfileId, sendLabRequestsPanels, updateLabRequest } from "@/redux/service/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getPatientProfile, getPatientTriage } from "@/redux/features/patients";
+import { getPatientProfile, getPatientTriage, getAllPatients } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllLabTestProfiles, getAllLabTestPanelsByProfile } from "@/redux/features/laboratory";
+import { updateAttendanceProcesses } from "@/redux/service/patients";
 
 const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   const { labTestProfiles, labTestPanelsById } = useSelector((store) => store.laboratory);
-  const { patientTriage } = useSelector((store) => store.patient);
+  const { patientTriage, patients } = useSelector((store) => store.patient);
   const [loading, setLoading] = React.useState(false);
   const [testProfile, setTestProfile]= useState(null)
   const [selectedPanels, setSelectedPanels] = useState([]);
   const auth = useAuth();
   const dispatch = useDispatch();
+
+  const patient = patients.find((patient)=> patient.id === selectedRowData.patient)
+
+  console.log("ROW DATA IS ",selectedRowData)
 
   const handleClose = () => {
     setLabOpen(false);
@@ -27,8 +32,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   const initialValues = {
     note: "",
-    sample_collected: null,
-    patient: selectedRowData?.id,
+    process: selectedRowData?.labTest,
     test_profile: null,
     requested_by: auth?.user_id,
   };
@@ -41,7 +45,6 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   const saveAllPanels = async (testReqPanelPayload) => {
     try{
       await sendLabRequestsPanels(testReqPanelPayload, auth)
-      console.log("PAYLOAD TO SAVE REQ PANEL",testReqPanelPayload)
       toast.success("Lab Request Panels saved Successful!");
     }catch(error){
       console.log(error)
@@ -65,6 +68,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
       setLoading(true);
       await sendLabRequests(formValue, auth).then((res) => {
         helpers.resetForm();
+        updateAttendanceProcesses({track: "lab"}, selectedRowData.id)
         savePanels(res.id)
         toast.success("Lab Request Successful!");
         setLoading(false);
@@ -72,7 +76,6 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
       });
     } catch (err) {
       toast.error(err);
-      setLoading(false);
       setLoading(false);
     }
   };
@@ -105,7 +108,8 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   }
 
   useEffect(() => {
-    dispatch(getPatientTriage(selectedRowData?.id));
+    dispatch(getAllPatients());
+    dispatch(getPatientTriage(selectedRowData?.triage));
     dispatch(getAllLabTestProfiles(auth));
     if(testProfile){
       getTestPanelsByTheProfileId(testProfile, auth);
@@ -123,6 +127,13 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
+        <DialogTitle>
+          <div className="flex justify-between">
+            <p>{`${patient?.first_name} ${patient?.second_name}`}</p>
+            <p>{`${patient?.gender}`}</p>
+            <p>{`${patient?.age}`}</p>            
+          </div>
+        </DialogTitle>
         <DialogContent>
           <Formik
             initialValues={initialValues}

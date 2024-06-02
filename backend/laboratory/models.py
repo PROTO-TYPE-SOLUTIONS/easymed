@@ -1,5 +1,6 @@
 from django.db import models
-from patient.models import Patient
+from random import randrange, choices
+# from patient.models import AttendanceProcess
 from django.conf import settings
 from customuser.models import CustomUser
 from inventory.models import Item
@@ -47,10 +48,15 @@ class LabTestProfile(models.Model):
     category = models.CharField(max_length=20, default="quantitative", choices=CATEGORY_CHOICE,)
 
     def __str__(self):
-        return self.name    
+        return self.name
+
+class Specimen(models.Model):
+    name = models.CharField(max_length=255)
+
 
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
+    specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=255)
     ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -60,20 +66,48 @@ class LabTestPanel(models.Model):
         return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.unit}"
 
 
+class ProcessTestRequest(models.Model):
+    reference = models.CharField(max_length=40)
+
 class LabTestRequest(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
-    note = models.TextField()
+    note = models.TextField(null=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     sample_collected = models.BooleanField(default=False, null=True)
-    sample = models.CharField(max_length=100, null=True, blank=True)
+    sample = models.CharField(max_length=100, null=True)
     requested_on = models.TimeField(auto_now_add=True, null=True, blank=True)
-
+    has_result = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
     
+class PatientSample(models.Model):
+    specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE)
+    specimen_name = models.TextField(max_length=50)
+    test_req = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    sample_code = models.CharField(max_length=100)
+    sample_collected = models.BooleanField(default=False)
+    process_test_request = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id)
+    
+    def generate_sample_code(self):
+        while True:
+            random_number = ''.join(choices('0123456789', k=4))
+            sp_id = f"SP-{random_number}"
+            if not PatientSample.objects.filter(sample_code=sp_id).exists():
+                return sp_id
+
+    def save(self, *args, **kwargs):
+        if not self.sample_code:
+            self.sample_code = self.generate_sample_code()
+        super().save(*args, **kwargs)
+   
+    
 class LabTestRequestPanel(models.Model):
+    sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     
@@ -93,15 +127,22 @@ class LabTestResult(models.Model):
         ("quantitative", "  QUANTITATIVE"),
         ("qualitative", "QUALITATIVE"),
     )
-    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
-    recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name="recorded_by")
     note = models.CharField(max_length=255, null=True, blank=True)
     category = models.CharField(max_length=20, default="quantitative", choices=CATEGORY_CHOICE,)
+    approved = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.title  
+        return self.title
+
+class ResultsVerification(models.Model):
+    lab_results = models.OneToOneField(LabTestResult, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
+    approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)
+
 
 class LabTestResultPanel(models.Model):
     lab_test_result= models.ForeignKey(LabTestResult, on_delete=models.CASCADE)
@@ -133,7 +174,7 @@ class PublicLabTestRequest(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
     )
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     appointment_date = models.DateField()
     status = models.CharField( max_length=10, choices=STATUS_CHOICES, default='pending')
     date_created = models.DateField(auto_now_add=True)
@@ -149,26 +190,27 @@ class PublicLabTestRequest(models.Model):
     sample_collected = models.BooleanField(default=False,null=True, blank=True)
     sample_id = models.CharField(max_length=100, null=True, blank=True)
 
-    def __str__(self):
-        return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
+    # def __str__(self):
+    #     return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
     
-    @property
-    def age(self):
-        if self.patient.date_of_birth:
-            patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
-            return patient_age
-        return None
+    # @property
+    # def age(self):
+    #     if self.patient.date_of_birth:
+    #         patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
+    #         return patient_age
+    #     return None
     
 
 
 class LabTestResultQualitative(models.Model):
-    lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    approved = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.title  
+        return self.title
 
 class LabTestResultPanelQualitative(models.Model):
     lab_test_result= models.ForeignKey(LabTestResultQualitative, on_delete=models.CASCADE)
@@ -178,3 +220,20 @@ class LabTestResultPanelQualitative(models.Model):
     
     def __str__(self):
         return f"{self.test_panel.name}"
+
+class QualitativeResultsVerification(models.Model):
+    lab_results = models.OneToOneField(LabTestResultQualitative, on_delete=models.CASCADE)
+    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
+    approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)
+
+# class PatientSample(models.Model):
+#     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE)
+#     test_req = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+#     sample_code = models.CharField(max_length=100)
+#     process_test_request = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE)
+    
+class Phlebotomy(models.Model):
+    lab_test_panel = models.ForeignKey(LabTestPanel, on_delete=models.CASCADE)
+    sample = models.ForeignKey(PatientSample, on_delete=models.CASCADE)
+    
+

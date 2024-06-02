@@ -61,9 +61,12 @@ export const fetchPrescriptionsPrescribedDrugs = (prescription_id, auth) =>{
 
 export const updatePrescription = (payload, auth) =>{
     const axiosInstance = UseAxios(auth);
-    console.log("HELLO CALLED UPDATE PRESCRIPTION")
     return new Promise((resolve,reject) =>{
-        axiosInstance.put(`${APP_API_URL.FETCH_PRESCRIPTION}`,payload)
+        axiosInstance.patch(`${APP_API_URL.FETCH_PRESCRIPTION}`,{status: payload.status}, {
+            params: {
+                prescription_id: payload.prescription
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })

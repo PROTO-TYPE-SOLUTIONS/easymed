@@ -33,6 +33,7 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    AttendanceProcess,
 )
 from .serializers import (
     InsuranceCompanySerializer,
@@ -48,6 +49,7 @@ from .serializers import (
     TriageSerializer,
     ConvertToAppointmentsSerializer,
     SendConfirmationMailSerializer,
+    AttendanceProcessSerializer,
 )
 
 # filters
@@ -291,3 +293,7 @@ def download_prescription_pdf(request, prescription_id):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{prescription.id}.pdf"'
     return response
+
+class AttendanceProcessViewSet(viewsets.ModelViewSet):
+    queryset = AttendanceProcess.objects.all()
+    serializer_class = AttendanceProcessSerializer
