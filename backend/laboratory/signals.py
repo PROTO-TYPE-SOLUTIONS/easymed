@@ -1,4 +1,5 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
+import pdb
 from patient.models import AttendanceProcess
 from billing.models import InvoiceItem
 from django.dispatch import receiver
@@ -11,7 +12,10 @@ from .models import (
     LabTestResult,
     LabTestResultQualitative,
     LabTestResult, LabTestResultQualitative,ResultsVerification,
-    QualitativeResultsVerification
+    QualitativeResultsVerification,
+    LabTestRequestPanel,
+    PatientSample,
+    Phlebotomy
 )
 # utils
 from .utils import (
@@ -172,3 +176,16 @@ def approve_qualitative_lab_test_result(sender, instance, **kwargs):
             print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')
         except AttendanceProcess.DoesNotExist:
             print('No AttendanceProcess found for the given lab test request.')
+
+
+@receiver(pre_save, sender=LabTestRequestPanel)
+def group_panels_with_specimen(sender, instance, **kwargs):
+        sample, created = PatientSample.objects.get_or_create(
+            specimen=instance.test_panel.specimen,
+            process_test_request=instance.lab_test_request.process,
+            test_req=instance.lab_test_request
+        )
+        
+        instance.sample = sample
+        sample.specimen_name = instance.test_panel.specimen.name
+        sample.save()

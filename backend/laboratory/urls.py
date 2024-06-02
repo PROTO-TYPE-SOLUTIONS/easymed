@@ -24,7 +24,9 @@ from .views import (
     ResultsVerificationViewSet,
     QualitativeResultsVerificationViewSet,
     ProcessTestRequestViewSet,
-    LabTestRequestByProcessId
+    LabTestRequestByProcessId,
+    PhlebotomyPanelByPatientSampleId,
+    PatientSampleByProcessId
 )
 
 router = DefaultRouter()
@@ -60,7 +62,9 @@ urlpatterns = [
     path('lab-test-result-panels-by-lab-test-result-id/<int:lab_test_result_id>/', LabTestResultPanelByLabTestResultId.as_view(), name='lab-test-result-panels'),
     path('qualitative-lab-test-result-panels-by-lab-test-result-id/<int:lab_test_result_id>/', QualitativeLabTestResultPanelByLabTestResultId.as_view(), name='qualitative-lab-test-result-panels'),
     path('lab-test-request-panels-by-lab-test-request-id/<int:lab_test_request_id>/', LabTestRequestPanelByLabTestRequestId.as_view(), name='lab-test-request-panels'),
-    path('lab-test-request-by-process-id/<int:process_id>/', LabTestRequestByProcessId.as_view(), name='lab-test-request-panels'),
+    path('lab-test-request-by-process-id/<int:process_id>/', LabTestRequestByProcessId.as_view(), name='lab-process-request'),
+    path('patient-samples-by-process-id/<int:process_id>/', PatientSampleByProcessId.as_view(), name='patient-samples'),
+    path('lab-test-panels-by-sample-id/<int:sample_id>/', PhlebotomyPanelByPatientSampleId.as_view(), name='lab-test-sample-panels'),
 
     path('download_qualitative_labtestresult_pdf/<int:labtestresult_id>/', download_qualitative_labtestresult_pdf, name='download_qualitative_labtestresult_pdf'),
 

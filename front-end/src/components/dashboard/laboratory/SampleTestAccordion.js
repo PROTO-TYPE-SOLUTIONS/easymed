@@ -10,7 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
 import TestPanelsItem from './TestPanelsItem';
 import { setProcessAllTestRequest } from '@/redux/features/laboratory';
-import { fetchLabTestPanelsBySpecificSample, fetchLabTestPanelsByTestRequestId } from '@/redux/service/laboratory';
+import { fetchLabTestPanelsByTestRequestId } from '@/redux/service/laboratory';
 
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -49,52 +49,70 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 
-const TestsAccordion = ({ sample }) => {
+const SampleTestAccordion = ({ specimen, panelss }) => {
     const dispatch = useDispatch();
     const auth = useAuth();
     const effectRan = useRef(false);
     const { labRequestsByProcess, processAllTestRequest } = useSelector((store) => store.laboratory);
-    const [expanded, setExpanded] = useState();
+    const [expanded, setExpanded] = useState(null);
     const [panels, setPanels] = useState([])
 
     const handleChange = (panel) => (event, newExpanded) => {
       setExpanded(newExpanded ? panel : false);
     };
 
-    const fetchLabTestPanelsBySpecificSample = async (sample_id, auth)=> {
-      try{
-        const response = await fetchLabTestPanelsBySpecificSample(sample_id, auth)
-        setPanels(response)
+    // const fetchLabTestPanelsByTestRequest = async (test_id, auth)=> {
+    //   try{
+    //     const response = await fetchLabTestPanelsByTestRequestId(test_id, auth)
+    //     setPanels(response)
+    //     response.forEach((item)=> dispatch(setProcessAllTestRequest(item)))
         
-      }catch(error){
-        console.log("ERR GETTING PANELS", error)
-      }
-    }
+    //   }catch(error){
+    //     console.log("ERR GETTING PANELS", error)
+    //   }
+    // }
 
-    useEffect(() => {
-      if (sample && !effectRan.current) {
-        fetchLabTestPanelsBySpecificSample(sample.id, auth);
-        effectRan.current = true;
-      }
-    }, [sample, auth]);
+    // useEffect(() => {
+    //   if (test && !effectRan.current) {
+    //     fetchLabTestPanelsByTestRequest(test.id, auth);
+    //     effectRan.current = true;
+    //   }
+    // }, [test, auth]);
+
+    const panelsBySample =  panelss.map((item)=> {
+        return(
+          <li key={`${item.id}_panel`} className='flex justify-between '>
+            <span className='w-full'>{item.name}</span>
+            <span className='w-full'>{item.unit}</span>
+            <span className='w-full'>127</span>
+            <span className='w-full'>110</span>
+          </li>
+        )
+    })
   
   return (
-    <Accordion key={`process_sample_${sample.id}`} expanded={expanded === sample.id} onChange={handleChange(sample.id)}>
+    <Accordion key={`process_test_${specimen}`} expanded={expanded === specimen} onChange={handleChange(specimen)}>
       <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
         <Typography className='w-full'>
-          <div className='flex w-full justify-between'>
-            <p className='flex'>{`${sample.specimen_name}`}</p>
-            <p className='flex text-warning'>{`${sample.sample_code ? sample.sample_code : `not collected`}`}</p>
-          </div>
+            <p className='flex'>{`${specimen}`}</p>
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Typography>
-          <TestPanelsItem collected={sample.sample_collected} sample={sample.id}/>
+        <ul className='flex gap-3 flex-col px-4'>
+          <li className='flex justify-between'>
+              <span className='text-primary w-full'>panel name</span>
+              <span className='text-primary w-full'>unit</span>
+              <span className='text-primary w-full'>Ref Val High</span>
+              <span className='text-primary w-full'>Ref Val Low</span>
+          </li>
+          {panelsBySample}
+        </ul>
+        <div className='w-full flex my-4 justify-end'><button className='bg-primary p-2 rounded-lg text-white'>collect</button></div>
         </Typography>
       </AccordionDetails>
     </Accordion>
   )
 }
 
-export default TestsAccordion
+export default SampleTestAccordion

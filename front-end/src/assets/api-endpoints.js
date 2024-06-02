@@ -67,6 +67,8 @@ export const API_URL = {
   APPROVE_LAB_RESULTS: "/lab/approve-results/",
   APPROVE_QUALITATIVE_LAB_RESULTS: "/lab/approve-qualitative-results/",
   LAB_TEST_REQ_BY_PROCESS_ID: "lab/lab-test-request-by-process-id/",
+  SAMPLES_BY_process_ID: "/lab/patient-samples-by-process-id/",
+  PANELS_BY_SAMPLE_ID: "/lab/lab-test-panels-by-sample-id/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -202,6 +204,8 @@ export const APP_API_URL = {
   APPROVE_LAB_RESULTS: "/api/laboratory/approve-results/",
   APPROVE_QUALITATIVE_LAB_RESULTS: "/api/laboratory/approve-qualitative-results/",
   LAB_TEST_REQ_BY_PROCESS_ID: "/api/laboratory/lab-test-request-by-process-id",
+  SAMPLES_BY_process_ID: "/api/laboratory/samples-by-process-id/",
+  PANELS_BY_SAMPLE_ID: "/api/laboratory/panels-by-specific-sample/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",

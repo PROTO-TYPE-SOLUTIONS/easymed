@@ -23,3 +23,4 @@ admin.site.register(LabTestResultPanelQualitative)
 
 admin.site.register(ResultsVerification)
 admin.site.register(QualitativeResultsVerification)
+admin.site.register(PatientSample)

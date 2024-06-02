@@ -9,6 +9,7 @@ import { fetchLabRequests,
     fetchResultPanelsByResultsId,
     fetchQualitativeResultPanelsByResultsId,
     fetchLabTestByProcessId,
+    fetchSamplesForSpecificProcess,
   } from "@/redux/service/laboratory";
 
 
@@ -21,6 +22,7 @@ const initialState = {
   labTestPanelsById: [],
   labRequests: [],
   labRequestsByProcess: [],
+  labSamplesByProcess: [],
   publicLabRequests: [],
   labEquipments: [],
   labTestProfiles: [],
@@ -46,6 +48,12 @@ const LaboratorySlice = createSlice({
     },
     clearProcessLabRequests: (state, action)=>{
       state.labRequestsByProcess = [];
+    },
+    setProcessesSamples: (state, action) => {
+      state.labSamplesByProcess = action.payload;
+    },
+    clearProcessesSamples: (state, action)=>{
+      state.labSamplesByProcess = [];
     },
     setPublicLabRequests: (state, action) => {
       state.publicLabRequests = action.payload;
@@ -90,6 +98,9 @@ const LaboratorySlice = createSlice({
     },
     setProcessAllTestRequest: (state, action) => {
       state.processAllTestRequest = [...state.processAllTestRequest, action.payload]
+    },
+    clearProcessAllTestRequest: (state, action) => {
+      state.processAllTestRequest = []
     }
   },
 });
@@ -99,7 +110,8 @@ export const { setLabResults,
   setLabEquipments,setLabTestProfile, setSpecificPatientLabRequests,
   setLabResultItems, setLabResultItemsAfterRemovingItem, setResultPanelsByResultId,
   clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults,
-  setProcessLabRequests, clearProcessLabRequests, setProcessAllTestRequest
+  setProcessLabRequests, clearProcessLabRequests, setProcessAllTestRequest,
+  clearProcessAllTestRequest, setProcessesSamples, clearProcessesSamples
 } = LaboratorySlice.actions;
 
 
@@ -223,6 +235,17 @@ export const getAllLabTestByProcessId = (process_id, auth) => async (dispatch) =
 
   } catch (error) {
     console.log("LAB_TEST_REQ_BY_PROCESS_ID_ERROR ", error);
+  }
+};
+
+export const getAllSamplesForProcessId = (process_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchSamplesForSpecificProcess(process_id, auth);
+    dispatch(clearProcessesSamples())
+    dispatch(setProcessesSamples(response));
+
+  } catch (error) {
+    console.log("SAMPLES_BY_PROCESS_ID_ERROR ", error);
   }
 };
 

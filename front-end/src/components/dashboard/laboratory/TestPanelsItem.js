@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
-import { fetchLabTestPanelsByTestRequestId } from '@/redux/service/laboratory';
+import { fetchLabTestPanelsBySpecificSample } from '@/redux/service/laboratory';
 
-const TestPanelsItem = ({test}) => {
+const TestPanelsItem = ({sample, collected}) => {
   const auth = useAuth()
   const dispatch = useDispatch()
   const [resultItems, setResultItems]=useState([])
   const { labTestPanels, processAllTestRequest } = useSelector((store) => store.laboratory);
 
-  const getTestPanelsByTestRequestId = async (test_id, auth)=> {
+  const getTestPanelsBySampleId = async (sample, auth)=> {
     try {
-      const response = await fetchLabTestPanelsByTestRequestId(test_id, auth)
+      const response = await fetchLabTestPanelsBySpecificSample(sample, auth)
       setResultItems(response)
     }catch(error){
       console.log("ERROR GETTING PANELS")
@@ -20,9 +20,9 @@ const TestPanelsItem = ({test}) => {
 
   useEffect(()=>{
     if(auth){
-      getTestPanelsByTestRequestId(test, auth)
+      getTestPanelsBySampleId(sample, auth)
     }
-  }, [test])
+  }, [sample])
 
 
   const panels = resultItems.map((item)=> {
@@ -40,15 +40,20 @@ const TestPanelsItem = ({test}) => {
   })
 
   return (
-    <ul className='flex gap-3 flex-col px-4'>
-        <li className='flex justify-between '>
-            <span className='text-primary w-full'>panel name</span>
-            <span className='text-primary w-full'>unit</span>
-            <span className='text-primary w-full'>Ref Val High</span>
-            <span className='text-primary w-full'>Ref Val Low</span>
-        </li>
-        {panels}
-    </ul>
+    <>
+      <ul className='flex gap-3 flex-col px-4'>
+          <li className='flex justify-between'>
+              <span className='text-primary w-full'>panel name</span>
+              <span className='text-primary w-full'>unit</span>
+              <span className='text-primary w-full'>Ref Val High</span>
+              <span className='text-primary w-full'>Ref Val Low</span>
+          </li>
+          {panels}
+      </ul>
+      { !collected && (<div className='w-full flex justify-end'>
+        <button className='bg-primary text-white p-2 rounded-lg'>collect</button>
+      </div>)}
+    </>
   )
 }
 

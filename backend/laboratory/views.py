@@ -28,7 +28,9 @@ from .models import (
     LabTestResultPanelQualitative,
     ResultsVerification,
     QualitativeResultsVerification,
-    ProcessTestRequest
+    ProcessTestRequest,
+    Phlebotomy,
+    PatientSample
 )
 # serializers
 from .serializers import (
@@ -47,7 +49,9 @@ from .serializers import (
     LabTestResultPanelQualitativeSerializer,
     ResultsVerificationSerializer,
     QualitativeResultsVerificationSerializer,
-    ProcessTestRequestSerializer
+    ProcessTestRequestSerializer,
+    PhlebotomySerializer,
+    PatientSampleSerializer
 )
 
 # permissions
@@ -175,6 +179,20 @@ class LabTestRequestPanelByLabTestRequestId(generics.ListAPIView):
     def get_queryset(self):
         lab_test_request_id = self.kwargs['lab_test_request_id']
         return LabTestRequestPanel.objects.filter(lab_test_request_id=lab_test_request_id)
+    
+class PhlebotomyPanelByPatientSampleId(generics.ListAPIView):
+    serializer_class = LabTestRequestPanelSerializer
+
+    def get_queryset(self):
+        sample_id = self.kwargs['sample_id']
+        return LabTestRequestPanel.objects.filter(sample_id=sample_id)
+    
+class PatientSampleByProcessId(generics.ListAPIView):
+    serializer_class = PatientSampleSerializer 
+
+    def get_queryset(self):
+        process_id = self.kwargs['process_id']
+        return PatientSample.objects.filter(process_test_request_id=process_id)
 
 class LabTestRequestByProcessId(generics.ListAPIView):
     serializer_class = LabTestRequestSerializer
