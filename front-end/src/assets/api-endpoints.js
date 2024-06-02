@@ -15,6 +15,7 @@ export const API_URL = {
   EDIT_PATIENT: "/patients/patients",
   DELETE_PATIENT: "/patients/patients/",
   FETCH_PATIENT: "/patients/patients/",
+  FETCH_PATIENT_BY_ID: "/patients/patients",
   PATIENT_KIN: "/patients/next-of-kin/",
   PATIENT_KIN_CONTACT: "/patients/contact-details/",
   SEARCH_PATIENT: "/patients/patients/",
@@ -65,6 +66,9 @@ export const API_URL = {
   SEND_LAB_RESULTS_ITEMS: "/lab/lab-test-result-item/",
   APPROVE_LAB_RESULTS: "/lab/approve-results/",
   APPROVE_QUALITATIVE_LAB_RESULTS: "/lab/approve-qualitative-results/",
+  LAB_TEST_REQ_BY_PROCESS_ID: "lab/lab-test-request-by-process-id/",
+  SAMPLES_BY_process_ID: "/lab/patient-samples-by-process-id/",
+  PANELS_BY_SAMPLE_ID: "/lab/lab-test-panels-by-sample-id/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -147,6 +151,7 @@ export const APP_API_URL = {
   EDIT_PATIENT: "/api/patient/edit-patient",
   DELETE_PATIENT: "/api/patient/delete-patient",
   FETCH_PATIENT: "/api/patient",
+  FETCH_PATIENT_BY_ID: "/api/patient/patient_by_id",
   PATIENT_KIN: "/api/patient/patientKin",
   PATIENT_KIN_CONTACT: "/api/patient/next-of-kin-contact/",
   SEARCH_PATIENT: "/api/billing/search-patients",
@@ -198,6 +203,9 @@ export const APP_API_URL = {
   GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID: "/api/laboratory/lab-test-request-panels-by-lab-test-request-id/",
   APPROVE_LAB_RESULTS: "/api/laboratory/approve-results/",
   APPROVE_QUALITATIVE_LAB_RESULTS: "/api/laboratory/approve-qualitative-results/",
+  LAB_TEST_REQ_BY_PROCESS_ID: "/api/laboratory/lab-test-request-by-process-id",
+  SAMPLES_BY_process_ID: "/api/laboratory/samples-by-process-id/",
+  PANELS_BY_SAMPLE_ID: "/api/laboratory/panels-by-specific-sample/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",

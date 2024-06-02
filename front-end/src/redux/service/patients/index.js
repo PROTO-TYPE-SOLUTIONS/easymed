@@ -26,6 +26,22 @@ export const fetchPatient = () =>{
     })
 }
 
+export const fetchPatientById = (patient_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.FETCH_PATIENT_BY_ID}`, {
+            params: {
+                patient_id: patient_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 
 export const searchPatients = (first_name) =>{
     return new Promise((resolve,reject) =>{

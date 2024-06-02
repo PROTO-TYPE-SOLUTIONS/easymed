@@ -302,6 +302,42 @@ export const fetchLabTestPanelsByTestRequestId = (test_request_id, auth) =>{
     })
 }
 
+export const fetchLabTestPanelsBySpecificSample = (sample_id, auth) =>{
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.PANELS_BY_SAMPLE_ID}`,{
+            params:{
+                sample_id: sample_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchLabTestByProcessId = (process_id, auth) =>{
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.LAB_TEST_REQ_BY_PROCESS_ID}`,{
+            params:{
+                process_id: process_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 
 export const fetchResultPanelsByResultsId = (result_id, auth) =>{
 
@@ -366,4 +402,23 @@ export const approveQualitativeLabResult = (payload, auth) => {
                 reject(err.message)
             })
     })
+}
+
+export const fetchSamplesForSpecificProcess = (process_id, auth) => {
+
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.get(`${APP_API_URL.SAMPLES_BY_process_ID}`, {
+            params:{
+                process_id: process_id,
+            },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
 }

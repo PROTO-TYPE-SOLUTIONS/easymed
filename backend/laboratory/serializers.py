@@ -1,5 +1,6 @@
-from random import randrange
+from random import randrange, choices
 from rest_framework import serializers
+import pdb
 
 from customuser.models import CustomUser
 from .models import (
@@ -16,7 +17,10 @@ from .models import (
     LabTestResultQualitative,
     LabTestResultPanelQualitative,
     ResultsVerification,
-    QualitativeResultsVerification
+    QualitativeResultsVerification,
+    ProcessTestRequest,
+    PatientSample,
+    Phlebotomy
 
     )
 
@@ -35,6 +39,11 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
 class LabTestPanelSerializer (serializers.ModelSerializer):
     class Meta:
         model = LabTestPanel
+        fields = '__all__'
+
+class PhlebotomySerializer (serializers.ModelSerializer):
+    class Meta:
+        model = Phlebotomy
         fields = '__all__'
      
 
@@ -84,7 +93,6 @@ class EquipmentTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = EquipmentTestRequest
         fields = '__all__'
-
 class LabTestRequestSerializer(serializers.ModelSerializer):
     patient_first_name = serializers.ReadOnlyField(source='patient.first_name')
     patient_last_name = serializers.ReadOnlyField(source='patient.second_name')
@@ -169,4 +177,16 @@ class QualitativeResultsVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = QualitativeResultsVerification
         fields = '__all__'
+
+class ProcessTestRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProcessTestRequest
+        fields = '__all__'
+
+
+class PatientSampleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PatientSample
+        fields = "__all__"
+
 
