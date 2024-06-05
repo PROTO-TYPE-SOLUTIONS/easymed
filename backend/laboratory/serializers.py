@@ -6,7 +6,6 @@ from customuser.models import CustomUser
 from .models import (
     LabReagent, LabTestResult, 
     LabTestRequest, 
-    # LabTestCategory, 
     LabTestProfile, 
     LabEquipment, 
     EquipmentTestRequest, 
@@ -14,10 +13,7 @@ from .models import (
     LabTestPanel, 
     LabTestResultPanel,
     LabTestRequestPanel,
-    LabTestResultQualitative,
-    LabTestResultPanelQualitative,
     ResultsVerification,
-    QualitativeResultsVerification,
     ProcessTestRequest,
     PatientSample,
     Phlebotomy
@@ -77,16 +73,6 @@ class LabTestResultPanelSerializer(serializers.ModelSerializer):
 class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestRequestPanel
-        fields = '__all__'
-
-class LabTestResultQualitativeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LabTestResultQualitative
-        fields = '__all__'
-
-class LabTestResultPanelQualitativeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LabTestResultPanelQualitative
         fields = '__all__'
 
 class EquipmentTestRequestSerializer(serializers.ModelSerializer):
@@ -161,21 +147,9 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         return data
     
 
-
-
-# class LabTestCategorySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = LabTestCategory
-#         fields = '__all__'
-
 class ResultsVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResultsVerification
-        fields = '__all__'
-
-class QualitativeResultsVerificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QualitativeResultsVerification
         fields = '__all__'
 
 class ProcessTestRequestSerializer(serializers.ModelSerializer):

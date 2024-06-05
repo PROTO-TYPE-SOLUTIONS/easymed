@@ -6,7 +6,7 @@ from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item
 from billing.models import Invoice, InvoiceItem
-from laboratory.models import ProcessTestRequest, LabTestResultQualitative, LabTestResult
+from laboratory.models import ProcessTestRequest, LabTestResult
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -249,7 +249,7 @@ class AttendanceProcess(models.Model):
     )
     track_number = models.CharField(max_length=50, null=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    patient_number = models.CharField(max_length=8, editable=False)
+    patient_number = models.CharField(max_length=8, editable=False, default=999)
     doctor = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctor_attendance_processes')
     labTech = models.ForeignKey(
@@ -260,8 +260,6 @@ class AttendanceProcess(models.Model):
     invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE, null=True)
     labTest = models.OneToOneField(ProcessTestRequest, on_delete=models.CASCADE, null=True)
     labResult = models.OneToOneField(LabTestResult, on_delete=models.CASCADE, null=True)
-    qualitativeLabTest = models.OneToOneField(LabTestResultQualitative, on_delete=models.CASCADE, null=True)
-
     #appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, null=True)
     triage = models.OneToOneField(Triage, on_delete=models.CASCADE, null=True)

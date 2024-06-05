@@ -18,9 +18,6 @@ admin.site.register(LabEquipment)
 admin.site.register(EquipmentTestRequest)
 admin.site.register(Specimen)
 
-admin.site.register(LabTestResultQualitative)
-admin.site.register(LabTestResultPanelQualitative)
 
 admin.site.register(ResultsVerification)
-admin.site.register(QualitativeResultsVerification)
 admin.site.register(PatientSample)

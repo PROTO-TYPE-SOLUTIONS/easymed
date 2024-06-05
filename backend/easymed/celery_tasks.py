@@ -95,22 +95,6 @@ def generate_labtestresult_pdf(labtestresult_id):
     labtestresult.save()
 
 
-
-@shared_task
-def generate_qualitative_labtestresult_pdf(labtestresult_id):
-    from laboratory.models import LabTestResultQualitative
-    labtestresult = LabTestResultQualitative.objects.get(pk=labtestresult_id)
-    app_template_dir  = apps.get_app_config('laboratory').path + '/templates/'
-    html_content = render_to_string(app_template_dir + 'labtestresultqualitative.html', {'labtestresult': labtestresult})
-    pdf_file_path = os.path.join('./easymed/static/labtestresult/', f'{labtestresult.id}.pdf')
-
-    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
-    HTML(string=html_content).write_pdf(pdf_file_path)
-
-    labtestresult.save()
-
-
-
 '''Task to generated Lab Results Report'''   
 @shared_task
 def generate_prescription_pdf(prescription_id):

@@ -12,7 +12,7 @@ ADD ./requirements.txt /app/
 RUN pip install -r requirements.txt
 
 # ADD  ./docker /app/backend/docker
-ADD . /app
+COPY . /app
 
 RUN chmod 777 ./backend-entrypoint.sh
 RUN chmod +x ./backend-entrypoint.sh
