@@ -1,6 +1,5 @@
 import { API_URL,API_METHODS } from "@/assets/api-endpoints";
 import { backendAxiosInstance } from "@/assets/backend-axios-instance";
-import query from "devextreme/data/query";
 
 export const config = {
     api: {
@@ -10,7 +9,7 @@ export const config = {
     }
 }
 export default async function handler(req, res) {
-    if (req.method === API_METHODS.POST) {
+    if (req.method === API_METHODS.GET) {
         try {
             if (!req.headers?.authorization){
                 res.status(401).send('Unauthorized');
@@ -20,15 +19,14 @@ export default async function handler(req, res) {
                     'Authorization': req.headers.authorization,
                 }
             };
-            const body = req.body;
-            await backendAxiosInstance.post(`${API_URL.FETCH_LAB_TEST_REQUEST_PANELS}`,body,config)
-                .then(response => {
-                    res.status(200).json(response.data);
-                })
-                .catch(e => {
-                        res.status(e.response?.status ?? 500).json(e.response?.data)
-                    }
-                )
+    
+            await backendAxiosInstance.get(`${API_URL.PHLEBOTOMY_PATIENT_SAMPLES}`, config).then(response => {
+                res.status(200).json(response.data);
+
+            }).catch(e => {
+                    res.status(e.response?.status ?? 500).json(e.response?.data)
+                }
+            )
 
         } catch (e) {
             res.status(500).json(e.message);
@@ -44,7 +42,7 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-            await backendAxiosInstance.patch(`${API_URL.FETCH_LAB_TEST_REQUEST_PANELS}${body.id}/`,body,config)
+            await backendAxiosInstance.patch(`${API_URL.PHLEBOTOMY_PATIENT_SAMPLES}${body.id}/`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

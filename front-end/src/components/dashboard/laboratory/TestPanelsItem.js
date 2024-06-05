@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
-import { fetchLabTestPanelsBySpecificSample } from '@/redux/service/laboratory';
+import { fetchLabTestPanelsBySpecificSample, updatePhlebotomySamples } from '@/redux/service/laboratory';
 
 const TestPanelsItem = ({sample, collected}) => {
   const auth = useAuth()
@@ -39,6 +39,18 @@ const TestPanelsItem = ({sample, collected}) => {
     }
   })
 
+  const approveCollection = async () => {
+    try{
+      const payload = {
+        sample_collected: true,
+        id:sample
+      }
+      await updatePhlebotomySamples(payload, auth)
+    }catch(error){
+      console.log("ERR APPROVING COLLECTION OF SAMPLE", error)
+    }
+  }
+
   return (
     <>
       <ul className='flex gap-3 flex-col px-4'>
@@ -51,7 +63,7 @@ const TestPanelsItem = ({sample, collected}) => {
           {panels}
       </ul>
       { !collected && (<div className='w-full flex justify-end'>
-        <button className='bg-primary text-white p-2 rounded-lg'>collect</button>
+        <button onClick={approveCollection} className='bg-primary text-white p-2 rounded-lg'>collect</button>
       </div>)}
     </>
   )

@@ -10,6 +10,8 @@ import { fetchLabRequests,
     fetchQualitativeResultPanelsByResultsId,
     fetchLabTestByProcessId,
     fetchSamplesForSpecificProcess,
+    fetchPhlebotomySamples,
+    fetchLabTestPanelsBySpecificSample,
   } from "@/redux/service/laboratory";
 
 
@@ -21,6 +23,7 @@ const initialState = {
   labTestPanels: [],
   labTestPanelsById: [],
   labRequests: [],
+  phlebotomySamples: [],
   labRequestsByProcess: [],
   labSamplesByProcess: [],
   publicLabRequests: [],
@@ -42,6 +45,9 @@ const LaboratorySlice = createSlice({
     },
     setLabRequests: (state, action) => {
       state.labRequests = action.payload;
+    },
+    setPhlebotomySamples: (state, action) => {
+      state.phlebotomySamples = action.payload;
     },
     setProcessLabRequests: (state, action) => {
       state.labRequestsByProcess = action.payload;
@@ -111,7 +117,8 @@ export const { setLabResults,
   setLabResultItems, setLabResultItemsAfterRemovingItem, setResultPanelsByResultId,
   clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults,
   setProcessLabRequests, clearProcessLabRequests, setProcessAllTestRequest,
-  clearProcessAllTestRequest, setProcessesSamples, clearProcessesSamples
+  clearProcessAllTestRequest, setProcessesSamples, clearProcessesSamples,
+  setPhlebotomySamples
 } = LaboratorySlice.actions;
 
 
@@ -148,6 +155,15 @@ export const getAllLabRequests = (auth) => async (dispatch) => {
     dispatch(setLabRequests(response));
   } catch (error) {
     console.log("LAB_ERROR ", error);
+  }
+};
+
+export const getAllPhlebotomySamples = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchPhlebotomySamples(auth);
+    dispatch(setPhlebotomySamples(response));
+  } catch (error) {
+    console.log("PHLEBOTOMY SAMPLES ", error);
   }
 };
 
@@ -218,6 +234,18 @@ export const getAllQualitativeResultPanelsByResult = (result_id, auth) => async 
 export const getAllLabTestPanelsByTestRequest = (test_request_id, auth) => async (dispatch) => {
   try {
     const response = await fetchLabTestPanelsByTestRequestId(test_request_id, auth);
+    dispatch(clearItemsToLabResultsItems())
+    response.forEach((item)=> {
+      dispatch(addItemToLabResultsItems(item));
+    })
+  } catch (error) {
+    console.log("LAB_TEST_PANELS_BY_PROFILE_ID_ERROR ", error);
+  }
+};
+
+export const getAllLabTestPanelsBySample = (sample_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchLabTestPanelsBySpecificSample(sample_id, auth);
     dispatch(clearItemsToLabResultsItems())
     response.forEach((item)=> {
       dispatch(addItemToLabResultsItems(item));

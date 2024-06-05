@@ -43,24 +43,27 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   });
 
   const saveAllPanels = async (testReqPanelPayload) => {
-    try{
-      await sendLabRequestsPanels(testReqPanelPayload, auth)
-      toast.success("Lab Request Panels saved Successful!");
-    }catch(error){
-      console.log(error)
-      toast.error(error)
+    try {
+      await sendLabRequestsPanels(testReqPanelPayload, auth);
+      toast.success("Lab Request Panels saved successfully!");
+    } catch (error) {
+      console.log(error);
+      toast.error(error);
     }
-  }
-
-  const savePanels = (reqId) => {
-    selectedPanels.forEach((panel)=> {
+  };
+  
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  
+  const savePanels = async (reqId) => {
+    for (const panel of selectedPanels) {
       const testReqPanelPayload = {    
         test_panel: panel.id,
-        lab_test_request: reqId      
-      }
-      saveAllPanels(testReqPanelPayload);
-    })
-  }
+        lab_test_request: reqId
+      };
+      await saveAllPanels(testReqPanelPayload);
+      await delay(500); // Adjust the delay as needed (1000ms = 1s)
+    }
+  };
 
   const handleSendLabRequest = async (formValue, helpers) => {
     console.log("FORM_DATA ", formValue);
@@ -121,7 +124,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
     <section>
       <Dialog
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
         open={labOpen}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"

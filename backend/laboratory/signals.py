@@ -178,14 +178,57 @@ def approve_qualitative_lab_test_result(sender, instance, **kwargs):
             print('No AttendanceProcess found for the given lab test request.')
 
 
-@receiver(pre_save, sender=LabTestRequestPanel)
-def group_panels_with_specimen(sender, instance, **kwargs):
-        sample, created = PatientSample.objects.get_or_create(
-            specimen=instance.test_panel.specimen,
-            process_test_request=instance.lab_test_request.process,
-            test_req=instance.lab_test_request
-        )
-        
-        instance.sample = sample
-        sample.specimen_name = instance.test_panel.specimen.name
-        sample.save()
+@receiver(post_save, sender=LabTestRequestPanel)
+def group_panels_with_specimen(sender, instance, created, **kwargs):
+        if created:
+            sample, created = PatientSample.objects.get_or_create(
+                specimen=instance.test_panel.specimen,
+                process_test_request=instance.lab_test_request.process,                
+            )
+            
+            instance.sample = sample
+            instance.category = instance.test_panel.test_profile.category
+            sample.specimen_name = instance.test_panel.specimen.name
+            sample.test_req=instance.lab_test_request
+            sample.save()
+            instance.save()
+
+        else:
+            if instance.result:
+                try:
+                    similar_panels_by_sample = LabTestRequestPanel.objects.filter(sample=instance.sample)
+                    all_have_results = True
+                    for panel in similar_panels_by_sample:
+                        # pdb.set_trace()
+                        if not panel.result:
+                            all_have_results = False
+                            break
+                    
+                    if all_have_results:
+                        instance.sample.has_results = True
+                        instance.sample.save()
+                except Exception as e:
+                    # Log the error or handle it as needed
+                    print(f"An error occurred: {e}")
+
+@receiver(post_save, sender=PatientSample)
+def confirm_lab_req_has_full_results(sender, instance, **kwargs):
+    if instance.has_results:
+        try:
+            test_simililar_samples = PatientSample.objects.filter(test_req=instance.test_req)
+            # pdb.set_trace()
+            all_have_results = True
+            for sample in test_simililar_samples:
+                pdb.set_trace()
+                if not sample.has_results:
+                    all_have_results = False
+                    break
+            
+            if all_have_results:
+                instance.test_req.has_result = True
+                instance.test_req.save()
+        except Exception as e:
+            # Log the error or handle it as needed
+            print(f"An error occurred: {e}")
+
+

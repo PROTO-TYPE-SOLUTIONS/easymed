@@ -11,6 +11,7 @@ import { useAuth } from '@/assets/hooks/use-auth';
 import TestPanelsItem from './TestPanelsItem';
 import { setProcessAllTestRequest } from '@/redux/features/laboratory';
 import { fetchLabTestPanelsByTestRequestId } from '@/redux/service/laboratory';
+import TestResultsPanels from './TestResultsItems';
 
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -49,7 +50,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 
-const SampleTestAccordion = ({ specimen, panelss }) => {
+const SampleTestAccordion = ({ testReq }) => {
     const dispatch = useDispatch();
     const auth = useAuth();
     const effectRan = useRef(false);
@@ -61,54 +62,36 @@ const SampleTestAccordion = ({ specimen, panelss }) => {
       setExpanded(newExpanded ? panel : false);
     };
 
-    // const fetchLabTestPanelsByTestRequest = async (test_id, auth)=> {
-    //   try{
-    //     const response = await fetchLabTestPanelsByTestRequestId(test_id, auth)
-    //     setPanels(response)
-    //     response.forEach((item)=> dispatch(setProcessAllTestRequest(item)))
+    const fetchLabTestPanelsByTestRequest = async (test_id, auth)=> {
+      try{
+        const response = await fetchLabTestPanelsByTestRequestId(test_id, auth)
+        setPanels(response)
+        response.forEach((item)=> dispatch(setProcessAllTestRequest(item)))
         
-    //   }catch(error){
-    //     console.log("ERR GETTING PANELS", error)
-    //   }
-    // }
+      }catch(error){
+        console.log("ERR GETTING PANELS", error)
+      }
+    }
 
-    // useEffect(() => {
-    //   if (test && !effectRan.current) {
-    //     fetchLabTestPanelsByTestRequest(test.id, auth);
-    //     effectRan.current = true;
-    //   }
-    // }, [test, auth]);
+    useEffect(() => {
+      if (testReq && !effectRan.current) {
+        fetchLabTestPanelsByTestRequest(testReq.id, auth);
+        effectRan.current = true;
+      }
+    }, [testReq, auth]);
 
-    const panelsBySample =  panelss.map((item)=> {
-        return(
-          <li key={`${item.id}_panel`} className='flex justify-between '>
-            <span className='w-full'>{item.name}</span>
-            <span className='w-full'>{item.unit}</span>
-            <span className='w-full'>127</span>
-            <span className='w-full'>110</span>
-          </li>
-        )
-    })
+  const bgColor = testReq.has_result ? '#83f28f' : 'inherit';
   
   return (
-    <Accordion key={`process_test_${specimen}`} expanded={expanded === specimen} onChange={handleChange(specimen)}>
-      <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-        <Typography className='w-full'>
-            <p className='flex'>{`${specimen}`}</p>
+    <Accordion key={`process_test_${testReq}`} expanded={expanded === testReq} onChange={handleChange(testReq)}>
+      <AccordionSummary style={{ width: '100%', backgroundColor: bgColor }} aria-controls="panel1d-content" id="panel1d-header">
+        <Typography>
+            <p className='flex'>{`${testReq.test_profile_name}`}</p>
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Typography>
-        <ul className='flex gap-3 flex-col px-4'>
-          <li className='flex justify-between'>
-              <span className='text-primary w-full'>panel name</span>
-              <span className='text-primary w-full'>unit</span>
-              <span className='text-primary w-full'>Ref Val High</span>
-              <span className='text-primary w-full'>Ref Val Low</span>
-          </li>
-          {panelsBySample}
-        </ul>
-        <div className='w-full flex my-4 justify-end'><button className='bg-primary p-2 rounded-lg text-white'>collect</button></div>
+          <TestResultsPanels test={testReq.id}/>
         </Typography>
       </AccordionDetails>
     </Accordion>

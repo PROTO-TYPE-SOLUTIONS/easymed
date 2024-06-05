@@ -160,6 +160,11 @@ const PatientsDataGrid = () => {
           showNavigationButtons={showNavButtons}
         />
         <Column 
+          dataField="unique_id" 
+          caption="id" 
+          width={180}
+        />
+        <Column 
           dataField="" 
           caption="Patient Name" 
           width={180}

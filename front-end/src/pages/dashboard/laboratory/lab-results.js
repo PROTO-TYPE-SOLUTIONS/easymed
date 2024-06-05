@@ -10,10 +10,12 @@ import LabResultDataGrid from "@/components/dashboard/laboratory/lab-results-dat
 import LabNav from "@/components/dashboard/laboratory/LabNav";
 import ProtectedRoute from "@/assets/hoc/protected-route";
 import { sortByLatest } from "@/functions/tables";
+import LabRequestDataGrid from "@/components/dashboard/laboratory/lab-request-datagrid";
+import { getAllProcesses } from "@/redux/features/patients";
 
 const LabResults = () => {
   const dispatch = useDispatch();
-  const { labResults, qualitativeLabResults } = useSelector((store) => store.laboratory);
+  const { labResults, qualitativeLabResults, labRequests } = useSelector((store) => store.laboratory);
   const token = useAuth();
 
   const sortedData = sortByLatest(labResults);
@@ -23,6 +25,7 @@ const LabResults = () => {
     if (token) {
       dispatch(getAllQualitativeLabResults(token));
       dispatch(getAllLabResults(token));
+      dispatch(getAllProcesses())
     }
   }, [token]);
 
@@ -30,7 +33,8 @@ const LabResults = () => {
     <Container maxWidth="xl">
       <LabNav/>
       <h1 className="uppercase text-2xl my-4">Lab Results</h1>
-      <LabResultDataGrid labResults={sortedData} qualitativeLabResults={sortedQualitativeData}/>
+      {/* <LabRequestDataGrid labRequests={labRequests} /> */}
+      <LabResultDataGrid labRequests={labRequests}/>
     </Container>
   );
 };
