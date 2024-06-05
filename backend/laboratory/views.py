@@ -264,6 +264,10 @@ class ProcessTestRequestViewSet(viewsets.ModelViewSet):
     queryset = ProcessTestRequest.objects.all()
     serializer_class = ProcessTestRequestSerializer
 
+class PatientSampleViewSet(viewsets.ModelViewSet):
+    queryset = PatientSample.objects.all()
+    serializer_class = PatientSampleSerializer
+
 
 '''
 This view gets the geneated pdf and downloads it ocally

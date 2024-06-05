@@ -84,7 +84,7 @@ const TestsAccordion = ({ sample }) => {
         <Typography className='w-full'>
           <div className='flex w-full justify-between'>
             <p className='flex'>{`${sample.specimen_name}`}</p>
-            <p className='flex text-warning'>{`${sample.sample_code ? sample.sample_code : `not collected`}`}</p>
+            <p className='flex text-warning'>{sample.sample_code}</p>
           </div>
         </Typography>
       </AccordionSummary>

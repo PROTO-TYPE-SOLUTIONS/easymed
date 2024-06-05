@@ -1,5 +1,6 @@
 from datetime import datetime
 from uuid import uuid4
+import random
 from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
@@ -31,6 +32,7 @@ class Patient(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
+    unique_id = models.CharField(max_length=8, unique=True, editable=False)
     first_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True, null=True, blank=True)
     phone = models.CharField(max_length=30, null=True, blank=True)
@@ -52,6 +54,17 @@ class Patient(models.Model):
             patient_age:int = (datetime.now().year - self.date_of_birth.year)
             return patient_age
         return None
+    
+    def save(self, *args, **kwargs):
+        if not self.unique_id:
+            self.unique_id = self.generate_unique_id()
+        super(Patient, self).save(*args, **kwargs)
+
+    def generate_unique_id(self):
+        while True:
+            unique_id = '{:08d}'.format(random.randint(0, 99999999))
+            if not Patient.objects.filter(unique_id=unique_id).exists():
+                return unique_id
 
 
 class NextOfKin(models.Model):
@@ -236,6 +249,7 @@ class AttendanceProcess(models.Model):
     )
     track_number = models.CharField(max_length=50, null=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient_number = models.CharField(max_length=8, editable=False)
     doctor = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctor_attendance_processes')
     labTech = models.ForeignKey(
@@ -260,6 +274,7 @@ class AttendanceProcess(models.Model):
 
             # Generate a unique track number
             self.track_number = str(uuid4())
+            self.patient_number = self.patient.unique_id
 
             # Create a new invoice with a default amount of 0
             self.invoice = Invoice.objects.create(invoice_amount=0)

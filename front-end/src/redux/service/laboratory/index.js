@@ -99,6 +99,20 @@ export const sendLabRequestsPanels = (payload,auth) =>{
     })
 }
 
+export const updateLabRequestPanels = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.FETCH_LAB_TEST_REQUEST_PANELS}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+
 export const fetchLabTestPanelsByProfileId = (profile_id, auth) =>{
 
     const axiosInstance = UseAxios(auth);
@@ -421,4 +435,30 @@ export const fetchSamplesForSpecificProcess = (process_id, auth) => {
             })
     })
 
+}
+
+export const fetchPhlebotomySamples = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.PHLEBOTOMY_PATIENT_SAMPLES}`,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updatePhlebotomySamples = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.PHLEBOTOMY_PATIENT_SAMPLES}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
 }

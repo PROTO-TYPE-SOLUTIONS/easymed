@@ -14,6 +14,7 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import ApproveResults from "./add-result/ApproveResults";
+import { useSelector } from "react-redux";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -38,7 +39,7 @@ const getActions = () => {
   return actions;
 };
 
-const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
+const LabResultDataGrid = ({ labRequests }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const auth = useAuth();
@@ -47,6 +48,15 @@ const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
   const [selectedData, setSelectedData] = useState(null)
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+
+  const { processes, patients } = useSelector((store)=> store.patient)
+
+  const labTestsSchedules = processes.filter((process)=> process.track==="lab")
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
   
   //   FILTER PATIENTS BASED ON SEARCH QUERY
   const filteredData = labData.filter((patient) => {
@@ -123,21 +133,17 @@ const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
       </Grid>
 
       {/* DATAGRID STARTS HERE */}
-      <h2 className='text-xl my-4 text-orange'>Quantitative Results</h2>
       <DataGrid
-        dataSource={labResults}
+        dataSource={labTestsSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
         remoteOperations={true}
-        showColumnLines={true}
+        showColumnLines={false}
         showRowLines={true}
         wordWrapEnabled={true}
-        allowPaging={true}
-        // height={"70vh"}
         className="w-full shadow"
       >
-        <HeaderFilter visible={true} />
         <Scrolling rowRenderingMode='virtual'></Scrolling>
         <Paging defaultPageSize={10} />
         <Pager
@@ -147,62 +153,25 @@ const LabResultDataGrid = ({ labResults, qualitativeLabResults }) => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column dataField="id" caption="Result ID" />
-        <Column dataField="title" caption="Title"  />
-        <Column dataField="date_created" caption="Date Created" />
         <Column
-          dataField="lab_test_request"
-          caption="Test Request"
-          allowFiltering={true}
-          allowSearch={true}
+          dataField="track_number" 
+          caption="Process Id" 
+          width={320} 
         />
-        <Column 
-          dataField="" 
+        <Column
+          dataField="patient" 
+          caption="Patient Name" 
+          width={200}
+          cellRender={patientNameRender}
+        />
+        <Column
+          dataField=""
           caption=""
+          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>
 
-      <h2 className='text-xl my-4 text-orange'>Qualitative Results</h2>
-
-      <DataGrid
-        dataSource={qualitativeLabResults}
-        allowColumnReordering={true}
-        rowAlternationEnabled={true}
-        showBorders={true}
-        remoteOperations={true}
-        showColumnLines={true}
-        showRowLines={true}
-        wordWrapEnabled={true}
-        allowPaging={true}
-        // height={"70vh"}
-        className="w-full shadow"
-      >
-        <HeaderFilter visible={true} />
-        <Scrolling rowRenderingMode='virtual'></Scrolling>
-        <Paging defaultPageSize={10} />
-        <Pager
-          visible={true}
-          allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={showPageSizeSelector}
-          showInfo={showInfo}
-          showNavigationButtons={showNavButtons}
-        />
-        <Column dataField="id" caption="Result ID" />
-        <Column dataField="title" caption="Title"  />
-        <Column dataField="date_created" caption="Date Created" />
-        <Column
-          dataField="lab_test_request"
-          caption="Test Request"
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column 
-          dataField="" 
-          caption=""
-          cellRender={actionsFunc}
-        />
-      </DataGrid>
       {approveOpen && (<ApproveResults selectedData={selectedData} approveOpen={approveOpen} setApproveOpen={setApproveOpen}/>)}
     </>
   );

@@ -85,9 +85,10 @@ class LabTestRequest(models.Model):
 class PatientSample(models.Model):
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE)
     specimen_name = models.TextField(max_length=50)
-    test_req = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
+    test_req = models.ForeignKey(LabTestRequest, null=True, on_delete=models.CASCADE)
     sample_code = models.CharField(max_length=100)
     sample_collected = models.BooleanField(default=False)
+    has_results = models.BooleanField(default=False)
     process_test_request = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -108,6 +109,8 @@ class PatientSample(models.Model):
     
 class LabTestRequestPanel(models.Model):
     sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
+    result = models.CharField(max_length=45, null=True)
+    category = models.CharField(max_length=20, default="quantitative")
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     

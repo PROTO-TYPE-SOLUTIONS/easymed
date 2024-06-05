@@ -24,6 +24,7 @@ const AddResultItemModal = ({open, setOpen, selected}) => {
   const handleClose = () => {
     setOpen(false);
   };
+  console.log("GIVE THANKS EVERYDAYYYYYAAAA", selected)
 
   const initialValues = {
     result: "",
@@ -100,12 +101,15 @@ const AddResultItemModal = ({open, setOpen, selected}) => {
               />
             </Grid>
             <Grid item md={12} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Result"
-                name="result"
-              />
+            <Field
+              as={selected?.category === 'qualitative' ? 'textarea' : 'input'}
+              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              maxWidth="sm"
+              type={selected?.category === 'qualitative' ? 'text' : 'number'}
+              placeholder="Result"
+              name="result"
+              rows={selected?.category === 'qualitative' ? 6 : undefined}
+            />
               <ErrorMessage
                 name="result"
                 component="div"

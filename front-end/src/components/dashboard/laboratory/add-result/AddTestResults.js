@@ -14,9 +14,9 @@ import { SlMinus } from 'react-icons/sl';
 import { useAuth } from '@/assets/hooks/use-auth';
 import LabItemModal from './LabItemModal';
 
-import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests, getAllLabTestPanelsByTestRequest } from '@/redux/features/laboratory';
+import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests, getAllLabTestPanelsByTestRequest, getAllPhlebotomySamples, getAllLabTestPanelsBySample } from '@/redux/features/laboratory';
 import SeachableSelect from '@/components/select/Searchable';
-import { sendLabResults, addTestResultPanel, sendLabResultQualitative, addQualitativeTestResultPanel } from '@/redux/service/laboratory';
+import { sendLabResults, addTestResultPanel, sendLabResultQualitative, addQualitativeTestResultPanel, updateLabRequestPanels } from '@/redux/service/laboratory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -51,31 +51,27 @@ const AddTestResults = () => {
   const { labResultItems  } = useSelector((store) => store.laboratory);
   const { labTestPanels  } = useSelector((store) => store.laboratory);
   const auth = useAuth();
-  const { labRequests } = useSelector((store) => store.laboratory);
+  const { labRequests, phlebotomySamples } = useSelector((store) => store.laboratory);
 
   const token = useAuth();
   const initialValues = {
     title: "",
     lab_test_request: null,
-    qualitative:  null,
     recorded_by:token.user_id,
   };
-
-  console.log("YTFGVTFVT", token)
-
 
   useEffect(() => {
     if (token) {
       dispatch(getAllLabRequests(token));
+      dispatch(getAllPhlebotomySamples(token))
       if(selected){
-        dispatch(getAllLabTestPanelsByTestRequest(selected.value, token));
+        dispatch(getAllLabTestPanelsBySample(selected.value, token));
       }
     }
   }, [token, selected]);
   
   const validationSchema = Yup.object().shape({
     lab_test_request: Yup.object().required("This field is required!"),
-    qualitative: Yup.object().required("This field is required!"),
     title: Yup.string().required("This field is required!"),
   });
 
@@ -160,55 +156,28 @@ const AddTestResults = () => {
       if (labResultItems.length <= 0) {
         toast.error("No lab result items");
         return;
-      }      
-    
+      }    
       setLoading(true);
 
-      // save from here if qualitative
-      if(formValue.qualitative.value === "qualitative"){
+      labResultItems.forEach(async(panel)=> {
 
-        const payload = {
-          ...formValue,
-          lab_test_request: formValue.lab_test_request.value,
-          category: formValue.qualitative.value
-        }
+          console.log("PPPPPPPPPPPPPPPPPPP", panel)
+          const payload = {
+            id:panel.id,
+            result: panel.result
+          }
 
-        await sendLabResultQualitative(payload, auth).then((res)=> {
-          console.log(res)
-          sendEachItemToDb(res, formValue)
-          toast.success("Result Added Successfully!");
-          setLoading(false);
-          dispatch(clearItemsToLabResultsItems());
+          const response = await updateLabRequestPanels(payload, auth)
+          console.log("RESSSPPPOONNSSE", response)
           
-          router.push('/dashboard/laboratory');
-        })
-
-      }else{
-
-        const payload = {
-          ...formValue,
-          lab_test_request: formValue.lab_test_request.value,
-          category: formValue.qualitative.value
-        }
-  
-        console.log(payload);
-      
-        await sendLabResults(payload, auth).then((res) => {
-          console.log(res)
-          sendEachItemToDb(res, formValue)
-          toast.success("Result Added Successfully!");
-          setLoading(false);
-          dispatch(clearItemsToLabResultsItems());
-          
-          router.push('/dashboard/laboratory');
-        });
-
-      }
-    } catch (err) {
-      toast.error(err);
+      })
       setLoading(false);
-    }
-  };
+
+      }catch(error){
+        console.log("ERR SAVING RESULTS")
+        setLoading(false);
+      }
+  }
 
   return (
     <section>
@@ -234,31 +203,18 @@ const AddTestResults = () => {
             name="lab_test_request"
             // setSelectedItem={setSelectedItem}
             setSelectedItem={(selectedOption) => {
-              console.log("THZ IZ ZELECTED", selectedOption)
               setSelectedItem(selectedOption);
               const selectedReq = labRequests.find((req)=> req.id === selectedOption?.value)
 
               setFieldValue('qualitative', selectedReq ? {value:selectedReq.category, label: selectedReq?.category} : null );
             }}
-            options={labRequests.filter((req)=>req.has_result === false && req.sample !== null).map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
+            options={phlebotomySamples.filter((sample)=>sample.sample_collected === true && sample.has_results === false).map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample_code}` }))}
           />
           <ErrorMessage
             name="lab_test_request"
             component="div"
             className="text-warning text-xs"
           />  
-        </Grid>
-        <Grid item md={4} xs={4}>
-          <SeachableSelect
-            label="Is Qualitative"
-            name="qualitative"
-            options={[{value: 'qualitative', label: "qualitative"}, {value: "quantitative", label: "quantitative"}].map((item) => ({ value: item.value, label: `${item.label}` }))}
-          />
-          <ErrorMessage
-            name="qualitative"
-            component="div"
-            className="text-warning text-xs"
-          />      
         </Grid>
         <Grid item md={4} xs={4}>
           <label>result title</label>
