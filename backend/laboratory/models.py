@@ -39,13 +39,8 @@ class LabReagent(models.Model):
         return self.name
 
 class LabTestProfile(models.Model):
-    CATEGORY_CHOICE = (
-        ("quantitative", "  QUANTITATIVE"),
-        ("qualitative", "QUALITATIVE"),
-    )
     name = models.CharField(max_length=255)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    category = models.CharField(max_length=20, default="quantitative", choices=CATEGORY_CHOICE,)
 
     def __str__(self):
         return self.name
@@ -61,7 +56,8 @@ class LabTestPanel(models.Model):
     unit = models.CharField(max_length=255)
     ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
+    is_qualitative = models.BooleanField(default=False)
+    is_quantitative = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.unit}"
 
@@ -126,16 +122,11 @@ class EquipmentTestRequest(models.Model):
     
     
 class LabTestResult(models.Model):
-    CATEGORY_CHOICE = (
-        ("quantitative", "  QUANTITATIVE"),
-        ("qualitative", "QUALITATIVE"),
-    )
     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
     title = models.CharField(max_length=45)
     date_created = models.DateField(auto_now_add=True)
     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name="recorded_by")
     note = models.CharField(max_length=255, null=True, blank=True)
-    category = models.CharField(max_length=20, default="quantitative", choices=CATEGORY_CHOICE,)
     approved = models.BooleanField(default=False)
 
     def __str__(self):
@@ -193,47 +184,15 @@ class PublicLabTestRequest(models.Model):
     sample_collected = models.BooleanField(default=False,null=True, blank=True)
     sample_id = models.CharField(max_length=100, null=True, blank=True)
 
-    # def __str__(self):
-    #     return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
-    
-    # @property
-    # def age(self):
-    #     if self.patient.date_of_birth:
-    #         patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
-    #         return patient_age
-    #     return None
-    
-
-
-class LabTestResultQualitative(models.Model):
-    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
-    title = models.CharField(max_length=45)
-    date_created = models.DateField(auto_now_add=True)
-    recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
-    approved = models.BooleanField(default=False)
-
     def __str__(self):
-        return self.title
-
-class LabTestResultPanelQualitative(models.Model):
-    lab_test_result= models.ForeignKey(LabTestResultQualitative, on_delete=models.CASCADE)
-    test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET_NULL, null=True, blank=True )
-    result = models.CharField(max_length=45)
-
+        return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
     
-    def __str__(self):
-        return f"{self.test_panel.name}"
-
-class QualitativeResultsVerification(models.Model):
-    lab_results = models.OneToOneField(LabTestResultQualitative, on_delete=models.CASCADE)
-    lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
-    approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)
-
-# class PatientSample(models.Model):
-#     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE)
-#     test_req = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
-#     sample_code = models.CharField(max_length=100)
-#     process_test_request = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE)
+    @property
+    def age(self):
+        if self.patient.date_of_birth:
+            patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
+            return patient_age
+        return None
     
 class Phlebotomy(models.Model):
     lab_test_panel = models.ForeignKey(LabTestPanel, on_delete=models.CASCADE)

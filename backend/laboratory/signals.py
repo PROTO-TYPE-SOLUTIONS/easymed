@@ -3,16 +3,18 @@ import pdb
 from patient.models import AttendanceProcess
 from billing.models import InvoiceItem
 from django.dispatch import receiver
-from easymed.celery_tasks import generate_labtestresult_pdf, generate_qualitative_labtestresult_pdf
+from easymed.celery_tasks import generate_labtestresult_pdf
+
+
 # models
 from .models import (
     EquipmentTestRequest,
     LabTestRequest,
     LabEquipment,
     LabTestResult,
-    LabTestResultQualitative,
-    LabTestResult, LabTestResultQualitative,ResultsVerification,
-    QualitativeResultsVerification,
+    LabTestResult,
+    ResultsVerification,
+
     LabTestRequestPanel,
     PatientSample,
     Phlebotomy
@@ -71,14 +73,6 @@ def generate_labtestresult(sender, instance, created, **kwargs):
     if created:
         generate_labtestresult_pdf.delay(instance.pk)
 
-
-@receiver(post_save, sender=LabTestResultQualitative)
-def generate_qualitative_labtestresult(sender, instance, created, **kwargs):
-    if created:
-        generate_qualitative_labtestresult_pdf.delay(instance.pk)
-
-
-
 '''
 This will capture test request and send to HumaStar 100 Computer
 HumaStar 100 uses network shared files
@@ -120,14 +114,6 @@ def update_lab_test_request(sender, instance, **kwargs):
         lab_test_request.has_result = True
         lab_test_request.save()
 
-@receiver(post_save, sender=LabTestResultQualitative)
-def update_lab_test_request(sender, instance, **kwargs):
-    # Check if the LabTestResultQualitative instance has a lab_test_request associated with it
-    if instance.lab_test_request:
-        lab_test_request = instance.lab_test_request
-        # Update the LabTestRequest to indicate that it has a result
-        lab_test_request.has_result = True
-        lab_test_request.save()
 
 @receiver(post_save, sender=ResultsVerification)
 def approve_lab_test_result(sender, instance, **kwargs):
@@ -146,30 +132,6 @@ def approve_lab_test_result(sender, instance, **kwargs):
             test_profile = lab_test_request.test_profile.item
             process.track = "added result"
             process.labResult = lab_results
-            process.labTech = lab_results.recorded_by
-            process.save()
-            InvoiceItem.objects.create(invoice=process.invoice, item=test_profile)
-            print(f'Process ID: {process.id}, Lab Test Request: {process.labTest}')
-        except AttendanceProcess.DoesNotExist:
-            print('No AttendanceProcess found for the given lab test request.')
-
-@receiver(post_save, sender=QualitativeResultsVerification)
-def approve_qualitative_lab_test_result(sender, instance, **kwargs):
-    # Check if the QualitativeResultsVerification instance has a lab_test_result associated with it
-    if instance.lab_results:
-        lab_results = instance.lab_results
-        # Update the LabTestResult to indicate that it has been approved
-        lab_results.approved = True
-        lab_results.save()
-    
-    if instance.lab_test_request:
-        lab_test_request = instance. lab_test_request
-        try:
-            process = AttendanceProcess.objects.get(labTest=lab_test_request)
-            # Print the process for debugging purposes
-            test_profile = lab_test_request.test_profile.item
-            process.track = "added result"
-            process.qualitativeLabTest=lab_results
             process.labTech = lab_results.recorded_by
             process.save()
             InvoiceItem.objects.create(invoice=process.invoice, item=test_profile)

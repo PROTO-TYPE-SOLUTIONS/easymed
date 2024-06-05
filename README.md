@@ -152,7 +152,7 @@ for a given payment mode
 
 The /preflight directory contains set up files for an LIS Host listener.
 
-
+Qualitative and quantitative results will be moved to specify the type in a test panel
 ## Qualitative reports;
 If a Lab results is selected as qualitative, use this endpoint
 ``/lab/lab-test-results-qualitative/``
