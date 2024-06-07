@@ -21,3 +21,6 @@ RUN chmod 777 ./worker-entrypoint.sh
 RUN chmod +x ./worker-entrypoint.sh
 
 
+ENTRYPOINT [ "./backend-entrypoint.sh" ]
+
+

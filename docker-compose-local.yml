@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
     redis:
-        image: redis:7.0-alpine
+        image: redis:7.0-alpine <- from dockerhub
         container_name: redis
         command: redis-server --appendonly yes --replica-read-only no
         volumes:
@@ -14,10 +14,9 @@ services:
         restart: unless-stopped
 
     backend:
-        build:
-          context: ./backend
+        image: mosesmbadi/easymedbackend
         container_name: easymed-backend
-        command: ./backend-entrypoint.sh
+        command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
         volumes:
             - ./backend:/code
         ports:
