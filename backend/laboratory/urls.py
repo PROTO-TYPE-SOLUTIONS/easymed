@@ -20,7 +20,6 @@ from .views import (
     ResultsVerificationViewSet,
     ProcessTestRequestViewSet,
     LabTestRequestByProcessId,
-    PhlebotomyPanelByPatientSampleId,
     PatientSampleByProcessId,
     PatientSampleViewSet
 )
@@ -54,10 +53,7 @@ urlpatterns = [
     path('lab-test-request-panels-by-lab-test-request-id/<int:lab_test_request_id>/', LabTestRequestPanelByLabTestRequestId.as_view(), name='lab-test-request-panels'),
     path('lab-test-request-by-process-id/<int:process_id>/', LabTestRequestByProcessId.as_view(), name='lab-process-request'),
     path('patient-samples-by-process-id/<int:process_id>/', PatientSampleByProcessId.as_view(), name='patient-samples'),
-    path('lab-test-panels-by-sample-id/<int:sample_id>/', PhlebotomyPanelByPatientSampleId.as_view(), name='lab-test-sample-panels'),
-
     path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
-
     path('labtestpanels-byprofile-id/<int:profile_id>/', LabTestPanelViewSet.as_view({'get': 'by_test_profile'}), name='labtestpanels-byprofile-id'),
 ]
 

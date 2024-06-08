@@ -16,7 +16,6 @@ from .models import (
     ResultsVerification,
     ProcessTestRequest,
     PatientSample,
-    Phlebotomy
 
     )
 
@@ -36,12 +35,6 @@ class LabTestPanelSerializer (serializers.ModelSerializer):
     class Meta:
         model = LabTestPanel
         fields = '__all__'
-
-class PhlebotomySerializer (serializers.ModelSerializer):
-    class Meta:
-        model = Phlebotomy
-        fields = '__all__'
-     
 
 class PublicLabTestRequestSerializer(serializers.ModelSerializer):
     class Meta:

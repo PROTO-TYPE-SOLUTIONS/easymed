@@ -26,7 +26,6 @@ from .models import (
     ResultsVerification,
 
     ProcessTestRequest,
-    Phlebotomy,
     PatientSample
 )
 # serializers
@@ -43,7 +42,6 @@ from .serializers import (
     LabTestRequestPanelSerializer,
     ResultsVerificationSerializer,
     ProcessTestRequestSerializer,
-    PhlebotomySerializer,
     PatientSampleSerializer
 )
 
@@ -173,12 +171,6 @@ class LabTestRequestPanelByLabTestRequestId(generics.ListAPIView):
         lab_test_request_id = self.kwargs['lab_test_request_id']
         return LabTestRequestPanel.objects.filter(lab_test_request_id=lab_test_request_id)
     
-class PhlebotomyPanelByPatientSampleId(generics.ListAPIView):
-    serializer_class = LabTestRequestPanelSerializer
-
-    def get_queryset(self):
-        sample_id = self.kwargs['sample_id']
-        return LabTestRequestPanel.objects.filter(sample_id=sample_id)
     
 class PatientSampleByProcessId(generics.ListAPIView):
     serializer_class = PatientSampleSerializer 

@@ -17,7 +17,6 @@ from .models import (
 
     LabTestRequestPanel,
     PatientSample,
-    Phlebotomy
 )
 # utils
 from .utils import (
