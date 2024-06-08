@@ -40,7 +40,7 @@ class LabReagent(models.Model):
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+
 
     def __str__(self):
         return self.name
@@ -56,6 +56,7 @@ class LabTestPanel(models.Model):
     unit = models.CharField(max_length=255)
     ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=False)
     def __str__(self):
@@ -106,10 +107,10 @@ class PatientSample(models.Model):
 class LabTestRequestPanel(models.Model):
     sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
     result = models.CharField(max_length=45, null=True)
-    category = models.CharField(max_length=20, default="quantitative")
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
-    
+    is_sample_collected = models.BooleanField(default=False)
+
     def __str__(self):
         return self.test_panel.name
 
@@ -135,6 +136,7 @@ class LabTestResult(models.Model):
 class ResultsVerification(models.Model):
     lab_results = models.OneToOneField(LabTestResult, on_delete=models.CASCADE)
     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
+    is_approved = models.BooleanField(default=False)
     approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)
 
 
@@ -193,9 +195,3 @@ class PublicLabTestRequest(models.Model):
             patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
             return patient_age
         return None
-    
-class Phlebotomy(models.Model):
-    lab_test_panel = models.ForeignKey(LabTestPanel, on_delete=models.CASCADE)
-    sample = models.ForeignKey(PatientSample, on_delete=models.CASCADE)
-    
-

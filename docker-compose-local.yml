@@ -15,9 +15,10 @@ services:
 
     backend:
         build:
-          context: ./backend
+            context: ./backend
         container_name: easymed-backend
-        command: ./backend-entrypoint.sh
+        # command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
+        command: python manage.py runserver 0.0.0.0:8080
         volumes:
             - ./backend:/code
         ports:

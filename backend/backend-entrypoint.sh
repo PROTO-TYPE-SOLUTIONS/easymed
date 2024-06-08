@@ -7,15 +7,15 @@ done
 
 python manage.py collectstatic --noinput
 
-sleep 10
+sleep 4
 
 
-python manage.py makemigrations announcement authperms customuser inventory laboratory patient pharmacy receptions billing reports company
-python manage.py migrate
+# python manage.py makemigrations announcement authperms customuser inventory laboratory patient pharmacy receptions billing reports company
+# python manage.py migrate
 
 
 # python manage.py createsuperuser --noinput --email admin@mail.com --password admin --skip-checks
 
-uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
+
 
 
