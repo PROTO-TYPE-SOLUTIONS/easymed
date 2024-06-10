@@ -104,6 +104,9 @@ HumaStar 100 uses network shared files
         # elif equipment.data_format != 'astm':
         #         print("Data not AST format")    
 
+
+
+
 @receiver(post_save, sender=LabTestResult)
 def update_lab_test_request(sender, instance, **kwargs):
     # Check if the LabTestResult instance has a lab_test_request associated with it
@@ -138,39 +141,84 @@ def approve_lab_test_result(sender, instance, **kwargs):
         except AttendanceProcess.DoesNotExist:
             print('No AttendanceProcess found for the given lab test request.')
 
+''''
+We go through LabTestRequestPanel and group them by specimen name
+We then create or get a PatientSample for each group
+We then assign the sample to each panel in the group
+'''
+# from collections import defaultdict
+# @receiver(post_save, sender=LabTestRequestPanel)
+# def group_panels_with_specimen(sender, instance, created, **kwargs):
+#     if created:
+#         # Get all panels belonging to the same LabTestRequest
+#         panels = LabTestRequestPanel.objects.filter(lab_test_request=instance.lab_test_request)
+        
+#         # Group panels by specimen name
+#         specimen_groups = defaultdict(list)
+#         for panel in panels:
+#             if panel.test_panel.specimen:
+#                 specimen_groups[panel.test_panel.specimen.name].append(panel)
 
-@receiver(post_save, sender=LabTestRequestPanel)
-def group_panels_with_specimen(sender, instance, created, **kwargs):
-        if created:
-            sample, created = PatientSample.objects.get_or_create(
-                specimen=instance.test_panel.specimen,
-                process_test_request=instance.lab_test_request.process,                
-            )
+#         # Create or get PatientSample for each group and assign to panels
+#         for specimen_name, panel_group in specimen_groups.items():
+#             # Create or get the PatientSample instance for the group
+#             sample, sample_created = PatientSample.objects.get_or_create(
+#                 specimen=panel_group[0].test_panel.specimen,
+#                 lab_test_request=instance.lab_test_request
+#             )
             
-            instance.sample = sample
-            instance.category = instance.test_panel.test_profile.category
-            sample.specimen_name = instance.test_panel.specimen.name
-            sample.test_req=instance.lab_test_request
-            sample.save()
-            instance.save()
+#             # Update each panel in the group with the same PatientSample instance
+#             for panel in panel_group:
+#                 panel.patient_sample = sample
+#                 panel.save()
 
-        else:
-            if instance.result:
-                try:
-                    similar_panels_by_sample = LabTestRequestPanel.objects.filter(sample=instance.sample)
-                    all_have_results = True
-                    for panel in similar_panels_by_sample:
-                        # pdb.set_trace()
-                        if not panel.result:
-                            all_have_results = False
-                            break
+#     # Additional logic for updating sample_collected based on results
+#     else:
+#         if instance.result:
+#             try:
+#                 similar_panels_by_sample = LabTestRequestPanel.objects.filter(patient_sample=instance.patient_sample)
+#                 all_have_results = all(panel.result for panel in similar_panels_by_sample)
+                
+#                 if all_have_results:
+#                     instance.patient_sample.sample_collected = True
+#                     instance.patient_sample.save()
+#             except Exception as e:
+#                 # Log the error or handle it as needed
+#                 print(f"An error occurred: {e}")
+
+
+
+# @receiver(post_save, sender=LabTestRequestPanel)
+# def group_panels_with_specimen(sender, instance, created, **kwargs):
+#         if created:
+#             sample, created = PatientSample.objects.get_or_create(
+#                 specimen=instance.test_panel.specimen,
+#                 process_test_request=instance.lab_test_request.process,                
+#             )
+            
+#             instance.sample = sample
+#             sample.specimen_name = instance.test_panel.specimen.name
+#             sample.lab_test_request=instance.lab_test_request
+#             sample.save()
+#             instance.save()
+
+#         else:
+#             if instance.result:
+#                 try:
+#                     similar_panels_by_sample = LabTestRequestPanel.objects.filter(sample=instance.sample)
+#                     all_have_results = True
+#                     for panel in similar_panels_by_sample:
+#                         # pdb.set_trace()
+#                         if not panel.result:
+#                             all_have_results = False
+#                             break
                     
-                    if all_have_results:
-                        instance.sample.has_results = True
-                        instance.sample.save()
-                except Exception as e:
-                    # Log the error or handle it as needed
-                    print(f"An error occurred: {e}")
+#                     if all_have_results:
+#                         instance.sample.has_results = True
+#                         instance.sample.save()
+#                 except Exception as e:
+#                     # Log the error or handle it as needed
+#                     print(f"An error occurred: {e}")
 
 @receiver(post_save, sender=PatientSample)
 def confirm_lab_req_has_full_results(sender, instance, **kwargs):
