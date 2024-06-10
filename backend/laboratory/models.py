@@ -102,7 +102,14 @@ class LabTestRequestPanel(models.Model):
             test_id = f"TC-{random_number}"
             if not LabTestRequestPanel.objects.filter(test_code=test_id).exists():
                 return test_id
-
+    ''''
+    Find or Create PatientSample:
+    Attempt to find a PatientSample that matches the current lab_test_request and specimen.
+    If no matching PatientSample is found, create a new one.
+    Assign this PatientSample to the patient_sample field of the LabTestRequestPanel.
+    Set Category: Determine the category (qualitative or quantitative) based on the LabTestPanel's boolean fields.
+    Save the Model: Call the superclass's save method to ensure the object is saved to the database.
+    '''
     def save(self, *args, **kwargs):
         if not self.test_code:
             self.test_code = self.generate_test_code()
@@ -119,7 +126,7 @@ class LabTestRequestPanel(models.Model):
             matching_sample = PatientSample.objects.create(
                 lab_test_request=self.lab_test_request,
                 specimen=self.test_panel.specimen,
-                patient_sample_code=self.generate_test_code()  # Assuming you want a unique code
+                patient_sample_code=self.generate_test_code()
             )
         self.patient_sample = matching_sample
 
