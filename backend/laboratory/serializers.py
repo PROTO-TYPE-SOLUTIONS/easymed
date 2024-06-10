@@ -64,32 +64,37 @@ class LabTestResultPanelSerializer(serializers.ModelSerializer):
 
 
 class LabTestRequestPanelSerializer(serializers.ModelSerializer):
+    test_panel_name = serializers.ReadOnlyField(source='test_panel.name')
+    sale_price = serializers.SerializerMethodField()
+
+    def get_sale_price(self, instance):
+        if instance.test_panel and instance.test_panel.item:
+            inventory = instance.test_panel.item.inventory_set.first()
+            return inventory.sale_price if inventory else None
+        return None
+
     class Meta:
         model = LabTestRequestPanel
         fields = '__all__'
+        extra_fields = ['test_panel_name', 'sale_price']
+
 
 class EquipmentTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = EquipmentTestRequest
         fields = '__all__'
+
 class LabTestRequestSerializer(serializers.ModelSerializer):
     patient_first_name = serializers.ReadOnlyField(source='patient.first_name')
     patient_last_name = serializers.ReadOnlyField(source='patient.second_name')
     test_profile_name = serializers.ReadOnlyField(source='test_profile.name')
-    sale_price = serializers.SerializerMethodField()
     category = serializers.CharField(source='test_profile.category', read_only=True)
-
 
     class Meta:
         model = LabTestRequest
         fields = "__all__"
         #Removed id and sample as they were readonly
 
-    def get_sale_price(self, instance):
-        if instance.test_profile and instance.test_profile.item:
-            inventory = instance.test_profile.item.inventory_set.first()
-            return inventory.sale_price if inventory else None
-        return None
 
     def sample_code():
         sp_id = ""

@@ -40,14 +40,14 @@ class LabReagent(models.Model):
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
-
-
     def __str__(self):
         return self.name
 
 class Specimen(models.Model):
     name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.name
 
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
@@ -58,7 +58,7 @@ class LabTestPanel(models.Model):
     ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
-    is_quantitative = models.BooleanField(default=False)
+    is_quantitative = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.unit}"
 
@@ -67,49 +67,71 @@ class ProcessTestRequest(models.Model):
     reference = models.CharField(max_length=40)
 
 class LabTestRequest(models.Model):
-    process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True)
+    process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True) # from patient app
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
     note = models.TextField(null=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
-    sample_collected = models.BooleanField(default=False, null=True)
-    sample = models.CharField(max_length=100, null=True)
     requested_on = models.TimeField(auto_now_add=True, null=True, blank=True)
     has_result = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
-    
+
+
 class PatientSample(models.Model):
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE)
-    specimen_name = models.TextField(max_length=50)
-    test_req = models.ForeignKey(LabTestRequest, null=True, on_delete=models.CASCADE)
-    sample_code = models.CharField(max_length=100)
-    sample_collected = models.BooleanField(default=False)
-    has_results = models.BooleanField(default=False)
-    process_test_request = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE)
+    lab_test_request = models.ForeignKey(LabTestRequest, null=True, on_delete=models.CASCADE)
+    patient_sample_code = models.CharField(max_length=100)
+    process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True) # from patient app
+    is_sample_collected = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
-    
-    def generate_sample_code(self):
-        while True:
-            random_number = ''.join(choices('0123456789', k=4))
-            sp_id = f"SP-{random_number}"
-            if not PatientSample.objects.filter(sample_code=sp_id).exists():
-                return sp_id
 
-    def save(self, *args, **kwargs):
-        if not self.sample_code:
-            self.sample_code = self.generate_sample_code()
-        super().save(*args, **kwargs)
-   
-    
 class LabTestRequestPanel(models.Model):
-    sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
-    result = models.CharField(max_length=45, null=True)
+    patient_sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
+    result = models.CharField(max_length=45, null=True)  # actual result
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
-    is_sample_collected = models.BooleanField(default=False)
+    test_code = models.CharField(max_length=100)
+    category = models.CharField(max_length=10, default="none")
+
+    def generate_test_code(self):
+        while True:
+            random_number = ''.join(choices('0123456789', k=4))
+            test_id = f"TC-{random_number}"
+            if not LabTestRequestPanel.objects.filter(test_code=test_id).exists():
+                return test_id
+
+    def save(self, *args, **kwargs):
+        if not self.test_code:
+            self.test_code = self.generate_test_code()
+
+        # Find or create a PatientSample for the current lab_test_request and specimen
+        try:
+            # Check if a matching PatientSample exists
+            matching_sample = PatientSample.objects.get(
+                lab_test_request=self.lab_test_request,
+                specimen=self.test_panel.specimen
+            )
+        except PatientSample.DoesNotExist:
+            # If not, create a new PatientSample
+            matching_sample = PatientSample.objects.create(
+                lab_test_request=self.lab_test_request,
+                specimen=self.test_panel.specimen,
+                patient_sample_code=self.generate_test_code()  # Assuming you want a unique code
+            )
+        self.patient_sample = matching_sample
+
+        # Set the category based on the related LabTestPanel
+        if self.test_panel.is_qualitative:
+            self.category = 'qualitative'
+        elif self.test_panel.is_quantitative:
+            self.category = 'quantitative'
+        else:
+            self.category = 'none'
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.test_panel.name
