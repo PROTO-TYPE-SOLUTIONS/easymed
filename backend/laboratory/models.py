@@ -86,6 +86,22 @@ class PatientSample(models.Model):
     process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True) # from patient app
     is_sample_collected = models.BooleanField(default=False)
 
+    
+    def generate_sample_code(self):
+        while True:
+            random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
+            sp_id = f"SC-{random_number}"
+            # Check if the generated sample code already exists in PatientSample
+            if not PatientSample.objects.filter(patient_sample_code=sp_id).exists():
+                break
+        return sp_id
+
+    def save(self, *args, **kwargs):
+        if not self.patient_sample_code:
+            self.patient_sample_code = self.generate_sample_code()
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return str(self.id)
 
@@ -94,7 +110,7 @@ class LabTestRequestPanel(models.Model):
     result = models.CharField(max_length=45, null=True)  # actual result
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
-    test_code = models.CharField(max_length=100, default="NA")
+    test_code = models.CharField(max_length=100, null=True)
     category = models.CharField(max_length=30, default="none")
 
     def generate_test_code(self):
@@ -127,7 +143,7 @@ class LabTestRequestPanel(models.Model):
             matching_sample = PatientSample.objects.create(
                 lab_test_request=self.lab_test_request,
                 specimen=self.test_panel.specimen,
-                patient_sample_code=self.generate_test_code()
+                # patient_sample_code=self.generate_sample_code()
             )
         self.patient_sample = matching_sample
 

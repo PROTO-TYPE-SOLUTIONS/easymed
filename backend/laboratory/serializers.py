@@ -96,27 +96,7 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         #Removed id and sample as they were readonly
 
 
-    # def sample_code():
-    #     sp_id = ""
-    #     while True:
-    #         random_number = [randrange(0,10000) for _ in range(4) ]
-    #         sp_id = f"SP-{random_number}"
-    #         lab_req = LabTestRequest.objects.filter(sample=sp_id)
-    #         if not lab_req.exists():
-    #             break
 
-    #     return sp_id
-    
-    
-    # def generate_sample_code(self):
-    #         sp_id = ""
-    #         while True:
-    #             random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
-    #             sp_id = f"SP-{random_number}"
-    #             lab_req = LabTestRequest.objects.filter(sample=sp_id)
-    #             if not lab_req.exists():
-    #                 break
-    #         return sp_id
 
     # def create(self, validated_data: dict):
     #     validated_data["sample"] = self.generate_sample_code()
