@@ -59,6 +59,7 @@ class LabTestPanel(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
+    
     def __str__(self):
         return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.unit}"
 
