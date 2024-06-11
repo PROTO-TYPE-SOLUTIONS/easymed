@@ -96,53 +96,53 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
         #Removed id and sample as they were readonly
 
 
-    def sample_code():
-        sp_id = ""
-        while True:
-            random_number = [randrange(0,10000) for _ in range(4) ]
-            sp_id = f"SP-{random_number}"
-            lab_req = LabTestRequest.objects.filter(sample=sp_id)
-            if not lab_req.exists():
-                break
+    # def sample_code():
+    #     sp_id = ""
+    #     while True:
+    #         random_number = [randrange(0,10000) for _ in range(4) ]
+    #         sp_id = f"SP-{random_number}"
+    #         lab_req = LabTestRequest.objects.filter(sample=sp_id)
+    #         if not lab_req.exists():
+    #             break
 
-        return sp_id
+    #     return sp_id
     
     
-    def generate_sample_code(self):
-            sp_id = ""
-            while True:
-                random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
-                sp_id = f"SP-{random_number}"
-                lab_req = LabTestRequest.objects.filter(sample=sp_id)
-                if not lab_req.exists():
-                    break
-            return sp_id
+    # def generate_sample_code(self):
+    #         sp_id = ""
+    #         while True:
+    #             random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
+    #             sp_id = f"SP-{random_number}"
+    #             lab_req = LabTestRequest.objects.filter(sample=sp_id)
+    #             if not lab_req.exists():
+    #                 break
+    #         return sp_id
 
-    def create(self, validated_data: dict):
-        validated_data["sample"] = self.generate_sample_code()
-        return super().create(validated_data)
+    # def create(self, validated_data: dict):
+    #     validated_data["sample"] = self.generate_sample_code()
+    #     return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        # If sample code is not provided, generate one
-        print(f"Updating data: {validated_data}")
+    # def update(self, instance, validated_data):
+    #     # If sample code is not provided, generate one
+    #     print(f"Updating data: {validated_data}")
 
-        if 'sample' in validated_data and validated_data['sample'] is not None:
-            validated_data["sample"] = validated_data["sample"] + "-" + self.generate_sample_code()
+    #     if 'sample' in validated_data and validated_data['sample'] is not None:
+    #         validated_data["sample"] = validated_data["sample"] + "-" + self.generate_sample_code()
 
-        return super().update(instance, validated_data)
+    #     return super().update(instance, validated_data)
 
 
-    def to_representation(self, instance: LabTestRequest):
+    # def to_representation(self, instance: LabTestRequest):
 
-        data = super().to_representation(instance)
-        if instance.requested_by:
-            try:
-                user: CustomUser = CustomUser.objects.get(id=data.get("requested_by"))
-                data["requested_name"] = user.get_fullname()
-            except Exception as e:
-                pass
+    #     data = super().to_representation(instance)
+    #     if instance.requested_by:
+    #         try:
+    #             user: CustomUser = CustomUser.objects.get(id=data.get("requested_by"))
+    #             data["requested_name"] = user.get_fullname()
+    #         except Exception as e:
+    #             pass
 
-        return data
+    #     return data
     
 
 class ResultsVerificationSerializer(serializers.ModelSerializer):

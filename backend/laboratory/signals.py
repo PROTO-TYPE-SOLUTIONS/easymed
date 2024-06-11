@@ -146,48 +146,6 @@ We go through LabTestRequestPanel and group them by specimen name
 We then create or get a PatientSample for each group
 We then assign the sample to each panel in the group
 '''
-# from collections import defaultdict
-# @receiver(post_save, sender=LabTestRequestPanel)
-# def group_panels_with_specimen(sender, instance, created, **kwargs):
-#     if created:
-#         # Get all panels belonging to the same LabTestRequest
-#         panels = LabTestRequestPanel.objects.filter(lab_test_request=instance.lab_test_request)
-        
-#         # Group panels by specimen name
-#         specimen_groups = defaultdict(list)
-#         for panel in panels:
-#             if panel.test_panel.specimen:
-#                 specimen_groups[panel.test_panel.specimen.name].append(panel)
-
-#         # Create or get PatientSample for each group and assign to panels
-#         for specimen_name, panel_group in specimen_groups.items():
-#             # Create or get the PatientSample instance for the group
-#             sample, sample_created = PatientSample.objects.get_or_create(
-#                 specimen=panel_group[0].test_panel.specimen,
-#                 lab_test_request=instance.lab_test_request
-#             )
-            
-#             # Update each panel in the group with the same PatientSample instance
-#             for panel in panel_group:
-#                 panel.patient_sample = sample
-#                 panel.save()
-
-#     # Additional logic for updating sample_collected based on results
-#     else:
-#         if instance.result:
-#             try:
-#                 similar_panels_by_sample = LabTestRequestPanel.objects.filter(patient_sample=instance.patient_sample)
-#                 all_have_results = all(panel.result for panel in similar_panels_by_sample)
-                
-#                 if all_have_results:
-#                     instance.patient_sample.sample_collected = True
-#                     instance.patient_sample.save()
-#             except Exception as e:
-#                 # Log the error or handle it as needed
-#                 print(f"An error occurred: {e}")
-
-
-
 # @receiver(post_save, sender=LabTestRequestPanel)
 # def group_panels_with_specimen(sender, instance, created, **kwargs):
 #         if created:
@@ -220,24 +178,24 @@ We then assign the sample to each panel in the group
 #                     # Log the error or handle it as needed
 #                     print(f"An error occurred: {e}")
 
-@receiver(post_save, sender=PatientSample)
-def confirm_lab_req_has_full_results(sender, instance, **kwargs):
-    if instance.has_results:
-        try:
-            test_simililar_samples = PatientSample.objects.filter(test_req=instance.test_req)
-            # pdb.set_trace()
-            all_have_results = True
-            for sample in test_simililar_samples:
-                pdb.set_trace()
-                if not sample.has_results:
-                    all_have_results = False
-                    break
+# @receiver(post_save, sender=LabTestRequestPanel)
+# def confirm_lab_req_has_full_results(sender, instance, **kwargs):
+#     if instance.result:
+#         try:
+#             test_simililar_samples = PatientSample.objects.filter(test_req=instance.test_req)
+#             # pdb.set_trace()
+#             all_have_results = True
+#             for sample in test_simililar_samples:
+#                 pdb.set_trace()
+#                 if not sample.has_results:
+#                     all_have_results = False
+#                     break
             
-            if all_have_results:
-                instance.test_req.has_result = True
-                instance.test_req.save()
-        except Exception as e:
-            # Log the error or handle it as needed
-            print(f"An error occurred: {e}")
+#             if all_have_results:
+#                 instance.test_req.has_result = True
+#                 instance.test_req.save()
+#         except Exception as e:
+#             # Log the error or handle it as needed
+#             print(f"An error occurred: {e}")
 
 
