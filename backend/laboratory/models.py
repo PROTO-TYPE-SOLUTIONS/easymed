@@ -59,7 +59,7 @@ class LabTestPanel(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.unit}"
 
@@ -94,8 +94,8 @@ class LabTestRequestPanel(models.Model):
     result = models.CharField(max_length=45, null=True)  # actual result
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
-    test_code = models.CharField(max_length=100)
-    category = models.CharField(max_length=10, default="none")
+    test_code = models.CharField(max_length=100, default="NA")
+    category = models.CharField(max_length=30, default="none")
 
     def generate_test_code(self):
         while True:

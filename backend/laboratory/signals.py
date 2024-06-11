@@ -178,24 +178,24 @@ We then assign the sample to each panel in the group
 #                     # Log the error or handle it as needed
 #                     print(f"An error occurred: {e}")
 
-@receiver(post_save, sender=PatientSample)
-def confirm_lab_req_has_full_results(sender, instance, **kwargs):
-    if instance.has_results:
-        try:
-            test_simililar_samples = PatientSample.objects.filter(test_req=instance.test_req)
-            # pdb.set_trace()
-            all_have_results = True
-            for sample in test_simililar_samples:
-                pdb.set_trace()
-                if not sample.has_results:
-                    all_have_results = False
-                    break
+# @receiver(post_save, sender=LabTestRequestPanel)
+# def confirm_lab_req_has_full_results(sender, instance, **kwargs):
+#     if instance.result:
+#         try:
+#             test_simililar_samples = PatientSample.objects.filter(test_req=instance.test_req)
+#             # pdb.set_trace()
+#             all_have_results = True
+#             for sample in test_simililar_samples:
+#                 pdb.set_trace()
+#                 if not sample.has_results:
+#                     all_have_results = False
+#                     break
             
-            if all_have_results:
-                instance.test_req.has_result = True
-                instance.test_req.save()
-        except Exception as e:
-            # Log the error or handle it as needed
-            print(f"An error occurred: {e}")
+#             if all_have_results:
+#                 instance.test_req.has_result = True
+#                 instance.test_req.save()
+#         except Exception as e:
+#             # Log the error or handle it as needed
+#             print(f"An error occurred: {e}")
 
 
