@@ -178,6 +178,7 @@ We then assign the sample to each panel in the group
 #                     # Log the error or handle it as needed
 #                     print(f"An error occurred: {e}")
 
+
 # @receiver(post_save, sender=LabTestRequestPanel)
 # def confirm_lab_req_has_full_results(sender, instance, **kwargs):
 #     if instance.result:

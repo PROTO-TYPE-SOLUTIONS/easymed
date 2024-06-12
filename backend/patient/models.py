@@ -252,14 +252,14 @@ class AttendanceProcess(models.Model):
     patient_number = models.CharField(max_length=8, editable=False, default=999)
     doctor = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='doctor_attendance_processes')
-    labTech = models.ForeignKey(
+    lab_tech = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='labTech_attendance_processes')
     pharmacist = models.ForeignKey(
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='pharmacist_attendance_processes')
     reason = models.TextField(max_length=300)
     invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE, null=True)
-    labTest = models.OneToOneField(ProcessTestRequest, on_delete=models.CASCADE, null=True)
-    labResult = models.OneToOneField(LabTestResult, on_delete=models.CASCADE, null=True)
+    process_test_req = models.OneToOneField(ProcessTestRequest, on_delete=models.CASCADE, null=True) # id of ProcessTestRequest is stored here
+    lab_result = models.OneToOneField(LabTestResult, on_delete=models.CASCADE, null=True)
     #appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, null=True)
     triage = models.OneToOneField(Triage, on_delete=models.CASCADE, null=True)

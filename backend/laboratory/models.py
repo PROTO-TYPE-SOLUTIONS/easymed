@@ -61,11 +61,14 @@ class LabTestPanel(models.Model):
     is_quantitative = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.unit}"
+        return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.specimen.name} - {self.unit} - { self.test_profile.name }"
 
 
 class ProcessTestRequest(models.Model):
-    reference = models.CharField(max_length=40)
+    reference = models.CharField(max_length=40) # track_number of AttendanceProcess is stored here
+
+    def __str__(self):
+        return self.reference
 
 class LabTestRequest(models.Model):
     process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True) # from patient app
@@ -99,6 +102,10 @@ class PatientSample(models.Model):
     def save(self, *args, **kwargs):
         if not self.patient_sample_code:
             self.patient_sample_code = self.generate_sample_code()
+        
+        # Check if the lab_test_request has a process and assign it to the patient sample
+        if self.lab_test_request and self.lab_test_request.process:
+            self.process = self.lab_test_request.process    
 
         super().save(*args, **kwargs)
 
