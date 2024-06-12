@@ -177,7 +177,7 @@ class PatientSampleByProcessId(generics.ListAPIView):
 
     def get_queryset(self):
         process_id = self.kwargs['process_id']
-        return PatientSample.objects.filter(process_test_request_id=process_id)
+        return PatientSample.objects.filter(process=process_id)
 
 class LabTestRequestByProcessId(generics.ListAPIView):
     serializer_class = LabTestRequestSerializer
