@@ -25,7 +25,7 @@ jobs:
       - name: Build and push backend image
         run: |
           cd ./backend
-          docker build -t mosesmbadi/easymedbackend:latest .
+          docker build . -t mosesmbadi/easymedbackend:latest
           docker push mosesmbadi/easymedbackend:latest
 
       - name: Build and push frontend image

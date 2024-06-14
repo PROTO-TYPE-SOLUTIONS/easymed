@@ -1,6 +1,3 @@
-
-# version: "3.9"
-
 services:
     redis:
         image: redis:7.0-alpine
@@ -17,34 +14,22 @@ services:
     backend:
         image: mosesmbadi/easymedbackend
         container_name: backend
-        command: ./backend-entrypoint.sh
-        volumes:
-            - ./volumes/backend:/code/
-
+        command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
         ports:
             - 8080:8080
         env_file:
             - ./.env
         depends_on:
             - db
-        environment:
-            - PG_INIT_WAIT_SQL=SELECT 1 FROM pg_stat_activity WHERE datname='${POSTGRES_DB}' AND state='idle' AND pid <> pg_backend_pid();
-        healthcheck:
-            test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
-            interval: 5s
-            timeout: 10s
-            retries: 10
         restart: unless-stopped
         networks:
             - mks
 
     worker:
-        restart: unless-stopped
         image: mosesmbadi/easymedbackend
         container_name: worker
-        command: ./worker-entrypoint.sh
-        volumes:
-            - ./volumes/static_files:/app/easymed/static
+        command: celery -A easymed worker --loglevel=INFO        
+        restart: unless-stopped
         env_file:
             - ./.env    
         depends_on:

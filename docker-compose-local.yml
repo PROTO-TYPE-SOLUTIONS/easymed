@@ -14,13 +14,11 @@ services:
         restart: unless-stopped
 
     backend:
-        build:
-            context: ./backend
+        build: ./backend
         container_name: easymed-backend
-        # command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
         command: python manage.py runserver 0.0.0.0:8080
         volumes:
-            - ./backend:/code
+            - ./backend:/app
         ports:
             - 8080:8080
         env_file:
@@ -30,15 +28,13 @@ services:
             - mks
 
     worker:
+        build: ./backend
+        container_name: "celery"
         restart: unless-stopped
-        build:
-            context: ./backend
-        volumes:
-            - ./static_files:/app/easymed/static
         env_file:
             - ./.env    
+        command: celery -A easymed worker --loglevel=INFO        
         depends_on:
-            - backend
             - redis
         networks:
             - mks   
@@ -53,8 +49,8 @@ services:
             - 3000:3000
         depends_on:
             - backend
-        volumes:
-            - ./front-end:/app    
+        # volumes:
+        #     - ./front-end:/app    
         networks:
             - mks    
 
