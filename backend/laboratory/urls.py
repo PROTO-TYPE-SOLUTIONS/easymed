@@ -21,7 +21,8 @@ from .views import (
     ProcessTestRequestViewSet,
     LabTestRequestByProcessId,
     PatientSampleByProcessId,
-    PatientSampleViewSet
+    PatientSampleViewSet,
+    LabTestRequestPanelBySampleView
 )
 
 router = DefaultRouter()
@@ -55,5 +56,6 @@ urlpatterns = [
     path('patient-samples-by-process-id/<int:process_id>/', PatientSampleByProcessId.as_view(), name='patient-samples'),
     path('download_labtestresult_pdf/<int:labtestrequest_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
     path('labtestpanels-byprofile-id/<int:profile_id>/', LabTestPanelViewSet.as_view({'get': 'by_test_profile'}), name='labtestpanels-byprofile-id'),
+    path('labtestrequestpanels/sample/<int:patient_sample_id>/', LabTestRequestPanelBySampleView.as_view(), name='labtestrequestpanel-by-sample'),
 ]
 
