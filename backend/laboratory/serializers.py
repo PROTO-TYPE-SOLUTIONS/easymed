@@ -137,8 +137,21 @@ class ProcessTestRequestSerializer(serializers.ModelSerializer):
 
 
 class PatientSampleSerializer(serializers.ModelSerializer):
+    specimen_name = serializers.SerializerMethodField()
+
     class Meta:
         model = PatientSample
-        fields = "__all__"
+        fields = [
+            'id',
+            'patient_sample_code',
+            'is_sample_collected',
+            'specimen',
+            'specimen_name',
+            'lab_test_request',
+            'process'
+        ]
+
+    def get_specimen_name(self, obj):
+        return obj.specimen.name
 
 
