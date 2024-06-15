@@ -29,17 +29,6 @@ const AddPatientModal = () => {
     dispatch(getAllInsurance());
   }, []);
 
-  const gender = [
-    {
-      id: 1,
-      name: "Male",
-    },
-    {
-      id: 2,
-      name: "Female",
-    },
-  ];
-
   const initialValues = {
     first_name: "",
     second_name: "",
@@ -90,11 +79,6 @@ const AddPatientModal = () => {
 
   const handleCreatePatient = async (formValue, helpers) => {
     try {
-      const formData = {
-        ...formValue,
-        insurance: parseInt(formValue.insurance),
-        user_id: parseInt(formValue.user_id),
-      };
       const patientPayload = {
         first_name: formValue.first_name,
         second_name: formValue.second_name,
@@ -121,11 +105,9 @@ const AddPatientModal = () => {
       setLoading(true);
 
       const nextOfKinContactResponse = await patientNextOfKinContact(nextOfKinContacts)
-      console.log("TREAT ME LIKE A QUEEN", nextOfKinContactResponse)
 
       await createPatient(patientPayload).then((res) => {
         helpers.resetForm();
-        console.log("RESPONSE FROM SAVING", res)
         createPatientNextOfKin(res.id, netOfKin, nextOfKinContactResponse.id)
         toast.success("Patient Created Successfully!");
         setLoading(false);

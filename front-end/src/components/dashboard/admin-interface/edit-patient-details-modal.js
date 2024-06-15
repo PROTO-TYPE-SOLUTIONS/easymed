@@ -15,8 +15,6 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
   const { insurance } = useSelector((store) => store.insurance);
   const dispatch = useDispatch();
 
-  console.log("SELECTED ROW DATA", selectedRowData)
-
   useEffect(() =>{
     dispatch(getAllInsurance());
   },[])
@@ -53,9 +51,6 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     gender: Yup.string().required("Select gender!"),
     phone: Yup.string().required("Phone NUmber is Required!"),
     email: Yup.string().required("Email Address is Required!"),
-
-    // insurance: Yup.number(),
-    // user_id: Yup.number(),
   });
 
   const handleEditPatient = async (formValue, helpers) => {
@@ -64,8 +59,6 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
       const formData = {
         ...formValue,
         id:selectedRowData?.id,
-        // insurance: parseInt(formValue.insurance),
-        // user_id: parseInt(formValue.user_id),
       };
       setLoading(true);
       await editPatient(formData).then(() => {

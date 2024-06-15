@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { fetchLabTestPanelsBySpecificSample, updatePhlebotomySamples } from '@/redux/service/laboratory';
 
 const TestPanelsItem = ({sample, collected}) => {
   const auth = useAuth()
-  const dispatch = useDispatch()
   const [resultItems, setResultItems]=useState([])
   const [status, setStatus]= useState(false)
-  const { labTestPanels, processAllTestRequest } = useSelector((store) => store.laboratory);
+  const { labTestPanels } = useSelector((store) => store.laboratory);
 
   const getTestPanelsBySampleId = async (sample, auth)=> {
     try {
@@ -33,8 +32,6 @@ const TestPanelsItem = ({sample, collected}) => {
         <li key={`${foundPanel.id}_panel`} className='flex justify-between '>
           <span className='w-full'>{foundPanel.name}</span>
           <span className='w-full'>{foundPanel.unit}</span>
-          <span className='w-full'>127</span>
-          <span className='w-full'>110</span>
         </li>
       )
     }
@@ -43,7 +40,7 @@ const TestPanelsItem = ({sample, collected}) => {
   const approveCollection = async () => {
     try{
       const payload = {
-        sample_collected: true,
+        is_sample_collected: true,
         id:sample
       }
       await updatePhlebotomySamples(payload, auth)
@@ -59,8 +56,6 @@ const TestPanelsItem = ({sample, collected}) => {
           <li className='flex justify-between'>
               <span className='text-primary w-full'>panel name</span>
               <span className='text-primary w-full'>unit</span>
-              <span className='text-primary w-full'>Ref Val High</span>
-              <span className='text-primary w-full'>Ref Val Low</span>
           </li>
           {panels}
       </ul>

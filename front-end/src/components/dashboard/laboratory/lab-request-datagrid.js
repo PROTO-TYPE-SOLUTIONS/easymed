@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling,
-  HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
 import { Grid } from "@mui/material";
@@ -30,7 +29,7 @@ const getActions = () => {
 };
 
 
-const LabRequestDataGrid = ({ labRequests }) => {
+const LabRequestDataGrid = ( ) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const [open,setOpen] = useState(false);
@@ -48,15 +47,6 @@ const LabRequestDataGrid = ({ labRequests }) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
     return patient ? `${patient.first_name} ${patient.second_name}` : ""
   }
-  
-
-  //   FILTER PATIENTS BASED ON SEARCH QUERY
-  const filteredData = labRequests.filter((request) => {
-    return request?.note
-      ?.toLocaleLowerCase()
-      .includes(searchQuery.toLowerCase());
-  });
-
 
   const onMenuClick = async (menu, data) => {
    if (menu.action === "sample") {
@@ -81,14 +71,6 @@ const LabRequestDataGrid = ({ labRequests }) => {
       />
       </>
     );
-  };
-
-  const patientFullName = (rowData) => {
-    return rowData.patient_first_name + " " + rowData.patient_last_name;
-  }
-
-  const sampleCollectedTemplate = (cellData) => {
-    return cellData.value ? 'Collected' : 'Not Collected';
   };
 
   return (
@@ -156,9 +138,9 @@ const LabRequestDataGrid = ({ labRequests }) => {
           showNavigationButtons={showNavButtons}
         />
         <Column 
-          dataField="track_number" 
-          caption="Process Id" 
-          width={320} 
+          dataField="patient_number" 
+          caption="PId" 
+          width={120}
         />
         <Column 
           dataField="patient" 
