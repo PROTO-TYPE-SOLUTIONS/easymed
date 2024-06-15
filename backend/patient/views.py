@@ -295,5 +295,5 @@ def download_prescription_pdf(request, prescription_id):
     return response
 
 class AttendanceProcessViewSet(viewsets.ModelViewSet):
-    queryset = AttendanceProcess.objects.all()
+    queryset = AttendanceProcess.objects.all().order_by('-id')
     serializer_class = AttendanceProcessSerializer

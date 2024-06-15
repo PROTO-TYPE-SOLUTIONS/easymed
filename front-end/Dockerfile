@@ -1,17 +1,28 @@
 FROM node:18-alpine
 
+# Set the working directory
 WORKDIR /app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-RUN npm cache add -g https://registry.npmjs.org
-
-COPY . .
-
+# Install dependencies
 RUN npm install
 
+# Copy the rest of the application code
+COPY . .
+
+# Build the Next.js application
 RUN npm run build
 
+# Optional: Debugging step to inspect the build directory
+RUN ls -la /app/.next
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Start the Next.js application
+CMD ["npm", "run", "start"]
+
+# Uncomment the below line if you are in development mode
+# CMD ["npm", "run", "dev"]
