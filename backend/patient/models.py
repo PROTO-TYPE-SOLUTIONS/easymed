@@ -276,7 +276,7 @@ class AttendanceProcess(models.Model):
 
             # Create a new invoice with a default amount of 0
             self.invoice = Invoice.objects.create(invoice_amount=0)
-            self.labTest = ProcessTestRequest.objects.create(reference=self.track_number)
+            self.process_test_req = ProcessTestRequest.objects.create(reference=self.track_number)
             self.triage = Triage.objects.create()
             self.prescription = Prescription.objects.create()
 

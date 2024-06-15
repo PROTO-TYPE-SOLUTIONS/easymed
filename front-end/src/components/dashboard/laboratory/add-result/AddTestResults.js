@@ -161,17 +161,15 @@ const AddTestResults = () => {
 
       labResultItems.forEach(async(panel)=> {
 
-          console.log("PPPPPPPPPPPPPPPPPPP", panel)
           const payload = {
             id:panel.id,
             result: panel.result
           }
-
           const response = await updateLabRequestPanels(payload, auth)
-          console.log("RESSSPPPOONNSSE", response)
-          
+                 
       })
       setLoading(false);
+      router.back() 
 
       }catch(error){
         console.log("ERR SAVING RESULTS")
