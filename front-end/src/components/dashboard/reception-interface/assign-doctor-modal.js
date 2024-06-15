@@ -2,19 +2,13 @@ import React, { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
-import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Formik, Form, ErrorMessage } from "formik";
 import { DialogTitle, Grid, Typography } from "@mui/material";
 import { toast } from "react-toastify";
-import { assignDoctor } from "@/redux/service/patients";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import SeachableSelect from "@/components/select/Searchable";
-import {
-  getAllAppointments,
-  getAllPatientAppointments,
-} from "@/redux/features/appointment";
-import FormikFieldDateTimePicker from "@/components/dateandtime/FormikFieldDateTimePicker";
 import { updateAttendanceProcesses } from "@/redux/service/patients";
 import { getAllProcesses } from "@/redux/features/patients";
 import { getItems } from "@/redux/features/inventory";
@@ -33,16 +27,6 @@ export default function AssignDoctorModal({
   const { item, } = useSelector(({ inventory }) => inventory);
 
   const authUser = useAuth();
-  console.log("SELECTED_ROW ", item);
-
-  const timezoneList = {
-    nairobi: "Africa/Nairobi" // +3:00
-  };
-  const timezone = timezoneList.nairobi;
-
-  const handleClickOpen = () => {
-    setAssignOpen(true);
-  };
 
   const handleClose = () => {
     setAssignOpen(false);
@@ -54,8 +38,6 @@ export default function AssignDoctorModal({
       dispatch(getItems())
     }
   }, [authUser]);
-
-  const status = ["pending", "confirmed", "cancelled"];
 
   const initialValues = {
     doctor: null,

@@ -68,7 +68,7 @@ export const API_URL = {
   APPROVE_QUALITATIVE_LAB_RESULTS: "/lab/approve-qualitative-results/",
   LAB_TEST_REQ_BY_PROCESS_ID: "lab/lab-test-request-by-process-id/",
   SAMPLES_BY_process_ID: "/lab/patient-samples-by-process-id/",
-  PANELS_BY_SAMPLE_ID: "/lab/lab-test-panels-by-sample-id/",
+  PANELS_BY_SAMPLE_ID: "/lab/labtestrequestpanels/sample/",
   PHLEBOTOMY_PATIENT_SAMPLES:"/lab/patient-samples/",
 
   /***************** INVENTORY APIS **********************/

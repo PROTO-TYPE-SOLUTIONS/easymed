@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { fetchLabTestPanelsByTestRequestId } from '@/redux/service/laboratory';
 
 const TestResultsPanels = ({test}) => {
   const auth = useAuth()
-  const dispatch = useDispatch()
   const [resultItems, setResultItems]=useState([])
-  const { labTestPanels, processAllTestRequest } = useSelector((store) => store.laboratory);
+  const { labTestPanels } = useSelector((store) => store.laboratory);
 
-  const getTestPanelsBySampleId = async (test, auth)=> {
+  const getTestPanelsByTestReq = async (test, auth)=> {
     try {
       const response = await fetchLabTestPanelsByTestRequestId(test, auth)
       setResultItems(response)
@@ -20,7 +19,7 @@ const TestResultsPanels = ({test}) => {
 
   useEffect(()=>{
     if(auth){
-      getTestPanelsBySampleId(test, auth)
+      getTestPanelsByTestReq(test, auth)
     }
   }, [test])
 

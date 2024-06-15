@@ -185,7 +185,7 @@ const AddTestResults = () => {
       </div>
       <div className='flex justify-end'>
         <LabItemModal open={open} setOpen={setOpen} selected={selectedOption}/>
-      </div>     
+      </div>
 
       <Formik
         initialValues={initialValues}
@@ -206,7 +206,7 @@ const AddTestResults = () => {
 
               setFieldValue('qualitative', selectedReq ? {value:selectedReq.category, label: selectedReq?.category} : null );
             }}
-            options={phlebotomySamples.filter((sample)=>sample.sample_collected === true && sample.has_results === false).map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample_code}` }))}
+            options={phlebotomySamples.filter((sample)=>sample.is_sample_collected === true).map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.patient_sample_code}` }))}
           />
           <ErrorMessage
             name="lab_test_request"

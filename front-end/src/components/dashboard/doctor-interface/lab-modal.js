@@ -66,7 +66,6 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   };
 
   const handleSendLabRequest = async (formValue, helpers) => {
-    console.log("FORM_DATA ", formValue);
     try {
       setLoading(true);
       await sendLabRequests(formValue, auth).then((res) => {

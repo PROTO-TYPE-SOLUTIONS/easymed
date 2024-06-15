@@ -3,10 +3,9 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling,
-  HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData } from "@/assets/dummy-data/laboratory";
-import { Grid,Chip } from "@mui/material";
+import { Grid } from "@mui/material";
 import { MdLocalPrintshop } from "react-icons/md";
 
 import { downloadPDF } from "@/redux/service/pdfs";
@@ -39,7 +38,7 @@ const getActions = () => {
   return actions;
 };
 
-const LabResultDataGrid = ({ labRequests }) => {
+const LabResultDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const auth = useAuth();
@@ -51,19 +50,12 @@ const LabResultDataGrid = ({ labRequests }) => {
 
   const { processes, patients } = useSelector((store)=> store.patient)
 
-  const labTestsSchedules = processes.filter((process)=> process.track==="lab")
+  const labTestsResultsSchedules = processes.filter((process)=> process.track==="lab")
 
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
     return patient ? `${patient.first_name} ${patient.second_name}` : ""
   }
-  
-  //   FILTER PATIENTS BASED ON SEARCH QUERY
-  const filteredData = labData.filter((patient) => {
-    return patient?.name
-      ?.toLocaleLowerCase()
-      .includes(searchQuery.toLowerCase());
-  });
 
   const handlePrint = async (data) => {
     const pdf_endpoint = data.category ?  "_labtestresult_pdf" : "_qualitative_labtestresult_pdf"
@@ -80,11 +72,7 @@ const LabResultDataGrid = ({ labRequests }) => {
   };
 
   const onMenuClick = async (menu, data) => {
-    if (menu.action === "dispense") {
-      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
-      setSelectedRowData(data);
-      setOpen(true);
-    }else if (menu.action === "print"){
+    if (menu.action === "print"){
       handlePrint(data);
     }else if (menu.action === "approve"){
       setSelectedData(data);
@@ -134,7 +122,7 @@ const LabResultDataGrid = ({ labRequests }) => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={labTestsSchedules}
+        dataSource={labTestsResultsSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -154,9 +142,9 @@ const LabResultDataGrid = ({ labRequests }) => {
           showNavigationButtons={showNavButtons}
         />
         <Column
-          dataField="track_number" 
-          caption="Process Id" 
-          width={320} 
+          dataField="patient_number" 
+          caption="PId" 
+          width={120} 
         />
         <Column
           dataField="patient" 

@@ -91,37 +91,6 @@ const PatientsDataGrid = () => {
     );
   };
 
-  const statusFunc = ({ data }) => {
-    if (data?.progress_status === "In Treatment") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          className="bg-primary text-white"
-          label={data.progress_status}
-        />
-      );
-    } else if (data?.progress_status === "Discharged") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          className="bg-success text-white"
-          label={data.progress_status}
-        />
-      );
-    } else if (data?.progress_status === "New Patient") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          className="bg-card text-white"
-          label={data.progress_status}
-        />
-      );
-    }
-  };
-
   const patientFullName = (rowData) => {
     return rowData.first_name + " " + rowData.second_name;
   }
@@ -184,7 +153,6 @@ const PatientsDataGrid = () => {
           dataField="age"
           caption="Age"
           width={80}
-          // calculateCellValue={(data) => calculateAge(data.date_of_birth)}
         />
         <Column dataField="gender" caption="Gender" width={100} />
         <Column dataField="insurance" caption="Insurance" width={100} />
