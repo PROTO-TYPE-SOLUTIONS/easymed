@@ -32,7 +32,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   const initialValues = {
     note: "",
-    process: selectedRowData?.labTest,
+    process: selectedRowData?.process_test_req,
     test_profile: null,
     requested_by: auth?.user_id,
   };

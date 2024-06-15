@@ -7,6 +7,7 @@ const TestPanelsItem = ({sample, collected}) => {
   const auth = useAuth()
   const dispatch = useDispatch()
   const [resultItems, setResultItems]=useState([])
+  const [status, setStatus]= useState(false)
   const { labTestPanels, processAllTestRequest } = useSelector((store) => store.laboratory);
 
   const getTestPanelsBySampleId = async (sample, auth)=> {
@@ -46,6 +47,7 @@ const TestPanelsItem = ({sample, collected}) => {
         id:sample
       }
       await updatePhlebotomySamples(payload, auth)
+      setStatus(true)
     }catch(error){
       console.log("ERR APPROVING COLLECTION OF SAMPLE", error)
     }
@@ -62,7 +64,7 @@ const TestPanelsItem = ({sample, collected}) => {
           </li>
           {panels}
       </ul>
-      { !collected && (<div className='w-full flex justify-end'>
+      { !collected && !status && (<div className='w-full flex justify-end'>
         <button onClick={approveCollection} className='bg-primary text-white p-2 rounded-lg'>collect</button>
       </div>)}
     </>

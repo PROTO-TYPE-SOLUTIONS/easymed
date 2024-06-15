@@ -143,7 +143,7 @@ class LabTestRequestPanel(models.Model):
         try:
             # Check if a matching PatientSample exists
             matching_sample = PatientSample.objects.get(
-                lab_test_request=self.lab_test_request,
+                process=self.lab_test_request.process, 
                 specimen=self.test_panel.specimen
             )
         except PatientSample.DoesNotExist:
