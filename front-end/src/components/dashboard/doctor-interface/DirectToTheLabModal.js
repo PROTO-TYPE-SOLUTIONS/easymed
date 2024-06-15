@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Checkbox, DialogTitle, Grid } from "@mui/material";
 import { toast } from "react-toastify";
-import { fetchLabTestPanelsByProfileId, sendLabRequestsPanels, updateLabRequest } from "@/redux/service/laboratory";
+import { fetchLabTestPanelsByProfileId, sendLabRequests, sendLabRequestsPanels, updateLabRequest } from "@/redux/service/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllPatients, getAllProcesses } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,10 +30,9 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
 
   const initialValues = {
     note: "",
-    sample_collected: null,
-    patient: selectedData?.id,
+    process: selectedData?.process_test_req,
     test_profile: null,
-    requested_by: auth?.user_id,
+    requested_by: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -64,7 +63,7 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
   const handleSendLabRequest = async (formValue, helpers) => {
     try {
       setLoading(true);
-      await updateLabRequest(selectedData.labTest, formValue, auth).then((res) => {
+      await sendLabRequests(formValue, auth).then((res) => {
         helpers.resetForm();
         updateAttendanceProcesses({track: "lab"}, selectedData.id)
         savePanels(res.id)

@@ -11,6 +11,7 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import EquipmentModal from "./equipment-modal";
 
 import RequestInfoModal from "./RequestInfoModal";
+import LabModal from "../doctor-interface/lab-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -20,6 +21,7 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
+    { action: "add", label: "Add Test", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "view", label: "Request Information", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "sample", label: "Confirm Sample Collection", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "equipment", label: "Send to equipment", icon: <AiOutlineDownload className="text-card text-xl" /> },
@@ -33,6 +35,7 @@ const LabRequestDataGrid = ( ) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const [open,setOpen] = useState(false);
+  const [labOpen, setLabOpen] = useState(false);
   const [requestInfoOpen,setRequestInfoOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -49,11 +52,12 @@ const LabRequestDataGrid = ( ) => {
   }
 
   const onMenuClick = async (menu, data) => {
-   if (menu.action === "sample") {
-    //   delete api call
+   if (menu.action === "add") {
+      setSelectedRowData(data)
+      setLabOpen(true)
     }else if(menu.action === 'equipment'){
-        setSelectedRowData(data)
-        setOpen(true)
+      setSelectedRowData(data)
+      setOpen(true)
     }else if(menu.action === 'view'){
       setSelectedRowData(data)
       setRequestInfoOpen(true)
@@ -156,6 +160,7 @@ const LabRequestDataGrid = ( ) => {
         />
       </DataGrid>
       {open && <EquipmentModal {...{open,setOpen,selectedRowData}} />}
+      {labOpen && (<LabModal {...{ labOpen, setLabOpen, selectedRowData }}/>)}
       {requestInfoOpen && (
         <RequestInfoModal {...{requestInfoOpen, setRequestInfoOpen, selectedRowData}}/>
       )}
