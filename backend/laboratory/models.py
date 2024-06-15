@@ -6,6 +6,7 @@ from customuser.models import CustomUser
 from inventory.models import Item
 from datetime import datetime
 from django.core.validators import FileExtensionValidator
+import logging
 
 
 class LabEquipment(models.Model):
@@ -66,6 +67,7 @@ class LabTestPanel(models.Model):
 
 class ProcessTestRequest(models.Model):
     reference = models.CharField(max_length=40) # track_number of AttendanceProcess is stored here
+    #attendance_process = models.ForeignKey(AttendanceProcess, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.reference
@@ -89,7 +91,6 @@ class PatientSample(models.Model):
     process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True) # from patient app
     is_sample_collected = models.BooleanField(default=False)
 
-    
     def generate_sample_code(self):
         while True:
             random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
@@ -110,7 +111,7 @@ class PatientSample(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.id)
+        return str(f"{self.patient_sample_code} - {self.specimen.name} - {self.process}")
 
 class LabTestRequestPanel(models.Model):
     patient_sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)

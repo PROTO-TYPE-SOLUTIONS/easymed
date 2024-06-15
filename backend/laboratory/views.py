@@ -106,7 +106,7 @@ class LabTestPanelViewSet(viewsets.ModelViewSet):
 
 '''Lab Test Request and lab Test Request Panel'''
 class LabTestRequestViewSet(viewsets.ModelViewSet):
-    queryset = LabTestRequest.objects.all()
+    queryset = LabTestRequest.objects.all().order_by('-id')
     serializer_class = LabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
     filter_backends = (DjangoFilterBackend,)
@@ -224,11 +224,11 @@ class ResultsVerificationViewSet(viewsets.ModelViewSet):
 
 
 class ProcessTestRequestViewSet(viewsets.ModelViewSet):
-    queryset = ProcessTestRequest.objects.all()
+    queryset = ProcessTestRequest.objects.all().order_by('-id')
     serializer_class = ProcessTestRequestSerializer
 
 class PatientSampleViewSet(viewsets.ModelViewSet):
-    queryset = PatientSample.objects.all()
+    queryset = PatientSample.objects.all().order_by('-id')
     serializer_class = PatientSampleSerializer
 
 
