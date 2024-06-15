@@ -267,3 +267,16 @@ def download_labtestresult_pdf(request, labtestrequest_id):
     
     return response
 
+class LabTestRequestPanelBySampleView(generics.ListAPIView):
+    serializer_class = LabTestRequestPanelSerializer
+
+    def get(self, request, *args, **kwargs):
+        patient_sample_id = self.kwargs.get('patient_sample_id')
+        try:
+            patient_sample = PatientSample.objects.get(id=patient_sample_id)
+        except PatientSample.DoesNotExist:
+            return Response({"error": "PatientSample not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        lab_test_request_panels = LabTestRequestPanel.objects.filter(patient_sample=patient_sample)
+        serializer = LabTestRequestPanelSerializer(lab_test_request_panels, many=True)
+        return Response(serializer.data)
