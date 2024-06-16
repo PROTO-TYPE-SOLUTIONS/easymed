@@ -69,7 +69,7 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
   };
 
   useEffect(() => {
-    dispatch(getPatientTriage(selectedRowData?.id));
+    dispatch(getPatientTriage(selectedRowData?.triage));
   }, [selectedRowData]);
 
   return (

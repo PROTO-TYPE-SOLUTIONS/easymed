@@ -78,26 +78,8 @@ const NursePatientDataGrid = () => {
     );
   };
 
-  const statusFunc = ({ data }) => {
-    if (data?.progress_status === "In Treatment") {
-      return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-primary text-white" />
-      );
-    } else if (data?.progress_status === "Discharged") {
-      return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-success text-white" />
-      );
-    } else if (data?.progress_status === "New Patient") {
-      return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-card text-white" />
-      );
-    }
-  };
-
   // filter users based on search query
   const filteredProcesses = processes.filter((process) => process.track === "triage");
-
-  console.log("FILTERED PROCESSES TRIAGE", filteredProcesses)
 
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
@@ -135,9 +117,9 @@ const NursePatientDataGrid = () => {
         />
         <HeaderFilter visible={true} />
         <Column
-          dataField="track_number"
-          caption="Process Id"
-          width={320}
+          dataField="patient_number"
+          caption="PId"
+          width={120}
         />
         <Column
           dataField="patient"

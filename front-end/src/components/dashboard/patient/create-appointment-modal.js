@@ -1,87 +1,29 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { DialogTitle, Grid } from "@mui/material";
-import { createPatient, initiateNewAttendanceProcesses } from "@/redux/service/patients";
+import { initiateNewAttendanceProcesses } from "@/redux/service/patients";
 import { toast } from "react-toastify";
-import { useSelector, useDispatch } from "react-redux";
-import { getAllOrderBills, getItems } from "@/redux/features/inventory";
-import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { createAppointment } from "@/redux/service/appointment";
-import SeachableSelect from "@/components/select/Searchable";
 
 const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
   const [loading, setLoading] = React.useState(false);
-  const dispatch = useDispatch();
-  const { orderBills,item } = useSelector((store) => store.inventory);
-  const { doctors } = useSelector((store) => store.doctor);
   const auth = useAuth();
-
-  const handleChange = (selectedOption) => {
-    setValue(selectedOption);
-  };
-
-  console.log("ROW_DATA ",selectedRowData)
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
 
   const handleClose = () => {
     setOpen(false);
   };
-
-  useEffect(() => {
-    dispatch(getAllOrderBills());
-    dispatch(getItems());
-    if (auth) {
-      dispatch(getAllDoctors(auth));
-    }
-  }, []);
 
   const initialValues = {
     patient: null,
     reason: "",
   };
 
-
-  const parseNumber = (value) => {
-    // Parse the value as a number or return null if not a valid number
-    const parsedValue = parseFloat(value);
-    return isNaN(parsedValue) ? null : parsedValue;
-  };
-
-
   const validationSchema = Yup.object().shape({
     reason: Yup.string().required("Reason for visit required!"),
   });
-
-  const handleCreateAppointment = async (formValue, helpers) => {
-    console.log("APPOINTMENT_DATA ", formValue);
-    const formData = {
-      ...formValue,
-      patient: selectedRowData?.id,
-      item: parseInt(formValue.item_id.value),
-      assigned_doctor: parseInt(formValue.assigned_doctor.value)
-    };
-    console.log("FORM_DATA ", formData);
-    try {
-      setLoading(true);
-      await createAppointment(formData).then(() => {
-        helpers.resetForm();
-        toast.success("Appointment Created Successfully!");
-        setLoading(false);
-        // dispatch(getAllPatients());
-        handleClose();
-      });
-    } catch (err) {
-      toast.error(err);
-      setLoading(false);
-    }
-  };
 
   const initiateVisit = async (formValue, helpers) => {
     console.log("CALLED WITH", formValue)
@@ -173,7 +115,7 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                           ></path>
                         </svg>
                       )}
-                      Create Appointment
+                      New Visit
                     </button>
                     <button
                       onClick={handleClose}

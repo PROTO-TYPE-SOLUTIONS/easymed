@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch  } from 'react-redux';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { Form, Formik } from 'formik';
-import * as Yup from "yup"
 
-import { getAllLabTestByProcessId, getAllLabTestPanels, getAllQualitativeResultPanelsByResult, getAllResultPanelsByResult } from '@/redux/features/laboratory';
+import { getAllLabTestByProcessId, getAllLabTestPanels } from '@/redux/features/laboratory';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { approveLabResult, approveQualitativeLabResult } from '@/redux/service/laboratory';
-import TestsAccordion from '../TestsAccordion';
-import SampleTestAccordion from '../SampleTestAccordion';
+import TestResultsAccordion from '../TestResultsAccordion';
 import { fetchPatientById } from '@/redux/service/patients';
 
 const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
@@ -16,16 +13,7 @@ const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
     const [testPatient, setTestPatient]=useState({})
     const dispatch = useDispatch()
     const auth = useAuth()
-    const { labRequestsByProcess, labTestPanels, resultPanels } = useSelector((store)=> store.laboratory)
-
-    console.log("THE SELECTED RESULT DATA", selectedData)
-    console.log("THE SELECTED RESULT DATA PANELS", resultPanels)
-
-    const initialValues = {
-        lab_results:selectedData.id,
-        lab_test_request: selectedData.lab_test_request,
-        approved_by: auth.user_id
-    }
+    const { labRequestsByProcess } = useSelector((store)=> store.laboratory)
 
     const handleClose = () => {
         setApproveOpen(false);
@@ -43,14 +31,14 @@ const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
     useEffect(()=> {
         if(auth){
             dispatch(getAllLabTestPanels(auth))
-            dispatch(getAllLabTestByProcessId(selectedData?.labTest, auth)) 
+            dispatch(getAllLabTestByProcessId(selectedData?.process_test_req, auth)) 
             getPatientDetailsForThisTestRequest()
         }
     }, [selectedData])
 
     const processTestRequests = labRequestsByProcess.map((testReq)=>{
         return(
-            <SampleTestAccordion key={`testReq-${testReq.id}`} testReq={testReq}/>
+            <TestResultsAccordion key={`testReq-${testReq.id}`} testReq={testReq}/>
         )
     })
 

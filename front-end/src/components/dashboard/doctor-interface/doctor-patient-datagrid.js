@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager, Selection,
+import { Column, Paging, Pager,
   HeaderFilter, Scrolling,
  } from "devextreme-react/data-grid";
-import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
 import { Chip } from "@mui/material";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
@@ -14,7 +13,6 @@ import { BiTransferAlt } from "react-icons/bi";
 import { MdOutlineContactSupport } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllPatients, getAllProcesses } from "@/redux/features/patients";
-import { getAllDoctorAppointments } from "@/redux/features/appointment";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { BiSupport } from 'react-icons/bi'
 import { GiMedicinePills } from 'react-icons/gi'
@@ -72,7 +70,6 @@ const DoctorPatientDataGrid = () => {
   const userActions = getActions();
   const dispatch = useDispatch();
   const auth = useAuth();
-  const { doctorAppointments } = useSelector((store) => store.appointment);
   const router = useRouter();
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
@@ -91,7 +88,6 @@ const DoctorPatientDataGrid = () => {
 
   useEffect(() => {
     if (auth) {
-      dispatch(getAllDoctorAppointments(auth.user_id));
       dispatch(getAllPatients());
       dispatch(getAllProcesses())
     }
@@ -131,46 +127,9 @@ const DoctorPatientDataGrid = () => {
   };
 
   const onSelectionChanged = (props) => {
-    const { selectedRowKeys, selectedRowsData } = props;
+    const { selectedRowKeys } = props;
     setSelectedRecords(selectedRowKeys);
   };
-
-  const statusFunc = ({ data }) => {
-    if (data?.status === "pending") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          label={data.status}
-          color="primary"
-          className="bg-primary text-white"
-        />
-      );
-    } else if (data?.status === "confirmed") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          label={data.status}
-          className="bg-success text-white"
-        />
-      );
-    } else if (data?.status === "New Patient") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          label={data.status}
-          className="bg-card text-white"
-        />
-      );
-    }
-  };
-
-  const dateCreated = ({ data }) => {
-    const formattedDate = new Date(data.date_created).toLocaleDateString();
-    return <div>{formattedDate}</div>
-  }
 
   return (
     <section>
@@ -193,11 +152,6 @@ const DoctorPatientDataGrid = () => {
         className="shadow-xl w-full"
         // height={"70vh"}
       >
-        {/* <Selection
-          mode="multiple"
-          selectAllMode={"allMode"}
-          showCheckBoxesMode={checkBoxesMode}
-        /> */}
         <HeaderFilter visible={true} />
         <Scrolling rowRenderingMode='virtual'></Scrolling>
         <Paging defaultPageSize={10} />
@@ -209,9 +163,9 @@ const DoctorPatientDataGrid = () => {
           showNavigationButtons={showNavButtons}
         />
         <Column
-          dataField="track_number"
-          caption="Process Id"
-          width={320}
+          dataField="patient_number"
+          caption="PId"
+          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
@@ -231,16 +185,16 @@ const DoctorPatientDataGrid = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <ReferPatientModal {...{ open, setOpen, selectedRowData }} />
-      <ConsultPatientModal
+      {open && (<ReferPatientModal {...{ open, setOpen, selectedRowData }} />)}
+      {consultOpen && (<ConsultPatientModal
         {...{ consultOpen, setConsultOpen, selectedRowData }}
-      />
-      <PrescribePatientModal
+      />)}
+      {prescribeOpen && (<PrescribePatientModal
         {...{ prescribeOpen, setPrescribeOpen, selectedRowData }}
-      />
-      <LabModal
+      />)}
+      {labOpen && (<LabModal
         {...{ labOpen, setLabOpen, selectedRowData }}
-      />
+      />)}
       {resultOpen && (<ViewAddedResults resultOpen={resultOpen} setResultOpen={setResultOpen} selectedData={selectedRowData}
       />)}
     </section>

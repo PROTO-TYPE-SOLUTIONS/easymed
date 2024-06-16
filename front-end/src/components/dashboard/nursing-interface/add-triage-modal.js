@@ -7,7 +7,6 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { toast } from "react-toastify";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { createTriage } from "@/redux/service/nursing";
 import { getAllProcesses, getPatientTriage } from "@/redux/features/patients";
 import { updateAttendanceProcesses, updatePatientTriage } from "@/redux/service/patients";
 
@@ -52,8 +51,6 @@ export default function AddTriageModal({
     bmi:patientTriage?.bmi ? patientTriage?.bmi : "",
     notes: patientTriage?.notes ? patientTriage?.notes : "",
   };
-
-  console.log("SELECTED ROW INITIAL VALS", initialValues)
 
   const validationSchema = Yup.object().shape({
     temperature: Yup.number().required("Temperature is required!"),
