@@ -244,28 +244,27 @@ import os
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.template.loader import get_template
-
-
 from .models import LabTestResult
 from company.models import Company
 
-def download_labtestresult_pdf(request, labtestrequest_id):
-    labtestrequest = get_object_or_404(LabTestRequest, pk=labtestrequest_id)
-    panels = LabTestRequestPanel.objects.filter(lab_test_request=labtestrequest)
+def download_labtestresult_pdf(request, processtestrequest_id):
+    processtestrequest = get_object_or_404(ProcessTestRequest, pk=processtestrequest_id)
+    labtestrequests = LabTestRequest.objects.filter(process=processtestrequest)
+    panels = LabTestRequestPanel.objects.filter(lab_test_request__in=labtestrequests)
     company = Company.objects.first()
-    
     html_template = get_template('labtestresult.html').render({
-        'labtestrequest': labtestrequest,
+        'processtestrequest': processtestrequest,
+        'labtestrequests': labtestrequests,
         'panels': panels,
         'company': company
     })
-    
     pdf_file = HTML(string=html_template).write_pdf()
-    
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="labtest_report_{labtestrequest_id}.pdf"'
-    
+    response['Content-Disposition'] = f'attachment; filename="labtest_report_{processtestrequest_id}.pdf"'
+
     return response
+
+
 
 class LabTestRequestPanelBySampleView(generics.ListAPIView):
     serializer_class = LabTestRequestPanelSerializer
