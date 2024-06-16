@@ -62,6 +62,13 @@ export default function AddTriageModal({
     notes: Yup.string().required("Notes is required!"),
   });
 
+  const calculateBMI = (height, weight) => {
+    if (height && weight) {
+      return (weight / (height / 100) ** 2).toFixed(2);
+    }
+    return "";
+  };
+
   const sendToDoc = async (payload, process_id)=> {
     try{
       const response = await updateAttendanceProcesses(payload, process_id)
@@ -80,6 +87,7 @@ export default function AddTriageModal({
       const formData = {
         ...formValue,
         created_by: auth?.user_id,
+        bmi: parseFloat(formValue.bmi).toFixed(1),
       };
       setLoading(true);
       await updatePatientTriage(selectedRowData?.triage, formData, auth).then(() => {
@@ -121,6 +129,8 @@ export default function AddTriageModal({
             validationSchema={validationSchema}
             onSubmit={handleUpdateTriage}
           >
+          {({ values, setFieldValue }) => {
+            return (
             <Form className="w-full">
               <section className="">
                 <section className="flex items-center justify-between gap-2 py-2 w-full">
@@ -141,8 +151,12 @@ export default function AddTriageModal({
                     <Field
                       className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                       type="text"
-                      placeholder="Height"
+                      placeholder="Height(cm)"
                       name="height"
+                      onChange={(e) => {
+                        setFieldValue("height", e.target.value);
+                        setFieldValue("bmi", calculateBMI(e.target.value, values.weight));
+                      }}
                     />
                     <ErrorMessage
                       name="height"
@@ -154,8 +168,12 @@ export default function AddTriageModal({
                     <Field
                       className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
                       type="text"
-                      placeholder="Weight"
+                      placeholder="Weight(kg)"
                       name="weight"
+                      onChange={(e) => {
+                        setFieldValue("weight", e.target.value);
+                        setFieldValue("bmi", calculateBMI(values.height, e.target.value));
+                      }}
                     />
                     <ErrorMessage
                       name="weight"
@@ -220,6 +238,15 @@ export default function AddTriageModal({
                   className="text-warning text-xs"
                 />
               </div>
+              <div className="w-full my-2">
+                <Field
+                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                  type="text"
+                  placeholder="BMI"
+                  name="bmi"
+                  disabled
+                />
+              </div>
               <button
                 type="submit"
                 className="bg-primary text-sm rounded-xl w-full px-8 py-2 mt-3 text-white"
@@ -246,6 +273,8 @@ export default function AddTriageModal({
                 Create Triage
               </button>
             </Form>
+              );
+            }}
           </Formik>
         </DialogContent>
       </Dialog>

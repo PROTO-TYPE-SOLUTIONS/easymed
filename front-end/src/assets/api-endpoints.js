@@ -119,6 +119,7 @@ export const API_URL = {
 
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/download",
+  DOWNLOAD_RESULT_PDF: "/lab/download",
   SALE_BY_DATE_RANGE_PDF: "/sale_by_date/pdf/",
   SALE_BY_DATE_RANGE_AND_ITEM_PDF: "/serve_sales_by_item_id_pdf/",
 
@@ -257,6 +258,7 @@ export const APP_API_URL = {
 
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/api/pdf/download_pdf",
+  DOWNLOAD_RESULT_PDF: "/api/pdf/result_pdf",
   SALE_BY_DATE_RANGE_PDF: "/api/pdf/sale-by-date-range-report-pdf",
   SALE_BY_DATE_RANGE_AND_ITEM_PDF: "/api/pdf/sale-by-date-range-and-item-report-pdf",
 
