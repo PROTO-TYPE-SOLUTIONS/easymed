@@ -1,8 +1,0 @@
-*/__pycache__/
-db.sqlite3
-env/
-
-
-*/migrations/
-
-easymed/staticfiles/
