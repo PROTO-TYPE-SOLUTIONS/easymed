@@ -56,7 +56,13 @@ static/
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
 # in your Git repository. Update and uncomment the following line accordingly.
-staticfiles/
+/backend/easymed/staticfiles/invoices
+/backend/easymed/staticfiles/labtestresult
+/backend/easymed/staticfiles/prescription
+/backend/easymed/staticfiles/purchaseorder
+/backend/easymed/staticfiles/reports
+/backend/easymed/staticfiles/requisitions
+
 
 ### Django.Python Stack ###
 # Byte-compiled / optimized / DLL files
