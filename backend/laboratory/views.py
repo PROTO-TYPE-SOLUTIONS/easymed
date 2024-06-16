@@ -246,23 +246,36 @@ from weasyprint import HTML
 from django.template.loader import get_template
 from .models import LabTestResult
 from company.models import Company
+# from patients.models import Patient
+# from laboratory.models import LabTestRequest, LabTestRequestPanel
+from patient.models import AttendanceProcess
 
 def download_labtestresult_pdf(request, processtestrequest_id):
     processtestrequest = get_object_or_404(ProcessTestRequest, pk=processtestrequest_id)
     labtestrequests = LabTestRequest.objects.filter(process=processtestrequest)
     panels = LabTestRequestPanel.objects.filter(lab_test_request__in=labtestrequests)
     company = Company.objects.first()
+
+    # Retrieve the patient from the AttendanceProcess linked via ProcessTestRequest
+    attendance_process = get_object_or_404(AttendanceProcess, process_test_req=processtestrequest)
+    patient = attendance_process.patient
+
     html_template = get_template('labtestresult.html').render({
         'processtestrequest': processtestrequest,
         'labtestrequests': labtestrequests,
         'panels': panels,
-        'company': company
+        'patient': patient,
+        'company': company,
+        'attendance_process': attendance_process
     })
+
     pdf_file = HTML(string=html_template).write_pdf()
+
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="labtest_report_{processtestrequest_id}.pdf"'
 
     return response
+
 
 
 
