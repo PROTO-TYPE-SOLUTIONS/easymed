@@ -14,7 +14,7 @@ services:
         restart: unless-stopped
 
     backend:
-        build: 
+        build:
             context: ./backend
             dockerfile: ./Dockerfile.local
         container_name: easymed-backend
