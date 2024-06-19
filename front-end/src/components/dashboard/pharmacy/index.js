@@ -169,7 +169,7 @@ const PharmacyDataGrid = () => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column width={320} dataField="track_number" caption="Process ID" />
+        <Column width={120} dataField="patient_number" caption="PID" />
         <Column 
           dataField="patient" 
           caption="Patient Name"

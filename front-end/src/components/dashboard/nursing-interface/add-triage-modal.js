@@ -64,7 +64,16 @@ export default function AddTriageModal({
 
   const calculateBMI = (height, weight) => {
     if (height && weight) {
-      return (weight / (height / 100) ** 2).toFixed(2);
+      const bmi = (weight / (height / 100) ** 2).toFixed(2);
+      if(bmi < 18.5){
+        return bmi + " " + "(Underweight)"
+      }else if(bmi >= 18.5 && bmi <= 24.9){
+        return bmi + " " + "(Ok)"
+      }else if(bmi >= 25 && bmi <= 24.9){
+        return bmi + " " + "(Overweight)"
+      }else{
+        return bmi + " " + "(Obes)"
+      }
     }
     return "";
   };
@@ -181,6 +190,15 @@ export default function AddTriageModal({
                       className="text-warning text-xs"
                     />
                   </div>
+                  <div className="w-full my-2">
+                    <Field
+                      className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="BMI"
+                      name="bmi"
+                      disabled
+                    />
+                  </div>
                 </section>
                 <section className="flex items-center justify-between gap-2 py-2 w-full">
                   <div className="w-full">
@@ -236,15 +254,6 @@ export default function AddTriageModal({
                   name="notes"
                   component="div"
                   className="text-warning text-xs"
-                />
-              </div>
-              <div className="w-full my-2">
-                <Field
-                  className="block border text-sm border-gray rounded-xl py-2 px-4 focus:outline-none w-full"
-                  type="text"
-                  placeholder="BMI"
-                  name="bmi"
-                  disabled
                 />
               </div>
               <button
