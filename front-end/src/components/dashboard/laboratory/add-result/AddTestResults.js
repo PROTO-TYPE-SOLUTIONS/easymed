@@ -100,55 +100,6 @@ const AddTestResults = () => {
     );
   };
 
-  const saveLabResultsItem = async (item, payload) => {
-
-    const payloadData = {
-      ...item,
-      lab_test_result: payload.id
-    }
-
-    console.log("PAYLOAD LAB RESULTS" , payloadData)
-
-    try {
-      await addTestResultPanel(payloadData, auth).then(()=>{
-        toast.success("Test REsult Item Added Successfully!");
-      })
-
-    } catch(err) {
-      toast.error(err);
-      setLoading(false);
-    } 
-  }
-
-  const saveQualitativeLabResultsItem = async (item, payload) => {
-    const payloadData = {
-      ...item,
-      lab_test_result: payload.id
-    }
-
-    console.log("QUALITATIVE PAYLOAD LAB RESULTS" , payloadData)
-
-    try {
-      await addQualitativeTestResultPanel(payloadData, auth).then(()=>{
-        toast.success("Qualitative Test REsult Item Added Successfully!");
-      })
-
-    } catch(err) {
-      toast.error(err);
-      setLoading(false);
-    } 
-  }
-
-  const sendEachItemToDb = (payload, formValue) => {
-    if(formValue.qualitative.value === "qualitative"){
-
-      labResultItems.forEach(item => saveQualitativeLabResultsItem(item, payload));
-
-    }else{
-      labResultItems.forEach(item => saveLabResultsItem(item, payload));
-    }
-  }
-
   const saveLabResults = async (formValue, helpers) => {
     console.log(formValue)
 
@@ -184,7 +135,7 @@ const AddTestResults = () => {
           <h3 className="text-xl"> Lab Result entry </h3>
       </div>
       <div className='flex justify-end'>
-        <LabItemModal open={open} setOpen={setOpen} selected={selectedOption}/>
+      {selected && (<LabItemModal open={open} setOpen={setOpen} sample_label={selected.label} selected={selectedOption}/>)}
       </div>
 
       <Formik
@@ -195,16 +146,12 @@ const AddTestResults = () => {
         {({ values, setFieldValue }) => (
       <Form className="">
       <Grid container spacing={2} className='my-2 flex items-center'>
-        <Grid item md={4} xs={4}>
+        <Grid item md={12} xs={12}>
           <SeachableSelect
-            label="test request ( sample id )"
+            label="Sample"
             name="lab_test_request"
-            // setSelectedItem={setSelectedItem}
             setSelectedItem={(selectedOption) => {
               setSelectedItem(selectedOption);
-              const selectedReq = labRequests.find((req)=> req.id === selectedOption?.value)
-
-              setFieldValue('qualitative', selectedReq ? {value:selectedReq.category, label: selectedReq?.category} : null );
             }}
             options={phlebotomySamples.filter((sample)=>sample.is_sample_collected === true).map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.patient_sample_code}` }))}
           />
@@ -213,20 +160,6 @@ const AddTestResults = () => {
             component="div"
             className="text-warning text-xs"
           />  
-        </Grid>
-        <Grid item md={4} xs={4}>
-          <label>result title</label>
-          <Field
-            className="block border rounded-lg text-sm border-gray py-2 px-4 focus:outline-card w-full"
-            maxWidth="sm"
-            placeholder="Test Result Title"
-            name="title"
-          />
-          <ErrorMessage
-            name="title"
-            component="div"
-            className="text-warning text-xs"
-          />
         </Grid>
       </Grid>
       <DataGrid
@@ -264,8 +197,23 @@ const AddTestResults = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <Grid className="mt-8" item md={12} xs={12}>
-        <div className="flex items-center justify-start">
+      <Grid className='py-2' item md={4} xs={12}>
+          <Field
+            as='textarea'
+            rows={4}
+            className="block border rounded-lg text-sm border-gray py-2 px-4 focus:outline-card w-full"
+            maxWidth="sm"
+            placeholder="Comments"
+            name="title"
+          />
+          <ErrorMessage
+            name="title"
+            component="div"
+            className="text-warning text-xs"
+          />
+        </Grid>
+      <Grid item md={12} xs={12}>
+        <div className="flex py-2 items-center justify-end">
           <button
             type="submit"
             className="bg-primary rounded-xl text-sm px-8 py-4 text-white"

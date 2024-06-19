@@ -122,12 +122,12 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
           caption="Dosage" 
         />
         <Column 
-          dataField="duration" 
-          caption="Duration"     
-        />
-        <Column 
           dataField="frequency" 
           caption="Frequency"
+        />
+        <Column 
+          dataField="duration" 
+          caption="Duration"     
         />
         <Column 
           dataField="note"

@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from "next/dynamic";
 import { Column, Pager } from "devextreme-react/data-grid";
 import { Grid, Container } from "@mui/material";
-import { createPrescription, updateAttendanceProcesses, updatePrescription } from "@/redux/service/patients";
+import { createPrescription, fetchPatientById, updateAttendanceProcesses, updatePrescription } from "@/redux/service/patients";
 import { prescribeDrug } from "@/redux/service/patients";
 import { clearAllPrescriptionItems, getAllProcesses } from "@/redux/features/patients";
 import { removeAPrescriptionItem } from "@/redux/features/patients";
@@ -55,6 +55,16 @@ const PrescribePatient = () => {
   let year = currentDate.getFullYear();
   let month = String(currentDate.getMonth() + 1).padStart(2, '0');
   let day = String(currentDate.getDate()).padStart(2, '0');
+  const [patient, setPatient]=useState({})
+
+  const getPatientDetailsForThisTestRequest = async () => {
+      try{
+          const response = await fetchPatientById(thisProcess?.patient)
+          setPatient(response);
+      }catch(error){
+          console.log("ERROR GETTING PATIENT")
+      }
+  }
 
   const initialValues = {
     status: "pending",
@@ -71,8 +81,9 @@ const PrescribePatient = () => {
   useEffect(()=> {
     if(auth){
       getAllProcesses()
+      getPatientDetailsForThisTestRequest()
     }
-  }, [])
+  }, [thisProcess])
 
   console.log("THE PATH HERE IS", pathname)
 
@@ -153,14 +164,22 @@ const PrescribePatient = () => {
     }
   };
   return (
-    <Container className="mt-20">
+    <Container className="mt-10">
     <section>
-    <div className="flex gap-4 mb-8 items-center">
+    {patient && (
+      <div className="grid grid-cols-2 gap-4 mb-8 bg-[#F5F5F5] p-2">
+        <p className="text-xs font-semibold">{`Name: ${patient?.first_name} ${patient?.second_name}`}</p>
+        <p className="text-xs font-semibold">{`UID: ${patient?.unique_id}`}</p>
+        <p className="text-xs font-semibold">{`Gender: ${patient?.gender}`}</p>
+        <p className="text-xs font-semibold">{`Age: ${patient?.age}`}</p>
+      </div>
+    )}
+    <div className="flex gap-4 mb-4 items-center">
         <img onClick={() => router.back()} className="h-3 w-3 cursor-pointer" src="/images/svgs/back_arrow.svg" alt="go back"/>
         <h3 className="text-xl"> patient prescription </h3>
     </div>
     <div className="flex items-center justify-end">
-        <PrescriptionItemDialog patient_id={params?.patient_id}/>
+        <PrescriptionItemDialog patient={patient} patient_id={params?.patient_id}/>
     </div>
 
     <Formik

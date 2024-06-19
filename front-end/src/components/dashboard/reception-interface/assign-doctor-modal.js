@@ -105,7 +105,7 @@ export default function AssignDoctorModal({
               <Grid container spacing={2}>
               <Grid item md={12} xs={12}>
                 <SeachableSelect
-                  label="Select Appointment Item"
+                  label="Select Appointment"
                   name="item"
                   options={item.filter((drug)=> (drug.category === "Specialized item") || (drug.category === "General Appointment") || (drug.category === "General")).map((item) => ({ value: item.id, label: `${item?.name}` }))}
                 />

@@ -23,8 +23,6 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   const patient = patients.find((patient)=> patient.id === selectedRowData.patient)
 
-  console.log("ROW DATA IS ",selectedRowData)
-
   const handleClose = () => {
     setLabOpen(false);
     setTestProfile(null)
@@ -61,7 +59,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
         lab_test_request: reqId
       };
       await saveAllPanels(testReqPanelPayload);
-      await delay(500); // Adjust the delay as needed (1000ms = 1s)
+      await delay(100); // Adjust the delay as needed (1000ms = 1s)
     }
   };
 
@@ -131,9 +129,9 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
       >
         <DialogTitle>
           <div className="flex justify-between">
-            <p>{`${patient?.first_name} ${patient?.second_name}`}</p>
-            <p>{`${patient?.gender}`}</p>
-            <p>{`${patient?.age}`}</p>            
+            <p>{`Name: ${patient?.first_name} ${patient?.second_name}`}</p>
+            <p>{`Gender: ${patient?.gender}`}</p>
+            <p>{`Age: ${patient?.age}`}</p>            
           </div>
         </DialogTitle>
         <DialogContent>
@@ -158,12 +156,30 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
                     <span>{patientTriage?.height}</span>
                   </div>
                   <div className="flex items-center gap-2">
+                    <span>Weight :</span>
+                    <span>{patientTriage?.weight}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Bmi :</span>
+                    <span>{patientTriage?.bmi}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <span>Pulse :</span>
                     <span>{patientTriage?.pulse}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>Weight :</span>
-                    <span>{patientTriage?.weight}</span>
+                    <span>Systolic :</span>
+                    <span>{patientTriage?.systolic}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Diastolic :</span>
+                    <span>{patientTriage?.diastolic}</span>
+                  </div>
+                </section>
+                <section className="flex items-center justify-between text-sm border-b bg-background p-1 rounded border-gray">
+                  <div className="flex items-center gap-2">
+                    <span>Nurses Note :</span>
+                    <span>{patientTriage?.notes}</span>
                   </div>
                 </section>
                 <Grid container spacing={2}>
@@ -204,7 +220,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
                           </div>
                           <Grid container spacing={4}>
                             {labTestPanelsById.map((panel) => (
-                              <Grid className="flex items-center" key={panel.id} item xs={4}>
+                              <Grid className="flex items-center" key={panel.id} item xs={3}>
                                 <Checkbox
                                   checked={selectedPanels.some((panelItem) => panelItem.id === panel.id)}
                                   onChange={() => handleCheckboxChange(panel)}
