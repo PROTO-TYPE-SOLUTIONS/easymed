@@ -192,13 +192,14 @@ class Prescription(models.Model):
 class PrescribedDrug(models.Model):
     class Meta:
         unique_together = ("prescription_id", "item")
-    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     note = models.TextField(null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE,)
+    is_dispensed = models.BooleanField(default=False)
+    quantity = models.PositiveIntegerField(default=1)
 
 
     def __str__(self):

@@ -120,6 +120,7 @@ class LabTestRequestPanel(models.Model):
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     test_code = models.CharField(max_length=100, null=True)
     category = models.CharField(max_length=30, default="none")
+    result_approved=models.BooleanField(default=False)
 
     def generate_test_code(self):
         while True:

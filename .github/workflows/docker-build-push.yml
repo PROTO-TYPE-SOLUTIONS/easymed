@@ -2,7 +2,7 @@ name: Build and Push to Registry
 
 on:
   push:
-    branches: [ dev-moses ]
+    branches: [ prod ]
 
 jobs:
   build-and-push:
