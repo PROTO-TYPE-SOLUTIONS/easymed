@@ -175,16 +175,10 @@ class Consultation(models.Model):
 
 
 class Prescription(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('dispensed', 'Dispensed'),
-    )
     date_created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField(null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
-    status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default='pending')
-
+    
     def __str__(self):
         return f"Prescription #{self.id}"
 
