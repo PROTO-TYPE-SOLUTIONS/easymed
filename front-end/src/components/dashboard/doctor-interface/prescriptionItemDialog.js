@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
+import { DialogTitle, Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
 import {  getItems, } from "@/redux/features/inventory";
@@ -10,13 +10,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 
-const PrescriptionItemDialog = ({patient_id}) => {
+const PrescriptionItemDialog = ({patient, patient_id}) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const { item, } = useSelector(({ inventory }) => inventory);
+    const { patients } = useSelector((store)=> store.patient);
     const { prescriptionItems } = useSelector(({ patient }) => patient);
-    console.log(item)
   
     const handleClickOpen = () => {
       setOpen(true);
@@ -80,6 +80,13 @@ const PrescriptionItemDialog = ({patient_id}) => {
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
+      <DialogTitle>
+        <div className="flex justify-between">
+          <p className="text-xs font-semibold">{`Name: ${patient.first_name} ${patient.second_name}`}</p>
+          <p className="text-xs font-semibold">{`Gender: ${patient.gender}`}</p>
+          <p className="text-xs font-semibold">{`Name: ${patient.age}`}</p>
+        </div>
+      </DialogTitle>
       <DialogContent>
         <h3 className="text-xl my-4"> Add Prescribe Drug </h3>
       <Formik

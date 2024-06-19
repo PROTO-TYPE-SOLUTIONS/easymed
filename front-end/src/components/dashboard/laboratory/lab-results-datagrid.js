@@ -8,7 +8,7 @@ import { labData } from "@/assets/dummy-data/laboratory";
 import { Grid } from "@mui/material";
 import { MdLocalPrintshop } from "react-icons/md";
 
-import { downloadPDF } from "@/redux/service/pdfs";
+import { downloadResultPDF } from "@/redux/service/pdfs";
 import { useAuth } from "@/assets/hooks/use-auth";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
@@ -58,17 +58,15 @@ const LabResultDataGrid = () => {
   }
 
   const handlePrint = async (data) => {
-    const pdf_endpoint = data.category ?  "_labtestresult_pdf" : "_qualitative_labtestresult_pdf"
       try{
-          const response = await downloadPDF(data.id, `${pdf_endpoint}`, auth)
+          const response = await downloadResultPDF(data.process_test_req, `_labtestresult_pdf`, auth)
           window.open(response.link, '_blank');
           toast.success("got pdf successfully")
 
       }catch(error){
           console.log(error)
           toast.error(error)
-      }
-      
+      }      
   };
 
   const onMenuClick = async (menu, data) => {

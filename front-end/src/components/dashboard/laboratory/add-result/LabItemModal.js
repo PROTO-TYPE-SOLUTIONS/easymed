@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
+import { DialogTitle, Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
 import { addItemToLabResultsItems, getAllLabTestPanels } from "@/redux/features/laboratory";
@@ -10,7 +10,7 @@ import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from "@/assets/hooks/use-auth";
 
-const AddResultItemModal = ({open, setOpen, selected}) => {
+const AddResultItemModal = ({open, setOpen, selected, sample_label}) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
@@ -24,7 +24,6 @@ const AddResultItemModal = ({open, setOpen, selected}) => {
   const handleClose = () => {
     setOpen(false);
   };
-  console.log("GIVE THANKS EVERYDAYYYYYAAAA", selected)
 
   const initialValues = {
     result: "",
@@ -45,8 +44,6 @@ const AddResultItemModal = ({open, setOpen, selected}) => {
         ...formValue,
         test_panel: formValue.test_panel.value,
       };
-
-      console.log("LAB TEST PANELS FORMDATA", formData)
 
       setLoading(true);    
       dispatch(addItemToLabResultsItems(formData))
@@ -79,6 +76,9 @@ const AddResultItemModal = ({open, setOpen, selected}) => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
+        <DialogTitle>
+          <p className="text-sm font-semibold">{`sample: ${sample_label}`}</p>
+        </DialogTitle>
         <DialogContent>
           <h3 className="text-xl my-4"> Add Lab Result Panel </h3>
         <Formik
