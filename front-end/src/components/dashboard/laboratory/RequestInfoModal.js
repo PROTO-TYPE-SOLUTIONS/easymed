@@ -30,7 +30,7 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
     useEffect(()=> {
         if(auth){
             dispatch(getAllLabTestPanels(auth))
-            dispatch(getAllSamplesForProcessId(selectedRowData?.id, auth)) 
+            dispatch(getAllSamplesForProcessId(selectedRowData?.process_test_req, auth)) 
             getPatientDetailsForThisTestRequest()
         }
     }, [selectedRowData])
