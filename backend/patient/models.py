@@ -6,7 +6,7 @@ from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item
 from billing.models import Invoice, InvoiceItem
-from laboratory.models import ProcessTestRequest, LabTestResult
+from laboratory.models import ProcessTestRequest
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -254,8 +254,6 @@ class AttendanceProcess(models.Model):
     reason = models.TextField(max_length=300)
     invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE, null=True)
     process_test_req = models.OneToOneField(ProcessTestRequest, on_delete=models.CASCADE, null=True) # id of ProcessTestRequest is stored here
-    lab_result = models.OneToOneField(LabTestResult, on_delete=models.CASCADE, null=True)
-    #appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, null=True)
     triage = models.OneToOneField(Triage, on_delete=models.CASCADE, null=True)
     track = models.CharField(max_length=50, choices=TRACK, default='reception')

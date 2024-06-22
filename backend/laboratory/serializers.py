@@ -4,16 +4,14 @@ import pdb
 
 from customuser.models import CustomUser
 from .models import (
-    LabReagent, LabTestResult, 
+    LabReagent,
     LabTestRequest, 
     LabTestProfile, 
     LabEquipment, 
     EquipmentTestRequest, 
     PublicLabTestRequest, 
     LabTestPanel, 
-    LabTestResultPanel,
     LabTestRequestPanel,
-    ResultsVerification,
     ProcessTestRequest,
     PatientSample,
 
@@ -51,16 +49,16 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
         model = LabTestProfile
         fields = '__all__'        
 
-class LabTestResultSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LabTestResult
-        fields = '__all__'
+# class LabTestResultSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = LabTestResult
+#         fields = '__all__'
 
 
-class LabTestResultPanelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LabTestResultPanel
-        fields = '__all__'
+# class LabTestResultPanelSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = LabTestResultPanel
+#         fields = '__all__'
 
 
 class LabTestRequestPanelSerializer(serializers.ModelSerializer):
@@ -125,10 +123,10 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
     #     return data
     
 
-class ResultsVerificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ResultsVerification
-        fields = '__all__'
+# class ResultsVerificationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ResultsVerification
+#         fields = '__all__'
 
 class ProcessTestRequestSerializer(serializers.ModelSerializer):
     class Meta:
