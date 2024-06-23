@@ -2,12 +2,28 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { fetchLabTestPanelsBySpecificSample, updatePhlebotomySamples } from '@/redux/service/laboratory';
+import SeachableSelect from '@/components/select/Searchable';
+import { Form, Formik } from 'formik';
+import * as Yup from "yup";
+import FormButton from '@/components/common/button/FormButton';
+import { sendToEquipment } from "@/redux/service/laboratory";
 
 const TestPanelsItem = ({sample, collected}) => {
   const auth = useAuth()
+  const [loading, setLoading] = useState(false)
   const [resultItems, setResultItems]=useState([])
   const [status, setStatus]= useState(false)
-  const { labTestPanels } = useSelector((store) => store.laboratory);
+  const { labTestPanels, labEquipments } = useSelector((store) => store.laboratory);
+
+  const initialValues = {
+    test_req_panel: 1,
+    equipment: ""
+  }
+
+
+  const validationSchema = Yup.object().shape({
+    equipment: Yup.object().required("This field is required!"),
+  });
 
   const getTestPanelsBySampleId = async (sample, auth)=> {
     try {
@@ -17,6 +33,26 @@ const TestPanelsItem = ({sample, collected}) => {
       console.log("ERROR GETTING PANELS")
     }
   }
+
+  const handleSendEquipment = async (formValue, helpers) => {
+    try {
+      const formData = {
+        ...formValue,
+        test_req_panel: formValue.equipment.value,
+      }
+      setLoading(true);
+      await sendToEquipment(formData, auth).then(() => {
+        helpers.resetForm();
+        toast.success("Send to Equipment Successful!");
+        setLoading(false);
+        handleClose();
+      });
+    } catch (err) {
+      toast.error(err);
+      setLoading(false);
+      setLoading(false);
+    }
+  };
 
   useEffect(()=>{
     if(auth){
@@ -29,9 +65,25 @@ const TestPanelsItem = ({sample, collected}) => {
     const foundPanel = labTestPanels.find((panel)=>panel.id === item.test_panel)
     if(foundPanel){
       return(
-        <li key={`${foundPanel.id}_panel`} className='flex justify-between '>
-          <span className='w-full'>{foundPanel.name}</span>
-          <span className='w-full'>{foundPanel.unit}</span>
+        <li key={`${foundPanel.id}_panel`}>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSendEquipment}
+            >
+              <Form className="w-full flex items-center bg-red-400">
+                <span className='w-full'>{foundPanel.name}</span>
+                <div className='w-full'>
+                  <SeachableSelect
+                    name="equipment"
+                    options={labEquipments.map((equipment) => ({ value: equipment.id, label: `${equipment?.name}` }))}
+                  />
+                </div>
+                <div className='w-full justify-end flex'>
+                  <FormButton label={`send to equipment`}/>
+                </div>
+              </Form>
+            </Formik>            
         </li>
       )
     }
@@ -55,7 +107,8 @@ const TestPanelsItem = ({sample, collected}) => {
       <ul className='flex gap-3 flex-col px-4'>
           <li className='flex justify-between'>
               <span className='text-primary w-full'>panel name</span>
-              <span className='text-primary w-full'>unit</span>
+              <span className='text-primary w-full'>select equipment</span>
+              <span className='text-primary w-full'></span>
           </li>
           {panels}
       </ul>
