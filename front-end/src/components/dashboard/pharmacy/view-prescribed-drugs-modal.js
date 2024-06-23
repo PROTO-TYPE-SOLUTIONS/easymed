@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import dynamic from "next/dynamic";
-import { Column, Pager } from "devextreme-react/data-grid";
+import {
+  Column,
+  Pager,
+  Selection,
+} from 'devextreme-react/data-grid';
+import CheckBox from 'devextreme-react/check-box';
+import themes from 'devextreme/ui/themes';
 import { Grid } from "@mui/material";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { updatePrescriptionStatus } from "@/redux/features/pharmacy";
 import { updatePrescription } from "@/redux/service/pharmacy";
-import { updateAttendanceProcesses } from "@/redux/service/patients";
+import { updateAttendanceProcesses, updatePrescribeDrug } from "@/redux/service/patients";
+import { FaCheck, FaTimes } from 'react-icons/fa';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -25,35 +32,76 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
   const doc = doctors.find( doc => doc.id === selectedRowData.doctor);
   const patient = patients.find (patient => patient.id === selectedRowData.patient)
   const prescription = prescriptions.find((prescription)=> prescription.id === selectedRowData.prescription)
-  console.log("SELECTED ROW DATA", auth)
+  const [allMode, setAllMode] = useState('allPages');
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [checkBoxesMode, setCheckBoxesMode] = useState(
+    themes.current().startsWith('material') ? 'always' : 'onClick',
+  );
+
+  const handleSelectionChanged = (selectedRowKeys) => {
+    setSelectedItems(selectedRowKeys);
+  };
+  console.log("CHECKED THE FOLLOWING ITEMS", selectedItems)
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const handleDispense = async () => {
-    const payload = {
-      ...selectedRowData,
-      status:"dispensed",
-    }
+  const calculateQuantity = (drug) => {
+    const frequency = parseInt(drug.frequency)
+    const dosage = parseInt(drug.dosage)
+    const duration = parseInt(drug.duration)
 
+    return frequency * dosage * duration
+  }
+
+  const handleDispense = async () => {
     try {
       setLoading(true);
-      await updatePrescription( payload, auth).then(() => {
+      selectedItems.selectedRowsData.forEach(async(drug)=> {
+        const payload = {
+          id: drug.id,
+          is_dispensed:true,
+          quantity: calculateQuantity(drug)
+        }
+        console.log(payload)
+        await updatePrescribeDrug( payload, auth).then(() => {
 
           setLoading(true);
-          updateAttendanceProcesses({ pharmacist: auth.user_id }, payload.id)
-          dispatch(updatePrescriptionStatus(selectedRowData.prescription))
+          // updateAttendanceProcesses({ pharmacist: auth.user_id }, payload.id)
           toast.success("successfully updated status")
           setOpen(false);
           setLoading(false);
           handleClose();
       });
+
+      })
     } catch (err) {
       toast.error(err);
       setLoading(false);
     }
   };
+
+  const renderDispensedCell = (cellData) => {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        {cellData.value ? (
+          <FaCheck style={{ color: 'green', fontSize: '1.2em' }} />
+        ) : (
+          <FaTimes style={{ color: 'red', fontSize: '1.2em' }} />
+        )}
+      </div>
+    );
+  };
+
+  const calculateQuantityToDispense = (cellData)=> {
+    console.log(cellData)
+    const frequency = parseInt(cellData.values[3])
+    const dosage = parseInt(cellData.values[2])
+    const duration = parseInt(cellData.values[5])
+
+    return frequency * dosage * duration
+  }
 
 
   return (
@@ -61,7 +109,7 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
 
       <Dialog
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -106,7 +154,13 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
         className="shadow-xl"
         rowHeight={4}
         minHeight={"70vh"}
+        onSelectionChanged={handleSelectionChanged}
       >
+        <Selection
+          mode="multiple"
+          selectAllMode={allMode}
+          showCheckBoxesMode={checkBoxesMode}
+        />
         <Pager
           visible={false}
           // allowedPageSizes={allowedPageSizes}
@@ -126,12 +180,22 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
           caption="Frequency"
         />
         <Column 
+          dataField="quantity" 
+          caption="Quantity"
+          cellRender={calculateQuantityToDispense}
+        />
+        <Column 
           dataField="duration" 
           caption="Duration"     
         />
         <Column 
           dataField="note"
           caption="Note"
+        />
+        <Column 
+          dataField="is_dispensed"
+          caption="Dispensed"
+          cellRender={renderDispensedCell}
         />
       </DataGrid>
 
