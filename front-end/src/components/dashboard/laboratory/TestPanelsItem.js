@@ -69,7 +69,7 @@ const TestPanelsItem = ({sample, collected}) => {
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={(values, { resetForm }) => {
-              handleSendEquipment(foundPanel, values); 
+              handleSendEquipment(item, values); 
               resetForm(); 
             }}
           >

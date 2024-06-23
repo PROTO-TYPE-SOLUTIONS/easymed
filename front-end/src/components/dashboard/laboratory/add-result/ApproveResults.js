@@ -43,26 +43,6 @@ const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
         )
     })
 
-    const approveLabResults = async () => {
-
-        const payload = {
-            id:panel.id,
-            rresult_approved: panel.result
-        }
-
-        try{
-            setLoading(true)
-            await updateLabRequestPanels()
-            setLoading(false)
-            console.log("SUCCESS APPROVAL", response)
-
-        }catch(error){
-            setLoading(false)
-            console.log("FAILED APPROVAL", error)
-        }
-
-    }
-
   return (
     <div>
         <Dialog
@@ -86,9 +66,6 @@ const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
             </DialogTitle>
             <DialogContent>
             {processTestRequests}
-            <div onClick={approveLabResults} className='flex justify-end'>
-                <FormButton label={`approve results`}/>
-            </div>
             </DialogContent>
         </Dialog>      
     </div>
