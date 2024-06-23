@@ -16,7 +16,6 @@ const TestPanelsItem = ({sample, collected}) => {
   const { labTestPanels, labEquipments } = useSelector((store) => store.laboratory);
 
   const initialValues = {
-    test_req_panel: 1,
     equipment: ""
   }
 
@@ -34,21 +33,21 @@ const TestPanelsItem = ({sample, collected}) => {
     }
   }
 
-  const handleSendEquipment = async (formValue, helpers) => {
+  const handleSendEquipment = async (foundPanel, formValue, helpers) => {
     try {
       const formData = {
-        ...formValue,
-        test_req_panel: formValue.equipment.value,
+        test_request_panel: foundPanel.id,
+        equipment: formValue.equipment.value,
       }
       setLoading(true);
       await sendToEquipment(formData, auth).then(() => {
         helpers.resetForm();
-        toast.success("Send to Equipment Successful!");
+        // toast.success("Send to Equipment Successful!");
         setLoading(false);
         handleClose();
       });
     } catch (err) {
-      toast.error(err);
+      // toast.error(err);
       setLoading(false);
       setLoading(false);
     }
@@ -64,28 +63,33 @@ const TestPanelsItem = ({sample, collected}) => {
   const panels = resultItems.map((item)=> {
     const foundPanel = labTestPanels.find((panel)=>panel.id === item.test_panel)
     if(foundPanel){
-      return(
+      return (
         <li key={`${foundPanel.id}_panel`}>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={handleSendEquipment}
-            >
-              <Form className="w-full flex items-center bg-red-400">
+            onSubmit={(values, { resetForm }) => {
+              handleSendEquipment(foundPanel, values); 
+              resetForm(); 
+            }}
+          >
+            {({ handleSubmit }) => (
+              <form onSubmit={handleSubmit} className="w-full flex items-center bg-red-400">
                 <span className='w-full'>{foundPanel.name}</span>
                 <div className='w-full'>
                   <SeachableSelect
                     name="equipment"
-                    options={labEquipments.map((equipment) => ({ value: equipment.id, label: `${equipment?.name}` }))}
+                    options={labEquipments.map((equipment) => ({ value: equipment.id, label: equipment.name }))}
                   />
                 </div>
                 <div className='w-full justify-end flex'>
                   <FormButton label={`send to equipment`}/>
                 </div>
-              </Form>
-            </Formik>            
+              </form>
+            )}
+          </Formik>
         </li>
-      )
+      );
     }
   })
 
