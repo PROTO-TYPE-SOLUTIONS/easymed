@@ -8,6 +8,7 @@ import LabNav from "@/components/dashboard/laboratory/LabNav";
 import ProtectedRoute from "@/assets/hoc/protected-route";
 import LabRequestDataGrid from "@/components/dashboard/laboratory/lab-request-datagrid";
 import { getAllProcesses } from "@/redux/features/patients";
+import { getAllLabEquipments } from "@/redux/features/laboratory";
 
 const LabResults = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ const LabResults = () => {
   useEffect(() => {
     if (token) {
       dispatch(getAllProcesses())
+      dispatch(getAllLabEquipments(token))
     }
   }, [token]);
 
