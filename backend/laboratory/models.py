@@ -67,7 +67,6 @@ class LabTestPanel(models.Model):
 
 class ProcessTestRequest(models.Model):
     reference = models.CharField(max_length=40) # track_number of AttendanceProcess is stored here
-    #attendance_process = models.ForeignKey(AttendanceProcess, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.reference
