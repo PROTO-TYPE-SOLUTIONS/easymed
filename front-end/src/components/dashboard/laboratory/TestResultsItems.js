@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
-import { fetchLabTestPanelsByTestRequestId } from '@/redux/service/laboratory';
+import { fetchLabTestPanelsByTestRequestId, updateLabRequestPanels } from '@/redux/service/laboratory';
+import FormButton from '@/components/common/button/FormButton';
 
 const TestResultsPanels = ({test}) => {
   const auth = useAuth()
@@ -33,6 +34,26 @@ const TestResultsPanels = ({test}) => {
     }
   }
 
+  const approveLabResults = async () => {
+
+    const payload = {
+        id:test,
+        result_approved: true
+    }
+
+    try{
+        setLoading(true)
+        await updateLabRequestPanels(payload, auth)
+        setLoading(false)
+        console.log("SUCCESS APPROVAL", response)
+
+    }catch(error){
+        setLoading(false)
+        console.log("FAILED APPROVAL", error)
+    }
+
+}
+
 
   const panels = resultItems.map((item)=> {
     const foundPanel = labTestPanels.find((panel)=>panel.id === item.test_panel)
@@ -46,6 +67,9 @@ const TestResultsPanels = ({test}) => {
             <span className='w-full text-center py-2'>{foundPanel.ref_value_low}</span>
             <span className='w-full text-center py-2'>{foundPanel.ref_value_high}</span>
             <span className='w-full text-center py-2'>{foundPanel.unit}</span>
+            <div onClick={approveLabResults} className='flex justify-end'>
+                  <FormButton label={`approve results`}/>
+            </div>
         </li>
       )
     }
@@ -61,6 +85,7 @@ const TestResultsPanels = ({test}) => {
               <span className='text-primary w-full text-center'>Ref Val Low</span>
               <span className='text-primary w-full text-center'>Ref Val High</span>
               <span className='text-primary w-full text-center'>unit</span>
+              <span className='text-primary w-full text-center'></span>
           </li>
           {panels}
       </ul>
