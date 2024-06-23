@@ -1,5 +1,6 @@
 import axios from "axios";
 import { APP_API_URL } from "@/assets/api-endpoints";
+import UseAxios from "@/assets/hooks/use-axios";
 
 
 export const fetchServices = () =>{
@@ -173,6 +174,19 @@ export const prescribeDrug = (payload) =>{
             .catch((err) =>{
                 reject(err.message)
             })
+    })
+}
+
+export const updatePrescribeDrug = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.PRESCRIBE_DRUG}`,payload)
+        .then((res) =>{
+            resolve(res.data)
+        })
+        .catch((err) =>{
+            reject(err.message)
+        })
     })
 }
 

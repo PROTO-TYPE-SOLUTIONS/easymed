@@ -185,12 +185,6 @@ const PharmacyDataGrid = () => {
           caption=""
           cellRender={actionsFunc}
         />
-        {/* <Column
-            dataField="id"
-            caption=""
-            alignment="center"
-            cellRender={(rowData) => renderGridCell(rowData)}
-        /> */}
       </DataGrid>
       {open && <ViewPrescribedDrugsModal {...{setOpen,open,selectedRowData}} />}
     </section>

@@ -138,7 +138,7 @@ const PrescriptionItemDialog = ({patient, patient_id}) => {
             <Field
               className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
-              placeholder="Duration"
+              placeholder="Duration(Days)"
               name="duration"
             />
             <ErrorMessage

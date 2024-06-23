@@ -4,9 +4,10 @@ import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
 import { getAllLabTestByProcessId, getAllLabTestPanels } from '@/redux/features/laboratory';
 import { useAuth } from '@/assets/hooks/use-auth';
-import { approveLabResult, approveQualitativeLabResult } from '@/redux/service/laboratory';
+import { approveLabResult, approveQualitativeLabResult, updateLabRequestPanels } from '@/redux/service/laboratory';
 import TestResultsAccordion from '../TestResultsAccordion';
 import { fetchPatientById } from '@/redux/service/patients';
+import FormButton from '@/components/common/button/FormButton';
 
 const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
     const [loading, setLoading] = useState(false)
@@ -42,20 +43,16 @@ const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
         )
     })
 
-    const approveLabResults = async (formValue) => {
+    const approveLabResults = async () => {
 
         const payload = {
-            ...formValue
+            id:panel.id,
+            rresult_approved: panel.result
         }
 
         try{
             setLoading(true)
-            let response;
-            if(selectedData.category === "quantitative"){
-                response = await approveLabResult(payload, auth)
-            }else{
-                response = await approveQualitativeLabResult(payload, auth)
-            }
+            await updateLabRequestPanels()
             setLoading(false)
             console.log("SUCCESS APPROVAL", response)
 
@@ -89,6 +86,9 @@ const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
             </DialogTitle>
             <DialogContent>
             {processTestRequests}
+            <div onClick={approveLabResults} className='flex justify-end'>
+                <FormButton label={`approve results`}/>
+            </div>
             </DialogContent>
         </Dialog>      
     </div>
