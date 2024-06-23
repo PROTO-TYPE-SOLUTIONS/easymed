@@ -79,8 +79,6 @@
     <table>
         <thead>
             <tr>
-                <th>Sample ID</th>
-                <th>Test Title</th>
                 <th>Test Panel</th>
                 <th>Result</th>
                 <th>Flag</th>
@@ -93,8 +91,6 @@
                 {% for panel in panels %}
                     {% if panel.lab_test_request == labtestrequest %}
                     <tr>
-                        <td>{{ labtestrequest.patient_sample.patient_sample_code }}</td>
-                        <td>{{ labtestrequest.title }}</td>
                         <td>{{ panel.test_panel.name }}</td>
                         <td>{{ panel.result }}</td>
                         <td>
@@ -121,11 +117,11 @@
     {% endif %}
 
     <div class="report-footer">
-        <p><strong>Date Posted:</strong> {% if labtestrequests.exists %}{{ labtestrequests.first.date_created }}{% endif %}</p>
+        <p><strong>Date Posted:</strong> {{ approved_on }}</p>
         <p><strong>Requested By:</strong> {% if attendance_process.doctor %}{{ attendance_process.doctor.first_name }}{% endif %}</p>
-        <p><strong>Done By:</strong> {% if attendance_process.lab_tech %}{{ attendance_process.lab_tech.first_name }}{% endif %}</p>
+        <p><strong>Done By:_______________</strong> {% if attendance_process.lab_tech %}{{ attendance_process.lab_tech.first_name }}{% endif %}</p>
         <p><strong>Approved By:</strong> Dr. Willy Kanga</p>
-        <p><strong>Done by Equipment:</strong> {% if labtestrequests.exists %}{{ labtestrequests.first.equipment }}{% endif %}</p>
+        <p><strong>Done by Equipment:_______________</strong> {% if labtestrequests.exists %}{{ labtestrequests.first.equipment }}{% endif %}</p>
     </div>
 
     <section class="footer">
