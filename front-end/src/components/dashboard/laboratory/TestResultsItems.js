@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { fetchLabTestPanelsByTestRequestId, updateLabRequestPanels } from '@/redux/service/laboratory';
-import FormButton from '@/components/common/button/FormButton';
 
 const TestResultsPanels = ({test}) => {
   const auth = useAuth()
+  const [loading, setLoading] = useState(false)
   const [resultItems, setResultItems]=useState([])
   const { labTestPanels } = useSelector((store) => store.laboratory);
 
@@ -34,19 +34,24 @@ const TestResultsPanels = ({test}) => {
     }
   }
 
-  const approveLabResults = async () => {
+  const updateApprovedState = (updatedPanel) => {
+    setResultItems(prevItems => prevItems.map(panel => 
+      panel.id === updatedPanel.id ? { ...panel, result_approved: updatedPanel.result_approved } : panel
+    ));
+  }
+
+  const approveLabResults = async (test_panel) => {
 
     const payload = {
-        id:test,
+        id:test_panel.id,
         result_approved: true
     }
 
     try{
         setLoading(true)
-        await updateLabRequestPanels(payload, auth)
+        const response = await updateLabRequestPanels(payload, auth)
+        updateApprovedState(response)
         setLoading(false)
-        console.log("SUCCESS APPROVAL", response)
-
     }catch(error){
         setLoading(false)
         console.log("FAILED APPROVAL", error)
@@ -67,8 +72,8 @@ const TestResultsPanels = ({test}) => {
             <span className='w-full text-center py-2'>{foundPanel.ref_value_low}</span>
             <span className='w-full text-center py-2'>{foundPanel.ref_value_high}</span>
             <span className='w-full text-center py-2'>{foundPanel.unit}</span>
-            <div onClick={approveLabResults} className='flex justify-end'>
-                  <FormButton label={`approve results`}/>
+            <div className='w-full text-center py-2 flex justify-end' >
+              <button className="bg-primary text-white px-3 py-2 text-xs rounded-xl" onClick={()=> approveLabResults(item)}>{item.result_approved === false ? 'approve': 'approved'}</button>
             </div>
         </li>
       )
