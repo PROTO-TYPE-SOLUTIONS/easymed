@@ -12,58 +12,65 @@ from .models import LabTestRequest, LabEquipment,LabTestRequestPanel
 
 
 
+def create_hl7_message(test_request_panel):
+    # Extract patient from AttendanceProcess
+    patient = test_request_panel.lab_test_request.process.attendanceprocess.patient
+    lab_test_request_panels = LabTestRequestPanel.objects.filter(lab_test_request=test_request_panel.lab_test_request)
 
-def create_hl7_message(test_request):
-    patient = test_request.patient
-    lab_test_request_panels = LabTestRequestPanel.objects.filter(lab_test_request=test_request)
-    
     # Generate HL7 message
     hl7_message = (
-        "MSH|^~\&|EASYMED|LABNAME|20240101000000||ADT^O01^ADTOBR|MSG00001|P|2.4\r"
-        "PID|1||{patient_id}||{patient_name}^^^^PI||{date_of_birth}|{gender}^||{address}^^Postal^Jones^Mary||||||||||||||||||||||||||||\r" #patient identification (PID) segment
+        "MSH|^~\\&|EASYMED|LABNAME|20240101000000||ADT^O01^ADTOBR|MSG00001|P|2.4\r"
+    )
+    
+    # Generate PID segment
+    hl7_message += (
+        "PID|1||{patient_id}||{patient_name}^^^^PI||{date_of_birth}|{gender}^||{address}^^Postal^Jones^Mary||||||||||||||||||||||||||||\r"
     ).format(
         patient_id=patient.id,
-        patient_name=patient.first_name + "^" + patient.second_name,
+        patient_name=f"{patient.first_name}^{patient.second_name}",
         date_of_birth=patient.date_of_birth.strftime("%Y%m%d") if patient.date_of_birth else "",
         gender=patient.gender,
-        address="address",
+        address=patient.address if hasattr(patient, 'address') else "address",
     )
 
-    obr_sequence = +1
+    obr_sequence = 0
     for panel in lab_test_request_panels:
-        lab_test_panel = panel.test_panel
         obr_sequence += 1
+        lab_test_panel = panel.test_panel
+        
+        # Generate OBR segment
         hl7_message += (
-            "OBR|{obr_sequence}|||{sample}|{test_name}||||||||{ordering_physician}||||||||{specimen_collection_date_time}||||||{test_profile}||||\r" # test report.
+            "OBR|{obr_sequence}|||{test_code}^{test_name}||||||||{ordering_physician}||||||||{specimen_collection_date_time}||||||{test_profile}||||\r"
         ).format(
             obr_sequence=obr_sequence,
-            sample=test_request.sample,
-            test_id=test_request.id,
+            test_code=panel.test_code,
             test_name=lab_test_panel.name,
-            ordering_physician=test_request.requested_by.first_name,
-            specimen_collection_date_time=test_request.requested_on,
-            test_profile = "Hematology"
+            ordering_physician=test_request_panel.lab_test_request.requested_by.first_name if test_request_panel.lab_test_request.requested_by else "",
+            specimen_collection_date_time=test_request_panel.lab_test_request.requested_on.strftime("%Y%m%d%H%M%S") if test_request_panel.lab_test_request.requested_on else "",
+            test_profile=test_request_panel.lab_test_request.test_profile.name if test_request_panel.lab_test_request.test_profile else ""
         )
 
     print("Generated data:", hl7_message)
 
     return hl7_message
 
+
 ''''
 Let's get the test request and convert to ASTM format
 '''
 def create_astm_message(test_request):
-    patient = test_request.patient
+    # Extract patient from AttendanceProcess
+    patient = test_request.process.attendanceprocess.patient
     lab_test_request_panels = LabTestRequestPanel.objects.filter(lab_test_request=test_request)
 
-    # Generate ASTM message
+    # Generate ASTM header
     astm_message = (
-        "H|\^&|{timestamp}|{facility_id}|{patient_id}|{patient_name}||{gender}|{order_date_time}||P|1|{test_id}||||||||\r"
+        "H|\\^&|{timestamp}|{facility_id}|{patient_id}|{patient_name}||{gender}|{order_date_time}||P|1|{test_id}||||||||\r"
     ).format(
         timestamp=datetime.now().strftime("%Y%m%d%H%M%S"),
         facility_id="FACILITY",
         patient_id=patient.id,
-        patient_name=patient.first_name + " " + patient.second_name,
+        patient_name=f"{patient.first_name} {patient.second_name}",
         gender=patient.gender,
         order_date_time=test_request.requested_on.strftime("%Y%m%d%H%M%S"),
         test_id=test_request.id,
@@ -75,9 +82,9 @@ def create_astm_message(test_request):
             "O|{test_name}|{test_id}|{test_type}|||{ordering_physician}||{result_status}||{sample_collection_date_time}||{result_date_time}||||\r"
         ).format(
             test_name=lab_test_panel.name,
-            test_id=test_request.id,
+            test_id=panel.test_code,
             test_type="A",
-            ordering_physician=test_request.requested_by.first_name,
+            ordering_physician=test_request.requested_by.first_name if test_request.requested_by else "",
             result_status="F",  # waiting for results
             sample_collection_date_time=test_request.requested_on.strftime("%Y%m%d%H%M%S"),
             result_date_time=test_request.requested_on.strftime("%Y%m%d%H%M%S"),
@@ -86,6 +93,9 @@ def create_astm_message(test_request):
     print("Generated data:", astm_message)
 
     return astm_message
+
+
+
 # def create_astm_message(test_request):
 #     patient = test_request.patient
 #     astm_message = (
