@@ -95,7 +95,6 @@ def create_astm_message(test_request):
     return astm_message
 
 
-
 # def create_astm_message(test_request):
 #     patient = test_request.patient
 #     astm_message = (
