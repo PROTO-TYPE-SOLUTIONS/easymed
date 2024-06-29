@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react'
+import { useRouter } from "next/router";
 import { useSelector } from 'react-redux';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { fetchLabTestPanelsByTestRequestId, updateLabRequestPanels } from '@/redux/service/laboratory';
 
 const TestResultsPanels = ({test}) => {
   const auth = useAuth()
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [resultItems, setResultItems]=useState([])
+  const currentPath = router.pathname;
   const { labTestPanels } = useSelector((store) => store.laboratory);
+
+  const current_interface = currentPath.includes('doctor-interface') ? 'doctor' : 'lab'
 
   const getTestPanelsByTestReq = async (test, auth)=> {
     try {
@@ -62,7 +67,7 @@ const TestResultsPanels = ({test}) => {
 
   const panels = resultItems.map((item)=> {
     const foundPanel = labTestPanels.find((panel)=>panel.id === item.test_panel)
-    if(foundPanel){
+    if(foundPanel && current_interface === 'lab'){
       const flag = checkRange(foundPanel.ref_value_low,foundPanel.ref_value_high,item.result)
       return(
         <li key={`${foundPanel.id}_panel`} className='flex justify-between items-center'>
@@ -72,9 +77,24 @@ const TestResultsPanels = ({test}) => {
             <span className='w-full text-center py-2'>{foundPanel.ref_value_low}</span>
             <span className='w-full text-center py-2'>{foundPanel.ref_value_high}</span>
             <span className='w-full text-center py-2'>{foundPanel.unit}</span>
+            {current_interface === 'lab' && (   
             <div className='w-full text-center py-2 flex justify-end' >
-              <button className="bg-primary text-white px-3 py-2 text-xs rounded-xl" onClick={()=> approveLabResults(item)}>{item.result_approved === false ? 'approve': 'approved'}</button>
-            </div>
+              {item.result && (
+                <button className="bg-primary text-white px-3 py-2 text-xs rounded-xl" onClick={()=> approveLabResults(item)}>{item.result_approved === false ? 'approve': 'approved'}</button>
+              )}
+            </div>)}
+        </li>
+      )
+    }else if (foundPanel && current_interface === 'doctor'){
+      const flag = checkRange(foundPanel.ref_value_low,foundPanel.ref_value_high,item.result)
+      return(
+        <li key={`${foundPanel.id}_panel`} className='flex justify-between items-center'>
+          <span className='w-full py-2'>{foundPanel.name}</span>
+          <span className='w-full text-center py-2'>{item.result_approved ? item.result : ""}</span>
+          <span className={`w-full text-center py-2 ${flag === 'high' ? 'text-warning': 'text-orange'}`}>{item.result_approved ? flag : ""}</span>
+          <span className='w-full text-center py-2'>{foundPanel.ref_value_low}</span>
+          <span className='w-full text-center py-2'>{foundPanel.ref_value_high}</span>
+          <span className='w-full text-center py-2'>{foundPanel.unit}</span>
         </li>
       )
     }
@@ -90,7 +110,9 @@ const TestResultsPanels = ({test}) => {
               <span className='text-primary w-full text-center'>Ref Val Low</span>
               <span className='text-primary w-full text-center'>Ref Val High</span>
               <span className='text-primary w-full text-center'>unit</span>
-              <span className='text-primary w-full text-center'></span>
+              {current_interface === 'lab' && (
+                <span className='text-primary w-full text-center'></span>
+              )}
           </li>
           {panels}
       </ul>
