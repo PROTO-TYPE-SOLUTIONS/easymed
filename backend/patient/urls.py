@@ -16,7 +16,7 @@ from .views import (
     ConvertToAppointmentAPIView,
     SendAppointmentConfirmationAPIView,
     AppointmentsByPatientIdAPIView,
-    PrescribedDrugByPatinetIdAPIView,
+    PrescribedDrugByPatientIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
     download_prescription_pdf,
     AttendanceProcessViewSet
@@ -45,7 +45,7 @@ urlpatterns = [
     path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     
     path('appointments/by_patient_id/<int:patient_id>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
-    path('prescribed-drugs/by_patient_id/<int:patient_id>/', PrescribedDrugByPatinetIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
+    path('prescribed-drugs/by_patient_id/<int:patient_id>/', PrescribedDrugByPatientIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
 
     path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
     path('send-appointment-confirmation/', SendAppointmentConfirmationAPIView.as_view(), name="send-appointment-confirmation"),

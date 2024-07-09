@@ -106,7 +106,7 @@ class IncomingItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
