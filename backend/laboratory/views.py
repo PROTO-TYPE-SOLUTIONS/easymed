@@ -137,10 +137,15 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
         return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
 
 
+
 class LabTestRequestByPatientIdAPIView(APIView):
-    def get_object(self, patient: int):
+    def get_lab_test_requests_by_patient(self, patient_id: int):
         try:
-            return Patient.objects.get(id=patient)
+            patient = get_object_or_404(Patient, id=patient_id)
+            attendance_processes = AttendanceProcess.objects.filter(patient=patient)
+            process_test_requests = ProcessTestRequest.objects.filter(attendanceprocess__in=attendance_processes)
+            lab_test_requests = LabTestRequest.objects.filter(process__in=process_test_requests)
+            return lab_test_requests
         except Patient.DoesNotExist:
             return None
 
@@ -148,16 +153,18 @@ class LabTestRequestByPatientIdAPIView(APIView):
         responses=LabTestRequestSerializer,
     )
     def get(self, request: Request, patient_id: int, *args, **kwargs):
-        patient = self.get_object(patient_id)
-        if patient is None:
-            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
+        lab_test_requests = self.get_lab_test_requests_by_patient(patient_id)
+        if lab_test_requests is None:
+            return Response({"error_message": f"Patient ID {patient_id} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
         
-        prescribed_drugs = LabTestRequest.objects.filter(patient=patient)
-        if not prescribed_drugs.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not lab_test_requests.exists():
+            return Response({"error_message": "No lab test requests found for the given patient"}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = LabTestRequestSerializer(prescribed_drugs, many=True)
+        serializer = LabTestRequestSerializer(lab_test_requests, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
 
 class LabTestRequestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequestPanel.objects.all()

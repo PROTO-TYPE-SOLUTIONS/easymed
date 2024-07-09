@@ -113,6 +113,7 @@ class PatientSample(models.Model):
     def __str__(self):
         return str(f"{self.patient_sample_code} - {self.specimen.name} - {self.process}")
 
+
 class LabTestRequestPanel(models.Model):
     patient_sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
     result = models.CharField(max_length=45, null=True)  # actual result
