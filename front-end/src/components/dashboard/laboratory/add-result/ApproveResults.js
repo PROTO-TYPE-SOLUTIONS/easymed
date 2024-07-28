@@ -4,10 +4,8 @@ import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
 import { getAllLabTestByProcessId, getAllLabTestPanels } from '@/redux/features/laboratory';
 import { useAuth } from '@/assets/hooks/use-auth';
-import { approveLabResult, approveQualitativeLabResult, updateLabRequestPanels } from '@/redux/service/laboratory';
 import TestResultsAccordion from '../TestResultsAccordion';
 import { fetchPatientById } from '@/redux/service/patients';
-import FormButton from '@/components/common/button/FormButton';
 
 const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
     const [loading, setLoading] = useState(false)

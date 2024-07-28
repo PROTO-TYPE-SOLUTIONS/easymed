@@ -63,15 +63,22 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
   const handleSendLabRequest = async (formValue, helpers) => {
     try {
       setLoading(true);
-      await sendLabRequests(formValue, auth).then((res) => {
-        helpers.resetForm();
+      if (formValue.test_profile){
+        await sendLabRequests(formValue, auth).then((res) => {
+          helpers.resetForm();
+          updateAttendanceProcesses({track: "lab"}, selectedData.id)
+          savePanels(res.id)
+          toast.success("Lab Request Successful!");
+          dispatch(getAllProcesses())
+          setLoading(false);
+          handleClose();
+        });
+      }else {
         updateAttendanceProcesses({track: "lab"}, selectedData.id)
-        savePanels(res.id)
-        toast.success("Lab Request Successful!");
         dispatch(getAllProcesses())
         setLoading(false);
         handleClose();
-      });
+      }
     } catch (err) {
       toast.error(err);
       setLoading(false);
