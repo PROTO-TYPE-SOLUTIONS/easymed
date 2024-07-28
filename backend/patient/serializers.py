@@ -1,7 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
 from .models import (
-    InsuranceCompany,
     ContactDetails,
     Patient,
     NextOfKin,
@@ -18,12 +17,6 @@ from inventory.models import (
     Inventory,
     Item,
 )
-
-class InsuranceCompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InsuranceCompany
-        fields = '__all__'
-
 
 class ContactDetailsSerializer(serializers.ModelSerializer):
     class Meta:

@@ -43,4 +43,10 @@ class CompanyBranch(models.Model):
 
 
     def __str__(self):
-        return self.name   
+        return self.name  
+
+class InsuranceCompany(models.Model):
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.name 
