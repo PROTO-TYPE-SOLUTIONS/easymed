@@ -19,6 +19,7 @@ import { GiMedicinePills } from 'react-icons/gi'
 import { useRouter } from "next/router";
 import LabModal from "./lab-modal";
 import ViewAddedResults from "./ViewAddedResults";
+import ApproveResults from "../laboratory/add-result/ApproveResults";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -134,8 +135,8 @@ const DoctorPatientDataGrid = () => {
   return (
     <section>
       <div className="capitalize flex gap-4 py-4">
-        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("doctor")}>new appointments</p>
-        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("added result")}>from the lab</p>
+        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("doctor")}>New Appointments</p>
+        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("lab")}>From The Lab</p>
       </div>
       <DataGrid
         dataSource={doctorsSchedules}
@@ -195,8 +196,9 @@ const DoctorPatientDataGrid = () => {
       {labOpen && (<LabModal
         {...{ labOpen, setLabOpen, selectedRowData }}
       />)}
-      {resultOpen && (<ViewAddedResults resultOpen={resultOpen} setResultOpen={setResultOpen} selectedData={selectedRowData}
-      />)}
+      {/* {resultOpen && (<ViewAddedResults resultOpen={resultOpen} setResultOpen={setResultOpen} selectedData={selectedRowData}
+      />)} */}
+      {resultOpen && (<ApproveResults selectedData={selectedRowData} approveOpen={resultOpen} setApproveOpen={setResultOpen}/>)}
     </section>
   );
 };

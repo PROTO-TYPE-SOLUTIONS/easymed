@@ -108,9 +108,9 @@ const PrescriptionItemDialog = ({patient, patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={4} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Dosage"
               name="dosage"
@@ -121,9 +121,9 @@ const PrescriptionItemDialog = ({patient, patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={4} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Frequenct"
               name="frequency"
@@ -134,9 +134,9 @@ const PrescriptionItemDialog = ({patient, patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={4} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Duration(Days)"
               name="duration"
@@ -147,9 +147,11 @@ const PrescriptionItemDialog = ({patient, patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={12} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              as='textarea'
+              rows={4}
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Note"
               name="note"
@@ -164,7 +166,7 @@ const PrescriptionItemDialog = ({patient, patient_id}) => {
             <div className="flex items-center justify-end">
               <button
                 type="submit"
-                className="bg-primary rounded-xl text-sm px-8 py-4 text-white"
+                className="bg-primary rounded-lg text-sm px-8 py-4 text-white"
               >
                 {loading && (
                   <svg
