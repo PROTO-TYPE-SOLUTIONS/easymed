@@ -81,6 +81,14 @@ const NursePatientDataGrid = () => {
   // filter users based on search query
   const filteredProcesses = processes.filter((process) => process.track === "triage");
 
+  const billedDocSchedules = filteredProcesses.filter(schedule => {
+    const hasAppointment = schedule.invoice_items.some(item =>  
+        item.category.toLowerCase().includes('appointment') && item.status.toLowerCase() === "billed"
+    );
+    
+    return hasAppointment;
+  });
+
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
     return patient ? `${patient.first_name} ${patient.second_name}` : ""
@@ -94,7 +102,7 @@ const NursePatientDataGrid = () => {
   return (
     <section>
       <DataGrid
-        dataSource={filteredProcesses}
+        dataSource={billedDocSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}

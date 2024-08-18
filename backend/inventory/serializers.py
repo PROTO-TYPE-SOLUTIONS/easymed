@@ -49,11 +49,15 @@ class InventorySerializer(serializers.ModelSerializer):
     def get_insurance_sale_prices(self, obj):
         # Retrieve all related insurance sale prices
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
-        insurance_prices = {}
+        insurance_prices = []
         for sale in sale_prices:
-            # Dynamically create a key for each insurance company
-            insurance_name = sale.insurance_company.name.lower().replace(" ", "_")
-            insurance_prices[f"{insurance_name}_price"] = str(sale.sale_price)
+            # Create a dictionary for each sale price
+            insurance_price = {
+                "id": sale.insurance_company.id,
+                "insurance_name": sale.insurance_company.name.lower().replace(" ", "_"),
+                "price": str(sale.sale_price)
+            }
+            insurance_prices.append(insurance_price)
         return insurance_prices
 
 

@@ -26,7 +26,7 @@ export const API_URL = {
   FETCH_PATIENT_APPOINTMENTS_BY_PATIENT_ID: "/patients/appointments/by_patient_id",
   FETCH_DOCTOR_APPOINTMENTS: "/patients/appointments/",
   FETCH_SERVICES: "/patients/services/",
-  FETCH_INSURANCE: "/patients/insurance-companies/",
+  FETCH_INSURANCE: "/company/insurance-companies/",
   PRESCRIBE: "/patients/prescriptions/",
   ASSIGN_DOCTOR: "/patients/appointments",
   CONSULT_PATIENT: "/patients/consultations/",
@@ -96,7 +96,10 @@ export const API_URL = {
   BILLING_INVOICE_ITEMS: "/billing/invoice-items/",
   BILLING_INVOICES: "/billing/invoices/",
   FETCH_INVOICES: "/billing/invoices/",
+  FeTCH_PATIENT_INVOICES: "/billing/invoices/patient/",
+  FETCH_INVOICE_ITEMS_BY_INVOICE: "/billing/invoices/items/",
   TOTALS_OF_THE_DAY: "/reports/total_payment_mode_amount/",
+  PAYMENT_MODES: "/billing/payment-modes/",
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
@@ -235,7 +238,10 @@ export const APP_API_URL = {
   BILLING_INVOICE_ITEMS: "/api/billing/invoice-items",
   BILLING_INVOICES: "/api/billing/billing-invoices",
   FETCH_INVOICES: "/api/billing/fetch-invoices",
+  FeTCH_PATIENT_INVOICES: "/api/billing/fetch-invoices-by-patient/",
+  FETCH_INVOICE_ITEMS_BY_INVOICE: "/api/billing/fetch-invoices-items-by-invoice/",
   TOTALS_OF_THE_DAY: "/api/billing/transactionAday/",
+  PAYMENT_MODES: "/api/billing/payment-modes/",
 
 
   /***************** PRESCRIPRION **********************/
