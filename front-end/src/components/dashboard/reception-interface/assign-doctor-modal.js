@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Form, ErrorMessage } from "formik";
-import { DialogTitle, Grid, Typography } from "@mui/material";
+import { DialogTitle, Grid } from "@mui/material";
 import { toast } from "react-toastify";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
@@ -13,7 +13,6 @@ import { updateAttendanceProcesses } from "@/redux/service/patients";
 import { getAllProcesses } from "@/redux/features/patients";
 import { getItems } from "@/redux/features/inventory";
 import { billingInvoiceItems } from "@/redux/service/billing";
-import { getPaymentModes } from "@/redux/features/billing";
 
 
 export default function AssignDoctorModal({
@@ -26,13 +25,8 @@ export default function AssignDoctorModal({
   const auth = useAuth();
   const { doctors } = useSelector((store) => store.doctor);
   const { item, } = useSelector(({ inventory }) => inventory);
-  const { paymodes, } = useSelector(({ billing }) => billing);
 
   const authUser = useAuth();
-
-  const patient_insurance = paymodes.filter((mode) => 
-    mode.insurance === null || selectedData.insurances.some(insurance => insurance.id === mode.insurance)
-  );
 
   const handleClose = () => {
     setAssignOpen(false);
@@ -41,7 +35,6 @@ export default function AssignDoctorModal({
   useEffect(() => {
     if (authUser) {
       dispatch(getAllDoctors(authUser)); 
-      dispatch(getPaymentModes(authUser));
       dispatch(getItems())
     }
   }, [authUser]);
@@ -49,20 +42,17 @@ export default function AssignDoctorModal({
   const initialValues = {
     doctor: null,
     item: null,
-    paymet_mode: "",
   };
 
   const validationSchema = Yup.object().shape({
     doctor: Yup.object().required("Select a doctor!"),
     item: Yup.object().required("Select an item!"),
-    paymet_mode: Yup.object().required("Select an payment method!"),
   });
 
-  const saveInvoiceItem = async (invoice, paymet_mode, item)=> {
+  const saveInvoiceItem = async (invoice, item)=> {
     const payload = {
       invoice: invoice,
       item:parseInt(item),
-      payment_mode: paymet_mode
     }
     try{
       billingInvoiceItems(auth, payload);
@@ -81,7 +71,7 @@ export default function AssignDoctorModal({
       };
       await updateAttendanceProcesses(formData, selectedData?.id).then(() => {
         helpers.resetForm();
-        saveInvoiceItem(selectedData.invoice, parseInt(formValue.paymet_mode.value), parseInt(formValue.item.value))
+        saveInvoiceItem(selectedData.invoice, parseInt(formValue.item.value))
         dispatch(getAllProcesses())
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
@@ -113,18 +103,6 @@ export default function AssignDoctorModal({
             <Form className="py-4">
             <section className="space-y-1">
               <Grid container spacing={2}>
-              <Grid item md={12} xs={12}>
-                <SeachableSelect
-                  label="Select Payment Mode"
-                  name="paymet_mode"
-                  options={patient_insurance.map((mode)=> ({ value: mode.id, label: `${mode?.paymet_mode}` }))}
-                />
-                <ErrorMessage
-                  name="paymet_mode"
-                  component="div"
-                  className="text-warning text-xs"
-                />
-              </Grid>
               <Grid item md={12} xs={12}>
                 <SeachableSelect
                   label="Select Appointment"
@@ -184,7 +162,6 @@ export default function AssignDoctorModal({
                     </p>
                   </div>
                 </Grid>
-
               </Grid>
             </section>
             </Form>
