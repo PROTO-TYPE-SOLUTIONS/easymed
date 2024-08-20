@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Selection,
   HeaderFilter, Scrolling,
@@ -7,9 +8,11 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import CreateAppointmentModal from "./create-appointment-modal";
 import { FaWheelchair } from "react-icons/fa";
+import { GiConfirmed } from "react-icons/gi";
 import AssignDoctorModal from "./assign-doctor-modal";
 import Link from "next/link";
 import AddPatientModal from "../patient/add-patient-modal";
+import { initiateNewAttendanceProcesses } from "@/redux/service/patients";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -24,6 +27,11 @@ const getActions = () => {
       label: "Assign Doctor",
       icon: <FaWheelchair className="text-success text-xl mx-2" />,
     },
+    {
+      action: "confirm",
+      label: "Confirm Appointment",
+      icon: <GiConfirmed className="text-success text-xl mx-2" />,
+    }
   ];
 
   return actions;
@@ -39,63 +47,25 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
 
-  const users = [
-    {
-      id_number: "1234821",
-      name: "Marcos Ochieng",
-      country: "Kenya",
-      progress: "In Progress",
-      gender: "Male",
-      age: "34",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Derrick Kimani",
-      progress: "Progress",
-      country: "Uganda",
-      gender: "Male",
-      age: "23",
-      status: "Active",
-    },
-    {
-      id_number: "1234821",
-      name: "Jane Munyua",
-      progress: "In Progress",
-      country: "Tanzania",
-      gender: "Female",
-      age: "70",
-      status: "Active",
-    },
-    {
-      id_number: "70081234",
-      name: "Ann Kibet",
-      progress: "Progress",
-      country: "Burundi",
-      gender: "Male",
-      age: "49",
-      status: "Active",
-    },
-    {
-      id_number: "1234221",
-      name: "Ann Ochieng",
-      progress: "In Progress",
-      country: "Rwanda",
-      gender: "Female",
-      age: "88",
-      status: "Active",
-    },
-  ];
+  const confirmAppointment = async (appointmentID) => {
+    try {
+      const payload = {
+        appointment: appointmentID
+      }
+      const response = await initiateNewAttendanceProcesses(payload)
+      console.log("SUCCESSFULLY INITIATED", response)
+    }catch(error){
+      console.log("ERROR INITIATING PROCESS", error)
+    }
 
-  //   filter users based on search query
-  const filteredUser = users.filter((user) => {
-    return user.name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
-  });
+  }
+
+  const newAppointments = [].filter((appointment)=> appointment.status !== "confirmed")
 
   const onMenuClick = async (menu, data) => {
-    if (menu.action === "create") {
-      setSelectedRowData(data);
-      setOpen(true);
+    console.log("I WANT THE ID OF APP", data)
+    if (menu.action === "confirm") {
+      confirmAppointment(data.id)
     } else if (menu.action === "assign") {
       setSelectedRowData(data);
       setAssignOpen(true);
@@ -153,7 +123,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
         </div>
       </section>
       <DataGrid
-        dataSource={patientAppointments}
+        dataSource={newAppointments}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}

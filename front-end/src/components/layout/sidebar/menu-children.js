@@ -41,7 +41,7 @@ const MenuChild = ({ collapsed, menu, index }) => {
       ) : (
         <>
           <Link
-            className={`${currentPath.includes(menu.href) ? 'bg-primary text-white' : ''} flex text-sm items-center gap-2 hover:bg-yellow hover:text-black rounded py-2 px-2`}
+            className={`${currentPath === menu.href ? 'bg-primary text-white' : ''} flex text-sm items-center gap-2 hover:bg-yellow hover:text-black rounded py-2 px-2`}
             href={menu.href}
           >
             <span className="w-6">{menu.icon}</span>{" "}

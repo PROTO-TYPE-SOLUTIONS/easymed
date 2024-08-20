@@ -11,6 +11,7 @@ import prescriptionsReducer from './features/pharmacy'
 import userReducer from './features/users'
 import AnnouncementReducer from './features/announcements'
 import MenuReducer from './features/menu'
+import CompanyReducer from './features/company'
 
 
 export const store = configureStore({
@@ -27,5 +28,6 @@ export const store = configureStore({
         user: userReducer,
         announcement: AnnouncementReducer,
         menu: MenuReducer,
+        company: CompanyReducer,
     }
 })

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lab Test Report</title>
     <style>
-        /* Add your CSS styles here */
         body {
             font-family: Arial, sans-serif;
         }
@@ -23,18 +21,14 @@
         th {
             background-color: #f2f2f2;
         }
-
-        .report-header-left {
-            float: left;
-            margin-bottom: 20px;
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            background-color: #e6edf7;
+            padding: 5px;
+            line-height: 1.4;
         }
-
-        .report-header-right {
-            float: right;
-            margin-bottom: 20px;
-        }
-
-        .header {
+        .header, .footer {
             text-align: center;
             margin-bottom: 20px;
         }
@@ -42,29 +36,44 @@
             max-width: 150px;
             max-height: 150px;
         }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            font-style: italic;
+            color: gray;
+            font-weight: bold;
+        }
+        .report-footer {
+            column-count: 2;
+            column-gap: 20px;
+            line-height: 1.4;
+            font-size: 12px;
+        }
+        .report-footer p {
+            break-inside: avoid;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
-        <h2>{{ company.name }} </h2>
-        <p>{{ company.address }}</p>
-        <p>{{ company.phone }} | {{ company.email }}</p>
+        <h2>{{ company.name }}</h2>
+        <p>{{ company.address1 }}</p>
+        <p>{{ company.phone1 }} | {{ company.email1 }}</p>
+        <h3>Lab Test Report</h3>
     </div>
 
-    <div class="report-header-left">
-        <h1>Lab Test Report</h1>
-        <p><strong>Patient Name:</strong> {{ labtestresult.lab_test_request.patient.first_name }}</p>
-        <p>{{ labtestresult.lab_test_request.patient.gender }}</p>
-        <p>{{ labtestresult.lab_test_request.patient.patient_age }}</p>
-        <p><strong>Test Title: {{ labtestresult.title }}</strong></p>
-    </div>
-
-    <div class="report-header-right">
-        <p><strong>Date Posted:</strong> {{ labtestresult.date_created }}</p>
-        <p><strong>Posted By: {{ labtestresult.recorded_by }}</strong></p>
-        <p><strong>Sample ID: {{ labtestresult.lab_test_request.sample }}</strong></p>
-        <p><strong>Approved By: Dr. Willy Kanga</strong></p>
+    <div class="report-header">
+        <div>
+            <p><strong>Patient Name:</strong> {{ patient.first_name }} {{ patient.second_name }}</p>
+            <p>Gender: {{ patient.gender }}</p>
+            <p>Age: {{ patient.age }}</p>
+            <p><strong>Process Reference:</strong> {{ processtestrequest.reference }}</p>
+        </div>
     </div>
 
     <table>
@@ -78,35 +87,46 @@
             </tr>
         </thead>
         <tbody>
-            {% for result_item in labtestresult.labtestresultpanel_set.all %}
-            <tr>
-                <td>{{ result_item.test_panel.name }}</td>
-                <td>{{ result_item.result }}</td>
-
-                <td>
-                    {% if result_item.difference >= 1 and result_item.difference < 10 %}
-                        <span style="color: yellow;">Medium</span>
-                    {% elif result_item.difference >= 11 %}
-                        <span style="color: red;">Critical</span>
+            {% for labtestrequest in labtestrequests %}
+                {% for panel in panels %}
+                    {% if panel.lab_test_request == labtestrequest %}
+                    <tr>
+                        <td>{{ panel.test_panel.name }}</td>
+                        <td>{{ panel.result }}</td>
+                        <td>
+                            {% if panel.result and panel.result < panel.test_panel.ref_value_low %}
+                                <span style="color: yellow;">Low</span>
+                            {% elif panel.result and panel.result > panel.test_panel.ref_value_high %}
+                                <span style="color: red;">High</span>
+                            {% else %}
+                                <span style="color: green;">Normal</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ panel.test_panel.ref_value_low }} - {{ panel.test_panel.ref_value_high }}</td>
+                        <td>{{ panel.test_panel.unit }}</td>
+                    </tr>
                     {% endif %}
-                </td>
-
-                <td>{{ result_item.test_panel.ref_value }}</td>
-                <td>{{ result_item.test_panel.unit }}</td>
-            </tr>
+                {% endfor %}
             {% endfor %}
         </tbody>
     </table>
 
     <p><strong>Notes:</strong></p>
-    <p>{{ labtestresult.lab_test_request.note }}</p>
+    {% if labtestrequests.exists %}
+        <p>{{ labtestrequests.first.note }}</p>
+    {% endif %}
 
-    <p><strong>Requested By:</strong> {{ labtestresult.lab_test_request.requested_by.first_name }}</p>
-   
+    <div class="report-footer">
+        <p><strong>Date Posted:</strong> {{ approved_on }}</p>
+        <p><strong>Requested By:</strong> {% if attendance_process.doctor %}{{ attendance_process.doctor.first_name }}{% endif %}</p>
+        <p><strong>Done By:_______________</strong> {% if attendance_process.lab_tech %}{{ attendance_process.lab_tech.first_name }}{% endif %}</p>
+        <p><strong>Approved By:</strong> Dr. Willy Kanga</p>
+        <p><strong>Done by Equipment:_______________</strong> {% if labtestrequests.exists %}{{ labtestrequests.first.equipment }}{% endif %}</p>
+    </div>
+
     <section class="footer">
         <span>Generated by: ME-HMIS</span>
         <p>Email: hello@me-hmis.com</p>
     </section>
 </body>
 </html>
-

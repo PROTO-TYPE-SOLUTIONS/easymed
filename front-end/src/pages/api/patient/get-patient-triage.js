@@ -48,7 +48,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.CREATE_DEPARTMENT}`,body, config)
+            await backendAxiosInstance.post(`${API_URL.GET_PATIENT_TRIAGE}`,body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
@@ -63,22 +63,22 @@ export default async function handler(req, res) {
     }
     else if (req.method === API_METHODS.PUT) {
         try {
-            if (!req.headers?.authorization){
-                res.status(401).send('Unauthorized');
-            }
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
             const body = req.body;
+            const query = req.query;
 
-            await backendAxiosInstance.post(`${API_URL.DELETE_DEPARTMENT}/${body.id}`, config).then(response => {
+            await backendAxiosInstance.put(`${API_URL.GET_PATIENT_TRIAGE}${query.id}/`,body, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
                     res.status(e.response?.status ?? 500).json(e.response?.data)
-
                 }
             )
 

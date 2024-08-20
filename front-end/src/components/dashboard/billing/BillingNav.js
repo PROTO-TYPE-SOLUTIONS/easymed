@@ -13,14 +13,14 @@ const BillingNav = () => {
     <Link href='/dashboard/billing/create-invoice' className={`${pathName === '/dashboard/billing/create-invoice' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
       New Invoice
     </Link>
-    <Link href='/dashboard/inventory/requisitions' className={`${pathName === '/dashboard/inventory/requisitions' || pathName === '/dashboard/inventory/create-requisition' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
-    Overdue Invoices
+    <Link href='/dashboard/billing/overdue-invoices' className={`${pathName === '/dashboard/billing/overdue-invoices' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+      Overdue Invoices
     </Link>
     {/* <RequisitionModal /> */}
     <Link href='/dashboard/inventory/incoming-items' className={`${pathName === '/dashboard/inventory/incoming-items' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
       View Items
     </Link>
-    <Link href='/dashboard/inventory/report' className={`${pathName === '/dashboard/inventory/report' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+    <Link href='/dashboard/billing/report' className={`${pathName === '/dashboard/billing/report' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
       Reports
     </Link>
   </div>

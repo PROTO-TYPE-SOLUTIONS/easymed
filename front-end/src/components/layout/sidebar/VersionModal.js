@@ -30,7 +30,7 @@ const VersionModal = () => {
         >
             <DialogContent>
                 <div className="py-4">
-                    <h2 className="w-full text-center my-2 text-xl"> Make-Easy-HMIS</h2>
+                    <h2 className="w-full text-center my-2 text-xl"> EaSYMed</h2>
                     <p className="w-full text-center my-2">{process.env.NEXT_PUBLIC_HMIS_VERSION}</p>
                     <p className="w-full text-center my-2 text-xl">29ᵗʰ February, 2024</p>
                 </div>

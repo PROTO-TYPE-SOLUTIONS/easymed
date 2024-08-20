@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/router";
 import { MdLocalPrintshop } from 'react-icons/md'
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
@@ -9,13 +10,15 @@ import { getAllPrescriptions, getAllPrescribedDrugs, getAllPrescriptionsPrescrib
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getAllPatients } from "@/redux/features/patients";
 import { downloadPDF } from '@/redux/service/pdfs';
+import { getAllPatients, getAllProcesses } from "@/redux/features/patients";
+
 
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
 import { LuMoreHorizontal } from "react-icons/lu";
 import ViewPrescribedDrugsModal from "./view-prescribed-drugs-modal";
+import { GiMedicinePills } from "react-icons/gi";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -25,6 +28,11 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
+    {
+      action: "prescribe",
+      label: "Prescribe",
+      icon: <GiMedicinePills className="text-card text-xl mx-2" />,
+    },
     {
       action: "dispense",
       label: "Dispense",
@@ -43,13 +51,28 @@ const getActions = () => {
 const PharmacyDataGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const userActions = getActions();
+  const router = useRouter();
   const [open,setOpen] = useState(false)
   const prescriptionsData = useSelector((store)=>store.prescription)
-  const doctorsData = useSelector((store)=>store.doctor.doctors)
+  const { doctors } = useSelector((store)=>store.doctor)
   const [selectedRowData,setSelectedRowData] = useState({});
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const { processes, patients } = useSelector((store)=> store.patient)
+  const filteredProcesses = processes.filter((process) => process.track === "pharmacy");
+
+  console.log("FILTERED PROCESSES TRIAGE", filteredProcesses)
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
+
+  const doctorNameRender = (cellData) => {
+    const doctor = doctors.find((doctor) => doctor.id === cellData.data.doctor);
+    return doctor ? `${doctor.first_name} ${doctor.last_name}` : ""
+  }
 
   const dispatch = useDispatch();
   const auth = useAuth();
@@ -57,7 +80,7 @@ const PharmacyDataGrid = () => {
   const handlePrint = async (data) => {
 
     try{
-        const response = await downloadPDF(data.id, "_prescription_pdf", auth)
+        const response = await downloadPDF(data.prescription, "_prescription_pdf", auth)
         window.open(response.link, '_blank');
         toast.success("got pdf successfully")
 
@@ -74,16 +97,19 @@ const PharmacyDataGrid = () => {
       dispatch(getAllPrescribedDrugs(auth));
       dispatch(getAllDoctors(auth));
       dispatch(getAllPatients())
+      dispatch(getAllProcesses())
     }
   }, [auth]);
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "dispense") {
-      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+      dispatch(getAllPrescriptionsPrescribedDrugs(data.prescription, auth))
       setSelectedRowData(data);
       setOpen(true);
     }else if (menu.action === "print"){
       handlePrint(data);
+    }else if (menu.action === "prescribe") {
+      router.push(`/dashboard/doctor-interface/${data.id}/${data.prescription}`);
     }
   };
 
@@ -122,7 +148,7 @@ const PharmacyDataGrid = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={prescriptionsData.prescriptions}
+        dataSource={filteredProcesses}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -143,36 +169,22 @@ const PharmacyDataGrid = () => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column dataField="id" caption="No" />
+        <Column width={120} dataField="patient_number" caption="PID" />
         <Column 
-          dataField="start_date" 
-          caption="Start Date" 
+          dataField="patient" 
+          caption="Patient Name"
+          cellRender={patientNameRender} 
         />
         <Column 
-          dataField="created_by" 
+          dataField="doctor" 
           caption="Doctor"
-          cellRender={(cellData) => {
-            const prescription = prescriptionsData.prescriptions.find(prescription => prescription.id === cellData.data.created_by);
-            const doctor = doctorsData.find(doc => doc.id === prescription?.created_by);
-            return doctor ? `${doctor.first_name} ${doctor.last_name}` : 'Doctor not found';
-        
-          }}        
-        />
-        <Column 
-          dataField="status" 
-          caption="Status"
+          cellRender={doctorNameRender}        
         />
         <Column 
           dataField="" 
           caption=""
           cellRender={actionsFunc}
         />
-        {/* <Column
-            dataField="id"
-            caption=""
-            alignment="center"
-            cellRender={(rowData) => renderGridCell(rowData)}
-        /> */}
       </DataGrid>
       {open && <ViewPrescribedDrugsModal {...{setOpen,open,selectedRowData}} />}
     </section>

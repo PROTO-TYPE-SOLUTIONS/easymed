@@ -12,6 +12,7 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    AttendanceProcess,
 )
 from inventory.models import (
     Inventory,
@@ -202,4 +203,9 @@ class SendConfirmationMailSerializer(serializers.Serializer):
         required = True,
         allow_null = False,
     )
+
+class AttendanceProcessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendanceProcess
+        fields = '__all__'
     

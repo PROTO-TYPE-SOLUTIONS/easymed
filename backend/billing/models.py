@@ -1,6 +1,6 @@
 from django.db import models
 from inventory.models import Item
-from patient.models import Patient
+# from patient.models import Patient
 from django.db.models import Sum
 
 
@@ -26,13 +26,13 @@ class Invoice(models.Model):
         ('pending', 'Pending'),
         ('paid', 'Paid'),
     )
-    patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True)
-    invoice_number = models.CharField(max_length=50)
-    invoice_date = models.DateField()
+    patient = models.ForeignKey('patient.Patient', on_delete=models.SET_NULL, null=True)
+    invoice_number = models.CharField(max_length=50, null=True)
+    invoice_date = models.DateField(null=True)
     invoice_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
-    invoice_description = models.CharField(max_length=200)
+    invoice_description = models.CharField(max_length=200, null=True)
     invoice_file = models.FileField(upload_to=invoice_file_path, null=True, blank=True)
     invoice_created_at = models.DateTimeField(auto_now_add=True)
     invoice_updated_at = models.DateTimeField(auto_now=True)
@@ -47,8 +47,8 @@ class Invoice(models.Model):
         self.calculate_invoice_amount()
         super().save(*args, **kwargs) 
 
-    def __str__(self):
-        return self.invoice_number
+    # def __str__(self):
+    #     return self.invoice_number
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='invoice_items')

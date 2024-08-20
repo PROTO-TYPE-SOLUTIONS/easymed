@@ -1,14 +1,17 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling,
-  HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData, months } from "@/assets/dummy-data/laboratory";
-import { Grid,Chip } from "@mui/material";
+import { Grid } from "@mui/material";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { AiOutlineDownload } from 'react-icons/ai';
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import EquipmentModal from "./equipment-modal";
+
+import RequestInfoModal from "./RequestInfoModal";
+import LabModal from "../doctor-interface/lab-modal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -18,6 +21,8 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
+    { action: "add", label: "Add Test", icon: <AiOutlineDownload className="text-card text-xl" /> },
+    { action: "view", label: "Request Information", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "sample", label: "Confirm Sample Collection", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "equipment", label: "Send to equipment", icon: <AiOutlineDownload className="text-card text-xl" /> },
   ];
@@ -26,30 +31,36 @@ const getActions = () => {
 };
 
 
-const LabRequestDataGrid = ({ labRequests }) => {
+const LabRequestDataGrid = ( ) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const [open,setOpen] = useState(false);
+  const [labOpen, setLabOpen] = useState(false);
+  const [requestInfoOpen,setRequestInfoOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
-  
 
-  //   FILTER PATIENTS BASED ON SEARCH QUERY
-  const filteredData = labRequests.filter((request) => {
-    return request?.note
-      ?.toLocaleLowerCase()
-      .includes(searchQuery.toLowerCase());
-  });
+  const { processes, patients } = useSelector((store)=> store.patient)
 
+  const labTestsSchedules = processes.filter((process)=> process.track==="lab")
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
 
   const onMenuClick = async (menu, data) => {
-   if (menu.action === "sample") {
-    //   delete api call
+   if (menu.action === "add") {
+      setSelectedRowData(data)
+      setLabOpen(true)
     }else if(menu.action === 'equipment'){
-        setSelectedRowData(data)
-        setOpen(true)
+      setSelectedRowData(data)
+      setOpen(true)
+    }else if(menu.action === 'view'){
+      setSelectedRowData(data)
+      setRequestInfoOpen(true)
     }
   };
 
@@ -65,11 +76,6 @@ const LabRequestDataGrid = ({ labRequests }) => {
       </>
     );
   };
-
-  const patientFullName = (rowData) => {
-    return rowData.patient_first_name + " " + rowData.patient_last_name;
-  }
-
 
   return (
     <>
@@ -114,7 +120,7 @@ const LabRequestDataGrid = ({ labRequests }) => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={filteredData}
+        dataSource={labTestsSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -135,22 +141,16 @@ const LabRequestDataGrid = ({ labRequests }) => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column dataField="sample" caption="Sample" width={100} />
-        <Column dataField="sample_collected" caption="Sample Collected" width={100} />
-        <Column dataField="test_profile_name" caption="Profile name" width={130} />
         <Column 
-          dataField="" 
-          caption="Patient Name" 
-          width={100}
-          calculateCellValue={patientFullName}
+          dataField="patient_number" 
+          caption="PId" 
+          width={120}
         />
-        <Column dataField="note" caption="Note" width={180} />
-        <Column
-          dataField="requested_name"
-          caption="Requested By"
-          width={130}
-          allowFiltering={true}
-          allowSearch={true}
+        <Column 
+          dataField="patient" 
+          caption="Patient Name" 
+          width={200}
+          cellRender={patientNameRender}
         />
         <Column
           dataField=""
@@ -160,6 +160,10 @@ const LabRequestDataGrid = ({ labRequests }) => {
         />
       </DataGrid>
       {open && <EquipmentModal {...{open,setOpen,selectedRowData}} />}
+      {labOpen && (<LabModal {...{ labOpen, setLabOpen, selectedRowData }}/>)}
+      {requestInfoOpen && (
+        <RequestInfoModal {...{requestInfoOpen, setRequestInfoOpen, selectedRowData}}/>
+      )}
     </>
   );
 };

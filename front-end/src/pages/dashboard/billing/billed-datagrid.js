@@ -14,6 +14,9 @@ import { LuMoreHorizontal } from 'react-icons/lu';
 import { CiMoneyCheck1 } from "react-icons/ci";
 import InvoicePayModal from '@/components/dashboard/billing/invoicePayModal';
 
+import { dayTransaction } from '@/redux/service/reports';
+import DayTotalsPerPayMode from '@/components/dashboard/billing/DayTotalsPerPayMode';
+
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
 });
@@ -43,7 +46,10 @@ const BilledDataGrid = () => {
     const auth = useAuth()
     const { invoices } = useSelector((store) => store.billing);
     const [open,setOpen] = useState(false)
+    const [totalsViewOPen, setTotalsViewOPen] = useState(false)
     const [selectedRowData, setSelectedRowData] = useState({})
+    const [infoAsPerPayMode, setInfoAsPerPayMode] = useState({})
+    const [selectedPayMethod, setSelectedPayMethod] = useState('')
 
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
     const [showInfo, setShowInfo] = useState(true);
@@ -83,6 +89,32 @@ const BilledDataGrid = () => {
             />
         );
       };
+
+      const getTransactionPerDayForAPaymentMethod = async (payment_method) => {
+        console.log("Payment method is", payment_method)
+        
+        try {
+            setSelectedPayMethod(payment_method)
+            setTotalsViewOPen(true)
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+
+            const formattedDate = `${year}-${month}-${day}`;
+            const payload = {
+                date: formattedDate,
+                payment_method: payment_method
+            }
+            await dayTransaction(payload).then((res)=> {
+                console.log("PAY FOR THE DAY", res)
+                setInfoAsPerPayMode(res)
+            })
+        }catch(e){
+            console.log("Error", e)
+        }
+
+      }
     
 
     useEffect(()=> {
@@ -138,7 +170,25 @@ const BilledDataGrid = () => {
                     cellRender={actionsFunc}
                 />
             </DataGrid>
+            <div className='w-full mt-4 flex justify-between h-12 gap-4'>
+                <div onClick={()=> getTransactionPerDayForAPaymentMethod("cash")} className='w-full gap-2 flex justify-center items-center bg-white rounded-lg cursor-pointer'>
+                    <button>
+                        Daily Cash Total.
+                    </button>
+                </div>
+                <div onClick={()=> getTransactionPerDayForAPaymentMethod("mpesa")} className='w-full gap-2 flex justify-center items-center bg-white rounded-lg cursor-pointer'>
+                    <button>
+                        Daily Mpesa Total.
+                    </button>
+                </div>
+                <div onClick={()=>getTransactionPerDayForAPaymentMethod("insurance")} className='w-full gap-2 flex justify-center items-center bg-white rounded-lg cursor-pointer'>
+                    <button>
+                        Daily Insurance Total.
+                    </button>
+                </div>
+            </div>
             {open && <InvoicePayModal {...{setOpen,open,selectedRowData}} />}
+            {totalsViewOPen &&  <DayTotalsPerPayMode {...{setTotalsViewOPen, totalsViewOPen, infoAsPerPayMode, selectedPayMethod}} />}
         </section>
     )
 }

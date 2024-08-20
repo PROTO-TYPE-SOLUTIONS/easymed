@@ -2,7 +2,7 @@
 
 # Get the current directory of the script
 
-DIR="$( cd "$( backend "${BASH_SOURCE[0]}" )" && pwd )"
+DIR="$( cd "$( app "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Specify the path to your Django project
 PROJECT_PATH="$DIR"

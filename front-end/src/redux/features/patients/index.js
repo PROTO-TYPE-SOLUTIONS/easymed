@@ -1,8 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchServices,fetchPatient, fetchPatientProfile, fetchPatientTriage, searchPatients, fetchPatientPrescribeDrugs } from "@/redux/service/patients";
+import { fetchPrescriptionsPrescribedDrugs } from "@/redux/service/pharmacy";
+import { 
+  fetchServices,
+  fetchPatient, 
+  fetchPatientProfile, 
+  fetchPatientTriage, 
+  searchPatients, 
+  fetchPatientPrescribeDrugs, 
+  fetchAllAttendanceProcesses,
+} from "@/redux/service/patients";
 
 
 const initialState = {
+  processes: [],
   services: [],
   patients: [],
   prescriptionItems: [],
@@ -16,6 +26,9 @@ const PatientSlice = createSlice({
   name: "patients",
   initialState,
   reducers: {
+    setProcesses: (state, action) => {
+      state.processes = action.payload;
+    },
     setServices: (state, action) => {
       state.services = action.payload;
     },
@@ -33,6 +46,10 @@ const PatientSlice = createSlice({
     },
     setPatientTriage: (state, action) => {
       state.patientTriage = action.payload;
+    },
+    setPrescriptionItem: (state, action) => {
+      state.prescriptionItems = action.payload
+
     },
     setPatientPrescriptionItem: (state, action) => {
       const prescriptionItem = state.prescriptionItems.find(item => item.item === action.payload.item );
@@ -56,7 +73,28 @@ const PatientSlice = createSlice({
   },
 });
 
-export const { setServices,setPatients,setProfile,setPatientTriage,setSearchedPatients, removePrescriptionItem, setPatientPrescriptionItem, clearPrescriptionItems, setPatientPrescribedDrugs } = PatientSlice.actions;
+export const { 
+  setServices,
+  setPatients,
+  setProfile,
+  setPatientTriage,
+  setSearchedPatients, 
+  removePrescriptionItem, 
+  setPatientPrescriptionItem, 
+  clearPrescriptionItems, 
+  setPatientPrescribedDrugs,
+  setProcesses,
+  setPrescriptionItem,
+} = PatientSlice.actions;
+
+export const getAllProcesses = () => async (dispatch) => {
+  try {
+    const response = await fetchAllAttendanceProcesses();
+    dispatch(setProcesses(response));
+  } catch (error) {
+    console.log("ATTENDANCE_PROCESSES_ERROR ", error);
+  }
+};
 
 
 export const getAllServices = () => async (dispatch) => {
@@ -110,6 +148,15 @@ export const getAllPatientPrescribedDrugs = (patient_id) => async (dispatch) => 
     dispatch(setPatientPrescribedDrugs(response));
   } catch (error) {
     console.log("PATIENT_PRESCRIBED_DRUGS_ERROR ", error);
+  }
+};
+
+export const getAllPrescribedDrugsByPrescription = (prescription_id, auth) => async (dispatch) => {
+  try {
+    const response = await fetchPrescriptionsPrescribedDrugs(prescription_id, auth);
+    dispatch(setPrescriptionItem(response));
+  } catch (error) {
+    console.log("PRESCRIPTIONS_PRESCRIBED_DRUGS_ERROR ", error);
   }
 };
 

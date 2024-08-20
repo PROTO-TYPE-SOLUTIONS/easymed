@@ -6,40 +6,36 @@ from rest_framework.request import Request
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from patient.models import Patient
 from rest_framework import generics
-
 from django_filters.rest_framework import DjangoFilterBackend
-
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-# models
 from .models import (
     LabReagent,
-    LabTestResult,
     LabTestRequest,
     LabTestProfile,
     LabEquipment,
     EquipmentTestRequest,
     PublicLabTestRequest,
     LabTestPanel,
-    LabTestResultPanel,
     LabTestRequestPanel,
+    ProcessTestRequest,
+    PatientSample
 )
-# serializers
+
 from .serializers import (
     LabReagentSerializer,
-    LabTestResultSerializer,
     LabTestRequestSerializer,
-    # LabTestCategorySerializer,
     LabTestProfileSerializer,
     LabEquipmentSerializer,
     EquipmentTestRequestSerializer,
     PublicLabTestRequestSerializer,
     LabTestPanelSerializer,
-    LabTestResultPanelSerializer,
     LabTestRequestPanelSerializer,
+    ProcessTestRequestSerializer,
+    PatientSampleSerializer
 )
 
-# permissions
+
 from authperms.permissions import (
     IsStaffUser,
     IsDoctorUser,
@@ -48,6 +44,17 @@ from authperms.permissions import (
     IsSystemsAdminUser,
     IsPatientUser
 )
+
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+import os
+
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.template.loader import get_template
+from company.models import Company
+from patient.models import AttendanceProcess
 
 # utils
 from .utils import (
@@ -100,7 +107,7 @@ class LabTestPanelViewSet(viewsets.ModelViewSet):
 
 '''Lab Test Request and lab Test Request Panel'''
 class LabTestRequestViewSet(viewsets.ModelViewSet):
-    queryset = LabTestRequest.objects.all()
+    queryset = LabTestRequest.objects.all().order_by('-id')
     serializer_class = LabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
     filter_backends = (DjangoFilterBackend,)
@@ -130,10 +137,15 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
         return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
 
 
+
 class LabTestRequestByPatientIdAPIView(APIView):
-    def get_object(self, patient: int):
+    def get_lab_test_requests_by_patient(self, patient_id: int):
         try:
-            return Patient.objects.get(id=patient)
+            patient = get_object_or_404(Patient, id=patient_id)
+            attendance_processes = AttendanceProcess.objects.filter(patient=patient)
+            process_test_requests = ProcessTestRequest.objects.filter(attendanceprocess__in=attendance_processes)
+            lab_test_requests = LabTestRequest.objects.filter(process__in=process_test_requests)
+            return lab_test_requests
         except Patient.DoesNotExist:
             return None
 
@@ -141,16 +153,18 @@ class LabTestRequestByPatientIdAPIView(APIView):
         responses=LabTestRequestSerializer,
     )
     def get(self, request: Request, patient_id: int, *args, **kwargs):
-        patient = self.get_object(patient_id)
-        if patient is None:
-            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
+        lab_test_requests = self.get_lab_test_requests_by_patient(patient_id)
+        if lab_test_requests is None:
+            return Response({"error_message": f"Patient ID {patient_id} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
         
-        prescribed_drugs = LabTestRequest.objects.filter(patient=patient)
-        if not prescribed_drugs.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        if not lab_test_requests.exists():
+            return Response({"error_message": "No lab test requests found for the given patient"}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = LabTestRequestSerializer(prescribed_drugs, many=True)
+        serializer = LabTestRequestSerializer(lab_test_requests, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
 
 class LabTestRequestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequestPanel.objects.all()
@@ -164,27 +178,41 @@ class LabTestRequestPanelByLabTestRequestId(generics.ListAPIView):
     def get_queryset(self):
         lab_test_request_id = self.kwargs['lab_test_request_id']
         return LabTestRequestPanel.objects.filter(lab_test_request_id=lab_test_request_id)
-
-
-'''Lab Test Result and Test Result Panel'''
-class LabTestResultViewSet(viewsets.ModelViewSet):
-    queryset = LabTestResult.objects.all()
-    serializer_class = LabTestResultSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
-
-class LabTestResultPanelViewSet(viewsets.ModelViewSet):
-    queryset = LabTestResultPanel.objects.all()
-    serializer_class = LabTestResultPanelSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)   
-
-
-class LabTestResultPanelByLabTestResultId(generics.ListAPIView):
-    serializer_class = LabTestResultPanelSerializer
+    
+    
+class PatientSampleByProcessId(generics.ListAPIView):
+    serializer_class = PatientSampleSerializer 
 
     def get_queryset(self):
-        lab_test_result_id = self.kwargs['lab_test_result_id']
-        return LabTestResultPanel.objects.filter(lab_test_result_id=lab_test_result_id)
+        process_id = self.kwargs['process_id']
+        return PatientSample.objects.filter(process=process_id)
 
+class LabTestRequestByProcessId(generics.ListAPIView):
+    serializer_class = LabTestRequestSerializer
+
+    def get_queryset(self):
+        process_id = self.kwargs['process_id']
+        return LabTestRequest.objects.filter(process_id=process_id)
+
+# '''Lab Test Result and Test Result Panel'''
+# class LabTestResultViewSet(viewsets.ModelViewSet):
+#     queryset = LabTestResult.objects.all()
+#     serializer_class = LabTestResultSerializer
+#     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+
+# class LabTestResultPanelViewSet(viewsets.ModelViewSet):
+#     queryset = LabTestResultPanel.objects.all()
+#     serializer_class = LabTestResultPanelSerializer
+#     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)   
+
+
+# class LabTestResultPanelByLabTestResultId(generics.ListAPIView):
+#     serializer_class = LabTestResultPanelSerializer
+
+#     def get_queryset(self):
+#         lab_test_result_id = self.kwargs['lab_test_result_id']
+#         return LabTestResultPanel.objects.filter(lab_test_result_id=lab_test_result_id)
 
 class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
     queryset = EquipmentTestRequest.objects.all()
@@ -192,50 +220,71 @@ class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 
-# class LabTestCategoryViewSet(viewsets.ModelViewSet):
-#     queryset = LabTestCategory.objects.all()
-#     serializer_class = LabTestCategorySerializer
-#     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
-
 
 class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()
     serializer_class = PublicLabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsPatientUser,)
 
+# class ResultsVerificationViewSet(viewsets.ModelViewSet):
+#     queryset = ResultsVerification.objects.all()
+#     serializer_class = ResultsVerificationSerializer
+
+
+class ProcessTestRequestViewSet(viewsets.ModelViewSet):
+    queryset = ProcessTestRequest.objects.all().order_by('-id')
+    serializer_class = ProcessTestRequestSerializer
+
+class PatientSampleViewSet(viewsets.ModelViewSet):
+    queryset = PatientSample.objects.all().order_by('-id')
+    serializer_class = PatientSampleSerializer
+
 
 '''
 This view gets the geneated pdf and downloads it ocally
 pdf accessed here http://127.0.0.1:8080/download_labtestresult_pdf/26/
 '''
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.conf import settings
-import os
-
-from django.template.loader import render_to_string
-from weasyprint import HTML
-from django.template.loader import get_template
-
-
-from .models import LabTestResult
-from company.models import Company
-
-def download_labtestresult_pdf(request, labtestresult_id):
-    labtestresult = get_object_or_404(LabTestResult, pk=labtestresult_id)
-    labtestresultpanel= LabTestResultPanel.objects.filter(lab_test_result=labtestresult)
+def download_labtestresult_pdf(request, processtestrequest_id):
+    processtestrequest = get_object_or_404(ProcessTestRequest, pk=processtestrequest_id)
+    labtestrequests = LabTestRequest.objects.filter(process=processtestrequest)
+    panels = LabTestRequestPanel.objects.filter(lab_test_request__in=labtestrequests)
     company = Company.objects.first()
 
+    # Retrieve the patient from the AttendanceProcess linked via ProcessTestRequest
+    attendance_process = get_object_or_404(AttendanceProcess, process_test_req=processtestrequest)
+    patient = attendance_process.patient
 
     html_template = get_template('labtestresult.html').render({
-        'labtestresult': labtestresult,
-        'labtestresultiem':labtestresultpanel,
-        'company': company
+        'processtestrequest': processtestrequest,
+        'labtestrequests': labtestrequests,
+        'panels': panels,
+        'patient': patient,
+        'company': company,
+        'attendance_process': attendance_process,
+        'approved_on': panels.first().approved_on if panels.exists() else None
     })
 
-
     pdf_file = HTML(string=html_template).write_pdf()
+
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'filename="invoice_report_{labtestresult_id}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="labtest_report_{processtestrequest_id}.pdf"'
 
     return response
+
+
+
+
+
+class LabTestRequestPanelBySampleView(generics.ListAPIView):
+    serializer_class = LabTestRequestPanelSerializer
+
+    def get(self, request, *args, **kwargs):
+        patient_sample_id = self.kwargs.get('patient_sample_id')
+        try:
+            patient_sample = PatientSample.objects.get(id=patient_sample_id)
+        except PatientSample.DoesNotExist:
+            return Response({"error": "PatientSample not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        lab_test_request_panels = LabTestRequestPanel.objects.filter(patient_sample=patient_sample)
+        serializer = LabTestRequestPanelSerializer(lab_test_request_panels, many=True)
+        return Response(serializer.data)

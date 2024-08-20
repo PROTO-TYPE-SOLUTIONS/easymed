@@ -1,5 +1,6 @@
 import { API_URL,API_METHODS } from "@/assets/api-endpoints";
 import { backendAxiosInstance } from "@/assets/backend-axios-instance";
+import query from "devextreme/data/query";
 
 export const config = {
     api: {
@@ -21,6 +22,29 @@ export default async function handler(req, res) {
             };
             const body = req.body;
             await backendAxiosInstance.post(`${API_URL.FETCH_LAB_TEST_REQUEST_PANELS}`,body,config)
+                .then(response => {
+                    res.status(200).json(response.data);
+                })
+                .catch(e => {
+                        res.status(e.response?.status ?? 500).json(e.response?.data)
+                    }
+                )
+
+        } catch (e) {
+            res.status(500).json(e.message);
+        }
+    }else if(req.method === API_METHODS.PATCH){
+        try {
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
+            const body = req.body;
+            await backendAxiosInstance.patch(`${API_URL.FETCH_LAB_TEST_REQUEST_PANELS}${body.id}/`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
