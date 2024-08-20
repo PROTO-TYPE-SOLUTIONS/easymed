@@ -299,6 +299,35 @@ def download_prescription_pdf(request, prescription_id):
     response['Content-Disposition'] = f'attachment; filename="{prescription.id}.pdf"'
     return response
 
+class PatientHistoryData(APIView):
+    def get_data(self, request, id):
+        #retrieve all the records based on the patient id
+        patient = Patient.objects.filter(patient_id=id)
+        triage = Triage.objects.filter(patient_id=id)
+        appointments = Appointment.objects.filter(patient_id=id)
+        consultations = Consultation.objects.filter(patient_id=id)
+        prescriptions = Prescription.objects.filter(prescription__patient_id=id)
+        referrals = Referral.objects.filter(referral__patient_id=id)
+        
+        #serializing the retrieved data
+        patient_serializer = PatientSerializer(patient, many=True)
+        triage_serializer = TriageSerializer(triage, many=True)
+        appointments_serializer = AppointmentSerializer(appointments, many=True)
+        consultations_serializer = ConsultationSerializer(consultations, many=True)
+        prescriptions_serializer = PrescriptionSerializer(prescriptions, many=True)
+        referrals_serializer = ReferralSerializer(referrals, many=True)
+
+        #returning a JSON response containing all the serialized data
+        return Response({
+            'patient': patient_serializer.data,
+            'triage': triage_serializer.data,
+            'appointments': appointments_serializer.data,
+            'consultations': consultations_serializer.data,
+            'prescriptions': prescriptions_serializer.data,
+            'referrals': referrals_serializer.data
+        }, status=status.HTTP_200_OK)
+
 class AttendanceProcessViewSet(viewsets.ModelViewSet):
     queryset = AttendanceProcess.objects.all().order_by('-id')
     serializer_class = AttendanceProcessSerializer
+
