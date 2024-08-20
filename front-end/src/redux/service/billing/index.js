@@ -70,6 +70,23 @@ export const billingInvoiceItems = (auth,payloads) =>{
     })
 }
 
+export const updateInvoiceItems = (auth,payloads, invoice_item) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.BILLING_INVOICE_ITEMS}`,payloads , {
+            params: {
+                invoice_item:invoice_item
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const getBillingInvoiceItems = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -114,6 +131,54 @@ export const fetchInvoices = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.get(`${APP_API_URL.FETCH_INVOICES}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchPatientInvoices = (auth, patient_id) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FeTCH_PATIENT_INVOICES}`,{
+            params:{
+                patient_id: patient_id,
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchInvoiceItemsByInvoiceId = (auth, invoice_id) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.FETCH_INVOICE_ITEMS_BY_INVOICE}`,{
+            params:{
+                invoice_id: invoice_id,
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+
+export const fetchPaymentModes = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.PAYMENT_MODES}`)
             .then((res) =>{
                 resolve(res.data)
             })

@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Form, ErrorMessage } from "formik";
-import { DialogTitle, Grid, Typography } from "@mui/material";
+import { DialogTitle, Grid } from "@mui/material";
 import { toast } from "react-toastify";
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useSelector, useDispatch } from "react-redux";
@@ -34,7 +34,7 @@ export default function AssignDoctorModal({
 
   useEffect(() => {
     if (authUser) {
-      dispatch(getAllDoctors(authUser));
+      dispatch(getAllDoctors(authUser)); 
       dispatch(getItems())
     }
   }, [authUser]);
@@ -52,7 +52,7 @@ export default function AssignDoctorModal({
   const saveInvoiceItem = async (invoice, item)=> {
     const payload = {
       invoice: invoice,
-      item:item
+      item:parseInt(item),
     }
     try{
       billingInvoiceItems(auth, payload);
@@ -162,7 +162,6 @@ export default function AssignDoctorModal({
                     </p>
                   </div>
                 </Grid>
-
               </Grid>
             </section>
             </Form>

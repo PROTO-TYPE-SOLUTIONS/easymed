@@ -5,20 +5,12 @@ from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item
-from billing.models import Invoice, InvoiceItem
+from billing.models import Invoice
+from company.models import InsuranceCompany
 from laboratory.models import ProcessTestRequest
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-
-# User = get_user_model()
-
-class InsuranceCompany(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
-
 
 class ContactDetails(models.Model):
     tel_no = models.IntegerField()
@@ -40,8 +32,7 @@ class Patient(models.Model):
     date_of_birth = models.DateField(null=True)
     email = models.EmailField(null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
-    insurance = models.ForeignKey(
-        InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
+    insurances = models.ManyToManyField(InsuranceCompany, blank=True)
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -268,7 +259,7 @@ class AttendanceProcess(models.Model):
             self.patient_number = self.patient.unique_id
 
             # Create a new invoice with a default amount of 0
-            self.invoice = Invoice.objects.create(invoice_amount=0)
+            self.invoice = Invoice.objects.create(invoice_amount=0, invoice_number=self.track_number, patient=self.patient, invoice_date=self.created_at)
             self.process_test_req = ProcessTestRequest.objects.create(reference=self.track_number)
             self.triage = Triage.objects.create()
             self.prescription = Prescription.objects.create()

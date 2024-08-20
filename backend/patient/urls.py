@@ -1,7 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    InsuranceCompanyViewSet,
     ContactDetailsViewSet,
     PatientViewSet,
     NextOfKinViewSet,
@@ -23,7 +22,6 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r'insurance-companies', InsuranceCompanyViewSet)
 router.register(r'contact-details', ContactDetailsViewSet)
 router.register(r'patients', PatientViewSet)
 router.register(r'next-of-kin', NextOfKinViewSet)

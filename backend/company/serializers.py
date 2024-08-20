@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Company, CompanyBranch
+from .models import Company, CompanyBranch, InsuranceCompany
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,4 +10,9 @@ class CompanySerializer(serializers.ModelSerializer):
 class CompanyBranchSerializer(serializers.ModelSerializer):
     class Meta:
         model= CompanyBranch
+        fields = '__all__'
+
+class InsuranceCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InsuranceCompany
         fields = '__all__'
