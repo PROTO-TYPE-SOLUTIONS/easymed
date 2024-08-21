@@ -2,15 +2,8 @@ Vagrant.configure("2") do |config|
 
     config.vm.define "listener" do |listener|
         config.vm.box = "ubuntu/bionic64"
-        config.vm.synced_folder ".", "/home/vagrant"
-        config.vm.provision "shell", path: "/scripts/setup.sh"
+        config.vm.synced_folder ".", "/home/vagrant/shared"
+        config.vm.network "public_network", ip: "192.168.100.19", bridge: "wlp0s20f3"
     end
-
-    config.vm.define "listener2" do |listener2|
-        config.vm.box = "gusztavvargadr/windows-10"
-        config.vm.synced_folder ".", "/home/vagrant"
-        config.vm.provision "shell", path: "/scripts/setup.sh"
-    end
-
 
   end

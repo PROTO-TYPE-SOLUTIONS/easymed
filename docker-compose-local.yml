@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+    redis:
+        image: redis:7.0-alpine
+        container_name: redis
+        command: redis-server --appendonly yes --replica-read-only no
+        volumes:
+            - ./volumes/redis/:/etc/redis/
+        ports:
+            - 6379:6379
+        networks:
+            - mks
+        restart: unless-stopped
+
+    backend:
+        build:
+            context: ./backend
+            dockerfile: ./Dockerfile.local
+        container_name: easymed-backend
+        command: python manage.py runserver 0.0.0.0:8080
+        volumes:
+            - ./backend:/app
+        ports:
+            - 8080:8080
+        env_file:
+            - ./.env
+        restart: unless-stopped
+        networks:
+            - mks
+
+    worker:
+        build: ./backend
+        container_name: "celery"
+        restart: unless-stopped
+        env_file:
+            - ./.env    
+        command: celery -A easymed worker --loglevel=INFO        
+        depends_on:
+            - redis
+        networks:
+            - mks   
+
+    frontend:
+        build:
+            context: ./front-end
+            dockerfile: ./Dockerfile.local
+        container_name: easymed-frontend
+        restart: unless-stopped
+        ports:
+            - 3000:3000
+        depends_on:
+            - backend
+        # volumes:
+        #     - ./front-end:/app    
+        networks:
+            - mks    
+
+networks:
+    mks:
+        name: mks
+        driver: bridge

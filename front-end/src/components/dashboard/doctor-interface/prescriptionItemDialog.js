@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
+import { DialogTitle, Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
 import {  getItems, } from "@/redux/features/inventory";
@@ -10,12 +10,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 
-const PrescriptionItemDialog = ({patient_id}) => {
+const PrescriptionItemDialog = ({patient, patient_id}) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const { item, } = useSelector(({ inventory }) => inventory);
-    const { prescriptionItems } = useSelector(({ patient }) => patient);    
+    const { patients } = useSelector((store)=> store.patient);
+    const { prescriptionItems } = useSelector(({ patient }) => patient);
   
     const handleClickOpen = () => {
       setOpen(true);
@@ -79,6 +80,13 @@ const PrescriptionItemDialog = ({patient_id}) => {
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
+      <DialogTitle>
+        <div className="flex justify-between">
+          <p className="text-xs font-semibold">{`Name: ${patient.first_name} ${patient.second_name}`}</p>
+          <p className="text-xs font-semibold">{`Gender: ${patient.gender}`}</p>
+          <p className="text-xs font-semibold">{`Name: ${patient.age}`}</p>
+        </div>
+      </DialogTitle>
       <DialogContent>
         <h3 className="text-xl my-4"> Add Prescribe Drug </h3>
       <Formik
@@ -92,7 +100,7 @@ const PrescriptionItemDialog = ({patient_id}) => {
             <SeachableSelect
               label="Select Item"
               name="item"
-              options={item.map((item) => ({ value: item.id, label: `${item?.name}` }))}
+              options={item.filter((drug)=> drug.category === "Drug").map((item) => ({ value: item.id, label: `${item?.name}` }))}
             />
             <ErrorMessage
               name="item"
@@ -100,9 +108,9 @@ const PrescriptionItemDialog = ({patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={4} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Dosage"
               name="dosage"
@@ -113,9 +121,9 @@ const PrescriptionItemDialog = ({patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={4} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Frequenct"
               name="frequency"
@@ -126,11 +134,11 @@ const PrescriptionItemDialog = ({patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={4} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
-              placeholder="Duration"
+              placeholder="Duration(Days)"
               name="duration"
             />
             <ErrorMessage
@@ -139,9 +147,11 @@ const PrescriptionItemDialog = ({patient_id}) => {
               className="text-warning text-xs"
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={12} xs={12}>
             <Field
-              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              as='textarea'
+              rows={4}
+              className="block border rounded-lg text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
               placeholder="Note"
               name="note"
@@ -156,7 +166,7 @@ const PrescriptionItemDialog = ({patient_id}) => {
             <div className="flex items-center justify-end">
               <button
                 type="submit"
-                className="bg-primary rounded-xl text-sm px-8 py-4 text-white"
+                className="bg-primary rounded-lg text-sm px-8 py-4 text-white"
               >
                 {loading && (
                   <svg

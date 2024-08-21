@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager, Selection,
+import { Column, Paging, Pager,
   HeaderFilter, Scrolling,
  } from "devextreme-react/data-grid";
-import AssignDoctorModal from "../reception-interface/assign-doctor-modal";
 import { Chip } from "@mui/material";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
@@ -13,13 +12,14 @@ import PrescribePatientModal from "./prescribe-patient-modal";
 import { BiTransferAlt } from "react-icons/bi";
 import { MdOutlineContactSupport } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllPatients } from "@/redux/features/patients";
-import { getAllDoctorAppointments } from "@/redux/features/appointment";
+import { getAllPatients, getAllProcesses } from "@/redux/features/patients";
 import { useAuth } from "@/assets/hooks/use-auth";
 import { BiSupport } from 'react-icons/bi'
 import { GiMedicinePills } from 'react-icons/gi'
 import { useRouter } from "next/router";
 import LabModal from "./lab-modal";
+import ViewAddedResults from "./ViewAddedResults";
+import ApproveResults from "../laboratory/add-result/ApproveResults";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -49,6 +49,11 @@ const getActions = () => {
       label: "Send To Lab",
       icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
     },
+    {
+      action: "results",
+      label: "View results",
+      icon: <MdOutlineContactSupport className="text-card text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -59,23 +64,33 @@ const DoctorPatientDataGrid = () => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const [open, setOpen] = useState(false);
+  const [resultOpen, setResultOpen]=useState(false)
   const [consultOpen, setConsultOpen] = useState(false);
   const [prescribeOpen, setPrescribeOpen] = useState(false);
   const [labOpen, setLabOpen] = useState(false);
   const userActions = getActions();
   const dispatch = useDispatch();
   const auth = useAuth();
-  const { doctorAppointments } = useSelector((store) => store.appointment);
   const router = useRouter();
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const { processes, patients } = useSelector((store)=> store.patient)
+  const [processTrack, setProcessTrack] = useState("doctor")
+  const actionsWhenOnDoctorTrack = userActions.filter((action)=> action.action !== "results")
+  const actionsWhenOnResultedTrack = userActions.filter((action)=> action.action !== "send to lab")
 
-  
+  const doctorsSchedules = processes.filter((process)=> process.track===processTrack)
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
 
   useEffect(() => {
     if (auth) {
-      dispatch(getAllDoctorAppointments(auth.user_id));
+      dispatch(getAllPatients());
+      dispatch(getAllProcesses())
     }
   }, [auth]);
 
@@ -87,14 +102,13 @@ const DoctorPatientDataGrid = () => {
       setSelectedRowData(data);
       setConsultOpen(true);
     } else if (menu.action === "prescribe") {
-      // router.push('/dashboard/doctor-interface/prescription');
-      const encodedData = encodeURIComponent(JSON.stringify(data));
-      router.push(`/dashboard/doctor-interface/prescribe/${data.patient}`);
-      // setSelectedRowData(data);
-      // setPrescribeOpen(true);
+      router.push(`/dashboard/doctor-interface/${data.id}/${data.prescription}`);
     } else if(menu.action === "send to lab"){
       setSelectedRowData(data);
       setLabOpen(true);
+    }else if(menu.action === "results"){
+      setSelectedRowData(data);
+      setResultOpen(true);
     }
   };
 
@@ -103,7 +117,7 @@ const DoctorPatientDataGrid = () => {
       <>
         <CmtDropdownMenu
           sx={{ cursor: "pointer" }}
-          items={userActions}
+          items={processTrack === 'doctor' ? actionsWhenOnDoctorTrack : actionsWhenOnResultedTrack }
           onItemClick={(menu) => onMenuClick(menu, data)}
           TriggerComponent={
             <LuMoreHorizontal className="cursor-pointer text-xl" />
@@ -114,51 +128,18 @@ const DoctorPatientDataGrid = () => {
   };
 
   const onSelectionChanged = (props) => {
-    const { selectedRowKeys, selectedRowsData } = props;
+    const { selectedRowKeys } = props;
     setSelectedRecords(selectedRowKeys);
   };
 
-  const statusFunc = ({ data }) => {
-    if (data?.status === "pending") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          label={data.status}
-          color="primary"
-          className="bg-primary text-white"
-        />
-      );
-    } else if (data?.status === "confirmed") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          label={data.status}
-          className="bg-success text-white"
-        />
-      );
-    } else if (data?.status === "New Patient") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          label={data.status}
-          className="bg-card text-white"
-        />
-      );
-    }
-  };
-
-  const dateCreated = ({ data }) => {
-    const formattedDate = new Date(data.date_created).toLocaleDateString();
-    return <div>{formattedDate}</div>
-  }
-
   return (
     <section>
+      <div className="capitalize flex gap-4 py-4">
+        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("doctor")}>New Appointments</p>
+        <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("lab")}>From The Lab</p>
+      </div>
       <DataGrid
-        dataSource={doctorAppointments}
+        dataSource={doctorsSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         onSelectionChanged={onSelectionChanged}
@@ -172,11 +153,6 @@ const DoctorPatientDataGrid = () => {
         className="shadow-xl w-full"
         // height={"70vh"}
       >
-        {/* <Selection
-          mode="multiple"
-          selectAllMode={"allMode"}
-          showCheckBoxesMode={checkBoxesMode}
-        /> */}
         <HeaderFilter visible={true} />
         <Scrolling rowRenderingMode='virtual'></Scrolling>
         <Paging defaultPageSize={10} />
@@ -188,70 +164,41 @@ const DoctorPatientDataGrid = () => {
           showNavigationButtons={showNavButtons}
         />
         <Column
-          dataField="first_name"
-          caption="First Name"
-          width={140}
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column
-          dataField="second_name"
-          caption="Last Name"
+          dataField="patient_number"
+          caption="PId"
           width={120}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
-          dataField="age"
-          caption="Age"
-          width={120}
+          dataField="patient"
+          caption="Patient Name"
+          width={150}
           allowFiltering={true}
           allowSearch={true}
+          cellRender={patientNameRender}
         />
+        <Column dataField="reason" caption="Reason" width={200} />
         <Column
-          dataField="gender"
-          caption="Gender"
-          width={140}
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column
-          dataField="date_created"
-          caption="Date Created"
-          width={140}
-          allowFiltering={true}
-          allowSearch={true}
-          cellRender={dateCreated}
-        />
-        <Column
-          dataField="status"
-          caption="Status"
-          width={140}
-          cellRender={statusFunc}
-        />
-        {/* <Column
-          dataField="assigned_doctor"
-          caption="Assigned Doctor"
-          width={200}
-        /> */}
-        <Column dataField="reason" caption="Reason" width={140} />
-        <Column
-          dataField="country"
+          dataField=""
           caption="Action"
           width={140}
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <ReferPatientModal {...{ open, setOpen, selectedRowData }} />
-      <ConsultPatientModal
+      {open && (<ReferPatientModal {...{ open, setOpen, selectedRowData }} />)}
+      {consultOpen && (<ConsultPatientModal
         {...{ consultOpen, setConsultOpen, selectedRowData }}
-      />
-      <PrescribePatientModal
+      />)}
+      {prescribeOpen && (<PrescribePatientModal
         {...{ prescribeOpen, setPrescribeOpen, selectedRowData }}
-      />
-      <LabModal
+      />)}
+      {labOpen && (<LabModal
         {...{ labOpen, setLabOpen, selectedRowData }}
-      />
+      />)}
+      {/* {resultOpen && (<ViewAddedResults resultOpen={resultOpen} setResultOpen={setResultOpen} selectedData={selectedRowData}
+      />)} */}
+      {resultOpen && (<ApproveResults selectedData={selectedRowData} approveOpen={resultOpen} setApproveOpen={setResultOpen}/>)}
     </section>
   );
 };

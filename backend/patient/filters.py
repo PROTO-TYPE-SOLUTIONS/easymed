@@ -45,7 +45,7 @@ class PrescriptionFilter(django_filters.FilterSet):
     patient_id__id = django_filters.NumberFilter(lookup_expr='exact', label='patient_id')
     class Meta:
         model = Prescription
-        fields = ("patient_id__id", "status")
+        fields = ("patient_id__id",)
 
 class PrescribedDrugFilter(django_filters.FilterSet):
     prescription_id__id = django_filters.NumberFilter(lookup_expr='exact', label='prescription_id')

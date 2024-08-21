@@ -29,13 +29,9 @@ export const fetchInventories = (auth) =>{
     })
 }
 
-export const fetchItems = (name) =>{
+export const fetchItems = () =>{
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_ITEMS}`,{
-            params:{
-                name: name
-            }
-        })
+        axios.get(`${APP_API_URL.FETCH_ITEMS}`)
             .then((res) =>{
                 resolve(res.data)
             })

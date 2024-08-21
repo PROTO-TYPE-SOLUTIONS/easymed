@@ -60,14 +60,16 @@ def get_invoice_items_by_date_range(request):
                 # Prepare the data for the template
                 context = {
                     'invoice_items': invoice_items,
-                    'company': company
+                    'company': company,
+                    'start_date': start_date,
+                    'end_date': end_date
                 }
 
 
                 # html_string = render_to_string('sales_by_date.html', {'invoice_items': serialized_invoice_items})
                 html_string = render_to_string('sales_by_date.html', context)
                 pdf_file = HTML(string=html_string).write_pdf()
-                pdf_directory = os.path.join(BASE_DIR, 'makeeasyhmis/static', 'reports')
+                pdf_directory = os.path.join(BASE_DIR, 'easymed/static', 'reports')
                 os.makedirs(pdf_directory, exist_ok=True)
                 pdf_file_name = 'invoice_items.pdf'
                 pdf_file_path = os.path.join(pdf_directory, pdf_file_name)
@@ -85,7 +87,7 @@ def get_invoice_items_by_date_range(request):
 def serve_generated_pdf(request):
     # Path to the generated PDF file
     pdf_file_name = 'invoice_items.pdf'
-    pdf_directory = os.path.join(BASE_DIR, 'makeeasyhmis/static', 'reports')
+    pdf_directory = os.path.join(BASE_DIR, 'easymed/static', 'reports')
     pdf_file_path = os.path.join(pdf_directory, pdf_file_name)
 
     # Check if the PDF file exists
@@ -120,12 +122,14 @@ def get_invoice_items_by_item_and_date_range(request):
                 # Prepare the data for the template
                 context = {
                     'invoice_items': invoice_items,
-                    'company': company
+                    'company': company,
+                    'start_date': start_date,
+                    'end_date': end_date
                 }
 
                 html_string = render_to_string('sales_by_item_id.html', context)
                 pdf_file = HTML(string=html_string).write_pdf()
-                pdf_directory = os.path.join(BASE_DIR, 'makeeasyhmis/static', 'reports')
+                pdf_directory = os.path.join(BASE_DIR, 'easymed/static', 'reports')
                 os.makedirs(pdf_directory, exist_ok=True)
                 pdf_file_name = 'sales_by_item_id.pdf'
                 pdf_file_path = os.path.join(pdf_directory, pdf_file_name)
@@ -144,7 +148,7 @@ from django.http import FileResponse
 
 def serve_sales_by_item_id_pdf(request):
     pdf_file_name = 'sales_by_item_id.pdf'
-    pdf_directory = os.path.join(BASE_DIR, 'makeeasyhmis/static', 'reports')
+    pdf_directory = os.path.join(BASE_DIR, 'easymed/static', 'reports')
     pdf_file_path = os.path.join(pdf_directory, pdf_file_name)
 
     if os.path.exists(pdf_file_path):

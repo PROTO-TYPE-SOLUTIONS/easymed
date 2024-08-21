@@ -3,16 +3,17 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling,
-  HeaderFilter
  } from "devextreme-react/data-grid";
 import { labData } from "@/assets/dummy-data/laboratory";
-import { Grid,Chip } from "@mui/material";
+import { Grid } from "@mui/material";
 import { MdLocalPrintshop } from "react-icons/md";
 
-import { downloadPDF } from "@/redux/service/pdfs";
+import { downloadResultPDF } from "@/redux/service/pdfs";
 import { useAuth } from "@/assets/hooks/use-auth";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
+import ApproveResults from "./add-result/ApproveResults";
+import { useSelector } from "react-redux";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -23,6 +24,11 @@ const allowedPageSizes = [5, 10, 'all'];
 const getActions = () => {
   let actions = [
     {
+      action: "approve",
+      label: "Approve Results",
+      icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+    },
+    {
       action: "print",
       label: "Print",
       icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
@@ -32,41 +38,43 @@ const getActions = () => {
   return actions;
 };
 
-const LabResultDataGrid = ({ labResults }) => {
+const LabResultDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const auth = useAuth();
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [approveOpen ,setApproveOpen] = useState(false)
+  const [selectedData, setSelectedData] = useState(null)
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
-  
-  //   FILTER PATIENTS BASED ON SEARCH QUERY
-  const filteredData = labData.filter((patient) => {
-    return patient?.name
-      ?.toLocaleLowerCase()
-      .includes(searchQuery.toLowerCase());
-  });
+
+  const { processes, patients } = useSelector((store)=> store.patient)
+
+  const labTestsResultsSchedules = processes.filter((process)=> process.track==="lab")
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
 
   const handlePrint = async (data) => {
       try{
-          const response = await downloadPDF(data.id, "_labtestresult_pdf", auth)
+          const response = await downloadResultPDF(data.process_test_req, `_labtestresult_pdf`, auth)
           window.open(response.link, '_blank');
           toast.success("got pdf successfully")
 
       }catch(error){
           console.log(error)
           toast.error(error)
-      }
-      
+      }      
   };
 
   const onMenuClick = async (menu, data) => {
-    if (menu.action === "dispense") {
-      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
-      setSelectedRowData(data);
-      setOpen(true);
-    }else if (menu.action === "print"){
+    if (menu.action === "print"){
       handlePrint(data);
+    }else if (menu.action === "approve"){
+      setSelectedData(data);
+      setApproveOpen(true)
     }
   };
 
@@ -112,19 +120,16 @@ const LabResultDataGrid = ({ labResults }) => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={labResults}
+        dataSource={labTestsResultsSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
         remoteOperations={true}
-        showColumnLines={true}
+        showColumnLines={false}
         showRowLines={true}
         wordWrapEnabled={true}
-        allowPaging={true}
-        // height={"70vh"}
         className="w-full shadow"
       >
-        <HeaderFilter visible={true} />
         <Scrolling rowRenderingMode='virtual'></Scrolling>
         <Paging defaultPageSize={10} />
         <Pager
@@ -134,21 +139,26 @@ const LabResultDataGrid = ({ labResults }) => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column dataField="id" caption="Result ID" />
-        <Column dataField="title" caption="Title"  />
-        <Column dataField="date_created" caption="Date Created" />
         <Column
-          dataField="lab_test_request"
-          caption="Test Request"
-          allowFiltering={true}
-          allowSearch={true}
+          dataField="patient_number" 
+          caption="PId" 
+          width={120} 
         />
-        <Column 
-          dataField="" 
+        <Column
+          dataField="patient" 
+          caption="Patient Name" 
+          width={200}
+          cellRender={patientNameRender}
+        />
+        <Column
+          dataField=""
           caption=""
+          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>
+
+      {approveOpen && (<ApproveResults selectedData={selectedData} approveOpen={approveOpen} setApproveOpen={setApproveOpen}/>)}
     </>
   );
 };

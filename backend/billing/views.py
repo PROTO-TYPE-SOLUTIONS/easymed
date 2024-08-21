@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from django.template.loader import get_template
 from .models import Invoice, InvoiceItem, PaymentMode
+from inventory.models import IncomingItem
 
 from authperms.permissions import (
     IsStaffUser,
@@ -50,6 +51,11 @@ def download_invoice_pdf(request, invoice_id,):
     invoice_items = InvoiceItem.objects.filter(invoice=invoice)
     company = Company.objects.first()
 
+    # Fetch the sale price for each InvoiceItem
+    for item in invoice_items:
+        incoming_item = IncomingItem.objects.filter(item=item.item).first()
+        if incoming_item:
+            item.sale_price = incoming_item.sale_price
 
     html_template = get_template('invoice.html').render({
         'invoice': invoice,

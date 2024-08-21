@@ -25,6 +25,18 @@
             max-width: 150px;
             max-height: 150px;
         }
+        .footer{
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            font-style: italic;
+            color: gray;
+            font-weight: bold;
+
+        }
     </style>
 </head>
 <body>
@@ -35,36 +47,36 @@
         <p>{{ company.phone1 }} | {{ company.email1 }}</p>
     </div>
 
+
     <h2>Invoice</h2>
     <p>Invoice Number: {{ invoice.invoice_number }}</p>
     <p>Invoice Date: {{ invoice.invoice_date }}</p>
     <p>Invoiced to: {{ invoice.patient.first_name }}</p>
 
 
+    <p>Total Amount: {{ invoice.invoice_amount }}</p>
+
     <table>
         <thead>
             <tr>
-                <th>Item</th>
-                <th>QTY</th>
+                <th>Item Name</th>
                 <th>Price</th>
                 <th>Category</th>
-                <th>Date Created</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
             {% for invoice_item in invoice_items %}
             <tr>
-                <td>{{ invoice_item.service.name }}</td>
-                <td>{{ invoice_item.quantity_purchased }}</td>
-
-                <td>{{ invoice_item.service.item.inventory.sale_price }}</td>
-                
-                <td>{{ invoice_item.service.category }}</td>
+                <td>{{ invoice_item.item.name }}</td>
+                <td>{{ invoice_item.sale_price|floatformat:2 }}</td>
+                <td>{{ invoice_item.item.category }}</td>
                 <td>{{ invoice_item.item_created_at }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
 
     <p>Total Amount: {{ invoice.invoice_amount }}</p>
 

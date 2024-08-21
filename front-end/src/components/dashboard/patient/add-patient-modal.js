@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import { IoMdAdd } from "react-icons/io";
-import { createPatient } from "@/redux/service/patients";
+import { createPatient, patientNextOfKin, patientNextOfKinContact } from "@/redux/service/patients";
 import { toast } from "react-toastify";
 import { getAllInsurance } from "@/redux/features/insurance";
 import { useSelector, useDispatch } from "react-redux";
@@ -29,42 +29,86 @@ const AddPatientModal = () => {
     dispatch(getAllInsurance());
   }, []);
 
-  const gender = [
-    {
-      id: 1,
-      name: "Male",
-    },
-    {
-      id: 2,
-      name: "Female",
-    },
-  ];
-
   const initialValues = {
     first_name: "",
     second_name: "",
     date_of_birth: "",
     gender: "",
+    phone: "",
+    email: "",
     insurance: null,
+    kin_first_name: "",
+    kin_second_name: "",
+    kin_phone: "",
+    kin_email:"",
+    residence: "",
+    relationship: "",
   };
 
   const validationSchema = Yup.object().shape({
     first_name: Yup.string().required("First Name is required!"),
     second_name: Yup.string().required("Second Name is required!"),
+    kin_first_name: Yup.string().required("Next Kin First Name is required!"),
+    kin_second_name: Yup.string().required("Next Kin Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
+    phone: Yup.number().required("Phone Number is required!"),
+    kin_phone: Yup.number().required("Next Kin Phone Number is required!"),
+    email: Yup.string().required("Email is required!"),
+    kin_email: Yup.string().required("Next Kin Email is required!"),
+    relationship: Yup.string().required("Relationship is required!"),
+    residence: Yup.string().required("location is required!"),
   });
+
+  const createPatientNextOfKin = async (patient_id, next_of_kin, contact) => {
+    const payload = {
+      ...next_of_kin,
+      patient: patient_id,
+      contacts: contact
+    }
+
+    try {
+      const nextOfKin = await patientNextOfKin(payload)
+      console.log("SUCCESS CREATING NEXT OF KIN", nextOfKin)
+      
+    }catch(err){
+      console.log("ERROR CREATING NEXT OF KIN", err)
+    }
+
+  }
 
   const handleCreatePatient = async (formValue, helpers) => {
     try {
-      const formData = {
-        ...formValue,
+      const patientPayload = {
+        first_name: formValue.first_name,
+        second_name: formValue.second_name,
+        date_of_birth: formValue.date_of_birth,
+        gender: formValue.gender,
+        phone: formValue.phone,
+        email: formValue.email,
         insurance: parseInt(formValue.insurance),
-        user_id: parseInt(formValue.user_id),
-      };
+        user_id: parseInt(formValue.user_id)
+      }
+
+      const netOfKin = {
+        first_name: formValue.kin_first_name,
+        second_name: formValue.kin_second_name,
+        relationship: formValue.relationship,
+      }
+
+      const nextOfKinContacts = {
+        email_address:formValue.kin_email,
+        residence: formValue.residence,
+        tel_no: formValue.kin_phone,
+      }
+
       setLoading(true);
-      await createPatient(formData).then(() => {
+
+      const nextOfKinContactResponse = await patientNextOfKinContact(nextOfKinContacts)
+
+      await createPatient(patientPayload).then((res) => {
         helpers.resetForm();
+        createPatientNextOfKin(res.id, netOfKin, nextOfKinContactResponse.id)
         toast.success("Patient Created Successfully!");
         setLoading(false);
         dispatch(getAllPatients());
@@ -86,7 +130,7 @@ const AddPatientModal = () => {
       </button>
       <Dialog
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -100,8 +144,9 @@ const AddPatientModal = () => {
           >
             <Form>
               <section className="space-y-1">
-                <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
+              <h2 className="text-sm font-semibold text-primary">Patients Details</h2>
+                <Grid className="py-3 " container spacing={1}>
+                  <Grid item md={3} xs={12}>
                     <label htmlFor="first_name">First Name</label>
                     <Field
                       className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
@@ -115,7 +160,7 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="second_name">Last Name</label>
                     <Field
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
@@ -129,9 +174,7 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="date_of_birth">Date of Birth</label>
                     <Field
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
@@ -145,7 +188,7 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="gender">Select Gender</label>
                     <Field
                       as="select"
@@ -163,9 +206,35 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
+                  <Grid item md={4} xs={12}>
+                  <label htmlFor="second_name">Phone Number</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="number"
+                      placeholder="Phone Number"
+                      name="phone"
+                    />
+                    <ErrorMessage
+                      name="phone"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                  <label htmlFor="second_name">Email</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="email"
+                      placeholder="Email"
+                      name="email"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
                   <label htmlFor="insurance">Insurance</label>
                     <Field
                       as="select"
@@ -186,7 +255,93 @@ const AddPatientModal = () => {
                     />
                   </Grid>
                 </Grid>
-
+                <h2 className="text-sm font-semibold text-primary">Next Of Kin Details</h2>
+                <Grid container spacing={1}>
+                <Grid item md={4} xs={12}>
+                    <label htmlFor="first_name">First Name</label>
+                    <Field
+                      className="block border border-gray rounded-xl py-2 text-sm px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="First Name"
+                      name="kin_first_name"
+                    />
+                    <ErrorMessage
+                      name="kin_first_name"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                  <label htmlFor="second_name">Last Name</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="Second Name"
+                      name="kin_second_name"
+                    />
+                    <ErrorMessage
+                      name="kin_second_name"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                  <label htmlFor="second_name">Relationship</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="Relationship to patient"
+                      name="relationship"
+                    />
+                    <ErrorMessage
+                      name="relationship"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                  <label htmlFor="second_name">Phone Number</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="number"
+                      placeholder="Phone Number"
+                      name="kin_phone"
+                    />
+                    <ErrorMessage
+                      name="kin_phone"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                  <label htmlFor="second_name">Email Address</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="email"
+                      placeholder="Email Address"
+                      name="kin_email"
+                    />
+                    <ErrorMessage
+                      name="kin_email"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                  <label htmlFor="second_name">Residence Location</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                      type="text"
+                      placeholder="Residence Location"
+                      name="residence"
+                    />
+                    <ErrorMessage
+                      name="residence"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                </Grid>
                 <div>
                   <div className="flex justify-end gap-2 mt-4">
                     <button

@@ -14,9 +14,9 @@ import { SlMinus } from 'react-icons/sl';
 import { useAuth } from '@/assets/hooks/use-auth';
 import LabItemModal from './LabItemModal';
 
-import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests } from '@/redux/features/laboratory';
+import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests, getAllLabTestPanelsByTestRequest, getAllPhlebotomySamples, getAllLabTestPanelsBySample } from '@/redux/features/laboratory';
 import SeachableSelect from '@/components/select/Searchable';
-import { sendLabResults, addTestResultPanel } from '@/redux/service/laboratory';
+import { sendLabResults, addTestResultPanel, sendLabResultQualitative, addQualitativeTestResultPanel, updateLabRequestPanels } from '@/redux/service/laboratory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -29,6 +29,11 @@ const getActions = () => {
       label: "Remove",
       icon: <SlMinus className="text-success text-xl mx-2" />,
     },
+    {
+      action: "add-result",
+      label: "Add Results",
+      icon: <SlMinus className="text-success text-xl mx-2" />,
+    },
   ];
   
   return actions;
@@ -38,28 +43,33 @@ const AddTestResults = () => {
 
   const router = useRouter()
   const userActions = getActions();
+  const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
+  const [selected, setSelectedItem] = useState(null)
+  const [selectedOption, setSelectedOPtion] = useState(null)
   const dispatch = useDispatch();
   const { labResultItems  } = useSelector((store) => store.laboratory);
   const { labTestPanels  } = useSelector((store) => store.laboratory);
   const auth = useAuth();
-  const { labRequests } = useSelector((store) => store.laboratory);
+  const { labRequests, phlebotomySamples } = useSelector((store) => store.laboratory);
 
   const token = useAuth();
+  const initialValues = {
+    title: "",
+    lab_test_request: null,
+    recorded_by:token.user_id,
+  };
 
   useEffect(() => {
     if (token) {
       dispatch(getAllLabRequests(token));
+      dispatch(getAllPhlebotomySamples(token))
+      if(selected){
+        dispatch(getAllLabTestPanelsBySample(selected.value, token));
+      }
     }
-  }, [token]);
+  }, [token, selected]);
   
-  const initialValues = {
-    title: "",
-    lab_test_request: null,
-  };
-
-  console.log("LAB_RESULTS_ITEMS ", labRequests)
-
   const validationSchema = Yup.object().shape({
     lab_test_request: Yup.object().required("This field is required!"),
     title: Yup.string().required("This field is required!"),
@@ -69,6 +79,9 @@ const AddTestResults = () => {
     console.log(data)
     if (menu.action === "remove") {
       dispatch(removeItemToLabResultsItems(data))
+    }else if(menu.action === "add-result"){
+      setOpen(true);
+      setSelectedOPtion(data)
     }
   };
 
@@ -87,30 +100,6 @@ const AddTestResults = () => {
     );
   };
 
-  const saveLabResultsItem = async (item, payload) => {
-
-    const payloadData = {
-      ...item,
-      lab_test_result: payload.id
-    }
-
-    console.log("PAYLOAD LAB RESULTS" , payloadData)
-
-    try {
-      await addTestResultPanel(payloadData, auth).then(()=>{
-        toast.success("Test REsult Item Added Successfully!");
-      })
-
-    } catch(err) {
-      toast.error(err);
-      setLoading(false);
-    } 
-  }
-
-  const sendEachItemToDb = (payload) => {
-    labResultItems.forEach(item => saveLabResultsItem(item, payload))
-  }
-
   const saveLabResults = async (formValue, helpers) => {
     console.log(formValue)
 
@@ -118,31 +107,26 @@ const AddTestResults = () => {
       if (labResultItems.length <= 0) {
         toast.error("No lab result items");
         return;
-      }      
-    
+      }    
       setLoading(true);
-    
-      const payload = {
-        ...formValue,
-        lab_test_request: formValue.lab_test_request.value
-      }
 
-      console.log(payload);
-    
-      await sendLabResults(payload, auth).then((res) => {
-        console.log(res)
-        sendEachItemToDb(res)
-        toast.success("Requisition Added Successfully!");
-        setLoading(false);
-        dispatch(clearItemsToLabResultsItems());
-        
-        router.push('/dashboard/laboratory');
-      });
-    } catch (err) {
-      toast.error(err);
+      labResultItems.forEach(async(panel)=> {
+
+          const payload = {
+            id:panel.id,
+            result: panel.result
+          }
+          const response = await updateLabRequestPanels(payload, auth)
+                 
+      })
       setLoading(false);
-    }
-  };
+      router.back() 
+
+      }catch(error){
+        console.log("ERR SAVING RESULTS")
+        setLoading(false);
+      }
+  }
 
   return (
     <section>
@@ -151,41 +135,31 @@ const AddTestResults = () => {
           <h3 className="text-xl"> Lab Result entry </h3>
       </div>
       <div className='flex justify-end'>
-       <LabItemModal />
-      </div>     
+      {selected && (<LabItemModal open={open} setOpen={setOpen} sample_label={selected.label} selected={selectedOption}/>)}
+      </div>
 
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={saveLabResults}
       >
+        {({ values, setFieldValue }) => (
       <Form className="">
-      <Grid container spacing={2} className='my-2'>
-        <Grid item md={4} xs={4}>
+      <Grid container spacing={2} className='my-2 flex items-center'>
+        <Grid item md={12} xs={12}>
           <SeachableSelect
-            label="test request ( sample id )"
+            label="Sample"
             name="lab_test_request"
-            options={labRequests.map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.sample}` }))}
+            setSelectedItem={(selectedOption) => {
+              setSelectedItem(selectedOption);
+            }}
+            options={phlebotomySamples.filter((sample)=>sample.is_sample_collected === true).map((labRequests) => ({ value: labRequests.id, label: `${labRequests?.patient_sample_code}` }))}
           />
           <ErrorMessage
             name="lab_test_request"
             component="div"
             className="text-warning text-xs"
-          />      
-        </Grid>
-        <Grid item md={4} xs={4}>
-          <label>result title</label>
-          <Field
-            className="block border rounded-lg text-sm border-gray py-2 px-4 focus:outline-card w-full"
-            maxWidth="sm"
-            placeholder="Test Result Title"
-            name="title"
-          />
-          <ErrorMessage
-            name="title"
-            component="div"
-            className="text-warning text-xs"
-          />
+          />  
         </Grid>
       </Grid>
       <DataGrid
@@ -223,8 +197,23 @@ const AddTestResults = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <Grid className="mt-8" item md={12} xs={12}>
-        <div className="flex items-center justify-start">
+      <Grid className='py-2' item md={4} xs={12}>
+          <Field
+            as='textarea'
+            rows={4}
+            className="block border rounded-lg text-sm border-gray py-2 px-4 focus:outline-card w-full"
+            maxWidth="sm"
+            placeholder="Comments"
+            name="title"
+          />
+          <ErrorMessage
+            name="title"
+            component="div"
+            className="text-warning text-xs"
+          />
+        </Grid>
+      <Grid item md={12} xs={12}>
+        <div className="flex py-2 items-center justify-end">
           <button
             type="submit"
             className="bg-primary rounded-xl text-sm px-8 py-4 text-white"
@@ -253,7 +242,7 @@ const AddTestResults = () => {
         </div>
       </Grid>
 
-      </Form>
+      </Form>)}
       </Formik>
     </section>
   )
