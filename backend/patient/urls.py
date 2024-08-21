@@ -18,7 +18,8 @@ from .views import (
     AppointmentsByPatientIdAPIView,
     PrescribedDrugByPatinetIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
-    download_prescription_pdf
+    download_prescription_pdf,
+    PatientHistoryData
 )
 
 router = DefaultRouter()
@@ -51,5 +52,5 @@ urlpatterns = [
     path('prescribed-drugs/by-prescription/<int:prescription_id>/', PrescribedDrugByPrescriptionViewSet.as_view({'get': 'list'}), name='prescribed_drugs_by_prescription'),
 
     path('download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
-    path('patient/<int:patient_id>/history/', PatientByUserIdAPIView.as_view(), name='patient-history')
+    path('patient/history/<int:patient_id>/', PatientHistoryData.as_view(), name='patient-history'),
 ]
