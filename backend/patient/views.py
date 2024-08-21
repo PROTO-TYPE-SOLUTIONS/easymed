@@ -293,23 +293,27 @@ def download_prescription_pdf(request, prescription_id):
     return response
 
 class PatientHistoryData(APIView):
-    def get_data(self, request, id):
+    def get(self, request, patient_id):
         #retrieve all the records based on the patient id
-        patient = Patient.objects.filter(patient_id=id)
-        triage = Triage.objects.filter(patient_id=id)
-        appointments = Appointment.objects.filter(patient_id=id)
-        consultations = Consultation.objects.filter(patient_id=id)
-        prescriptions = Prescription.objects.filter(prescription__patient_id=id)
-        referrals = Referral.objects.filter(referral__patient_id=id)
+        if id is None:
+            return Response({"error_message": "No patient ID provided"}, status=status.HTTP_400_BAD_REQUEST)
+        patient = Patient.objects.filter(id=patient_id).first()
+        if not patient:
+            return Response({"erro_message": "Patient with id {id} does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        triage = Triage.objects.filter(patient_id=patient_id)
+        appointments = Appointment.objects.filter(patient_id=patient_id)
+        consultations = Consultation.objects.filter(patient_id=patient_id)
+        prescriptions = Prescription.objects.filter(prescribeddrug__patient_id=patient_id)
+        referrals = Referral.objects.filter(referred_by__patient=patient_id)
         
         #serializing the retrieved data
-        patient_serializer = PatientSerializer(patient, many=True)
+        patient_serializer = PatientSerializer(patient)
         triage_serializer = TriageSerializer(triage, many=True)
         appointments_serializer = AppointmentSerializer(appointments, many=True)
         consultations_serializer = ConsultationSerializer(consultations, many=True)
         prescriptions_serializer = PrescriptionSerializer(prescriptions, many=True)
         referrals_serializer = ReferralSerializer(referrals, many=True)
-
+       
         #returning a JSON response containing all the serialized data
         return Response({
             'patient': patient_serializer.data,
