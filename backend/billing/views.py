@@ -3,6 +3,7 @@ from rest_framework import viewsets, status
 from django.template.loader import get_template
 from .models import Invoice, InvoiceItem, PaymentMode
 from inventory.models import IncomingItem
+from rest_framework import generics
 
 from authperms.permissions import (
     IsStaffUser,
@@ -19,11 +20,26 @@ class InvoiceViewset(viewsets.ModelViewSet):
     serializer_class = InvoiceSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+
+class InvoicesByPatientId(generics.ListAPIView):
+    serializer_class = InvoiceSerializer
+
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        return Invoice.objects.filter(patient_id=patient_id)
+
 class InvoiceItemViewset(viewsets.ModelViewSet):
         queryset = InvoiceItem.objects.all()
         serializer_class = InvoiceItemSerializer
         permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
+
+class InvoiceItemsByInvoiceId(generics.ListAPIView):
+    serializer_class = InvoiceItemSerializer
+
+    def get_queryset(self):
+        invoice_id = self.kwargs['invoice_id']
+        return InvoiceItem.objects.filter(invoice_id=invoice_id)
 
 class PaymentModeViewset(viewsets.ModelViewSet):
         queryset = PaymentMode.objects.all()

@@ -22,7 +22,6 @@ from authperms.permissions import (
 from customuser.models import CustomUser
 from inventory.models import Item
 from .models import (
-    InsuranceCompany,
     ContactDetails,
     Patient,
     NextOfKin,
@@ -35,7 +34,6 @@ from .models import (
     Triage,
 )
 from .serializers import (
-    InsuranceCompanySerializer,
     ContactDetailsSerializer,
     PatientSerializer,
     NextOfKinSerializer,
@@ -67,11 +65,6 @@ from drf_spectacular.utils import (
 
 # utils
 from .utils import send_appointment_email
-
-
-class InsuranceCompanyViewSet(viewsets.ModelViewSet):
-    queryset = InsuranceCompany.objects.all()
-    serializer_class = InsuranceCompanySerializer
 
 
 class ConsultationViewSet(viewsets.ModelViewSet):

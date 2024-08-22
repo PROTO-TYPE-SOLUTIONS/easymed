@@ -81,6 +81,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
     filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ['item',]
     filterset_class = InventoryFilter
 
 class SupplierViewSet(viewsets.ModelViewSet):
