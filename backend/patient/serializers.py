@@ -1,7 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
 from .models import (
-    InsuranceCompany,
     ContactDetails,
     Patient,
     NextOfKin,
@@ -12,17 +11,15 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    AttendanceProcess,
 )
+from company.serializers import InsuranceCompanySerializer
 from inventory.models import (
     Inventory,
     Item,
 )
-
-class InsuranceCompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InsuranceCompany
-        fields = '__all__'
-
+from billing.models import InvoiceItem
+from billing.serializers import InvoiceItemSerializer
 
 class ContactDetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,12 +38,15 @@ class PatientSerializer(serializers.ModelSerializer):
         if obj.age:
             return obj.age
         return None
+    
+    def get_patient_insurances(self, obj: Patient):
+        return [{"id": insurance.id, "name": insurance.name} for insurance in obj.insurances.all()]
+    
 
     def to_representation(self, instance: Patient):
         data = super().to_representation(instance)
         data["gender"] = instance.get_gender_display()
-        if instance.insurance:
-            data["insurance"] = instance.insurance.name
+        data["insurances"] = self.get_patient_insurances(instance)
         return data
 
 
@@ -202,4 +202,21 @@ class SendConfirmationMailSerializer(serializers.Serializer):
         required = True,
         allow_null = False,
     )
+
+class AttendanceProcessSerializer(serializers.ModelSerializer):
+    insurances = serializers.SerializerMethodField()
+    invoice_items = serializers.SerializerMethodField()
+    class Meta:
+        model = AttendanceProcess
+        fields = '__all__'
+
+    def get_insurances(self, obj):
+        insurances = obj.patient.insurances.all()
+        return InsuranceCompanySerializer(insurances, many=True).data
+    
+    def get_invoice_items(self, obj):
+        invoice = obj.invoice.pk
+        invoice_items = InvoiceItem.objects.filter(invoice=invoice)
+        serialized_items = InvoiceItemSerializer(invoice_items, many=True)
+        return serialized_items.data
     

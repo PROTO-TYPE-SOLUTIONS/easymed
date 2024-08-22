@@ -1,96 +1,50 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
-import { createPatient } from "@/redux/service/patients";
+import { DialogTitle, Grid } from "@mui/material";
+import { initiateNewAttendanceProcesses } from "@/redux/service/patients";
 import { toast } from "react-toastify";
-import { useSelector, useDispatch } from "react-redux";
-import { getAllOrderBills, getItems } from "@/redux/features/inventory";
-import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { createAppointment } from "@/redux/service/appointment";
-import SeachableSelect from "@/components/select/Searchable";
 
 const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
   const [loading, setLoading] = React.useState(false);
-  const dispatch = useDispatch();
-  const { orderBills,item } = useSelector((store) => store.inventory);
-  const { doctors } = useSelector((store) => store.doctor);
   const auth = useAuth();
-
-  const handleChange = (selectedOption) => {
-    setValue(selectedOption);
-  };
-
-  console.log("ROW_DATA ",selectedRowData)
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  useEffect(() => {
-    dispatch(getAllOrderBills());
-    dispatch(getItems());
-    if (auth) {
-      dispatch(getAllDoctors(auth));
-    }
-  }, []);
-
   const initialValues = {
     patient: null,
-    appointment_date_time: "",
-    status: "pending",
     reason: "",
-    fee: 0,
-    assigned_doctor: null,
-    item_id: null,
   };
-
-
-  const parseNumber = (value) => {
-    // Parse the value as a number or return null if not a valid number
-    const parsedValue = parseFloat(value);
-    return isNaN(parsedValue) ? null : parsedValue;
-  };
-
 
   const validationSchema = Yup.object().shape({
-    appointment_date_time: Yup.string().required("Date is required!"),
-    // reason: Yup.string().required("Prov is required!"),
-    fee: Yup.string().required("Fee is required!"),
-    assigned_doctor: Yup.object().required("Assign Doctor!"),
-    item_id: Yup.object().required('Select Item!'),
+    reason: Yup.string().required("Reason for visit required!"),
   });
 
-  const handleCreateAppointment = async (formValue, helpers) => {
-    console.log("APPOINTMENT_DATA ", formValue);
-    const formData = {
-      ...formValue,
-      patient: selectedRowData?.id,
-      item: parseInt(formValue.item_id.value),
-      assigned_doctor: parseInt(formValue.assigned_doctor.value)
-    };
-    console.log("FORM_DATA ", formData);
-    try {
-      setLoading(true);
-      await createAppointment(formData).then(() => {
-        helpers.resetForm();
-        toast.success("Appointment Created Successfully!");
-        setLoading(false);
-        // dispatch(getAllPatients());
-        handleClose();
-      });
-    } catch (err) {
-      toast.error(err);
-      setLoading(false);
+  const initiateVisit = async (formValue, helpers) => {
+    console.log("CALLED WITH", formValue)
+    setLoading(true)
+
+    try{
+      const payload = {
+        ...formValue,
+        patient: selectedRowData?.id
+      }
+      const response = await initiateNewAttendanceProcesses(payload)
+      console.log(response)
+      setLoading(false)
+      handleClose()
+
+    }catch(error){
+      console.log("ERROR INITIATING NEW VISIT",error)
+      setLoading(false)
+      handleClose()
     }
-  };
+  }
 
   return (
     <section>
@@ -102,79 +56,31 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
+        <DialogTitle>
+          <div className="flex justify-between text-card">
+            <p>{`${selectedRowData.first_name} ${selectedRowData.second_name}`}</p>
+            <p>{`${selectedRowData.phone}`}</p>
+            <p>{`${selectedRowData.gender}`}</p>
+          </div>
+        </DialogTitle>
         <DialogContent>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={handleCreateAppointment}
+            onSubmit={initiateVisit}
           >
             <Form>
               <section className="space-y-1">
                 <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="first_name">Appointment Date</label>
-                    <Field
-                      className="block border border-gray rounded-md py-2 text-sm px-4 focus:outline-none w-full"
-                      type="date"
-                      placeholder="Appointment date time"
-                      name="appointment_date_time"
-                    />
-                    <ErrorMessage
-                      name="appointment_date_time"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <SeachableSelect
-                      label="Assign Doctor"
-                      name="assigned_doctor"
-                      options={doctors.map((item) => ({ value: item.id, label: `${item?.first_name} ${item?.last_name}` }))}
-                    />
-                    <ErrorMessage
-                      name="assigned_doctor"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2}>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="date_of_birth">Fee</label>
-                    <Field
-                      className="block border border-gray rounded-md text-sm py-2 px-4 focus:outline-none w-full"
-                      type="number"
-                      placeholder="Fee"
-                      name="fee"
-                    />
-                    <ErrorMessage
-                      name="fee"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                </Grid>
-                <Grid container spacing={2}>
                   <Grid item md={12} xs={12}>
-                    <SeachableSelect
-                      label="Select Item"
-                      name="item_id"
-                      options={item.map((item) => ({ value: item.id, label: item.name }))}
-                    />
-                    <ErrorMessage
-                      name="item_id"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <label htmlFor="second_name">Reason</label>
+                    <label className="text-xs font-bold mb-3" htmlFor="reason">Reason For Visiting</label>
                     <Field
                       as="textarea"
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
                       type="text"
-                      placeholder="Reason"
+                      placeholder="Reason For Visit"
                       name="reason"
+                      rows={8}
                     />
                     <ErrorMessage
                       name="reason"
@@ -209,7 +115,7 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
                           ></path>
                         </svg>
                       )}
-                      Create Appointment
+                      New Visit
                     </button>
                     <button
                       onClick={handleClose}

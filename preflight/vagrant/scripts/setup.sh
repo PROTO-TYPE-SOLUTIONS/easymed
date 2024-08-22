@@ -1,3 +1,3 @@
 echo "Hello, listener will start..."
 
-python tcp_listener.py
+python3 tcp_listener.py

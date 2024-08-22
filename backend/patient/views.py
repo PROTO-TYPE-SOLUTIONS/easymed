@@ -22,7 +22,6 @@ from authperms.permissions import (
 from customuser.models import CustomUser
 from inventory.models import Item
 from .models import (
-    InsuranceCompany,
     ContactDetails,
     Patient,
     NextOfKin,
@@ -33,9 +32,9 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    AttendanceProcess,
 )
 from .serializers import (
-    InsuranceCompanySerializer,
     ContactDetailsSerializer,
     PatientSerializer,
     NextOfKinSerializer,
@@ -48,6 +47,7 @@ from .serializers import (
     TriageSerializer,
     ConvertToAppointmentsSerializer,
     SendConfirmationMailSerializer,
+    AttendanceProcessSerializer,
 )
 
 # filters
@@ -67,11 +67,6 @@ from drf_spectacular.utils import (
 
 # utils
 from .utils import send_appointment_email
-
-
-class InsuranceCompanyViewSet(viewsets.ModelViewSet):
-    queryset = InsuranceCompany.objects.all()
-    serializer_class = InsuranceCompanySerializer
 
 
 class ConsultationViewSet(viewsets.ModelViewSet):
@@ -154,23 +149,28 @@ class AppointmentsByPatientIdAPIView(APIView):
         serializer = AppointmentSerializer(appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class PrescribedDrugByPatinetIdAPIView(APIView):
-    def get_object(self, patient_id: int):
+class PrescribedDrugByPatientIdAPIView(APIView):
+    def get_prescribed_drugs_by_patient(self, patient_id: int):
         try:
-            return Patient.objects.get(id=patient_id)
+            patient = get_object_or_404(Patient, id=patient_id)
+            attendance_processes = AttendanceProcess.objects.filter(patient=patient)
+            prescriptions = Prescription.objects.filter(attendanceprocess__in=attendance_processes)
+            prescribed_drugs = PrescribedDrug.objects.filter(prescription__in=prescriptions)
+            return prescribed_drugs
         except Patient.DoesNotExist:
             return None
+
     @extend_schema(
         responses=PrescribedDrugSerializer,
     )
-    def get(self, request: Request, *args, **kwargs):
-        patient_id = self.kwargs.get('patient_id')
-        patient = self.get_object(patient_id)
-        if patient is None:
-            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
-        prescribed_drugs = PrescribedDrug.objects.filter(patient_id=patient_id)
+    def get(self, request: Request, patient_id: int, *args, **kwargs):
+        prescribed_drugs = self.get_prescribed_drugs_by_patient(patient_id)
+        if prescribed_drugs is None:
+            return Response({"error_message": f"Patient ID {patient_id} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
+        
         if not prescribed_drugs.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response({"error_message": "No prescribed drugs found for the given patient"}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = PrescribedDrugSerializer(prescribed_drugs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -291,3 +291,7 @@ def download_prescription_pdf(request, prescription_id):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{prescription.id}.pdf"'
     return response
+
+class AttendanceProcessViewSet(viewsets.ModelViewSet):
+    queryset = AttendanceProcess.objects.all().order_by('-id')
+    serializer_class = AttendanceProcessSerializer

@@ -3,22 +3,26 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Checkbox, Grid } from "@mui/material";
+import { Checkbox, DialogTitle, Grid } from "@mui/material";
 import { toast } from "react-toastify";
-import { sendLabRequests, fetchLabTestPanelsByProfileId, sendLabRequestsPanels } from "@/redux/service/laboratory";
+import { sendLabRequests, fetchLabTestPanelsByProfileId, sendLabRequestsPanels, updateLabRequest } from "@/redux/service/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getPatientProfile, getPatientTriage } from "@/redux/features/patients";
+import { getPatientProfile, getPatientTriage, getAllPatients } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllLabTestProfiles, getAllLabTestPanelsByProfile } from "@/redux/features/laboratory";
+import { updateAttendanceProcesses } from "@/redux/service/patients";
+import { billingInvoiceItems } from "@/redux/service/billing";
 
 const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   const { labTestProfiles, labTestPanelsById } = useSelector((store) => store.laboratory);
-  const { patientTriage } = useSelector((store) => store.patient);
+  const { patientTriage, patients } = useSelector((store) => store.patient);
   const [loading, setLoading] = React.useState(false);
   const [testProfile, setTestProfile]= useState(null)
   const [selectedPanels, setSelectedPanels] = useState([]);
   const auth = useAuth();
   const dispatch = useDispatch();
+
+  const patient = patients.find((patient)=> patient.id === selectedRowData.patient)
 
   const handleClose = () => {
     setLabOpen(false);
@@ -27,8 +31,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
 
   const initialValues = {
     note: "",
-    sample_collected: null,
-    patient: selectedRowData?.id,
+    process: selectedRowData?.process_test_req,
     test_profile: null,
     requested_by: auth?.user_id,
   };
@@ -39,32 +42,41 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   });
 
   const saveAllPanels = async (testReqPanelPayload) => {
-    try{
-      await sendLabRequestsPanels(testReqPanelPayload, auth)
-      console.log("PAYLOAD TO SAVE REQ PANEL",testReqPanelPayload)
-      toast.success("Lab Request Panels saved Successful!");
-    }catch(error){
-      console.log(error)
-      toast.error(error)
+    try {
+      await sendLabRequestsPanels(testReqPanelPayload, auth).then((res)=> {
+        console.log("PANELS INVOICVE ITEMS",res)
+        const payload = {
+          invoice: selectedRowData.invoice,
+          item: parseInt(res.item)
+        }
+        billingInvoiceItems(auth, payload)
+      })
+      toast.success("Lab Request Panels saved successfully!");
+    } catch (error) {
+      console.log(error);
+      toast.error(error);
     }
-  }
-
-  const savePanels = (reqId) => {
-    selectedPanels.forEach((panel)=> {
+  };
+  
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  
+  const savePanels = async (reqId) => {
+    for (const panel of selectedPanels) {
       const testReqPanelPayload = {    
         test_panel: panel.id,
-        lab_test_request: reqId      
-      }
-      saveAllPanels(testReqPanelPayload);
-    })
-  }
+        lab_test_request: reqId
+      };
+      await saveAllPanels(testReqPanelPayload);
+      await delay(100); // Adjust the delay as needed (1000ms = 1s)
+    }
+  };
 
   const handleSendLabRequest = async (formValue, helpers) => {
-    console.log("FORM_DATA ", formValue);
     try {
       setLoading(true);
       await sendLabRequests(formValue, auth).then((res) => {
         helpers.resetForm();
+        updateAttendanceProcesses({track: "lab"}, selectedRowData.id)
         savePanels(res.id)
         toast.success("Lab Request Successful!");
         setLoading(false);
@@ -72,7 +84,6 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
       });
     } catch (err) {
       toast.error(err);
-      setLoading(false);
       setLoading(false);
     }
   };
@@ -105,7 +116,8 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   }
 
   useEffect(() => {
-    dispatch(getPatientTriage(selectedRowData?.id));
+    dispatch(getAllPatients());
+    dispatch(getPatientTriage(selectedRowData?.triage));
     dispatch(getAllLabTestProfiles(auth));
     if(testProfile){
       getTestPanelsByTheProfileId(testProfile, auth);
@@ -117,12 +129,19 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
     <section>
       <Dialog
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
         open={labOpen}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
+        <DialogTitle>
+          <div className="flex justify-between">
+            <p>{`Name: ${patient?.first_name} ${patient?.second_name}`}</p>
+            <p>{`Gender: ${patient?.gender}`}</p>
+            <p>{`Age: ${patient?.age}`}</p>            
+          </div>
+        </DialogTitle>
         <DialogContent>
           <Formik
             initialValues={initialValues}
@@ -145,12 +164,30 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
                     <span>{patientTriage?.height}</span>
                   </div>
                   <div className="flex items-center gap-2">
+                    <span>Weight :</span>
+                    <span>{patientTriage?.weight}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Bmi :</span>
+                    <span>{patientTriage?.bmi}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <span>Pulse :</span>
                     <span>{patientTriage?.pulse}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>Weight :</span>
-                    <span>{patientTriage?.weight}</span>
+                    <span>Systolic :</span>
+                    <span>{patientTriage?.systolic}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Diastolic :</span>
+                    <span>{patientTriage?.diastolic}</span>
+                  </div>
+                </section>
+                <section className="flex items-center justify-between text-sm border-b bg-background p-1 rounded border-gray">
+                  <div className="flex items-center gap-2">
+                    <span>Nurses Note :</span>
+                    <span>{patientTriage?.notes}</span>
                   </div>
                 </section>
                 <Grid container spacing={2}>
@@ -191,7 +228,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
                           </div>
                           <Grid container spacing={4}>
                             {labTestPanelsById.map((panel) => (
-                              <Grid className="flex items-center" key={panel.id} item xs={4}>
+                              <Grid className="flex items-center" key={panel.id} item xs={3}>
                                 <Checkbox
                                   checked={selectedPanels.some((panelItem) => panelItem.id === panel.id)}
                                   onChange={() => handleCheckboxChange(panel)}

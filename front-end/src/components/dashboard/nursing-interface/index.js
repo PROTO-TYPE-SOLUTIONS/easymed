@@ -7,9 +7,11 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { MdAddCircle } from "react-icons/md";
 import { Chip } from "@mui/material";
-import { getAllPatients } from "@/redux/features/patients";
+import { getAllPatients, getAllProcesses } from "@/redux/features/patients";
 import { useSelector,useDispatch } from "react-redux";
 import AddTriageModal from './add-triage-modal';
+import { getAllDoctors } from "@/redux/features/doctors";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -37,14 +39,20 @@ const NursePatientDataGrid = () => {
   const [triageOpen, setTriageOpen] = React.useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const dispatch = useDispatch();
-  const { patients } = useSelector((store) => store.patient);
+  const { patients, processes } = useSelector((store) => store.patient);
+  const { doctors } = useSelector((store)=> store.doctor)
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const auth = useAuth()
 
 
   useEffect(() =>{
-    dispatch(getAllPatients());
+    if(auth){
+      dispatch(getAllPatients());
+      dispatch(getAllProcesses())
+      dispatch(getAllDoctors(auth))
+    }
   },[]);
 
 
@@ -70,31 +78,31 @@ const NursePatientDataGrid = () => {
     );
   };
 
-  const statusFunc = ({ data }) => {
-    if (data?.progress_status === "In Treatment") {
-      return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-primary text-white" />
-      );
-    } else if (data?.progress_status === "Discharged") {
-      return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-success text-white" />
-      );
-    } else if (data?.progress_status === "New Patient") {
-      return (
-        <Chip variant="contained" size="small" label={data.progress_status} className="bg-card text-white" />
-      );
-    }
-  };
+  // filter users based on search query
+  const filteredProcesses = processes.filter((process) => process.track === "triage");
 
-  //   filter users based on search query
-  const filteredPatients = patients.filter((user) => {
-    return user.first_name.toLocaleLowerCase().includes(searchQuery.toLowerCase());
+  const billedDocSchedules = filteredProcesses.filter(schedule => {
+    const hasAppointment = schedule.invoice_items.some(item =>  
+        item.category.toLowerCase().includes('appointment') && item.status.toLowerCase() === "billed"
+    );
+    
+    return hasAppointment;
   });
+
+  const patientNameRender = (cellData) => {
+    const patient = patients.find((patient) => patient.id === cellData.data.patient);
+    return patient ? `${patient.first_name} ${patient.second_name}` : ""
+  }
+
+  const doctorNameRender = (cellData) => {
+    const doctor = doctors.find((doctor) => doctor.id === cellData.data.doctor);
+    return doctor ? `${doctor.first_name} ${doctor.last_name}` : ""
+  }
 
   return (
     <section>
       <DataGrid
-        dataSource={filteredPatients}
+        dataSource={billedDocSchedules}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -117,22 +125,26 @@ const NursePatientDataGrid = () => {
         />
         <HeaderFilter visible={true} />
         <Column
-          dataField="first_name"
-          caption="First Name"
+          dataField="patient_number"
+          caption="PId"
+          width={120}
+        />
+        <Column
+          dataField="patient"
+          caption="Patient Name"
           width={140}
           allowFiltering={true}
           allowSearch={true}
+          cellRender={patientNameRender}
         />
         <Column
-          dataField="second_name"
-          caption="Last Name"
+          dataField="doctor"
+          caption="Assigned Doctor"
           width={120}
           allowFiltering={true}
           allowSearch={true}
+          cellRender={doctorNameRender}
         />
-        <Column dataField="age" caption="Age" width={140} />
-        <Column dataField="gender" caption="Gender" width={120} />
-        <Column dataField="insurance" caption="Insurance" width={120} />
         <Column
           dataField=""
           caption="Action"

@@ -1,5 +1,6 @@
 from django.db import models
 from customuser.models import CustomUser
+from company.models import InsuranceCompany
 from django.utils import timezone
 
 
@@ -106,7 +107,7 @@ class IncomingItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -134,6 +135,16 @@ class Inventory(models.Model):
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
     
+class InventoryInsuranceSaleprice(models.Model):
+    inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    insurance_company = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        unique_together = ('inventory_item', 'insurance_company')
+    
+    
+
 class DepartmentInventory(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)

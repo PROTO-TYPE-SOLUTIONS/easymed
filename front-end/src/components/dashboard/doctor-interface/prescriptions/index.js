@@ -176,7 +176,7 @@ const AllPrescriptions = ({ patient }) => {
                     <Field
                       className="block border rounded-xl border-gray  py-2 text-sm px-4 focus:outline-none w-full"
                       type="text"
-                      placeholder="Duration"
+                      placeholder="Duration(days)"
                       name="duration"
                     />
                     <Field

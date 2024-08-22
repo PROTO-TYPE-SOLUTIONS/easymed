@@ -8,16 +8,20 @@ import {
   HeaderFilter,
   Scrolling,
 } from "devextreme-react/data-grid";
+import { useRouter } from 'next/navigation'
 import AddPatientModal from "./add-patient-modal";
 import { Chip } from "@mui/material";
 import { getAllPatients } from "@/redux/features/patients";
 import { useSelector, useDispatch } from "react-redux";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { MdAddCircle } from "react-icons/md";
+import { MdOutlineContactSupport } from "react-icons/md";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { BiEdit } from "react-icons/bi";
 import CreateAppointmentModal from "./create-appointment-modal";
 import EditPatientDetails from "../admin-interface/edit-patient-details-modal";
+import { GiMedicinePills } from "react-icons/gi";
+import LabModal from "../doctor-interface/lab-modal";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -30,7 +34,7 @@ const getActions = () => {
   let actions = [
     {
       action: "add",
-      label: "Create Appointment",
+      label: "New Visit",
       icon: <MdAddCircle className="text-success text-xl mx-2" />,
     },
     {
@@ -54,7 +58,8 @@ const PatientsDataGrid = () => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
-
+  const [labOpen, setLabOpen] = useState(false);
+  const router = useRouter()
 
   const onMenuClick = async (menu, data) => {
     if (menu.action === "add") {
@@ -63,6 +68,11 @@ const PatientsDataGrid = () => {
     }else if(menu.action === "update"){
       setSelectedRowData(data);
       setEditOpen(true);      
+    }else if (menu.action === "prescribe") {
+      router.push(`/dashboard/patients/prescribe/${data.id}`);
+    } else if(menu.action === "send to lab"){
+      setSelectedRowData(data);
+      setLabOpen(true);
     }
   };
 
@@ -79,37 +89,6 @@ const PatientsDataGrid = () => {
         />
       </>
     );
-  };
-
-  const statusFunc = ({ data }) => {
-    if (data?.progress_status === "In Treatment") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          className="bg-primary text-white"
-          label={data.progress_status}
-        />
-      );
-    } else if (data?.progress_status === "Discharged") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          className="bg-success text-white"
-          label={data.progress_status}
-        />
-      );
-    } else if (data?.progress_status === "New Patient") {
-      return (
-        <Chip
-          variant="contained"
-          size="small"
-          className="bg-card text-white"
-          label={data.progress_status}
-        />
-      );
-    }
   };
 
   const patientFullName = (rowData) => {
@@ -150,29 +129,37 @@ const PatientsDataGrid = () => {
           showNavigationButtons={showNavButtons}
         />
         <Column 
+          dataField="unique_id" 
+          caption="id" 
+          width={180}
+        />
+        <Column 
           dataField="" 
           caption="Patient Name" 
           width={180}
           calculateCellValue={patientFullName}
         />
         <Column
+          dataField="phone"
+          caption="Phone"
+          width={100}
+        />
+        <Column
+          dataField="email"
+          caption="Email"
+          width={150}
+        />
+        <Column
           dataField="age"
           caption="Age"
-          width={100}
-          // calculateCellValue={(data) => calculateAge(data.date_of_birth)}
+          width={80}
         />
         <Column dataField="gender" caption="Gender" width={100} />
-        <Column dataField="insurance" caption="Insurance" width={150} />
-        <Column
-          dataField=""
-          caption="Status"
-          width={150}
-          cellRender={statusFunc}
-        />
+        <Column dataField="insurance" caption="Insurance" width={100} />
         <Column
           dataField=""
           caption=""
-          width={100}
+          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>
@@ -180,7 +167,6 @@ const PatientsDataGrid = () => {
 
     {open && <CreateAppointmentModal {...{setOpen,open,selectedRowData}} />}
     <EditPatientDetails open={editOpen} setOpen={setEditOpen} selectedRowData={selectedRowData}  />
-
     </>
   );
 };

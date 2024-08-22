@@ -13,6 +13,9 @@ djangorestframework-simplejwt==5.3.0
 drf-spectacular==0.26.5
 hl7==0.4.5
 inflection==0.5.1
+
+impacket
+
 jsonschema==4.19.1
 jsonschema-specifications==2023.7.1
 PyJWT==2.8.0

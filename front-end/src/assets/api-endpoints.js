@@ -7,12 +7,17 @@ export const API_URL = {
   REFRESH_TOKEN: "/api/token/refresh/",
   GET_USER_PERMISSIONS: "/authperms/permissions/user",
   FETCH_GROUP: "/authperms/groups",
+  FETCH_ALL_PERMISSIONS: "/authperms/permissions",
+  FETCH_GROUP_PERMISSIONS: "/authperms/groups/",
 
   /***************** PATIENT APIS **********************/
   CREATE_PATIENT: "/patients/patients/",
   EDIT_PATIENT: "/patients/patients",
   DELETE_PATIENT: "/patients/patients/",
   FETCH_PATIENT: "/patients/patients/",
+  FETCH_PATIENT_BY_ID: "/patients/patients",
+  PATIENT_KIN: "/patients/next-of-kin/",
+  PATIENT_KIN_CONTACT: "/patients/contact-details/",
   SEARCH_PATIENT: "/patients/patients/",
   BOOK_APPOINTMENT: "/patients/publicappointments/",
   CREATE_APPOINTMENT: "/patients/appointments/",
@@ -21,7 +26,7 @@ export const API_URL = {
   FETCH_PATIENT_APPOINTMENTS_BY_PATIENT_ID: "/patients/appointments/by_patient_id",
   FETCH_DOCTOR_APPOINTMENTS: "/patients/appointments/",
   FETCH_SERVICES: "/patients/services/",
-  FETCH_INSURANCE: "/patients/insurance-companies/",
+  FETCH_INSURANCE: "/company/insurance-companies/",
   PRESCRIBE: "/patients/prescriptions/",
   ASSIGN_DOCTOR: "/patients/appointments",
   CONSULT_PATIENT: "/patients/consultations/",
@@ -32,6 +37,8 @@ export const API_URL = {
   CREATE_PRESCRIPTION: "/patients/prescriptions/",
   GET_PATIENT_TRIAGE: "/patients/triage/",
 
+  PATIENT_ATTENDANCE_PROCESS: "/patients/initiate-attendance-process/",
+
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/accounts/register/",
   FETCH_DOCTOR: "/users/doctors/",
@@ -40,6 +47,7 @@ export const API_URL = {
   FETCH_LAB_RESULTS: "/lab/lab-test-results/",
   SEND_LAB_RESULTS: "/lab/lab-test-results/",
   FETCH_LAB_REQUESTS: "/lab/lab-test-requests/",
+  FETCH_ONE_LAB_REQUESTS: "/lab/lab-test-requests/",
   FETCH_LAB_REQUESTS_BY_PATIENT_ID: "/lab/lab-test-request-by-patient-id",
   SEND_LAB_REQUESTS: "/lab/lab-test-requests/",
   FETCH_LAB_EQUIPMENT: "/lab/lab-equipment/",
@@ -49,8 +57,19 @@ export const API_URL = {
   FETCH_LAB_TEST_PANELS: "/lab/lab-test-panel/",
   FETCH_LAB_TEST_PANELS_BY_PROFILE_ID: "/lab/lab-test-panel/labtestpanels-byprofile-id",
   FETCH_LAB_TEST_REQUEST_PANELS: "/lab/lab-test-requests-panel/",
+  FETCH_PANELS_BY_RESULT:"/lab/lab-test-result-panels-by-lab-test-result-id/",
+  FETCH_QUALITATIVE_PANELS_BY_RESULT:"/lab/qualitative-lab-test-result-panels-by-lab-test-result-id/",
   FETCH_LAB_TEST_RESULT_PANELS: "/lab/lab-test-results-panel/",
+  QUALITATIVE_LAB_TEST_RESULTS:"/lab/lab-test-results-qualitative/",
+  QUALITATIVE_LAB_TEST_RESULTS_PANEL_ITEM: "/lab/lab-test-results-panel-qualitative/",
+  GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID: "lab/lab-test-request-panels-by-lab-test-request-id/",
   SEND_LAB_RESULTS_ITEMS: "/lab/lab-test-result-item/",
+  APPROVE_LAB_RESULTS: "/lab/approve-results/",
+  APPROVE_QUALITATIVE_LAB_RESULTS: "/lab/approve-qualitative-results/",
+  LAB_TEST_REQ_BY_PROCESS_ID: "lab/lab-test-request-by-process-id/",
+  SAMPLES_BY_process_ID: "/lab/patient-samples-by-process-id/",
+  PANELS_BY_SAMPLE_ID: "/lab/labtestrequestpanels/sample/",
+  PHLEBOTOMY_PATIENT_SAMPLES:"/lab/patient-samples/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -77,6 +96,10 @@ export const API_URL = {
   BILLING_INVOICE_ITEMS: "/billing/invoice-items/",
   BILLING_INVOICES: "/billing/invoices/",
   FETCH_INVOICES: "/billing/invoices/",
+  FeTCH_PATIENT_INVOICES: "/billing/invoices/patient/",
+  FETCH_INVOICE_ITEMS_BY_INVOICE: "/billing/invoices/items/",
+  TOTALS_OF_THE_DAY: "/reports/total_payment_mode_amount/",
+  PAYMENT_MODES: "/billing/payment-modes/",
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
@@ -94,8 +117,19 @@ export const API_URL = {
   FETCH_ANNOUNCEMENTS_CHANNELS: "/announcement/channels/",
   FETCH_ANNOUNCEMENTS:"/announcement/announcements/",
 
+  /***************** Company **********************/
+  FETCH_COMPANY_INFO: "/company/company/",
+
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/download",
+  DOWNLOAD_RESULT_PDF: "/lab/download",
+  SALE_BY_DATE_RANGE_PDF: "/sale_by_date/pdf/",
+  SALE_BY_DATE_RANGE_AND_ITEM_PDF: "/serve_sales_by_item_id_pdf/",
+
+  /***************** REPORTS **********************/
+  SALE_BY_DATE_RANGE_GENERATE_REPORTS: "/reports/sale_by_date/",
+  SALE_BY_DATE_RANGE_AND_ITEM_ID_GENERATE_REPORTS: "/reports/sale_by_item_and_date/",
+
 
   /***************** PATIENTS USERS ENDPOINTS **********************/
   /***************** LABORATORY **********************/
@@ -114,12 +148,17 @@ export const APP_API_URL = {
   GET_USER_PERMISSIONS: "/api/auth/user-permissions",
   FETCH_GROUP: "/api/groups",
   FETCH_PATIENT_GROUP: "/api/auth/get-group",
+  FETCH_ALL_PERMISSIONS: "/api/groups/fetchPermissions",
+  FETCH_GROUP_PERMISSIONS: "/api/groups/fetchGroupPermissions",
 
   /***************** PATIENT APIS **********************/
   CREATE_PATIENT: "/api/patient",
   EDIT_PATIENT: "/api/patient/edit-patient",
   DELETE_PATIENT: "/api/patient/delete-patient",
   FETCH_PATIENT: "/api/patient",
+  FETCH_PATIENT_BY_ID: "/api/patient/patient_by_id",
+  PATIENT_KIN: "/api/patient/patientKin",
+  PATIENT_KIN_CONTACT: "/api/patient/next-of-kin-contact/",
   SEARCH_PATIENT: "/api/billing/search-patients",
   BOOK_APPOINTMENT: "/api/appointment",
   CREATE_APPOINTMENT: "/api/appointment/create-appointment",
@@ -139,6 +178,9 @@ export const APP_API_URL = {
   CREATE_PRESCRIPTION: "/api/patient/create-prescription",
   GET_PATIENT_TRIAGE: "/api/patient/get-patient-triage",
 
+  PATIENT_ATTENDANCE_PROCESS: "/api/patient/attendance-process",
+
+
   /***************** DOCTOR APIS **********************/
   CREATE_DOCTOR: "/api/doctor/create-doctor",
   FETCH_DOCTOR: "/api/doctor/fetch-doctor",
@@ -147,6 +189,7 @@ export const APP_API_URL = {
   FETCH_LAB_RESULTS: "/api/laboratory/get-lab-results",
   SEND_LAB_RESULTS: "/api/laboratory/get-lab-results",
   FETCH_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
+  FETCH_ONE_LAB_REQUESTS: "/api/laboratory/getOneTestRequest",
   FETCH_LAB_REQUESTS_BY_PATIENT_ID: "/api/laboratory/labRequestsByPatientId",
   SEND_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
   FETCH_LAB_EQUIPMENT: "/api/laboratory/get-lab-equipment",
@@ -157,7 +200,18 @@ export const APP_API_URL = {
   FETCH_LAB_TEST_PANELS_BY_PROFILE_ID: "/api/laboratory/labtestpanels-byprofile-id",
   SEND_LAB_RESULTS_ITEMS: "/api/laboratory/get-lab-test-result-item",
   FETCH_LAB_TEST_REQUEST_PANELS: "/api/laboratory/lab-test-requests-panel/",
+  FETCH_PANELS_BY_RESULT:"/api/laboratory/lab-test-result-panels-by-lab-test-result-id/",
+  FETCH_QUALITATIVE_PANELS_BY_RESULT:"/api/laboratory/qualitative-lab-test-result-panels-by-lab-test-result-id/",
   FETCH_LAB_TEST_RESULT_PANELS: "/api/laboratory/lab-test-results-panel/",
+  QUALITATIVE_LAB_TEST_RESULTS:"/api/laboratory/lab-test-results-qualitative/",
+  QUALITATIVE_LAB_TEST_RESULTS_PANEL_ITEM: "/api/laboratory/lab-test-results-panel-qualitative/",
+  GET_LAB_TEST_PANELS_BY_LAB_TEST_REQUEST_ID: "/api/laboratory/lab-test-request-panels-by-lab-test-request-id/",
+  APPROVE_LAB_RESULTS: "/api/laboratory/approve-results/",
+  APPROVE_QUALITATIVE_LAB_RESULTS: "/api/laboratory/approve-qualitative-results/",
+  LAB_TEST_REQ_BY_PROCESS_ID: "/api/laboratory/lab-test-request-by-process-id",
+  SAMPLES_BY_process_ID: "/api/laboratory/samples-by-process-id/",
+  PANELS_BY_SAMPLE_ID: "/api/laboratory/panels-by-specific-sample/",
+  PHLEBOTOMY_PATIENT_SAMPLES:"/api/laboratory/patient-samples",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",
@@ -184,6 +238,11 @@ export const APP_API_URL = {
   BILLING_INVOICE_ITEMS: "/api/billing/invoice-items",
   BILLING_INVOICES: "/api/billing/billing-invoices",
   FETCH_INVOICES: "/api/billing/fetch-invoices",
+  FeTCH_PATIENT_INVOICES: "/api/billing/fetch-invoices-by-patient/",
+  FETCH_INVOICE_ITEMS_BY_INVOICE: "/api/billing/fetch-invoices-items-by-invoice/",
+  TOTALS_OF_THE_DAY: "/api/billing/transactionAday/",
+  PAYMENT_MODES: "/api/billing/payment-modes/",
+
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/api/pharmacy/fetch-prescriptions",
@@ -200,10 +259,20 @@ export const APP_API_URL = {
   FETCH_ANNOUNCEMENTS_CHANNELS: "/api/announcement/channels/",
   FETCH_ANNOUNCEMENTS:"/api/announcement/announcements/",
 
+  /***************** Company **********************/
+  FETCH_COMPANY_INFO: "/api/company/company/",
+
   /***************** PDFs **********************/
   DOWNLOAD_PDF: "/api/pdf/download_pdf",
+  DOWNLOAD_RESULT_PDF: "/api/pdf/result_pdf",
+  SALE_BY_DATE_RANGE_PDF: "/api/pdf/sale-by-date-range-report-pdf",
+  SALE_BY_DATE_RANGE_AND_ITEM_PDF: "/api/pdf/sale-by-date-range-and-item-report-pdf",
 
-    /***************** PATIENTS USERS ENDPOINTS **********************/
+  /***************** REPORTS **********************/
+  SALE_BY_DATE_RANGE_GENERATE_REPORTS: "/api/reports/sale-by-date-range/",
+  SALE_BY_DATE_RANGE_AND_ITEM_ID_GENERATE_REPORTS: "/api/reports/sale-by-date-range-and-item",
+
+  /***************** PATIENTS USERS ENDPOINTS **********************/
   /***************** LABORATORY **********************/
   PATIENTLABTESTREQUEST: "/api/patient-profile/patientlabtestrequest",
 

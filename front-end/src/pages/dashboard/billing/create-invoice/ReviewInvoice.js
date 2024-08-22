@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toast } from "react-toastify";
 import { MdLocalPrintshop } from 'react-icons/md'
 import { billingInvoiceItems, billingInvoices } from '@/redux/service/billing'
-import { getAllInvoices } from '@/redux/features/billing';
+import { getAllInvoiceItemsByInvoiceId, getAllInvoices } from '@/redux/features/billing';
 import { useAuth } from '@/assets/hooks/use-auth'
 import { ErrorMessage, Field, Form, Formik, FormikProps } from 'formik';
 import * as Yup from "yup";
@@ -13,9 +13,14 @@ import BillingViewSelectedLabtests from '@/components/dashboard/billing/payOverv
 import BillingViewSelectedAppointments from '@/components/dashboard/billing/payOverview/BillingViewSelectedAppointments';
 import FormButton from '@/components/common/button/FormButton';
 import PayAmountsDisplay from '@/components/dashboard/billing/payOverview/PayAmountsDisplay';
+import { getAllLabTestProfiles } from '@/redux/features/laboratory';
+import { Container, Grid } from '@mui/material';
+import InvoiceItems from './InvoiceItems';
 
 const ReviewInvoice = ({ 
-    selectedOption, 
+    selectedOption,
+    selectedPatient,
+    selectedInvoice,
     selectedAppointments, 
     selectedLabRequests, 
     selectedPrescribedDrugs, 
@@ -26,6 +31,7 @@ const ReviewInvoice = ({
     
     {
     const [loading, setLoading] = useState(false)
+    const { invoiceItems } = useSelector((store)=> store.billing)
 
     const [appointmentSum, setAppointmentSum] = useState(0);
     const [appointmentMpesaSum, setAppointmentMpesaSum] = useState(0);
@@ -45,6 +51,7 @@ const ReviewInvoice = ({
 
 
     const { invoices } = useSelector((store) => store.billing);
+    const { labTestProfiles } = useSelector((store) => store.laboratory);
     const auth = useAuth()
     const invoiceRef = useRef();
     const router = useRouter();
@@ -149,14 +156,14 @@ const ReviewInvoice = ({
 
     }
 
-    const saveEachAppointmentInvoiceItem = () => {
+    const saveEachAppointmentInvoiceItem = (savedInvoice) => {
         selectedAppointments.forEach((appointment)=>{
             console.log("THESE ARE THE APPOINTMENTS",appointment)
             const payloadInvoiceItemData = {
                 item_name: appointment.item_name,
                 payment_mode:appointment.payMethod ? payMethods[appointment.payMethod] : 2,
                 item_price: appointment.sale_price,
-                invoice: invoices.length + 1,
+                invoice: savedInvoice.id,
                 item: parseInt(appointment.item)
             }
             console.log("THESE ARE APPOINTMENTS INVOICE ITEMS",appointment)
@@ -166,30 +173,35 @@ const ReviewInvoice = ({
 
     }
 
-    const saveEachLabReqInvoiceItem = () => {
+    const saveEachLabReqInvoiceItem = (savedInvoice) => {
         selectedLabRequests.forEach((labREq)=>{
-            console.log(labREq)
-            const payloadInvoiceItemData = {
-                item_name: labREq.test_profile_name,
-                payment_mode:labREq.payMethod ? payMethods[labREq.payMethod] : 2,
-                item_price: labREq.sale_price,
-                invoice: invoices.length + 1,
-                item: parseInt(labREq.item)
-            }
-            console.log("THESE ARE LAB REQ INVOICE ITEMS",labREq)
-            saveInvoiceItem(payloadInvoiceItemData);
+            const item_ID = labTestProfiles.find((profile)=> profile.id === labREq.test_profile)
 
+            if(item_ID){
+
+                const payloadInvoiceItemData = {
+                    item_name: labREq.test_profile_name,
+                    payment_mode:labREq.payMethod ? payMethods[labREq.payMethod] : 2,
+                    item_price: labREq.sale_price,
+                    invoice: savedInvoice.id,
+                    item: parseInt(item_ID.item)
+                }
+                saveInvoiceItem(payloadInvoiceItemData);
+
+            }else(
+                toast.error("Item not Found")
+            )
         })
 
     }
 
-    const saveEachPrescribedDrugInvoiceItem = () => {
+    const saveEachPrescribedDrugInvoiceItem = (savedInvoice) => {
         selectedPrescribedDrugs.forEach((drug)=>{
             const payloadInvoiceItemData = {
                 item_name: drug.item_name,
                 payment_mode:drug.payMethod ? payMethods[drug.payMethod] : 2,
                 item_price: drug.sale_price,
-                invoice: invoices.length + 1,
+                invoice: savedInvoice.id,
                 item: parseInt(drug.item)
             }
             console.log("THESE ARE DURG INVOICE ITEMS",drug)
@@ -199,10 +211,10 @@ const ReviewInvoice = ({
 
     }
 
-    const saveEachInvoiceItem = () => {
-        saveEachAppointmentInvoiceItem();
-        saveEachLabReqInvoiceItem();
-        saveEachPrescribedDrugInvoiceItem();
+    const saveEachInvoiceItem = (savedInvoice) => {
+        saveEachAppointmentInvoiceItem(savedInvoice);
+        saveEachLabReqInvoiceItem(savedInvoice);
+        saveEachPrescribedDrugInvoiceItem(savedInvoice);
     } 
 
     const saveInvoice = async (formValue) => {
@@ -229,7 +241,7 @@ const ReviewInvoice = ({
 
             const response = await billingInvoices(auth, payloadData)
             console.log(response)
-            saveEachInvoiceItem();
+            saveEachInvoiceItem(response);
             toast.success("invoice saved successfully");
             setLoading(false);
             router.push('/dashboard/billing');
@@ -241,14 +253,7 @@ const ReviewInvoice = ({
         }
     }
 
-    useEffect(()=>{
-        if(auth){
-            totalAppointmentSum();
-            totalPrescribedDrugsSum();
-            totalLabReqSum();
-            dispatch(getAllInvoices(auth));
-        }
-    },[selectedOption, selectedAppointments, selectedLabRequests, selectedPrescribedDrugs, auth])
+
 
   return (
     <Formik
@@ -256,14 +261,14 @@ const ReviewInvoice = ({
         validationSchema={validationSchema}
         onSubmit={saveInvoice}
     >
-        <Form ref={invoiceRef} className="py-4 bg-white_light rounded-lg space-y-4 px-4 min-h-full flex flex-col justify-between">
+        <Form ref={invoiceRef} className="py-4 bg-white_light rounded-lg space-y-4 px-2 min-h-full flex flex-col justify-between">
             {selectedOption && 
             <>
             <div ref={invoiceRef} className='space-y-8'>
             <div className='flex justify-between items-center'>
                 <div>
                     <p className='text-2xl'> {selectedOption?.label} </p>
-                    <p className='text-lg text-center'>{`Invoice Number: ${invoices.length + 1}`}</p>
+                    {/* <p className='text-lg text-center'>{`Invoice Number: ${invoices.length + 1}`}</p> */}
                 </div>
                 <div>
                 <Field
@@ -280,14 +285,8 @@ const ReviewInvoice = ({
                 />
                 </div>
             </div>
-            {selectedAppointments.length > 0 && (
-                <BillingViewSelectedAppointments selectedAppointments={selectedAppointments} setSelectedAppointments={setSelectedAppointments}/>
-            )}
-            {selectedLabRequests.length > 0 && (
-                <BillingViewSelectedLabtests selectedLabRequests={selectedLabRequests} setSelectedLabRequests={setSelectedLabRequests}/>
-            )}
-            {selectedPrescribedDrugs.length > 0 && (
-                <BillingViewSelectedPrescribedDrugs selectedPrescribedDrugs={selectedPrescribedDrugs} setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}/>
+            {InvoiceItems.length > 0 && (
+                <InvoiceItems selectedPatient={selectedPatient} items={invoiceItems} />
             )}
             </div>
 

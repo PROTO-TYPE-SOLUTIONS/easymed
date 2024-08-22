@@ -1,5 +1,4 @@
 import React from "react";
-import CustomizedLayout from "@/components/layout/customized-layout";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Container } from "@mui/material";
 import DoctorPatientDataGrid from "@/components/dashboard/doctor-interface/doctor-patient-datagrid";

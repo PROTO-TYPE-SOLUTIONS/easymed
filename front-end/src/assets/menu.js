@@ -15,39 +15,70 @@ import { FaProductHunt, FaLock, FaUser } from 'react-icons/fa'
 import { TbBrandBandlab } from 'react-icons/tb'
 import { FaMoneyBillWave } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { BsReception4 } from "react-icons/bs";
+import { LiaUserNurseSolid } from "react-icons/lia";
+import { FaUserDoctor } from "react-icons/fa6";
+import { BsCapsule } from "react-icons/bs";
+import { GiMicroscope } from "react-icons/gi";
+
 
 export const menus = [
+  // {
+  //   label: "Dashboard",
+  //   href: "/dashboard",
+  //   icon: <BiSolidDashboard className="text-xl" />,
+  //   children: [
+  //     {
+  //       label: "General Dashboard",
+  //       href: "/dashboard",
+  //       icon: <GrAdd className="" />,
+  //     },
+  //     {
+  //       label: "Doctor",
+  //       href: "/dashboard/doctor-interface",
+  //       icon: <FaWheelchair className="" />,
+  //     },
+  //     {
+  //       label: "Reception",
+  //       href: "/dashboard/reception-interface",
+  //       icon: <FaWheelchair className="" />,
+  //     },
+  //     {
+  //       label: "Nursing",
+  //       href: "/dashboard/nursing-interface",
+  //       icon: <FaWheelchair className="" />,
+  //     },
+  //   ],
+  // },
   {
-    label: "Dashboard",
+    label: "Patients",
+    href: "/dashboard/patients",
+    icon: <HiUsers className="text-xl" />,
+  },
+  {
+    label: "Reception",
     href: "/dashboard",
     icon: <BiSolidDashboard className="text-xl" />,
-    children: [
-      {
-        label: "General Dashboard",
-        href: "/dashboard",
-        icon: <GrAdd className="" />,
-      },
-      {
-        label: "Doctor",
-        href: "/dashboard/doctor-interface",
-        icon: <FaWheelchair className="" />,
-      },
-      {
-        label: "Reception",
-        href: "/dashboard/reception-interface",
-        icon: <FaWheelchair className="" />,
-      },
-      {
-        label: "Nursing",
-        href: "/dashboard/nursing-interface",
-        icon: <FaWheelchair className="" />,
-      },
-    ],
+  },
+  // {
+  //   label: "Reception",
+  //   href: "/dashboard/reception-interface",
+  //   icon: <BsReception4 className="" />,
+  // },
+  {
+    label: "Nursing",
+    href: "/dashboard/nursing-interface",
+    icon: <LiaUserNurseSolid className="text-xl" />,
+  },
+  {
+    label: "Doctor",
+    href: "/dashboard/doctor-interface",
+    icon: <FaUserDoctor className="text-xl" />,
   },
   {
     label: "Laboratory",
     href: "/dashboard/laboratory",
-    icon: <TbBrandBandlab className="text-xl" />,
+    icon: <GiMicroscope className="text-xl" />,
     // children: [
     //   {
     //     label: "Lab Results",
@@ -79,11 +110,6 @@ export const menus = [
     // ],
   },
   {
-    label: "Patients",
-    href: "/dashboard/patients",
-    icon: <HiUsers className="text-xl" />,
-  },
-  {
     label: "AI Assistant",
     href: "/dashboard/ai-assistant",
     icon: <RiMessage2Fill className="text-xl" />,
@@ -96,7 +122,7 @@ export const menus = [
   {
     label: "Phamarcy",
     href: "/dashboard/phamarcy",
-    icon: <MdLocalPharmacy className="text-xl" />,
+    icon: <BsCapsule className="text-xl" />,
   },
   {
     label: "Inventory",

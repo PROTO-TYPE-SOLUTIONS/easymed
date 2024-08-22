@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Grid } from "@mui/material";
+import { DialogTitle, Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
 import { addItemToLabResultsItems, getAllLabTestPanels } from "@/redux/features/laboratory";
@@ -10,13 +10,13 @@ import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from "@/assets/hooks/use-auth";
 
-const AddResultItemModal = () => {
-  const [open, setOpen] = React.useState(false);
+const AddResultItemModal = ({open, setOpen, selected, sample_label}) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
   const { labTestPanels  } = useSelector((store) => store.laboratory);
-
+  const selectedPanel = labTestPanels.find((panel)=> panel.id ===selected?.test_panel)
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -27,7 +27,7 @@ const AddResultItemModal = () => {
 
   const initialValues = {
     result: "",
-    test_panel: "",
+    test_panel: selectedPanel ? {value:selectedPanel.id, label: selectedPanel.name} : "",
     lab_test_result: 0
   };
 
@@ -44,8 +44,6 @@ const AddResultItemModal = () => {
         ...formValue,
         test_panel: formValue.test_panel.value,
       };
-
-      console.log("LAB TEST PANELS FORMDATA", formData)
 
       setLoading(true);    
       dispatch(addItemToLabResultsItems(formData))
@@ -78,6 +76,9 @@ const AddResultItemModal = () => {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
+        <DialogTitle>
+          <p className="text-sm font-semibold">{`sample: ${sample_label}`}</p>
+        </DialogTitle>
         <DialogContent>
           <h3 className="text-xl my-4"> Add Lab Result Panel </h3>
         <Formik
@@ -100,12 +101,15 @@ const AddResultItemModal = () => {
               />
             </Grid>
             <Grid item md={12} xs={12}>
-              <Field
-                className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Result"
-                name="result"
-              />
+            <Field
+              as={selected?.category === 'qualitative' ? 'textarea' : 'input'}
+              className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+              maxWidth="sm"
+              type={selected?.category === 'qualitative' ? 'text' : 'number'}
+              placeholder="Result"
+              name="result"
+              rows={selected?.category === 'qualitative' ? 6 : undefined}
+            />
               <ErrorMessage
                 name="result"
                 component="div"

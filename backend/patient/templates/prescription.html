@@ -29,16 +29,29 @@
         th {
             background-color: #f2f2f2;
         }
+
+        .footer{
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            font-style: italic;
+            color: gray;
+            font-weight: bold;
+
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
         <h2>{{ company.name }} </h2>
-        <p>{{ company.address }}</p>
-        <p>{{ company.phone }} | {{ company.email }}</p>
+        <p>{{ company.address1 }}</p>
+        <p>{{ company.phone1 }} | {{ company.email1 }}</p>
     </div>
-    
+
     <div class="container">
         <h2>Prescription Note</h2>
         <h3>Patient Information</h3>

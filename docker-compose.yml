@@ -1,48 +1,20 @@
-version: "3.8"
-
 services:
-    nginx:
-        restart: always
-        image: nginx:1.23-alpine
-        ports:
-            - 80:80
-        volumes:
-            # - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-            - static_volume:/app/backend/django_static
-
-    db:
-        image: postgres:10
-        container_name: db
-        volumes:
-            - ./data/db:/pgdata
-        environment:
-            - POSTGRES_DB=postgres
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-            - HOST=db
-        # networks:
-        #     - mks
-        restart: unless-stopped
-
     redis:
         image: redis:7.0-alpine
         container_name: redis2
         command: redis-server --appendonly yes --replica-read-only no
         volumes:
-            - ./redis/:/etc/redis/
-        # ports:
-        #     - 6379:6379
-        # networks:
-        #     - mks
+            - ./volumes/redis/:/etc/redis/
+        ports:
+            - 6379:6379
+        networks:
+            - mks
         restart: unless-stopped
 
     backend:
-        build:
-          context: ./backend
+        image: mosesmbadi/easymedbackend
         container_name: backend
-        command: ./backend-entrypoint.sh
-        volumes:
-            - ./backend:/code/
+        #command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
         ports:
             - 8080:8080
         env_file:
@@ -50,49 +22,34 @@ services:
         depends_on:
             - db
         restart: unless-stopped
-        # networks:
-        #     - mks
+        networks:
+            - mks
 
     worker:
+        image: mosesmbadi/easymedbackend
+        container_name: worker
+        command: celery -A easymed worker --loglevel=INFO        
         restart: unless-stopped
-        build:
-            context: ./backend
-        volumes:
-            - static_volume:/app/backend/django_static
-        environment:
-            DEBUG: "True"
-            CELERY_BROKER_URL: "redis://redis:6379/0"
-            CELERY_RESULT_BACKEND: "redis://redis:6379/0"
-            DJANGO_DB: postgresql
-            POSTGRES_HOST: db
-            POSTGRES_NAME: postgres
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_PORT: 5432
+        env_file:
+            - ./.env    
         depends_on:
             - backend
             - redis
-        # networks:
-        #     - mks   
+        networks:
+            - mks   
 
     frontend:
-        build:
-            context: ./front-end
+        image: mosesmbadi/easymedfrontend
         container_name: front-end
         restart: unless-stopped
         ports:
             - 3000:3000
         depends_on:
             - backend
-        # networks:
-        #     - mks    
+        networks:
+            - mks    
 
-
-volumes:
-    static_volume: {}
-    postgres_data: {}
-
-# networks:
-#     mks:
-#         name: mks
-#         driver: bridge
+networks:
+    mks:
+        name: mks
+        driver: bridge

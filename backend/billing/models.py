@@ -1,6 +1,6 @@
 from django.db import models
-from inventory.models import Item
-from patient.models import Patient
+# from inventory.models import Item
+# from patient.models import Patient
 from django.db.models import Sum
 
 
@@ -14,6 +14,7 @@ class PaymentMode(models.Model):
         ('mpesa', 'MPesa'),
     )
     paymet_mode = models.CharField(max_length=20)
+    insurance = models.ForeignKey('company.InsuranceCompany',null=True, on_delete=models.CASCADE)
     payment_category = models.CharField(
         max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
     
@@ -26,13 +27,13 @@ class Invoice(models.Model):
         ('pending', 'Pending'),
         ('paid', 'Paid'),
     )
-    patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True)
-    invoice_number = models.CharField(max_length=50)
-    invoice_date = models.DateField()
+    patient = models.ForeignKey('patient.Patient', on_delete=models.SET_NULL, null=True)
+    invoice_number = models.CharField(max_length=50, null=True)
+    invoice_date = models.DateField(null=True)
     invoice_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
-    invoice_description = models.CharField(max_length=200)
+    invoice_description = models.CharField(max_length=200, null=True)
     invoice_file = models.FileField(upload_to=invoice_file_path, null=True, blank=True)
     invoice_created_at = models.DateTimeField(auto_now_add=True)
     invoice_updated_at = models.DateTimeField(auto_now=True)
@@ -47,15 +48,22 @@ class Invoice(models.Model):
         self.calculate_invoice_amount()
         super().save(*args, **kwargs) 
 
-    def __str__(self):
-        return self.invoice_number
+    # def __str__(self):
+    #     return self.invoice_number
 
 class InvoiceItem(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('billed', 'Billed'),
+    )
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='invoice_items')
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)
     payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
+    item_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending')
 
 
     def save(self, *args, **kwargs):

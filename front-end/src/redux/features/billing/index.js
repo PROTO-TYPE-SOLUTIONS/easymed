@@ -4,7 +4,8 @@ import {
   fetchPatientBillingAppointments,
   fetchPatientBillingLabRequest,
   fetchPatientBillingPrescribedDrug,
-  getBillingInvoiceItems,
+  getBillingInvoiceItems, fetchPaymentModes, fetchPatientInvoices,
+  fetchInvoiceItemsByInvoiceId
 } from "@/redux/service/billing";
 
 const initialState = {
@@ -15,7 +16,8 @@ const initialState = {
   selectedLabRequests: [],
   selectedPrescribedDrugs: [],
   invoices: [],
-  invoiceItems:[]
+  invoiceItems:[],
+  paymodes: [],
 };
 
 const BillingSlice = createSlice({
@@ -46,6 +48,9 @@ const BillingSlice = createSlice({
     setInvoiceItems: (state, action) => {
       state.invoiceItems = action.payload;
     },
+    setPayModes: (state, action) => {
+      state.paymodes = action.payload;
+    },
   },
 });
 
@@ -57,7 +62,7 @@ export const {
   setSelectedLabRequest,
   setSelectedPrescribedDrug,
   setInvoices,
-  setInvoiceItems,
+  setInvoiceItems, setPayModes,
 } = BillingSlice.actions;
 
 export const getAllPatientBillingAppointments =
@@ -99,12 +104,40 @@ export const getAllInvoices = (auth) => async (dispatch) => {
   }
 };
 
+export const getPatientInvoices = (auth, patient_id) => async (dispatch) => {
+  try {
+    const response = await fetchPatientInvoices(auth, patient_id);
+    dispatch(setInvoices(response));
+  } catch (error) {
+    console.log("PATIENT_INVOICES_ERROR ", error);
+  }
+};
+
 export const getAllInvoiceItems = (auth) => async (dispatch) => {
   try {
     const response = await getBillingInvoiceItems(auth);
     dispatch(setInvoiceItems(response));
   } catch (error) {
     console.log("BILLING_ITEMS_ERROR ", error);
+  }
+};
+
+
+export const getAllInvoiceItemsByInvoiceId = (auth, invoice) => async (dispatch) => {
+  try {
+    const response = await fetchInvoiceItemsByInvoiceId(auth, invoice);
+    dispatch(setInvoiceItems(response));
+  } catch (error) {
+    console.log("BILLING_ITEMS_ERROR ", error);
+  }
+};
+
+export const getPaymentModes = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchPaymentModes(auth);
+    dispatch(setPayModes(response));
+  } catch (error) {
+    console.log("BILLINGI_ERROR ", error);
   }
 };
 

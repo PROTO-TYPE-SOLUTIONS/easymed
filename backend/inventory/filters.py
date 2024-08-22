@@ -10,11 +10,11 @@ from .models import (
 )
 
 class InventoryFilter(django_filters.FilterSet):
-    location = django_filters.CharFilter(lookup_expr='exact')
+    item = django_filters.CharFilter(field_name='item__id', lookup_expr='icontains')
 
     class Meta:
         model = Inventory
-        fields = ('location',)
+        fields = ['item']
 
 
 class ItemFilter(django_filters.FilterSet):

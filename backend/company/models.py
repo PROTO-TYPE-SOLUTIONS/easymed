@@ -1,4 +1,5 @@
 from django.db import models
+from billing.models import PaymentMode
 from django.core.validators import FileExtensionValidator
 
 class Company(models.Model):
@@ -39,8 +40,28 @@ class CompanyBranch(models.Model):
     )
 
     class Meta:
-        verbose_name_plural = "company"
+        verbose_name_plural = "Company Branch"
 
 
     def __str__(self):
-        return self.name   
+        return self.name  
+
+class InsuranceCompany(models.Model):
+    name = models.CharField(max_length=30)
+
+    def save(self, *args, **kwargs):
+        created = not self.pk
+        super().save(*args, **kwargs)
+        if created:
+            PaymentMode.objects.create(
+                paymet_mode=self.name,
+                insurance=self,
+                payment_category='insurance'
+            )
+
+    def delete(self, *args, **kwargs):
+        PaymentMode.objects.filter(insurance=self).delete()
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
