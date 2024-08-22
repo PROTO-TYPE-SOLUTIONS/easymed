@@ -32,7 +32,6 @@ from .models import (
     Consultation,
     Referral,
     Triage,
-    AttendanceProcess,
 )
 from .serializers import (
     ContactDetailsSerializer,
@@ -47,7 +46,6 @@ from .serializers import (
     TriageSerializer,
     ConvertToAppointmentsSerializer,
     SendConfirmationMailSerializer,
-    AttendanceProcessSerializer,
 )
 
 # filters
@@ -121,7 +119,7 @@ class PatientByUserIdAPIView(APIView):
         if user is None:
             return Response({"error_message": f"user id {user_id} doesn't exist"})
 
-        patient = Patient.objects.filter(user_id__pk=user.pk)
+        patient = Patient.objects.filter(id_number=request.query_params.get("id_number"))
         if not patient.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -130,47 +128,42 @@ class PatientByUserIdAPIView(APIView):
 
 
 class AppointmentsByPatientIdAPIView(APIView):
-    def get_object(self, patient_id: int):
+    def get_object(self, id_number: int):
         try:
-            return Patient.objects.get(id=patient_id)
+            return Patient.objects.get(id_number=id_number)
         except Patient.DoesNotExist:
             return None
     @extend_schema(
         responses=AppointmentSerializer,
     )
     def get(self, request: Request, *args, **kwargs):
-        patient_id = self.kwargs.get('patient_id')
-        patient = self.get_object(patient_id)
+        id_number = self.kwargs.get('id_number')
+        patient = self.get_object(id_number)
         if patient is None:
-            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
+            return Response({"error_message": f"patient id {id_number} doesn't exist"})
         appointments = Appointment.objects.filter(patient=patient)
         if not appointments.exists():
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = AppointmentSerializer(appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class PrescribedDrugByPatientIdAPIView(APIView):
-    def get_prescribed_drugs_by_patient(self, patient_id: int):
+class PrescribedDrugByPatinetIdAPIView(APIView):
+    def get_object(self, id_number: int):
         try:
-            patient = get_object_or_404(Patient, id=patient_id)
-            attendance_processes = AttendanceProcess.objects.filter(patient=patient)
-            prescriptions = Prescription.objects.filter(attendanceprocess__in=attendance_processes)
-            prescribed_drugs = PrescribedDrug.objects.filter(prescription__in=prescriptions)
-            return prescribed_drugs
+            return Patient.objects.get(id_number=id_number)
         except Patient.DoesNotExist:
             return None
-
     @extend_schema(
         responses=PrescribedDrugSerializer,
     )
-    def get(self, request: Request, patient_id: int, *args, **kwargs):
-        prescribed_drugs = self.get_prescribed_drugs_by_patient(patient_id)
-        if prescribed_drugs is None:
-            return Response({"error_message": f"Patient ID {patient_id} doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
-        
+    def get(self, request: Request, *args, **kwargs):
+        id_number = self.kwargs.get('id_number')
+        patient = self.get_object(id_number)
+        if patient is None:
+            return Response({"error_message": f"patient id {id_number} doesn't exist"})
+        prescribed_drugs = PrescribedDrug.objects.filter(patient=patient)
         if not prescribed_drugs.exists():
-            return Response({"error_message": "No prescribed drugs found for the given patient"}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = PrescribedDrugSerializer(prescribed_drugs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -292,6 +285,35 @@ def download_prescription_pdf(request, prescription_id):
     response['Content-Disposition'] = f'attachment; filename="{prescription.id}.pdf"'
     return response
 
-class AttendanceProcessViewSet(viewsets.ModelViewSet):
-    queryset = AttendanceProcess.objects.all().order_by('-id')
-    serializer_class = AttendanceProcessSerializer
+
+class PatientHistoryData(APIView):
+    def get(self, request, id_number):
+        #retrieve all the records based on the patient id
+        if id_number is None:
+            return Response({"error_message": "No patient ID provided"}, status=status.HTTP_400_BAD_REQUEST)
+        patient = Patient.objects.filter(id_number=id_number).first()
+        if not patient:
+            return Response({"erro_message": "Patient with ID Number {id_number} does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        triage = Triage.objects.filter(patient__id_number=id_number)
+        appointments = Appointment.objects.filter(patient__id_number=id_number)
+        consultations = Consultation.objects.filter(patient__id_number=id_number)
+        prescriptions = Prescription.objects.filter(prescribeddrug__patient__id_number=id_number)
+        referrals = Referral.objects.filter(referred_by__patient=id_number)
+        
+        #serializing the retrieved data
+        patient_serializer = PatientSerializer(patient)
+        triage_serializer = TriageSerializer(triage, many=True)
+        appointments_serializer = AppointmentSerializer(appointments, many=True)
+        consultations_serializer = ConsultationSerializer(consultations, many=True)
+        prescriptions_serializer = PrescriptionSerializer(prescriptions, many=True)
+        referrals_serializer = ReferralSerializer(referrals, many=True)
+       
+        #returning a JSON response containing all the serialized data
+        return Response({
+            'patient': patient_serializer.data,
+            'triage': triage_serializer.data,
+            'appointments': appointments_serializer.data,
+            'consultations': consultations_serializer.data,
+            'prescriptions': prescriptions_serializer.data,
+            'referrals': referrals_serializer.data
+        }, status=status.HTTP_200_OK)

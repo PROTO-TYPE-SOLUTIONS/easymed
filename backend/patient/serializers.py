@@ -11,7 +11,6 @@ from .models import (
     Consultation,
     Referral,
     Triage,
-    AttendanceProcess,
 )
 from company.serializers import InsuranceCompanySerializer
 from inventory.models import (
@@ -28,6 +27,7 @@ class ContactDetailsSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    id_number = serializers.IntegerField()
     age = serializers.SerializerMethodField()
 
     class Meta:
@@ -76,6 +76,7 @@ class ConvertToAppointmentsSerializer(serializers.Serializer):
     def create_patient_appointment(self) -> int:
         try:
             patient = Patient.objects.create(
+                id_number = self.validate_data.get("id_number"),
                 first_name = self.validated_data.get("first_name"),
                 second_name = self.validated_data.get("second_name"),
                 date_of_birth = self.validated_data.get("date_of_birth"),
@@ -175,6 +176,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             data["assigned_doctor"] = instance.assigned_doctor.get_fullname()
 
         if instance.patient:
+            data["id_number"] = instance.patient.id_number
             data["first_name"] = instance.patient.first_name
             data["second_name"] = instance.patient.second_name
             data["gender"] = instance.patient.gender

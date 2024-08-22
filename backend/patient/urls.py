@@ -15,10 +15,10 @@ from .views import (
     ConvertToAppointmentAPIView,
     SendAppointmentConfirmationAPIView,
     AppointmentsByPatientIdAPIView,
-    PrescribedDrugByPatientIdAPIView,
+    PrescribedDrugByPatinetIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
     download_prescription_pdf,
-    AttendanceProcessViewSet
+    PatientHistoryData
 )
 
 router = DefaultRouter()
@@ -34,7 +34,7 @@ router.register(r'referrals', ReferralViewSet)
 router.register(r'triage', TriageViewSet)
 router.register(r'appointments', AppointmentViewSet)
 router.register(r'appointments', AppointmentViewSet, basename='appointments')
-router.register(r'initiate-attendance-process', AttendanceProcessViewSet)
+
 
 
 
@@ -42,8 +42,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     
-    path('appointments/by_patient_id/<int:patient_id>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
-    path('prescribed-drugs/by_patient_id/<int:patient_id>/', PrescribedDrugByPatientIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
+    path('appointments/by_patient_id/<int:id_number>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
+    path('prescribed-drugs/by_patient_id/<int:id_number>/', PrescribedDrugByPatinetIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
 
     path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
     path('send-appointment-confirmation/', SendAppointmentConfirmationAPIView.as_view(), name="send-appointment-confirmation"),
@@ -51,4 +51,6 @@ urlpatterns = [
     path('prescribed-drugs/by-prescription/<int:prescription_id>/', PrescribedDrugByPrescriptionViewSet.as_view({'get': 'list'}), name='prescribed_drugs_by_prescription'),
 
     path('download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
+
+    path('patient/history/<int:id_number>/', PatientHistoryData.as_view(), name='patient-history'),
 ]
