@@ -303,3 +303,12 @@ fabric.properties
 
 
 backend/easymed/static/
+
+*/__pycache__/
+
+env/
+
+
+*/migrations/
+**/migrations/
+**/__pycache__/

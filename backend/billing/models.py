@@ -56,7 +56,10 @@ class InvoiceItem(models.Model):
         ('pending', 'Pending'),
         ('billed', 'Billed'),
     )
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='invoice_items')
+    invoice = models.ForeignKey(
+        Invoice,
+        on_delete=models.CASCADE,
+        related_name='invoice_items')
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)

@@ -24,7 +24,7 @@ services:
         ports:
             - 8080:8080
         env_file:
-            - ./.env
+            - ./.env.local
         restart: unless-stopped
         networks:
             - mks
@@ -34,7 +34,7 @@ services:
         container_name: "celery"
         restart: unless-stopped
         env_file:
-            - ./.env    
+            - ./.env.local  
         command: celery -A easymed worker --loglevel=INFO        
         depends_on:
             - redis
