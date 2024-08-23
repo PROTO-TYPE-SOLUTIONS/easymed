@@ -1,4 +1,16 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# USER DEFINED=========================================
+
+# static
+static/
+
+# If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
+# in your Git repository. Update and uncomment the following line accordingly.
+/backend/easymed/staticfiles/invoices
+/backend/easymed/staticfiles/labtestresult
+/backend/easymed/staticfiles/prescription
+/backend/easymed/staticfiles/purchaseorder
+/backend/easymed/staticfiles/reports
+/backend/easymed/staticfiles/requisitions
 
 # dependencies
 /front-end/node_modules
@@ -6,6 +18,22 @@
 /.pnp
 .pnp.js
 
+
+backend/easymed/static/
+
+*/__pycache__/
+
+env/
+
+migrations/
+*/migrations/
+**/migrations/
+**/__pycache__/
+
+
+
+
+## TOOLS GENERETED ========================================
 # testing
 /coverage
 
@@ -51,17 +79,7 @@ local_settings.py
 organizers
 .vscode
 .history
-# static
-static/
 
-# If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
-# in your Git repository. Update and uncomment the following line accordingly.
-/backend/easymed/staticfiles/invoices
-/backend/easymed/staticfiles/labtestresult
-/backend/easymed/staticfiles/prescription
-/backend/easymed/staticfiles/purchaseorder
-/backend/easymed/staticfiles/reports
-/backend/easymed/staticfiles/requisitions
 
 
 ### Django.Python Stack ###
@@ -301,14 +319,3 @@ fabric.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/django
 
-
-backend/easymed/static/
-
-*/__pycache__/
-
-env/
-
-
-*/migrations/
-**/migrations/
-**/__pycache__/

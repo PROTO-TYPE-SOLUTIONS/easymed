@@ -15,12 +15,12 @@ from .views import (
     ConvertToAppointmentAPIView,
     SendAppointmentConfirmationAPIView,
     AppointmentsByPatientIdAPIView,
-    PrescribedDrugByPatinetIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
     download_prescription_pdf,
     AttendanceProcessViewSet,
     AppointmentByDoctorView,
     PatientHistoryData,
+    PrescribedDrugByPatientIdAPIView,
 )
 
 router = DefaultRouter()

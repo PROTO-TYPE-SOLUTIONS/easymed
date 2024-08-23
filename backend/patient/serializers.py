@@ -11,6 +11,7 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    AttendanceProcess
 )
 from company.serializers import InsuranceCompanySerializer
 from inventory.models import (

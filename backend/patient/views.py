@@ -40,6 +40,7 @@ from .models import (
     Consultation,
     Referral,
     Triage,
+    AttendanceProcess
 )
 from .serializers import (
     ContactDetailsSerializer,
@@ -54,6 +55,7 @@ from .serializers import (
     TriageSerializer,
     ConvertToAppointmentsSerializer,
     SendConfirmationMailSerializer,
+    AttendanceProcessSerializer
 )
 
 # filters
@@ -155,7 +157,7 @@ class AppointmentsByPatientIdAPIView(APIView):
         serializer = AppointmentSerializer(appointments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class PrescribedDrugByPatinetIdAPIView(APIView):
+class PrescribedDrugByPatientIdAPIView(APIView):
     def get_object(self, id_number: int):
         try:
             return Patient.objects.get(id_number=id_number)

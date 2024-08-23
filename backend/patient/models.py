@@ -1,13 +1,16 @@
 from datetime import datetime
 from django.db import models
 from customuser.models import CustomUser
-# from pharmacy.models import Drug
+
+from django.utils import timezone
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+
 from inventory.models import Item
 from billing.models import Invoice
 from company.models import InsuranceCompany
 from laboratory.models import ProcessTestRequest
-from django.dispatch import receiver
-from django.contrib.auth import get_user_model
+
 
 class ContactDetails(models.Model):
     tel_no = models.IntegerField()
