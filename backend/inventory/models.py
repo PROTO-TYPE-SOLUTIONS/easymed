@@ -39,7 +39,7 @@ class Item(models.Model):
         ('Specialized Appointment', 'Specialized Appointment'),
         ('general', 'General'),
     ]
-    id = models.CharField(max_length=255, primary_key=True, editable=True)
+    item_code = models.CharField(max_length=255, editable=True)
     name = models.CharField(max_length=255)
     desc = models.CharField(max_length=255)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)

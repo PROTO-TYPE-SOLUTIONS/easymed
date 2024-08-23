@@ -42,7 +42,7 @@ virtualenv venv
 source venv/bin/activate
 cd backend
 pip install -r requirements.txt
-python manage.py makemigrations customuser authperms patient pharmacy inventory laboratory receptions billing announcement
+python manage.py makemigrations customuser company authperms patient pharmacy inventory laboratory receptions billing announcement reports
 python manage.py migrate
 python manage.py runserver
 ```
@@ -84,7 +84,22 @@ npm start
 
 Visit localhost 127.0.0.1:3000/dashboard
 
+## Running celery
+
+If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
+`pip install celery redis`
+Run Celery: `celery -A easymed worker --loglevel=INFO`
+Run Redis: `redis-cli -h 127.0.0.1 -p 6379`
+
+Generated PDFs
+`http://127.0.0.1:8080/download_{service_name}_pdf/{id}`
+i.e `http://127.0.0.1:8080/download_invoice_pdf/24`
+
+
+
 ## Adding Permissions
+You can now loginto the django admin and create groups and permissions.
+YOU WILL HAVE POBLEM WITH FRONTEND IF THE GROUPS AND PERMISSIONS ARE NOT SET UP
 
 You need to create groups and associate permissions. make sure groups follow this order `SYS_ADMIN`, `PATIENT` group then the rest ie `DOCTOR`,`PHARMACIST`, `RECEPTIONIST`, `LAB_TECH` , `NURSE`
 Then create permissions below and link to the `GROUPS`.
@@ -106,16 +121,9 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 
 You will notice that we have a Role and a Group. A group is associated with permissions which determines which specific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
 
-## Running celery
+After adding permissions, make sure whichever user you're trying to login as has atleast one
+Group assigned to them.
 
-If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
-`pip install celery redis`
-Run Celery: `celery -A easymed worker --loglevel=INFO`
-Run Redis: `redis-cli -h 127.0.0.1 -p 6379`
-
-Generated PDFs
-`http://127.0.0.1:8080/download_{service_name}_pdf/{id}`
-i.e `http://127.0.0.1:8080/download_invoice_pdf/24`
 
 ## Testing Socket connection for notifications
 

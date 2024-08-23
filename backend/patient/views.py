@@ -1,8 +1,16 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.conf import settings
+import os
 
+
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from company.models import Company
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -251,21 +259,14 @@ class SendAppointmentConfirmationAPIView(APIView):
 
 
 
-'''
-This view gets the geneated pdf and downloads it locally
-pdf accessed here http://127.0.0.1:8080/download_prescription_pdf/26/
-'''
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
-from django.conf import settings
-import os
 
 
-from django.template.loader import render_to_string
-from weasyprint import HTML
-from company.models import Company
 
 def download_prescription_pdf(request, prescription_id):
+    '''
+    This view gets the geneated pdf and downloads it locally
+    pdf accessed here http://127.0.0.1:8080/download_prescription_pdf/26/
+    '''
     prescription = get_object_or_404(Prescription, pk=prescription_id)
     prescribed_drugs = PrescribedDrug.objects.filter(prescription=prescription)
     company = Company.objects.first()
@@ -285,6 +286,18 @@ def download_prescription_pdf(request, prescription_id):
     response['Content-Disposition'] = f'attachment; filename="{prescription.id}.pdf"'
     return response
 
+class AttendanceProcessViewSet(viewsets.ModelViewSet):
+    queryset = AttendanceProcess.objects.all().order_by('-id')
+    serializer_class = AttendanceProcessSerializer
+
+
+
+class AppointmentByDoctorView(generics.ListAPIView):
+    serializer_class = AppointmentSerializer
+
+    def get_queryset(self):
+        assigned_doctor_id = self.kwargs['assigned_doctor_id']
+        return Appointment.objects.filter(assigned_doctor_id=assigned_doctor_id)
 
 class PatientHistoryData(APIView):
     def get(self, request, id_number):

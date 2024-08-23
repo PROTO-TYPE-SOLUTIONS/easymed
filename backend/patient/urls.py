@@ -18,7 +18,9 @@ from .views import (
     PrescribedDrugByPatinetIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
     download_prescription_pdf,
-    PatientHistoryData
+    AttendanceProcessViewSet,
+    AppointmentByDoctorView,
+    PatientHistoryData,
 )
 
 router = DefaultRouter()
@@ -42,14 +44,16 @@ urlpatterns = [
     path('', include(router.urls)),
     path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     
-    path('appointments/by_patient_id/<int:id_number>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
-    path('prescribed-drugs/by_patient_id/<int:id_number>/', PrescribedDrugByPatinetIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
+
+    path('appointments/by_patient_id/<int:patient_id>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
+    path('appointments/by_doctor/<int:assigned_doctor_id>/', AppointmentByDoctorView.as_view(), name='appointments-by-doctor'),
 
     path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
     path('send-appointment-confirmation/', SendAppointmentConfirmationAPIView.as_view(), name="send-appointment-confirmation"),
     
-    path('prescribed-drugs/by-prescription/<int:prescription_id>/', PrescribedDrugByPrescriptionViewSet.as_view({'get': 'list'}), name='prescribed_drugs_by_prescription'),
 
+    path('prescribed-drugs/by_patient_id/<int:patient_id>/', PrescribedDrugByPatientIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
+    path('prescribed-drugs/by-prescription/<int:prescription_id>/', PrescribedDrugByPrescriptionViewSet.as_view({'get': 'list'}), name='prescribed_drugs_by_prescription'),
     path('download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
 
     path('patient/history/<int:id_number>/', PatientHistoryData.as_view(), name='patient-history'),

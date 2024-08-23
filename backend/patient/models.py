@@ -127,6 +127,9 @@ class Triage(models.Model):
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.CharField(max_length=300, blank=True)
 
+    def __str__(self):
+        return str(self.date_created) + ' - ' + str(self.id)
+
 
 class Consultation(models.Model):
     DISPOSITION_CHOICES = (
