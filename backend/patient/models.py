@@ -1,6 +1,4 @@
 from datetime import datetime
-from uuid import uuid4
-import random
 from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
@@ -10,7 +8,6 @@ from company.models import InsuranceCompany
 from laboratory.models import ProcessTestRequest
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 
 class ContactDetails(models.Model):
     tel_no = models.IntegerField()
@@ -24,7 +21,7 @@ class Patient(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    unique_id = models.CharField(max_length=8, unique=True, editable=False)
+    id_number = models.PositiveIntegerField(unique=True, db_index=True, null=True, blank=True)
     first_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True, null=True, blank=True)
     phone = models.CharField(max_length=30, null=True, blank=True)
@@ -45,17 +42,6 @@ class Patient(models.Model):
             patient_age:int = (datetime.now().year - self.date_of_birth.year)
             return patient_age
         return None
-    
-    def save(self, *args, **kwargs):
-        if not self.unique_id:
-            self.unique_id = self.generate_unique_id()
-        super(Patient, self).save(*args, **kwargs)
-
-    def generate_unique_id(self):
-        while True:
-            unique_id = '{:08d}'.format(random.randint(0, 99999999))
-            if not Patient.objects.filter(unique_id=unique_id).exists():
-                return unique_id
 
 
 class NextOfKin(models.Model):
@@ -85,7 +71,7 @@ class Appointment(models.Model):
     reason = models.TextField(max_length=300, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, default=22)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"Appointment #{self.patient.first_name}"
@@ -132,17 +118,14 @@ class PublicAppointment(models.Model):
 
 class Triage(models.Model):
     created_by = models.CharField(max_length=45)
-    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True)
-    height = models.DecimalField(max_digits=5, decimal_places=2, null=True)
-    weight = models.IntegerField(null=True)
-    pulse = models.PositiveIntegerField(null=True)
-    diastolic = models.PositiveIntegerField(null=True)
-    systolic = models.PositiveIntegerField(null=True)
-    bmi = models.DecimalField(max_digits=10, decimal_places=1, null=True)
+    temperature = models.DecimalField(max_digits=5, decimal_places=2)
+    height = models.DecimalField(max_digits=5, decimal_places=2)
+    weight = models.IntegerField()
+    pulse = models.PositiveIntegerField()
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    notes = models.CharField(max_length=300, blank=True, null=True)
+    notes = models.CharField(max_length=300, blank=True)
 
     def __str__(self):
         return str(self.date_created) + ' - ' + str(self.id)
@@ -169,10 +152,16 @@ class Consultation(models.Model):
 
 
 class Prescription(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('dispensed', 'Dispensed'),
+    )
     date_created = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateField(null=True)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
-    
+    start_date = models.DateField()
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending')
+
     def __str__(self):
         return f"Prescription #{self.id}"
 
@@ -180,14 +169,13 @@ class Prescription(models.Model):
 class PrescribedDrug(models.Model):
     class Meta:
         unique_together = ("prescription_id", "item")
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
     duration = models.CharField(max_length=45)
     note = models.TextField(null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE,)
-    is_dispensed = models.BooleanField(default=False)
-    quantity = models.PositiveIntegerField(default=1)
 
 
     def __str__(self):

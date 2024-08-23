@@ -115,15 +115,18 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
-
+from weasyprint import HTML
 from .models import Requisition
 from company.models import Company
 
 def download_requisition_pdf(request, requisition_id):
     requisition = get_object_or_404(Requisition, pk=requisition_id)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
-    html_template = get_template('requisition.html').render({'requisition_items': requisition_items})
-    from weasyprint import HTML
+    html_template = get_template('requisition.html').render({
+        'requisition': requisition, 
+        'requisition_items': requisition_items
+        })
+
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="purchase_order_report_{requisition_id}.pdf"'
@@ -142,7 +145,6 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
         'company': company
     })
     
-    from weasyprint import HTML
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="purchase_order_report_{purchaseorder_id}.pdf"'
