@@ -30,9 +30,16 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LabTestPanelSerializer (serializers.ModelSerializer):
+    reference_range = serializers.SerializerMethodField()
+
     class Meta:
         model = LabTestPanel
-        fields = '__all__'
+        fields = ['name', 'specimen', 'test_profile', 'unit', 'reference_range']
+
+    def get_reference_range(self, obj):
+        patient_age = self.context.get('patient_age')
+        patient_gender = self.context.get('patient_gender')
+        return obj.get_reference_range(patient_age, patient_gender)
 
 class PublicLabTestRequestSerializer(serializers.ModelSerializer):
     class Meta:

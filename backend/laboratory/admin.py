@@ -16,3 +16,4 @@ admin.site.register(EquipmentTestRequest)
 admin.site.register(Specimen)
 
 admin.site.register(PatientSample)
+admin.site.register(LabTestReferenceRange)

@@ -50,19 +50,47 @@ class Specimen(models.Model):
     def __str__(self):
         return self.name
 
+
 class LabTestPanel(models.Model):
     name = models.CharField(max_length=255)
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=255)
-    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.specimen.name} - {self.unit} - { self.test_profile.name }"
+        return f"{self.name} - {self.specimen.name} - {self.unit} - { self.test_profile.name }"
+    
+    def get_reference_range(self, age, gender):
+        reference_range = LabTestReferenceRange.objects.filter(
+            lab_test_panel = self,
+            gender = gender,
+            age_min__lte = age,
+            age_max__gte = age
+        ).first()
+        if reference_range:
+            return reference_range.ref_value_low, reference_range.ref_value_high
+        return None, None
+
+
+class LabTestReferenceRange(models.Model):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    )
+
+    lab_test_panel = models.ForeignKey(LabTestPanel, on_delete=models.CASCADE, related_name='reference_ranges')
+    age_min = models.PositiveBigIntegerField(null=True, blank=True)
+    age_max = models.PositiveBigIntegerField(null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
+    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.lab_test_panel.name} - {self.gender} - {self.age_min}-{self.age_max} years: {self.ref_value_low} - {self.ref_value_high}"
 
 
 class ProcessTestRequest(models.Model):

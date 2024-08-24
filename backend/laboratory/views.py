@@ -99,9 +99,19 @@ class LabTestPanelViewSet(viewsets.ModelViewSet):
             test_profile = LabTestProfile.objects.get(pk=profile_id)
         except LabTestProfile.DoesNotExist:
             return Response({"error": "Test Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        patient_age = request.query_params.get('patient_age')
+        patient_gender = request.query_params.get('patient_gender')
+        if not patient_age or not patient_gender:
+            return Response({"error": "Patient age and gender must be provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            patient_age = int(patient_age)
+        except ValueError:
+            return Response({"error": "Invalid age format"}, status=status.HTTP_400_BAD_REQUEST)
 
         lab_test_panels = LabTestPanel.objects.filter(test_profile=test_profile)
-        serializer = LabTestPanelSerializer(lab_test_panels, many=True)
+        serializer = LabTestPanelSerializer(lab_test_panels, many=True, context={'patient_age': patient_age, 'patient_gender': patient_gender})
         return Response(serializer.data)
 
 
