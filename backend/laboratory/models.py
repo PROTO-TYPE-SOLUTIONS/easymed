@@ -51,10 +51,22 @@ class Specimen(models.Model):
         return self.name
 
 class LabTestPanel(models.Model):
+    UNITS_OPTIONS = (
+        ('mL', 'mL'),
+        ('uL', 'uL'),
+        ('L', 'L'),
+        ('mg', 'mg'),
+        ('ug', 'ug'),
+        ('g', 'g'),
+        ('IU', 'IU'),
+        ('IU/ml', 'IU/ml'),
+        ('ng/ml', 'ng/ml'),
+        ('ng', 'ng'),
+    )
     name = models.CharField(max_length=255)
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
-    unit = models.CharField(max_length=255)
+    unit = models.CharField(max_length=10, choices=UNITS_OPTIONS, default='mL')
     ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -123,6 +135,7 @@ class LabTestRequestPanel(models.Model):
     category = models.CharField(max_length=30, default="none")
     result_approved=models.BooleanField(default=False)
     approved_on = models.DateTimeField(null=True, blank=True) 
+    is_billed = models.BooleanField(default=False)
 
     def generate_test_code(self):
         while True:

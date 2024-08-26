@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -295,3 +295,10 @@ def download_prescription_pdf(request, prescription_id):
 class AttendanceProcessViewSet(viewsets.ModelViewSet):
     queryset = AttendanceProcess.objects.all().order_by('-id')
     serializer_class = AttendanceProcessSerializer
+
+class AppointmentByDoctorView(generics.ListAPIView):
+    serializer_class = AppointmentSerializer
+
+    def get_queryset(self):
+        assigned_doctor_id = self.kwargs['assigned_doctor_id']
+        return Appointment.objects.filter(assigned_doctor_id=assigned_doctor_id)
