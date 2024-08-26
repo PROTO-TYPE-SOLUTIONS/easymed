@@ -16,10 +16,13 @@ from easymed.celery_tasks import (
 print("update_labtest_billed_on_invoice_item_save signal fired")
 
 
-'''If an InvoiceItem is of category LabTest, and the InvoiceItem status changes to
-billed, updated the LabTestRequestPanel's is_billed field to True'''
+
 @receiver(post_save, sender=InvoiceItem)
 def update_labtestrequestpanel_billed_status(sender, instance, **kwargs):
+    '''
+    If an InvoiceItem is of category LabTest, and the InvoiceItem status changes to
+    billed, updated the LabTestRequestPanel's is_billed field to True
+    '''
     # Check if the status is 'billed' and the item is in the 'LabTest' category
     if instance.status == 'billed' and instance.item.category == 'Lab Test':
         # Find the related AttendanceProcess through the invoice
