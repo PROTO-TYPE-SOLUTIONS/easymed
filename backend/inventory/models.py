@@ -2,25 +2,26 @@ from django.db import models
 from customuser.models import CustomUser
 from company.models import InsuranceCompany
 from django.utils import timezone
+from patient.base_model import BaseModel
 
 
 
 
-class Department(models.Model):
+class Department(BaseModel):
     name = models.CharField(max_length=100)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
 
     def __str__(self):
         return f"{self.id} - {self.name}"
     
-class Supplier(models.Model):
+class Supplier(BaseModel):
     name = models.CharField(max_length=255)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
 
     def __str__(self):
         return f"{self.id} - {self.name}"
     
-class Item(models.Model):
+class Item(BaseModel):
     UNIT_CHOICES = [
         ('unit', 'Unit'),
         ('mg', 'Milligram'),
@@ -44,42 +45,40 @@ class Item(models.Model):
     desc = models.CharField(max_length=255)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
 
     def __str__(self):
         return f"{self.id} - {self.name}"
 
 
-class Requisition(models.Model):
+class Requisition(BaseModel):
     STATUS_CHOICES = [
         ('COMPLETED', 'completed'),
         ('PENDING', 'Pending'),
     ]
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
 
     def __str__(self):
         return self.status
         
-class RequisitionItem(models.Model):
+class RequisitionItem(BaseModel):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_requested = models.IntegerField()
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
+    
     
     def __str__(self):
         return self.id    
 
-class PurchaseOrder(models.Model):
+class PurchaseOrder(BaseModel):
     STATUS_CHOICES = [
         ('COMPLETED', 'completed'),
         ('PENDING', 'Pending'),
     ]
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True)
@@ -87,19 +86,19 @@ class PurchaseOrder(models.Model):
     def __str__(self):
         return str(self.requested_by)
 
-class PurchaseOrderItem(models.Model):
+class PurchaseOrderItem(BaseModel):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_purchased = models.IntegerField()
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
+    
 
     
     def __str__(self):
         return self.id
 
 
-class IncomingItem(models.Model):
+class IncomingItem(BaseModel):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
@@ -110,15 +109,14 @@ class IncomingItem(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
     category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES) 
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.item.name} - {self.date_created}"
+        return f"{self.item.name} - {self.created_at}"
 
-class Inventory(models.Model):
+class Inventory(BaseModel):
     CATEGORY_ONE_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
@@ -129,11 +127,10 @@ class Inventory(models.Model):
     quantity_in_stock = models.IntegerField()
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
 
     def __str__(self):
-        return f"{self.item.name} - {self.date_created}"
+        return f"{self.item.name} - {self.created_at}"
     
 class InventoryInsuranceSaleprice(models.Model):
     inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
@@ -145,12 +142,12 @@ class InventoryInsuranceSaleprice(models.Model):
     
     
 
-class DepartmentInventory(models.Model):
+class DepartmentInventory(BaseModel):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
 
     def __str__(self):
         return str(self.item)

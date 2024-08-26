@@ -10,6 +10,7 @@ from inventory.models import Item
 from billing.models import Invoice
 from company.models import InsuranceCompany
 from laboratory.models import ProcessTestRequest
+from patient.base_model import BaseModel
 
 
 class ContactDetails(models.Model):
@@ -55,9 +56,9 @@ class NextOfKin(models.Model):
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
 
-class Appointment(models.Model):
+class Appointment(BaseModel):
     class Meta:
-        ordering = ("-date_created",)
+        ordering = ("-created_at",)
 
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -72,7 +73,6 @@ class Appointment(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
     reason = models.TextField(max_length=300, null=True)
-    date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True)
 
@@ -81,7 +81,7 @@ class Appointment(models.Model):
 
 
 
-class PublicAppointment(models.Model):
+class PublicAppointment(BaseModel):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
@@ -105,7 +105,6 @@ class PublicAppointment(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
     reason = models.TextField(max_length=300,)
-    date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -119,10 +118,9 @@ class PublicAppointment(models.Model):
         return None
 
 
-class Triage(models.Model):
+class Triage(BaseModel):
     created_by = models.CharField(max_length=45)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
     temperature = models.DecimalField(max_digits=5, decimal_places=2)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     weight = models.IntegerField()
@@ -134,7 +132,7 @@ class Triage(models.Model):
         return str(self.date_created) + ' - ' + str(self.id)
 
 
-class Consultation(models.Model):
+class Consultation(BaseModel):
     DISPOSITION_CHOICES = (
         ('admitted', 'Admitted'),
         ('referred', 'Referred'),
@@ -143,7 +141,6 @@ class Consultation(models.Model):
     )
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     complaint = models.TextField(null=True, blank=True)
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -154,12 +151,11 @@ class Consultation(models.Model):
         return self.note
 
 
-class Prescription(models.Model):
+class Prescription(BaseModel):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('dispensed', 'Dispensed'),
     )
-    date_created = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField()
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     status = models.CharField(
@@ -185,7 +181,7 @@ class PrescribedDrug(models.Model):
         return f"Prescribed Drug #{self.item.name}"    
         
 
-class Referral(models.Model):
+class Referral(BaseModel):
     SERVICE = (
         ('general', 'General'),
         ('dentist', 'Dentist'),
@@ -196,7 +192,6 @@ class Referral(models.Model):
         ('surgeon', 'Surgeon'),
         ('physiotherapist', 'Physiotherapist'),
     )
-    date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(null=True, blank=True)
     referred_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     service = models.CharField(max_length=50, choices=SERVICE, default='general')
@@ -214,7 +209,7 @@ class Referral(models.Model):
                 raise ValueError("You must set the 'referred_by' user before saving.")
         super().save(*args, **kwargs)
 
-class AttendanceProcess(models.Model):
+class AttendanceProcess(BaseModel):
     TRACK = (
         ('reception', 'Reception'),
         ('triage', 'Triage'),
@@ -242,7 +237,7 @@ class AttendanceProcess(models.Model):
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, null=True)
     triage = models.OneToOneField(Triage, on_delete=models.CASCADE, null=True)
     track = models.CharField(max_length=50, choices=TRACK, default='reception')
-    created_at = models.DateTimeField(default=timezone.now)
+    
 
     def save(self, *args, **kwargs):
         # Check if the attendance process is being created for the first time
