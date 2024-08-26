@@ -24,7 +24,7 @@ class Patient(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    unique_id = models.CharField(max_length=8, unique=True, editable=False)
+    unique_id = models.CharField(max_length=8, unique=True, editable=True) # id number
     first_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True, null=True, blank=True)
     phone = models.CharField(max_length=30, null=True, blank=True)

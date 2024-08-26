@@ -123,6 +123,7 @@ class LabTestRequestPanel(models.Model):
     category = models.CharField(max_length=30, default="none")
     result_approved=models.BooleanField(default=False)
     approved_on = models.DateTimeField(null=True, blank=True) 
+    is_billed = models.BooleanField(default=False)
 
     def generate_test_code(self):
         while True:
