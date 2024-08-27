@@ -5,19 +5,13 @@ from django.db import models
 from customuser.models import CustomUser
 # from pharmacy.models import Drug
 from inventory.models import Item
-from billing.models import Invoice, InvoiceItem
+from billing.models import Invoice
+from company.models import InsuranceCompany
 from laboratory.models import ProcessTestRequest
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-# User = get_user_model()
-
-class InsuranceCompany(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
 
 
 class ContactDetails(models.Model):
@@ -32,7 +26,7 @@ class Patient(models.Model):
         ('F', 'Female'),
         ('O', 'Other'),
     )
-    unique_id = models.CharField(max_length=8, unique=True, editable=False)
+    unique_id = models.CharField(max_length=8, unique=True, editable=True) # id number
     first_name = models.CharField(max_length=40)
     email = models.EmailField(unique=True, null=True, blank=True)
     phone = models.CharField(max_length=30, null=True, blank=True)
@@ -40,8 +34,7 @@ class Patient(models.Model):
     date_of_birth = models.DateField(null=True)
     email = models.EmailField(null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
-    insurance = models.ForeignKey(
-        InsuranceCompany, on_delete=models.CASCADE, null=True, blank=True)
+    insurances = models.ManyToManyField(InsuranceCompany, blank=True)
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
@@ -229,6 +222,7 @@ class Referral(models.Model):
                 raise ValueError("You must set the 'referred_by' user before saving.")
         super().save(*args, **kwargs)
 
+
 class AttendanceProcess(models.Model):
     TRACK = (
         ('reception', 'Reception'),
@@ -242,7 +236,7 @@ class AttendanceProcess(models.Model):
         ('billing', 'Billing'),
         ('complete', 'Complete'),
     )
-    track_number = models.CharField(max_length=50, null=True)
+    track_number = models.CharField(max_length=50, null=True, unique=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     patient_number = models.CharField(max_length=8, editable=False, default=999)
     doctor = models.ForeignKey(
@@ -253,28 +247,33 @@ class AttendanceProcess(models.Model):
         CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='pharmacist_attendance_processes')
     reason = models.TextField(max_length=300)
     invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE, null=True)
-    process_test_req = models.OneToOneField(ProcessTestRequest, on_delete=models.CASCADE, null=True) # id of ProcessTestRequest is stored here
+    process_test_req = models.OneToOneField(ProcessTestRequest, on_delete=models.CASCADE, null=True)
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, null=True)
     triage = models.OneToOneField(Triage, on_delete=models.CASCADE, null=True)
     track = models.CharField(max_length=50, choices=TRACK, default='reception')
     created_at = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
-        # Check if the attendance process is being created for the first time
         if not self.pk:
+            # Generate a unique track number using the date and a random number
+            today = datetime.now().strftime('%Y%m%d')
+            random_number = random.randint(1000, 9999)
+            self.track_number = f'{today}-{random_number}'
 
-            # Generate a unique track number
-            self.track_number = str(uuid4())
+            # Check if the generated track_number already exists
+            while AttendanceProcess.objects.filter(track_number=self.track_number).exists():
+                random_number = random.randint(1000, 9999)
+                self.track_number = f'{today}-{random_number}'
+
             self.patient_number = self.patient.unique_id
 
-            # Create a new invoice with a default amount of 0
-            self.invoice = Invoice.objects.create(invoice_amount=0)
+            # Create related records
+            self.invoice = Invoice.objects.create(invoice_amount=0, invoice_number=self.track_number, patient=self.patient, invoice_date=self.created_at)
             self.process_test_req = ProcessTestRequest.objects.create(reference=self.track_number)
             self.triage = Triage.objects.create()
             self.prescription = Prescription.objects.create()
 
         super().save(*args, **kwargs)
-
 
     def __str__(self):
         return f"{self.id} - {self.patient.first_name}"

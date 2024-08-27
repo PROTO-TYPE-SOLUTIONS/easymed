@@ -1,5 +1,5 @@
 from django.db import models
-from inventory.models import Item
+# from inventory.models import Item
 # from patient.models import Patient
 from django.db.models import Sum
 
@@ -13,7 +13,8 @@ class PaymentMode(models.Model):
         ('insurance', 'Insurance'),
         ('mpesa', 'MPesa'),
     )
-    paymet_mode = models.CharField(max_length=20)
+    paymet_mode = models.CharField(max_length=20, blank=True, null=True)
+    insurance = models.ForeignKey('company.InsuranceCompany',null=True, on_delete=models.CASCADE)
     payment_category = models.CharField(
         max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
     
@@ -51,11 +52,18 @@ class Invoice(models.Model):
     #     return self.invoice_number
 
 class InvoiceItem(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('billed', 'Billed'),
+    )
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='invoice_items')
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)
     payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
+    item_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default='pending')
 
 
     def save(self, *args, **kwargs):

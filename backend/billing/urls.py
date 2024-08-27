@@ -10,6 +10,8 @@ from .views import (
     InvoiceViewset,
     InvoiceItemViewset,
     PaymentModeViewset,
+    InvoicesByPatientId,
+    InvoiceItemsByInvoiceId,
 )
 
 router = DefaultRouter()
@@ -21,6 +23,8 @@ router.register(r'payment-modes', PaymentModeViewset)
 urlpatterns = [
     path('', include(router.urls)),
     path('download_invoice_pdf/<int:invoice_id>/', download_invoice_pdf, name='download_invoice_pdf'),
+    path('invoices/patient/<int:patient_id>/', InvoicesByPatientId.as_view()),
+    path('invoices/items/<int:invoice_id>/', InvoiceItemsByInvoiceId.as_view()),
 ]
 
 if settings.DEBUG:

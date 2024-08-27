@@ -63,6 +63,7 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
 
 class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     test_panel_name = serializers.ReadOnlyField(source='test_panel.name')
+    item = serializers.CharField(source='test_panel.item.id', read_only=True)
     sale_price = serializers.SerializerMethodField()
 
     def get_sale_price(self, instance):

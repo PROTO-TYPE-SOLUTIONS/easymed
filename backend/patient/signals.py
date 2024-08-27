@@ -12,14 +12,14 @@ from django.conf import settings
 # models
 from .models import Patient, Appointment
 
-@receiver(post_save, sender=Patient)
-def create_appointment(sender: Patient, instance: Patient, created: bool, **kwargs):
-    if not created:
-        return
-    try:
-        Appointment.objects.create(patient=instance)
-    except Exception as e:
-        print(e)
+# @receiver(post_save, sender=Patient)
+# def create_appointment(sender: Patient, instance: Patient, created: bool, **kwargs):
+#     if not created:
+#         return
+#     try:
+#         Appointment.objects.create(patient=instance)
+#     except Exception as e:
+#         print(e)
 
 
 

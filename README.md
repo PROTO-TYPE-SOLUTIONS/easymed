@@ -42,7 +42,9 @@ virtualenv venv
 source venv/bin/activate
 cd backend
 pip install -r requirements.txt
-python manage.py makemigrations customuser authperms patient pharmacy inventory laboratory receptions billing announcement
+
+python manage.py makemigrations customuser authperms patient pharmacy inventory laboratory company receptions billing announcement
+
 python manage.py migrate
 python manage.py runserver
 ```
@@ -85,7 +87,6 @@ npm start
 Visit localhost 127.0.0.1:3000/dashboard
 
 ## Adding Permissions
-
 You need to create groups and associate permissions. make sure groups follow this order `SYS_ADMIN`, `PATIENT` group then the rest ie `DOCTOR`,`PHARMACIST`, `RECEPTIONIST`, `LAB_TECH` , `NURSE`
 Then create permissions below and link to the `GROUPS`.
 
@@ -107,7 +108,6 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 You will notice that we have a Role and a Group. A group is associated with permissions which determines which specific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
 
 ## Running celery
-
 If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
 `pip install celery redis`
 Run Celery: `celery -A easymed worker --loglevel=INFO`
@@ -117,8 +117,16 @@ Generated PDFs
 `http://127.0.0.1:8080/download_{service_name}_pdf/{id}`
 i.e `http://127.0.0.1:8080/download_invoice_pdf/24`
 
-## Testing Socket connection for notifications
+## Each process starting form Appointment, should be billed first before it's actioned.
+For Billing to work, these should be updated in order.
+Patient must have Insurance if not, cash will be picked by default.
+Payment Modes should be updated in that regard
+Add Item
+Add Inventory for that item
+Add InsuranceSalePrise for specific Items depending on the Insurance
 
+
+## Testing Socket connection for notifications
 Django's runserver does not support asgi
 run with uvicorn to have the notifications working
 `uvicorn --port 8080 easymed.asgi:application`
@@ -185,3 +193,5 @@ For equipment with any other form of coms other than TCP/Ethernet,
 will need to be configured with additional hardware that converts
 the coms to TCP
 A device such us [this](https://www.whizz.co.ke/product/1443079/usr-tcp232-302-tiny-size-rs232-to-tcp-ip-converter-serial-rs232-to-ethernet-server-module-ethernet-converter-support-dhcp-dns/), can work.
+
+

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -22,7 +22,6 @@ from authperms.permissions import (
 from customuser.models import CustomUser
 from inventory.models import Item
 from .models import (
-    InsuranceCompany,
     ContactDetails,
     Patient,
     NextOfKin,
@@ -36,7 +35,6 @@ from .models import (
     AttendanceProcess,
 )
 from .serializers import (
-    InsuranceCompanySerializer,
     ContactDetailsSerializer,
     PatientSerializer,
     NextOfKinSerializer,
@@ -69,11 +67,6 @@ from drf_spectacular.utils import (
 
 # utils
 from .utils import send_appointment_email
-
-
-class InsuranceCompanyViewSet(viewsets.ModelViewSet):
-    queryset = InsuranceCompany.objects.all()
-    serializer_class = InsuranceCompanySerializer
 
 
 class ConsultationViewSet(viewsets.ModelViewSet):
@@ -302,3 +295,10 @@ def download_prescription_pdf(request, prescription_id):
 class AttendanceProcessViewSet(viewsets.ModelViewSet):
     queryset = AttendanceProcess.objects.all().order_by('-id')
     serializer_class = AttendanceProcessSerializer
+
+class AppointmentByDoctorView(generics.ListAPIView):
+    serializer_class = AppointmentSerializer
+
+    def get_queryset(self):
+        assigned_doctor_id = self.kwargs['assigned_doctor_id']
+        return Appointment.objects.filter(assigned_doctor_id=assigned_doctor_id)

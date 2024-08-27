@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toast } from "react-toastify";
 import { MdLocalPrintshop } from 'react-icons/md'
 import { billingInvoiceItems, billingInvoices } from '@/redux/service/billing'
-import { getAllInvoices } from '@/redux/features/billing';
+import { getAllInvoiceItemsByInvoiceId, getAllInvoices } from '@/redux/features/billing';
 import { useAuth } from '@/assets/hooks/use-auth'
 import { ErrorMessage, Field, Form, Formik, FormikProps } from 'formik';
 import * as Yup from "yup";
@@ -14,9 +14,13 @@ import BillingViewSelectedAppointments from '@/components/dashboard/billing/payO
 import FormButton from '@/components/common/button/FormButton';
 import PayAmountsDisplay from '@/components/dashboard/billing/payOverview/PayAmountsDisplay';
 import { getAllLabTestProfiles } from '@/redux/features/laboratory';
+import { Container, Grid } from '@mui/material';
+import InvoiceItems from './InvoiceItems';
 
 const ReviewInvoice = ({ 
-    selectedOption, 
+    selectedOption,
+    selectedPatient,
+    selectedInvoice,
     selectedAppointments, 
     selectedLabRequests, 
     selectedPrescribedDrugs, 
@@ -27,6 +31,7 @@ const ReviewInvoice = ({
     
     {
     const [loading, setLoading] = useState(false)
+    const { invoiceItems } = useSelector((store)=> store.billing)
 
     const [appointmentSum, setAppointmentSum] = useState(0);
     const [appointmentMpesaSum, setAppointmentMpesaSum] = useState(0);
@@ -248,15 +253,7 @@ const ReviewInvoice = ({
         }
     }
 
-    useEffect(()=>{
-        if(auth){
-            totalAppointmentSum();
-            totalPrescribedDrugsSum();
-            totalLabReqSum();
-            dispatch(getAllInvoices(auth));
-            dispatch(getAllLabTestProfiles(auth))
-        }
-    },[selectedOption, selectedAppointments, selectedLabRequests, selectedPrescribedDrugs, auth])
+
 
   return (
     <Formik
@@ -264,7 +261,7 @@ const ReviewInvoice = ({
         validationSchema={validationSchema}
         onSubmit={saveInvoice}
     >
-        <Form ref={invoiceRef} className="py-4 bg-white_light rounded-lg space-y-4 px-4 min-h-full flex flex-col justify-between">
+        <Form ref={invoiceRef} className="py-4 bg-white_light rounded-lg space-y-4 px-2 min-h-full flex flex-col justify-between">
             {selectedOption && 
             <>
             <div ref={invoiceRef} className='space-y-8'>
@@ -288,14 +285,8 @@ const ReviewInvoice = ({
                 />
                 </div>
             </div>
-            {selectedAppointments.length > 0 && (
-                <BillingViewSelectedAppointments selectedAppointments={selectedAppointments} setSelectedAppointments={setSelectedAppointments}/>
-            )}
-            {selectedLabRequests.length > 0 && (
-                <BillingViewSelectedLabtests selectedLabRequests={selectedLabRequests} setSelectedLabRequests={setSelectedLabRequests}/>
-            )}
-            {selectedPrescribedDrugs.length > 0 && (
-                <BillingViewSelectedPrescribedDrugs selectedPrescribedDrugs={selectedPrescribedDrugs} setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}/>
+            {InvoiceItems.length > 0 && (
+                <InvoiceItems selectedPatient={selectedPatient} items={invoiceItems} />
             )}
             </div>
 

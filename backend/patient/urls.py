@@ -1,7 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    InsuranceCompanyViewSet,
     ContactDetailsViewSet,
     PatientViewSet,
     NextOfKinViewSet,
@@ -19,11 +18,11 @@ from .views import (
     PrescribedDrugByPatientIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
     download_prescription_pdf,
-    AttendanceProcessViewSet
+    AttendanceProcessViewSet,
+    AppointmentByDoctorView
 )
 
 router = DefaultRouter()
-router.register(r'insurance-companies', InsuranceCompanyViewSet)
 router.register(r'contact-details', ContactDetailsViewSet)
 router.register(r'patients', PatientViewSet)
 router.register(r'next-of-kin', NextOfKinViewSet)
@@ -45,6 +44,8 @@ urlpatterns = [
     path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     
     path('appointments/by_patient_id/<int:patient_id>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
+    path('appointments/by_doctor/<int:assigned_doctor_id>/', AppointmentByDoctorView.as_view(), name='appointments-by-doctor'),
+
     path('prescribed-drugs/by_patient_id/<int:patient_id>/', PrescribedDrugByPatientIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
 
     path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),

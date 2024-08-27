@@ -9,7 +9,8 @@ from .models import (
     Requisition,
     RequisitionItem,
     PurchaseOrder,
-    PurchaseOrderItem
+    PurchaseOrderItem,
+    InventoryInsuranceSaleprice
 )
 
 
@@ -40,9 +41,24 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class InventorySerializer(serializers.ModelSerializer):
+    insurance_sale_prices = serializers.SerializerMethodField()
     class Meta:
         model = Inventory
-        fields = '__all__'
+        fields = ['item', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
+
+    def get_insurance_sale_prices(self, obj):
+        # Retrieve all related insurance sale prices
+        sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
+        insurance_prices = []
+        for sale in sale_prices:
+            # Create a dictionary for each sale price
+            insurance_price = {
+                "id": sale.insurance_company.id,
+                "insurance_name": sale.insurance_company.name.lower().replace(" ", "_"),
+                "price": str(sale.sale_price)
+            }
+            insurance_prices.append(insurance_price)
+        return insurance_prices
 
 
 class DepartmentInventorySerializer(serializers.ModelSerializer):
