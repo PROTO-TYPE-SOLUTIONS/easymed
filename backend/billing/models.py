@@ -71,6 +71,6 @@ class InvoiceItem(models.Model):
         self.invoice.calculate_invoice_amount()
     
     def __str__(self):
-        return self.item.name
+        return self.item.name + ' - ' + str(self.item_created_at)
     
     

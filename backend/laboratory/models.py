@@ -50,7 +50,12 @@ class Specimen(models.Model):
     def __str__(self):
         return self.name
 
+
 class LabTestPanel(models.Model):
+    '''
+    This need s whole lot of testing to see if the ref value are actually
+    gotten dynamically using the patients age and sex
+    '''
     UNITS_OPTIONS = (
         ('mL', 'mL'),
         ('uL', 'uL'),
@@ -67,14 +72,47 @@ class LabTestPanel(models.Model):
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=10, choices=UNITS_OPTIONS, default='mL')
-    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
+    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def get_reference_values(self, patient):
+        # Fetch the reference value based on patient sex and age
+        return self.reference_values.filter(
+            sex=patient.gender,
+            age_min__lte=patient.age,
+            age_max__gte=patient.age
+        ).first()
 
     def __str__(self):
-        return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.specimen.name} - {self.unit} - { self.test_profile.name }"
+        return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
+
+
+class ReferenceValue(models.Model):
+    '''
+    capture different reference values in the LabTestPanel model
+    based on the patient’s sex and age, you can create a related
+    model that stores reference ranges and conditions based on
+    patient sex and age
+    '''
+    SEX_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    )
+
+    lab_test_panel = models.ForeignKey(LabTestPanel, on_delete=models.CASCADE, related_name="reference_values")
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
+    age_min = models.IntegerField(null=True, blank=True)  # Minimum age for this reference range
+    age_max = models.IntegerField(null=True, blank=True)  # Maximum age for this reference range
+    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2)
+    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.lab_test_panel.name} - {self.sex} - {self.age_min}-{self.age_max}: {self.ref_value_low} - {self.ref_value_high}"
+
 
 
 class ProcessTestRequest(models.Model):
@@ -194,7 +232,13 @@ class EquipmentTestRequest(models.Model):
     def __str__(self):
         return str(self.equipment.name + " " + self.equipment.ip_address + " " + self.equipment.port)
     
-    
+
+
+
+'''
+This is ugly!! Don't do this,... ut hey since we're
+in ative development, it's ok.
+'''    
 # class LabTestResult(models.Model):
 #     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
 #     title = models.CharField(max_length=45)
