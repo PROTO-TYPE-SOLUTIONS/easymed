@@ -4,6 +4,7 @@ from pid import PID
 
 
 class HL7Utils:
+  '''This might help: https://github.com/sudhi001/HL7_TO_JSON_WITH_FAST_API'''
   def __init__(self):
      pass
 

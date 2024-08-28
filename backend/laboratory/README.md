@@ -1,5 +1,8 @@
 Under ./addons you'll find usefull scripts to help troubleshoot communication/integration issues
 
+Openource converted: This might help: https://github.com/sudhi001/HL7_TO_JSON_WITH_FAST_API
+
+
 # # Below are example data exchanges
 # Mindray Equipment - HL7
 ## Patient sample
