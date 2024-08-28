@@ -337,20 +337,12 @@ def generate_appointments_report(request):
     if not appointments.exists():
         return HttpResponse("No appointments found for the given doctor.", content_type="text/plain")
 
-    # Render the appointments to a template
-    html_string = render_to_string('appointments_report.html', {'appointments': appointments})
+    html = HTML(string=render_to_string('appointments_report.html', {'appointments': appointments}))
+    pdf_file = html.write_pdf()
 
-    # Convert the HTML string to a PDF using WeasyPrint
-    html = HTML(string=html_string)
-    css = CSS(string='''
-        body { font-family: Arial, sans-serif; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    ''')
-    pdf_file = html.write_pdf(stylesheets=[css])
 
     # Return the PDF as an HTTP response
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="appointments_report_{doctor_id}.pdf"'
     return response
+
