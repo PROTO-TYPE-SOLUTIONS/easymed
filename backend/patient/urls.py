@@ -22,6 +22,7 @@ from .views import (
     
     generate_appointments_report,
     download_prescription_pdf,
+    generate_lab_tests_report,
 )
 
 router = DefaultRouter()
@@ -55,8 +56,10 @@ urlpatterns = [
     
     path('prescribed-drugs/by-prescription/<int:prescription_id>/', PrescribedDrugByPrescriptionViewSet.as_view({'get': 'list'}), name='prescribed_drugs_by_prescription'),
 
-    path('download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
+    path('reports/download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
 
-    path('report/appointments/', generate_appointments_report, name='generate_appointments_report'),
+    path('reports/appointments/', generate_appointments_report, name='generate_appointments_report'),
+    path('reports/lab-tests/', generate_lab_tests_report, name='generate_lab_tests_report'),
+
 
 ]
