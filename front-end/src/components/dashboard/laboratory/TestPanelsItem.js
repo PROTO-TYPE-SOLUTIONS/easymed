@@ -11,6 +11,7 @@ import { sendToEquipment } from "@/redux/service/laboratory";
 const TestPanelsItem = ({sample, collected}) => {
   const auth = useAuth()
   const [loading, setLoading] = useState(false)
+  const [selectedEquip, setSelectedEquip] = useState('')
   const [resultItems, setResultItems]=useState([])
   const [status, setStatus]= useState(false)
   const { labTestPanels, labEquipments } = useSelector((store) => store.laboratory);
@@ -62,6 +63,7 @@ const TestPanelsItem = ({sample, collected}) => {
 
   const panels = resultItems.map((item)=> {
     const foundPanel = labTestPanels.find((panel)=>panel.id === item.test_panel)
+    console.log("THIS IS THE FOUND ELEMENT", item)
     if(foundPanel){
       return (
         <li key={`${foundPanel.id}_panel`}>
@@ -79,12 +81,24 @@ const TestPanelsItem = ({sample, collected}) => {
                 <div className='w-full'>
                   <SeachableSelect
                     name="equipment"
-                    options={labEquipments.map((equipment) => ({ value: equipment.id, label: equipment.name }))}
+                    setSelectedItem={(value)=>setSelectedEquip(value)}
+                    options={[{ value: 'manual', label: 'Manual' }, ...labEquipments.map(equipment => ({
+                      value: equipment.id,
+                      label: equipment.name
+                    }))]}
                   />
                 </div>
-                <div className='w-full justify-end flex'>
-                  <FormButton label={`send to equipment`}/>
-                </div>
+                {item.is_billed ? (
+                  <div className='w-full justify-end flex'>
+                    <FormButton label={`send to equipment`}/>
+                  </div>
+                ) : (
+                  <div className='w-full justify-end flex'>
+                      <button className="bg-primary text-white cursor-default px-3 py-2 text-xs rounded-xl">
+                        NP
+                      </button>
+                  </div>
+                )}
               </form>
             )}
           </Formik>
