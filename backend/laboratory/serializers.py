@@ -18,7 +18,6 @@ from .models import (
     )
 
 
-
 class LabReagentSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabReagent
@@ -29,10 +28,34 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
         model = LabTestProfile
         fields = '__all__'
 
-class LabTestPanelSerializer (serializers.ModelSerializer):
+class LabTestPanelSerializer(serializers.ModelSerializer):
+    '''
+    This need s whole lot of testing to see if the ref value are actually
+    gotten dynamically using the patients age and sex
+    '''
+    ref_value_low = serializers.SerializerMethodField()
+    ref_value_high = serializers.SerializerMethodField()
+
     class Meta:
         model = LabTestPanel
         fields = '__all__'
+
+    def get_ref_value_low(self, obj):
+        # Implement your logic to determine the reference value low
+        # For example, based on patient gender and age
+        patient = self.context.get('patient')
+        if patient:
+            return obj.calculate_ref_value_low(patient.gender, patient.date_of_birth)
+        return obj.ref_value_low
+
+    def get_ref_value_high(self, obj):
+        # Implement your logic to determine the reference value high
+        # For example, based on patient gender and age
+        patient = self.context.get('patient')
+        if patient:
+            return obj.calculate_ref_value_high(patient.gender, patient.date_of_birth)
+        return obj.ref_value_high
+    
 
 class PublicLabTestRequestSerializer(serializers.ModelSerializer):
     class Meta:

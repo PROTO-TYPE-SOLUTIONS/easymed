@@ -86,10 +86,14 @@ class LabTestProfileViewSet(viewsets.ModelViewSet):
 
 
 class LabTestPanelViewSet(viewsets.ModelViewSet):
+    '''
+    This need s whole lot of testing to see if the ref value are actually
+    gotten dynamically using the patients age and sex
+    '''
     queryset = LabTestPanel.objects.all()
     serializer_class = LabTestPanelSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
-    
+
     @action(detail=False, methods=['get'], url_path='labtestpanels-byprofile-id/(?P<profile_id>[^/.]+)')
     def by_test_profile(self, request, profile_id=None):
         """
@@ -100,9 +104,20 @@ class LabTestPanelViewSet(viewsets.ModelViewSet):
         except LabTestProfile.DoesNotExist:
             return Response({"error": "Test Profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        # Retrieve patient details from request (assuming patient_id is provided)
+        patient_id = request.query_params.get('patient_id')
+        patient = None
+        if patient_id:
+            try:
+                patient = Patient.objects.get(pk=patient_id)
+            except Patient.DoesNotExist:
+                return Response({"error": "Patient not found."}, status=status.HTTP_404_NOT_FOUND)
+
         lab_test_panels = LabTestPanel.objects.filter(test_profile=test_profile)
-        serializer = LabTestPanelSerializer(lab_test_panels, many=True)
+        serializer = LabTestPanelSerializer(lab_test_panels, many=True, context={'patient': patient})
         return Response(serializer.data)
+
+
 
 
 '''Lab Test Request and lab Test Request Panel'''

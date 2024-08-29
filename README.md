@@ -175,6 +175,13 @@ then generate the pdf report
 ``/lab/lab-test-results-panel/``
 ``/download_labtestresult_pdf/<int:labtestresult_id>/``
 
+#Doctor Reports
+This will give you all appointments by given doctor and date range
+http://127.0.0.1:8080/patients/report/appointments/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
+
+If no date range is specified it will get you a report for all appointments
+http://127.0.0.1:8080/patients/report/appointments/?doctor_id=2
+
 
 ## Laboratory Integration
 When you click Send to Equipment and select the equiment in the dashboard, the test request gets converted to HL7 or ASTM and sent to the equipment.

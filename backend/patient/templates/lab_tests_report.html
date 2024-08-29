@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Tests Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lab Test Requests Report</h1>
+    <p><strong>Doctor ID:</strong> {{ doctor_id }}</p>
+    <p><strong>Date Range:</strong> {% if start_date %}{{ start_date }} - {{ end_date }}{% else %}All Dates{% endif %}</p>
+
+    {% if lab_test_requests %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Test Profile</th>
+                <th>Notes</th>
+                <th>Requested On</th>
+                <th>Has Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in lab_test_requests %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ request.test_profile.name }}</td>
+                <td>{{ request.note }}</td>
+                <td>{{ request.created_on }}</td>
+                <td>{{ request.has_result|yesno:"Yes,No" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No lab test requests found for the specified criteria.</p>
+    {% endif %}
+</body>
+</html>

@@ -42,4 +42,4 @@ redis==5.0.1
 uvicorn==0.27.1
 uvicorn[standard]
 
-weasyprint==60.2
+weasyprint==62.3
