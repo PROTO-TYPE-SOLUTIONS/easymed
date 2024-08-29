@@ -12,6 +12,7 @@ from weasyprint import HTML
 from django_filters.rest_framework import DjangoFilterBackend
 
 
+from laboratory.models import LabTestRequest
 from company.models import Company
 
 # permissions
@@ -300,6 +301,7 @@ def download_prescription_pdf(request, prescription_id):
 
 
 
+
 def generate_appointments_report(request):
     '''
     This will give you all appointments by given doctor and date range
@@ -312,15 +314,14 @@ def generate_appointments_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Validate the doctor_id input
     if not doctor_id:
         return HttpResponseBadRequest("Missing doctor_id parameter.")
     
-    # Handle optional date range
     if start_date and end_date:
         try:
             start_date = datetime.strptime(start_date, '%Y-%m-%d')
             end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            end_date = end_date.replace(hour=23, minute=59, second=59)
             appointments = Appointment.objects.filter(
                 assigned_doctor_id=doctor_id,
                 appointment_date_time__range=(start_date, end_date)
@@ -328,7 +329,6 @@ def generate_appointments_report(request):
         except ValueError:
             return HttpResponseBadRequest("Invalid date format. Please use YYYY-MM-DD.")
     else:
-        # If no date range is provided, fetch all appointments for the doctor
         appointments = Appointment.objects.filter(
             assigned_doctor_id=doctor_id
         ).order_by('appointment_date_time')
@@ -336,17 +336,12 @@ def generate_appointments_report(request):
     if not appointments.exists():
         return HttpResponse("No appointments found for the given doctor.", content_type="text/plain")
 
-    # Render the appointments to a template
-    html_string = render_to_string('appointments_report.html', {'appointments': appointments})
-    print(html_string)
+    html_content = render_to_string('appointments_report.html', {'appointments': appointments})
+    html = HTML(string=html_content)
 
-    # Convert the HTML string to a PDF using WeasyPrint
     try:
-        html = HTML(string=html_string)
-        pdf_file = html.write_pdf()
-        pdf_bytes = pdf_file.read()
+        pdf_bytes = html.write_pdf()
 
-        # Return the PDF as an HTTP response
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename="appointments_report_{doctor_id}.pdf"'
         return response
@@ -354,48 +349,59 @@ def generate_appointments_report(request):
         return HttpResponseBadRequest(f"Error generating PDF: {str(e)}")
     
 
-# def generate_appointments_report(request):
-#     '''
-#     This will give you all appointments by given doctor and date range
-#     http://127.0.0.1:8080/patients/report/appointments/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
 
-#     If no date range is specified it will get you a report for all appointments
-#     http://127.0.0.1:8080/patients/report/appointments/?doctor_id=2
-#     '''
-#     doctor_id = request.GET.get('doctor_id')
-#     start_date = request.GET.get('start_date')
-#     end_date = request.GET.get('end_date')
 
-#     # Validate the doctor_id input
-#     if not doctor_id:
-#         return HttpResponseBadRequest("Missing doctor_id parameter.")
+def generate_lab_tests_report(request):
+    '''
+    This will give you all lab test requests by a given doctor and date range
+    http://127.0.0.1:8080/lab/reports/tests/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
+
+    If no date range is specified it will get you a report for all lab test requests
+    http://127.0.0.1:8080/lab/reports/tests/?doctor_id=2
+    '''
+    doctor_id = request.GET.get('doctor_id')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if not doctor_id:
+        return HttpResponseBadRequest("Missing doctor_id parameter.")
     
-#     # Handle optional date range
-#     if start_date and end_date:
-#         try:
-#             start_date = datetime.strptime(start_date, '%Y-%m-%d')
-#             end_date = datetime.strptime(end_date, '%Y-%m-%d')
-#             appointments = Appointment.objects.filter(
-#                 assigned_doctor_id=doctor_id,
-#                 appointment_date_time__range=(start_date, end_date)
-#             ).order_by('appointment_date_time')
-#         except ValueError:
-#             return HttpResponseBadRequest("Invalid date format. Please use YYYY-MM-DD.")
-#     else:
-#         # If no date range is provided, fetch all appointments for the doctor
-#         appointments = Appointment.objects.filter(
-#             assigned_doctor_id=doctor_id
-#         ).order_by('appointment_date_time')
+    # Handle date range
+    if start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            return HttpResponseBadRequest("Invalid date format. Please use YYYY-MM-DD.")
+    else:
+        # If no date range is provided, set start_date and end_date to None
+        start_date = None
+        end_date = None
 
-#     if not appointments.exists():
-#         return HttpResponse("No appointments found for the given doctor.", content_type="text/plain")
+    # Get lab test requests by doctor and date range
+    if start_date and end_date:
+        lab_test_requests = LabTestRequest.objects.filter(
+            requested_by_id=doctor_id,
+            created_on__range=(start_date.date(), end_date.date())
+        ).order_by('created_on')
+    else:
+        lab_test_requests = LabTestRequest.objects.filter(
+            requested_by_id=doctor_id
+        ).order_by('created_on')
 
-#     html = HTML(string=render_to_string('appointments_report.html', {'appointments': appointments}))
-#     pdf_file = html.write_pdf()
+    if not lab_test_requests.exists():
+        return HttpResponse("No lab test requests found for the given doctor.", content_type="text/plain")
 
+    # Render the lab test requests to a template
+    html_content = render_to_string('lab_tests_report.html', {'lab_test_requests': lab_test_requests})
+    html = HTML(string=html_content)
 
-#     # Return the PDF as an HTTP response
-#     response = HttpResponse(pdf_file, content_type='application/pdf')
-#     response['Content-Disposition'] = f'inline; filename="appointments_report_{doctor_id}.pdf"'
-#     return response
+    try:
+        pdf_bytes = html.write_pdf()
 
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="lab_tests_report_{doctor_id}.pdf"'
+        return response
+    except Exception as e:
+        return HttpResponseBadRequest(f"Error generating PDF: {str(e)}")
