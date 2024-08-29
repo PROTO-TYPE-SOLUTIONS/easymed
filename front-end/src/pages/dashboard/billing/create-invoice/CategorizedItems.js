@@ -53,41 +53,45 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
         <p>{invoiceItem?.item_name}</p>
       </Grid>
       <Grid item xs={4}>
-        <select
-          className='p-2 focus:outline-none'
-            name={invoiceItem?.item_name}
-            onChange={(e) => {
-              const selectedOption = patient_insurance_for_this_item.find(
-                (mode) => mode.id === parseInt(e.target.value)
-              );
-              setSelectedPayMethod(selectedOption);
-              if (selectedOption?.paymet_mode === 'cash') {
-                setSelectedPrice(inventoryPrices ? inventoryPrices[0].sale_price : 'NA');
-              } else {
-                const selectedInsurance = inventoryPrices[0].insurance_sale_prices?.find((mode) => 
-                  mode.insurance_name.toLowerCase() === selectedOption?.paymet_mode.toLowerCase()
+        {invoiceItem?.status !== 'billed' ? (
+          <select
+            className='p-2 focus:outline-none'
+              name={invoiceItem?.item_name}
+              onChange={(e) => {
+                const selectedOption = patient_insurance_for_this_item.find(
+                  (mode) => mode.id === parseInt(e.target.value)
                 );
-                setSelectedPrice(selectedInsurance ? selectedInsurance.price : 'NA');
-              }
-            }}
-          >
-          <option value="" disabled selected>Payment Method</option>
-          {patient_insurance_for_this_item?.map((mode) => (
-            <option key={mode.id} value={mode.id}>
-              {mode.paymet_mode}
-            </option>
-          ))}
-        </select>
+                setSelectedPayMethod(selectedOption);
+                if (selectedOption?.paymet_mode === 'cash') {
+                  setSelectedPrice(inventoryPrices ? inventoryPrices[0].sale_price : 'NA');
+                } else {
+                  const selectedInsurance = inventoryPrices[0].insurance_sale_prices?.find((mode) => 
+                    mode.insurance_name.toLowerCase() === selectedOption?.paymet_mode.toLowerCase()
+                  );
+                  setSelectedPrice(selectedInsurance ? selectedInsurance.price : 'NA');
+                }
+              }}
+            >
+            <option value="" disabled selected>Payment Method</option>
+            {patient_insurance_for_this_item?.map((mode) => (
+              <option key={mode.id} value={mode.id}>
+                {mode.paymet_mode}
+              </option>
+            ))}
+          </select>
+        ) : (<div className='p-2'>{invoiceItem.payment_mode_name}</div>)}
       </Grid>
-      <Grid className='px-2 flex justify-end' item xs={3}>
+      {invoiceItem?.status !== 'billed' ? (
+        <>
+          <Grid className='px-2 flex justify-end' item xs={3}>
+            {selectedPayMethod && selectedPrice && (
+              <div className="mt-2">
+                <p>{selectedPrice}</p>
+              </div>
+            )}
+          </Grid>
+        <Grid item xs={1}>
         {selectedPayMethod && selectedPrice && (
-          <div className="mt-2">
-            <p>{selectedPrice}</p>
-          </div>
-        )}
-      </Grid>
-      <Grid item xs={1}>
-      {selectedPayMethod && selectedPrice && (
         <button
           onClick={() => updateInvoiceItem(invoiceItem)}
           type="button"
@@ -115,6 +119,17 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
           bill
         </button>)}
       </Grid>
+        </>
+
+      ): (
+        <Grid className='px-2 flex justify-end' item xs={3}>
+            <div className="mt-2">
+              <p>{invoiceItem.item_amount}</p>
+            </div>
+        </Grid>
+      )}
+
+
     </Grid>
   );
 };
