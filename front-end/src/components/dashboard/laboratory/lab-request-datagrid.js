@@ -23,8 +23,6 @@ const getActions = () => {
   let actions = [
     { action: "add", label: "Add Test", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "view", label: "Request Information", icon: <AiOutlineDownload className="text-card text-xl" /> },
-    { action: "sample", label: "Confirm Sample Collection", icon: <AiOutlineDownload className="text-card text-xl" /> },
-    { action: "equipment", label: "Send to equipment", icon: <AiOutlineDownload className="text-card text-xl" /> },
   ];
  
   return actions;
@@ -159,7 +157,6 @@ const LabRequestDataGrid = ( ) => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      {open && <EquipmentModal {...{open,setOpen,selectedRowData}} />}
       {labOpen && (<LabModal {...{ labOpen, setLabOpen, selectedRowData }}/>)}
       {requestInfoOpen && (
         <RequestInfoModal {...{requestInfoOpen, setRequestInfoOpen, selectedRowData}}/>

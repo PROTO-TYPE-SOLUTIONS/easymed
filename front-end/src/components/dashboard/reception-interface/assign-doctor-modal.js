@@ -107,7 +107,7 @@ export default function AssignDoctorModal({
                 <SeachableSelect
                   label="Select Appointment"
                   name="item"
-                  options={item.filter((drug)=> (drug.category === "Specialized item") || (drug.category === "General Appointment") || (drug.category === "General")).map((item) => ({ value: item.id, label: `${item?.name}` }))}
+                  options={item.filter((drug)=> (drug.category === "Specialized Appointment") || (drug.category === "General Appointment") || (drug.category === "General")).map((item) => ({ value: item.id, label: `${item?.name}` }))}
                 />
                 <ErrorMessage
                   name="item"
