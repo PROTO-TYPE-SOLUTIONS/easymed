@@ -177,8 +177,6 @@ class Prescription(models.Model):
 
 
 class PrescribedDrug(models.Model):
-    class Meta:
-        unique_together = ("prescription_id", "item")
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True)
     dosage = models.CharField(max_length=45)
     frequency = models.CharField(max_length=45)
@@ -188,11 +186,14 @@ class PrescribedDrug(models.Model):
     is_dispensed = models.BooleanField(default=False)
     quantity = models.PositiveIntegerField(default=1)
     is_billed = models.BooleanField(default=False)
-
+    created_on = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"Prescribed Drug #{self.item.name}"    
-        
+        return f"Prescribed Drug #{self.item.name} - {self.created_on}"    
+    
+    class Meta:
+        unique_together = ("prescription_id", "item")    
+
 
 class Referral(models.Model):
     SERVICE = (

@@ -1,6 +1,7 @@
 from django.db import models
 from django.db import transaction
 from django.db.models import Sum
+from django.apps import apps
 
 # from laboratory.models import LabTestRequestPanel
 # from patient.models import PrescribedDrug
@@ -50,8 +51,9 @@ class Invoice(models.Model):
         self.calculate_invoice_amount()
         super().save(*args, **kwargs) 
 
-    # def __str__(self):
-    #     return self.invoice_number
+    def __str__(self):
+        return self.invoice_number
+
 
 class InvoiceItem(models.Model):
     STATUS_CHOICES = (
@@ -68,31 +70,11 @@ class InvoiceItem(models.Model):
         max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def save(self, *args, **kwargs):
-        with transaction.atomic():
-            if self.pk:
-                previous_status = InvoiceItem.objects.get(pk=self.pk).status
-                if previous_status != 'billed' and self.status == 'billed':
-                    prescribed_drug = PrescribedDrug.objects.filter(
-                        prescription__invoiceitem=self, item=self.item).first()
-                    if prescribed_drug:
-                        prescribed_drug.is_billed = True
-                        prescribed_drug.save()
-
-                    lab_test_panel = LabTestRequestPanel.objects.filter(
-                        test_panel__item=self.item, 
-                        lab_test_request__process__reference=self.invoice.process_test_req.reference
-                    ).first()
-                    if lab_test_panel:
-                        lab_test_panel.is_billed = True
-                        lab_test_panel.save()
-
-            super().save(*args, **kwargs)
-            self.invoice.calculate_invoice_amount()
-
         super().save(*args, **kwargs)
         self.invoice.calculate_invoice_amount()
-    
+
     def __str__(self):
         return self.item.name + ' - ' + str(self.item_created_at)
+
     
     

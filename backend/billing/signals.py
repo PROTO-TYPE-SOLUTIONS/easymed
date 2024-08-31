@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.apps import apps
 
-from patient.models import AttendanceProcess
+from patient.models import AttendanceProcess, PrescribedDrug
 from inventory.models import Inventory
 from laboratory.models import LabTestRequest, LabTestRequestPanel
 from .models import Invoice, InvoiceItem
@@ -11,10 +12,6 @@ from easymed.celery_tasks import (
     send_invoice_created_email,
     send_invoice_updated_email
 )
-
-
-print("update_labtest_billed_on_invoice_item_save signal fired")
-
 
 
 # @receiver(post_save, sender=InvoiceItem)
@@ -83,3 +80,47 @@ def handle_invoice_item_created(sender, instance, created, **kwargs):
             item_price = inventory.sale_price
             invoice.invoice_amount += item_price
             invoice.save()  # Save the updated invoice
+
+
+@receiver(post_save, sender=InvoiceItem)
+def update_related_models(sender, instance, **kwargs):
+    '''
+    When an InvoiceItem is saved, and the status field is changed to billed,
+    we check if it's a Drug or a Lab Test. If it is, we update the is_billed
+    field of the related PrescribedDrug or LabTestRequestPanel
+    '''
+    # Check if the item is a Drug or Lab Test to update billed status accordingly
+    if instance.item.category in ['Drug', 'Lab Test']:
+        update_service_billed_status(instance)
+
+def update_service_billed_status(instance):
+    if instance.status == 'billed' and instance.item.category == 'Drug':
+        try:
+            # Get the related Prescription through the invoice's attendance process
+            prescription = instance.invoice.attendanceprocess.prescription
+            prescribed_drug = PrescribedDrug.objects.filter(
+                prescription=prescription,  # Use the retrieved prescription object
+                item=instance.item
+            ).first()
+
+            if prescribed_drug:
+                prescribed_drug.is_billed = True
+                prescribed_drug.save()
+        except AttendanceProcess.DoesNotExist:
+            # Handle the case where the InvoiceItem is not associated with an AttendanceProcess
+            pass
+            
+    if instance.status== 'billed' and instance.item.category == 'Lab Test':
+        try:
+            process_test_request = instance.invoice.attendanceprocess.process_test_req
+            lab_test_panel = LabTestRequestPanel.objects.filter(
+                test_panel__item=instance.item,
+                lab_test_request__process=process_test_request
+            ).first()
+
+            if lab_test_panel:
+                lab_test_panel.is_billed = True
+                lab_test_panel.save()
+        except LabTestRequest.DoesNotExist:
+            # Handle the case where the InvoiceItem is not associated with an LabTestRequest
+            pass        
