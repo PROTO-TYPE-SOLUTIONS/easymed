@@ -43,6 +43,7 @@ const AddPatientModal = () => {
     kin_email:"",
     residence: "",
     relationship: "",
+    unique_id: ""
   };
 
   const validationSchema = Yup.object().shape({
@@ -53,6 +54,7 @@ const AddPatientModal = () => {
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
     phone: Yup.number().required("Phone Number is required!"),
+    unique_id: Yup.number().required("Id Number is required!"),
     kin_phone: Yup.number().required("Next Kin Phone Number is required!"),
     email: Yup.string().required("Email is required!"),
     kin_email: Yup.string().required("Next Kin Email is required!"),
@@ -87,7 +89,8 @@ const AddPatientModal = () => {
         phone: formValue.phone,
         email: formValue.email,
         insurance: parseInt(formValue.insurance),
-        user_id: parseInt(formValue.user_id)
+        user_id: parseInt(formValue.user_id),
+        unique_id: parseInt(formValue.unique_id)
       }
 
       const netOfKin = {
@@ -130,7 +133,7 @@ const AddPatientModal = () => {
       </button>
       <Dialog
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -206,7 +209,21 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={4} xs={12}>
+                  <Grid item md={3} xs={12}>
+                  <label htmlFor="second_name">Id Number</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-3 focus:outline-none w-full"
+                      type="number"
+                      placeholder="Id Number"
+                      name="unique_id"
+                    />
+                    <ErrorMessage
+                      name="unique_id"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="second_name">Phone Number</label>
                     <Field
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
@@ -220,7 +237,7 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={4} xs={12}>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="second_name">Email</label>
                     <Field
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
@@ -234,7 +251,7 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={4} xs={12}>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="insurance">Insurance</label>
                     <Field
                       as="select"
