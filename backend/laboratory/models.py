@@ -3,7 +3,7 @@ from random import randrange, choices
 # from patient.models import AttendanceProcess
 from django.conf import settings
 from customuser.models import CustomUser
-from inventory.models import Item
+# from inventory.models import Item
 from datetime import datetime
 from django.core.validators import FileExtensionValidator
 import logging
@@ -34,7 +34,7 @@ class LabReagent(models.Model):
     cas_number = models.CharField(max_length=255)
     molecular_weight = models.DecimalField(max_digits=10, decimal_places=2)
     purity = models.DecimalField(max_digits=10, decimal_places=2)
-    item_number = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item_number = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -72,7 +72,7 @@ class LabTestPanel(models.Model):
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=10, choices=UNITS_OPTIONS, default='mL')
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
     ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

@@ -313,6 +313,7 @@ def generate_appointments_report(request):
     doctor_id = request.GET.get('doctor_id')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    company = Company.objects.first()
 
     if not doctor_id:
         return HttpResponseBadRequest("Missing doctor_id parameter.")
@@ -336,7 +337,7 @@ def generate_appointments_report(request):
     if not appointments.exists():
         return HttpResponse("No appointments found for the given doctor.", content_type="text/plain")
 
-    html_content = render_to_string('appointments_report.html', {'appointments': appointments})
+    html_content = render_to_string('appointments_report.html',{'appointments': appointments, 'company': company}, )
     html = HTML(string=html_content)
 
     try:
@@ -349,19 +350,18 @@ def generate_appointments_report(request):
         return HttpResponseBadRequest(f"Error generating PDF: {str(e)}")
     
 
-
-
 def generate_lab_tests_report(request):
     '''
     This will give you all lab test requests by a given doctor and date range
-    http://127.0.0.1:8080/lab/reports/tests/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
+    http://127.0.0.1:8080/patients/reports/lab-tests/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
 
     If no date range is specified it will get you a report for all lab test requests
-    http://127.0.0.1:8080/lab/reports/tests/?doctor_id=2
+    http://127.0.0.1:8080/patients/reports/lab-tests/?doctor_id=2
     '''
     doctor_id = request.GET.get('doctor_id')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    company= Company.objects.first()
 
     if not doctor_id:
         return HttpResponseBadRequest("Missing doctor_id parameter.")
@@ -394,7 +394,7 @@ def generate_lab_tests_report(request):
         return HttpResponse("No lab test requests found for the given doctor.", content_type="text/plain")
 
     # Render the lab test requests to a template
-    html_content = render_to_string('lab_tests_report.html', {'lab_test_requests': lab_test_requests})
+    html_content = render_to_string('lab_tests_report.html', {'lab_test_requests': lab_test_requests, 'company': company})
     html = HTML(string=html_content)
 
     try:
