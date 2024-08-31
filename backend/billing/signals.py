@@ -17,27 +17,27 @@ print("update_labtest_billed_on_invoice_item_save signal fired")
 
 
 
-@receiver(post_save, sender=InvoiceItem)
-def update_labtestrequestpanel_billed_status(sender, instance, **kwargs):
-    '''
-    If an InvoiceItem is of category LabTest, and the InvoiceItem status changes to
-    billed, updated the LabTestRequestPanel's is_billed field to True
-    '''
-    # Check if the status is 'billed' and the item is in the 'LabTest' category
-    if instance.status == 'billed' and instance.item.category == 'Lab Test':
-        # Find the related AttendanceProcess through the invoice
-        attendance_process = AttendanceProcess.objects.filter(invoice=instance.invoice).first()
+# @receiver(post_save, sender=InvoiceItem)
+# def update_labtestrequestpanel_billed_status(sender, instance, **kwargs):
+#     '''
+#     If an InvoiceItem is of category LabTest, and the InvoiceItem status changes to
+#     billed, updated the LabTestRequestPanel's is_billed field to True
+#     '''
+#     # Check if the status is 'billed' and the item is in the 'LabTest' category
+#     if instance.status == 'billed' and instance.item.category == 'Lab Test':
+#         # Find the related AttendanceProcess through the invoice
+#         attendance_process = AttendanceProcess.objects.filter(invoice=instance.invoice).first()
 
-        if attendance_process and attendance_process.process_test_req:
-            # Find all LabTestRequest instances associated with this ProcessTestRequest
-            lab_test_requests = LabTestRequest.objects.filter(
-                process=attendance_process.process_test_req
-            )
+#         if attendance_process and attendance_process.process_test_req:
+#             # Find all LabTestRequest instances associated with this ProcessTestRequest
+#             lab_test_requests = LabTestRequest.objects.filter(
+#                 process=attendance_process.process_test_req
+#             )
 
-            # Update the is_billed field to True in all related LabTestRequestPanels
-            LabTestRequestPanel.objects.filter(
-                lab_test_request__in=lab_test_requests
-            ).update(is_billed=True)
+#             # Update the is_billed field to True in all related LabTestRequestPanels
+#             LabTestRequestPanel.objects.filter(
+#                 lab_test_request__in=lab_test_requests
+#             ).update(is_billed=True)
 
 
 

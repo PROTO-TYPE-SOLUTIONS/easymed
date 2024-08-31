@@ -1,7 +1,9 @@
 from django.db import models
-# from inventory.models import Item
-# from patient.models import Patient
+from django.db import transaction
 from django.db.models import Sum
+
+# from laboratory.models import LabTestRequestPanel
+# from patient.models import PrescribedDrug
 
 
 def invoice_file_path(instance, filename):
@@ -65,8 +67,28 @@ class InvoiceItem(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
 
-
     def save(self, *args, **kwargs):
+        with transaction.atomic():
+            if self.pk:
+                previous_status = InvoiceItem.objects.get(pk=self.pk).status
+                if previous_status != 'billed' and self.status == 'billed':
+                    prescribed_drug = PrescribedDrug.objects.filter(
+                        prescription__invoiceitem=self, item=self.item).first()
+                    if prescribed_drug:
+                        prescribed_drug.is_billed = True
+                        prescribed_drug.save()
+
+                    lab_test_panel = LabTestRequestPanel.objects.filter(
+                        test_panel__item=self.item, 
+                        lab_test_request__process__reference=self.invoice.process_test_req.reference
+                    ).first()
+                    if lab_test_panel:
+                        lab_test_panel.is_billed = True
+                        lab_test_panel.save()
+
+            super().save(*args, **kwargs)
+            self.invoice.calculate_invoice_amount()
+
         super().save(*args, **kwargs)
         self.invoice.calculate_invoice_amount()
     

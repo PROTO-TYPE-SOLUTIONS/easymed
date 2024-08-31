@@ -187,6 +187,7 @@ class PrescribedDrug(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE,)
     is_dispensed = models.BooleanField(default=False)
     quantity = models.PositiveIntegerField(default=1)
+    is_billed = models.BooleanField(default=False)
 
 
     def __str__(self):
