@@ -6,7 +6,12 @@ import CategorizedItems from "./CategorizedItems";
 
 const { Container, Grid } = require("@mui/material");
 
-const InvoiceItems = ({ items, selectedPatient }) => {
+const InvoiceItems = ({ 
+    items, selectedPatient,
+    setSelectedPrescribedDrugs,
+    setSelectedLabRequests,
+    setSelectedAppointments 
+    }) => {
     const authUser = useAuth()
     const dispatch = useDispatch()
     const { paymodes, } = useSelector(({ billing }) => billing);
@@ -28,6 +33,19 @@ const InvoiceItems = ({ items, selectedPatient }) => {
         acc[item.category].push(item);
         return acc;
     }, {});
+
+    // {groupedItems && (
+    //     Object.keys(groupedItems)?.map((category) => {
+    //         if(category.toLowerCase().includes("appointment")){
+    //             console.log("APPPOINT THE F CXATEGORY", category)
+    //             setSelectedAppointments(groupedItems[category])                
+    //         }else if(category==="Lab Test"){
+    //             setSelectedLabRequests(groupedItems[category])
+    //         }else if(category==="Drug"){
+    //             setSelectedPrescribedDrugs(groupedItems[category])
+    //         }
+    //     })
+    // )}
 
     return (
         <div>
