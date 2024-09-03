@@ -271,15 +271,18 @@ class LabTestRequestPanelBySampleView(generics.ListAPIView):
                 return Response({"error": "Patient not found"}, status=status.HTTP_404_NOT_FOUND)
 
         queryset = self.get_queryset()
+        serializer_context = self.get_serializer_context()
+        serializer_context['patient'] = patient
 
-        # Pass patient to the serializer context if needed (though it's accessed directly in the serializer)
-        serializer = self.get_serializer(queryset, many=True)
+        print("Serializer context:", serializer_context)  # Debug line
+
+        serializer = self.get_serializer(queryset, many=True, context=serializer_context)
         return Response(serializer.data)
 
 
 def download_labtestresult_pdf(request, processtestrequest_id):
     '''
-    This view gets the geneated pdf and downloads it ocally
+    This view gets the generated PDF and downloads it locally
     pdf accessed here http://127.0.0.1:8080/download_labtestresult_pdf/26/
     '''
     processtestrequest = get_object_or_404(ProcessTestRequest, pk=processtestrequest_id)
@@ -291,15 +294,57 @@ def download_labtestresult_pdf(request, processtestrequest_id):
     attendance_process = get_object_or_404(AttendanceProcess, process_test_req=processtestrequest)
     patient = attendance_process.patient
 
-    html_template = get_template('labtestresult.html').render({
+    # Prepare data for the template
+    panel_data = []
+    for panel in panels:
+        # Fetch reference values based on the patient
+        reference_value = panel.test_panel.reference_values.filter(
+            sex=patient.gender,
+            age_min__lte=patient.age,
+            age_max__gte=patient.age
+        ).first()
+
+        if reference_value:
+            result = panel.result
+            if result:
+                if float(result) < reference_value.ref_value_low:
+                    flag = 'Low'
+                elif float(result) > reference_value.ref_value_high:
+                    flag = 'High'
+                else:
+                    flag = 'Normal'
+            else:
+                flag = 'N/A'
+
+            panel_data.append({
+                'test_panel_name': panel.test_panel.name,
+                'result': result,
+                'flag': flag,
+                'ref_value_low': reference_value.ref_value_low,
+                'ref_value_high': reference_value.ref_value_high,
+                'unit': panel.test_panel.unit
+            })
+        else:
+            panel_data.append({
+                'test_panel_name': panel.test_panel.name,
+                'result': panel.result,
+                'flag': 'N/A',
+                'ref_value_low': 'N/A',
+                'ref_value_high': 'N/A',
+                'unit': panel.test_panel.unit
+            })
+
+    context = {
         'processtestrequest': processtestrequest,
         'labtestrequests': labtestrequests,
-        'panels': panels,
+        'panels': panel_data,
         'patient': patient,
         'company': company,
         'attendance_process': attendance_process,
         'approved_on': panels.first().approved_on if panels.exists() else None
-    })
+    }
+
+    html_template = get_template('labtestresult.html').render(context)
 
     pdf_file = HTML(string=html_template).write_pdf()
 
@@ -307,3 +352,35 @@ def download_labtestresult_pdf(request, processtestrequest_id):
     response['Content-Disposition'] = f'attachment; filename="labtest_report_{processtestrequest_id}.pdf"'
 
     return response
+
+
+# def download_labtestresult_pdf(request, processtestrequest_id):
+#     '''
+#     This view gets the geneated pdf and downloads it ocally
+#     pdf accessed here http://127.0.0.1:8080/download_labtestresult_pdf/26/
+#     '''
+#     processtestrequest = get_object_or_404(ProcessTestRequest, pk=processtestrequest_id)
+#     labtestrequests = LabTestRequest.objects.filter(process=processtestrequest)
+#     panels = LabTestRequestPanel.objects.filter(lab_test_request__in=labtestrequests)
+#     company = Company.objects.first()
+
+#     # Retrieve the patient from the AttendanceProcess linked via ProcessTestRequest
+#     attendance_process = get_object_or_404(AttendanceProcess, process_test_req=processtestrequest)
+#     patient = attendance_process.patient
+
+#     html_template = get_template('labtestresult.html').render({
+#         'processtestrequest': processtestrequest,
+#         'labtestrequests': labtestrequests,
+#         'panels': panels,
+#         'patient': patient,
+#         'company': company,
+#         'attendance_process': attendance_process,
+#         'approved_on': panels.first().approved_on if panels.exists() else None
+#     })
+
+#     pdf_file = HTML(string=html_template).write_pdf()
+
+#     response = HttpResponse(pdf_file, content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="labtest_report_{processtestrequest_id}.pdf"'
+
+#     return response

@@ -180,12 +180,12 @@ class LabTestRequestPanel(models.Model):
             if not LabTestRequestPanel.objects.filter(test_code=test_id).exists():
                 return test_id
             
-    def get_reference_values(self, patient):
-        try:
-            reference_value = self.reference_values.filter(age=patient.age, sex=patient.sex).first()
-            return reference_value
-        except ReferenceValue.DoesNotExist:
-            return None
+    # def get_reference_values(self, patient):
+    #     try:
+    #         reference_value = self.reference_values.filter(age=patient.age, sex=patient.sex).first()
+    #         return reference_value
+    #     except ReferenceValue.DoesNotExist:
+    #         return None
 
     def get_patient_name(self):
         return self.patient_sample.process.reference  # Should get you the process track_number or reference ID
