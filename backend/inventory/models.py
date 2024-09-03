@@ -133,6 +133,9 @@ class Inventory(models.Model):
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
     
+    class meta:
+        verbose_name_plural = 'Inventory'
+    
 class InventoryInsuranceSaleprice(models.Model):
     inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
     insurance_company = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)

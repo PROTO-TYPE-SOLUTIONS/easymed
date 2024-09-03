@@ -4,6 +4,15 @@ from django.template.loader import get_template
 from .models import Invoice, InvoiceItem, PaymentMode
 from inventory.models import IncomingItem
 from rest_framework import generics
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.conf import settings
+from weasyprint import HTML
+
+from inventory.models import Inventory, Item
+from company.models import Company
+
 
 from authperms.permissions import (
     IsStaffUser,
@@ -47,22 +56,11 @@ class PaymentModeViewset(viewsets.ModelViewSet):
         permission_classes = (IsDoctorUser | IsNurseUser | IsReceptionistUser |  IsLabTechUser,)
 
 
-'''
-This view gets the geneated pdf and downloads it ocally
-pdf accessed here http://127.0.0.1:8080/download_invoice_pdf/26/
-'''
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.template.loader import get_template
-from django.conf import settings
-from weasyprint import HTML
-
-
-from inventory.models import Inventory, Item
-from company.models import Company
-
-
 def download_invoice_pdf(request, invoice_id,):
+    '''
+    This view gets the geneated pdf and downloads it ocally
+    pdf accessed here http://127.0.0.1:8080/download_invoice_pdf/26/
+    '''
     invoice = get_object_or_404(Invoice, pk=invoice_id)
     invoice_items = InvoiceItem.objects.filter(invoice=invoice)
     company = Company.objects.first()

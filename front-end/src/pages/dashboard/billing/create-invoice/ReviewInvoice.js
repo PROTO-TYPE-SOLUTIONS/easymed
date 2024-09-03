@@ -253,6 +253,8 @@ const ReviewInvoice = ({
         }
     }
 
+    console.log("GONE FOR TOOOO LONG AAAH",     selectedAppointments)
+
 
 
   return (
@@ -286,7 +288,13 @@ const ReviewInvoice = ({
                 </div>
             </div>
             {InvoiceItems.length > 0 && (
-                <InvoiceItems selectedPatient={selectedPatient} items={invoiceItems} />
+                <InvoiceItems 
+                    selectedPatient={selectedPatient} 
+                    items={invoiceItems}    
+                    setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}
+                    setSelectedLabRequests={setSelectedLabRequests}
+                    setSelectedAppointments={setSelectedAppointments}
+                />
             )}
             </div>
 

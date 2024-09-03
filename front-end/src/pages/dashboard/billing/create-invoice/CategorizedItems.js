@@ -11,6 +11,7 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
   const [inventoryPrices, setInventoryPrices] = useState([]);
   const [selectedPrice, setSelectedPrice] = useState(null);
   const [selectedPayMethod, setSelectedPayMethod] = useState(null);
+  const [updatedInvoiceItem, setUpdatedInvoiceItem] = useState(invoiceItem);
 
   const patient_insurance_for_this_item = patient_insurance?.filter((mode) =>
     mode.insurance === null || inventoryPrices[0]?.insurance_sale_prices.some(insurance => insurance.id === mode.insurance)
@@ -26,7 +27,7 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
   };
 
   useEffect(() => {
-    fetchInventoryForPrices(invoiceItem?.item);
+    fetchInventoryForPrices(updatedInvoiceItem?.item);
   }, []);
 
   const updateInvoiceItem = async (invoice_item) => {
@@ -37,9 +38,10 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
         status: "billed"
       }
 
-      const response = await updateInvoiceItems(auth, payload, invoice_item.id )
+      const response = await updateInvoiceItems(auth, payload, invoice_item.id)
 
       console.log("RESPONSE FROM THE UPDATE IS THE FOLLOWING", response)
+      setUpdatedInvoiceItem(response);
     } catch (error) {
       console.log("ERROR SUBMITTING VALUES", error);
     } finally {
@@ -50,13 +52,13 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
   return (
     <Grid className='flex items-center py-1' container>
       <Grid item xs={4}>
-        <p>{invoiceItem?.item_name}</p>
+        <p>{updatedInvoiceItem?.item_name}</p>
       </Grid>
       <Grid item xs={4}>
-        {invoiceItem?.status !== 'billed' ? (
+        {updatedInvoiceItem?.status !== 'billed' ? (
           <select
             className='p-2 focus:outline-none'
-              name={invoiceItem?.item_name}
+              name={updatedInvoiceItem?.item_name}
               onChange={(e) => {
                 const selectedOption = patient_insurance_for_this_item.find(
                   (mode) => mode.id === parseInt(e.target.value)
@@ -79,9 +81,9 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
               </option>
             ))}
           </select>
-        ) : (<div className='p-2'>{invoiceItem.payment_mode_name}</div>)}
+        ) : (<div className='p-2'>{updatedInvoiceItem.payment_mode_name}</div>)}
       </Grid>
-      {invoiceItem?.status !== 'billed' ? (
+      {updatedInvoiceItem?.status !== 'billed' ? (
         <>
           <Grid className='px-2 flex justify-end' item xs={3}>
             {selectedPayMethod && selectedPrice && (
@@ -124,7 +126,7 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
       ): (
         <Grid className='px-2 flex justify-end' item xs={3}>
             <div className="mt-2">
-              <p>{invoiceItem.item_amount}</p>
+              <p>{updatedInvoiceItem.item_amount}</p>
             </div>
         </Grid>
       )}
