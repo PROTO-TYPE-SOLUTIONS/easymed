@@ -76,14 +76,6 @@ class LabTestPanel(models.Model):
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
 
-    # def get_reference_values(self, patient):
-    #     # Fetch the reference value based on patient sex and age
-    #     return self.reference_values.filter(
-    #         sex=patient.gender,
-    #         age_min__lte=patient.age,
-    #         age_max__gte=patient.age
-    #     ).first()
-
     def __str__(self):
         return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
 
@@ -180,13 +172,6 @@ class LabTestRequestPanel(models.Model):
             if not LabTestRequestPanel.objects.filter(test_code=test_id).exists():
                 return test_id
             
-    # def get_reference_values(self, patient):
-    #     try:
-    #         reference_value = self.reference_values.filter(age=patient.age, sex=patient.sex).first()
-    #         return reference_value
-    #     except ReferenceValue.DoesNotExist:
-    #         return None
-
     def get_patient_name(self):
         return self.patient_sample.process.reference  # Should get you the process track_number or reference ID
 
@@ -282,52 +267,4 @@ class PublicLabTestRequest(models.Model):
             patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
             return patient_age
         return None
-
-
-
-'''
-This is ugly!! Don't do this,... put hey since we're
-in active development, it's ok.
-'''    
-# class LabTestResult(models.Model):
-#     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
-#     title = models.CharField(max_length=45)
-#     date_created = models.DateField(auto_now_add=True)
-#     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name="recorded_by")
-#     note = models.CharField(max_length=255, null=True, blank=True)
-#     approved = models.BooleanField(default=False)
-
-#     def __str__(self):
-#         return self.title
-
-# class ResultsVerification(models.Model):
-#     lab_results = models.OneToOneField(LabTestResult, on_delete=models.CASCADE)
-#     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
-#     is_approved = models.BooleanField(default=False)
-#     approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)
-
-
-# class LabTestResultPanel(models.Model):
-#     lab_test_result= models.ForeignKey(LabTestResult, on_delete=models.CASCADE)
-#     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET_NULL, null=True, blank=True )
-#     result = models.CharField(max_length=45)
-#     difference = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-#     def __str__(self):
-#         return f"{self.test_panel.name} - {self.test_panel.ref_value_low}"
-
-#     def save(self, *args, **kwargs):
-#         if self.test_panel and self.result:
-#             try:
-#                 ref_value_low = float(self.test_panel.ref_value_low)
-#                 ref_value_high = float(self.test_panel.ref_value_high)
-#                 result_value = float(self.result)
-#                 if result_value < ref_value_low:
-#                     self.difference = -round(ref_value_low - result_value, 2)
-#                 elif result_value > ref_value_high:
-#                     self.difference = round(result_value - ref_value_high, 2)
-#             except ValueError:
-#                 pass 
-#         super().save(*args, **kwargs)
-
 
