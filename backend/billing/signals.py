@@ -14,30 +14,6 @@ from easymed.celery_tasks import (
 )
 
 
-# @receiver(post_save, sender=InvoiceItem)
-# def update_labtestrequestpanel_billed_status(sender, instance, **kwargs):
-#     '''
-#     If an InvoiceItem is of category LabTest, and the InvoiceItem status changes to
-#     billed, updated the LabTestRequestPanel's is_billed field to True
-#     '''
-#     # Check if the status is 'billed' and the item is in the 'LabTest' category
-#     if instance.status == 'billed' and instance.item.category == 'Lab Test':
-#         # Find the related AttendanceProcess through the invoice
-#         attendance_process = AttendanceProcess.objects.filter(invoice=instance.invoice).first()
-
-#         if attendance_process and attendance_process.process_test_req:
-#             # Find all LabTestRequest instances associated with this ProcessTestRequest
-#             lab_test_requests = LabTestRequest.objects.filter(
-#                 process=attendance_process.process_test_req
-#             )
-
-#             # Update the is_billed field to True in all related LabTestRequestPanels
-#             LabTestRequestPanel.objects.filter(
-#                 lab_test_request__in=lab_test_requests
-#             ).update(is_billed=True)
-
-
-
 '''signal to fire up celery task to  to generated pdf once Invoice tale gets a new entry'''
 @receiver(post_save, sender=Invoice)
 def generate_invoice(sender, instance, created, **kwargs):
@@ -60,6 +36,7 @@ def handle_invoice_status_change(sender, instance, created, **kwargs):
         if instance.status != instance.status:
             send_invoice_updated_email.delay(instance.id)
     instance._previous_status = instance.status
+
 
 ''''
 whenever an invoice item is created add the resulting price for the item to the invoice

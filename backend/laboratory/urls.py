@@ -39,9 +39,13 @@ urlpatterns = [
     path('lab-test-request-by-patient-id/<int:patient_id>/', LabTestRequestByPatientIdAPIView.as_view()),
     path('lab-test-request-panels-by-lab-test-request-id/<int:lab_test_request_id>/', LabTestRequestPanelByLabTestRequestId.as_view(), name='lab-test-request-panels'),
     path('lab-test-request-by-process-id/<int:process_id>/', LabTestRequestByProcessId.as_view(), name='lab-process-request'),
+    path('labtestpanels-byprofile-id/<int:profile_id>/', LabTestPanelViewSet.as_view({'get': 'by_test_profile'}), name='labtestpanels-byprofile-id'),
+    path('labtestrequestpanels/sample/<str:patient_sample_code>/', LabTestRequestPanelBySampleView.as_view(), name='labtestrequestpanel-by-sample'),
+
     path('patient-samples-by-process-id/<int:process_id>/', PatientSampleByProcessId.as_view(), name='patient-samples'),
     path('download_labtestresult_pdf/<int:processtestrequest_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
-    path('labtestpanels-byprofile-id/<int:profile_id>/', LabTestPanelViewSet.as_view({'get': 'by_test_profile'}), name='labtestpanels-byprofile-id'),
-    path('labtestrequestpanels/sample/<int:patient_sample_id>/', LabTestRequestPanelBySampleView.as_view(), name='labtestrequestpanel-by-sample'),
+
+
+
 ]
 

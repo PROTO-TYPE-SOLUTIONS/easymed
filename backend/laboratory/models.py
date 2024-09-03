@@ -75,16 +75,14 @@ class LabTestPanel(models.Model):
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
-    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
-    def get_reference_values(self, patient):
-        # Fetch the reference value based on patient sex and age
-        return self.reference_values.filter(
-            sex=patient.gender,
-            age_min__lte=patient.age,
-            age_max__gte=patient.age
-        ).first()
+    # def get_reference_values(self, patient):
+    #     # Fetch the reference value based on patient sex and age
+    #     return self.reference_values.filter(
+    #         sex=patient.gender,
+    #         age_min__lte=patient.age,
+    #         age_max__gte=patient.age
+    #     ).first()
 
     def __str__(self):
         return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
@@ -181,15 +179,30 @@ class LabTestRequestPanel(models.Model):
             test_id = f"TC-{random_number}"
             if not LabTestRequestPanel.objects.filter(test_code=test_id).exists():
                 return test_id
-    ''''
-    Find or Create PatientSample:
-    Attempt to find a PatientSample that matches the current lab_test_request and specimen.
-    If no matching PatientSample is found, create a new one.
-    Assign this PatientSample to the patient_sample field of the LabTestRequestPanel.
-    Set Category: Determine the category (qualitative or quantitative) based on the LabTestPanel's boolean fields.
-    Save the Model: Call the superclass's save method to ensure the object is saved to the database.
-    '''
+            
+    def get_reference_values(self, patient):
+        try:
+            reference_value = self.reference_values.filter(age=patient.age, sex=patient.sex).first()
+            return reference_value
+        except ReferenceValue.DoesNotExist:
+            return None
+
+    def get_patient_name(self):
+        return self.patient_sample.process.reference  # Should get you the process track_number or reference ID
+
+    def get_patient_info(self):
+        patient = self.patient_sample.process.attendanceprocess.patient
+        return f"{patient.first_name} {patient.second_name}, Age: {patient.age}, Sex: {patient.gender}"
+        
     def save(self, *args, **kwargs):
+        ''''
+        Find or Create PatientSample:
+        Attempt to find a PatientSample that matches the current lab_test_request and specimen.
+        If no matching PatientSample is found, create a new one.
+        Assign this PatientSample to the patient_sample field of the LabTestRequestPanel.
+        Set Category: Determine the category (qualitative or quantitative) based on the LabTestPanel's boolean fields.
+        Save the Model: Call the superclass's save method to ensure the object is saved to the database.
+        '''
         if not self.test_code:
             self.test_code = self.generate_test_code()
 
@@ -225,6 +238,11 @@ class LabTestRequestPanel(models.Model):
     def __str__(self):
         return self.test_panel.name
 
+    # def __str__(self):
+    #     return f"{self.patient_sample} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
+
+
+
 class EquipmentTestRequest(models.Model):
     test_request_panel = models.ForeignKey(LabTestRequestPanel, on_delete=models.CASCADE)
     equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
@@ -233,11 +251,43 @@ class EquipmentTestRequest(models.Model):
         return str(self.equipment.name + " " + self.equipment.ip_address + " " + self.equipment.port)
     
 
+class PublicLabTestRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+    )
+    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    appointment_date = models.DateField()
+    status = models.CharField( max_length=10, choices=STATUS_CHOICES, default='pending')
+    date_created = models.DateField(auto_now_add=True)
+    date_changed = models.DateField(auto_now=True)
+    lab_request = models.FileField(
+        upload_to="Lab Test Requests/public-requests",
+        max_length=254,
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'img', 'png', 'jpg'])]
+    )
+    test_profile = models.ForeignKey(LabTestProfile, on_delete=models.PROTECT)
+    sample_collected = models.BooleanField(default=False,null=True, blank=True)
+    sample_id = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
+    
+    @property
+    def age(self):
+        if self.patient.date_of_birth:
+            patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
+            return patient_age
+        return None
+
 
 
 '''
-This is ugly!! Don't do this,... ut hey since we're
-in ative development, it's ok.
+This is ugly!! Don't do this,... put hey since we're
+in active development, it's ok.
 '''    
 # class LabTestResult(models.Model):
 #     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
@@ -281,34 +331,3 @@ in ative development, it's ok.
 #         super().save(*args, **kwargs)
 
 
-class PublicLabTestRequest(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('cancelled', 'Cancelled'),
-    )
-    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    appointment_date = models.DateField()
-    status = models.CharField( max_length=10, choices=STATUS_CHOICES, default='pending')
-    date_created = models.DateField(auto_now_add=True)
-    date_changed = models.DateField(auto_now=True)
-    lab_request = models.FileField(
-        upload_to="Lab Test Requests/public-requests",
-        max_length=254,
-        null=True,
-        blank=True,
-        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'img', 'png', 'jpg'])]
-    )
-    test_profile = models.ForeignKey(LabTestProfile, on_delete=models.PROTECT)
-    sample_collected = models.BooleanField(default=False,null=True, blank=True)
-    sample_id = models.CharField(max_length=100, null=True, blank=True)
-
-    def __str__(self):
-        return f"PublicTestRequest #{self.patient.first_name} - {self.test_profile}"
-    
-    @property
-    def age(self):
-        if self.patient.date_of_birth:
-            patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
-            return patient_age
-        return None

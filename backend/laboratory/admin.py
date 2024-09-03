@@ -1,5 +1,17 @@
 from django.contrib import admin
-from .models import *
+from .models import (
+    LabReagent,
+    LabTestProfile,
+    LabTestPanel,
+    LabTestRequest,
+    LabTestRequestPanel,
+    ProcessTestRequest,
+    LabEquipment,
+    EquipmentTestRequest,
+    Specimen,
+    PatientSample,
+    ReferenceValue,
+)
 
 admin.site.register(LabReagent)
 
@@ -16,3 +28,5 @@ admin.site.register(EquipmentTestRequest)
 admin.site.register(Specimen)
 
 admin.site.register(PatientSample)
+
+admin.site.register(ReferenceValue)

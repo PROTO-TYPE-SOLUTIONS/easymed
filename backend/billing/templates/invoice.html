@@ -62,7 +62,6 @@
                 <th>Item Name</th>
                 <th>Price</th>
                 <th>Category</th>
-                <th>Date</th>
             </tr>
         </thead>
         <tbody>
@@ -71,7 +70,6 @@
                 <td>{{ invoice_item.item.name }}</td>
                 <td>{{ invoice_item.sale_price|floatformat:2 }}</td>
                 <td>{{ invoice_item.item.category }}</td>
-                <td>{{ invoice_item.item_created_at }}</td>
             </tr>
             {% endfor %}
         </tbody>
