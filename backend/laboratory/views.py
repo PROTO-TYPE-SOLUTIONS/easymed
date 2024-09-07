@@ -118,8 +118,6 @@ class LabTestPanelViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
-
 '''Lab Test Request and lab Test Request Panel'''
 class LabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequest.objects.all().order_by('-id')
@@ -150,7 +148,6 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
                 send_through_tcp(data=data)
                 return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
         return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
-
 
 
 class LabTestRequestByPatientIdAPIView(APIView):
@@ -224,23 +221,16 @@ class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     serializer_class = PublicLabTestRequestSerializer
     permission_classes = (IsDoctorUser | IsPatientUser,)
 
-# class ResultsVerificationViewSet(viewsets.ModelViewSet):
-#     queryset = ResultsVerification.objects.all()
-#     serializer_class = ResultsVerificationSerializer
 
 class ProcessTestRequestViewSet(viewsets.ModelViewSet):
     queryset = ProcessTestRequest.objects.all().order_by('-id')
     serializer_class = ProcessTestRequestSerializer
 
+
 class PatientSampleViewSet(viewsets.ModelViewSet):
     queryset = PatientSample.objects.all().order_by('-id')
     serializer_class = PatientSampleSerializer
 
-
-# from rest_framework import generics, status
-# from rest_framework.response import Response
-# from .models import PatientSample, LabTestRequestPanel, Patient
-# from .serializers import LabTestRequestPanelSerializer
 
 class LabTestRequestPanelBySampleView(generics.ListAPIView):
     serializer_class = LabTestRequestPanelSerializer
@@ -352,35 +342,3 @@ def download_labtestresult_pdf(request, processtestrequest_id):
     response['Content-Disposition'] = f'attachment; filename="labtest_report_{processtestrequest_id}.pdf"'
 
     return response
-
-
-# def download_labtestresult_pdf(request, processtestrequest_id):
-#     '''
-#     This view gets the geneated pdf and downloads it ocally
-#     pdf accessed here http://127.0.0.1:8080/download_labtestresult_pdf/26/
-#     '''
-#     processtestrequest = get_object_or_404(ProcessTestRequest, pk=processtestrequest_id)
-#     labtestrequests = LabTestRequest.objects.filter(process=processtestrequest)
-#     panels = LabTestRequestPanel.objects.filter(lab_test_request__in=labtestrequests)
-#     company = Company.objects.first()
-
-#     # Retrieve the patient from the AttendanceProcess linked via ProcessTestRequest
-#     attendance_process = get_object_or_404(AttendanceProcess, process_test_req=processtestrequest)
-#     patient = attendance_process.patient
-
-#     html_template = get_template('labtestresult.html').render({
-#         'processtestrequest': processtestrequest,
-#         'labtestrequests': labtestrequests,
-#         'panels': panels,
-#         'patient': patient,
-#         'company': company,
-#         'attendance_process': attendance_process,
-#         'approved_on': panels.first().approved_on if panels.exists() else None
-#     })
-
-#     pdf_file = HTML(string=html_template).write_pdf()
-
-#     response = HttpResponse(pdf_file, content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="labtest_report_{processtestrequest_id}.pdf"'
-
-#     return response
