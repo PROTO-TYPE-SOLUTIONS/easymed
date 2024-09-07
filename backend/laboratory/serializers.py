@@ -120,6 +120,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestRequestPanel
         fields = [
+            'test_panel',
             'test_panel_name', 
             'item', 
             'sale_price', 
@@ -127,6 +128,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
             'patient_age', 
             'patient_sex',
             'reference_values',
+            'lab_test_request',
         ]
 
 
@@ -171,39 +173,5 @@ class PatientSampleSerializer(serializers.ModelSerializer):
 
     def get_specimen_name(self, obj):
         return obj.specimen.name
-
-
-
-    # def create(self, validated_data: dict):
-    #     validated_data["sample"] = self.generate_sample_code()
-    #     return super().create(validated_data)
-
-    # def update(self, instance, validated_data):
-    #     # If sample code is not provided, generate one
-    #     print(f"Updating data: {validated_data}")
-
-    #     if 'sample' in validated_data and validated_data['sample'] is not None:
-    #         validated_data["sample"] = validated_data["sample"] + "-" + self.generate_sample_code()
-
-    #     return super().update(instance, validated_data)
-
-
-    # def to_representation(self, instance: LabTestRequest):
-
-    #     data = super().to_representation(instance)
-    #     if instance.requested_by:
-    #         try:
-    #             user: CustomUser = CustomUser.objects.get(id=data.get("requested_by"))
-    #             data["requested_name"] = user.get_fullname()
-    #         except Exception as e:
-    #             pass
-
-    #     return data
-    
-
-# class ResultsVerificationSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ResultsVerification
-#         fields = '__all__'
 
 
