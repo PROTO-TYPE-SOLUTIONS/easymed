@@ -120,6 +120,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestRequestPanel
         fields = [
+            'test_panel',
             'test_panel_name', 
             'item', 
             'sale_price', 
@@ -127,6 +128,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
             'patient_age', 
             'patient_sex',
             'reference_values',
+            'lab_test_request',
         ]
 
 

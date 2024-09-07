@@ -156,7 +156,7 @@ class PatientSample(models.Model):
 
 class LabTestRequestPanel(models.Model):
     patient_sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
-    result = models.CharField(max_length=45, null=True)  # actual result
+    result = models.CharField(max_length=45, null=True)
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     test_code = models.CharField(max_length=100, null=True)
@@ -198,6 +198,8 @@ class LabTestRequestPanel(models.Model):
                 process=self.lab_test_request.process, 
                 specimen=self.test_panel.specimen
             )
+            print(f"Found matching sample: {matching_sample}")
+
         except PatientSample.DoesNotExist:
             # If not, create a new PatientSample
             matching_sample = PatientSample.objects.create(
@@ -221,10 +223,7 @@ class LabTestRequestPanel(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.test_panel.name
-
-    # def __str__(self):
-    #     return f"{self.patient_sample} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
+        return f"{self.test_panel.name}"
 
 
 
