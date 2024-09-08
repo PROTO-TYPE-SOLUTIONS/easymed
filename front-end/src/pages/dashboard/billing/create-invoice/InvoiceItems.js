@@ -8,9 +8,18 @@ const { Container, Grid } = require("@mui/material");
 
 const InvoiceItems = ({ 
     items, selectedPatient,
-    setSelectedPrescribedDrugs,
-    setSelectedLabRequests,
-    setSelectedAppointments 
+    totalLabReqSum,
+    totalAppointmentSum,
+    totalPrescribedDrugsSum,
+    setLabReqSum,
+    setLabReqCashSum,
+    setLabReqInsuranceSum,
+    setAppointmentSum,
+    setAppointmentCashSum,
+    setAppointmentInsuranceSum,
+    setPrescribedDrugsSum,
+    setPrescribedDrugsCashSum,
+    setPrescribedDrugsInsuranceSum,
     }) => {
     const authUser = useAuth()
     const dispatch = useDispatch()
@@ -34,18 +43,19 @@ const InvoiceItems = ({
         return acc;
     }, {});
 
-    // {groupedItems && (
-    //     Object.keys(groupedItems)?.map((category) => {
-    //         if(category.toLowerCase().includes("appointment")){
-    //             console.log("APPPOINT THE F CXATEGORY", category)
-    //             setSelectedAppointments(groupedItems[category])                
-    //         }else if(category==="Lab Test"){
-    //             setSelectedLabRequests(groupedItems[category])
-    //         }else if(category==="Drug"){
-    //             setSelectedPrescribedDrugs(groupedItems[category])
-    //         }
-    //     })
-    // )}
+    useEffect(() => {
+        if (groupedItems) {
+            Object.keys(groupedItems).forEach((category) => {
+                if (category.toLowerCase().includes("appointment")) {
+                    totalAppointmentSum(groupedItems[category]);
+                } else if (category === "Lab Test") {
+                    totalLabReqSum(groupedItems[category]);
+                } else if (category === "Drug") {
+                    totalPrescribedDrugsSum(groupedItems[category]);
+                }
+            });
+        }
+    }, [items]);
 
     return (
         <div>
@@ -67,7 +77,20 @@ const InvoiceItems = ({
                         </Grid>
                         <section>
                             {groupedItems[category].map(item => (
-                                <CategorizedItems key={item.id} invoiceItem={item} patient_insurance={patient_insurance}/>
+                                <CategorizedItems 
+                                    key={item.id} 
+                                    invoiceItem={item} 
+                                    patient_insurance={patient_insurance}
+                                    setLabReqSum={setLabReqSum}
+                                    setLabReqCashSum={setLabReqCashSum}
+                                    setLabReqInsuranceSum={setLabReqInsuranceSum}
+                                    setAppointmentSum={setAppointmentSum}
+                                    setAppointmentCashSum={setAppointmentCashSum}
+                                    setAppointmentInsuranceSum={setAppointmentInsuranceSum}
+                                    setPrescribedDrugsSum={setPrescribedDrugsSum}
+                                    setPrescribedDrugsCashSum={setPrescribedDrugsCashSum}
+                                    setPrescribedDrugsInsuranceSum={setPrescribedDrugsInsuranceSum}
+                                    />
                             ))}
                         </section>
                     </section>

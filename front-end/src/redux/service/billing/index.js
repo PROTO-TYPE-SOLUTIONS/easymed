@@ -113,6 +113,23 @@ export const billingInvoices = (auth,payload) =>{
     })
 }
 
+export const updateInvoices = (auth, invoice, payload) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.BILLING_INVOICES}`,payload,{
+            params: {
+                invoice_id: invoice
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const payBillingInvoices = (auth,payload) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
