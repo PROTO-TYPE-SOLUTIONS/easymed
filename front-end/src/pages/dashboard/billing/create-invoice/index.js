@@ -14,11 +14,10 @@ import ProtectedRoute from '@/assets/hoc/protected-route';
 
 const CreateNewInvoice = () => {
     const dispatch = useDispatch()
-    const [selectedOption, setSelectedOption] = useState(null);
 
     useEffect(() => {
         dispatch(getAllPatients());
-    }, [selectedOption]);
+    }, []);
     
 
   return (
