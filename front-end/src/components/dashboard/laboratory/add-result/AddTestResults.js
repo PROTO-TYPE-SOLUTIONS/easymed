@@ -65,7 +65,7 @@ const AddTestResults = () => {
       dispatch(getAllLabRequests(token));
       dispatch(getAllPhlebotomySamples(token))
       if(selected){
-        dispatch(getAllLabTestPanelsBySample(selected.value, token));
+        dispatch(getAllLabTestPanelsBySample(selected.label, token));
       }
     }
   }, [token, selected]);
@@ -163,7 +163,7 @@ const AddTestResults = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={labResultItems}
+        dataSource={labResultItems.filter((resultItem)=> resultItem.is_billed)}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
