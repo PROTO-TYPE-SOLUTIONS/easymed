@@ -10,9 +10,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
     item_name = serializers.SerializerMethodField()
+    item_code = serializers.SerializerMethodField()
     payment_mode_name = serializers.SerializerMethodField()
-
 
     class Meta:
         model = InvoiceItem
@@ -25,6 +26,10 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
     def get_item_name(self, obj):
         item = obj.item
         return item.name if item else None
+
+    def get_item_code(self, obj):
+        item = obj.item
+        return item.item_code if item else None
     
     def get_payment_mode_name(self, obj):
         item = obj.payment_mode
