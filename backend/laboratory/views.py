@@ -231,7 +231,9 @@ class PatientSampleViewSet(viewsets.ModelViewSet):
     queryset = PatientSample.objects.all().order_by('-id')
     serializer_class = PatientSampleSerializer
 
-
+'''
+TODO: This is not shwoing is_billed in response
+'''
 class LabTestRequestPanelBySampleView(generics.ListAPIView):
     serializer_class = LabTestRequestPanelSerializer
 

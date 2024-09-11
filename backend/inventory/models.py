@@ -38,6 +38,7 @@ class Item(models.Model):
         ('general', 'General'),
     ]
     id = models.CharField(max_length=255, primary_key=True, editable=True)
+    item_code=models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     desc = models.CharField(max_length=255)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
@@ -103,6 +104,7 @@ class IncomingItem(models.Model):
         ('Internal', 'internal'),
     ]
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item_code= models.CharField(max_length=255) # so as to hide names from user
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
@@ -115,6 +117,7 @@ class IncomingItem(models.Model):
 
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
+
 
 class Inventory(models.Model):
     CATEGORY_ONE_CHOICES = [

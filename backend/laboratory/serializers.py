@@ -59,7 +59,9 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
         model = LabTestProfile
         fields = '__all__'        
 
-
+'''
+TODO: 
+'''
 class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     test_panel_name = serializers.ReadOnlyField(source='test_panel.name')
     item = serializers.CharField(source='test_panel.item.id', read_only=True)
@@ -129,6 +131,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
             'patient_sex',
             'reference_values',
             'lab_test_request',
+            'is_billed',
         ]
 
 
