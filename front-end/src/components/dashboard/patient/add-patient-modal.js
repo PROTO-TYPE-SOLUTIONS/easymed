@@ -36,7 +36,7 @@ const AddPatientModal = () => {
     gender: "",
     phone: "",
     email: "",
-    insurance: null,
+    insurances: [],
     kin_first_name: "",
     kin_second_name: "",
     kin_phone: "",
@@ -88,7 +88,7 @@ const AddPatientModal = () => {
         gender: formValue.gender,
         phone: formValue.phone,
         email: formValue.email,
-        insurance: parseInt(formValue.insurance),
+        insurances: formValue.insurances,
         user_id: parseInt(formValue.user_id),
         unique_id: parseInt(formValue.unique_id)
       }
@@ -252,25 +252,28 @@ const AddPatientModal = () => {
                     />
                   </Grid>
                   <Grid item md={3} xs={12}>
-                  <label htmlFor="insurance">Insurance</label>
+                    <label htmlFor="insurances">Insurance</label>
                     <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      name="insurance"
+                        as="select"
+                        className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                        name="insurances" 
+                        multiple={true} 
                     >
-                      <option value="">Select Insurance</option>
-                      {insurance.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.name}
+                        <option value="" disabled>
+                            Select Insurance
                         </option>
-                      ))}
+                        {insurance.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.name}
+                            </option>
+                        ))}
                     </Field>
                     <ErrorMessage
-                      name="insurance"
-                      component="div"
-                      className="text-warning text-xs"
+                        name="insurances"
+                        component="div"
+                        className="text-warning text-xs"
                     />
-                  </Grid>
+                </Grid>
                 </Grid>
                 <h2 className="text-sm font-semibold text-primary">Next Of Kin Details</h2>
                 <Grid container spacing={1}>

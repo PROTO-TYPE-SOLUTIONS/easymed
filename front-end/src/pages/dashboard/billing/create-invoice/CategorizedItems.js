@@ -5,7 +5,19 @@ import { fetchInventories } from '@/redux/service/inventory';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { updateInvoiceItems } from '@/redux/service/billing';
 
-const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
+const CategorizedItems = ({ 
+  invoiceItem, 
+  patient_insurance,
+  setLabReqSum,
+  setLabReqCashSum,
+  setLabReqInsuranceSum,
+  setAppointmentSum,
+  setAppointmentCashSum,
+  setAppointmentInsuranceSum,
+  setPrescribedDrugsSum,
+  setPrescribedDrugsCashSum,
+  setPrescribedDrugsInsuranceSum,
+ }) => {
   const auth = useAuth();
   const [loading, setLoading] = useState(false);
   const [inventoryPrices, setInventoryPrices] = useState([]);
@@ -30,6 +42,31 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
     fetchInventoryForPrices(updatedInvoiceItem?.item);
   }, []);
 
+  const updateInvoiceTotals = (invoiceItem) => {
+    if(invoiceItem.category.toLowerCase().includes("appointment")){
+      setAppointmentSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount));
+      if(invoiceItem.payment_mode_name === "cash"){
+        setAppointmentCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }else{
+        setAppointmentInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }
+    }else if(invoiceItem.category==="Lab Test"){
+      setLabReqSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      if(invoiceItem.payment_mode_name === "cash"){
+        setLabReqCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }else{
+        setLabReqInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }
+    }else if(invoiceItem.category==="Drug"){
+      setPrescribedDrugsSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      if(invoiceItem.payment_mode_name === "cash"){
+        setPrescribedDrugsCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }else{
+        setPrescribedDrugsInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }
+    }
+  }
+
   const updateInvoiceItem = async (invoice_item) => {
     try {
       const payload = {
@@ -39,9 +76,8 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
       }
 
       const response = await updateInvoiceItems(auth, payload, invoice_item.id)
-
-      console.log("RESPONSE FROM THE UPDATE IS THE FOLLOWING", response)
       setUpdatedInvoiceItem(response);
+      updateInvoiceTotals(response)
     } catch (error) {
       console.log("ERROR SUBMITTING VALUES", error);
     } finally {

@@ -17,6 +17,7 @@ const NewInvoice = () => {
     const dispatch = useDispatch()
     const auth = useAuth();
     const [selectedOption, setSelectedOption] = useState(null);
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [selectedAppointments, setSelectedAppointments] = useState([]);
     const [selectedLabRequests, setSelectedLabRequests] = useState([]);
     const [selectedPrescribedDrugs, setSelectedPrescribedDrugs] = useState([]);
@@ -25,7 +26,6 @@ const NewInvoice = () => {
     const { patients } = useSelector((store) => store.patient);
     const { invoices } = useSelector((store) => store.billing)
 
-    console.log("BELIEVE MEEEEEEEE", patient)
 
     const handleChange = (selectedOption) => {
         setSelectedOption(selectedOption);
@@ -49,10 +49,14 @@ const NewInvoice = () => {
 
     useEffect(() => {
         dispatch(getAllPatients());
-        setSelectedAppointments([]);
-        setSelectedLabRequests([]);
-        setSelectedPrescribedDrugs([]);
+
     }, [selectedOption]);
+
+    const selectInvoice = (invoice)=> {
+      setSelectedInvoice(invoice)
+      dispatch(getAllInvoiceItemsByInvoiceId(auth, invoice.id))
+    }
+
   return (
     <Grid container spacing={2}>
       <Grid className='' item md={3} xs={12}>
@@ -77,8 +81,8 @@ const NewInvoice = () => {
                   {invoices.map((invoice) => {
                     const date = invoice.invoice_created_at
                     return (
-                      <li onClick={()=> dispatch(getAllInvoiceItemsByInvoiceId(auth, invoice.id))} className='my-2 py-2 cursor-pointer border-b border-[#D3D3D3]' key={invoice.id}>
-                        {formatDate(date)}               
+                      <li onClick={()=> selectInvoice(invoice)} className='my-2 py-2 cursor-pointer border-b border-[#D3D3D3]' key={invoice.id}>
+                        {formatDate(date)}
                       </li>
                       )
                   })}
@@ -96,7 +100,8 @@ const NewInvoice = () => {
       </Grid>
       <Grid className='h-[80vh]' item md={9} xs={12}>
         <ReviewInvoice 
-          selectedOption={selectedOption} 
+          selectedOption={selectedOption}
+          selectedInvoice={selectedInvoice}
           selectedPatient={patient} 
           selectedAppointments={selectedAppointments} 
           selectedLabRequests={selectedLabRequests}
