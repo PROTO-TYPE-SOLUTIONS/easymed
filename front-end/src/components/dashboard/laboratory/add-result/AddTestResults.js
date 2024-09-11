@@ -111,13 +111,13 @@ const AddTestResults = () => {
       setLoading(true);
 
       labResultItems.forEach(async(panel)=> {
-
+        if(panel.is_billed){
           const payload = {
             id:panel.id,
             result: panel.result
           }
           const response = await updateLabRequestPanels(payload, auth)
-                 
+        }                 
       })
       setLoading(false);
       router.back() 

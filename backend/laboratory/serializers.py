@@ -122,6 +122,8 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabTestRequestPanel
         fields = [
+            'id',
+            'result',
             'test_panel',
             'test_panel_name', 
             'item', 
