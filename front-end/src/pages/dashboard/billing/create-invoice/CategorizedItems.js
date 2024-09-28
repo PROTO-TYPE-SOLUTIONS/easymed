@@ -88,7 +88,7 @@ const CategorizedItems = ({
   return (
     <Grid className='flex items-center py-1' container>
       <Grid item xs={4}>
-        <p>{updatedInvoiceItem?.item_name}</p>
+        <p>{updatedInvoiceItem?.item_code}</p>
       </Grid>
       <Grid item xs={4}>
         {updatedInvoiceItem?.status !== 'billed' ? (

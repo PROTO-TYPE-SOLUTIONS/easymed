@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import FormButton from '@/components/common/button/FormButton';
 import { sendToEquipment } from "@/redux/service/laboratory";
 
-const TestPanelsItem = ({sample, collected}) => {
+const TestPanelsItem = ({sample, collected, sample_id}) => {
   const auth = useAuth()
   const [loading, setLoading] = useState(false)
   const [resultItems, setResultItems]=useState([])
@@ -36,7 +36,7 @@ const TestPanelsItem = ({sample, collected}) => {
     try{
       const payload = {
         is_sample_collected: true,
-        id:sample
+        id:sample_id
       }
       await updatePhlebotomySamples(payload, auth)
     }catch(error){
