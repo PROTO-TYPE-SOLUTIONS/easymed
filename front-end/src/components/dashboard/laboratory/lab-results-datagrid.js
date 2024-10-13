@@ -51,6 +51,7 @@ const LabResultDataGrid = () => {
   const { processes, patients } = useSelector((store)=> store.patient)
 
   const labTestsResultsSchedules = processes.filter((process)=> process.track==="lab")
+  const searchedProcesses = labTestsResultsSchedules.filter((process)=> process.patient_number.includes(searchQuery))
 
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
@@ -108,7 +109,7 @@ const LabResultDataGrid = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
-            placeholder="Search referrals by facility"
+            placeholder="Search by patient ID"
           />
         </Grid>
         <Grid className="bg-primary w-full rounded-md flex items-center text-white" item md={4} xs={4}>
@@ -120,7 +121,7 @@ const LabResultDataGrid = () => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={labTestsResultsSchedules}
+        dataSource={searchedProcesses}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
