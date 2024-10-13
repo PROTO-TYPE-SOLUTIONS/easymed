@@ -57,6 +57,36 @@ export const fetchItem = () =>{
     })
 }
 
+export const createItem = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_ITEM}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateItem = (item_id, payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.FETCH_ITEM}`, payload, {
+            params: {
+                item_id: item_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const deleteItem = (id) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.DELETE_ITEM}`,{id})

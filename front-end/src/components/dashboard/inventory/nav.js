@@ -19,6 +19,9 @@ const InventoryNav = () => {
         Requisition Entry
       </Link>
       {/* <RequisitionModal /> */}
+      <Link href='/dashboard/inventory/items' className={`${pathName === '/dashboard/inventory/items' || pathName === '/dashboard/inventory/items/new' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+        Items
+      </Link>
       <Link href='/dashboard/inventory/incoming-items' className={`${pathName === '/dashboard/inventory/incoming-items' || pathName === '/dashboard/inventory/incoming-items/new' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
         Incoming Items
       </Link>
