@@ -124,6 +124,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'result',
+            'result_approved',
             'test_panel',
             'test_panel_name', 
             'item', 
