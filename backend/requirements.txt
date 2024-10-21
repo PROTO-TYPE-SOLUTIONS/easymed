@@ -5,9 +5,11 @@ channels_redis==4.2.0
 # Django==4.2.5
 django-ledger==0.5.6.2
 
+dj-database-url==2.2.0
 Django
 django-filter==23.3
 django-guardian==2.4.0
+django-redis==5.4.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.0
 drf-spectacular==0.26.5

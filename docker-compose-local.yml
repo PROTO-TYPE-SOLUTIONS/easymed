@@ -1,6 +1,17 @@
-version: "3.9"
 
 services:
+    postgres:
+        image: postgres:13
+        container_name: postgres
+        env_file:
+            - ./.env
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - ${POSTGRES_PORT}:5432
+        networks:
+            - mks
+
     redis:
         image: redis:7.0-alpine
         container_name: redis
@@ -12,7 +23,7 @@ services:
         networks:
             - mks
         restart: unless-stopped
-
+    
     backend:
         build:
             context: ./backend
@@ -21,6 +32,9 @@ services:
         command: python manage.py runserver 0.0.0.0:8080
         volumes:
             - ./backend:/app
+        depends_on:
+            - postgres
+            - redis
         ports:
             - 8080:8080
         env_file:
@@ -51,8 +65,6 @@ services:
             - 3000:3000
         depends_on:
             - backend
-        # volumes:
-        #     - ./front-end:/app    
         networks:
             - mks    
 
@@ -60,3 +72,6 @@ networks:
     mks:
         name: mks
         driver: bridge
+
+volumes:
+  postgres_data:

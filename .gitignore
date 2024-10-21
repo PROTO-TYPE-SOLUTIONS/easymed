@@ -29,6 +29,7 @@ migrations/
 */migrations/
 **/migrations/
 **/__pycache__/
+volumes/
 
 
 # dependencies

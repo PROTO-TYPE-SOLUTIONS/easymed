@@ -4,6 +4,8 @@ from datetime import timedelta
 from decouple import config
 import os
 from dotenv import load_dotenv
+import dj_database_url
+
 
 load_dotenv()
 
@@ -191,33 +193,56 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str)
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str)
 
 
+REDIS_PORT=os.getenv("REDIS_PORT")
+REDIS_HOST=os.getenv("REDIS_HOST")
+# Celery Configuration
+CELERY_BROKER_URL = f'redis://redis:6379/0'
+print("wacuka")
+
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+
+
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Nairobi'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': CELERY_BROKER_URL,# Adjust the Redis location as needed
+        'TIMEOUT': 108001,
+        'KEY_PREFIX': 'user:',
+
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 
 
 
 CHANNELS_ROUTING = 'patient.routing.application'
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('localhost', 6379)],
+            "hosts": [(os.getenv('REDIS_HOST'), int(os.getenv('REDIS_PORT')))],
         },
     },
 }
 
-
 ''''
 For some reason, docker is not able to differentiate db configs 
 '''
+DATABASE_URL = os.getenv("DATABASE_URL")
+print(DATABASE_URL)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=1800),
 }
 
 ''' You need to have the environemnt variables defined in your .env
