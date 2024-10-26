@@ -40,3 +40,34 @@ export const fetchAnnouncementChannels = (auth) =>{
         })
     });
 }
+
+
+export const createAnnouncementChannels = (auth, payload) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_ANNOUNCEMENTS_CHANNELS}`, payload)
+        .then((res) =>{
+            resolve(res.data)
+        })
+        .catch((err) =>{
+            reject(err.message)
+        })
+    });
+}
+
+export const updateAnnouncementChannels = (channel_id, payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.FETCH_ANNOUNCEMENTS_CHANNELS}`, payload, {
+            params: {
+                channel_id: channel_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

@@ -8,6 +8,7 @@ import MembersNav from "@/components/dashboard/admin-interface/members/MembersNa
 import MainSettingsNav from "@/components/dashboard/admin-interface/members/MainSettingsNav";
 import CompanyDetails from "@/components/dashboard/admin-interface/company/CompanyDetails";
 import Permissions from "@/components/dashboard/admin-interface/permissions/Permissions";
+import Channels from "@/components/dashboard/admin-interface/announcements/channels";
 
 const Admin = () => {
   const [ selectedRoute, setSelectedRoute ] = useState("members")
@@ -18,6 +19,7 @@ const Admin = () => {
       {selectedRoute === "members" && <MembersNav/>}
       {selectedRoute === "company" && <CompanyDetails/>}
       {selectedRoute === "permissions" && <Permissions/>}
+      {selectedRoute === "announcements" && <Channels/>}
     </Container>
   );
 };

@@ -62,6 +62,8 @@ const PharmacyDataGrid = () => {
   const { processes, patients } = useSelector((store)=> store.patient)
   const filteredProcesses = processes.filter((process) => process.track === "pharmacy");
 
+  const searchedProcesses = filteredProcesses.filter((process)=> process.patient_number.includes(searchQuery))
+
   console.log("FILTERED PROCESSES TRIAGE", filteredProcesses)
 
   const patientNameRender = (cellData) => {
@@ -129,26 +131,17 @@ const PharmacyDataGrid = () => {
   return (
     <section className=" my-0">
       <Grid container spacing={2} className="mb-4 mt-2">
-      <Grid item md={4} xs={12}>
-          <select className="px-4 w-full py-2 focus:outline-none" name="" id="">
-            {months.map((month, index) => (
-              <option key={index} value="">
-                {month.name}
-              </option>
-            ))}
-          </select>
-        </Grid>
         <Grid item md={6} xs={12}>
           <input
             className="py-2 w-full px-4 focus:outline-none placeholder-font font-thin text-sm"
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
-            placeholder="Search by name or title"
+            placeholder="Search by patient ID"
           />
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={filteredProcesses}
+        dataSource={searchedProcesses}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}

@@ -70,6 +70,21 @@ const LaboratorySlice = createSlice({
     setLabEquipments: (state, action) => {
       state.labEquipments = action.payload;
     },
+    createLabEquipmentStore: (state, action) => {
+      state.labEquipments = [action.payload, ...state.labEquipments];
+    },
+    updateLabEquipmentStore: (state, action) => {
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.labEquipments.findIndex(equipment => parseInt(equipment.id) === parseInt(action.payload.id));
+
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.labEquipments[index] = {
+          ...state.labEquipments[index], // Keep existing properties
+          ...action.payload       // Override with new data
+        };
+      }
+    },
     setLabTestProfile: (state, action) => {
       state.labTestProfiles = action.payload;
     },
@@ -118,7 +133,7 @@ export const { setLabResults,
   clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults,
   setProcessLabRequests, clearProcessLabRequests, setProcessAllTestRequest,
   clearProcessAllTestRequest, setProcessesSamples, clearProcessesSamples,
-  setPhlebotomySamples
+  setPhlebotomySamples, updateLabEquipmentStore, createLabEquipmentStore
 } = LaboratorySlice.actions;
 
 
@@ -287,6 +302,14 @@ export const removeItemToLabResultsItems = (payload) => (dispatch) => {
 
 export const clearItemsToLabResultsItems = () => (dispatch) => {
   dispatch(clearLabResultItems());
+};
+
+export const createALabEquipmentStore = (payload) => (dispatch) => {
+  dispatch(createLabEquipmentStore(payload));
+};
+
+export const updateALabEquipmentStore = (payload) => (dispatch) => {
+  dispatch(updateLabEquipmentStore(payload));
 };
 
 

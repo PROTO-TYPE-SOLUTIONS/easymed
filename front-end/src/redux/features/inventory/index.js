@@ -31,6 +31,18 @@ const InventorySlice = createSlice({
     setItem: (state, action) => {
       state.item = action.payload;
     },
+    updateItem: (state, action) => {
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.item.findIndex(item => parseInt(item.id) === parseInt(action.payload.id));
+      
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.item[index] = {
+          ...state.item[index], // Keep existing properties
+          ...action.payload       // Override with new data
+        };
+      }
+    },
     setInventories: (state, action) => {
       state.inventories = action.payload;
     },
@@ -87,7 +99,7 @@ const InventorySlice = createSlice({
   },
 });
 
-export const { setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf, setIncoming } = InventorySlice.actions;
+export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf, setIncoming } = InventorySlice.actions;
 
 
 export const getAllItems = () => async (dispatch) => {
@@ -185,5 +197,10 @@ export const removeItemToPurchaseOrderPdf = (payload) => (dispatch) => {
 export const clearItemsToPurchaseOrderPdf = () => (dispatch) => {
   dispatch(clearPurchaseOrderItemsPdf());
 };
+
+export const updateAnItem = (item) => (dispatch) => {
+  dispatch(updateItem(item));
+};
+
 
 export default InventorySlice.reducer;

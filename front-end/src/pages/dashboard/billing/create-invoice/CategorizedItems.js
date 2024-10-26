@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { fetchInventories } from '@/redux/service/inventory';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { updateInvoiceItems } from '@/redux/service/billing';
+import { toast } from 'react-toastify';
 
 const CategorizedItems = ({ 
   invoiceItem, 
@@ -79,16 +80,14 @@ const CategorizedItems = ({
       setUpdatedInvoiceItem(response);
       updateInvoiceTotals(response)
     } catch (error) {
-      console.log("ERROR SUBMITTING VALUES", error);
-    } finally {
-      console.log("false");
+      toast.error(error);
     }
   };
 
   return (
     <Grid className='flex items-center py-1' container>
       <Grid item xs={4}>
-        <p>{updatedInvoiceItem?.item_name}</p>
+        <p>{updatedInvoiceItem?.item_code}</p>
       </Grid>
       <Grid item xs={4}>
         {updatedInvoiceItem?.status !== 'billed' ? (
