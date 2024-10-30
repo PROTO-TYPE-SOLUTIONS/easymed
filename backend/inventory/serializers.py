@@ -72,12 +72,56 @@ class SupplierSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = '__all__'
 
-class RequisitionSerializer(serializers.ModelSerializer):
+# class RequisitionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Requisition
+#         fields = '__all__'        
+
+# class RequisitionItemSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = RequisitionItem
+#         fields = '__all__'        
+
+# serializers.py
+from rest_framework import serializers
+from .models import Requisition, RequisitionItem
+from django.contrib.auth import get_user_model
+
+CustomUser = get_user_model()
+class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Requisition
-        fields = '__all__'        
+        model=Department
+        fields=['name']
 
 class RequisitionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequisitionItem
-        fields = '__all__'        
+        fields = ['id', 'item', 'quantity_requested', 'supplier', 'date_created']
+        read_only_fields = ['id', 'date_created']
+
+class RequisitionSerializer(serializers.ModelSerializer):
+    items = RequisitionItemSerializer(many=True)
+    department=DepartmentSerializer()
+    requested_by = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+
+    class Meta:
+        model = Requisition
+        fields = ['id', 'department', 'requested_by', 'date_created', 'status', 'file', 'items']
+        read_only_fields = ['id', 'date_created']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        requested_by = validated_data.pop('requested_by')  # Remove requested_by from validated_data
+        department_data = validated_data.pop('department')
+
+        department_name=department_data.get('name')
+        department, created = Department.objects.get_or_create(name=department_name)
+
+        # Create the Requisition instance with the provided requested_by
+        requisition = Requisition.objects.create(requested_by=requested_by, department=department, **validated_data)
+        
+        # Create associated RequisitionItem instances
+        for item_data in items_data:
+            RequisitionItem.objects.create(requisition=requisition, **item_data)
+        
+        return requisition

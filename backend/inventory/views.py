@@ -120,9 +120,12 @@ from .models import Requisition
 from company.models import Company
 
 def download_requisition_pdf(request, requisition_id):
+    print(requisition_id)
     requisition = get_object_or_404(Requisition, pk=requisition_id)
+    print(requisition)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
-    html_template = get_template('requisition.html').render({'requisition_items': requisition_items})
+    print(requisition_items)
+    html_template = get_template('requisition.html').render({'requisition': requisition, 'requisition_items': requisition_items})
     from weasyprint import HTML
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')

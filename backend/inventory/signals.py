@@ -4,8 +4,9 @@ from django.db.models.signals import post_save
 from .models import Requisition, PurchaseOrder, IncomingItem, Inventory
 from easymed.celery_tasks import (
     generate_requisition_pdf,
-    generate_purchaseorder_pdf,
-    create_or_update_inventory_record
+    generate_purchase_order_pdf,
+    create_or_update_inventory_record,
+    create_purchase_order_task
 )
 
 
@@ -27,4 +28,12 @@ def generate_invoice(sender, instance, created, **kwargs):
 @receiver(post_save, sender=PurchaseOrder)
 def generate_purchaseorder(sender, instance, created, **kwargs):
     if created:
-        generate_purchaseorder_pdf.delay(instance.pk)
+        generate_purchase_order_pdf.delay(instance.pk)
+
+
+
+@receiver(post_save, sender=Requisition)
+def create_purchase_order(sender, instance, created, **kwargs):
+    if created:
+        # Trigger the Celery task to create a purchase order
+        create_purchase_order_task.delay(instance.id)

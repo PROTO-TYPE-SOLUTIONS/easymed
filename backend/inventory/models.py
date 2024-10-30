@@ -58,6 +58,7 @@ class Requisition(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
+    department=models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.status
@@ -66,11 +67,11 @@ class RequisitionItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_requested = models.IntegerField()
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE)
+    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     date_created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.id    
+        return self.item.name   
 
 class PurchaseOrder(models.Model):
     STATUS_CHOICES = [
