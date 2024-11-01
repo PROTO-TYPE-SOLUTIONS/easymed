@@ -11,15 +11,17 @@ export const config = {
 export default async function handler(req, res) {
     if (req.method === API_METHODS.GET) {
         try {
-            // if (!req.headers?.authorization){
-            //     res.status(401).send('Unauthorized');
-            // }
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
-            await backendAxiosInstance.get(`${API_URL.FETCH_LAB_TEST_PROFILE}`, config).then(response => {
+    
+
+            await backendAxiosInstance.get(`${API_URL.SPECIMENS}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -33,16 +35,16 @@ export default async function handler(req, res) {
     }
     else if (req.method === API_METHODS.POST) {
         try {
-            // if (!req.headers?.authorization){
-            //     res.status(401).send('Unauthorized');
-            // }
+            if (!req.headers?.authorization){
+                res.status(401).send('Unauthorized');
+            }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
             const body = req.body;
-            await backendAxiosInstance.post(`${API_URL.FETCH_LAB_TEST_PROFILE}`,body,config)
+            await backendAxiosInstance.post(`${API_URL.SPECIMENS}`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
@@ -66,14 +68,13 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-            const query = req.query
+            const query = req.query;
 
-            await backendAxiosInstance.patch(`${API_URL.FETCH_LAB_TEST_PROFILE}${query.profile_id}/`, body, config).then(response => {
+            await backendAxiosInstance.patch(`${API_URL.SPECIMENS}${query.specimen_id}/`, body , config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
                     res.status(e.response?.status ?? 500).json(e.response?.data)
-
                 }
             )
 

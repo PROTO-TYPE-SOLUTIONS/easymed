@@ -7,9 +7,7 @@ import { Grid } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify'
 import SeachableSelect from "@/components/select/Searchable";
-import { updateItem } from "@/redux/service/inventory";
 import { useAuth } from '@/assets/hooks/use-auth';
-import { updateAnItem } from "@/redux/features/inventory";
 import { updateLabEquipment } from "@/redux/service/laboratory";
 import { updateALabEquipmentStore } from "@/redux/features/laboratory";
 const EditLabEquipmentModal = ({ open, setOpen, selectedRowData }) => {

@@ -5,15 +5,13 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
-// import EditUserDetailsModal from "./edit-user-details-modal";
-// import DeleteUserModal from "./delete-user-modal";
-// import AdminCreateUser from "./admin-create-user";
 import { Grid } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllLabTestPanels } from "@/redux/features/laboratory";
 import CreateTestPanelModal from "./modals/panels/CreateTestPanel";
+import EditTestPanelModal from "./modals/panels/editTestPanel";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -86,7 +84,7 @@ const TestPanels = () => {
 
   //   filter Panels based on search query
   const filteredPanels = labTestPanels.filter((panel) => {
-    return panel.name.toLocaleLowerCase().includes(searchQuery.toLowerCase())
+    return panel.name.toLowerCase().includes(searchQuery.toLowerCase())
   });
 
   return (
@@ -137,8 +135,8 @@ const TestPanels = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="is_qualitative" caption="Qualitative" width={180} />
-        <Column dataField="is_quantitative" caption="Quantitative" width={180} />
+        <Column dataField="is_qualitative" caption="Qualitative" width={100} />
+        <Column dataField="is_quantitative" caption="Quantitative" width={100} />
         <Column
           dataField=""
           caption=""
@@ -146,8 +144,8 @@ const TestPanels = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      {/* <EditUserDetailsModal {...{ open, setOpen, selectedRowData }} />
-      <DeleteUserModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} /> */}
+      <EditTestPanelModal {...{ open, setOpen, selectedRowData }} />
+      {/* <DeleteModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} /> */}
     </section>
   );
 };
