@@ -66,38 +66,60 @@ class Requisition(models.Model):
 class RequisitionItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_requested = models.IntegerField()
+    quantity_purchased = models.IntegerField(default=0, editable=False)  # New field to track purchased quantity
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     date_created = models.DateTimeField(auto_now_add=True)
-    
+
+    @property
+    def quantity_outstanding(self):
+        return max(0, self.quantity_requested - self.quantity_purchased)
+
     def __str__(self):
-        return self.item.name   
+        return f"{self.item.name} - Requested: {self.quantity_requested}, Purchased: {self.quantity_purchased}"
+
 
 class PurchaseOrder(models.Model):
-    STATUS_CHOICES = [
-        ('COMPLETED', 'completed'),
-        ('PENDING', 'Pending'),
-    ]
+    class STATUS_CHOICES(models.TextChoices):
+        COMPLETED = 'COMPLETED', 'Completed'
+        PARTIALLY_COMPLETED = 'PARTIALLY_COMPLETED', 'Partially Completed'
+        PENDING = 'PENDING', 'Pending'
+
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES.choices, default=STATUS_CHOICES.PENDING)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def update_status(self):
+        if all(item.quantity_purchased >= item.quantity_requested for item in self.requisition.items.all()):
+            self.status = self.STATUS_CHOICES.COMPLETED
+        elif any(item.quantity_purchased > 0 for item in self.requisition.items.all()):
+            self.status = self.STATUS_CHOICES.PARTIALLY_COMPLETED
+        else:
+            self.status = self.STATUS_CHOICES.PENDING
+        self.save()
+
     def __str__(self):
-        return str(self.requested_by)
+        return f"Purchase Order by {self.requested_by} - Status: {self.status}"
+
 
 class PurchaseOrderItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_purchased = models.IntegerField()
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='items')
+    requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, related_name='purchase_order_items', null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
-    
-    def __str__(self):
-        return self.id
+    def save(self, *args, **kwargs):
+        if self.requisition_item:
+            self.requisition_item.quantity_purchased += self.quantity_purchased
+            self.requisition_item.save()
+        super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.item.name} - Purchased: {self.quantity_purchased}"
 
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [

@@ -24,10 +24,43 @@ class ItemSerializer(serializers.ModelSerializer):
         model = Item
         fields = '__all__'
 
+class PurchaseOrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrderItem
+        fields = ['item', 'quantity_purchased', 'supplier']
+
 class PurchaseOrderSerializer(serializers.ModelSerializer):
+    items = PurchaseOrderItemSerializer(many=True, write_only=True)
+
     class Meta:
         model = PurchaseOrder
-        fields = '__all__'
+        fields = ['requested_by', 'requisition', 'file', 'status', 'items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        requisition = validated_data.get('requisition')
+
+        # Check if the requisition is already completed
+        if requisition.status == 'COMPLETED':
+            raise serializers.ValidationError("This requisition is already completed.")
+
+        purchase_order = PurchaseOrder.objects.create(**validated_data)
+
+        for item_data in items_data:
+            requisition_item = RequisitionItem.objects.get(
+                requisition=requisition,
+                item=item_data['item']
+            )
+
+            PurchaseOrderItem.objects.create(
+                purchase_order=purchase_order,
+                requisition_item=requisition_item,
+                **item_data
+            )
+            
+        purchase_order.update_status()
+
+        return purchase_order
 
 
 class PurchaseOrderItemSerializer(serializers.ModelSerializer):
