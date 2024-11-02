@@ -14,8 +14,8 @@ const InsuranceSlice = createSlice({
     setInsurance: (state, action) => {
       state.insurance = action.payload;
     },
-    setInsurancePrices: (state, action) => {
-      state.insurancePrices = action.payload;
+    createInsuranceStore: (state, action) => {
+      state.insurance = [action.payload, ...state.insurance]
     },
     updateInsuranceToStoreOnPatch: (state, action) => {
 
@@ -29,6 +29,9 @@ const InsuranceSlice = createSlice({
           ...action.payload       // Override with new data
         };
       }
+    },
+    setInsurancePrices: (state, action) => {
+      state.insurancePrices = action.payload;
     },
     createInsurancePriceStore: (state, action) => {
       state.insurancePrices = [action.payload, ...state.insurancePrices]
@@ -50,7 +53,7 @@ const InsuranceSlice = createSlice({
 });
 
 export const { 
-  setInsurance, updateInsuranceToStoreOnPatch,
+  setInsurance, updateInsuranceToStoreOnPatch, createInsuranceStore,
   setInsurancePrices, createInsurancePriceStore, updateInsurancePriceStore
  } = InsuranceSlice.actions;
 
@@ -79,6 +82,10 @@ export const createAInsurancePriceStore = (payload) => (dispatch) => {
 
 export const updateAInsurancePriceStore = (payload) => (dispatch) => {
   dispatch(updateInsurancePriceStore(payload));
+};
+
+export const createAInsuranceToStore = (payload) => (dispatch) => {
+  dispatch(createInsuranceStore(payload));
 };
 
 export const updateInsuranceToStore = (payload) => (dispatch) => {

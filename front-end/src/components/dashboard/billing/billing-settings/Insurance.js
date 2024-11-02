@@ -13,8 +13,9 @@ import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import { BiEdit } from 'react-icons/bi';
 import { addSpecimenToStore } from '@/redux/features/laboratory';
 import { createSpecimen } from '@/redux/service/laboratory';
-import { getAllInsurance } from '@/redux/features/insurance';
+import { createAInsuranceToStore, getAllInsurance } from '@/redux/features/insurance';
 import EditInsuranceModal from './modals/insurances/EditInsuranceModal';
+import { createInsurance } from '@/redux/service/insurance';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -58,8 +59,8 @@ const Insurance = () => {
     const addNewInsurance = async (values, helpers) => {
         setLoading(true)
         try{
-            const response = await createSpecimen( values, auth )
-            dispatch(addSpecimenToStore(response))
+            const response = await createInsurance( values, auth )
+            dispatch(createAInsuranceToStore(response))
             setLoading(false)
             helpers.resetForm();
             toast.success('Specimen created succesfully')
