@@ -13,10 +13,23 @@ const InsuranceSlice = createSlice({
     setInsurance: (state, action) => {
       state.insurance = action.payload;
     },
+    updateInsuranceToStoreOnPatch: (state, action) => {
+
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.insurance.findIndex(insurance => parseInt(insurance.id) === parseInt(action.payload.id));
+
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.insurance[index] = {
+          ...state.insurance[index], // Keep existing properties
+          ...action.payload       // Override with new data
+        };
+      }
+    },
   },
 });
 
-export const { setInsurance } = InsuranceSlice.actions;
+export const { setInsurance, updateInsuranceToStoreOnPatch } = InsuranceSlice.actions;
 
 
 export const getAllInsurance = () => async (dispatch) => {
@@ -26,6 +39,10 @@ export const getAllInsurance = () => async (dispatch) => {
   } catch (error) {
     console.log("INSURANCE_ERROR ", error);
   }
+};
+
+export const updateInsuranceToStore = (payload) => (dispatch) => {
+  dispatch(updateInsuranceToStoreOnPatch(payload));
 };
 
 export default InsuranceSlice.reducer;

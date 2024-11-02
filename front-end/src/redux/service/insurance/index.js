@@ -1,5 +1,6 @@
 import axios from "axios";
 import { APP_API_URL } from "@/assets/api-endpoints";
+import UseAxios from "@/assets/hooks/use-axios";
 
 
 export const fetchInsurance = () =>{
@@ -12,4 +13,35 @@ export const fetchInsurance = () =>{
                 reject(err.message)
             })
     })
+}
+
+export const createInsurance = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.post(`${APP_API_URL.FETCH_INSURANCE}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateInsurance  = (insurance_id, payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.patch(`${APP_API_URL.FETCH_INSURANCE}`, payload, {
+            params: {
+                insurance_id: insurance_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
 }
