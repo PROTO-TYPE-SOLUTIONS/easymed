@@ -15,6 +15,48 @@ export const fetchInsurance = () =>{
     })
 }
 
+export const fetchInventoryInsurancePrices = () =>{
+    return new Promise((resolve,reject) =>{
+        axios.get(`${APP_API_URL.INSURANCE_INVENTORY_PRICES}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const createInventoryInsurancePrices = (auth, payload) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.INSURANCE_INVENTORY_PRICES}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateInventoryInsurancePrices = (insurance_price_id, payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.INSURANCE_INVENTORY_PRICES}`, payload, {
+            params: {
+                insurance_price_id: insurance_price_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const createInsurance = (payload, auth) => {
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) => {
