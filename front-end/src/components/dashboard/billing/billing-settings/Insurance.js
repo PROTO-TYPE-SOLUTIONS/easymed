@@ -11,8 +11,6 @@ import { LuMoreHorizontal } from 'react-icons/lu';
 import { useDispatch, useSelector } from 'react-redux';
 import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import { BiEdit } from 'react-icons/bi';
-import { addSpecimenToStore } from '@/redux/features/laboratory';
-import { createSpecimen } from '@/redux/service/laboratory';
 import { createAInsuranceToStore, getAllInsurance } from '@/redux/features/insurance';
 import EditInsuranceModal from './modals/insurances/EditInsuranceModal';
 import { createInsurance } from '@/redux/service/insurance';

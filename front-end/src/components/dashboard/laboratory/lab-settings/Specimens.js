@@ -145,7 +145,7 @@ const Specimens = () => {
                                 ></path>
                                 </svg>
                             )}
-                            Add Channel
+                            Add Specimen
                         </button>
                         </div>
                     </Grid>
