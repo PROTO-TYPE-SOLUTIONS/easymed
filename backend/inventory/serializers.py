@@ -29,44 +29,21 @@ class PurchaseOrderItemSerializer(serializers.ModelSerializer):
         model = PurchaseOrderItem
         fields = ['item', 'quantity_purchased', 'supplier']
 
-class PurchaseOrderSerializer(serializers.ModelSerializer):
-    items = PurchaseOrderItemSerializer(many=True, write_only=True)
+class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
+    items = PurchaseOrderItemSerializer(many=True)
 
     class Meta:
         model = PurchaseOrder
-        fields = ['requested_by', 'requisition', 'file', 'status', 'items']
+        fields = ['requested_by','status', 'file', 'items']
 
-    def create(self, validated_data):
-        items_data = validated_data.pop('items')
-        requisition = validated_data.get('requisition')
+class PurchaseOrderSerializer(serializers.ModelSerializer):
+    items = PurchaseOrderItemSerializer(many=True, read_only=True)
+                                                  
 
-        # Check if the requisition is already completed
-        if requisition.status == 'COMPLETED':
-            raise serializers.ValidationError("This requisition is already completed.")
-
-        purchase_order = PurchaseOrder.objects.create(**validated_data)
-
-        for item_data in items_data:
-            requisition_item = RequisitionItem.objects.get(
-                requisition=requisition,
-                item=item_data['item']
-            )
-
-            PurchaseOrderItem.objects.create(
-                purchase_order=purchase_order,
-                requisition_item=requisition_item,
-                **item_data
-            )
-            
-        purchase_order.update_status()
-
-        return purchase_order
-
-
-class PurchaseOrderItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PurchaseOrderItem
-        fields = '__all__'        
+        model = PurchaseOrder
+        fields = ['id', 'requested_by', 'date_created', 'status', 'file', 'requisition', 'items']
+     
 
 class IncomingItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -105,17 +82,6 @@ class SupplierSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = '__all__'
 
-# class RequisitionSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Requisition
-#         fields = '__all__'        
-
-# class RequisitionItemSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = RequisitionItem
-#         fields = '__all__'        
-
-# serializers.py
 from rest_framework import serializers
 from .models import Requisition, RequisitionItem
 from django.contrib.auth import get_user_model
@@ -129,8 +95,29 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class RequisitionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequisitionItem
-        fields = ['id', 'item', 'quantity_requested', 'supplier', 'date_created']
+        fields = ['id', 'item', 'status', 'quantity_requested', 'quantity_approved', 'quantity_outstanding','supplier', 'date_created']
         read_only_fields = ['id', 'date_created']
+        
+    def update(self, instance, validated_data):
+        # Get the initial status before the update
+        initial_status = instance.status
+
+        # Update the instance with new data
+        instance = super().update(instance, validated_data)
+
+        # Check if the status has changed to 'APPROVED'
+        if validated_data.get('status') == 'APPROVED' and initial_status != 'APPROVED':
+            if PurchaseOrder.objects.filter(requisition=instance.requisition).exists():
+                purchase_order=PurchaseOrder.objects.get(requisition=instance.requisition)
+            else:
+                purchase_order=PurchaseOrder.objects.create(requested_by=instance.requisition.requested_by,
+                                                            requisition=instance.requisition
+                                                            )
+            PurchaseOrderItem.objects.create(item=instance.item, supplier=instance.supplier, quantity_=instance.quantity_requested, purchase_order=purchase_order,
+                                             requisition_item=instance)
+        
+
+        return instance
 
 class RequisitionSerializer(serializers.ModelSerializer):
     items = RequisitionItemSerializer(many=True)

@@ -2,6 +2,7 @@ from django.db import models
 from customuser.models import CustomUser
 from company.models import InsuranceCompany
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
 
 class Department(models.Model):
@@ -64,30 +65,34 @@ class Requisition(models.Model):
         return self.status
         
 class RequisitionItem(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'approved'),
+        ('REJECTED', 'rejected')
+    ]
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     quantity_requested = models.IntegerField()
-    quantity_purchased = models.IntegerField(default=0, editable=False)  # New field to track purchased quantity
+    quantity_approved = models.IntegerField(default=0)  # New field to track purchased quantity
+    quantity_outstanding = models.IntegerField(default=0)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     date_created = models.DateTimeField(auto_now_add=True)
 
-    @property
-    def quantity_outstanding(self):
-        return max(0, self.quantity_requested - self.quantity_purchased)
+    def save(self, *args, **kwargs):
+        if self.quantity_approved > self.quantity_requested:
+            raise ValidationError("Quantity approved cannot be greater than quantity requested.")
+        if self.status == 'APPROVED':
+            self.quantity_outstanding = max(0, self.quantity_requested - (self.quantity_approved or 0))
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.item.name} - Requested: {self.quantity_requested}, Purchased: {self.quantity_purchased}"
 
 
 class PurchaseOrder(models.Model):
-    class STATUS_CHOICES(models.TextChoices):
-        COMPLETED = 'COMPLETED', 'Completed'
-        PARTIALLY_COMPLETED = 'PARTIALLY_COMPLETED', 'Partially Completed'
-        PENDING = 'PENDING', 'Pending'
-
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICES.choices, default=STATUS_CHOICES.PENDING)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True)
 

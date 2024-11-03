@@ -23,6 +23,7 @@ from .models import (
 
 from .serializers import (
     ItemSerializer,
+    PurchaseOrderCreateSerializer, 
     PurchaseOrderSerializer,
     PurchaseOrderItemSerializer,
     IncomingItemSerializer,
@@ -41,6 +42,7 @@ from .filters import (
     PurchaseOrderFilter,
     SupplierFilter
 )
+from authperms.permissions import IsSystemsAdminUser
 
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
@@ -69,7 +71,12 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
 class RequisitionItemViewSet(viewsets.ModelViewSet):
     queryset = RequisitionItem.objects.all()
-    serializer_class = RequisitionItemSerializer    
+    serializer_class = RequisitionItemSerializer   
+
+    def get_queryset(self):
+        print(self.kwargs)
+        reqisition_id = self.kwargs.get('requisition_pk')
+        return  RequisitionItem.objects.filter(requisition=reqisition_id)
 
     @action(detail=False, methods=['GET'])
     def by_requisition_id(self, request, requisition_id):
@@ -92,9 +99,17 @@ class SupplierViewSet(viewsets.ModelViewSet):
 
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrder.objects.all()
     serializer_class = PurchaseOrderSerializer
+    permission_classes =[IsSystemsAdminUser]
+    http_method_names = ['get', 'put', 'patch', 'delete']
 
+    def get_queryset(self):
+        requisition_id = self.kwargs.get('requisition_pk')
+        if requisition_id:
+            return PurchaseOrder.objects.filter(requisition_id=requisition_id)
+        return PurchaseOrder.objects.none()
+
+    
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrderItem.objects.all()
     serializer_class = PurchaseOrderItemSerializer 
