@@ -43,4 +43,4 @@ class PurchaseOrderItemFilter(django_filters.FilterSet):
 class SupplierFilter(django_filters.FilterSet):
     class Meta:
         model = Supplier
-        fields = ('name',)
+        fields = ('common_name',)

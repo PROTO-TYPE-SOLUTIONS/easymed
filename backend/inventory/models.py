@@ -13,11 +13,12 @@ class Department(models.Model):
         return f"{self.id} - {self.name}"
     
 class Supplier(models.Model):
-    name = models.CharField(max_length=255)
+    official_name = models.CharField(max_length=255)  # Official name of the supplier (e.g., "Crown-Lab LTD")
+    common_name = models.CharField(max_length=30)  # Common name (e.g., "Crown")
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.id} - {self.name}"
+        return f"{self.id} - {self.official_name} ({self.common_name})"
     
 class Item(models.Model):
     UNIT_CHOICES = [
@@ -39,27 +40,53 @@ class Item(models.Model):
         ('general', 'General'),
     ]
     id = models.CharField(max_length=255, primary_key=True, editable=True)
+    code = models.IntegerField()
     item_code=models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
     desc = models.CharField(max_length=255)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    quantity_at_hand = models.IntegerField()
+    re_order_level = models.IntegerField()     # Send a notification when items fall below this level
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2) 
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
 
     def __str__(self):
         return f"{self.id} - {self.name}"
 
 
 class Requisition(models.Model):
+    # Add unique requisiion number depart-year-month-req-number
     STATUS_CHOICES = [
         ('COMPLETED', 'completed'),
         ('PENDING', 'Pending'),
     ]
+    requisition_number = models.IntegerField()
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
     department=models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+    is_approved = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        # Generate requisition number
+        today = timezone.now()
+        year = today.year % 100
+        day = today.day
+        abbr = self.department[:3].upper()
+        self.requisition_number = f"{abbr}/{year}/{day}"
+        super().save(*args, **kwargs)
+
+    # Calculated field, total items requested and total amount 
+
+    def check_all_items_approved(self):
+        if all(item.status == 'APPROVED' for item in self.items.all()):
+            self.status = 'COMPLETED'
+            self.save() 
 
     def __str__(self):
         return self.status
@@ -70,14 +97,18 @@ class RequisitionItem(models.Model):
         ('APPROVED', 'approved'),
         ('REJECTED', 'rejected')
     ]
+    # Order requistion based department, and then requisition number
+ 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     quantity_requested = models.IntegerField()
     quantity_approved = models.IntegerField(default=0)  # New field to track purchased quantity
-    quantity_outstanding = models.IntegerField(default=0)
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     date_created = models.DateTimeField(auto_now_add=True)
+    # Calculated field, item.buying_price * quantity_requested
+    
+    # Serializer for creating requisition, department approval(same as procurement apparoval)
 
     def save(self, *args, **kwargs):
         if self.quantity_approved > self.quantity_requested:
@@ -85,12 +116,14 @@ class RequisitionItem(models.Model):
         if self.status == 'APPROVED':
             self.quantity_outstanding = max(0, self.quantity_requested - (self.quantity_approved or 0))
         super().save(*args, **kwargs)
+        self.requisition.check_all_items_approved() 
 
     def __str__(self):
         return f"{self.item.name} - Requested: {self.quantity_requested}, Purchased: {self.quantity_purchased}"
 
 
 class PurchaseOrder(models.Model):
+    PO_number = models.IntegerField()
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
@@ -119,7 +152,7 @@ class PurchaseOrderItem(models.Model):
 
     def save(self, *args, **kwargs):
         if self.requisition_item:
-            self.requisition_item.quantity_purchased += self.quantity_purchased
+            self.requisition_item.quantity_approved += self.quantity_purchased
             self.requisition_item.save()
         super().save(*args, **kwargs)
 

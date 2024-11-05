@@ -31,7 +31,8 @@ from .serializers import (
     SupplierSerializer,
     DepartmentSerializer,
     DepartmentInventorySerializer,
-    RequisitionSerializer,
+    RequisitionCreateSerializer,
+    RequisitionListSerializer,
     RequisitionItemSerializer,  
 
 )
@@ -67,7 +68,7 @@ class DepartmentInventoryViewSet(viewsets.ModelViewSet):
 
 class RequisitionViewSet(viewsets.ModelViewSet):
     queryset = Requisition.objects.all()
-    serializer_class = RequisitionSerializer
+    serializer_class = RequisitionCreateSerializer
 
 class RequisitionItemViewSet(viewsets.ModelViewSet):
     queryset = RequisitionItem.objects.all()
@@ -100,7 +101,6 @@ class SupplierViewSet(viewsets.ModelViewSet):
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseOrderSerializer
-    permission_classes =[IsSystemsAdminUser]
     http_method_names = ['get', 'put', 'patch', 'delete']
 
     def get_queryset(self):
@@ -113,6 +113,8 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrderItem.objects.all()
     serializer_class = PurchaseOrderItemSerializer 
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ['supplier',]
 
     @action(detail=False, methods=['GET'])
     def by_purchase_order_id(self, request, purchase_order_id):
