@@ -1,7 +1,8 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
 
 from django.shortcuts import render
 from django.template.loader import get_template
@@ -23,17 +24,18 @@ from .models import (
 
 from .serializers import (
     ItemSerializer,
-    PurchaseOrderCreateSerializer, 
-    PurchaseOrderSerializer,
-    PurchaseOrderItemSerializer,
+    PurchaseOrderCreateSerializer,
+    PurchaseOrderListSerializer,
     IncomingItemSerializer,
     InventorySerializer,
     SupplierSerializer,
-    DepartmentSerializer,
+    RequisitionItemCreateSerializer,
     DepartmentInventorySerializer,
     RequisitionCreateSerializer,
+    RequisitionUpdateSerializer,
+    RequisitionItemUpdateSerializer,
     RequisitionListSerializer,
-    RequisitionItemSerializer,  
+    RequisitionItemListSerializer,  
 
 )
 
@@ -53,7 +55,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderSerializer
+    serializer_class = PurchaseOrderCreateSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PurchaseOrderFilter
 
@@ -68,16 +70,34 @@ class DepartmentInventoryViewSet(viewsets.ModelViewSet):
 
 class RequisitionViewSet(viewsets.ModelViewSet):
     queryset = Requisition.objects.all()
-    serializer_class = RequisitionCreateSerializer
 
+    def get_serializer_class(self):
+        if self.action in ['create']:
+            return RequisitionCreateSerializer
+        elif self.action in ['retrieve', 'list']:
+            return RequisitionListSerializer
+        elif self.action in ['update', 'partial_update']:
+            return RequisitionUpdateSerializer
+        return super().get_serializer_class()
+    
 class RequisitionItemViewSet(viewsets.ModelViewSet):
     queryset = RequisitionItem.objects.all()
-    serializer_class = RequisitionItemSerializer   
+    serializer_class = RequisitionItemListSerializer
 
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return RequisitionItemCreateSerializer
+        elif self.request.method in ["PUT", "PATCH"]:
+            return RequisitionItemUpdateSerializer
+        return super().get_serializer_class()
+    
     def get_queryset(self):
-        print(self.kwargs)
-        reqisition_id = self.kwargs.get('requisition_pk')
-        return  RequisitionItem.objects.filter(requisition=reqisition_id)
+        requisition_id = self.kwargs.get('requisition_pk')
+        return  RequisitionItem.objects.filter(requisition=requisition_id)
+
+    def get_serializer_context(self):
+        requisition_id = self.kwargs.get('requisition_pk')
+        return {'requisition_id': requisition_id}
 
     @action(detail=False, methods=['GET'])
     def by_requisition_id(self, request, requisition_id):
@@ -98,31 +118,45 @@ class SupplierViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = SupplierFilter
 
-
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
-    serializer_class = PurchaseOrderSerializer
-    http_method_names = ['get', 'put', 'patch', 'delete']
+    serializer_class = PurchaseOrderCreateSerializer
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete']
 
     def get_queryset(self):
         requisition_id = self.kwargs.get('requisition_pk')
         if requisition_id:
             return PurchaseOrder.objects.filter(requisition_id=requisition_id)
-        return PurchaseOrder.objects.none()
+        return PurchaseOrder.objects.all()
 
+    def get_serializer_context(self):
+        requisition_id = self.kwargs.get('requisition_pk')
+        return {
+            'request': self.request,
+            'requisition_id': requisition_id,
+            'requested_by': self.request.user 
+        }
     
-class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrderItem.objects.all()
-    serializer_class = PurchaseOrderItemSerializer 
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['supplier',]
-
-    @action(detail=False, methods=['GET'])
-    def by_purchase_order_id(self, request, purchase_order_id):
-        items = PurchaseOrderItem.objects.filter(purchase_order_id=purchase_order_id)
-        serializer = self.get_serializer(items, many=True)
+    def get_serializer_class(self):
+        if self.request.method == 'post':
+            return PurchaseOrderCreateSerializer
+        return PurchaseOrderListSerializer
+    
+    def create(self, request, *args, **kwargs):
+        context = self.get_serializer_context()
+        serializer = PurchaseOrderCreateSerializer(data=request.data, context=context)
+        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def all_purchase_orders(self, request):
+        purchase_orders = PurchaseOrder.objects.all()
+        serializer = PurchaseOrderListSerializer(purchase_orders, many=True)
         return Response(serializer.data)
-
-
+    
 
 '''
 This view gets the geneated pdf and downloads it locally

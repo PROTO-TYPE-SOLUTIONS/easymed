@@ -1,9 +1,11 @@
+import uuid
+import random
 from django.db import models
-from customuser.models import CustomUser
-from company.models import InsuranceCompany
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-
+from customuser.models import CustomUser
+from company.models import InsuranceCompany
+from customuser.models import CustomUser
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
@@ -39,9 +41,7 @@ class Item(models.Model):
         ('Specialized Appointment', 'Specialized Appointment'),
         ('general', 'General'),
     ]
-    id = models.CharField(max_length=255, primary_key=True, editable=True)
-    code = models.IntegerField()
-    item_code=models.CharField(max_length=255, unique=True)
+    item_code=models.CharField(max_length=255, unique=True, editable=False)
     name = models.CharField(max_length=255)
     desc = models.CharField(max_length=255)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
@@ -51,45 +51,62 @@ class Item(models.Model):
     re_order_level = models.IntegerField()     # Send a notification when items fall below this level
     buying_price = models.DecimalField(max_digits=10, decimal_places=2) 
     selling_price = models.DecimalField(max_digits=10, decimal_places=2)
-    
+
+    def clean(self):
+        if self.buying_price > self.selling_price:
+            raise ValidationError("Buying price cannot exceed selling price")
+        
+        if self.re_order_level > self.quantity_at_hand:
+            raise ValidationError("Re-order leves cannot exceed the quantity at hand")
+        
+    def save(self, *args, **kwargs):
+        ''' Generate unique item code'''
+        name_abbr = ''.join([part[:3].upper() for part in self.name.split()[:2]])
+        category_abbr = ''.join([part[:3].upper() for part in self.category.split()[:1]])
+        unique_id = str(uuid.uuid4().hex[:4].upper())
+
+        item_code = f"{name_abbr}-{category_abbr}-{unique_id}"
+        self.item_code = item_code
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.id} - {self.name}"
 
 
 class Requisition(models.Model):
-    # Add unique requisiion number depart-year-month-req-number
     STATUS_CHOICES = [
         ('COMPLETED', 'completed'),
         ('PENDING', 'Pending'),
     ]
-    requisition_number = models.IntegerField()
-    requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    requisition_number = models.CharField(max_length=50, unique=True, editable=False)
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
-    department=models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
     is_approved = models.BooleanField(default=False)
+    department_approved = models.BooleanField(default=False)
+    procurement_approved = models.BooleanField(default=False)
+
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, max_length=255, null=False, blank=False)
+    requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='req_requested_by')
+    approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='req_approved_by')
+
 
     def save(self, *args, **kwargs):
-        # Generate requisition number
+        '''Generate requisition number'''
         today = timezone.now()
         year = today.year % 100
+        month = today.month
         day = today.day
-        abbr = self.department[:3].upper()
-        self.requisition_number = f"{abbr}/{year}/{day}"
+        abbr = self.department.name[:3].upper()
+        random_code = random.randint(1000, 9999)
+
+        self.requisition_number = f"{abbr}/{year}/{month:02d}/{day:02d}/{random_code}"
         super().save(*args, **kwargs)
-
-    # Calculated field, total items requested and total amount 
-
-    def check_all_items_approved(self):
-        if all(item.status == 'APPROVED' for item in self.items.all()):
-            self.status = 'COMPLETED'
-            self.save() 
 
     def __str__(self):
         return self.status
+      
         
 class RequisitionItem(models.Model):
     STATUS_CHOICES = [
@@ -97,67 +114,53 @@ class RequisitionItem(models.Model):
         ('APPROVED', 'approved'),
         ('REJECTED', 'rejected')
     ]
-    # Order requistion based department, and then requisition number
- 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     quantity_requested = models.IntegerField()
     quantity_approved = models.IntegerField(default=0)  # New field to track purchased quantity
-    preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     date_created = models.DateTimeField(auto_now_add=True)
-    # Calculated field, item.buying_price * quantity_requested
-    
-    # Serializer for creating requisition, department approval(same as procurement apparoval)
+    ordered = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        if self.quantity_approved > self.quantity_requested:
-            raise ValidationError("Quantity approved cannot be greater than quantity requested.")
-        if self.status == 'APPROVED':
-            self.quantity_outstanding = max(0, self.quantity_requested - (self.quantity_approved or 0))
-        super().save(*args, **kwargs)
-        self.requisition.check_all_items_approved() 
+    requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
+    preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.item.name} - Requested: {self.quantity_requested}, Purchased: {self.quantity_purchased}"
+        return f"{self.item.name} - Requested: {self.quantity_requested}, Approved: {self.quantity_approved}"
 
 
 class PurchaseOrder(models.Model):
-    PO_number = models.IntegerField()
-    requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    PO_number = models.CharField(unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
-    requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True)
+    is_dispatched = models.BooleanField(default=False)
 
-    def update_status(self):
-        if all(item.quantity_purchased >= item.quantity_requested for item in self.requisition.items.all()):
-            self.status = self.STATUS_CHOICES.COMPLETED
-        elif any(item.quantity_purchased > 0 for item in self.requisition.items.all()):
-            self.status = self.STATUS_CHOICES.PARTIALLY_COMPLETED
-        else:
-            self.status = self.STATUS_CHOICES.PENDING
-        self.save()
-
-    def __str__(self):
-        return f"Purchase Order by {self.requested_by} - Status: {self.status}"
-
-
-class PurchaseOrderItem(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity_purchased = models.IntegerField()
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='items')
-    requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, related_name='purchase_order_items', null=True, blank=True)
-    date_created = models.DateTimeField(auto_now_add=True)
+    ordered_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ordered_by')
+    approved_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='po_approved_by')
+    requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True, related_name='requisition')
 
     def save(self, *args, **kwargs):
-        if self.requisition_item:
-            self.requisition_item.quantity_approved += self.quantity_purchased
-            self.requisition_item.save()
+        '''Generate purchase order number'''
+        today = timezone.now()
+        year = today.year % 100
+        month = today.month
+        day = today.day
+        random_code = random.randint(1000, 9999)
+        self.PO_number= f"PO/{year}/{month:02d}/{day:02d}/{random_code}"
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.item.name} - Purchased: {self.quantity_purchased}"
+        return f"Purchase Order by {self.requested_by} - Status: {self.PO_number}"
+
+
+class PurchaseOrderItem(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='purchase_order')
+    requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
+
+    def __str__(self):
+        return f"{self.item.name} - Purchased: {self.quantity_purchased}"    
 
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
@@ -178,7 +181,6 @@ class IncomingItem(models.Model):
 
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
-
 
 class Inventory(models.Model):
     CATEGORY_ONE_CHOICES = [
@@ -211,8 +213,6 @@ class InventoryInsuranceSaleprice(models.Model):
     class Meta:
         unique_together = ('inventory_item', 'insurance_company')
     
-    
-
 class DepartmentInventory(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     packed = models.CharField(max_length=255)
