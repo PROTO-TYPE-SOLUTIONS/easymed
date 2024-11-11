@@ -37,10 +37,10 @@ class PurchaseOrderFilter(django_filters.FilterSet):
 class PurchaseOrderItemFilter(django_filters.FilterSet):
     class Meta:
         model = PurchaseOrderItem
-        fields = ('quantity_purchased', 'id', 'item')
+        fields = ( 'id', 'requisition_item')
 
 
 class SupplierFilter(django_filters.FilterSet):
     class Meta:
         model = Supplier
-        fields = ('name',)
+        fields = ('common_name',)
