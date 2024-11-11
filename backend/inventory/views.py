@@ -19,6 +19,7 @@ from .models import (
     Requisition,
     PurchaseOrder,
     PurchaseOrderItem,
+    InventoryInsuranceSaleprice,
 )
 
 from .serializers import (
@@ -31,7 +32,8 @@ from .serializers import (
     DepartmentSerializer,
     DepartmentInventorySerializer,
     RequisitionSerializer,
-    RequisitionItemSerializer,  
+    RequisitionItemSerializer,
+    InventoryInsuranceSalepriceSerializer,
 
 )
 
@@ -94,6 +96,10 @@ class SupplierViewSet(viewsets.ModelViewSet):
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
     serializer_class = PurchaseOrderSerializer
+
+class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
+    queryset = InventoryInsuranceSaleprice.objects.all()
+    serializer_class = InventoryInsuranceSalepriceSerializer
 
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrderItem.objects.all()

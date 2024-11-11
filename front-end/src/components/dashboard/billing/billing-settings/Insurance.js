@@ -11,9 +11,9 @@ import { LuMoreHorizontal } from 'react-icons/lu';
 import { useDispatch, useSelector } from 'react-redux';
 import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import { BiEdit } from 'react-icons/bi';
-import { addSpecimenToStore, getSpecimens } from '@/redux/features/laboratory';
-import EditSpecimenModal from './modals/Specimens/EditSpecimens';
-import { createSpecimen } from '@/redux/service/laboratory';
+import { createAInsuranceToStore, getAllInsurance } from '@/redux/features/insurance';
+import EditInsuranceModal from './modals/insurances/EditInsuranceModal';
+import { createInsurance } from '@/redux/service/insurance';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -34,7 +34,7 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   };
 
 
-const Specimens = () => {
+const Insurance = () => {
     const auth = useAuth()
     const userActions = getActions();
     const dispatch =  useDispatch()
@@ -43,7 +43,7 @@ const Specimens = () => {
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
     const [showInfo, setShowInfo] = useState(true);
     const [showNavButtons, setShowNavButtons] = useState(true);
-    const { specimens }  = useSelector((store)=> store.laboratory);
+    const { insurance }  = useSelector((store)=> store.insurance);
     const [selectedRowData, setSelectedRowData] = useState({})
 
     const initialValues = {
@@ -54,11 +54,11 @@ const Specimens = () => {
         name: Yup.string().required("Fiels is required!"),
     });
 
-    const addNewSpecimen = async (values, helpers) => {
+    const addNewInsurance = async (values, helpers) => {
         setLoading(true)
         try{
-            const response = await createSpecimen( values, auth )
-            dispatch(addSpecimenToStore(response))
+            const response = await createInsurance( values, auth )
+            dispatch(createAInsuranceToStore(response))
             setLoading(false)
             helpers.resetForm();
             toast.success('Specimen created succesfully')
@@ -70,7 +70,7 @@ const Specimens = () => {
     }
 
     useEffect(() => {
-        dispatch(getSpecimens(auth))
+        dispatch(getAllInsurance(auth))
     },[])
 
     const onMenuClick = async (menu, data) => {
@@ -99,11 +99,11 @@ const Specimens = () => {
 
   return (
     <div>
-        <h2 className='my-10 font-bold text-xl'>Add Specimens</h2>
+        <h2 className='my-10 font-bold text-xl'>Add Insurances</h2>
         <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
-            onSubmit={addNewSpecimen}
+            onSubmit={addNewInsurance}
         >
             <Form>
                 <Grid container spacing={0}>
@@ -145,7 +145,7 @@ const Specimens = () => {
                                 ></path>
                                 </svg>
                             )}
-                            Add Specimen
+                            Add Insurance
                         </button>
                         </div>
                     </Grid>
@@ -154,7 +154,7 @@ const Specimens = () => {
         </Formik>
         <div className='my-10'>
         <DataGrid
-        dataSource={specimens}
+        dataSource={insurance}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -186,10 +186,10 @@ const Specimens = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <EditSpecimenModal open={editOpen} setOpen={setEditOpen} selectedRowData={selectedRowData}  />
+      <EditInsuranceModal open={editOpen} setOpen={setEditOpen} selectedRowData={selectedRowData}  />
         </div>
     </div>
   )
 }
 
-export default Specimens
+export default Insurance

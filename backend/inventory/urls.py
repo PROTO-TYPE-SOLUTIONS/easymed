@@ -17,6 +17,7 @@ from .views import (
     RequisitionItemViewSet,
     download_requisition_pdf,
     download_purchaseorder_pdf,
+    InventoryInsuranceSalepriceViewSet,
 )
 
 router = DefaultRouter()
@@ -29,6 +30,7 @@ router.register(r'requisition-item', RequisitionItemViewSet)
 router.register(r'purchase-order', PurchaseOrderViewSet)
 router.register(r'purchase-order-item', PurchaseOrderItemViewSet)
 router.register(r'incoming-item', IncomingItemViewSet)
+router.register(r'insurance-prices', InventoryInsuranceSalepriceViewSet)
 
 
 urlpatterns = [

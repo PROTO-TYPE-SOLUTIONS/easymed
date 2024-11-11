@@ -11,7 +11,7 @@ import { fetchLabRequests,
     fetchLabTestByProcessId,
     fetchSamplesForSpecificProcess,
     fetchPhlebotomySamples,
-    fetchLabTestPanelsBySpecificSample,
+    fetchLabTestPanelsBySpecificSample, fetchSpecimens,
   } from "@/redux/service/laboratory";
 
 
@@ -30,7 +30,8 @@ const initialState = {
   labEquipments: [],
   labTestProfiles: [],
   patientSpecificLabRequests: [],
-  processAllTestRequest: []
+  processAllTestRequest: [],
+  specimens: []
 };
 
 const LaboratorySlice = createSlice({
@@ -48,6 +49,25 @@ const LaboratorySlice = createSlice({
     },
     setPhlebotomySamples: (state, action) => {
       state.phlebotomySamples = action.payload;
+    },
+    setSpecimens: (state, action) => {
+      state.specimens = action.payload;
+    },
+    addSpecimenToStoreOnCreate: (state, action) => {
+      state.specimens = [action.payload, ...state.specimens];
+    },
+    updateSpecimenToStoreOnPatch: (state, action) => {
+
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.specimens.findIndex(specimen => parseInt(specimen.id) === parseInt(action.payload.id));
+
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.specimens[index] = {
+          ...state.specimens[index], // Keep existing properties
+          ...action.payload       // Override with new data
+        };
+      }
     },
     setProcessLabRequests: (state, action) => {
       state.labRequestsByProcess = action.payload;
@@ -88,8 +108,38 @@ const LaboratorySlice = createSlice({
     setLabTestProfile: (state, action) => {
       state.labTestProfiles = action.payload;
     },
+    addProfileToStoreOnCreate: (state, action) => {
+      state.labTestProfiles = [action.payload, ...state.labTestProfiles];
+    },
+    updateProfileToStoreOnPatch: (state, action) => {
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.labTestProfiles.findIndex(profile => parseInt(profile.id) === parseInt(action.payload.id));
+
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.labTestProfiles[index] = {
+          ...state.labTestProfiles[index], // Keep existing properties
+          ...action.payload       // Override with new data
+        };
+      }
+    },
     setLabTestPanels: (state, action) => {
       state.labTestPanels = action.payload;
+    },
+    newTestPanelsStore: (state, action) => {
+      state.labTestPanels = [action.payload, ...state.labTestPanels];
+    },
+    updatePanelsOnPatch: (state, action) => {
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.labTestPanels.findIndex(panels => parseInt(panels.id) === parseInt(action.payload.id));
+
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.labTestPanels[index] = {
+          ...state.labTestPanels[index], // Keep existing properties
+          ...action.payload       // Override with new data
+        };
+      }
     },
     setLabTestPanelsById: (state, action) => {
       state.labTestPanelsById = action.payload;
@@ -133,7 +183,9 @@ export const { setLabResults,
   clearLabResultItems, setLabTestPanels, setLabTestPanelsById, setQualitativeLabResults,
   setProcessLabRequests, clearProcessLabRequests, setProcessAllTestRequest,
   clearProcessAllTestRequest, setProcessesSamples, clearProcessesSamples,
-  setPhlebotomySamples, updateLabEquipmentStore, createLabEquipmentStore
+  setPhlebotomySamples, updateLabEquipmentStore, createLabEquipmentStore, setSpecimens, newTestPanelsStore,
+  updatePanelsOnPatch, addSpecimenToStoreOnCreate, updateSpecimenToStoreOnPatch,
+  updateProfileToStoreOnPatch, addProfileToStoreOnCreate
 } = LaboratorySlice.actions;
 
 
@@ -292,6 +344,15 @@ export const getAllSamplesForProcessId = (process_id, auth) => async (dispatch) 
   }
 };
 
+export const getSpecimens = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchSpecimens(auth);
+    dispatch(setSpecimens(response));
+  } catch (error) {
+    console.log("SPECIMENS_ERROR ", error);
+  }
+};
+
 export const addItemToLabResultsItems = (payload) => (dispatch) => {
   dispatch(setLabResultItems(payload));
 };
@@ -310,6 +371,29 @@ export const createALabEquipmentStore = (payload) => (dispatch) => {
 
 export const updateALabEquipmentStore = (payload) => (dispatch) => {
   dispatch(updateLabEquipmentStore(payload));
+};
+
+export const updateTestPanelsStore = (payload) => (dispatch) => {
+  dispatch(newTestPanelsStore(payload));
+}
+
+export const updateTestPanelStoreOnPatch = (payload) => (dispatch) => {
+  dispatch(updatePanelsOnPatch(payload));
+};
+export const addSpecimenToStore = (payload) => (dispatch) => {
+  dispatch(addSpecimenToStoreOnCreate(payload));
+};
+
+export const updateSpecimenToStore = (payload) => (dispatch) => {
+  dispatch(updateSpecimenToStoreOnPatch(payload));
+};
+
+export const addProfileToStore = (payload) => (dispatch) => {
+  dispatch(addProfileToStoreOnCreate(payload));
+};
+
+export const updateProfileToStore = (payload) => (dispatch) => {
+  dispatch(updateProfileToStoreOnPatch(payload));
 };
 
 

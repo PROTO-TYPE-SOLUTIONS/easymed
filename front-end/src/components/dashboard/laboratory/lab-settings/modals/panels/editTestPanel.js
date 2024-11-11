@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
-import { useSelector,useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify'
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from '@/assets/hooks/use-auth';
-import { getItems } from "@/redux/features/inventory";
-import { IoMdAdd } from "react-icons/io";
-import { getAllLabTestProfiles, getSpecimens, updateTestPanelsStore } from "@/redux/features/laboratory";
-import { createLabTestPanels } from "@/redux/service/laboratory";
-const CreateTestPanelModal = () => {
+import { updateLabTestPanel } from "@/redux/service/laboratory";
+import { updateTestPanelStoreOnPatch } from "@/redux/features/laboratory";
+const EditTestPanelModal = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
   const { item } = useSelector((store)=> store.inventory)
   const { specimens, labTestProfiles } = useSelector((store)=> store.laboratory)
 
-  const units = [
+    const units = [
         {value: 'mL', label: 'mL'}, 
         {value: 'uL', label: 'uL'},
         {value: 'L', label: 'L'},
@@ -33,55 +30,41 @@ const CreateTestPanelModal = () => {
         {value: 'ng', label: 'ng'}
     ]
 
+    console.log('selected', item)
+
+    const getUnits = ()=> {
+        const unit = units.find((unit)=> unit.value === selectedRowData?.unit)
+        return unit
+    }
+
+    const getSpecimens = ()=> {
+        const specimen = specimens.find((specimen)=> specimen.id === selectedRowData?.specimen)
+        return {value: specimen?.id, label: specimen?.name}
+    }
+
+    const getTestProfile = ()=> {
+        const profile = labTestProfiles.find((profile)=> profile.id === selectedRowData?.test_profile)
+        return {value: profile?.id, label: profile?.name}
+    }
+
+    const getItem = ()=> {
+        const anItem = item.find((item)=> parseInt(item.id) === parseInt(selectedRowData?.item))
+        console.log("PLACE", anItem)
+        return  {value: anItem?.id, label: anItem?.name}
+    }
+
   const handleClose = () => {
     setOpen(false);
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  }
-
-  const fetchItems = () => {
-    try{
-      dispatch(getItems())
-    }catch(error){
-      console.log(error)
-    }
-  }
-
-  const fetchAllSpecimens = (auth) => {
-    try{
-      dispatch(getSpecimens(auth))
-    }catch(error){
-      console.log(error)
-    }
-  }
-
-  const fetchAllTestProfiles = (auth) => {
-    try{
-      dispatch(getAllLabTestProfiles(auth))
-    }catch(error){
-      console.log(error)
-    }
-  }
-
-  useEffect(()=> {
-    if(auth){
-      fetchItems()
-      fetchAllSpecimens(auth)
-      fetchAllTestProfiles(auth)
-    }
-  }, [])
-
-
   const initialValues = {
-    item: "",
-    specimen: "",
-    test_profile: "",
-    name: "",
-    unit: "",
-    is_qualitative: false,
-    is_quantitative: true
+    item: getItem() || "",
+    specimen: getSpecimens() || "",
+    test_profile: getTestProfile() || "",
+    name: selectedRowData?.name || "",
+    unit: getUnits() || "",
+    is_qualitative: selectedRowData?.is_qualitative || false,
+    is_quantitative: selectedRowData?.is_qualitative || true
   };
 
   const validationSchema = Yup.object().shape({
@@ -92,7 +75,7 @@ const CreateTestPanelModal = () => {
     unit: Yup.object().required("Field is Required!"),
   });
 
-  const handleCreateTestPanel = async (formValue, helpers) => {
+  const handleEditTestPanel = async (formValue, helpers) => {
     const formData = {
         ...formValue,
         specimen: formValue.specimen.value,
@@ -100,13 +83,12 @@ const CreateTestPanelModal = () => {
         unit: formValue.unit.value,
         item: formValue.item.value,
         is_quantitative: formValue.is_qualitative ? false : formValue.is_quantitative
-
     };
 
     try {
       setLoading(true);
-      const response = await createLabTestPanels(formData, auth)
-      dispatch(updateTestPanelsStore(response))
+      const response = await updateLabTestPanel(parseInt(selectedRowData?.id), formData, auth)
+      dispatch(updateTestPanelStoreOnPatch(response))
       setLoading(false);
       toast.success("Item Updated Successfully!");
       handleClose();
@@ -118,34 +100,25 @@ const CreateTestPanelModal = () => {
   };
 
   return (
-        <>
-        <button
-          onClick={handleClickOpen}
-          className="bg-primary rounded-xl text-white px-4 py-2 text-sm flex items-center gap-1"
-        >
-          <IoMdAdd /> Create Test Panel
-        </button>
-        <Dialog
-          fullWidth
-          maxWidth="md"
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-          sx={{
-            '& .MuiDialog-paper': {
-              minHeight: '70vh',
-            },
-          }}
-        >
-          <DialogContent>
-            <section className="flex items-center justify-center gap-8">
+    <section>
+      <Dialog
+        fullWidth
+        maxWidth="md"
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogContent>
+        <h1 className="text-xl font-bold my-10">{selectedRowData?.name}</h1>
+
+        <section className="flex items-center justify-center gap-8">
               <div className="w-full space-y-4 px-4">
-                <h1 className="text-xl text-center">Create Test Panel</h1>
+                <h1 className="text-xl text-center">Update Test Panel</h1>
                 <Formik
                     initialValues={initialValues}
                     validationSchema={validationSchema}
-                    onSubmit={handleCreateTestPanel}
+                    onSubmit={handleEditTestPanel}
                     >
                     <Form className="">
                         <Grid container spacing={2}>
@@ -254,10 +227,10 @@ const CreateTestPanelModal = () => {
                 </Formik>
               </div>
             </section>
-          </DialogContent>
-        </Dialog>
-      </>
+        </DialogContent>
+      </Dialog>
+    </section>
   );
 };
 
-export default CreateTestPanelModal;
+export default EditTestPanelModal;

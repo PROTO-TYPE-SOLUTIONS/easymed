@@ -116,6 +116,36 @@ export const fetchLabTestPanels = (auth) =>{
     })
 }
 
+export const createLabTestPanels = ( payload , auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_LAB_TEST_PANELS}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateLabTestPanel = ( panel_id, payload , auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.FETCH_LAB_TEST_PANELS}`, payload, {
+            params: {
+                panel_id: panel_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const sendLabRequestsPanels = (payload,auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -310,6 +340,38 @@ export const fetchLabTestProfile = (auth) =>{
     })
 }
 
+export const createLabTestProfile = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.post(`${APP_API_URL.FETCH_LAB_TEST_PROFILE}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
+}
+
+export const updateLabTestProfile = (profile_id, payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.patch(`${APP_API_URL.FETCH_LAB_TEST_PROFILE}`, payload, {
+            params: {
+                profile_id: profile_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
+}
+
 export const fetchSpecificPatientLabRequests = (patient_id, auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -456,6 +518,53 @@ export const fetchSamplesForSpecificProcess = (process_id, auth) => {
             params:{
                 process_id: process_id,
             },
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
+}
+
+export const fetchSpecimens = (auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.get(`${APP_API_URL.SPECIMENS}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
+}
+
+export const createSpecimen = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.post(`${APP_API_URL.SPECIMENS}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+
+}
+
+
+export const updateSpecimen = (specimen_id, payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) => {
+        axiosInstance.patch(`${APP_API_URL.SPECIMENS}`, payload, {
+            params: {
+                specimen_id: specimen_id
+            }
         })
             .then((res) =>{
                 resolve(res.data)

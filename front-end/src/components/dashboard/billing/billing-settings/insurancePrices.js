@@ -5,13 +5,14 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
+
 import { Grid } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getAllLabTestPanels } from "@/redux/features/laboratory";
-import CreateTestPanelModal from "./modals/panels/CreateTestPanel";
-import EditTestPanelModal from "./modals/panels/editTestPanel";
+import { getAllInventoryInsurancePrices } from "@/redux/features/insurance";
+import CreateInsurancePriceModal from "./modals/prices/CreateInsurancePriceModal";
+import EditInsurancePricesModal from "./modals/prices/EditInsurancePricesModal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -21,11 +22,11 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
-    {
-      action: "delete",
-      label: "Delete",
-      icon: <AiFillDelete className="text-warning text-xl mx-2" />,
-    },
+    // {
+    //   action: "delete",
+    //   label: "Delete",
+    //   icon: <AiFillDelete className="text-warning text-xl mx-2" />,
+    // },
     {
       action: "edit",
       label: "Edit",
@@ -36,7 +37,7 @@ const getActions = () => {
   return actions;
 };
 
-const TestPanels = () => {
+const InsurancePrices = () => {
   const auth = useAuth();
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -44,17 +45,17 @@ const TestPanels = () => {
   const [open, setOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
-  const { labTestPanels } = useSelector((store)=> store.laboratory);
+  const { insurancePrices } = useSelector((store)=> store.insurance);
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
 
   useEffect(()=> {
     if (auth){
-      dispatch(getAllLabTestPanels(auth));
+      dispatch(getAllInventoryInsurancePrices(auth));
     }
 
-  }, [auth])
+  }, [])
 
 
   const onMenuClick = async (menu, data) => {
@@ -82,9 +83,9 @@ const TestPanels = () => {
     );
   };
 
-  //   filter Panels based on search query
-  const filteredPanels = labTestPanels.filter((panel) => {
-    return panel.name.toLowerCase().includes(searchQuery.toLowerCase())
+  //   filter Insurance Prices based on search query
+  const filteredInsurancePrices = insurancePrices.filter((insurance) => {
+    return insurance.item_name.toLocaleLowerCase().includes(searchQuery.toLowerCase()) || insurance.insurance_name.toLocaleLowerCase().includes(searchQuery.toLowerCase())
   });
 
   return (
@@ -101,11 +102,11 @@ const TestPanels = () => {
           />
         </Grid>
         <div className="w-full flex justify-end">
-          <CreateTestPanelModal />
+          <CreateInsurancePriceModal />
         </div>
       </Grid>
       <DataGrid
-        dataSource={filteredPanels}
+        dataSource={filteredInsurancePrices}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -126,17 +127,14 @@ const TestPanels = () => {
             showInfo={showInfo}
             showNavigationButtons={showNavButtons}
         />
-        <Column dataField="name" caption="Name" width={180} />
-        <Column dataField="specimen_name" caption="Specimen" width={180} />
+        <Column dataField="item_name" caption="Item" />
+        <Column dataField="insurance_name" caption="Insurance" />
         <Column
-          dataField="unit"
-          caption="Unit"
-          width={180}
+          dataField="sale_price"
+          caption="Price"
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="is_qualitative" caption="Qualitative" width={100} />
-        <Column dataField="is_quantitative" caption="Quantitative" width={100} />
         <Column
           dataField=""
           caption=""
@@ -144,10 +142,10 @@ const TestPanels = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <EditTestPanelModal {...{ open, setOpen, selectedRowData }} />
-      {/* <DeleteModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} /> */}
+      <EditInsurancePricesModal {...{ open, setOpen, selectedRowData }} />
+      {/* <DeleteUserModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} /> */}
     </section>
   );
 };
 
-export default TestPanels;
+export default InsurancePrices;

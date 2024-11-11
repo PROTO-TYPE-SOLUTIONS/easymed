@@ -14,6 +14,7 @@ from .models import (
     LabTestRequestPanel,
     ProcessTestRequest,
     PatientSample,
+    Specimen,
 
     )
 
@@ -31,6 +32,9 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
 
 class LabTestPanelSerializer(serializers.ModelSerializer):
     reference_values = serializers.SerializerMethodField()
+    item_name = serializers.ReadOnlyField(source='item.name')
+    test_profile_name = serializers.ReadOnlyField(source='test_profile.name')
+    specimen_name = serializers.ReadOnlyField(source='specimen.name')
 
     class Meta:
         model = LabTestPanel
@@ -179,5 +183,11 @@ class PatientSampleSerializer(serializers.ModelSerializer):
 
     def get_specimen_name(self, obj):
         return obj.specimen.name
+
+class SpecimenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Specimen
+        fields = '__all__'
+
 
 

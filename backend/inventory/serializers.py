@@ -40,12 +40,19 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         model = IncomingItem
         fields = '__all__'
 
+class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
+    item_name = serializers.ReadOnlyField(source='inventory_item.item.name')
+    insurance_name = serializers.ReadOnlyField(source='insurance_company.name')
+    class Meta:
+        model = InventoryInsuranceSaleprice
+        fields = '__all__'
+
 class InventorySerializer(serializers.ModelSerializer):
     insurance_sale_prices = serializers.SerializerMethodField()
     item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = Inventory
-        fields = ['item', 'item_name', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
 
     def get_insurance_sale_prices(self, obj):
         # Retrieve all related insurance sale prices

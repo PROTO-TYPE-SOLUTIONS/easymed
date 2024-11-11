@@ -19,7 +19,8 @@ from .models import (
     LabTestPanel,
     LabTestRequestPanel,
     ProcessTestRequest,
-    PatientSample
+    PatientSample,
+    Specimen
 )
 
 from .serializers import (
@@ -32,7 +33,8 @@ from .serializers import (
     LabTestPanelSerializer,
     LabTestRequestPanelSerializer,
     ProcessTestRequestSerializer,
-    PatientSampleSerializer
+    PatientSampleSerializer,
+    SpecimenSerializer
 )
 
 
@@ -76,6 +78,11 @@ class LabEquipmentViewSet(viewsets.ModelViewSet):
     queryset = LabEquipment.objects.all()
     serializer_class = LabEquipmentSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+
+class SpecimenViewSet(viewsets.ModelViewSet):
+    queryset = Specimen.objects.all()
+    serializer_class = SpecimenSerializer
+    # permission_classes = (IsLabTechUser,)
 
 
 '''Lab Test Profile and Panel'''
