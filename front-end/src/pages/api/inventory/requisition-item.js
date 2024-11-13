@@ -45,8 +45,35 @@ export default async function handler(req, res) {
             //     }
             // };
             const body = req.body;
+            const query = req.query;
 
-            await backendAxiosInstance.post(`${API_URL.REQUISITION_ITEM}`,body)
+            await backendAxiosInstance.post(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/`,body)
+                .then(response => {
+                    res.status(200).json(response.data);
+                })
+                .catch(e => {
+                        res.status(e.response?.status ?? 500).json(e.response?.data)
+                    }
+                )
+
+        } catch (e) {
+            res.status(500).json(e.message);
+        }
+    }
+    else if (req.method === API_METHODS.PATCH) {
+        try {
+            // if (!req.headers?.authorization){
+            //     res.status(401).send('Unauthorized');
+            // }
+            // const config = {
+            //     headers: {
+            //         'Authorization': req.headers.authorization,
+            //     }
+            // };
+            const body = req.body;
+            const query = req.query;
+
+            await backendAxiosInstance.patch(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/${query.requisition_item_id}/`,body)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

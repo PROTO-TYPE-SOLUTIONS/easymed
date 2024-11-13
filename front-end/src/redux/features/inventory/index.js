@@ -68,7 +68,7 @@ const InventorySlice = createSlice({
       if (inventoryItem) {
         // If inventoryItem is found, update the existing item in the array
         state.inventoryItems = state.inventoryItems.map(item =>
-          item.item === action.payload.item ? { ...item, date_created:action.payload.date_created, supplier:action.payload.supplier, quantity_requested:action.payload.quantity_requested } : item
+          item.item === action.payload.item ? { ...item, preferred_supplier:action.payload.preferred_supplier, quantity_requested:action.payload.quantity_requested } : item
         );
       } else {
         // If inventoryItem is not found, add the new item to the array
@@ -174,7 +174,7 @@ export const getAllOrderBills = () => async (dispatch) => {
   }
 };
 
-export const addItemToInventoryPdf = (payload) => (dispatch) => {
+export const addItemToInventoryList = (payload) => (dispatch) => {
   dispatch(setInventoryItems(payload));
 };
 

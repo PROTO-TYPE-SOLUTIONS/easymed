@@ -3,7 +3,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
-import { getAllItems, getItems, getAllSuppliers, addItemToInventoryPdf } from "@/redux/features/inventory";
+import { getAllItems, getItems, getAllSuppliers, addItemToInventoryList } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -30,14 +30,13 @@ const AddRequisitionItemModal = () => {
   const initialValues = {
     date_created: "",
     item: null,
-    supplier: null,
+    preferred_supplier: null,
     quantity_requested: "",
-    requisition: 0
   };
 
   const validationSchema = Yup.object().shape({
     item: Yup.object().required("This field is required!"),
-    supplier: Yup.object().required("This field is required!"),
+    preferred_supplier: Yup.object().required("This field is required!"),
     quantity_requested: Yup.string().required("This field is required!"),
   });
 
@@ -49,13 +48,12 @@ const AddRequisitionItemModal = () => {
     try {
       const formData = {
         ...formValue,
-        supplier: formValue.supplier.value,
+        preferred_supplier: formValue.preferred_supplier.value,
         item: formValue.item.value,
-        date_created:`${year}-${month}-${day}`
       };
 
       setLoading(true);    
-      dispatch(addItemToInventoryPdf(formData))
+      dispatch(addItemToInventoryList(formData))
       setLoading(false);
       handleClose()
 
@@ -109,11 +107,11 @@ const AddRequisitionItemModal = () => {
             <Grid className='my-2' item md={12} xs={12}>
               <SeachableSelect
                 label="Select Supplier"
-                name="supplier"
-                options={suppliers.map((supplier) => ({ value: supplier.id, label: `${supplier?.name}` }))}
+                name="preferred_supplier"
+                options={suppliers.map((supplier) => ({ value: supplier.id, label: `${supplier?.official_name}` }))}
               />
               <ErrorMessage
-                name="supplier"
+                name="preferred_supplier"
                 component="div"
                 className="text-warning text-xs"
               />
