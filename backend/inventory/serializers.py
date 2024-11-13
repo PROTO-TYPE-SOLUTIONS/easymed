@@ -99,13 +99,20 @@ class RequisitionItemListSerializer(serializers.ModelSerializer):
     
 class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=True)
-    item = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all())
+    item_code = serializers.CharField(source='item.item_code', read_only=True)
+    item_name = serializers.CharField(source='iem.item_name', read_only=True)
+    preferred_supplier_name = serializers.SerializerMethodField()
+
+    def get_preferred_supplier_name(self, obj):
+        if obj.preferred_supplier:
+            return obj.preferred_supplier.official_name
+        return ''
 
     class Meta:
         model = RequisitionItem
-        fields = ['id', 'item', 'quantity_requested', 'preferred_supplier', 'date_created']
-        read_only_fields = ['id', 'date_created']
-
+        fields = ['id', 'item', 'quantity_requested', 'preferred_supplier', 'preferred_supplier_name', 'date_created',
+                  'item_code', 'item_name', 'status']
+        read_only_fields = ['id', 'date_created', 'item_code', 'item_name', 'preffered_supplier_name', 'status']
     def create(self, validated_data):
         requisition_id = self.context.get('requisition_id')
         validated_data['requisition_id'] = requisition_id
