@@ -1,11 +1,8 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested.routers import NestedDefaultRouter
-
-from django.conf import settings
-from django.conf.urls.static import static
-
-
 from .views import (
     ItemViewSet,
     PurchaseOrderViewSet,
@@ -18,8 +15,6 @@ from .views import (
     download_requisition_pdf,
     download_purchaseorder_pdf,
 )
-   
-
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet)
@@ -29,8 +24,9 @@ router.register(r'department-inventory', DepartmentInventoryViewSet)
 router.register(r'requisition', RequisitionViewSet, basename='requisition')
 router.register(r'incoming-item', IncomingItemViewSet)
 
-requisition_url=NestedDefaultRouter(router, 'requisition', lookup='requisition')
+router.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
 
+requisition_url = NestedDefaultRouter(router, 'requisition', lookup='requisition')
 requisition_url.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
 requisition_url.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
 
@@ -39,9 +35,10 @@ urlpatterns = [
     path('', include(requisition_url.urls)),
     path('download__requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
     path('purchase-orders/all_purchase_orders/', PurchaseOrderViewSet.as_view({'get': 'all_purchase_orders'}), name='all_purchase_orders'),
-    path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
+    path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),
 
-    ]
+    path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

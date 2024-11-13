@@ -69,6 +69,33 @@ class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     serializer_class = DepartmentInventorySerializer
 
 class RequisitionViewSet(viewsets.ModelViewSet):
+    """
+    Allows CRUD operations for a requisition and individual requisition items. 
+    It also facilitates the creation of a purchase order linked to a specific requisition.
+
+                                **URL Patterns**
+    1. **Create Requisition** (`POST /inventory/requisition/`):
+        Example Request:
+         {
+           "requested_by": 1,
+           "department": 3,
+           "items": [
+             {"item": 3, "quantity_requested": 10, "preferred_supplier": 1}
+           ]
+         }
+
+    2. **List All Requisitions** (`GET /inventory/requisition/`)
+
+    3. **Retrieve, Update, or Delete a Requisition** (`GET/PUT/PATCH/DELETE /inventory/requisition/<id>/`)
+
+    4. **Retrieve, Update, or Delete a RequisitionItems** `/inventory/requisition/<id>/requisitionitems/`
+
+    5. **Retrieve, Update, or Delete a a single requisition item** `/inventory/requisition/<id>/requisitionitems/<id>`
+
+    6. **Retrieve all requisition items or create an item ** `/inventory/requisition/<id>/purchase-orders/`
+
+    """
+
     queryset = Requisition.objects.all()
 
     def get_serializer_class(self):
@@ -79,8 +106,30 @@ class RequisitionViewSet(viewsets.ModelViewSet):
         elif self.action in ['update', 'partial_update']:
             return RequisitionUpdateSerializer
         return super().get_serializer_class()
+
     
 class RequisitionItemViewSet(viewsets.ModelViewSet):
+    """
+    Provides CRUD operations for requisition items.
+
+    1. **Retrieve or Create Requisition Items Linked to a Specific Requisition**
+       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/`
+       - **Example Request Body for POST**:
+         ```json
+         {
+           "item": 1,
+           "quantity_requested": 10,
+           "preferred_supplier": 3
+         }
+         ```
+
+    2. **Retrieve, Update, or Delete a Specific Requisition Item**
+       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/<requisitionitem_id>/`
+
+    3. **Retrieve All Requisition Items with Pending Status**
+       - **Endpoint**: `/inventory/requisitionitems/all_items/`
+    """
+
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemListSerializer
 
@@ -98,13 +147,14 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         requisition_id = self.kwargs.get('requisition_pk')
         return {'requisition_id': requisition_id}
-
-    @action(detail=False, methods=['GET'])
-    def by_requisition_id(self, request, requisition_id):
-        items = RequisitionItem.objects.filter(requisition_id=requisition_id)
+    
+    @action(detail=False, methods=['get'], url_path='all_items')
+    def all_items(self, request):
+        """Custom endpoint to return all requisition items ordered by status"""
+        items = RequisitionItem.objects.filter(status='PENDING')
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
-
+    
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer

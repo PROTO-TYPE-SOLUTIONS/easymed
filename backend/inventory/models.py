@@ -15,8 +15,8 @@ class Department(models.Model):
         return f"{self.id} - {self.name}"
     
 class Supplier(models.Model):
-    official_name = models.CharField(max_length=255)  # Official name of the supplier (e.g., "Crown-Lab LTD")
-    common_name = models.CharField(max_length=30)  # Common name (e.g., "Crown")
+    official_name = models.CharField(max_length=255)  
+    common_name = models.CharField(max_length=30) 
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
@@ -48,9 +48,10 @@ class Item(models.Model):
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity_at_hand = models.IntegerField()
-    re_order_level = models.IntegerField()     # Send a notification when items fall below this level
+    re_order_level = models.IntegerField()     
     buying_price = models.DecimalField(max_digits=10, decimal_places=2) 
     selling_price = models.DecimalField(max_digits=10, decimal_places=2)
+    vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
 
     def clean(self):
         if self.buying_price > self.selling_price:
@@ -86,7 +87,8 @@ class Requisition(models.Model):
     is_approved = models.BooleanField(default=False)
     department_approved = models.BooleanField(default=False)
     procurement_approved = models.BooleanField(default=False)
-
+    department_approval_date = models.DateTimeField(null=True, blank=True)
+    procurement_approval_date = models.DateTimeField(null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, max_length=255, null=False, blank=False)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='req_requested_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='req_approved_by')
@@ -116,7 +118,7 @@ class RequisitionItem(models.Model):
     ]
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     quantity_requested = models.IntegerField()
-    quantity_approved = models.IntegerField(default=0)  # New field to track purchased quantity
+    quantity_approved = models.IntegerField(default=0)  
     date_created = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=False)
 
