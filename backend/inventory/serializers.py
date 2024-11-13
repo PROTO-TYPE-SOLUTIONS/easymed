@@ -54,49 +54,6 @@ class ItemPOSerializer(serializers.ModelSerializer):
         instance.save()
         return instance    
     
-class RequisitionItemListSerializer(serializers.ModelSerializer):
-    item_code = serializers.CharField(source='item.item_code', read_only=True)
-    item_name = serializers.CharField(source='item.name', read_only=True)
-    quantity_at_hand = serializers.IntegerField(source='item.quantity_at_hand', read_only=True)
-    re_order_level = serializers.IntegerField(source='item.re_order_level', read_only=True)
-    buying_price = serializers.DecimalField(source='item.buying_price', max_digits=10, decimal_places=2, read_only=True)
-    selling_price = serializers.DecimalField(source='item.selling_price', max_digits=10, decimal_places=2, read_only=True)
-    vat_rate = serializers.DecimalField(source='item.vat_rate', max_digits=10, decimal_places=2, read_only=True)
-    preferred_supplier = serializers.SerializerMethodField()
-    requested_amount = serializers.SerializerMethodField() 
-
-
-    class Meta:
-        model = RequisitionItem
-        fields = [
-            'id', 
-            'item', 
-            'item_code',
-            'status',
-            'item_name', 
-            're_order_level',
-            'quantity_requested', 
-            'quantity_approved', 
-            'quantity_at_hand', 
-            'buying_price', 
-            'selling_price', 
-            'vat_rate',
-            'preferred_supplier', 
-            'requested_amount', 
-            'ordered',
-            'date_created'
-        ]
-
-    def get_preferred_supplier(self, obj):
-        if obj.preferred_supplier:
-            return obj.preferred_supplier.official_name
-        return ''
-
-    def get_requested_amount(self, obj):
-        return obj.quantity_requested * obj.item.buying_price
-   
-    
-    
 class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=True)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
@@ -113,6 +70,7 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'item', 'quantity_requested', 'preferred_supplier', 'preferred_supplier_name', 'date_created',
                   'item_code', 'item_name', 'status']
         read_only_fields = ['id', 'date_created', 'item_code', 'item_name', 'preffered_supplier_name', 'status']
+
     def create(self, validated_data):
         requisition_id = self.context.get('requisition_id')
         validated_data['requisition_id'] = requisition_id
@@ -121,16 +79,24 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
         
         return requisition_item
         
-class RequisitionItemUpdateSerializer(serializers.ModelSerializer):
+class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=True)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
-    item_name = serializers.CharField(source='iem.item_name', read_only=True)
+    item_name = serializers.CharField(source='item.item_name', read_only=True)
+    buying_price = serializers.CharField(source='item.buying_price', read_only=True)
+    selling_price = serializers.CharField(source='item.selling_price', read_only=True)
+    desc = serializers.CharField(source='item.desc', read_only=True)
+    quantity_at_hand = serializers.CharField(source='item.quantity_at_hand', read_only=True)
     preferred_supplier_name = serializers.SerializerMethodField()
+    requested_amount = serializers.SerializerMethodField() 
+    vat_rate = serializers.DecimalField(source='item.vat_rate', max_digits=10, decimal_places=2, read_only=True)
+
     class Meta:
         model = RequisitionItem
-        fields = ['id', 'item', 'status','quantity_requested', 'quantity_approved', 'preferred_supplier', 'preferred_supplier_name', 'date_created',
-                    'item_code', 'item_name', 'status']
-        read_only_fields = ['id', 'date_created', 'item_code', 'item_name', 'preffered_supplier_name', 'status']
+        fields = ['id', 'item','item_code','item_name', 'desc', 'status', 'quantity_at_hand','quantity_requested', 'quantity_approved',  'preferred_supplier', 
+                  'preferred_supplier_name', 'buying_price', 'vat_rate', 'selling_price', 'requested_amount', 'date_created',
+                     'status']
+        read_only_fields = ['id', 'date_created', 'item_code', 'desc', 'item_name', 'preffered_supplier_name', 'status', 'buying_price', 'selling_price', 'quantity_at_hand', 'vat_rate']
 
     def validate(self, attrs):
         quantity_approved = attrs.get('quantity_approved')
@@ -149,6 +115,9 @@ class RequisitionItemUpdateSerializer(serializers.ModelSerializer):
             return obj.preferred_supplier.official_name
         return ''
     
+    def get_requested_amount(self, obj):
+        return obj.quantity_requested * obj.item.buying_price
+      
 class RequisitionCreateSerializer(serializers.ModelSerializer):
     items = RequisitionItemCreateSerializer(many=True)
     requested_by = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
@@ -199,7 +168,7 @@ class RequisitionUpdateSerializer(serializers.ModelSerializer):
         return instance
     
 class RequisitionListSerializer(serializers.ModelSerializer):
-    items = RequisitionItemListSerializer(many=True, read_only=True)
+    items = RequisitionItemListUpdateSerializer(many=True, read_only=True)
     ordered_by = serializers.SerializerMethodField()
     department = serializers.CharField(source='department.name')
     total_items_requested = serializers.SerializerMethodField()

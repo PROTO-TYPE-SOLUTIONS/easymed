@@ -33,9 +33,9 @@ from .serializers import (
     DepartmentInventorySerializer,
     RequisitionCreateSerializer,
     RequisitionUpdateSerializer,
-    RequisitionItemUpdateSerializer,
+    RequisitionItemListUpdateSerializer,
     RequisitionListSerializer,
-    RequisitionItemListSerializer,  
+    # RequisitionItemListSerializer,  
 
 )
 
@@ -92,7 +92,7 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
     5. **Retrieve, Update, or Delete a a single requisition item** `/inventory/requisition/<id>/requisitionitems/<id>`
 
-    6. **Retrieve all requisition items or create an item ** `/inventory/requisition/<id>/purchase-orders/`
+    6. **Retrieve all or create purchase orders linked to the requisition** `/inventory/requisition/<id>/purchase-orders/`
 
     """
 
@@ -131,13 +131,13 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
     """
 
     queryset = RequisitionItem.objects.all()
-    serializer_class = RequisitionItemListSerializer
+    serializer_class = RequisitionItemListUpdateSerializer
 
     def get_serializer_class(self):
         if self.request.method == "POST":
             return RequisitionItemCreateSerializer
         elif self.request.method in ["PUT", "PATCH"]:
-            return RequisitionItemUpdateSerializer
+            return RequisitionItemListUpdateSerializer
         return super().get_serializer_class()
     
     def get_queryset(self):
