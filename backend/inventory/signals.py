@@ -1,11 +1,12 @@
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 # from easymed.celery_tasks import create_or_update_inventory_record
-from .models import Requisition, PurchaseOrder, IncomingItem, Inventory
+from .models import Requisition, PurchaseOrder, IncomingItem, PurchaseOrderItem
 from easymed.celery_tasks import (
     generate_requisition_pdf,
-    generate_purchaseorder_pdf,
-    create_or_update_inventory_record
+    generate_purchase_order_pdf,
+    create_or_update_inventory_record,
+    create_purchase_order_task
 )
 
 
@@ -25,6 +26,8 @@ def generate_invoice(sender, instance, created, **kwargs):
 
 '''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''
 @receiver(post_save, sender=PurchaseOrder)
-def generate_purchaseorder(sender, instance, created, **kwargs):
+def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
     if created:
-        generate_purchaseorder_pdf.delay(instance.pk)
+        generate_purchase_order_pdf.delay(instance.pk)
+
+

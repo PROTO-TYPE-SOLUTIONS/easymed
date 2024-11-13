@@ -135,9 +135,30 @@ export const addRequisition = (payload) =>{
     })
 }
 
-export const addRequisitionItem = (payload) =>{
+export const addRequisitionItem = (payload, requisition_id) =>{
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.REQUISITION_ITEM}`,payload)
+        axios.post(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
+            params: {
+                requisition_id: requisition_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateRequisitionItem = (payload, requisition_id, requisition_item_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.patch(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
+            params: {
+                requisition_id: requisition_id,
+                requisition_item_id: requisition_item_id
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })

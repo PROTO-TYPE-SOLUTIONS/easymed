@@ -1,4 +1,4 @@
-/*global SelectBox, interpolate*/
+items = req.requisitionitem_set.all()/*global SelectBox, interpolate*/
 // Handles related-objects functionality: lookup link for raw_id_fields
 // and Add Another links.
 'use strict';

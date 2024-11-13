@@ -11,9 +11,11 @@ import { getAllRequisitions, getAllSuppliers, getAllItems } from "@/redux/featur
 import { getAllDoctors } from "@/redux/features/doctors";
 import { getAllTheUsers } from "@/redux/features/users";
 import { downloadPDF } from '@/redux/service/pdfs';
-import { MdLocalPrintshop } from 'react-icons/md'
+import { MdLocalPrintshop } from 'react-icons/md';
+import { CiSquareQuestion } from "react-icons/ci";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
+import ViewRequisitionItemsModal from "./modals/requisition/ViewRequisitionItemsModal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -28,6 +30,11 @@ const getActions = () => {
       label: "Print",
       icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
     },
+    {
+      action: "r-items",
+      label: "Requisition Items",
+      icon: <CiSquareQuestion className="text-success text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -41,13 +48,14 @@ const RequisitionDatagrid = () => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [selectedRowData, setSelectedRowData] = useState({})
 
   const dispatch = useDispatch()
   const auth = useAuth();
 
   const onMenuClick = async (menu, data) => {
-    if (menu.action === "dispense") {
-      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+    if (menu.action === "r-items") {
       setSelectedRowData(data);
       setOpen(true);
     }else if (menu.action === "print"){
@@ -69,16 +77,15 @@ const RequisitionDatagrid = () => {
   };
 
   const handlePrint = async (data) => {
-      try{
-          const response = await downloadPDF(data.id, "_requisition_pdf", auth)
-          window.open(response.link, '_blank');
-          toast.success("got pdf successfully")
+    try{
+        const response = await downloadPDF(data.id, "_requisition_pdf", auth)
+        window.open(response.link, '_blank');
+        toast.success("got pdf successfully")
 
-      }catch(error){
-          console.log(error)
-          toast.error(error)
-      }
-      
+    }catch(error){
+        console.log(error)
+        toast.error(error)
+    }
   };
 
   useEffect(() => {
@@ -144,6 +151,18 @@ const RequisitionDatagrid = () => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
+        <Column
+          dataField="requisition_number"
+          caption="Requisition"
+        />
+        <Column
+          dataField="department"
+          caption="Department"
+        />
+        <Column 
+          dataField="total_items_requested" 
+          caption="Items"
+        />
         <Column 
           dataField="requested_by"
           caption="Requested By" 
@@ -157,12 +176,13 @@ const RequisitionDatagrid = () => {
           caption="Status"
         />
         <Column dataField="date_created" caption="Requested Date" />
-        <Column 
+        <Column
           dataField="" 
           caption=""
           cellRender={actionsFunc}
         />
       </DataGrid>
+      <ViewRequisitionItemsModal open={open} setOpen={setOpen} setSelectedRowData={setSelectedRowData} selectedRowData={selectedRowData}/>
     </section>
   );
 };
