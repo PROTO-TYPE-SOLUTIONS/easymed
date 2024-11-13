@@ -123,20 +123,31 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
         
 class RequisitionItemUpdateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=True)
+    item_code = serializers.CharField(source='item.item_code', read_only=True)
+    item_name = serializers.CharField(source='iem.item_name', read_only=True)
+    preferred_supplier_name = serializers.SerializerMethodField()
     class Meta:
         model = RequisitionItem
-        fields = ['id', 'item', 'status', 'quantity_requested', 'preferred_supplier', 'quantity_approved', 'date_created']
-        read_only_fields = ['id', 'item', 'date_created']
+        fields = ['id', 'item', 'status','quantity_requested', 'quantity_approved', 'preferred_supplier', 'preferred_supplier_name', 'date_created',
+                    'item_code', 'item_name', 'status']
+        read_only_fields = ['id', 'date_created', 'item_code', 'item_name', 'preffered_supplier_name', 'status']
 
     def validate(self, attrs):
         quantity_approved = attrs.get('quantity_approved')
         quantity_requested = attrs.get('quantity_requested')
         
-        if quantity_approved and quantity_requested:
-            if quantity_approved > quantity_requested:
-                raise serializers.ValidationError('Quantity approved cannot exceed quantity requested')
+        if quantity_approved is not None and quantity_approved <= 0:
+            raise serializers.ValidationError('Quantity approved must be greater than 0.')
+
+        if quantity_requested is not None and quantity_approved > quantity_requested:
+            raise serializers.ValidationError('Quantity approved cannot exceed quantity requested.')
         
         return attrs
+    
+    def get_preferred_supplier_name(self, obj):
+        if obj.preferred_supplier:
+            return obj.preferred_supplier.official_name
+        return ''
     
 class RequisitionCreateSerializer(serializers.ModelSerializer):
     items = RequisitionItemCreateSerializer(many=True)
