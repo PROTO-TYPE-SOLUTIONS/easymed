@@ -57,7 +57,7 @@ class ItemPOSerializer(serializers.ModelSerializer):
 class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=True)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
-    item_name = serializers.CharField(source='iem.item_name', read_only=True)
+    item_name = serializers.CharField(source='item.name', read_only=True)
     preferred_supplier_name = serializers.SerializerMethodField()
 
     def get_preferred_supplier_name(self, obj):
@@ -65,19 +65,12 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
             return obj.preferred_supplier.official_name
         return ''
 
-    def get_amount(self, obj):
-        if obj.quantity_approved and obj.item.buying_price:
-            return obj.quantity_approved* obj.item.buying_price
-        return None
-    
-    
-class RequisitionItemCreateSerializer(serializers.ModelSerializer):
-    preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=True)
     class Meta:
         model = RequisitionItem
-        fields = ['id', 'item', 'quantity_requested', 'preferred_supplier', 'date_created']
-        read_only_fields = ['id', 'date_created']
-        
+        fields = ['id', 'item', 'quantity_requested', 'preferred_supplier', 'preferred_supplier_name', 'date_created',
+                  'item_code', 'item_name', 'status']
+        read_only_fields = ['id', 'date_created', 'item_code', 'item_name', 'preffered_supplier_name', 'status']
+
     def create(self, validated_data):
         requisition_id = self.context.get('requisition_id')
         validated_data['requisition_id'] = requisition_id
@@ -88,10 +81,22 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
         
 class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=True)
+    item_code = serializers.CharField(source='item.item_code', read_only=True)
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    buying_price = serializers.CharField(source='item.buying_price', read_only=True)
+    selling_price = serializers.CharField(source='item.selling_price', read_only=True)
+    desc = serializers.CharField(source='item.desc', read_only=True)
+    quantity_at_hand = serializers.CharField(source='item.quantity_at_hand', read_only=True)
+    preferred_supplier_name = serializers.SerializerMethodField()
+    requested_amount = serializers.SerializerMethodField() 
+    vat_rate = serializers.DecimalField(source='item.vat_rate', max_digits=10, decimal_places=2, read_only=True)
+
     class Meta:
         model = RequisitionItem
-        fields = ['id', 'item', 'status', 'quantity_requested', 'preferred_supplier', 'quantity_approved', 'date_created']
-        read_only_fields = ['id', 'item', 'date_created']
+        fields = ['id', 'item','item_code','item_name', 'desc', 'status', 'quantity_at_hand','quantity_requested', 'quantity_approved',  'preferred_supplier', 
+                  'preferred_supplier_name', 'buying_price', 'vat_rate', 'selling_price', 'requested_amount', 'date_created',
+                     'status']
+        read_only_fields = ['id', 'date_created', 'item_code', 'desc', 'item_name', 'preffered_supplier_name', 'status', 'buying_price', 'selling_price', 'quantity_at_hand', 'vat_rate']
 
     def validate(self, attrs):
         quantity_approved = attrs.get('quantity_approved')
@@ -171,7 +176,7 @@ class RequisitionListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Requisition
-        fields = ['id', 'requisition_number', 'total_amount', 'department', 'total_items_requested', 'ordered_by', 'status', 'department_approved','procurement_approved', 'items', 'date_created']
+        fields = ['id', 'requisition_number', 'department', 'total_items_requested', 'ordered_by', 'status', 'department_approved','procurement_approved', "department_approval_date" , "procurement_approval_date", 'items', 'date_created']
         
     def get_ordered_by(self, obj):
         return f"{obj.requested_by.first_name} {obj.requested_by.last_name}"
@@ -181,8 +186,8 @@ class RequisitionListSerializer(serializers.ModelSerializer):
         distinct_items = requisition_items.values('item').distinct()  # Assuming 'item' is the field you're distinguishing by
         return len(distinct_items)
     
-    def get_total_amount(self, obj):
-        return sum(item.get('amount') for item in RequisitionItemListSerializer(obj.items, many=True).data)
+    # def get_total_amount(self, obj):
+    #     return sum(item.get('requested_amount') for item in RequisitionItemListSerializer(obj.items, many=True).data)
 
 class PurchaseOrderItemSerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(source='requisition_item.item.name', read_only=True)
@@ -273,19 +278,12 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         model = IncomingItem
         fields = '__all__'
 
-class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
-    item_name = serializers.ReadOnlyField(source='inventory_item.item.name')
-    insurance_name = serializers.ReadOnlyField(source='insurance_company.name')
-    class Meta:
-        model = InventoryInsuranceSaleprice
-        fields = '__all__'
-
 class InventorySerializer(serializers.ModelSerializer):
     insurance_sale_prices = serializers.SerializerMethodField()
     item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = Inventory
-        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['item', 'item_name', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
 
     def get_insurance_sale_prices(self, obj):
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
@@ -307,3 +305,9 @@ class DepartmentInventorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
+    item_name = serializers.ReadOnlyField(source='inventory_item.item.name')
+    insurance_name = serializers.ReadOnlyField(source='insurance_company.name')
+    class Meta:
+        model = InventoryInsuranceSaleprice
+        fields = '__all__'

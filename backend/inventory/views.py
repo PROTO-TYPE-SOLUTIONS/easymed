@@ -37,6 +37,7 @@ from .serializers import (
     RequisitionItemListUpdateSerializer,
     RequisitionListSerializer,
     # RequisitionItemListSerializer,  
+    InventoryInsuranceSalepriceSerializer
 
 )
 
