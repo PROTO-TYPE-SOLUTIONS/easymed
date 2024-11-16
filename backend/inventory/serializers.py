@@ -167,15 +167,19 @@ class RequisitionUpdateSerializer(serializers.ModelSerializer):
 class RequisitionListSerializer(serializers.ModelSerializer):
     items = RequisitionItemListUpdateSerializer(many=True, read_only=True)
     ordered_by = serializers.SerializerMethodField()
+    approved_by = serializers.SerializerMethodField()
     department = serializers.CharField(source='department.name')
     total_items_requested = serializers.SerializerMethodField()
     total_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Requisition
-        fields = ['id', 'requisition_number', 'total_amount', 'department', 'total_items_requested', 'ordered_by', 'status', 'department_approved','procurement_approved', "department_approval_date" , "procurement_approval_date", 'items', 'date_created']
+        fields = ['id', 'requisition_number', 'total_amount', 'department', 'total_items_requested', 'ordered_by', 'approved_by', 'status', 'department_approved','procurement_approved', "department_approval_date" , "procurement_approval_date", 'items', 'date_created']
         
     def get_ordered_by(self, obj):
+        return f"{obj.requested_by.first_name} {obj.requested_by.last_name}"
+    
+    def get_approved_by(self, obj):
         return f"{obj.requested_by.first_name} {obj.requested_by.last_name}"
     
     def get_total_items_requested(self, obj):
