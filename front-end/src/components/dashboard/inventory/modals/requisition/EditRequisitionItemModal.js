@@ -28,7 +28,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
   }
 
   const getPreferredSupplier = () => {
-    const supplier = suppliers.find((supplier)=> supplier.official_name === selectedEditRowData.preferred_supplier)
+    const supplier = suppliers.find((supplier)=> supplier.official_name === selectedEditRowData.preferred_supplier_name)
     return supplier ? {value:supplier.id, label: supplier.official_name}: null
   }
 
@@ -63,7 +63,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
       
         // Create a copy of the items array and update the specific item
         const updatedItems = [...requisition.items];
-        updatedItems[gottenReqItemIndex] = {...response, preferred_supplier: response.preferred_supplier_name};
+        updatedItems[gottenReqItemIndex] = {response};
       
         // Create a new requisition object with the updated items array
         const updatedRequisition = {

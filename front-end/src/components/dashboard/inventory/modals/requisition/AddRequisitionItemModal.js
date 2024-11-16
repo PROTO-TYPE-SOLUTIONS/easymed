@@ -26,7 +26,6 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
 
 
   const initialValues = {
-    date_created: "",
     item: null,
     preferred_supplier: null,
     quantity_requested: "",
@@ -53,7 +52,7 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
         // Update the requisition's items array with the new item
         const updatedRequisition = {
             ...requisition,
-            items: [{...response, preferred_supplier: response.preferred_supplier_name}, ...requisition.items],
+            items: [response, ...requisition.items],
         };
     
         // Update the selected row data with the updated requisition

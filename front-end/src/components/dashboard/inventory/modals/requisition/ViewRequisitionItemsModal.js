@@ -107,7 +107,7 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
                     dataField="item_name"
                     caption="Item name"
                 />
-                <Column dataField="preferred_supplier" caption="Preferred Supplier" />
+                <Column dataField="preferred_supplier_name" caption="Preferred Supplier" />
                 <Column 
                     dataField="quantity_requested"
                     caption="Quantity Requested" 
