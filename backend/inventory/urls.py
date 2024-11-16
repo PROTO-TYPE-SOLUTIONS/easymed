@@ -38,7 +38,6 @@ urlpatterns = [
     path('download__requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
     path('purchase-orders/all_purchase_orders/', PurchaseOrderViewSet.as_view({'get': 'all_purchase_orders'}), name='all_purchase_orders'),
     path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),
-
     path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
 ]
 
