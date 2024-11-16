@@ -244,16 +244,21 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
 class PurchaseOrderListSerializer(serializers.ModelSerializer):
     PO_number = serializers.CharField()
     is_dispatched = serializers.BooleanField()
-    items = serializers.SerializerMethodField()  #
+    items = serializers.SerializerMethodField()
     ordered_by = serializers.SerializerMethodField()
     approved_by = serializers.SerializerMethodField()
-    total_items_ordered = serializers.SerializerMethodField()  
-    total_amount = serializers.SerializerMethodField()  
-
+    total_items_ordered = serializers.SerializerMethodField()
+    total_amount_before_vat = serializers.SerializerMethodField()
+    total_vat_amount = serializers.SerializerMethodField()
+    total_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = PurchaseOrder
-        fields = ['id', 'PO_number', 'is_dispatched','total_items_ordered', 'total_amount', 'ordered_by', 'approved_by', 'items']
+        fields = [
+            'id', 'PO_number', 'is_dispatched', 'total_items_ordered', 
+            'total_amount_before_vat', 'total_vat_amount', 'total_amount', 
+            'ordered_by', 'approved_by', 'items'
+        ]
 
     def get_ordered_by(self, obj):
         return f"{obj.ordered_by.first_name} {obj.ordered_by.last_name}"
@@ -261,11 +266,11 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
     def get_approved_by(self, obj):
         if obj.approved_by is not None:
             return f"{obj.approved_by.first_name} {obj.approved_by.last_name}"
-        return "Not Approved"  
+        return "Not Approved"
 
     def get_items(self, obj):
         purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
-        requisition_items = [purchase_order_item.requisition_item for purchase_order_item in purchase_order_items]
+        requisition_items = [item.requisition_item for item in purchase_order_items]
         return RequisitionItemListUpdateSerializer(requisition_items, many=True).data
     
     def get_total_items_ordered(self, obj):
@@ -273,10 +278,27 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         distinct_items = purchase_order_items.values('requisition_item__item').distinct()
         return len(distinct_items)
 
-    def get_total_amount(self, obj):
+    def get_total_amount_before_vat(self, obj):
         purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
-        total_amount = sum(item.requisition_item.quantity_approved * item.requisition_item.item.buying_price for item in purchase_order_items)
-        return total_amount
+        total_amount_before_vat = sum(
+            item.requisition_item.quantity_approved * item.requisition_item.item.buying_price
+            for item in purchase_order_items
+        )
+        return total_amount_before_vat
+
+    def get_total_vat_amount(self, obj):
+        purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
+        total_vat = sum(
+            (item.requisition_item.quantity_approved * item.requisition_item.item.buying_price) *
+            (item.requisition_item.item.vat_rate / 100)
+            for item in purchase_order_items
+        )
+        return total_vat
+
+    def get_total_amount(self, obj):
+        total_before_vat = self.get_total_amount_before_vat(obj)
+        vat_amount = self.get_total_vat_amount(obj)
+        return total_before_vat + vat_amount
 
 class IncomingItemSerializer(serializers.ModelSerializer):
     class Meta:
