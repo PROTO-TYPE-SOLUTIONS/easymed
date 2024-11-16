@@ -101,10 +101,10 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         quantity_approved = attrs.get('quantity_approved')
-        quantity_requested = attrs.get('quantity_requested')
         
         if quantity_approved is not None and quantity_approved <= 0:
             raise serializers.ValidationError('Quantity approved must be greater than 0.')
+        return attrs
     
     def get_preferred_supplier_name(self, obj):
         if obj.preferred_supplier:
