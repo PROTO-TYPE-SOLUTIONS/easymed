@@ -7,27 +7,31 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import { Column, Paging, Pager, Selection } from "devextreme-react/data-grid";
+import themes from 'devextreme/ui/themes';
 import { Grid } from "@mui/material";
 import { addPurchaseOrder, addPurchaseOrdersItem } from "@/redux/service/inventory";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllDoctors } from "@/redux/features/doctors";
-import { removeItemToPurchaseOrderPdf, clearItemsToPurchaseOrderPdf  } from "@/redux/features/inventory";
+import { removeItemToPurchaseOrderPdf, clearItemsToPurchaseOrderPdf, getAllRequisitionItems  } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { SlMinus } from "react-icons/sl";
 import { LuMoreHorizontal } from "react-icons/lu";
 import AddPurchaseOrderItemModal from "./create-purchase-order-dialog";
+import EditRequisitionItemModal from "./modals/requisition/EditRequisitionItemModal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const allowedPageSizes = [5, 10, 'all'];
+
 const getActions = () => {
   let actions = [
     {
-      action: "remove",
-      label: "Remove",
+      action: "edit",
+      label: "Edit",
       icon: <SlMinus className="text-success text-xl mx-2" />,
     },
   ];
@@ -43,9 +47,20 @@ const AddProductPurchase = () => {
   const userActions = getActions();
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { item, suppliers, purchaseOrderItems } = useSelector(({ inventory }) => inventory);
+  const { item, suppliers, purchaseOrderItems, requisitionItems } = useSelector(({ inventory }) => inventory);
   const doctorsData = useSelector((store)=>store.doctor.doctors)
   const auth = useAuth();
+  const [allMode, setAllMode] = useState('allPages');
+  const [open, setOpen] = useState(false)
+  const [selectedRowData, setSelectedRowData] = useState({})
+  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
+  const [showNavButtons, setShowNavButtons] = useState(true);
+  const [selectedItems, setSelectedItems] = useState(null)
+  // const [checkBoxesMode, setCheckBoxesMode] = useState(
+  //   themes.current().startsWith('material') ? 'always' : 'onClick',
+  // );
+
 
   const initialValues = {
     status: "COMPLETED",
@@ -53,16 +68,24 @@ const AddProductPurchase = () => {
 
   };
 
+  console.log("SELECTED ARE THE FOLLOWING", selectedItems)
+
+  const handleSelectionChanged = (selectedRowKeys) => {
+    console.log("HADI KWENYE DAMU UPPP", selectedRowKeys)
+    setSelectedItems(selectedRowKeys);
+  };
+
   useEffect(() => {
     if (auth) {
-      dispatch(getAllDoctors(auth));
+      dispatch(getAllRequisitionItems(auth))
     }
   }, [auth]);
 
   const onMenuClick = async (menu, data) => {
     console.log(data)
-    if (menu.action === "remove") {
-      dispatch(removeItemToPurchaseOrderPdf(data))
+    if (menu.action === "edit") {
+      setSelectedRowData(data)
+      setOpen(true)    
     }
   };
 
@@ -79,26 +102,6 @@ const AddProductPurchase = () => {
         />
       </>
     );
-  };
-
-  const generatePdf = () => {
-    return new Promise((resolve) => {
-      const input = pdfRef.current;  
-      const table = input.children[2].children[0].children[5];
-      const pdfWidth = 210; 
-      const pdfHeight = 297;
-      const scale = 1; 
-  
-      html2canvas(table, { scale: scale }).then((canvas) => {
-        const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
-  
-        const imgWidth = pdf.internal.pageSize.getWidth();
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-  
-        resolve(pdf);
-      });
-    });
   };
 
   const savePurchaseOrderItem = async (item, payload) => {
@@ -148,7 +151,7 @@ const AddProductPurchase = () => {
     // });
 
     try {
-      if (purchaseOrderItems.length <= 0) {
+      if (selectedItems.selectedRowsData.length <= 0) {
         toast.error("No purchase order items");
         return;
       }      
@@ -190,7 +193,7 @@ const AddProductPurchase = () => {
       >
       <Form className="">
       <DataGrid
-        dataSource={purchaseOrderItems}
+        dataSource={requisitionItems}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -199,36 +202,45 @@ const AddProductPurchase = () => {
         showRowLines={true}
         wordWrapEnabled={true}
         allowPaging={true}
+        onSelectionChanged={handleSelectionChanged}
         className="shadow-xl"
       >
+        <Selection
+          mode="multiple"
+          selectAllMode={allMode}
+          // showCheckBoxesMode={checkBoxesMode}
+        />
+        <Paging defaultPageSize={10} />
         <Pager
-          visible={false}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
+          visible={true}
+          allowedPageSizes={allowedPageSizes}
+          showPageSizeSelector={showPageSizeSelector}
+          showInfo={showInfo}
+          showNavigationButtons={showNavButtons}
         />
         <Column 
-          dataField="item" 
-          caption="Item Name" 
-          cellRender={(cellData) => {
-            const productItem = item.find(item => item.id === cellData.data.item);
-            return productItem ? `${productItem.name}` : 'null';
-          }}
+          dataField="item_code" 
+          caption="Code"
         />
         <Column 
-          dataField="supplier" 
-          caption="Supplier Name"
-          cellRender={(cellData) => {
-            const supplier = suppliers.find(supplier => supplier.id === parseInt(cellData.data.supplier));
-            return supplier ? `${supplier.name}` : 'null';
-          }}        
+          dataField="item_name" 
+          caption="Name" 
         />
         <Column 
-          dataField="quantity_purchased" 
-          caption="Quantity"
+          dataField="preferred_supplier_name"
+          caption="Supplier"      
         />
         <Column 
-          dataField="date_created" 
-          caption="Created" 
+          dataField="quantity_at_hand" 
+          caption="Quantity At Hand"
+        />
+        <Column 
+          dataField="quantity_requested" 
+          caption="Quantity Requested"
+        />
+        <Column 
+          dataField="buying_price" 
+          caption="Buying Price"
         />
         <Column 
           dataField="" 
@@ -262,12 +274,14 @@ const AddProductPurchase = () => {
                 ></path>
               </svg>
             )}
-            Save Purchase Order Pdf
+            Create Purchase Order
           </button>
         </div>
       </Grid>
       </Form>
       </Formik>
+      {/* PO tracks if update is from this page or actual requisition page so as to update store accordingly */}
+      <EditRequisitionItemModal editOpen={open} setEditOpen={setOpen} selectedEditRowData={selectedRowData} PO={true}/>
     </section>
   )
 }

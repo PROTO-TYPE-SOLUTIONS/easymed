@@ -135,6 +135,19 @@ export const addRequisition = (payload) =>{
     })
 }
 
+export const fetchAllRequisitionItems = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.REQUISITION_ITEM}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const addRequisitionItem = (payload, requisition_id) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.REQUISITION_ITEM}`,payload, {

@@ -1,11 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions, fetchPurchaseOrders, fetchIncomingItems } from "@/redux/service/inventory";
+import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions,
+   fetchPurchaseOrders, fetchIncomingItems, fetchAllRequisitionItems } from "@/redux/service/inventory";
 
 
 const initialState = {
   inventories: [],
   inventoryItems: [],
   requisitions: [],
+  requisitionItems: [],
   purchaseOrderItems: [],
   purchaseOrders: [],
   items: [],
@@ -48,6 +50,9 @@ const InventorySlice = createSlice({
     },
     setRequisitions: (state, action) => {
       state.requisitions = action.payload;
+    },
+    setRequisitionsItems: (state, action) => {
+      state.requisitionItems = action.payload;
     },
     setPurchaseOrders: (state, action) => {
       state.purchaseOrders = action.payload;
@@ -99,7 +104,10 @@ const InventorySlice = createSlice({
   },
 });
 
-export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf, setIncoming } = InventorySlice.actions;
+export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, 
+  setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, 
+  setPurchaseOrderItems, setPurchaseOrderItemsPdf, 
+  clearPurchaseOrderItemsPdf, setIncoming, setRequisitionsItems } = InventorySlice.actions;
 
 
 export const getAllItems = () => async (dispatch) => {
@@ -126,6 +134,15 @@ export const getAllRequisitions = (auth) => async (dispatch) => {
     dispatch(setRequisitions(response));
   } catch (error) {
     console.log("REQUISITIONS_ERROR ", error);
+  }
+};
+
+export const getAllRequisitionItems = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchAllRequisitionItems(auth);
+    dispatch(setRequisitionsItems(response));
+  } catch (error) {
+    console.log("REQUISITIONS_ITEMS_ERROR ", error);
   }
 };
 

@@ -10,7 +10,7 @@ import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 import { addRequisitionItem, updateRequisitionItem } from "@/redux/service/inventory";
 
-const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, setSelectedEditRowData, requisition, setSelectedRowData }) => {
+const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, setSelectedEditRowData, requisition, setSelectedRowData, PO=false }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -19,8 +19,6 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
   const handleClose = () => {
     setEditOpen(false);
   };
-
-  console.log("SELECTED ROW DATA IS", requisition)
 
   const getItem = () => {
     const iteem = item.find((itm)=> parseInt(itm.id) === parseInt(selectedEditRowData.item))
@@ -55,26 +53,31 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
         item: formValue.item.value,
       };
 
-      const response = await updateRequisitionItem(formData, requisition.id, selectedEditRowData.id)
-      const gottenReqItemIndex = requisition.items.findIndex((item)=> item.id === response.id)
+      const response = await updateRequisitionItem(formData, selectedEditRowData.requisition, selectedEditRowData.id)
 
-      if (gottenReqItemIndex !== -1) {
-        console.log("THE RESPONSE IS", response);
-      
-        // Create a copy of the items array and update the specific item
-        const updatedItems = [...requisition.items];
-        updatedItems[gottenReqItemIndex] = {response};
-      
-        // Create a new requisition object with the updated items array
-        const updatedRequisition = {
-          ...requisition,
-          items: updatedItems,
-        };
-      
-        // Update the selected row data with the updated requisition
-        setSelectedRowData(updatedRequisition);
+      if(PO){
+        console.log("THE RESPONSE IS", response)
+
+      }else{
+        const gottenReqItemIndex = requisition.items.findIndex((item)=> item.id === response.id)
+
+        if (gottenReqItemIndex !== -1) {
+        
+          // Create a copy of the items array and update the specific item
+          const updatedItems = [...requisition.items];
+          updatedItems[gottenReqItemIndex] = response;
+        
+          // Create a new requisition object with the updated items array
+          const updatedRequisition = {
+            ...requisition,
+            items: updatedItems,
+          };
+        
+          // Update the selected row data with the updated requisition
+          setSelectedRowData(updatedRequisition);
+        }
+
       }
-
 
       setLoading(false);
       handleClose()

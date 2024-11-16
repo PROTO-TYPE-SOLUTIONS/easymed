@@ -21,7 +21,7 @@ export default async function handler(req, res) {
             };
 
     
-            await backendAxiosInstance.get(`${API_URL.REQUISITION_ITEM}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_ALL_REQUISITION_ITEMS}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
