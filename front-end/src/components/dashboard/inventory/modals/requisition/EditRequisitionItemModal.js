@@ -35,15 +35,17 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
     item: getItem() || null,
     preferred_supplier: getPreferredSupplier() || null,
     quantity_requested: selectedEditRowData?.quantity_requested || "",
+    quantity_approved: selectedEditRowData?.quantity_approved ?? "",
   };
 
   const validationSchema = Yup.object().shape({
     item: Yup.object().required("This field is required!"),
     preferred_supplier: Yup.object().required("This field is required!"),
-    quantity_requested: Yup.string().required("This field is required!"),
+    quantity_requested: Yup.number().required("This field is required!"),
+    quantity_approved: Yup.number().required("This field is required!"),
   });
 
-  const handleAddRequisitionItem = async (formValue, helpers) => {
+  const handleUpdateRequisitionItem = async (formValue, helpers) => {
     console.log("ERROR", formValue)
     try {
     setLoading(true);
@@ -112,7 +114,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
             <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleAddRequisitionItem}
+                onSubmit={handleUpdateRequisitionItem}
             >
                 <Form className="">
                 <Grid container spacing={4}>
@@ -144,11 +146,24 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
                     <Field
                         className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                         maxWidth="sm"
-                        placeholder="Quantity"
+                        placeholder="Quantity Requested"
                         name="quantity_requested"
                     />
                     <ErrorMessage
                         name="quantity_requested"
+                        component="div"
+                        className="text-warning text-xs"
+                    />
+                    </Grid>
+                    <Grid item md={12} xs={12}>
+                    <Field
+                        className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                        maxWidth="sm"
+                        placeholder="Quantity Approved"
+                        name="quantity_approved"
+                    />
+                    <ErrorMessage
+                        name="quantity_approved"
                         component="div"
                         className="text-warning text-xs"
                     />

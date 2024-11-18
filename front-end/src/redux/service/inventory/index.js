@@ -135,6 +135,22 @@ export const addRequisition = (payload) =>{
     })
 }
 
+export const updateRequisition = (payload, requisition_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.patch(`${APP_API_URL.REQUISITION}`,payload, {
+            params: {
+                requisition_id:requisition_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const fetchAllRequisitionItems = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -167,6 +183,23 @@ export const addRequisitionItem = (payload, requisition_id) =>{
 export const updateRequisitionItem = (payload, requisition_id, requisition_item_id) =>{
     return new Promise((resolve,reject) =>{
         axios.patch(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
+            params: {
+                requisition_id: requisition_id,
+                requisition_item_id: requisition_item_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const deleteRequisitionItem = (requisition_id, requisition_item_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.delete(`${APP_API_URL.REQUISITION_ITEM}`, {
             params: {
                 requisition_id: requisition_id,
                 requisition_item_id: requisition_item_id
