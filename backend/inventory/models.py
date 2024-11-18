@@ -112,12 +112,6 @@ class Requisition(models.Model):
       
         
 class RequisitionItem(models.Model):
-    STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('APPROVED', 'approved'),
-        ('REJECTED', 'rejected')
-    ]
-    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     quantity_requested = models.IntegerField()
     quantity_approved = models.IntegerField(default=0)  
     date_created = models.DateTimeField(auto_now_add=True)
