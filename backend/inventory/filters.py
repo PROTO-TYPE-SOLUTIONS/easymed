@@ -6,8 +6,16 @@ from .models import (
     Item,
     PurchaseOrder,
     Supplier,
-    PurchaseOrderItem
+    PurchaseOrderItem,
+    RequisitionItem
+
 )
+
+class RequisitionItemFilter(django_filters.FilterSet):
+    class Meta:
+        model = RequisitionItem
+        fields = ['preferred_supplier']
+
 
 class InventoryFilter(django_filters.FilterSet):
     item = django_filters.CharFilter(field_name='item__id', lookup_expr='icontains')

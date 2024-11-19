@@ -230,22 +230,28 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['PO_number', 'date_created', 'is_dispatched']
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        requisition_id = self.context.get('requisition_id')
-        ordered_by = self.context.get('requested_by')
+        context = self.context
+        request = context.get('request')
+        requisition_id = context.get('requisition_id')
+        supplier_id = context.get('supplier_id')
+        ordered_by = context.get('requested_by')
 
         requisition_items = RequisitionItem.objects.filter(
             requisition_id=requisition_id,
+            preferred_supplier_id=supplier_id,
             ordered=False
         )
 
         if not requisition_items.exists():
-            raise serializers.ValidationError("No unprocessed requisition items found for the specified supplier.")
+            raise serializers.ValidationError(
+                "No unprocessed requisition items found for the specified supplier."
+            )
 
         purchase_order = PurchaseOrder.objects.create(
             ordered_by=ordered_by,
             requisition_id=requisition_id
         )
+
         for req_item in requisition_items:
             PurchaseOrderItem.objects.create(
                 purchase_order=purchase_order,
@@ -254,8 +260,9 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
             )
             req_item.ordered = True
             req_item.save()
-            print(purchase_order.PO_number)
+
         return purchase_order
+
     
     def get_items(self, obj):
         purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)

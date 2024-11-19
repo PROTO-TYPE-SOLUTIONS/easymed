@@ -45,7 +45,8 @@ from .filters import (
     InventoryFilter,
     ItemFilter,
     PurchaseOrderFilter,
-    SupplierFilter
+    SupplierFilter,
+    RequisitionItemFilter
 )
 from authperms.permissions import IsSystemsAdminUser
 
@@ -134,6 +135,8 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
 
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemListUpdateSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RequisitionItemFilter
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -181,9 +184,11 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         return PurchaseOrder.objects.all()
 
     def get_serializer_context(self):
+        supplier_id = self.request.query_params.get('preferred_supplier')
         requisition_id = self.kwargs.get('requisition_pk')
         return {
             'request': self.request,
+            'supplier_id': supplier_id,
             'requisition_id': requisition_id,
             'requested_by': self.request.user 
         }
