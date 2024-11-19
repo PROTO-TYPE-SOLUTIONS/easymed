@@ -44,8 +44,9 @@ export default async function handler(req, res) {
             //     }
             // };
             const body = req.body;
+            const query = req.query;
 
-            await backendAxiosInstance.post(`${API_URL.PURCHASE_ORDER}`,body)
+            await backendAxiosInstance.post(`${API_URL.PURCHASE_ORDER}${query.requisition_id}/purchase-orders/`,body)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

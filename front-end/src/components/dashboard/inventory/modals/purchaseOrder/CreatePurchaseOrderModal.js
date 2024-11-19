@@ -93,7 +93,7 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
 
     const generatePurchaseOrder = async () => {
         try{
-            await addPurchaseOrder()
+            await addPurchaseOrder(payload, requisition_id)
 
         }catch(error){
             console.log("ERR", error)            
