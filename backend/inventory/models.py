@@ -102,7 +102,7 @@ class Requisition(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.requisition_number
+        return self.req
       
         
 class RequisitionItem(models.Model):
@@ -112,7 +112,7 @@ class RequisitionItem(models.Model):
     ordered = models.BooleanField(default=False)
 
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
-    preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, default=1)
+    preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
