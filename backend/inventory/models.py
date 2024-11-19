@@ -76,15 +76,9 @@ class Item(models.Model):
 
 
 class Requisition(models.Model):
-    STATUS_CHOICES = [
-        ('COMPLETED', 'completed'),
-        ('PENDING', 'Pending'),
-    ]
     requisition_number = models.CharField(max_length=50, unique=True, editable=False)
     date_created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="PENDING")
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
-    is_approved = models.BooleanField(default=False)
     department_approved = models.BooleanField(default=False)
     procurement_approved = models.BooleanField(default=False)
     department_approval_date = models.DateTimeField(null=True, blank=True)
@@ -108,7 +102,7 @@ class Requisition(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.status
+        return self.requisition_number
       
         
 class RequisitionItem(models.Model):
@@ -118,7 +112,7 @@ class RequisitionItem(models.Model):
     ordered = models.BooleanField(default=False)
 
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
-    preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
+    preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, default=1)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -157,23 +151,27 @@ class PurchaseOrderItem(models.Model):
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
     def __str__(self):
-        return f"{self.item.name} - Purchased: {self.quantity_purchased}"    
+        return f"{self.item.name} - Purchased: {self.quantity_purchased}"  
+
+class IncomingItemsReceiptNOte(models.Model):
+    goods_receipt_number = models.CharField(max_length=100)  
 
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     item_code= models.CharField(max_length=255) # so as to hide names from user
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
     category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES) 
+
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
