@@ -140,7 +140,7 @@ class PurchaseOrder(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Purchase Order by {self.requested_by} - Status: {self.PO_number}"
+        return f"Purchase Order by {self.ordered_by} - Status: {self.PO_number}"
 
 
 class PurchaseOrderItem(models.Model):
