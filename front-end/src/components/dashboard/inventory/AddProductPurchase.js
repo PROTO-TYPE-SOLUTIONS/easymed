@@ -84,7 +84,7 @@ const AddProductPurchase = () => {
       </div>
 
       <DataGrid
-        dataSource={requisitions.filter((requisition)=> requisition.department_approved)}
+        dataSource={requisitions.filter((requisition)=> (requisition.department_approved) && requisition.items.find((req)=> (!req.ordered) && (req.quantity_approved > 0)))}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -126,10 +126,10 @@ const AddProductPurchase = () => {
           caption="Requested By" 
         />
         <Column dataField="procurement_approval_date" caption="Approval Date" />
-        <Column 
+        {/* <Column 
           dataField="status"
           caption="Status"
-        />
+        /> */}
         <Column
           dataField="" 
           caption=""

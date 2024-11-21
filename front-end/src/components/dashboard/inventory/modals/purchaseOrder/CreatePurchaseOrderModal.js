@@ -7,10 +7,11 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { AiFillDelete } from "react-icons/ai";
 import { CiSquareQuestion } from "react-icons/ci";
-// import AddRequisitionItemModal from './AddRequisitionItemModal';
-// import EditRequisitionItemModal from './EditRequisitionItemModal';
 import { addPurchaseOrder, deleteRequisitionItem, updateRequisition } from '@/redux/service/inventory';
 import EditRequisitionItemModal from '../requisition/EditRequisitionItemModal';
+import { useAuth } from '@/assets/hooks/use-auth';
+import { useDispatch } from 'react-redux';
+import { updateRequisitionAfterPoGenerate } from '@/redux/features/inventory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -31,6 +32,8 @@ const getActions = () => {
   };
 
 const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedRowData }) => {
+    const auth = useAuth()
+    const dispatch = useDispatch()
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
     const [showInfo, setShowInfo] = useState(true);
     const [showNavButtons, setShowNavButtons] = useState(true);
@@ -50,6 +53,8 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
     const handleClose = () => {
         setOpen(false);
     };
+
+    console.log("FORM", auth)
 
     const onMenuClick = async (menu, data) => {
         if (menu.action === "edit") {
@@ -83,6 +88,8 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
             await updateRequisition(payload, selectedRowData.id)
             const updatedData = {...selectedRowData, procurement_approved: true}
             setSelectedRowData(updatedData)
+            dispatch(updateRequisitionAfterPoGenerate(updatedData))
+
 
             // handleClose()
 
@@ -92,13 +99,56 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
     }
 
     const generatePurchaseOrder = async () => {
-        try{
-            await addPurchaseOrder(payload, requisition_id)
+        // Extract requisition IDs from selected items
+        const req_ids = selectedItems?.selectedRowKeys.map((req_item) => req_item.id);
+    
+        const payload = {
+            "requisition_items": req_ids,
+            "ordered_by": parseInt(auth.user_id),
+        };
+        
+        try {
+            // Call the API to add the purchase order
+            const response = await addPurchaseOrder(payload, selectedRowData.id, auth);
+    
+            let newData = []
+    
+            // Update the `ordered` field to `true` for each selected item
+            const updatedRowKeys = selectedRowData?.items.map((req_item) => {
+                const foundItem = req_ids.find((item)=> item === req_item.id)
+                if(foundItem){
+                    const updated_req_item =  {
+                        ...req_item,
+                        ordered: true,
+                    }
+                    newData.push(updated_req_item)    
 
-        }catch(error){
-            console.log("ERR", error)            
+                }else{
+                    newData.push(req_item)
+                }
+            });
+
+            let newRowData = {
+                ...selectedRowData,
+                items: newData
+            }
+
+            //update state of items in row
+            setSelectedRowData(newRowData)
+            // update requisition in store
+            dispatch(updateRequisitionAfterPoGenerate(newRowData))
+            // close modal if all have been po created
+            // check for un approved items
+            const unApproved = newRowData.items.find((item)=>(!item.ordered) && (item.quantity_approved > 0))
+            console.log("AGEEE", unApproved)
+            if(!unApproved){
+                handleClose()
+            }
+
+        } catch (error) {
+            console.error("ERROR", error);
         }
-    }
+    }; 
 
 
 
@@ -125,7 +175,7 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
                 </div>
             </DialogTitle>
             <DataGrid
-                dataSource={selectedRowData?.procurement_approved ? selectedRowData?.items.filter((item)=>item.quantity_approved > 0) : selectedRowData?.items}
+                dataSource={selectedRowData?.procurement_approved ? selectedRowData?.items.filter((item)=>(item.quantity_approved > 0) && !item.ordered ) : selectedRowData?.items.filter((req)=>!req.ordered)}
                 allowColumnReordering={true}
                 rowAlternationEnabled={true}
                 showBorders={true}

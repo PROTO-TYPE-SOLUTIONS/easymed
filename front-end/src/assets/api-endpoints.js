@@ -82,7 +82,7 @@ export const API_URL = {
   REQUISITION: "/inventory/requisition/",
   REQUISITION_ITEM: "/inventory/requisition/",
   FETCH_ALL_REQUISITION_ITEMS: "/inventory/requisitionitems/all_items/",
-  PURCHASE_ORDER: "/inventory/requisition/",
+  PURCHASE_ORDER: "/inventory/",
   PURCHASE_ORDER_ITEM: "/inventory/purchase-order-item/",
   FETCH_INCOMING_ITEMS: "/inventory/incoming-item/",
 

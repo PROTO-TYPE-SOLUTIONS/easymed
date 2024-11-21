@@ -39,15 +39,15 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
             const body = req.body;
             const query = req.query;
 
-            await backendAxiosInstance.post(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/`,body)
+            await backendAxiosInstance.post(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/`,body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
@@ -65,15 +65,15 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
             const body = req.body;
             const query = req.query;
 
-            await backendAxiosInstance.patch(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/${query.requisition_item_id}/`,body)
+            await backendAxiosInstance.patch(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/${query.requisition_item_id}/`,body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

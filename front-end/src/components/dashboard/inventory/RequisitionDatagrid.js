@@ -172,11 +172,7 @@ const RequisitionDatagrid = () => {
           dataField="ordered_by"
           caption="Requested By" 
         />
-        <Column dataField="procurement_approval_date" caption="Approval Date" />
-        <Column 
-          dataField="status"
-          caption="Status"
-        />
+        <Column dataField="department_approval_date" caption="Department Approval Date" />
         <Column
           dataField="" 
           caption=""

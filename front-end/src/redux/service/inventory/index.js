@@ -227,11 +227,30 @@ export const fetchRequisitions = (auth) =>{
     })
 }
 
-export const addPurchaseOrder = (payload, requisition_id) =>{
+export const addPurchaseOrder = (payload, requisition_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.PURCHASE_ORDER}`,payload , {
+        axiosInstance.post(`${APP_API_URL.PURCHASE_ORDER}`,payload , {
             params: {
                 requisition_id: requisition_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updatePurchaseOrder = (payload, requisition_id, purchase_order, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.PURCHASE_ORDER}`,payload , {
+            params: {
+                requisition_id: requisition_id,
+                purchase_order: purchase_order
             }
         })
             .then((res) =>{

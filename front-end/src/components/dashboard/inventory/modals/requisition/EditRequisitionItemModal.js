@@ -3,7 +3,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { DialogTitle, Grid } from "@mui/material";
 import * as Yup from "yup";
 import { useSelector, useDispatch } from "react-redux";
-import { getAllItems, getItems, getAllSuppliers, addItemToInventoryList } from "@/redux/features/inventory";
+import { getAllItems, getItems, getAllSuppliers, updateRequisitionAfterPoGenerate } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -77,6 +77,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
         
           // Update the selected row data with the updated requisition
           setSelectedRowData(updatedRequisition);
+          dispatch(updateRequisitionAfterPoGenerate(updatedRequisition))
         }
 
       }
