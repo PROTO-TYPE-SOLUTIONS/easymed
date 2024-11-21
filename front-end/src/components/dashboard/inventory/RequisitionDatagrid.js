@@ -160,22 +160,19 @@ const RequisitionDatagrid = () => {
           caption="Department"
         />
         <Column 
+          dataField="ordered_by"
+          caption="Requested By" 
+        />
+        <Column dataField="date_created" caption="Requested Date" />
+        <Column 
           dataField="total_items_requested" 
           caption="Items"
         />
         <Column 
-          dataField="requested_by"
+          dataField="ordered_by"
           caption="Requested By" 
-          cellRender={(cellData) => {
-            const user = usersData.find(user => user.id === cellData.data.requested_by);
-            return user ? `${user.first_name} ${user.last_name}` : 'user not found';
-          }}
-          />
-        <Column 
-          dataField="status"
-          caption="Status"
         />
-        <Column dataField="date_created" caption="Requested Date" />
+        <Column dataField="department_approval_date" caption="Department Approval Date" />
         <Column
           dataField="" 
           caption=""

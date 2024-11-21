@@ -1,11 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions, fetchPurchaseOrders, fetchIncomingItems } from "@/redux/service/inventory";
+import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions,
+   fetchPurchaseOrders, fetchIncomingItems, fetchAllRequisitionItems } from "@/redux/service/inventory";
 
 
 const initialState = {
   inventories: [],
   inventoryItems: [],
   requisitions: [],
+  requisitionItems: [],
   purchaseOrderItems: [],
   purchaseOrders: [],
   items: [],
@@ -49,8 +51,35 @@ const InventorySlice = createSlice({
     setRequisitions: (state, action) => {
       state.requisitions = action.payload;
     },
+    setRequisitionsAfterPoGenerate: (state, action) => {
+      const requisitionIndex = state.requisitions.findIndex(
+        (req) => req.id === action.payload.id
+      );
+      if (requisitionIndex !== -1) {
+        // If requisition is found, update the existing item in the array
+        state.requisitions[requisitionIndex] = {
+          ...state.requisitions[requisitionIndex], // Spread existing requisition data
+          ...action.payload, // Spread the updated data from the action payload
+        };
+      }
+    },
+    setRequisitionsItems: (state, action) => {
+      state.requisitionItems = action.payload;
+    },
     setPurchaseOrders: (state, action) => {
       state.purchaseOrders = action.payload;
+    },
+    setPoAfterDispatch: (state, action) => {
+      const orderIndex = state.purchaseOrders.findIndex(
+        (po) => po.id === action.payload.id
+      );
+      if (orderIndex !== -1) {
+        // If po is found, update the existing item in the array
+        state.purchaseOrders[orderIndex] = {
+          ...state.purchaseOrders[orderIndex], // Spread existing po data
+          ...action.payload, // Spread the updated data from the action payload
+        };
+      }
     },
     setIncoming:(state, action) => {
       state.incomingItems = action.payload;
@@ -99,7 +128,10 @@ const InventorySlice = createSlice({
   },
 });
 
-export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, setPurchaseOrderItems, setPurchaseOrderItemsPdf, clearPurchaseOrderItemsPdf, setIncoming } = InventorySlice.actions;
+export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, 
+  setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, 
+  setPurchaseOrderItems, setPurchaseOrderItemsPdf, setRequisitionsAfterPoGenerate, setPoAfterDispatch,
+  clearPurchaseOrderItemsPdf, setIncoming, setRequisitionsItems } = InventorySlice.actions;
 
 
 export const getAllItems = () => async (dispatch) => {
@@ -126,6 +158,15 @@ export const getAllRequisitions = (auth) => async (dispatch) => {
     dispatch(setRequisitions(response));
   } catch (error) {
     console.log("REQUISITIONS_ERROR ", error);
+  }
+};
+
+export const getAllRequisitionItems = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchAllRequisitionItems(auth);
+    dispatch(setRequisitionsItems(response));
+  } catch (error) {
+    console.log("REQUISITIONS_ITEMS_ERROR ", error);
   }
 };
 
@@ -200,6 +241,13 @@ export const clearItemsToPurchaseOrderPdf = () => (dispatch) => {
 
 export const updateAnItem = (item) => (dispatch) => {
   dispatch(updateItem(item));
+};
+
+export const updateRequisitionAfterPoGenerate = (requisition) => (dispatch) => {
+  dispatch(setRequisitionsAfterPoGenerate(requisition));
+};
+export const updatePOAfterDispatch = (po) => (dispatch) => {
+  dispatch(setPoAfterDispatch(po));
 };
 
 

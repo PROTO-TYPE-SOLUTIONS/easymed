@@ -6,11 +6,11 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { AiFillDelete } from "react-icons/ai";
 import { CiSquareQuestion } from "react-icons/ci";
-import AddRequisitionItemModal from './AddRequisitionItemModal';
-import EditRequisitionItemModal from './EditRequisitionItemModal';
-import { deleteRequisitionItem, updateRequisition } from '@/redux/service/inventory';
-import { updateRequisitionAfterPoGenerate } from '@/redux/features/inventory';
+import EditRequisitionItemModal from '../requisition/EditRequisitionItemModal';
+import { deleteRequisitionItem, updatePurchaseOrder, updateRequisition } from '@/redux/service/inventory';
+import { useAuth } from '@/assets/hooks/use-auth';
 import { useDispatch } from 'react-redux';
+import { updatePOAfterDispatch } from '@/redux/features/inventory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -35,12 +35,13 @@ const getActions = () => {
     return actions;
   };
 
-const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelectedRowData }) => {
+const ViewPurchaseOrderItemsModal = ({ open, setOpen, selectedRowData, setSelectedRowData }) => {
+    const auth = useAuth()
+    const dispatch = useDispatch()
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
     const [showInfo, setShowInfo] = useState(true);
     const [showNavButtons, setShowNavButtons] = useState(true);
     const userActions = getActions();
-    const dispatch = useDispatch()
     const [editOpen, setEditOpen] = useState(false);
     const [selectedEditRowData, setSelectedEditRowData] = useState({})
 
@@ -65,9 +66,9 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
     const onMenuClick = async (menu, data) => {
         if (menu.action === "edit") {
           setSelectedEditRowData(data);
-          setEditOpen(true);
+        //   setEditOpen(true);
         }else if(menu.action === "delete"){
-            deleteReqItem(data)
+            // deleteReqItem(data)
         }
     };
 
@@ -85,20 +86,16 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
       };
 
 
-    const approveRequisition = async() => {
+    const approveOrder = async() => {
         const payload = {
-
-            department_approved: true,
-            status: 'completed'
-
+            is_dispatched: true
         }
         try{
-            await updateRequisition(payload, selectedRowData.id)
-            const updatedData = {...selectedRowData, department_approved: true, department_approval_date: new Date().toISOString()}
+            await updatePurchaseOrder(payload, selectedRowData.requisition, selectedRowData.id, auth)
+            const updatedData = {...selectedRowData, is_dispatched: true}
             setSelectedRowData(updatedData)
             // handleClose()
-            dispatch(updateRequisitionAfterPoGenerate(updatedData))
-
+            dispatch(updatePOAfterDispatch(updatedData))
 
         }catch(error){
             console.log("ERROR", error)
@@ -121,9 +118,8 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
             <DialogTitle>
                 <div className='flex justify-between'>
                     <h2 className='text-lg font-bold'>{selectedRowData.requisition_number}</h2>
-                    {!selectedRowData?.department_approved && (<div className='flex gap-5'>
-                    <button onClick={()=>approveRequisition()} className="bg-primary text-white text-sm rounded px-3 py-2"> Approve</button>
-                    <AddRequisitionItemModal requisition={selectedRowData} setSelectedRowData={setSelectedRowData}/>
+                    {!selectedRowData?.is_dispatched && (<div className='flex gap-5'>
+                    <button onClick={()=>approveOrder()} className="bg-primary text-white text-sm rounded px-3 py-2"> dispatch</button>
                     </div>)}
                 </div>
             </DialogTitle>
@@ -190,7 +186,7 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
                 dataField="status"
                 caption="Status"
                 /> */}
-                {!selectedRowData?.department_approved && (<Column
+                {!selectedRowData?.is_dispatched && (<Column
                     dataField="" 
                     caption=""
                     cellRender={actionsFunc}
@@ -203,4 +199,4 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
     )
 }
 
-export default ViewRequisitionItemsModal
+export default ViewPurchaseOrderItemsModal
