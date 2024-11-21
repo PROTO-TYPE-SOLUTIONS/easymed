@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Sum
 from decimal import Decimal
 from django.utils import timezone
@@ -19,6 +20,12 @@ from .models import (
     InventoryInsuranceSaleprice
 )
 
+from .validators import (
+    validate_quantity_requested,
+    validate_requisition_item_uniqueness,
+    assign_default_supplier
+)
+
 CustomUser = get_user_model()
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -34,25 +41,8 @@ class SupplierSerializer(serializers.ModelSerializer):
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = '__all__'
+        fields = '__all__'    
 
-class ItemPOSerializer(serializers.ModelSerializer):
-    total_amount = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = PurchaseOrderItem
-        fields = ['id', 'item_code', 'item_name', 'description', 'buying_price', 'quantity_approved', 'total_amount', 'selling_price', 'date_created']
-        
-    def get_total_amount(self, obj):
-        return float(obj.quantity_approved * obj.buying_price)
-
-    def update(self, instance, validated_data):
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.clean()
-        instance.save()
-        return instance    
-    
 class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=False)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
@@ -68,27 +58,45 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
         model = RequisitionItem
         fields = [
             'id',
-            'item','item_code', 'item_name',             
-            'quantity_at_hand', 'quantity_requested',  
-            'preferred_supplier', 'preferred_supplier_name',  
-            'buying_price', 'selling_price', 'vat_rate', 'date_created',           
+            'item', 'item_code', 'item_name',
+            'quantity_at_hand', 'quantity_requested',
+            'preferred_supplier', 'preferred_supplier_name',
+            'buying_price', 'selling_price', 'vat_rate', 'date_created',
         ]
 
+    def validate_quantity_requested(self, value):
+        return validate_quantity_requested(value)
+
+    def validate(self, attrs):
+        requisition_id = self.context.get('requisition_id')
+        item = attrs.get('item')
+        preferred_supplier = attrs.get('preferred_supplier')
+
+        validate_requisition_item_uniqueness(
+            requisition_id, item, preferred_supplier, attrs.get('quantity_requested')
+        )
+        assign_default_supplier(attrs)
+        return attrs
+    
     def create(self, validated_data):
         requisition_id = self.context.get('requisition_id')
         validated_data['requisition_id'] = requisition_id
 
-        if 'preferred_supplier' not in validated_data or validated_data['preferred_supplier'] is None:
-            default_supplier = Supplier.objects.first()
-            print("tf")
-            if not default_supplier:
-                raise ValidationError("No supplier is available. Please add a supplier first.")
-            validated_data['preferred_supplier'] = default_supplier
+        with transaction.atomic():
+            existing_item = RequisitionItem.objects.filter(
+                requisition_id=requisition_id,
+                item=validated_data['item'],
+                preferred_supplier=validated_data['preferred_supplier']
+            ).first()
 
-        requisition_item = RequisitionItem.objects.create(**validated_data)
-        return requisition_item
+            if existing_item:
+                existing_item.quantity_requested += validated_data['quantity_requested']
+                existing_item.save()
+                return existing_item
 
-        
+            requisition_item = RequisitionItem.objects.create(**validated_data)
+            return requisition_item
+
 class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     requisition_number = serializers.CharField(source='requisition.requisition_number', read_only=True)
     requisition_date_created = serializers.DateTimeField(source='requisition.date_created', read_only=True)
@@ -154,25 +162,59 @@ class RequisitionCreateSerializer(serializers.ModelSerializer):
         fields = ['requested_by', 'department', 'department_name', 'items']
         read_only_fields = ['id', 'date_created', 'department_name']
 
+    def validate(self, attrs):
+        """
+        Custom validation to ensure quantity requested is greater than 0 and a default supplier is assigned if needed.
+        """
+        items_data = attrs.get('items', [])
+        
+        # Assign default supplier if not provided
+        for item_data in items_data:
+            assign_default_supplier(item_data)
+            
+            # Validate quantity requested
+            if 'quantity_requested' in item_data:
+                validate_quantity_requested(item_data['quantity_requested'])
+
+            # Ensure requisition item uniqueness by supplier and item
+            requisition_id = attrs.get('id')
+            item = item_data['item']
+            preferred_supplier = item_data['preferred_supplier']
+            quantity_requested = item_data['quantity_requested']
+            validate_requisition_item_uniqueness(requisition_id, item, preferred_supplier, quantity_requested)
+
+        return attrs
+
     def create(self, validated_data):        
         items_data = validated_data.pop('items')
         requested_by = validated_data.pop('requested_by') 
         department = validated_data.pop('department')
 
+        # Create requisition
         requisition = Requisition.objects.create(requested_by=requested_by, department=department, **validated_data)
         
+        # Group items by supplier
+        items_by_supplier = {}
+
         for item_data in items_data:
-            if 'preferred_supplier' not in item_data or item_data['preferred_supplier'] is None:
-                default_supplier = Supplier.objects.first()  
-                if not default_supplier:
-                    raise ValidationError("No supplier is available. Please add a supplier first.")
-                item_data['preferred_supplier'] = default_supplier
-            
+            supplier_id = item_data['preferred_supplier'].id
+            item_id = item_data['item']
+
+            # Create or update the requisition item
+            if (supplier_id, item_id) in items_by_supplier:
+                existing_item = items_by_supplier[(supplier_id, item_id)]
+                # Merge quantities
+                existing_item['quantity_requested'] += item_data['quantity_requested']
+            else:
+                # Initialize a new item entry
+                items_by_supplier[(supplier_id, item_id)] = item_data
+
+        # Now, create requisition items after combining the data
+        for item_data in items_by_supplier.values():
             RequisitionItem.objects.create(requisition=requisition, **item_data)
         
         return requisition
 
-    
     def update(self, instance, validated_data):
         if self.context['request'].method in ['PUT', 'PATCH']:
             department = validated_data.get('department')
