@@ -105,8 +105,9 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='requisition.department.name', read_only=True)
     requested_by_name = serializers.CharField(source='requisition.requested_by.get_full_name', read_only=True)
     preferred_supplier = serializers.CharField(source='preferred_supplier.official_name', read_only=True)
+    preferred_supplier_name = serializers.CharField(source='preferred_supplier.official_name', read_only=True)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
-    item_name = serializers.CharField(source='item.item_name', read_only=True)
+    item_name = serializers.CharField(source='item.name', read_only=True)
     buying_price = serializers.CharField(source='item.buying_price', read_only=True)
     selling_price = serializers.CharField(source='item.selling_price', read_only=True)
     desc = serializers.CharField(source='item.desc', read_only=True)
@@ -121,14 +122,14 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
             'quantity_at_hand', 'quantity_requested', 'quantity_approved', 
             'preferred_supplier', 'buying_price', 
             'vat_rate', 'selling_price', 'requested_amount', 'date_created', 
-            'department_name', 'requested_by_name']
+            'department_name', 'requested_by_name', 'requisition', 'preferred_supplier_name']
         
         read_only_fields = [
             'id', 'ordered', 'date_created', 'item_code', 'desc', 'item_name', 
             'preferred_supplier_name', 'buying_price', 'selling_price', 
             'quantity_at_hand', 'vat_rate', 'requisition_number', 
             'requisition_status', 'requisition_date_created', 
-            'department_name', 'requested_by_name'
+            'department_name', 'requested_by_name', 'requisition'
         ]
 
     def validate(self, attrs):
@@ -348,7 +349,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'PO_number', 'is_dispatched', 'total_items_ordered', 
             'total_amount_before_vat', 'total_vat_amount', 'total_amount', 
-            'ordered_by', 'approved_by', 'items'
+            'ordered_by', 'approved_by', 'items', 'requisition'
         ]
 
     def get_ordered_by(self, obj):
