@@ -21,10 +21,10 @@ from channels.layers import get_channel_layer
 from celery import chain
 
 
-
 """Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
 def create_or_update_inventory_record(incoming_item_id):
+
     try:
         incoming_item = IncomingItem.objects.get(id=incoming_item_id)
 
@@ -39,7 +39,7 @@ def create_or_update_inventory_record(incoming_item_id):
         else:
             inventory.purchase_price = incoming_item.purchase_price
             inventory.sale_price = incoming_item.sale_price
-            inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity
+            inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity, from quantity purchased
             inventory.packed = incoming_item.packed
             inventory.subpacked = incoming_item.subpacked
             inventory.category_one = incoming_item.catgeory_1
@@ -78,6 +78,19 @@ def generate_requisition_pdf(requisition_id):
     HTML(string=html_content).write_pdf(pdf_file_path)
 
     requisition.save
+
+@shared_task
+def create_purchase_order(purchaseorder_id):
+    from inventory.models import PurchaseOrder
+    purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
+    app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
+    html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchaseorder': purchaseorder})
+    pdf_file_path = os.path.join('./easymed/static/purchaseorder/', f'{purchaseorder.id}.pdf')
+
+    os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
+    HTML(string=html_content).write_pdf(pdf_file_path)
+
+    purchaseorder.save
 
 
 '''Task to generated Lab Results Report'''   

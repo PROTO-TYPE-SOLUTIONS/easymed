@@ -1,14 +1,19 @@
+import os
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from rest_framework.response import Response
-
-from django.shortcuts import render
+from rest_framework.response import Response # type: ignore
+from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 from django.http import HttpResponse
 from weasyprint import HTML
 from .models import PurchaseOrderItem
+from django.http import HttpResponse
+from django.conf import settings
 
+
+from .models import Requisition
+from company.models import Company
 from .models import (
     Item,
     Inventory,
@@ -58,7 +63,6 @@ class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all()
     serializer_class = IncomingItemSerializer
 
-
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()
     serializer_class = DepartmentInventorySerializer
@@ -106,20 +110,11 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
-'''
-This view gets the geneated pdf and downloads it locally
-pdf accessed here http://127.0.0.1:8080/download_requisition_pdf/26/
-'''
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.conf import settings
-import os
-
-from .models import Requisition
-from company.models import Company
-
 def download_requisition_pdf(request, requisition_id):
+    '''
+    This view gets the geneated pdf and downloads it locally
+    pdf accessed here http://127.0.0.1:8080/download_requisition_pdf/26/
+    '''
     requisition = get_object_or_404(Requisition, pk=requisition_id)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
     html_template = get_template('requisition.html').render({'requisition_items': requisition_items})
@@ -142,7 +137,6 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
         'company': company
     })
     
-    from weasyprint import HTML
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="purchase_order_report_{purchaseorder_id}.pdf"'
