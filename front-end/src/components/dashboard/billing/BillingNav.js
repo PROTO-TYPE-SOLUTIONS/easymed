@@ -23,6 +23,9 @@ const BillingNav = () => {
     <Link href='/dashboard/billing/report' className={`${pathName === '/dashboard/billing/report' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
       Reports
     </Link>
+    <Link href='/dashboard/billing/settings' className={`${pathName === '/dashboard/billing/settings' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+      Settings
+    </Link>
   </div>
   )
 }

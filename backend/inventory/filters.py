@@ -6,8 +6,16 @@ from .models import (
     Item,
     PurchaseOrder,
     Supplier,
-    PurchaseOrderItem
+    PurchaseOrderItem,
+    RequisitionItem
+
 )
+
+class RequisitionItemFilter(django_filters.FilterSet):
+    class Meta:
+        model = RequisitionItem
+        fields = ['preferred_supplier']
+
 
 class InventoryFilter(django_filters.FilterSet):
     item = django_filters.CharFilter(field_name='item__id', lookup_expr='icontains')
@@ -37,10 +45,10 @@ class PurchaseOrderFilter(django_filters.FilterSet):
 class PurchaseOrderItemFilter(django_filters.FilterSet):
     class Meta:
         model = PurchaseOrderItem
-        fields = ('quantity_purchased', 'id', 'item')
+        fields = ( 'id', 'requisition_item')
 
 
 class SupplierFilter(django_filters.FilterSet):
     class Meta:
         model = Supplier
-        fields = ('name',)
+        fields = ('common_name',)

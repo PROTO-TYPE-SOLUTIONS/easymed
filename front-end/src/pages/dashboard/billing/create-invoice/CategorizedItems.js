@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { fetchInventories } from '@/redux/service/inventory';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { updateInvoiceItems } from '@/redux/service/billing';
+import { toast } from 'react-toastify';
 
 const CategorizedItems = ({ 
   invoiceItem, 
@@ -79,9 +80,7 @@ const CategorizedItems = ({
       setUpdatedInvoiceItem(response);
       updateInvoiceTotals(response)
     } catch (error) {
-      console.log("ERROR SUBMITTING VALUES", error);
-    } finally {
-      console.log("false");
+      toast.error(error);
     }
   };
 

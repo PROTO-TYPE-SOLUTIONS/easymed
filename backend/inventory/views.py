@@ -1,8 +1,9 @@
 import os
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response # type: ignore
+
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 from django.http import HttpResponse
@@ -24,19 +25,24 @@ from .models import (
     Requisition,
     PurchaseOrder,
     PurchaseOrderItem,
+    InventoryInsuranceSaleprice,
 )
 
 from .serializers import (
     ItemSerializer,
-    PurchaseOrderSerializer,
-    PurchaseOrderItemSerializer,
+    PurchaseOrderCreateSerializer,
+    PurchaseOrderListSerializer,
     IncomingItemSerializer,
     InventorySerializer,
     SupplierSerializer,
-    DepartmentSerializer,
+    RequisitionItemCreateSerializer,
     DepartmentInventorySerializer,
-    RequisitionSerializer,
-    RequisitionItemSerializer,  
+    RequisitionCreateSerializer,
+    RequisitionUpdateSerializer,
+    RequisitionItemListUpdateSerializer,
+    RequisitionListSerializer,
+    # RequisitionItemListSerializer,  
+    InventoryInsuranceSalepriceSerializer
 
 )
 
@@ -44,8 +50,10 @@ from .filters import (
     InventoryFilter,
     ItemFilter,
     PurchaseOrderFilter,
-    SupplierFilter
+    SupplierFilter,
+    RequisitionItemFilter
 )
+from authperms.permissions import IsSystemsAdminUser
 
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
@@ -55,7 +63,7 @@ class ItemViewSet(viewsets.ModelViewSet):
 
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderSerializer
+    serializer_class = PurchaseOrderCreateSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PurchaseOrderFilter
 
@@ -68,19 +76,94 @@ class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     serializer_class = DepartmentInventorySerializer
 
 class RequisitionViewSet(viewsets.ModelViewSet):
+    """
+    Allows CRUD operations for a requisition and individual requisition items. 
+    It also facilitates the creation of a purchase order linked to a specific requisition.
+
+                                **URL Patterns**
+    1. **Create Requisition** (`POST /inventory/requisition/`):
+        Example Request:
+         {
+           "requested_by": 1,
+           "department": 3,
+           "items": [
+             {"item": 3, "quantity_requested": 10, "preferred_supplier": 1}
+           ]
+         }
+
+    2. **List All Requisitions** (`GET /inventory/requisition/`)
+
+    3. **Retrieve, Update, or Delete a Requisition** (`GET/PUT/PATCH/DELETE /inventory/requisition/<id>/`)
+
+    4. **Retrieve, Update, or Delete a RequisitionItems** `/inventory/requisition/<id>/requisitionitems/`
+
+    5. **Retrieve, Update, or Delete a a single requisition item** `/inventory/requisition/<id>/requisitionitems/<id>`
+
+    6. **Retrieve all or create purchase orders linked to the requisition** `/inventory/requisition/<id>/purchase-orders/`
+
+    """
+
     queryset = Requisition.objects.all()
-    serializer_class = RequisitionSerializer
 
+    def get_serializer_class(self):
+        if self.action in ['create']:
+            return RequisitionCreateSerializer
+        elif self.action in ['retrieve', 'list']:
+            return RequisitionListSerializer
+        elif self.action in ['update', 'partial_update']:
+            return RequisitionUpdateSerializer
+        return super().get_serializer_class()
+
+    
 class RequisitionItemViewSet(viewsets.ModelViewSet):
-    queryset = RequisitionItem.objects.all()
-    serializer_class = RequisitionItemSerializer    
+    """
+    Provides CRUD operations for requisition items.
 
-    @action(detail=False, methods=['GET'])
-    def by_requisition_id(self, request, requisition_id):
-        items = RequisitionItem.objects.filter(requisition_id=requisition_id)
+    1. **Retrieve or Create Requisition Items Linked to a Specific Requisition**
+       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/`
+       - **Example Request Body for POST**:
+         ```json
+         {
+           "item": 1,
+           "quantity_requested": 10,
+           "preferred_supplier": 3
+         }
+         ```
+
+    2. **Retrieve, Update, or Delete a Specific Requisition Item**
+       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/<requisitionitem_id>/`
+
+    3. **Retrieve All Requisition Items with Pending Status**
+       - **Endpoint**: `/inventory/requisitionitems/all_items/`
+    """
+
+    queryset = RequisitionItem.objects.all()
+    serializer_class = RequisitionItemListUpdateSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RequisitionItemFilter
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return RequisitionItemCreateSerializer
+        elif self.request.method in ["PUT", "PATCH"]:
+            return RequisitionItemListUpdateSerializer
+        return super().get_serializer_class()
+    
+    def get_queryset(self):
+        requisition_id = self.kwargs.get('requisition_pk')
+        return  RequisitionItem.objects.filter(requisition=requisition_id)
+
+    def get_serializer_context(self):
+        requisition_id = self.kwargs.get('requisition_pk')
+        return {'requisition_id': requisition_id}
+    
+    @action(detail=False, methods=['get'], url_path='all_items')
+    def all_items(self, request):
+        """Custom endpoint to return all requisition items ordered by status"""
+        items = RequisitionItem.objects.filter(status='PENDING')
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
-
+    
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
@@ -94,30 +177,60 @@ class SupplierViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = SupplierFilter
 
-
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderSerializer
+    serializer_class = PurchaseOrderCreateSerializer
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete']
 
-class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrderItem.objects.all()
-    serializer_class = PurchaseOrderItemSerializer 
+    def get_queryset(self):
+        requisition_id = self.kwargs.get('requisition_pk')
+        if requisition_id:
+            return PurchaseOrder.objects.filter(requisition_id=requisition_id)
+        return PurchaseOrder.objects.all()
 
-    @action(detail=False, methods=['GET'])
-    def by_purchase_order_id(self, request, purchase_order_id):
-        items = PurchaseOrderItem.objects.filter(purchase_order_id=purchase_order_id)
-        serializer = self.get_serializer(items, many=True)
+    def get_serializer_context(self):
+        requisition_id = self.kwargs.get('requisition_pk')
+        return {
+            'request': self.request,
+            'requisition_id': requisition_id,
+            'requested_by': self.request.user 
+        }
+    
+    def get_serializer_class(self):
+        if self.request.method == 'post':
+            return PurchaseOrderCreateSerializer
+        return PurchaseOrderListSerializer
+    
+    def create(self, request, *args, **kwargs):
+        context = self.get_serializer_context()
+        serializer = PurchaseOrderCreateSerializer(data=request.data, context=context)
+        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['get'])
+    def all_purchase_orders(self, request):
+        purchase_orders = PurchaseOrder.objects.all()
+        serializer = PurchaseOrderListSerializer(purchase_orders, many=True)
         return Response(serializer.data)
 
-
+class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
+    queryset = InventoryInsuranceSaleprice.objects.all()
+    serializer_class = InventoryInsuranceSalepriceSerializer
+    
 def download_requisition_pdf(request, requisition_id):
     '''
     This view gets the geneated pdf and downloads it locally
     pdf accessed here http://127.0.0.1:8080/download_requisition_pdf/26/
     '''
+    print(requisition_id)
     requisition = get_object_or_404(Requisition, pk=requisition_id)
+    print(requisition)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
-    html_template = get_template('requisition.html').render({'requisition_items': requisition_items})
+    print(requisition_items)
+    html_template = get_template('requisition.html').render({'requisition': requisition, 'requisition_items': requisition_items})
     from weasyprint import HTML
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')

@@ -82,7 +82,12 @@ export const updateInvoiceItems = (auth,payloads, invoice_item) =>{
                 resolve(res.data)
             })
             .catch((err) =>{
-                reject(err.message)
+                console.log("THZ THE FUCKING ERROR", err)
+                if(err.response.status === 422){
+                    reject(err.response.data.error)
+                }else{
+                    reject(err.message)
+                }
             })
     })
 }

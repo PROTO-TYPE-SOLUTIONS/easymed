@@ -17,10 +17,22 @@ const AnnouncementSlice = createSlice({
     setAnnouncementsChannels: (state, action) => {
         state.channels = action.payload;
     },
+    updateChannel: (state, action) => {
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.channels.findIndex(channel => parseInt(channel.id) === parseInt(action.payload.id));
+      
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.channels[index] = {
+          ...state.channels[index], // Keep existing properties
+          ...action.payload       // Override with new data
+        };
+      }
+    },
   },
 });
 
-export const { setAnnouncements, setAnnouncementsChannels } = AnnouncementSlice.actions;
+export const { setAnnouncements, setAnnouncementsChannels, updateChannel } = AnnouncementSlice.actions;
 
 
 export const getAllAnnouncements = (auth) => async (dispatch) => {
@@ -39,6 +51,10 @@ export const getAllAnnouncementsChannels = (auth) => async (dispatch) => {
     } catch (error) {
       console.log("Announcements_Channels_ERROR ", error);
     }
+};
+
+export const updateAChannelItemStore = (channel) => (dispatch) => {
+  dispatch(updateChannel(channel));
 };
 
 

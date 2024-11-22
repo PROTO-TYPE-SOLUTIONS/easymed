@@ -21,6 +21,12 @@ const MainSettingsNav = ( { setSelectedRoute, selectedRoute } ) => {
         >
             Permissions
         </li>
+        <li
+          className={`cursor-pointer ${selectedRoute === 'announcements' ? "font-semibold text-xl text-warning ": ""}`} 
+          onClick={()=>setSelectedRoute("announcements")}
+        >
+            Announcements
+        </li>
     </ul>
   )
 }

@@ -1,5 +1,6 @@
 from .models import Invoice, InvoiceItem, PaymentMode
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
@@ -34,6 +35,12 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
     def get_payment_mode_name(self, obj):
         item = obj.payment_mode
         return item.paymet_mode if item  else None
+
+    def save(self, **kwargs):
+        try:
+            return super().save(**kwargs)
+        except ValidationError as e:
+            raise serializers.ValidationError({'detail': str(e)})
 
 
 class PaymentModeSerializer(serializers.ModelSerializer):

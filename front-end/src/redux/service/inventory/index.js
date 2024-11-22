@@ -57,6 +57,36 @@ export const fetchItem = () =>{
     })
 }
 
+export const createItem = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_ITEM}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateItem = (item_id, payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.FETCH_ITEM}`, payload, {
+            params: {
+                item_id: item_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
 export const deleteItem = (id) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.DELETE_ITEM}`,{id})
@@ -105,9 +135,76 @@ export const addRequisition = (payload) =>{
     })
 }
 
-export const addRequisitionItem = (payload) =>{
+export const updateRequisition = (payload, requisition_id) =>{
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.REQUISITION_ITEM}`,payload)
+        axios.patch(`${APP_API_URL.REQUISITION}`,payload, {
+            params: {
+                requisition_id:requisition_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const fetchAllRequisitionItems = (auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.get(`${APP_API_URL.REQUISITION_ITEM}`)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const addRequisitionItem = (payload, requisition_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.post(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
+            params: {
+                requisition_id: requisition_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateRequisitionItem = (payload, requisition_id, requisition_item_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.patch(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
+            params: {
+                requisition_id: requisition_id,
+                requisition_item_id: requisition_item_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const deleteRequisitionItem = (requisition_id, requisition_item_id) =>{
+    return new Promise((resolve,reject) =>{
+        axios.delete(`${APP_API_URL.REQUISITION_ITEM}`, {
+            params: {
+                requisition_id: requisition_id,
+                requisition_item_id: requisition_item_id
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })
@@ -130,9 +227,32 @@ export const fetchRequisitions = (auth) =>{
     })
 }
 
-export const addPurchaseOrder = (payload) =>{
+export const addPurchaseOrder = (payload, requisition_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.PURCHASE_ORDER}`,payload)
+        axiosInstance.post(`${APP_API_URL.PURCHASE_ORDER}`,payload , {
+            params: {
+                requisition_id: requisition_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updatePurchaseOrder = (payload, requisition_id, purchase_order, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.PURCHASE_ORDER}`,payload , {
+            params: {
+                requisition_id: requisition_id,
+                purchase_order: purchase_order
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })
