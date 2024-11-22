@@ -19,13 +19,15 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 const allowedPageSizes = [5, 10, 'all'];
 
 const InventoryDataGrid = () => {
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { item, inventories } = useSelector((store) => store.inventory);
   const dispatch = useDispatch()
   const auth = useAuth();
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+
+  const filteredInventories = inventories.filter((inventory)=> inventory.item_name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   useEffect(() => {
     if (auth) {
@@ -48,17 +50,6 @@ const InventoryDataGrid = () => {
       </Grid>
       <h3 className="text-xl mt-8"> Inventory </h3>
       <Grid className="my-2 flex justify-between gap-4">
-        <Grid className="flex justify-between gap-8 rounded-lg w-full">
-            <select className="px-4 w-full py-2 border broder-gray rounded-lg focus:outline-none" name="" id="">
-              <option value="" selected>                
-              </option>
-              {months.map((month, index) => (
-                <option key={index} value="">
-                  {month.name}
-                </option>
-              ))}
-            </select> 
-        </Grid>
         <Grid className="flex items-center rounded-lg bg-white px-2 w-full" item md={4} xs={4}>
           <img className="h-4 w-4" src='/images/svgs/search.svg'/>
           <input
@@ -76,7 +67,7 @@ const InventoryDataGrid = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={inventories}
+        dataSource={filteredInventories}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -98,12 +89,8 @@ const InventoryDataGrid = () => {
           showNavigationButtons={showNavButtons}
         />
         <Column 
-          dataField="item" 
-          caption="Product Name"
-          cellRender={(cellData) => {
-            const prodName = item.find(prod => prod.id === cellData.data.item);
-            return prodName ? `${prodName.name}` : 'NA';
-          }}   
+          dataField="item_name"
+          caption="Product Name" 
         />
         <Column dataField="purchase_price" caption="Purchase Price"/>
         <Column

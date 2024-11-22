@@ -17,7 +17,8 @@ from .views import (
     LabTestRequestByProcessId,
     PatientSampleByProcessId,
     PatientSampleViewSet,
-    LabTestRequestPanelBySampleView
+    LabTestRequestPanelBySampleView,
+    SpecimenViewSet
 )
 
 router = DefaultRouter()
@@ -31,6 +32,7 @@ router.register(r'equipment-test-request', EquipmentTestRequestViewSet)
 router.register(r'public-lab-test-request', PublicLabTestRequestViewSet)
 router.register(r'process-test-request', ProcessTestRequestViewSet)
 router.register(r'patient-samples', PatientSampleViewSet)
+router.register(r'specimens', SpecimenViewSet)
 
 
 
