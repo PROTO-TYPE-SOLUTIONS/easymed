@@ -167,6 +167,16 @@ const LaboratorySlice = createSlice({
         state.labResultItems = [...state.labResultItems, action.payload];
       }
     },
+    updateLabResultItems: (state, action) => {
+      const labResultItemIndex = state.labResultItems.findIndex(item => item.test_panel === action.payload.test_panel );
+      if (labResultItemIndex !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.labResultItems[labResultItemIndex] = {
+          ...state.labResultItems[labResultItemIndex], // Keep existing properties
+          ...action.payload// Override with new data
+        };
+      }
+    },
     setProcessAllTestRequest: (state, action) => {
       state.processAllTestRequest = [...state.processAllTestRequest, action.payload]
     },
@@ -185,7 +195,7 @@ export const { setLabResults,
   clearProcessAllTestRequest, setProcessesSamples, clearProcessesSamples,
   setPhlebotomySamples, updateLabEquipmentStore, createLabEquipmentStore, setSpecimens, newTestPanelsStore,
   updatePanelsOnPatch, addSpecimenToStoreOnCreate, updateSpecimenToStoreOnPatch,
-  updateProfileToStoreOnPatch, addProfileToStoreOnCreate
+  updateProfileToStoreOnPatch, addProfileToStoreOnCreate, updateLabResultItems
 } = LaboratorySlice.actions;
 
 
@@ -355,6 +365,10 @@ export const getSpecimens = (auth) => async (dispatch) => {
 
 export const addItemToLabResultsItems = (payload) => (dispatch) => {
   dispatch(setLabResultItems(payload));
+};
+
+export const updateItemToLabResultsItems = (payload) => (dispatch) => {
+  dispatch(updateLabResultItems(payload));
 };
 
 export const removeItemToLabResultsItems = (payload) => (dispatch) => {
