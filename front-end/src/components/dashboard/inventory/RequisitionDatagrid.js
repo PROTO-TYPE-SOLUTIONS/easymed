@@ -88,6 +88,20 @@ const RequisitionDatagrid = () => {
     }
   };
 
+  const calculateTotalAmount = ({ data }) => {
+    let amount = 0
+    data.items.forEach((req)=>{
+      if(data.department_approved){
+        let price = parseInt(req.quantity_approved) * parseInt(req.buying_price)
+        amount += price
+      }else{
+        let price = parseInt(req.quantity_requested) * parseInt(req.buying_price)
+        amount += price
+      }
+    })
+    return amount
+  };
+
   useEffect(() => {
     if (auth) {
       dispatch(getAllRequisitions(auth));
@@ -173,6 +187,11 @@ const RequisitionDatagrid = () => {
           caption="Requested By" 
         />
         <Column dataField="department_approval_date" caption="Department Approval Date" />
+        <Column 
+          dataField="items" 
+          caption="Total Amount"
+          cellRender={calculateTotalAmount} 
+        />
         <Column
           dataField="" 
           caption=""

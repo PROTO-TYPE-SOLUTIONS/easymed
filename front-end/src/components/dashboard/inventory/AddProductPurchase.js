@@ -76,6 +76,20 @@ const AddProductPurchase = () => {
     );
   };
 
+  const calculateTotalAmount = ({ data }) => {
+    let amount = 0
+    data.items.forEach((req)=>{
+      if(data.procurement_approved){
+        let price = parseInt(req.quantity_approved) * parseInt(req.buying_price)
+        amount += price
+      }else{
+        let price = parseInt(req.quantity_requested) * parseInt(req.buying_price)
+        amount += price
+      }
+    })
+    return amount
+  };
+
   return (
     <section ref={pdfRef}>
       <div className="flex gap-4 mb-8 items-center">
@@ -126,10 +140,11 @@ const AddProductPurchase = () => {
           caption="Requested By" 
         />
         <Column dataField="procurement_approval_date" caption="Approval Date" />
-        {/* <Column 
-          dataField="status"
-          caption="Status"
-        /> */}
+        <Column 
+          dataField="items" 
+          caption="Total Amount"
+          cellRender={calculateTotalAmount} 
+        />
         <Column
           dataField="" 
           caption=""
