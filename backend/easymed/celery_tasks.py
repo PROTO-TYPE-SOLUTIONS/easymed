@@ -24,33 +24,24 @@ from celery import chain
 
 """Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
-def create_or_update_inventory_record(incoming_item_id):
+def create_or_update_inventory_record(purchase_order_item_id):
     try:
-        incoming_item = IncomingItem.objects.get(id=incoming_item_id)
-
-        # Check if an Inventory record exists for the item
+        purchase_order_item = PurchaseOrderItem.objects.get(id=purchase_order_item_id)
         inventory, created = Inventory.objects.get_or_create(
-            item=incoming_item.item
+            item=purchase_order_item.requisition_item.item
         )
-
-        # Update the existing record or create a new one
         if created:
-            print(f"Inventory record created for incoming item: {incoming_item}")
+            inventory.quantity_at_hand = purchase_order_item.quantity_received
         else:
-            inventory.purchase_price = incoming_item.purchase_price
-            inventory.sale_price = incoming_item.sale_price
-            inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity
-            inventory.packed = incoming_item.packed
-            inventory.subpacked = incoming_item.subpacked
-            inventory.category_one = incoming_item.catgeory_1
-            inventory.save()
-            print(f"Inventory record updated for incoming item: {incoming_item}")
+            inventory.quantity_at_hand += purchase_order_item.quantity_received
 
-    except IncomingItem.DoesNotExist:
-        print(f"Incoming item with ID {incoming_item_id} not found.")
-        # Handle the exception appropriately
+        inventory.packed = purchase_order_item.packed
+        inventory.subpacked = purchase_order_item.subpacked
+        print(inventory.packed)
+        inventory.save()
+    except Exception as e:
+        print(f"Error updating inventory: {str(e)}")
 
-        
 '''Task to generated pdf once Invoice tale gets a new entry'''
 @shared_task
 def generate_invoice_pdf(invoice_id):

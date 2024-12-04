@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'weasyprint',
     'django_filters',
     'channels',
+    'django_extensions',
 
     # user apps
     'authperms.apps.AuthpermsConfig',
