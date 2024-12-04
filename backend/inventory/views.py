@@ -20,6 +20,7 @@ from .models import (
     Requisition,
     PurchaseOrder,
     PurchaseOrderItem,
+    IncomingItemsReceiptNote,
     InventoryInsuranceSaleprice,
 )
 
@@ -27,7 +28,7 @@ from .serializers import (
     ItemSerializer,
     PurchaseOrderCreateSerializer,
     PurchaseOrderListSerializer,
-    IncomingItemSerializer,
+    PurchaseOrderItemListUPdateSerializer,
     InventorySerializer,
     SupplierSerializer,
     RequisitionItemCreateSerializer,
@@ -36,9 +37,8 @@ from .serializers import (
     RequisitionUpdateSerializer,
     RequisitionItemListUpdateSerializer,
     RequisitionListSerializer,
-    # RequisitionItemListSerializer,  
-    InventoryInsuranceSalepriceSerializer
-
+    IncomingItemCreateSerializer,
+    InventoryInsuranceSalepriceSerializer,
 )
 
 from .filters import (
@@ -61,10 +61,6 @@ class PurchaseViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseOrderCreateSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PurchaseOrderFilter
-
-class IncomingItemViewSet(viewsets.ModelViewSet):
-    queryset = IncomingItem.objects.all()
-    serializer_class = IncomingItemSerializer
 
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
@@ -211,7 +207,28 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         purchase_orders = PurchaseOrder.objects.all()
         serializer = PurchaseOrderListSerializer(purchase_orders, many=True)
         return Response(serializer.data)
+    
+class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
+    serializer_class = PurchaseOrderItemListUPdateSerializer
+    allowed_http_methods = ['get', 'put']
+    lookup_field = 'id' 
+    def get_queryset(self):
+        purchase_order_id = self.kwargs.get('purchaseorder_pk')
+        return PurchaseOrderItem.objects.filter(purchase_order=purchase_order_id)
 
+
+class IncomingReceiptNoteViewSet(viewsets.ModelViewSet):
+    queryset = IncomingItemsReceiptNote.objects.all()
+    serializer_class = IncomingItemCreateSerializer
+
+    def get_serializer_context(self):
+        purchase_order_id = self.kwargs.get('purchaseorder_pk')
+        print(self.request.user.id)
+        return {
+            'purchase_order_id': purchase_order_id,
+            'updated_by': self.request.user
+            }
+    
 class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
     queryset = InventoryInsuranceSaleprice.objects.all()
     serializer_class = InventoryInsuranceSalepriceSerializer
