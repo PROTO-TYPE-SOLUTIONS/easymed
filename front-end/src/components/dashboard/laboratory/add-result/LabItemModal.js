@@ -26,7 +26,7 @@ const AddResultItemModal = ({open, setOpen, selected, sample_label}) => {
   };
 
   const initialValues = {
-    result: "",
+    result: selected?.result || '',
     test_panel: selectedPanel ? {value:selectedPanel.id, label: selectedPanel.name} : "",
     lab_test_result: 0
   };
@@ -102,13 +102,13 @@ const AddResultItemModal = ({open, setOpen, selected, sample_label}) => {
             </Grid>
             <Grid item md={12} xs={12}>
             <Field
-              as={selected?.category === 'qualitative' ? 'textarea' : 'input'}
+              as={selected?.is_qualitative ? 'textarea' : 'input'}
               className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
               maxWidth="sm"
-              type={selected?.category === 'qualitative' ? 'text' : 'number'}
+              type={selected?.is_qualitative ? 'text' : 'number'}
               placeholder="Result"
               name="result"
-              rows={selected?.category === 'qualitative' ? 6 : undefined}
+              rows={selected?.is_qualitative ? 6 : undefined}
             />
               <ErrorMessage
                 name="result"
@@ -141,7 +141,7 @@ const AddResultItemModal = ({open, setOpen, selected, sample_label}) => {
                       ></path>
                     </svg>
                   )}
-                  Add Result Item
+                  Save Result
                 </button>
               </div>
             </Grid>

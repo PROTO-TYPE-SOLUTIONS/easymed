@@ -74,6 +74,8 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     patient_age = serializers.SerializerMethodField()
     patient_sex = serializers.SerializerMethodField()
     reference_values = serializers.SerializerMethodField()
+    is_qualitative = serializers.ReadOnlyField(source='test_panel.is_qualitative')
+    is_quantitative = serializers.ReadOnlyField(source='test_panel.is_quantitative')
 
     def get_sale_price(self, instance):
         if instance.test_panel and instance.test_panel.item:
@@ -139,6 +141,8 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
             'reference_values',
             'lab_test_request',
             'is_billed',
+            'is_quantitative',
+            'is_qualitative'
         ]
 
 
