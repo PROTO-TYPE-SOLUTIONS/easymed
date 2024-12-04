@@ -40,6 +40,24 @@ class PurchaseOrderFilter(django_filters.FilterSet):
         model = PurchaseOrder
         fields = ('id', 'supplier_ID__name')
 
+class PurchaseOrderSupplierFilter(django_filters.FilterSet):
+    supplier = django_filters.ModelChoiceFilter(
+        queryset=Supplier.objects.all(),
+        method='filter_by_supplier',
+        label='Supplier'
+    )
+
+    class Meta:
+        model = PurchaseOrder
+        fields = ['supplier']  # This field will be used in filtering
+
+    def filter_by_supplier(self, queryset, name, value):
+        """
+        Filters PurchaseOrders by the supplier of their related PurchaseOrderItems.
+        """
+        return queryset.filter(purchase_order__supplier=value).distinct()
+
+
 
 
 class PurchaseOrderItemFilter(django_filters.FilterSet):
