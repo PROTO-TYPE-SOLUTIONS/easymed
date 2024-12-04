@@ -1,7 +1,6 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
-# from easymed.celery_tasks import create_or_update_inventory_record
-from .models import Requisition, PurchaseOrder, IncomingItem, PurchaseOrderItem
+from .models import Requisition, PurchaseOrder, IncomingItem, PurchaseOrderItem, IncomingItemsReceiptNote
 from easymed.celery_tasks import (
     generate_requisition_pdf,
     generate_purchase_order_pdf,
@@ -32,5 +31,6 @@ def generate_invoice(sender, instance, created, **kwargs):
 def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
     if created:
         generate_purchase_order_pdf.delay(instance.pk)
+
 
 
