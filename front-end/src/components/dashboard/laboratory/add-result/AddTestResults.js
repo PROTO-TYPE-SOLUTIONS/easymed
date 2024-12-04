@@ -7,6 +7,9 @@ import dynamic from "next/dynamic";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Column, Pager, Editing } from "devextreme-react/data-grid";
+import CmtDropdownMenu from '@/assets/DropdownMenu';
+import { LuMoreHorizontal } from 'react-icons/lu';
+import { SlMinus } from 'react-icons/sl';
 
 import { useAuth } from '@/assets/hooks/use-auth';
 import LabItemModal from './LabItemModal';
@@ -19,11 +22,31 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+const getActions = () => {
+  let actions = [
+    {
+      action: "remove",
+      label: "Remove",
+      icon: <SlMinus className="text-success text-xl mx-2" />,
+    },
+    {
+      action: "add-result",
+      label: "Add Results",
+      icon: <SlMinus className="text-success text-xl mx-2" />,
+    },
+  ];
+  
+  return actions;
+};
+
 const AddTestResults = () => {
 
-  const router = useRouter()
+  const userActions = getActions();
+  const [open, setOpen] = React.useState(false);
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selected, setSelectedItem] = useState(null)
+  const [selectedOption, setSelectedOPtion] = useState(null)
   const dispatch = useDispatch();
   const { labResultItems  } = useSelector((store) => store.laboratory);
   const { labTestPanels  } = useSelector((store) => store.laboratory);
@@ -51,6 +74,31 @@ const AddTestResults = () => {
   const validationSchema = Yup.object().shape({
     lab_test_request: Yup.object().required("This field is required!"),
   });
+
+  const onMenuClick = async (menu, data) => {
+    console.log(data)
+    if (menu.action === "remove") {
+      dispatch(removeItemToLabResultsItems(data))
+    }else if(menu.action === "add-result"){
+      setOpen(true);
+      setSelectedOPtion(data)
+    }
+  };
+
+  const actionsFunc = ({ data }) => {
+    return (
+      <>
+        <CmtDropdownMenu
+          sx={{ cursor: "pointer" }}
+          items={userActions}
+          onItemClick={(menu) => onMenuClick(menu, data)}
+          TriggerComponent={
+            <LuMoreHorizontal className="cursor-pointer text-xl" />
+          }
+        />
+      </>
+    );
+  };
 
   const saveLabResults = async (formValue, helpers) => {
     console.log(formValue)
@@ -97,6 +145,9 @@ const AddTestResults = () => {
       <div className="flex gap-4 mb-8 items-center">
           <img onClick={() => router.back()} className="h-3 w-3 cursor-pointer" src="/images/svgs/back_arrow.svg" alt="go back"/>
           <h3 className="text-xl"> Lab Result entry </h3>
+      </div>
+      <div className='flex justify-end'>
+        {selected && (<LabItemModal open={open} setOpen={setOpen} sample_label={selected.label} selected={selectedOption}/>)}
       </div>
 
       <Formik
@@ -158,6 +209,11 @@ const AddTestResults = () => {
           dataField="result" 
           caption="Result" 
           allowEditing={true}
+        />
+        <Column 
+          dataField="" 
+          caption=""
+          cellRender={actionsFunc}
         />
       </DataGrid>
       <Grid className='py-2' item md={4} xs={12}>
