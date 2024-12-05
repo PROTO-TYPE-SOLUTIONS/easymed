@@ -47,10 +47,10 @@ class Item(models.Model):
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    quantity_at_hand = models.IntegerField()
-    re_order_level = models.IntegerField()     
-    buying_price = models.DecimalField(max_digits=10, decimal_places=2) 
-    selling_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity_at_hand = models.IntegerField(default=10)
+    re_order_level = models.IntegerField(default=10)     
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2, default=10) 
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
 
     def clean(self):
@@ -220,9 +220,9 @@ class Inventory(models.Model):
         ('Internal', 'internal'),
     ]
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity_in_stock = models.IntegerField()
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=20)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=10)
+    quantity_in_stock = models.IntegerField(default=0)
     packed = models.CharField(max_length=255)
     subpacked = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)

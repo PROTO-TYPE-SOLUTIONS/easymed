@@ -143,18 +143,15 @@ const LabResultDataGrid = () => {
         <Column
           dataField="patient_number" 
           caption="PId" 
-          width={120} 
         />
         <Column
           dataField="patient" 
           caption="Patient Name" 
-          width={200}
           cellRender={patientNameRender}
         />
         <Column
           dataField=""
           caption=""
-          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>
