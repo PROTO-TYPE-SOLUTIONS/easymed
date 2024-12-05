@@ -155,6 +155,8 @@ class PurchaseOrderItem(models.Model):
 
 class IncomingItemsReceiptNOte(models.Model):
     goods_receipt_number = models.CharField(max_length=100)  
+
+
 class GoodsReceiptNote(models.Model):
     '''
     Create a signal to gen pdf
@@ -205,7 +207,6 @@ class IncomingItem(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
     category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES) 
-
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)

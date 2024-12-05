@@ -23,7 +23,7 @@ router.register(r'inventories', InventoryViewSet)
 router.register(r'suppliers', SupplierViewSet)
 router.register(r'department-inventory', DepartmentInventoryViewSet)
 router.register(r'requisition', RequisitionViewSet, basename='requisition')
-router.register(r'incoming-item', IncomingItemViewSet)
+router.register(r'incoming-item', IncomingItemViewSet, basename='incoming-item-list')
 router.register(r'insurance-prices', InventoryInsuranceSalepriceViewSet)
 
 router.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')

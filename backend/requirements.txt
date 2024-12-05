@@ -4,7 +4,6 @@ channels==4.0.0
 channels_redis==4.2.0
 # Django==4.2.5
 django-ledger==0.5.6.2
-
 Django
 django-filter==23.3
 django-guardian==2.4.0
@@ -13,9 +12,7 @@ djangorestframework-simplejwt==5.3.0
 drf-spectacular==0.26.5
 hl7==0.4.5
 inflection==0.5.1
-
 impacket
-
 jsonschema==4.19.1
 jsonschema-specifications==2023.7.1
 PyJWT==2.8.0
@@ -26,7 +23,6 @@ PyYAML==6.0.1
 referencing==0.30.2
 rpds-py==0.10.3
 sqlparse==0.4.4
-
 pysmb==1.2.9.1
 typing_extensions==4.8.0
 tzdata==2023.3
@@ -38,8 +34,8 @@ pillow==10.1.0
 reportlab==4.0.8
 celery==5.3.6
 redis==5.0.1
-
 uvicorn==0.27.1
 uvicorn[standard]
-
 weasyprint==62.3
+drf-nested-routers
+pytest-django
