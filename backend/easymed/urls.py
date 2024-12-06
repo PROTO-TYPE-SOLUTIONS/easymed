@@ -40,7 +40,7 @@ urlpatterns = [
     path('download_invoice_pdf/<int:invoice_id>/', download_invoice_pdf, name='download_invoice_pdf'),
     path('download_requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download_requisition_pdf'),
 
-    path('download_labtestresult_pdf/<int:labtestresult_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
+    path('download_labtestresult_pdf/<int:processtestrequest_id>/', download_labtestresult_pdf, name='download_labtestresult_pdf'),
     path('download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
 
     path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),

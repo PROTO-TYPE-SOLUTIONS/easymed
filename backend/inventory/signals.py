@@ -5,7 +5,8 @@ from easymed.celery_tasks import (
     generate_requisition_pdf,
     generate_purchase_order_pdf,
     create_or_update_inventory_record,
-    create_purchase_order_task
+    create_purchase_order_task,
+    create_purchase_order
 )
 
 
@@ -21,9 +22,10 @@ def update_inventory_after_receipt_note_creation(sender, instance, created, **kw
 
 '''signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry'''
 @receiver(post_save, sender=Requisition)
-def generate_invoice(sender, instance, created, **kwargs):
+def generate_requisition_note(sender, instance, created, **kwargs):
     if created:
         generate_requisition_pdf.delay(instance.pk)
+        create_purchase_order.delay(instance.pk)
 
 
 '''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''

@@ -66,6 +66,7 @@ from .filters import (
     PrescribedDrugFilter
 )
 
+from authperms.permissions import IsPatientUser
 # swagger
 from drf_spectacular.utils import (
     extend_schema,
@@ -93,6 +94,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     serializer_class = PatientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PatientFilter
+    permission_classes = (IsReceptionistUser,)
 
 
 class ConvertToAppointmentAPIView(APIView):

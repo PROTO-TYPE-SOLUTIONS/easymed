@@ -155,6 +155,10 @@ class Receptionist(CustomUser):
     BASE_ROLE = CustomUser.RECEPTIONIST
 
 
+'''Why do we need a DoctorManager?
+Separating query-related logic into a manager (like DoctorManager)
+keeps the Doctor model focused solely on defining what a doctor
+is, not how to retrieve doctors.'''
 class DoctorManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
         users = super().get_queryset(*args, **kwargs)
@@ -162,6 +166,7 @@ class DoctorManager(BaseUserManager):
 
 
 class Doctor(CustomUser):
+    '''Proxy model. No new table created'''
     class Meta:
         proxy = True
 

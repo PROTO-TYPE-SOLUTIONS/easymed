@@ -120,7 +120,6 @@ class PurchaseOrder(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     is_dispatched = models.BooleanField(default=False)
-
     ordered_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ordered_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='po_approved_by')
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True, related_name='requisition')
@@ -176,7 +175,45 @@ class IncomingItemsReceiptNote(models.Model):
     def __str__(self):
         return self.goods_receipt_number
 
+
+class GoodsReceiptNote(models.Model):
+    '''
+    Create a signal to gen pdf
+    '''
+    receipt_no = models.CharField(max_length=255)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def gen_receipt_no(self): 
+        # generate receipt number using celery
+        return f"GRN-{timezone.now().year}-{timezone.now().month}-{timezone.now().day}-{timezone.now().hour}-{timezone.now().minute}-{timezone.now().second}"  
+
+class SupplierAccount(models.Model):
+    '''
+    Create signal to update this from IncoingItem
+    '''
+    STATUS=[
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+    ]
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    account_no = models.CharField(max_length=255)
+    date_created = models.DateTimeField(auto_now_add=True)
+    invoice_no = models.CharField(max_length=255, null=True, blank=True)# get from IncomingItem.supplier_invoice
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=255, choices=STATUS, default="pending")
+
+    def __str__(self):    
+        return self.account_no
+
+
 class IncomingItem(models.Model):
+    '''
+    Update inventory
+    Associate with PO
+    Update Invoice Number
+    Generate Good receipt note
+    Update supplier account
+    '''
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
@@ -189,10 +226,10 @@ class IncomingItem(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
     category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES) 
-
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
+    supplier_invoice = models.CharField(max_length=255, null=True, blank=True) # supplier's Invoice, manual input
 
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"

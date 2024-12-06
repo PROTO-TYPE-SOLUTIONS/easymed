@@ -21,9 +21,9 @@ class Company(models.Model):
     class Meta:
         verbose_name_plural = "company"
 
-
     def __str__(self):
         return self.name    
+
 
 class CompanyBranch(models.Model):
     name = models.CharField(max_length=250)
@@ -42,9 +42,9 @@ class CompanyBranch(models.Model):
     class Meta:
         verbose_name_plural = "Company Branch"
 
-
     def __str__(self):
         return self.name  
+
 
 class InsuranceCompany(models.Model):
     name = models.CharField(max_length=30)

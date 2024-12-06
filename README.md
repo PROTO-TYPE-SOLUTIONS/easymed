@@ -151,9 +151,13 @@ for a given payment mode
 ## Lab reports
 By default, or when explicitly specified, all lab test will be quantitative and will use the following endpoints.  In the same order, create a report, add test-panel-results to that report
 then generate the pdf report
-``/lab/lab-test-results/``
-``/lab/lab-test-results-panel/``
-``/download_labtestresult_pdf/<int:labtestresult_id>/``
+```/lab/lab-test-results/```
+```/lab/lab-test-results-panel/```
+```/download_labtestresult_pdf/<int:labtestresult_id>/```
+
+To get  a test result report for a particular patient, you send a GET request to this endpoint:
+``http://127.0.0.1:8080/download_labtestresult_pdf/{processtestrequest_id}``
+
 
 # Doctor Reports
 This will give you all appointments by given doctor and date range

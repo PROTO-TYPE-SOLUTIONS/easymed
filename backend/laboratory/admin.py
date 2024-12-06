@@ -11,6 +11,7 @@ from .models import (
     Specimen,
     PatientSample,
     ReferenceValue,
+    ProcessTestRequest
 )
 
 admin.site.register(LabReagent)
