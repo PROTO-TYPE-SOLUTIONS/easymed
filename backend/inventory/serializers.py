@@ -51,8 +51,8 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     quantity_at_hand = serializers.IntegerField(source='inventory.quantity_at_hand', read_only=True)
     quantity_requested = serializers.IntegerField()
     preferred_supplier_name = serializers.CharField(source='preferred_supplier.official_name', read_only=True)
-    buying_price = serializers.IntegerField(source='item.buying_price', read_only=True)
-    selling_price = serializers.IntegerField(source='item.selling_price', read_only=True)
+    buying_price = serializers.SerializerMethodField()
+    selling_price = serializers.SerializerMethodField()
     vat_rate = serializers.DecimalField(source='item.vat_rate', max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
@@ -62,8 +62,22 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
             'item', 'item_code', 'item_name',
             'quantity_at_hand', 'quantity_requested',
             'preferred_supplier', 'preferred_supplier_name',
-            'buying_price', 'selling_price', 'vat_rate', 'date_created',
+            'buying_price', 'selling_price', 'vat_rate', 'date_created', 
         ]
+
+    def get_buying_price(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.item)
+            return inventory.buying_price
+        except Inventory.DoesNotExist:
+            return None
+
+    def get_selling_price(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.item)
+            return inventory.selling_price
+        except Inventory.DoesNotExist:
+            return None
 
     def validate_quantity_requested(self, value):
         return validate_quantity_requested(value)
@@ -109,8 +123,8 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     preferred_supplier_name = serializers.CharField(source='preferred_supplier.official_name', read_only=True)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
     item_name = serializers.CharField(source='item.name', read_only=True)
-    buying_price = serializers.CharField(source='item.buying_price', read_only=True)
-    selling_price = serializers.CharField(source='item.selling_price', read_only=True)
+    buying_price = serializers.SerializerMethodField()
+    selling_price = serializers.SerializerMethodField()
     desc = serializers.CharField(source='item.desc', read_only=True)
     quantity_at_hand = serializers.SerializerMethodField()
     requested_amount = serializers.SerializerMethodField()
@@ -133,6 +147,27 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
             'department_name', 'requested_by_name', 'requisition'
         ]
 
+    def get_buying_price(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.item)
+            return inventory.buying_price
+        except Inventory.DoesNotExist:
+            return None
+
+    def get_selling_price(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.item)
+            return inventory.selling_price
+        except Inventory.DoesNotExist:
+            return None
+
+    def get_requested_amount(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.item)
+            return float(obj.quantity_requested * inventory.buying_price)
+        except Inventory.DoesNotExist:
+            return None
+
     def validate(self, attrs):
         quantity_approved = attrs.get('quantity_approved')
         
@@ -146,16 +181,12 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
         return None  
 
     def get_quantity_at_hand(self, obj):
-        inventory = obj.item.inventory.first()  
-        return inventory.quantity_at_hand if inventory else 0
+        return obj.item.inventory.quantity_at_hand
+
     def get_approved_by(self, obj):
         if obj.requisition.approved_by:  
             return f"{obj.requisition.approved_by.first_name} {obj.requisition.approved_by.last_name}"
         return None  
-
-    def get_requested_amount(self, obj):
-        
-        return obj.quantity_requested * obj.item.buying_price
 
 class RequisitionCreateSerializer(serializers.ModelSerializer):
     items = RequisitionItemCreateSerializer(many=True)
@@ -269,7 +300,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     PO_number = serializers.CharField(source='purchase_order.PO_number', read_only=True)
     supplier = serializers.CharField(source='supplier.official_name', read_only=True)
     item_name = serializers.CharField(source='requisition_item.item.name', read_only=True)
-    buying_price = serializers.IntegerField(source='requisition_item.item.buying_price', read_only=True)
+    buying_price = serializers.SerializerMethodField()
     quantity_ordered = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
     total_buying_amount = serializers.SerializerMethodField()
 
@@ -277,6 +308,20 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
         model = PurchaseOrderItem
         fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'quantity_received', 'packed', 'subpacked', 'total_buying_amount', 'date_created']
 
+
+    def get_buying_price(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            return inventory.buying_price
+        except Inventory.DoesNotExist:
+            return None
+
+    def get_total_buying_amount(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            return float(obj.quantity_received * inventory.buying_price)
+        except Inventory.DoesNotExist:
+            return None
 
     def validate(self, attrs):
         quantity_received = attrs.get('quantity_received')
@@ -301,7 +346,11 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
         return instance
 
     def get_total_buying_amount(self, obj):
-        return float(obj.quantity_received * obj.requisition_item.item.buying_price)
+        try:
+            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            return float(obj.quantity_received * inventory.buying_price)
+        except Inventory.DoesNotExist:
+            return None
     
 class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
     requisition_items = serializers.ListField(
@@ -393,20 +442,25 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         return len(distinct_items)
 
     def get_total_amount_before_vat(self, obj):
-        purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
-        total_amount_before_vat = sum(
-            item.requisition_item.quantity_approved * item.requisition_item.item.buying_price
-            for item in purchase_order_items
-        )
-        return total_amount_before_vat
+        total = 0
+        for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
+            try:
+                inventory = Inventory.objects.get(item=item.requisition_item.item)
+                total += item.requisition_item.quantity_approved * inventory.buying_price
+            except Inventory.DoesNotExist:
+                continue
+        return total
 
     def get_total_vat_amount(self, obj):
-        purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
-        total_vat = sum(
-            (item.requisition_item.quantity_approved * item.requisition_item.item.buying_price) *
-            (item.requisition_item.item.vat_rate / 100)
-            for item in purchase_order_items
-        )
+        total_vat = 0
+        for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
+            try:
+                inventory = Inventory.objects.get(item=item.requisition_item.item)
+                amount = item.requisition_item.quantity_approved * inventory.buying_price
+                vat = amount * (item.requisition_item.item.vat_rate / 100)
+                total_vat += vat
+            except Inventory.DoesNotExist:
+                continue
         return total_vat
 
     def get_total_amount(self, obj):
@@ -421,7 +475,6 @@ class IncomingItemCreateSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(),
         write_only=True
     )
-    supplier = serializers.CharField(source="purchase_order.purchase_order_items.first.supplier.official_name", read_only=True)
     po_number = serializers.CharField(source="purchase_order.PO_number", read_only=True)
     supplier = serializers.SerializerMethodField()
     purchase_order_items_detail = serializers.SerializerMethodField()
@@ -442,16 +495,19 @@ class IncomingItemCreateSerializer(serializers.ModelSerializer):
             return purchase_order_item.supplier.official_name  # Adjust based on supplier fields
         return None
     def get_purchase_order_items_detail(self, obj):
-        purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj.purchase_order)
-        return [
-            {
-                "item_code": item.requisition_item.item.item_code,
-                "item_description": item.requisition_item.item.desc,
-                "unit_price": item.requisition_item.item.buying_price,
-                "quantity_received": item.quantity_received
-            }
-            for item in purchase_order_items
-        ]
+        items_detail = []
+        for item in PurchaseOrderItem.objects.filter(purchase_order=obj.purchase_order):
+            try:
+                inventory = Inventory.objects.get(item=item.requisition_item.item)
+                items_detail.append({
+                    "item_code": item.requisition_item.item.item_code,
+                    "item_description": item.requisition_item.item.desc,
+                    "unit_price": inventory.buying_price,
+                    "quantity_received": item.quantity_received
+                })
+            except Inventory.DoesNotExist:
+                continue
+        return items_detail
 
     def create(self, validated_data):
         # Extract context and validated data

@@ -32,6 +32,7 @@ class Item(models.Model):
         ('L', 'Liter'),
     ]
     CATEGORY_CHOICES = [
+        
         ('SurgicalEquipment', 'Surgical Equipment'),
         ('LabReagent', 'Lab Reagent'),
         ('Drug', 'Drug'),
@@ -47,15 +48,8 @@ class Item(models.Model):
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    quantity_at_hand = models.IntegerField(default=10)
-    re_order_level = models.IntegerField(default=10)     
-    buying_price = models.DecimalField(max_digits=10, decimal_places=2, default=10) 
-    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
 
-    def clean(self):
-        if self.buying_price > self.selling_price:
-            raise ValidationError("Buying price cannot exceed selling price")
     def save(self, *args, **kwargs):
         ''' Generate unique item code'''
         name_abbr = ''.join([part[:3].upper() for part in self.name.split()[:2]])
@@ -239,22 +233,26 @@ class Inventory(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=20)
-    sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=10)
-    quantity_in_stock = models.IntegerField(default=0)
-    packed = models.CharField(max_length=255)
-    subpacked = models.CharField(max_length=255)
+    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='inventory')
+    buying_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
+    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
+    quantity_at_hand = models.PositiveIntegerField()
+    re_order_level= models.PositiveIntegerField(default=5)
+    packed = models.CharField(max_length=255, default=10)
+    subpacked = models.CharField(max_length=255, default=50)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
 
     def clean(self):
+        if self.buying_price > self.selling_price:
+            raise ValidationError("Buying price cannot exceed selling price")
+
         if self.re_order_level > self.quantity_at_hand:
             raise ValidationError("Re-order leves cannot exceed the quantity at hand")
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
     
-    class meta:
+    class Meta:
         verbose_name_plural = 'Inventory'
     
 class InventoryInsuranceSaleprice(models.Model):
