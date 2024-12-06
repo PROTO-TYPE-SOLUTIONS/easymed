@@ -491,7 +491,7 @@ class InventorySerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = Inventory
-        fields = ['item', 'item_name', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
 
     def get_insurance_sale_prices(self, obj):
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
@@ -515,6 +515,7 @@ class DepartmentInventorySerializer(serializers.ModelSerializer):
 
 class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='inventory_item.item.name')
+    item_id = serializers.ReadOnlyField(source='inventory_item.item.id')
     insurance_name = serializers.ReadOnlyField(source='insurance_company.name')
     class Meta:
         model = InventoryInsuranceSaleprice
