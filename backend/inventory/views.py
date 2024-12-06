@@ -69,7 +69,7 @@ class PurchaseViewSet(viewsets.ModelViewSet):
 
 class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all()
-    serializer_class = IncomingItemSerializer
+    serializer_class = IncomingItemCreateSerializer
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()

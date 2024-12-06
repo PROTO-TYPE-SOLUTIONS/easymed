@@ -11,6 +11,7 @@ from .views import (
     InventoryViewSet,
     SupplierViewSet,
     DepartmentInventoryViewSet,
+    IncomingItemViewSet,
     RequisitionItemViewSet,
     RequisitionViewSet,
     download_requisition_pdf,
