@@ -26,16 +26,12 @@ from celery import chain
 def create_or_update_inventory_record(incoming_item_id):
 
     try:
-        incoming_item = IncomingItem.objects.get(id=incoming_item_id)
-
-        # Check if an Inventory record exists for the item
+        purchase_order_item = PurchaseOrderItem.objects.get(id=purchase_order_item_id)
         inventory, created = Inventory.objects.get_or_create(
-            item=incoming_item.item
+            item=purchase_order_item.requisition_item.item
         )
-
-        # Update the existing record or create a new one
         if created:
-            print(f"Inventory record created for incoming item: {incoming_item}")
+            inventory.quantity_at_hand = purchase_order_item.quantity_received
         else:
             inventory.purchase_price = incoming_item.purchase_price
             inventory.sale_price = incoming_item.sale_price

@@ -6,7 +6,8 @@ from rest_framework_nested.routers import NestedDefaultRouter
 from .views import (
     ItemViewSet,
     PurchaseOrderViewSet,
-    IncomingItemViewSet,
+    PurchaseOrderItemViewSet,
+    IncomingReceiptNoteViewSet,
     InventoryViewSet,
     SupplierViewSet,
     DepartmentInventoryViewSet,
@@ -25,16 +26,23 @@ router.register(r'department-inventory', DepartmentInventoryViewSet)
 router.register(r'requisition', RequisitionViewSet, basename='requisition')
 router.register(r'incoming-item', IncomingItemViewSet, basename='incoming-item-list')
 router.register(r'insurance-prices', InventoryInsuranceSalepriceViewSet)
-
+router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
 router.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
 
 requisition_url = NestedDefaultRouter(router, 'requisition', lookup='requisition')
 requisition_url.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
 requisition_url.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
 
+purchase_orders_url = NestedDefaultRouter(router, 'purchase-orders', lookup='purchaseorder')
+purchase_orders_url.register(r'purchaseorderitems', PurchaseOrderItemViewSet, basename='purchase_order_items')
+purchase_orders_url.register(r'incomimgreceiptnote', IncomingReceiptNoteViewSet, basename='incoming_receipt_note')
+
+
+
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(requisition_url.urls)),
+    path('', include(purchase_orders_url.urls)),
     path('download__requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
     path('purchase-orders/all_purchase_orders/', PurchaseOrderViewSet.as_view({'get': 'all_purchase_orders'}), name='all_purchase_orders'),
     path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),

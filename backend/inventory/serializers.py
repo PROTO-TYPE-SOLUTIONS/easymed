@@ -17,7 +17,8 @@ from .models import (
     RequisitionItem,
     PurchaseOrder,
     PurchaseOrderItem,
-    InventoryInsuranceSaleprice
+    InventoryInsuranceSaleprice,
+    IncomingItemsReceiptNote
 )
 
 from .validators import (
@@ -47,7 +48,7 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     preferred_supplier = serializers.PrimaryKeyRelatedField(queryset=Supplier.objects.all(), required=False)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
     item_name = serializers.CharField(source='item.name', read_only=True)
-    quantity_at_hand = serializers.IntegerField(source='item.quantity_at_hand', read_only=True)
+    quantity_at_hand = serializers.IntegerField(source='inventory.quantity_at_hand', read_only=True)
     quantity_requested = serializers.IntegerField()
     preferred_supplier_name = serializers.CharField(source='preferred_supplier.official_name', read_only=True)
     buying_price = serializers.IntegerField(source='item.buying_price', read_only=True)
@@ -72,25 +73,25 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
         item = attrs.get('item')
         preferred_supplier = attrs.get('preferred_supplier')
 
-        validate_requisition_item_uniqueness(
-            requisition_id, item, preferred_supplier, attrs.get('quantity_requested')
+        quantity_requested = attrs.get('quantity_requested')
+
+        validation_result = validate_requisition_item_uniqueness(
+            requisition_id, item, preferred_supplier, quantity_requested
         )
-        assign_default_supplier(attrs)
+
+        if validation_result["exists"]:
+            self.context['validation_result'] = validation_result
         return attrs
-    
+
     def create(self, validated_data):
         requisition_id = self.context.get('requisition_id')
         validated_data['requisition_id'] = requisition_id
 
         with transaction.atomic():
-            existing_item = RequisitionItem.objects.filter(
-                requisition_id=requisition_id,
-                item=validated_data['item'],
-                preferred_supplier=validated_data['preferred_supplier']
-            ).first()
-
-            if existing_item:
-                existing_item.quantity_requested += validated_data['quantity_requested']
+            validation_result = self.context.get('validation_result')
+            if validation_result and validation_result["exists"]:
+                existing_item = validation_result["existing_item"]
+                existing_item.quantity_requested = validation_result["new_quantity"]
                 existing_item.save()
                 return existing_item
 
@@ -111,7 +112,7 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     buying_price = serializers.CharField(source='item.buying_price', read_only=True)
     selling_price = serializers.CharField(source='item.selling_price', read_only=True)
     desc = serializers.CharField(source='item.desc', read_only=True)
-    quantity_at_hand = serializers.CharField(source='item.quantity_at_hand', read_only=True)
+    quantity_at_hand = serializers.SerializerMethodField()
     requested_amount = serializers.SerializerMethodField()
     vat_rate = serializers.DecimalField(source='item.vat_rate', max_digits=10, decimal_places=2, read_only=True)
 
@@ -144,12 +145,16 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
             return f"{obj.requisition.requested_by.first_name} {obj.requisition.requested_by.last_name}"
         return None  
 
+    def get_quantity_at_hand(self, obj):
+        inventory = obj.item.inventory.first()  
+        return inventory.quantity_at_hand if inventory else 0
     def get_approved_by(self, obj):
         if obj.requisition.approved_by:  
             return f"{obj.requisition.approved_by.first_name} {obj.requisition.approved_by.last_name}"
         return None  
 
     def get_requested_amount(self, obj):
+        
         return obj.quantity_requested * obj.item.buying_price
 
 class RequisitionCreateSerializer(serializers.ModelSerializer):
@@ -190,27 +195,18 @@ class RequisitionCreateSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items')
         requested_by = validated_data.pop('requested_by') 
         department = validated_data.pop('department')
-
-        # Create requisition
         requisition = Requisition.objects.create(requested_by=requested_by, department=department, **validated_data)
         
-        # Group items by supplier
         items_by_supplier = {}
-
         for item_data in items_data:
             supplier_id = item_data['preferred_supplier'].id
             item_id = item_data['item']
 
-            # Create or update the requisition item
             if (supplier_id, item_id) in items_by_supplier:
                 existing_item = items_by_supplier[(supplier_id, item_id)]
-                # Merge quantities
                 existing_item['quantity_requested'] += item_data['quantity_requested']
             else:
-                # Initialize a new item entry
                 items_by_supplier[(supplier_id, item_id)] = item_data
-
-        # Now, create requisition items after combining the data
         for item_data in items_by_supplier.values():
             RequisitionItem.objects.create(requisition=requisition, **item_data)
         
@@ -269,17 +265,43 @@ class RequisitionListSerializer(serializers.ModelSerializer):
     def get_total_amount(self, obj):
         return sum(item.get('requested_amount') for item in RequisitionItemListUpdateSerializer(obj.items, many=True).data)
 
-class PurchaseOrderItemSerializer(serializers.ModelSerializer):
+class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
+    PO_number = serializers.CharField(source='purchase_order.PO_number', read_only=True)
+    supplier = serializers.CharField(source='supplier.official_name', read_only=True)
     item_name = serializers.CharField(source='requisition_item.item.name', read_only=True)
-    quantity_approved = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
-    total_amount = serializers.SerializerMethodField()
+    buying_price = serializers.IntegerField(source='requisition_item.item.buying_price', read_only=True)
+    quantity_ordered = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
+    total_buying_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = PurchaseOrderItem
-        fields = ['id', 'item_name', 'quantity_approved', 'total_amount', 'date_created', 'supplier']
+        fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'quantity_received', 'packed', 'subpacked', 'total_buying_amount', 'date_created']
 
-    def get_total_amount(self, obj):
-        return float(obj.quantity_approved * obj.requisition_item.item.buying_price)
+
+    def validate(self, attrs):
+        quantity_received = attrs.get('quantity_received')
+        requisition_item = self.instance.requisition_item if self.instance else None
+        quantity_ordered = requisition_item.quantity_approved if requisition_item else None
+
+        if quantity_received is not None and quantity_received <= 0:
+            raise serializers.ValidationError('Quantity received must be greater than 0.')
+
+        if quantity_received is not None and quantity_ordered is not None and quantity_received > quantity_ordered:
+            raise serializers.ValidationError('Quantity received cannot exceed the quantity ordered.')
+
+        return attrs
+
+
+    def update(self, instance, validated_data):
+        
+        instance.quantity_received = validated_data.get('quantity_received', instance.quantity_received)
+        instance.packed= validated_data.get('packed', instance.packed)
+        instance.subpacked= validated_data.get('subpacked', instance.subpacked)
+        instance.save()
+        return instance
+
+    def get_total_buying_amount(self, obj):
+        return float(obj.quantity_received * obj.requisition_item.item.buying_price)
     
 class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
     requisition_items = serializers.ListField(
@@ -392,11 +414,78 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         vat_amount = self.get_total_vat_amount(obj)
         return total_before_vat + vat_amount
 
-class IncomingItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IncomingItem
-        fields = '__all__'
 
+
+class IncomingItemCreateSerializer(serializers.ModelSerializer):
+    purchase_order_items = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True
+    )
+    supplier = serializers.CharField(source="purchase_order.purchase_order_items.first.supplier.official_name", read_only=True)
+    po_number = serializers.CharField(source="purchase_order.PO_number", read_only=True)
+    supplier = serializers.SerializerMethodField()
+    purchase_order_items_detail = serializers.SerializerMethodField()
+
+    class Meta:
+        model = IncomingItemsReceiptNote
+        fields = [
+
+            'id', 'goods_receipt_number', 'supplier', 'invoice_number', 'checked_by', 
+            'purchase_order', 'purchase_order_items', 'po_number', 
+            'purchase_order_items_detail'
+        ]
+        read_only_fields = ['goods_receipt_number', 'supplier', 'po_number', 'purchase_order_items_detail']
+    def get_supplier(self, obj):
+        purchase_order = obj.purchase_order
+        purchase_order_item = PurchaseOrderItem.objects.filter(purchase_order=purchase_order).first()
+        if purchase_order_item and purchase_order_item.supplier:
+            return purchase_order_item.supplier.official_name  # Adjust based on supplier fields
+        return None
+    def get_purchase_order_items_detail(self, obj):
+        purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj.purchase_order)
+        return [
+            {
+                "item_code": item.requisition_item.item.item_code,
+                "item_description": item.requisition_item.item.desc,
+                "unit_price": item.requisition_item.item.buying_price,
+                "quantity_received": item.quantity_received
+            }
+            for item in purchase_order_items
+        ]
+
+    def create(self, validated_data):
+        # Extract context and validated data
+        context = self.context
+        purchase_order_id = context.get('purchase_order_id')
+        updated_by = context.get('updated_by')
+        purchase_order_item_ids = validated_data.pop('purchase_order_items')
+
+        try:
+            purchase_order = PurchaseOrder.objects.get(id=purchase_order_id)
+        except PurchaseOrder.DoesNotExist:
+            raise serializers.ValidationError("The specified purchase order does not exist.")
+
+        purchase_order_items = PurchaseOrderItem.objects.filter(
+            id__in=purchase_order_item_ids,
+            purchase_order=purchase_order,
+            quantity_received__gt=0
+        )
+        if not purchase_order_items.exists():
+            raise serializers.ValidationError("No matching purchase order items found with quantities received greater than 0.")
+
+        # Create the IncomingItemsReceiptNote
+        receipt_note = IncomingItemsReceiptNote.objects.create(
+            purchase_order=purchase_order,
+            updated_by=updated_by,
+            **validated_data
+        )
+
+        # Link filtered purchase order item to receipt note (if needed)
+        for item in purchase_order_items:
+            item.receipt_note = receipt_note  # Assuming `receipt_note` field exists
+            item.save()
+
+        return receipt_note
 class InventorySerializer(serializers.ModelSerializer):
     insurance_sale_prices = serializers.SerializerMethodField()
     item_name = serializers.ReadOnlyField(source='item.name')
