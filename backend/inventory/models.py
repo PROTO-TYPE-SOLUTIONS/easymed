@@ -56,10 +56,6 @@ class Item(models.Model):
     def clean(self):
         if self.buying_price > self.selling_price:
             raise ValidationError("Buying price cannot exceed selling price")
-        
-        if self.re_order_level > self.quantity_at_hand:
-            raise ValidationError("Re-order leves cannot exceed the quantity at hand")
-        
     def save(self, *args, **kwargs):
         ''' Generate unique item code'''
         name_abbr = ''.join([part[:3].upper() for part in self.name.split()[:2]])
@@ -102,7 +98,7 @@ class Requisition(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.req
+        return self.requisition_number
       
         
 class RequisitionItem(models.Model):
@@ -145,16 +141,40 @@ class PurchaseOrder(models.Model):
 
 class PurchaseOrderItem(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    
+    quantity_received = models.IntegerField(default=0)
+    packed = models.CharField(max_length=255)
+    subpacked = models.CharField(max_length=255)
+
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='purchase_order')
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
     def __str__(self):
-        return f"{self.item.name} - Purchased: {self.quantity_purchased}"  
+        return f"{self.requisition_item.item.name} - Purchased: {self.requisition_item.item.quantity_approved}"  
 
-class IncomingItemsReceiptNOte(models.Model):
-    goods_receipt_number = models.CharField(max_length=100)  
+class IncomingItemsReceiptNote(models.Model):
+    goods_receipt_number = models.CharField(max_length=100, unique=True)  
+    # is_checked = models.BooleanField(default=False)
+    invoice_number = models.CharField(max_length=100)
+
+
+    updated_by= models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_by')
+    checked_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='checked_by')
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='incoming_item_purchase_order')
+
+    def save(self, *args, **kwargs):
+        '''Generate goods receipt number'''
+        if not self.goods_receipt_number:  
+            today = timezone.now()
+            year = today.year % 100
+            month = today.month
+            day = today.day
+            random_code = random.randint(1000, 9999)
+            self.goods_receipt_number = f"GRN/{year}/{month:02d}/{day:02d}/{random_code}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.goods_receipt_number
 
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
@@ -191,6 +211,9 @@ class Inventory(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
 
+    def clean(self):
+        if self.re_order_level > self.quantity_at_hand:
+            raise ValidationError("Re-order leves cannot exceed the quantity at hand")
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
     

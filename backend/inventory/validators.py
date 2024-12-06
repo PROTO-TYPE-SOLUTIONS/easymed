@@ -21,14 +21,13 @@ def validate_requisition_item_uniqueness(requisition_id, item, preferred_supplie
     ).first()
 
     if existing_item:
-        previous_quantity = existing_item.quantity_requested
-        new_quantity = previous_quantity + quantity_requested
-        raise ValidationError({
-            "non_field_errors": [
-                f"The item '{item.name}' with supplier '{preferred_supplier.official_name}' "
-                f"already exists. Quantity updated from {previous_quantity} to {new_quantity}."
-            ]
-        })
+        return {
+            "exists": True,
+            "previous_quantity": existing_item.quantity_requested,
+            "new_quantity": existing_item.quantity_requested + quantity_requested,
+            "existing_item": existing_item,
+        }
+    return {"exists": False}
 
 def assign_default_supplier(attrs):
     """
