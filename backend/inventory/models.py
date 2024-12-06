@@ -124,7 +124,6 @@ class PurchaseOrder(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     is_dispatched = models.BooleanField(default=False)
-
     ordered_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ordered_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='po_approved_by')
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True, related_name='requisition')

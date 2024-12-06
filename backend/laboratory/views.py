@@ -332,6 +332,8 @@ def download_labtestresult_pdf(request, processtestrequest_id):
                 'ref_value_high': 'N/A',
                 'unit': panel.test_panel.unit
             })
+    # Construct full logo URL for template
+    company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
 
     context = {
         'processtestrequest': processtestrequest,
@@ -339,6 +341,7 @@ def download_labtestresult_pdf(request, processtestrequest_id):
         'panels': panel_data,
         'patient': patient,
         'company': company,
+        'company_logo_url': company_logo_url,
         'attendance_process': attendance_process,
         'approved_on': panels.first().approved_on if panels.exists() else None
     }
