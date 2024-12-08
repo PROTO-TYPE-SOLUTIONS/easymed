@@ -416,7 +416,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
 
 
 
-class IncomingItemCreateSerializer(serializers.ModelSerializer):
+class IncomingItemSerializer(serializers.ModelSerializer):
     purchase_order_items = serializers.ListField(
         child=serializers.IntegerField(),
         write_only=True
@@ -425,6 +425,7 @@ class IncomingItemCreateSerializer(serializers.ModelSerializer):
     po_number = serializers.CharField(source="purchase_order.PO_number", read_only=True)
     supplier = serializers.SerializerMethodField()
     purchase_order_items_detail = serializers.SerializerMethodField()
+    supplier_invoice= serializers.CharField(source="supplier_invoice", read_only=True)
 
     class Meta:
         model = IncomingItemsReceiptNote
@@ -432,7 +433,7 @@ class IncomingItemCreateSerializer(serializers.ModelSerializer):
 
             'id', 'goods_receipt_number', 'supplier', 'invoice_number', 'checked_by', 
             'purchase_order', 'purchase_order_items', 'po_number', 
-            'purchase_order_items_detail'
+            'purchase_order_items_detail', 'supplier_invoice'
         ]
         read_only_fields = ['goods_receipt_number', 'supplier', 'po_number', 'purchase_order_items_detail']
     def get_supplier(self, obj):

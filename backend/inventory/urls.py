@@ -16,6 +16,7 @@ from .views import (
     download_requisition_pdf,
     download_purchaseorder_pdf,
     InventoryInsuranceSalepriceViewSet,
+    IncomingItemViewSet
 )
 
 router = DefaultRouter()

@@ -42,7 +42,7 @@ from .serializers import (
     RequisitionUpdateSerializer,
     RequisitionItemListUpdateSerializer,
     RequisitionListSerializer,
-    IncomingItemCreateSerializer,
+    IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
 )
 
@@ -227,7 +227,7 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
 
 class IncomingReceiptNoteViewSet(viewsets.ModelViewSet):
     queryset = IncomingItemsReceiptNote.objects.all()
-    serializer_class = IncomingItemCreateSerializer
+    serializer_class = IncomingItemSerializer
 
     def get_serializer_context(self):
         purchase_order_id = self.kwargs.get('purchaseorder_pk')
