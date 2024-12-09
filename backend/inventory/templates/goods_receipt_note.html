@@ -84,16 +84,16 @@
             <th>Item Code</th>
             <th>Item Name</th>
             <th>Quantity</th>
-            <th>Purchase Price</th>
-            <th>Sale Price</th>
+            <th>Supplier IN</th>
+            <th>LOT Number</th>
         </tr>
         {% for item in incoming_items %}
         <tr>
             <td>{{ item.item_code }}</td>
             <td>{{ item.item.name }}</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ item.purchase_price }}</td>
-            <td>{{ item.sale_price }}</td>
+            <td>{{ item.supplier_invoice.amount }}</td>
+            <td>{{ item.supplier_invoice.LOT_number }}</td>
         </tr>
         {% endfor %}
     </table>

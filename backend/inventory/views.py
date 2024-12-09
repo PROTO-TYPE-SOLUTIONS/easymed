@@ -280,6 +280,7 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
     # Extract the Goods Receipt Note and its number (assuming all items share the same GRN)
     goods_receipt_note = incoming_items.first().goods_receipt_note if incoming_items.exists() else None
     grn_number = goods_receipt_note.grn_number if goods_receipt_note else "N/A"
+    print(f'GRN Number: {grn_number}')
     
 
     # Construct full logo URL for template
@@ -289,7 +290,7 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
         'incoming_items': incoming_items,
         'company': company,
         'company_logo_url': company_logo_url,
-        'grn_note_number': grn_number,
+        'grn_number': grn_number,
         }
 
     html_template = get_template('goods_receipt_note.html').render(context)
