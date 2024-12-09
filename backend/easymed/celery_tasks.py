@@ -1,3 +1,4 @@
+
 import os
 from celery import shared_task
 from django.db.models.signals import post_save
@@ -7,8 +8,23 @@ from weasyprint import HTML
 from django.apps import apps
 from django.conf import settings
 from decouple import config
+from company.models import Company
+from django.template.loader import get_template
+import tempfile
+from django.core.mail import EmailMultiAlternatives
+from logging import Logger
 
-from inventory.models import IncomingItem, Inventory, PurchaseOrder, Requisition, RequisitionItem,PurchaseOrderItem
+
+from inventory.models import (
+    IncomingItem,
+    Inventory,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    Requisition,
+    RequisitionItem,
+    GoodsReceiptNote,
+    GoodsReceiptNoteItem
+)
 from billing.models import Invoice, InvoiceItem
 from patient.models import Appointment
 
@@ -23,31 +39,22 @@ from celery import chain
 """Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 @shared_task
 def create_or_update_inventory_record(incoming_item_id):
-
+    incoming_item = IncomingItem.objects.get(id=incoming_item_id)
+    purchase_order_item_id = incoming_item.purchase_order_item_id
     try:
-        incoming_item = IncomingItem.objects.get(id=incoming_item_id)
+        purchase_order_item = PurchaseOrderItem.objects.get(id=purchase_order_item_id)
         inventory, created = Inventory.objects.get_or_create(
-            item=incoming_item.item
+            item=purchase_order_item.requisition_item.item
         )
-        print(incoming_item.id)
-        print("wtf")
-        print(incoming_item.sale_price)
         if created:
-            inventory.quantity_at_hand = incoming_item.quantity
-            inventory.sale_price = incoming_item.sale_price
-            inventory.purchase_price = incoming_item.purchase_price
-            inventory.packed = incoming_item.packed
-            inventory.subpacked = incoming_item.subpacked
-            inventory.category_one = incoming_item.category_one
-            inventory.save()
-            print(f"New inventory record created for incoming item: {incoming_item}")
+            inventory.quantity_at_hand = purchase_order_item.quantity_received
         else:
-            inventory.sale_price = incoming_item.sale_price
             inventory.purchase_price = incoming_item.purchase_price
-            inventory.quantity_at_hand += incoming_item.quantity  # Increment quantity, from quantity purchased
+            inventory.sale_price = incoming_item.sale_price
+            inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity, from quantity purchased
             inventory.packed = incoming_item.packed
             inventory.subpacked = incoming_item.subpacked
-            inventory.category_one = incoming_item.category_one
+            inventory.category_one = incoming_item.catgeory_1
             inventory.save()
             print(f"Inventory record updated for incoming item: {incoming_item}")
 
@@ -108,6 +115,9 @@ def create_purchase_order_task(requisition_id):
     except Exception as e:
         # Handle other exceptions that may arise
         raise ValueError(f"An error occurred while creating the purchase order: {str(e)}")
+
+
+
 
 '''Task to generated Requisition'''   
 @shared_task
@@ -188,7 +198,6 @@ def generate_purchase_order_pdf(purchase_order_id):
     # Optionally, save the file path to the PurchaseOrder model if desired
     purchase_order.save()
 
-    
 
 '''task to send the appointment assigned notification'''
 @shared_task
@@ -232,15 +241,6 @@ def send_appointment_status_email(appointment_id):
 ''''
 This task sends Invoice creation or status update emails with a generated PDF attachment
 '''  
-from company.models import Company
-from django.template.loader import get_template
-import tempfile
-from django.core.mail import EmailMultiAlternatives
-from logging import Logger
-
-
-
-
 @shared_task
 def send_invoice_created_email(invoice_id):
     invoice = Invoice.objects.get(id=invoice_id)
@@ -262,7 +262,6 @@ def send_invoice_created_email(invoice_id):
 
 
 
-
 @shared_task
 def send_invoice_updated_email(invoice_id):
     invoice = Invoice.objects.get(id=invoice_id)
@@ -271,3 +270,4 @@ def send_invoice_updated_email(invoice_id):
     from_email = config('EMAIL_HOST_USER')
     to_email = invoice.patient.email
     send_mail(subject, message, from_email, [to_email])    
+    

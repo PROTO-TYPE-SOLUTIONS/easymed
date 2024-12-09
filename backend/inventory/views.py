@@ -3,6 +3,7 @@ from rest_framework import viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response # type: ignore
+from weasyprint import HTML
 
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
@@ -25,9 +26,11 @@ from .models import (
     Requisition,
     PurchaseOrder,
     PurchaseOrderItem,
-    IncomingItemReceiptNote,
-    IncomingItemReceiptNote,
+    GoodsReceiptNote,
+    GoodsReceiptNoteItem,
     InventoryInsuranceSaleprice,
+    
+
 )
 
 from .serializers import (
@@ -44,8 +47,8 @@ from .serializers import (
     RequisitionItemListUpdateSerializer,
     RequisitionListSerializer,
     IncomingItemSerializer,
-    IncomingItemReceiptNoteSerializer,
     InventoryInsuranceSalepriceSerializer,
+    GoodsReceiptNoteSerializer
 )
 
 from .filters import (
@@ -228,9 +231,9 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
         return PurchaseOrderItem.objects.filter(purchase_order=purchase_order_id)
 
 
-class IncomingReceiptNoteViewSet(viewsets.ModelViewSet):
-    queryset = IncomingItemReceiptNote.objects.all()
-    serializer_class = IncomingItemReceiptNoteSerializer
+class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
+    queryset = GoodsReceiptNote.objects.all()
+    serializer_class = GoodsReceiptNoteSerializer
 
     def get_serializer_context(self):
         purchase_order_id = self.kwargs.get('purchaseorder_pk')
@@ -244,6 +247,7 @@ class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
     queryset = InventoryInsuranceSaleprice.objects.all()
     serializer_class = InventoryInsuranceSalepriceSerializer
     
+
 def download_requisition_pdf(request, requisition_id):
     '''
     This view gets the geneated pdf and downloads it locally
@@ -255,7 +259,7 @@ def download_requisition_pdf(request, requisition_id):
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
     print(requisition_items)
     html_template = get_template('requisition.html').render({'requisition': requisition, 'requisition_items': requisition_items})
-    from weasyprint import HTML
+    
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="purchase_order_report_{requisition_id}.pdf"'
@@ -277,5 +281,22 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="purchase_order_report_{purchaseorder_id}.pdf"'
+
+    return response
+
+
+def download_goods_receipt_note_pdf(request, receiptnote_id):
+    receiptnote = get_object_or_404(GoodsReceiptNote, pk=receiptnote_id)
+    receiptnote_items = GoodsReceiptNoteItem.objects.filter(receiptnote=receiptnote)
+    company = Company.objects.first()
+
+    html_template = get_template('goodsreceiptnote.html').render({
+        'receiptnote': receiptnote,
+        'receiptnote_items': receiptnote_items,
+        'company': company
+    })
+    pdf_file = HTML(string=html_template).write_pdf()
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="receipt_note_report_{receiptnote_id}.pdf"'
 
     return response

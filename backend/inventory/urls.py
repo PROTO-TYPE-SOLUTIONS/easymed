@@ -7,7 +7,7 @@ from .views import (
     ItemViewSet,
     PurchaseOrderViewSet,
     PurchaseOrderItemViewSet,
-    IncomingReceiptNoteViewSet,
+    GoodsReceiptNoteViewSet,
     InventoryViewSet,
     SupplierViewSet,
     DepartmentInventoryViewSet,
@@ -16,6 +16,7 @@ from .views import (
     RequisitionViewSet,
     download_requisition_pdf,
     download_purchaseorder_pdf,
+    download_goods_receipt_note_pdf,
     InventoryInsuranceSalepriceViewSet,
     IncomingItemViewSet
 )
@@ -37,7 +38,7 @@ requisition_url.register(r'purchase-orders', PurchaseOrderViewSet, basename='pur
 
 purchase_orders_url = NestedDefaultRouter(router, 'purchase-orders', lookup='purchaseorder')
 purchase_orders_url.register(r'purchaseorderitems', PurchaseOrderItemViewSet, basename='purchase_order_items')
-purchase_orders_url.register(r'incomimgreceiptnote', IncomingReceiptNoteViewSet, basename='incoming_receipt_note')
+purchase_orders_url.register(r'goodsreceiptnote', GoodsReceiptNoteViewSet, basename='incoming_receipt_note')
 
 
 
@@ -49,6 +50,7 @@ urlpatterns = [
     path('purchase-orders/all_purchase_orders/', PurchaseOrderViewSet.as_view({'get': 'all_purchase_orders'}), name='all_purchase_orders'),
     path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),
     path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
+    path('download-goods-receipt-note', download_goods_receipt_note_pdf, name='download_goods_receipt_note_pdf'),
 ]
 
 if settings.DEBUG:

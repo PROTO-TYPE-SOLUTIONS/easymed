@@ -18,7 +18,8 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
-    IncomingItemReceiptNote
+    GoodsReceiptNoteItem,
+    GoodsReceiptNote
 )
 
 from .validators import (
@@ -473,7 +474,7 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         model = IncomingItem
         fields = '__all__'
 
-class IncomingItemReceiptNoteSerializer(serializers.ModelSerializer):
+class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
     purchase_order_items = serializers.ListField(
         child=serializers.IntegerField(),
         write_only=True
@@ -484,7 +485,7 @@ class IncomingItemReceiptNoteSerializer(serializers.ModelSerializer):
     supplier_invoice= serializers.CharField(source="supplier_invoice", read_only=True)
 
     class Meta:
-        model = IncomingItemReceiptNote
+        model = GoodsReceiptNoteItem
         fields = [
 
             'id', 'goods_receipt_number', 'supplier', 'invoice_number', 'checked_by', 

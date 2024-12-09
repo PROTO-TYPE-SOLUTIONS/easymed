@@ -136,9 +136,7 @@ class PurchaseOrder(models.Model):
 
 class PurchaseOrderItem(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    quantity_received = models.IntegerField(default=0)
-    packed = models.CharField(max_length=255)
-    subpacked = models.CharField(max_length=255)
+    quantity_ordered = models.IntegerField(default=0)
 
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='purchase_order')
@@ -147,59 +145,11 @@ class PurchaseOrderItem(models.Model):
     def __str__(self):
         return f"{self.requisition_item.item.name} - Purchased: {self.requisition_item.item.quantity_approved}"  
 
-class IncomingItemReceiptNote(models.Model):
-    goods_receipt_number = models.CharField(max_length=100, unique=True)  
-    invoice_number = models.CharField(max_length=100)
 
-    updated_by= models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_by')
-    checked_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='checked_by')
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='incoming_item_purchase_order')
-
-    def save(self, *args, **kwargs):
-        '''Generate goods receipt number'''
-        if not self.goods_receipt_number:  
-            today = timezone.now()
-            year = today.year % 100
-            month = today.month
-            day = today.day
-            random_code = random.randint(1000, 9999)
-            self.goods_receipt_number = f"GRN/{year}/{month:02d}/{day:02d}/{random_code}"
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.goods_receipt_number
-
-
-class GoodsReceiptNote(models.Model):
-    '''
-    Create a signal to gen pdf
-    '''
-    receipt_no = models.CharField(max_length=255)
-    date_created = models.DateTimeField(auto_now_add=True)
-
-    def gen_receipt_no(self): 
-        # generate receipt number using celery
-        return f"GRN-{timezone.now().year}-{timezone.now().month}-{timezone.now().day}-{timezone.now().hour}-{timezone.now().minute}-{timezone.now().second}"  
-
-class SupplierAccount(models.Model):
+class SupplierInvoice(models.Model):
     '''
     Create signal to update this from IncoingItem
     '''
-    STATUS=[
-        ('pending', 'Pending'),
-        ('paid', 'Paid'),
-    ]
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    account_no = models.CharField(max_length=255)
-    date_created = models.DateTimeField(auto_now_add=True)
-    invoice_no = models.CharField(max_length=255, null=True, blank=True)# get from IncomingItem.supplier_invoice
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=255, choices=STATUS, default="pending")
-
-    def __str__(self):    
-        return self.account_no
-
-class SupplierInvoice(models.Model):
     STATUS=[
         ('pending', 'Pending'),
         ('paid', 'Paid'),
@@ -234,13 +184,51 @@ class IncomingItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
-    supplier_invoice = models.CharField(max_length=255, null=True, blank=True) # supplier's Invoice, manual input
     lot_no= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
-    supplier_invoice= models.CharField(max_length=255, null=True, blank=True)
+    supplier_invoice= models.ForeignKey(SupplierInvoice, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
+
+class GoodsReceiptNote(models.Model):
+    receipt_no = models.CharField(max_length=255)
+    date_created = models.DateTimeField(auto_now_add=True)
+    delivery_note_number = models.CharField(max_length=255)
+    received_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_by')
+    supplier_invoice = models.ForeignKey(SupplierInvoice, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def gen_receipt_no(self): 
+        # generate receipt number using celery
+        return f"GRN-{timezone.now().year}-{timezone.now().month}-{timezone.now().day}-{timezone.now().hour}-{timezone.now().minute}-{timezone.now().second}"  
+
+    def __str__(self):
+        return f"receipt_no: {self.receipt_no}"
+    
+
+class GoodsReceiptNoteItem(models.Model):
+    incoming_item = models.ForeignKey(IncomingItem, on_delete=models.CASCADE, related_name='grn_items')
+    invoice_number = models.CharField(max_length=100)
+    quantity_received = models.IntegerField()
+    goods_receipt_note = models.ForeignKey(GoodsReceiptNote, on_delete=models.SET_NULL, null=True, blank=True)
+    updated_by= models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='updated_by')
+    checked_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='checked_by')
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='incoming_item_purchase_order')
+
+    def save(self, *args, **kwargs):
+        '''Generate goods receipt number'''
+        if not self.goods_receipt_number:  
+            today = timezone.now()
+            year = today.year % 100
+            month = today.month
+            day = today.day
+            random_code = random.randint(1000, 9999)
+            self.goods_receipt_number = f"GRN/{year}/{month:02d}/{day:02d}/{random_code}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.goods_receipt_number
+
 
 class Inventory(models.Model):
     CATEGORY_ONE_CHOICES = [

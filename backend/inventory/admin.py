@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import PurchaseOrder, Inventory, Supplier, Item, Requisition, IncomingItem, DepartmentInventory, Department, InventoryInsuranceSaleprice
+from .models import (
+    PurchaseOrder, Inventory, Supplier, Item,
+    Requisition, IncomingItem, DepartmentInventory,
+    Department, InventoryInsuranceSaleprice,
+    GoodsReceiptNote, GoodsReceiptNoteItem
+)
 
 admin.site.register(PurchaseOrder)
 admin.site.register(Inventory)
@@ -10,3 +15,5 @@ admin.site.register(IncomingItem)
 admin.site.register(DepartmentInventory)
 admin.site.register(Department)
 admin.site.register(InventoryInsuranceSaleprice)
+admin.site.register(GoodsReceiptNote)
+admin.site.register(GoodsReceiptNoteItem)
