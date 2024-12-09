@@ -26,8 +26,6 @@ from .models import (
     Requisition,
     PurchaseOrder,
     PurchaseOrderItem,
-    GoodsReceiptNote,
-    GoodsReceiptNoteItem,
     InventoryInsuranceSaleprice,
     
 
@@ -48,7 +46,6 @@ from .serializers import (
     RequisitionListSerializer,
     IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
-    GoodsReceiptNoteSerializer
 )
 
 from .filters import (
@@ -230,18 +227,6 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
         purchase_order_id = self.kwargs.get('purchaseorder_pk')
         return PurchaseOrderItem.objects.filter(purchase_order=purchase_order_id)
 
-
-class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
-    queryset = GoodsReceiptNote.objects.all()
-    serializer_class = GoodsReceiptNoteSerializer
-
-    def get_serializer_context(self):
-        purchase_order_id = self.kwargs.get('purchaseorder_pk')
-        print(self.request.user.id)
-        return {
-            'purchase_order_id': purchase_order_id,
-            'updated_by': self.request.user
-            }
     
 class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
     queryset = InventoryInsuranceSaleprice.objects.all()
@@ -285,18 +270,30 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
     return response
 
 
-def download_goods_receipt_note_pdf(request, receiptnote_id):
-    receiptnote = get_object_or_404(GoodsReceiptNote, pk=receiptnote_id)
-    receiptnote_items = GoodsReceiptNoteItem.objects.filter(receiptnote=receiptnote)
-    company = Company.objects.first()
+from django.template.loader import get_template
+from .models import IncomingItem, GoodsReceiptNote
 
-    html_template = get_template('goodsreceiptnote.html').render({
-        'receiptnote': receiptnote,
-        'receiptnote_items': receiptnote_items,
-        'company': company
-    })
+def download_goods_receipt_note_pdf(request, purchase_order_id):
+    incoming_items = IncomingItem.objects.filter(purchase_order_id=purchase_order_id)
+    company = Company.objects.first()
+    
+    # Extract the Goods Receipt Note and its number (assuming all items share the same GRN)
+    goods_receipt_note = incoming_items.first().goods_receipt_note if incoming_items.exists() else None
+    grn_number = goods_receipt_note.grn_number if goods_receipt_note else "N/A"
+    
+
+    # Construct full logo URL for template
+    company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
+
+    context = {
+        'incoming_items': incoming_items,
+        'company': company,
+        'company_logo_url': company_logo_url,
+        'grn_note_number': grn_number,
+        }
+
+    html_template = get_template('goods_receipt_note.html').render(context)
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'filename="receipt_note_report_{receiptnote_id}.pdf"'
-
+    response['Content-Disposition'] = 'attachment; filename="incoming_items.pdf"'
     return response

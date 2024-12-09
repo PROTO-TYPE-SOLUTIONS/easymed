@@ -18,8 +18,6 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
-    GoodsReceiptNoteItem,
-    GoodsReceiptNote
 )
 
 from .validators import (
@@ -474,79 +472,6 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         model = IncomingItem
         fields = '__all__'
 
-class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
-    purchase_order_items = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True
-    )
-    po_number = serializers.CharField(source="purchase_order.PO_number", read_only=True)
-    supplier = serializers.SerializerMethodField()
-    purchase_order_items_detail = serializers.SerializerMethodField()
-    supplier_invoice= serializers.CharField(source="supplier_invoice", read_only=True)
-
-    class Meta:
-        model = GoodsReceiptNoteItem
-        fields = [
-
-            'id', 'goods_receipt_number', 'supplier', 'invoice_number', 'checked_by', 
-            'purchase_order', 'purchase_order_items', 'po_number', 
-            'purchase_order_items_detail', 'supplier_invoice'
-        ]
-        read_only_fields = ['goods_receipt_number', 'supplier', 'po_number', 'purchase_order_items_detail']
-    def get_supplier(self, obj):
-        purchase_order = obj.purchase_order
-        purchase_order_item = PurchaseOrderItem.objects.filter(purchase_order=purchase_order).first()
-        if purchase_order_item and purchase_order_item.supplier:
-            return purchase_order_item.supplier.official_name  # Adjust based on supplier fields
-        return None
-    def get_purchase_order_items_detail(self, obj):
-        items_detail = []
-        for item in PurchaseOrderItem.objects.filter(purchase_order=obj.purchase_order):
-            try:
-                inventory = Inventory.objects.get(item=item.requisition_item.item)
-                items_detail.append({
-                    "item_code": item.requisition_item.item.item_code,
-                    "item_description": item.requisition_item.item.desc,
-                    "unit_price": inventory.buying_price,
-                    "quantity_received": item.quantity_received
-                })
-            except Inventory.DoesNotExist:
-                continue
-        return items_detail
-
-    def create(self, validated_data):
-        # Extract context and validated data
-        context = self.context
-        purchase_order_id = context.get('purchase_order_id')
-        updated_by = context.get('updated_by')
-        purchase_order_item_ids = validated_data.pop('purchase_order_items')
-
-        try:
-            purchase_order = PurchaseOrder.objects.get(id=purchase_order_id)
-        except PurchaseOrder.DoesNotExist:
-            raise serializers.ValidationError("The specified purchase order does not exist.")
-
-        purchase_order_items = PurchaseOrderItem.objects.filter(
-            id__in=purchase_order_item_ids,
-            purchase_order=purchase_order,
-            quantity_received__gt=0
-        )
-        if not purchase_order_items.exists():
-            raise serializers.ValidationError("No matching purchase order items found with quantities received greater than 0.")
-
-        # Create the IncomingItemsReceiptNote
-        receipt_note = IncomingItemsReceiptNote.objects.create(
-            purchase_order=purchase_order,
-            updated_by=updated_by,
-            **validated_data
-        )
-
-        # Link filtered purchase order item to receipt note (if needed)
-        for item in purchase_order_items:
-            item.receipt_note = receipt_note  # Assuming `receipt_note` field exists
-            item.save()
-
-        return receipt_note
 
 class InventorySerializer(serializers.ModelSerializer):
     insurance_sale_prices = serializers.SerializerMethodField()

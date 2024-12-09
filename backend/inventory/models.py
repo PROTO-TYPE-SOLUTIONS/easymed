@@ -163,14 +163,19 @@ class SupplierInvoice(models.Model):
     def __str__(self):    
         return self.invoice_no
 
+class GoodsReceiptNote(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='incoming-item-notes', null=True, blank=True)
+    note = models.TextField(max_length=255, null=True, blank=True)
+    grn_number = models.CharField(max_length=255, unique=True, editable=True)
+    # number = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.note} - {self.grn_number} - {self.date_created}"
+    
+
+# 1.Update Inventory 2.Associate PO 3.Update Invoice Number 4.Generate Good receipt note    
 class IncomingItem(models.Model):
-    '''
-    Update inventory
-    Associate with PO
-    Update Invoice Number
-    Generate Good receipt note
-    Update supplier account
-    '''
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
@@ -187,47 +192,10 @@ class IncomingItem(models.Model):
     lot_no= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
     supplier_invoice= models.ForeignKey(SupplierInvoice, on_delete=models.SET_NULL, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.item.name} - {self.date_created}"
-
-class GoodsReceiptNote(models.Model):
-    receipt_no = models.CharField(max_length=255)
-    date_created = models.DateTimeField(auto_now_add=True)
-    delivery_note_number = models.CharField(max_length=255)
-    received_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_by')
-    supplier_invoice = models.ForeignKey(SupplierInvoice, on_delete=models.SET_NULL, null=True, blank=True)
-
-    def gen_receipt_no(self): 
-        # generate receipt number using celery
-        return f"GRN-{timezone.now().year}-{timezone.now().month}-{timezone.now().day}-{timezone.now().hour}-{timezone.now().minute}-{timezone.now().second}"  
-
-    def __str__(self):
-        return f"receipt_no: {self.receipt_no}"
-    
-
-class GoodsReceiptNoteItem(models.Model):
-    incoming_item = models.ForeignKey(IncomingItem, on_delete=models.CASCADE, related_name='grn_items')
-    invoice_number = models.CharField(max_length=100)
-    quantity_received = models.IntegerField()
     goods_receipt_note = models.ForeignKey(GoodsReceiptNote, on_delete=models.SET_NULL, null=True, blank=True)
-    updated_by= models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='updated_by')
-    checked_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='checked_by')
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='incoming_item_purchase_order')
-
-    def save(self, *args, **kwargs):
-        '''Generate goods receipt number'''
-        if not self.goods_receipt_number:  
-            today = timezone.now()
-            year = today.year % 100
-            month = today.month
-            day = today.day
-            random_code = random.randint(1000, 9999)
-            self.goods_receipt_number = f"GRN/{year}/{month:02d}/{day:02d}/{random_code}"
-        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.goods_receipt_number
+        return f"{self.item.name} - {self.date_created}"    
 
 
 class Inventory(models.Model):

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link href="./requisition.css" media="print" rel="stylesheet">
-    <title>Requisition: {{ requisition.id }}</title>
+    <title>Goods Receipt Note: {{ incoming_items.0.purchase_order.PO_number }}</title>
 
     <style>
         table {
@@ -22,10 +22,31 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .logo {
-            max-width: 150px;
-            max-height: 150px;
+
+        .company-details {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
         }
+
+        .logo-column {
+            flex: 0 0 auto;
+            border-right: 2px solid #ddd;
+            padding-right: 20px;
+        }
+
+        .details-column {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .logo {
+            width: 100px;
+            height: auto;
+        }
+        
+
         .footer{
             position: fixed;
             bottom: 0;
@@ -42,44 +63,39 @@
 </head>
 
 <body>
-    <div class="header">
-        <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
-        <h2>{{ company.name }} </h2>
-        <p>{{ company.address1 }}</p>
-        <p>{{ company.phone1 }} | {{ company.email1 }}</p>
+    <div class="company-details">
+        <div class="logo-column">
+            <img src="{{ company_logo_url }}" alt="Company Logo" class="logo">
+        </div>
+        <div class="details-column">
+            <p><strong>{{ company.name }}</strong></p>
+            <p>Address: {{ company.address1 }}</p>
+            <p>{{ company.phone1 }} | {{ company.email1 }}</p>
+        </div>
     </div>
 
-    
-    <h1>Requisition Note</h1>
-
-    <aside>
-        <address id="from">
-            Hospital Name
-            Ngon Road, 32 Bleve
-            Nairobi, Kenya
-        </address>
-
-        <address id="to">
-            {{ requisition.requested_by }}
-            From all around the world
-            Earth
-        </address>
-    </aside>
-    <h1>Requisition Number: {{ requisition.id }} </h1>
-    <p>Department: {{ requisition.department.name }}</p>
+    <p>Goods Receipt Note Number: {{ grn_number }}</p>
     <p>Date: {{ requisition.date_created }}</p>
-    <p>Status: {{ requisition.status }}</p>
 
-    <h2>Requisition Items</h2>
+    <p>Purchase Order {{ incoming_items.0.purchase_order.PO_number }}</p>
 
-    <table border="1">
-        <thead>
-            <tr>
-
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
+    <table>
+        <tr>
+            <th>Item Code</th>
+            <th>Item Name</th>
+            <th>Quantity</th>
+            <th>Purchase Price</th>
+            <th>Sale Price</th>
+        </tr>
+        {% for item in incoming_items %}
+        <tr>
+            <td>{{ item.item_code }}</td>
+            <td>{{ item.item.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.purchase_price }}</td>
+            <td>{{ item.sale_price }}</td>
+        </tr>
+        {% endfor %}
     </table>
 
     <section class="footer">

@@ -22,8 +22,6 @@ from inventory.models import (
     PurchaseOrderItem,
     Requisition,
     RequisitionItem,
-    GoodsReceiptNote,
-    GoodsReceiptNoteItem
 )
 from billing.models import Invoice, InvoiceItem
 from patient.models import Appointment
