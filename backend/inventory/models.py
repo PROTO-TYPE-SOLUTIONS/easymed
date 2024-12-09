@@ -147,10 +147,7 @@ class PurchaseOrderItem(models.Model):
 
 class IncomingItemsReceiptNote(models.Model):
     goods_receipt_number = models.CharField(max_length=100, unique=True)  
-    # is_checked = models.BooleanField(default=False)
     invoice_number = models.CharField(max_length=100)
-
-
     updated_by= models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_by')
     checked_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='checked_by')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='incoming_item_purchase_order')
@@ -199,6 +196,19 @@ class SupplierAccount(models.Model):
     def __str__(self):    
         return self.account_no
 
+class SupplierInvoice(models.Model):
+    STATUS=[
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+    ]
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    invoice_no = models.CharField(max_length=255)
+    date_created = models.DateTimeField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=255, choices=STATUS, default="pending")
+
+    def __str__(self):    
+        return self.invoice_no
 
 class IncomingItem(models.Model):
     '''
@@ -224,6 +234,9 @@ class IncomingItem(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
     supplier_invoice = models.CharField(max_length=255, null=True, blank=True) # supplier's Invoice, manual input
+    lot_no= models.CharField(max_length=255, null=True, blank=True)
+    expiry_date= models.DateField(null=True, blank=True)
+    supplier_invoice= models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"

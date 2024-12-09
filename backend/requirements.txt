@@ -39,3 +39,4 @@ uvicorn[standard]
 weasyprint==62.3
 drf-nested-routers
 pytest-django
+django-extensions==3.2.3
