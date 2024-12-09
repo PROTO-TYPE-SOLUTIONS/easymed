@@ -49,6 +49,8 @@ class Item(models.Model):
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
+    packed = models.CharField(max_length=255, default=10)
+    subpacked = models.CharField(max_length=255, default=50)
 
     def save(self, *args, **kwargs):
         ''' Generate unique item code'''
@@ -110,7 +112,7 @@ class RequisitionItem(models.Model):
 
 
 class PurchaseOrder(models.Model):
-    PO_number = models.CharField(unique=True)
+    PO_number = models.CharField(unique=True, max_length=255, editable=False)
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     is_dispatched = models.BooleanField(default=False)
@@ -226,8 +228,6 @@ class IncomingItem(models.Model):
     item_code= models.CharField(max_length=255) # so as to hide names from user
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    packed = models.CharField(max_length=255)
-    subpacked = models.CharField(max_length=255)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
     category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES) 
@@ -252,8 +252,6 @@ class Inventory(models.Model):
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField()
     re_order_level= models.PositiveIntegerField(default=5)
-    packed = models.CharField(max_length=255, default=10)
-    subpacked = models.CharField(max_length=255, default=50)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
 
