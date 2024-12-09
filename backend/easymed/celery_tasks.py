@@ -1,4 +1,3 @@
-
 import os
 from celery import shared_task
 from django.db.models.signals import post_save
@@ -26,19 +25,29 @@ from celery import chain
 def create_or_update_inventory_record(incoming_item_id):
 
     try:
-        purchase_order_item = PurchaseOrderItem.objects.get(id=purchase_order_item_id)
+        incoming_item = IncomingItem.objects.get(id=incoming_item_id)
         inventory, created = Inventory.objects.get_or_create(
-            item=purchase_order_item.requisition_item.item
+            item=incoming_item.item
         )
+        print(incoming_item.id)
+        print("wtf")
+        print(incoming_item.sale_price)
         if created:
-            inventory.quantity_at_hand = purchase_order_item.quantity_received
-        else:
-            inventory.purchase_price = incoming_item.purchase_price
+            inventory.quantity_at_hand = incoming_item.quantity
             inventory.sale_price = incoming_item.sale_price
-            inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity, from quantity purchased
+            inventory.purchase_price = incoming_item.purchase_price
             inventory.packed = incoming_item.packed
             inventory.subpacked = incoming_item.subpacked
-            inventory.category_one = incoming_item.catgeory_1
+            inventory.category_one = incoming_item.category_one
+            inventory.save()
+            print(f"New inventory record created for incoming item: {incoming_item}")
+        else:
+            inventory.sale_price = incoming_item.sale_price
+            inventory.purchase_price = incoming_item.purchase_price
+            inventory.quantity_at_hand += incoming_item.quantity  # Increment quantity, from quantity purchased
+            inventory.packed = incoming_item.packed
+            inventory.subpacked = incoming_item.subpacked
+            inventory.category_one = incoming_item.category_one
             inventory.save()
             print(f"Inventory record updated for incoming item: {incoming_item}")
 

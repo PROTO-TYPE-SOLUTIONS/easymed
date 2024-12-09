@@ -21,7 +21,7 @@ class Supplier(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.official_name} ({self.common_name})"
-    
+
 class Item(models.Model):
     UNIT_CHOICES = [
         ('unit', 'Unit'),
@@ -145,9 +145,10 @@ class PurchaseOrderItem(models.Model):
     def __str__(self):
         return f"{self.requisition_item.item.name} - Purchased: {self.requisition_item.item.quantity_approved}"  
 
-class IncomingItemsReceiptNote(models.Model):
+class IncomingItemReceiptNote(models.Model):
     goods_receipt_number = models.CharField(max_length=100, unique=True)  
     invoice_number = models.CharField(max_length=100)
+
     updated_by= models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_by')
     checked_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='checked_by')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True, related_name='incoming_item_purchase_order')
@@ -247,8 +248,8 @@ class Inventory(models.Model):
         ('Internal', 'internal'),
     ]
     item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='inventory')
-    buying_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
-    selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField()
     re_order_level= models.PositiveIntegerField(default=5)
     packed = models.CharField(max_length=255, default=10)

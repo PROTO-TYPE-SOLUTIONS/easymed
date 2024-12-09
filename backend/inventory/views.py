@@ -25,7 +25,8 @@ from .models import (
     Requisition,
     PurchaseOrder,
     PurchaseOrderItem,
-    IncomingItemsReceiptNote,
+    IncomingItemReceiptNote,
+    IncomingItemReceiptNote,
     InventoryInsuranceSaleprice,
 )
 
@@ -43,6 +44,7 @@ from .serializers import (
     RequisitionItemListUpdateSerializer,
     RequisitionListSerializer,
     IncomingItemSerializer,
+    IncomingItemReceiptNoteSerializer,
     InventoryInsuranceSalepriceSerializer,
 )
 
@@ -69,7 +71,8 @@ class PurchaseViewSet(viewsets.ModelViewSet):
 
 class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all()
-    serializer_class = IncomingItemCreateSerializer
+    serializer_class = IncomingItemSerializer
+
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()
@@ -226,8 +229,8 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
 
 
 class IncomingReceiptNoteViewSet(viewsets.ModelViewSet):
-    queryset = IncomingItemsReceiptNote.objects.all()
-    serializer_class = IncomingItemSerializer
+    queryset = IncomingItemReceiptNote.objects.all()
+    serializer_class = IncomingItemReceiptNoteSerializer
 
     def get_serializer_context(self):
         purchase_order_id = self.kwargs.get('purchaseorder_pk')

@@ -18,7 +18,7 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
-    IncomingItemsReceiptNote
+    IncomingItemReceiptNote
 )
 
 from .validators import (
@@ -75,7 +75,7 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     def get_selling_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.item)
-            return inventory.selling_price
+            return inventory.sale_price
         except Inventory.DoesNotExist:
             return None
 
@@ -150,14 +150,14 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     def get_buying_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.item)
-            return inventory.buying_price
+            return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
     def get_selling_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.item)
-            return inventory.selling_price
+            return inventory.sale_price
         except Inventory.DoesNotExist:
             return None
 
@@ -468,9 +468,12 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         vat_amount = self.get_total_vat_amount(obj)
         return total_before_vat + vat_amount
 
-
-
 class IncomingItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncomingItem
+        fields = '__all__'
+
+class IncomingItemReceiptNoteSerializer(serializers.ModelSerializer):
     purchase_order_items = serializers.ListField(
         child=serializers.IntegerField(),
         write_only=True
@@ -481,7 +484,7 @@ class IncomingItemSerializer(serializers.ModelSerializer):
     supplier_invoice= serializers.CharField(source="supplier_invoice", read_only=True)
 
     class Meta:
-        model = IncomingItemsReceiptNote
+        model = IncomingItemReceiptNote
         fields = [
 
             'id', 'goods_receipt_number', 'supplier', 'invoice_number', 'checked_by', 
@@ -543,12 +546,13 @@ class IncomingItemSerializer(serializers.ModelSerializer):
             item.save()
 
         return receipt_note
+
 class InventorySerializer(serializers.ModelSerializer):
     insurance_sale_prices = serializers.SerializerMethodField()
     item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = Inventory
-        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_in_stock', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_at_hand', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
 
     def get_insurance_sale_prices(self, obj):
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
