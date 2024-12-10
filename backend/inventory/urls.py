@@ -48,8 +48,7 @@ urlpatterns = [
     path('purchase-orders/all_purchase_orders/', PurchaseOrderViewSet.as_view({'get': 'all_purchase_orders'}), name='all_purchase_orders'),
     path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),
     path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
-    path('download-goods-receipt-note', download_goods_receipt_note_pdf, name='download_goods_receipt_note_pdf'),
-    path('purchase-orders/<int:purchase_order_id>/pdf/', download_goods_receipt_note_pdf, name='incoming_items_pdf'),
+    path('receipt-note/<int:purchase_order_id>/', download_goods_receipt_note_pdf, name='incoming_items_pdf'),
 ]
 
 if settings.DEBUG:

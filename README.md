@@ -159,12 +159,18 @@ To get  a test result report for a particular patient, you send a GET request to
 ``http://127.0.0.1:8080/download_labtestresult_pdf/{processtestrequest_id}``
 
 
-# Doctor Reports
+## Doctor Reports
 This will give you all appointments by given doctor and date range
 http://127.0.0.1:8080/patients/report/appointments/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
 
 If no date range is specified it will get you a report for all appointments
 http://127.0.0.1:8080/patients/report/appointments/?doctor_id=2
+
+
+## Goods Receipt note
+Generates a receipt note for incoming items
+``http://127.0.0.1:8080/inventory/receipt-note/{purchade_order_id}/``
+
 
 
 # 1.6.0 Laboratory Integration

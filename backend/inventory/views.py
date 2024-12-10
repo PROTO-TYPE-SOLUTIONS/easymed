@@ -282,7 +282,6 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
     grn_number = goods_receipt_note.grn_number if goods_receipt_note else "N/A"
     print(f'GRN Number: {grn_number}')
     
-
     # Construct full logo URL for template
     company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
 

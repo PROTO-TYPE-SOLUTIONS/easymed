@@ -1,8 +1,10 @@
 import uuid
 import random
+from datetime import datetime
 from django.db import models
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+
 from customuser.models import CustomUser
 from company.models import InsuranceCompany
 from customuser.models import CustomUser
@@ -167,14 +169,20 @@ class GoodsReceiptNote(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='incoming-item-notes', null=True, blank=True)
     note = models.TextField(max_length=255, null=True, blank=True)
-    grn_number = models.CharField(max_length=255, unique=True, editable=True)
-    # number = models.IntegerField(null=True, blank=True)
+    grn_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.grn_number:
+            today = datetime.now().strftime('%Y%m%d')
+            unique_id = uuid.uuid4().hex[:6].upper()  # Get a short unique ID
+            self.grn_number = f'{today}-GRN-{unique_id}'
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.note} - {self.grn_number} - {self.date_created}"
     
 
-# 1.Update Inventory 2.Associate PO 3.Update Invoice Number 4.Generate Good receipt note    
+# 1.Update Inventory 2.Associate PO 3.Update Supplier Invoice
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
