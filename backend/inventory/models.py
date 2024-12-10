@@ -150,7 +150,7 @@ class PurchaseOrderItem(models.Model):
 
 class SupplierInvoice(models.Model):
     '''
-    Create signal to update this from IncoingItem
+    Create signal to update this from IncomingItem"
     '''
     STATUS=[
         ('pending', 'Pending'),

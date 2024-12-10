@@ -163,7 +163,7 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     def get_requested_amount(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.item)
-            return float(obj.quantity_requested * inventory.buying_price)
+            return float(obj.quantity_requested * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
 
@@ -311,14 +311,14 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     def get_buying_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return inventory.buying_price
+            return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
     def get_total_buying_amount(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return float(obj.quantity_received * inventory.buying_price)
+            return float(obj.quantity_received * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
 
@@ -347,7 +347,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     def get_total_buying_amount(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return float(obj.quantity_received * inventory.buying_price)
+            return float(obj.quantity_received * inventory.pu)
         except Inventory.DoesNotExist:
             return None
     
@@ -445,7 +445,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
                 inventory = Inventory.objects.get(item=item.requisition_item.item)
-                total += item.requisition_item.quantity_approved * inventory.buying_price
+                total += item.requisition_item.quantity_approved * inventory.purchase_price
             except Inventory.DoesNotExist:
                 continue
         return total
@@ -455,7 +455,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
                 inventory = Inventory.objects.get(item=item.requisition_item.item)
-                amount = item.requisition_item.quantity_approved * inventory.buying_price
+                amount = item.requisition_item.quantity_approved * inventory.purchase_price
                 vat = amount * (item.requisition_item.item.vat_rate / 100)
                 total_vat += vat
             except Inventory.DoesNotExist:
