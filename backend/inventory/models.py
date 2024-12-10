@@ -214,7 +214,7 @@ class Inventory(models.Model):
     item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='inventory')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
-    quantity_at_hand = models.PositiveIntegerField()
+    quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
     re_order_level= models.PositiveIntegerField(default=5)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
