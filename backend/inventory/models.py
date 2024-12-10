@@ -220,11 +220,11 @@ class Inventory(models.Model):
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
 
     def clean(self):
-        if self.buying_price > self.selling_price:
+        if self.purchase_price > self.sale_price:
             raise ValidationError("Buying price cannot exceed selling price")
 
         if self.re_order_level > self.quantity_at_hand:
-            raise ValidationError("Re-order leves cannot exceed the quantity at hand")
+            raise ValidationError("Re-order levels cannot exceed the quantity at hand")
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
     
