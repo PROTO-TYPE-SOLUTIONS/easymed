@@ -67,7 +67,7 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     def get_buying_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.item)
-            return inventory.buying_price
+            return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
