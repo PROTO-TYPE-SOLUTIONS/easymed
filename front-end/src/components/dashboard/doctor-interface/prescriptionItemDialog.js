@@ -9,11 +9,13 @@ import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const PrescriptionItemDialog = ({patient, patient_id}) => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
+    const auth = useAuth();
     const { item, } = useSelector(({ inventory }) => inventory);
     const { patients } = useSelector((store)=> store.patient);
     const { prescriptionItems } = useSelector(({ patient }) => patient);
@@ -64,7 +66,7 @@ const PrescriptionItemDialog = ({patient, patient_id}) => {
     };
   
     useEffect(() => {
-      dispatch(getItems());      
+      dispatch(getItems(auth));      
     }, []);
 
   return (

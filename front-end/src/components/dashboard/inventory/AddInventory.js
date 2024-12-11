@@ -9,11 +9,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { getAllItems, getAllSuppliers } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import SeachableSelect from "@/components/select/Searchable";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const AddInventory = () => {
 
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const router = useRouter()
   const { item } = useSelector((store) => store.inventory);
 
@@ -62,7 +64,7 @@ const AddInventory = () => {
 
   useEffect(() => {
     dispatch(getAllSuppliers());
-    dispatch(getAllItems());
+    dispatch(getAllItems(auth));
   }, []);
 
   return (

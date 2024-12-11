@@ -106,7 +106,7 @@ const RequisitionDatagrid = () => {
     if (auth) {
       dispatch(getAllRequisitions(auth));
       dispatch(getAllSuppliers());
-      dispatch(getAllItems());
+      dispatch(getAllItems(auth));
       dispatch(getAllDoctors(auth))
       dispatch(getAllTheUsers(auth))
     }

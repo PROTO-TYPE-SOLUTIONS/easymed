@@ -38,7 +38,7 @@ const AllPrescriptions = ({ patient }) => {
   const handleSearchItem = async (formValue, helpers) => {
     try {
       setLoading(true);
-      const res = await dispatch(getAllItems(formValue.name)).then(() => {
+      const res = await dispatch(getAllItems(currentUser)).then(() => {
         console.log("RESPONSE ", res);
         helpers.resetForm();
         toast.success("Data Retrieved Successfully!");

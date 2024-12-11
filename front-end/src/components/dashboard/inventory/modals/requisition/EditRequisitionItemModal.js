@@ -9,11 +9,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 import { addRequisitionItem, updateRequisitionItem } from "@/redux/service/inventory";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, setSelectedEditRowData, requisition, setSelectedRowData, PO=false }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { item, suppliers, inventoryItems } = useSelector(({ inventory }) => inventory);
 
   const handleClose = () => {
@@ -92,8 +94,8 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
   };
 
   useEffect(() => {
-    dispatch(getAllItems());
-    dispatch(getItems())
+    dispatch(getAllItems(auth));
+    dispatch(getItems(auth))
     dispatch(getAllSuppliers());
     
   }, []);

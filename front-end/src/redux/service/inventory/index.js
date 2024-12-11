@@ -33,9 +33,10 @@ export const fetchInventories = (auth, params=null) =>{
     })
 }
 
-export const fetchItems = () =>{
+export const fetchItems = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_ITEMS}`)
+        axiosInstance.get(`${APP_API_URL.FETCH_ITEMS}`)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -45,9 +46,10 @@ export const fetchItems = () =>{
     })
 }
 
-export const fetchItem = () =>{
+export const fetchItem = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_ITEM}`)
+        axiosInstance.get(`${APP_API_URL.FETCH_ITEM}`)
             .then((res) =>{
                 resolve(res.data)
             })

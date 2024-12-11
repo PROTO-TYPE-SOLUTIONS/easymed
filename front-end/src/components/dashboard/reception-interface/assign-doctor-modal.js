@@ -35,7 +35,7 @@ export default function AssignDoctorModal({
   useEffect(() => {
     if (authUser) {
       dispatch(getAllDoctors(authUser)); 
-      dispatch(getItems())
+      dispatch(getItems(authUser))
     }
   }, [authUser]);
 

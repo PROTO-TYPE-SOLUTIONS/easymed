@@ -28,7 +28,7 @@ const IncomingItemsGrid = () => {
   useEffect(()=>{
     if (auth){
       dispatch(getAllIncomingItems(auth));
-      dispatch(getItems())
+      dispatch(getItems(auth))
     }
 
   }, [auth])

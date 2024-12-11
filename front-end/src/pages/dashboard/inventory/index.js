@@ -19,7 +19,7 @@ const Inventory = () => {
   useEffect(() => {
     if (auth) {
       dispatch(getAllInventories(auth));
-      dispatch(getItems())
+      dispatch(getItems(auth))
     }
   }, [auth]);
 
