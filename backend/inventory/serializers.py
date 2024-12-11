@@ -311,7 +311,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseOrderItem
-        fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'quantity_received', 'packed', 'subpacked', 'total_buying_amount', 'date_created']
+        fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'quantity_received', 'total_buying_amount', 'date_created']
 
 
     def get_buying_price(self, obj):
@@ -345,8 +345,6 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         
         instance.quantity_received = validated_data.get('quantity_received', instance.quantity_received)
-        instance.packed= validated_data.get('packed', instance.packed)
-        instance.subpacked= validated_data.get('subpacked', instance.subpacked)
         instance.save()
         return instance
 
@@ -484,7 +482,7 @@ class InventorySerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = Inventory
-        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_at_hand', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_at_hand', 'date_created', 'category_one', 'insurance_sale_prices']
 
     def get_insurance_sale_prices(self, obj):
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
