@@ -10,6 +10,7 @@ from .models import (
     Item,
     Inventory,
     Supplier,
+    SupplierInvoice,
     IncomingItem,
     Department,
     DepartmentInventory,
@@ -36,6 +37,11 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
+        fields = '__all__'
+
+class SupplierInvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierInvoice
         fields = '__all__'
 
 class ItemSerializer(serializers.ModelSerializer):

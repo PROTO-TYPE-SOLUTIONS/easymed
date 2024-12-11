@@ -20,6 +20,7 @@ from .models import (
     Item,
     Inventory,
     Supplier,
+    SupplierInvoice,
     IncomingItem,
     DepartmentInventory,
     RequisitionItem,
@@ -38,6 +39,7 @@ from .serializers import (
     PurchaseOrderItemListUPdateSerializer,
     InventorySerializer,
     SupplierSerializer,
+    SupplierInvoiceSerializer,
     RequisitionItemCreateSerializer,
     DepartmentInventorySerializer,
     RequisitionCreateSerializer,
@@ -180,6 +182,10 @@ class SupplierViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = SupplierFilter
 
+class SupplierInvoiceViewSet(viewsets.ModelViewSet):
+    queryset = SupplierInvoice.objects.all()
+    serializer_class = SupplierInvoiceSerializer
+
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseOrderCreateSerializer
     http_method_names = ['get', 'post', 'put', 'patch', 'delete']
@@ -280,8 +286,32 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
     # Extract the Goods Receipt Note and its number (assuming all items share the same GRN)
     goods_receipt_note = incoming_items.first().goods_receipt_note if incoming_items.exists() else None
     grn_number = goods_receipt_note.grn_number if goods_receipt_note else "N/A"
-    print(f'GRN Number: {grn_number}')
-    
+    # Prepare data for the template
+    item_details = []
+    total_price_before_vat = 0
+    total_vat = 0
+    total_amount_after_vat = 0
+
+    for item in incoming_items:
+        amount_before_vat = item.purchase_price * item.quantity
+        vat_amount = amount_before_vat * (item.item.vat_rate / 100)
+        amount_with_vat = amount_before_vat + vat_amount
+        
+        total_price_before_vat += amount_before_vat
+        total_vat += vat_amount
+        total_amount_after_vat += amount_with_vat
+        item_details.append({
+            'supplier': item.supplier,
+            'item_code': item.item_code,
+            'lot_number': item.lot_no,
+            'item_name': item.item.name,
+            'quantity_received': item.quantity,
+            'unit_price': item.purchase_price,
+            'amount_before_vat': amount_before_vat,
+            'vat_amount': vat_amount,
+            'amount_with_vat': amount_with_vat
+        })
+
     # Construct full logo URL for template
     company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
 
@@ -290,7 +320,13 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
         'company': company,
         'company_logo_url': company_logo_url,
         'grn_number': grn_number,
-        }
+        'delivery_note': delivery_note,
+        'item_details': item_details,
+        'total_price_before_vat': total_price_before_vat,
+        'total_vat': total_vat,
+        'total_amount_after_vat': total_amount_after_vat
+        
+    }
 
     html_template = get_template('goods_receipt_note.html').render(context)
     pdf_file = HTML(string=html_template).write_pdf()

@@ -156,14 +156,21 @@ class SupplierInvoice(models.Model):
         ('pending', 'Pending'),
         ('paid', 'Paid'),
     ]
-    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
-    invoice_no = models.CharField(max_length=255)
+
+    invoice_no = models.CharField(max_length=255, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=255, choices=STATUS, default="pending")
+    
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='supplier_invoices')
+
+    class Meta:
+        ordering = ['-date_created']
 
     def __str__(self):    
-        return self.invoice_no
+        return f"{self.invoice_no} - PO: {self.purchase_order.PO_number}"
+
 
 class GoodsReceiptNote(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
