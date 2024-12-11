@@ -20,7 +20,7 @@ const RequestInfoModal = ({requestInfoOpen, setRequestInfoOpen, selectedRowData}
 
     const getPatientDetailsForThisTestRequest = async () => {
         try{
-            const response = await fetchPatientById(selectedRowData?.patient)
+            const response = await fetchPatientById(selectedRowData?.patient, auth)
             setTestPatient(response);
         }catch(error){
             console.log("ERROR GETTING PATIENT")

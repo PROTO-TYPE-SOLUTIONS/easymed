@@ -6,17 +6,19 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllPatients } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const TriageBilling = () => {
   const [loading, setLoading] = useState(false);
   const { patients } = useSelector((store) => store.patient);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const [currentStep, setCurrentStep] = useState(0);
 
   console.log("PATIENTS ", patients);
 
   useEffect(() => {
-    dispatch(getAllPatients());
+    dispatch(getAllPatients(auth));
   }, []);
 
   return (

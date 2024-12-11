@@ -11,12 +11,14 @@ import AuthGuard from '@/assets/hoc/auth-guard';
 import BillingNav from '@/components/dashboard/billing/BillingNav';
 import NewInvoice from './NewInvoice';
 import ProtectedRoute from '@/assets/hoc/protected-route';
+import { useAuth } from '@/assets/hooks/use-auth';
 
 const CreateNewInvoice = () => {
     const dispatch = useDispatch()
+    const auth = useAuth()
 
     useEffect(() => {
-        dispatch(getAllPatients());
+        dispatch(getAllPatients(auth));
     }, []);
     
 

@@ -98,7 +98,7 @@ const PharmacyDataGrid = () => {
       dispatch(getAllPrescriptions(auth));
       dispatch(getAllPrescribedDrugs(auth));
       dispatch(getAllDoctors(auth));
-      dispatch(getAllPatients())
+      dispatch(getAllPatients(auth))
       dispatch(getAllProcesses())
     }
   }, [auth]);

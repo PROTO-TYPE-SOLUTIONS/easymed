@@ -59,7 +59,7 @@ const PrescribePatient = () => {
 
   const getPatientDetailsForThisTestRequest = async () => {
       try{
-          const response = await fetchPatientById(thisProcess?.patient)
+          const response = await fetchPatientById(thisProcess?.patient, auth)
           setPatient(response);
       }catch(error){
           console.log("ERROR GETTING PATIENT")

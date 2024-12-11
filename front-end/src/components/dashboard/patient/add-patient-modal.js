@@ -10,11 +10,13 @@ import { toast } from "react-toastify";
 import { getAllInsurance } from "@/redux/features/insurance";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllPatients } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const AddPatientModal = () => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { insurance } = useSelector((store) => store.insurance);
 
   const handleClickOpen = () => {
@@ -70,7 +72,7 @@ const AddPatientModal = () => {
     }
 
     try {
-      const nextOfKin = await patientNextOfKin(payload)
+      const nextOfKin = await patientNextOfKin(payload, auth)
       console.log("SUCCESS CREATING NEXT OF KIN", nextOfKin)
       
     }catch(err){
@@ -107,14 +109,14 @@ const AddPatientModal = () => {
 
       setLoading(true);
 
-      const nextOfKinContactResponse = await patientNextOfKinContact(nextOfKinContacts)
+      const nextOfKinContactResponse = await patientNextOfKinContact(nextOfKinContacts, auth)
 
-      await createPatient(patientPayload).then((res) => {
+      await createPatient(patientPayload, auth).then((res) => {
         helpers.resetForm();
         createPatientNextOfKin(res.id, netOfKin, nextOfKinContactResponse.id)
         toast.success("Patient Created Successfully!");
         setLoading(false);
-        dispatch(getAllPatients());
+        dispatch(getAllPatients(auth));
         handleClose();
       });
     } catch (err) {

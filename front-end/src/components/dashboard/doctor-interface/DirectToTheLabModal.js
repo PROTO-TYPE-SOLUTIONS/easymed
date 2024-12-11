@@ -113,7 +113,7 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
   }
 
   useEffect(() => {
-    dispatch(getAllPatients());
+    dispatch(getAllPatients(auth));
     dispatch(getAllLabTestProfiles(auth));
     if(testProfile){
       getTestPanelsByTheProfileId(testProfile, auth);

@@ -13,7 +13,7 @@ const NotAuthorized = () => {
   const dispatch = useDispatch();
 
   useEffect(()=>{
-    dispatch(getAllPatients());      
+    dispatch(getAllPatients(auth));      
   }, [auth]);
 
   return (

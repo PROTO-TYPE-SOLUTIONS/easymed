@@ -62,7 +62,7 @@ const PatientProfile = () => {
   useEffect(() => {
     if (auth) {
       dispatch(getCurrentUser(auth));
-      dispatch(getAllPatients());
+      dispatch(getAllPatients(auth));
     }
   }, [auth]);
 

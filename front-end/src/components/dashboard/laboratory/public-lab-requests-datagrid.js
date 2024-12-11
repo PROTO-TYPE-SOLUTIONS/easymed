@@ -46,7 +46,7 @@ const PublicLabRequestDataGrid = ({ publicLabRequests }) => {
   useEffect(() => {
     if (auth) {
       dispatch(getAllLabTestProfiles(auth));
-      dispatch(getAllPatients());
+      dispatch(getAllPatients(auth));
     }
   }, [auth]);
 

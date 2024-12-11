@@ -10,17 +10,19 @@ import AppointmentBilling from "./appointment-billing";
 import TriageBilling from "./triage-billing";
 import PrescriptionBilling from "./prescription-billing";
 import LabRequestBilling from "./lab-request-billing";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const Billing = () => {
   const [loading, setLoading] = useState(false);
   const { patients } = useSelector((store) => store.patient);
   const dispatch = useDispatch();
+  const auth = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [totalSteps, setTotalSteps] = useState(4);
 
 
   useEffect(() => {
-    dispatch(getAllPatients());
+    dispatch(getAllPatients(auth));
   }, []);
 
   return (
