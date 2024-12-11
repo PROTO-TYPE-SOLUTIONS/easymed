@@ -37,8 +37,8 @@ const NewItem = () => {
     ]
   
     const initialValues = {
-      id:"",
-      item_code: "",
+      packed: "",
+      subpacked: "",
       name: "",
       category: "",
       units_of_measure: "",
@@ -46,8 +46,8 @@ const NewItem = () => {
     };
   
     const validationSchema = Yup.object().shape({
-      item_code: Yup.string().required("This field is required!"),
-      id: Yup.string().required("This field is required!"),
+    //   packed: Yup.string().required("This field is required!"),
+    //   subpacked: Yup.string().required("This field is required!"),
       name: Yup.string().required("This field is required!"),
       category: Yup.object().required("This field is required!"),
       units_of_measure: Yup.object().required("This field is required!"),
@@ -92,35 +92,7 @@ const NewItem = () => {
         >
         <Form className="">
             <Grid container spacing={2}>
-            <Grid className='my-2' item md={4} xs={12}>
-            <label htmlFor="item_id">Item Id</label>
-                <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Item Id"
-                name="id"
-                />
-                <ErrorMessage
-                name="id"
-                component="div"
-                className="text-warning text-xs"
-                />
-            </Grid>
-            <Grid className='my-2' item md={4} xs={12}>
-            <label htmlFor="item_code">Item Code</label>
-                <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Item Code"
-                name="item_code"
-                />
-                <ErrorMessage
-                name="item_code"
-                component="div"
-                className="text-warning text-xs"
-                />
-            </Grid>
-            <Grid className='my-2' item md={4} xs={12}>
+            <Grid className='my-2' item md={12} xs={12}>
             <label htmlFor="item_name">Item Name</label>
                 <Field
                 className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
@@ -130,6 +102,34 @@ const NewItem = () => {
                 />
                 <ErrorMessage
                 name="name"
+                component="div"
+                className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="item_id">Packed</label>
+                <Field
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="Packed"
+                name="packed"
+                />
+                <ErrorMessage
+                name="packed"
+                component="div"
+                className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="item_code">Sub Packed</label>
+                <Field
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="Sub Packed"
+                name="subpacked"
+                />
+                <ErrorMessage
+                name="subpacked"
                 component="div"
                 className="text-warning text-xs"
                 />
