@@ -197,9 +197,9 @@ export const getItems = (auth) => async (dispatch) => {
   }
 };
 
-export const getAllSuppliers = () => async (dispatch) => {
+export const getAllSuppliers = (auth) => async (dispatch) => {
   try {
-    const response = await fetchSuppliers();
+    const response = await fetchSuppliers(auth);
     dispatch(setSuppliers(response));
   } catch (error) {
     console.log("SUPPLIERS_ERROR ", error);

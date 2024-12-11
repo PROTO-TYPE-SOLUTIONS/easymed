@@ -84,7 +84,7 @@ const RequisitionModal = () => {
   };
 
   useEffect(() => {
-    dispatch(getAllSuppliers());
+    dispatch(getAllSuppliers(auth));
     dispatch(getAllItems(auth));
   }, []);
 

@@ -96,7 +96,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
   useEffect(() => {
     dispatch(getAllItems(auth));
     dispatch(getItems(auth))
-    dispatch(getAllSuppliers());
+    dispatch(getAllSuppliers(auth));
     
   }, []);
 

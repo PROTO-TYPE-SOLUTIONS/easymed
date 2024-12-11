@@ -68,7 +68,7 @@ const AddPurchaseOrderItemModal = () => {
   useEffect(() => {
     dispatch(getAllItems(auth));
     dispatch(getItems(auth))
-    dispatch(getAllSuppliers());
+    dispatch(getAllSuppliers(auth));
     
   }, []);
 

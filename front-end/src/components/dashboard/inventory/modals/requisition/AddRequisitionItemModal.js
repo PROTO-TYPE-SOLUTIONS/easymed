@@ -71,7 +71,7 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
   useEffect(() => {
     dispatch(getAllItems(auth));
     dispatch(getItems(auth))
-    dispatch(getAllSuppliers());
+    dispatch(getAllSuppliers(auth));
     
   }, []);
 

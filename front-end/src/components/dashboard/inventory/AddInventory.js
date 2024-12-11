@@ -63,7 +63,7 @@ const AddInventory = () => {
   };
 
   useEffect(() => {
-    dispatch(getAllSuppliers());
+    dispatch(getAllSuppliers(auth));
     dispatch(getAllItems(auth));
   }, []);
 

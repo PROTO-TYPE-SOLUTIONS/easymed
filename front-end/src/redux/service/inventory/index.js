@@ -101,9 +101,10 @@ export const deleteItem = (id) =>{
     })
 }
 
-export const fetchSuppliers = () =>{
+export const fetchSuppliers = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_SUPPLIERS}`)
+        axiosInstance.get(`${APP_API_URL.FETCH_SUPPLIERS}`)
             .then((res) =>{
                 resolve(res.data)
             })
