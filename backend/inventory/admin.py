@@ -3,10 +3,11 @@ from .models import (
     PurchaseOrder, Inventory, Supplier, SupplierInvoice, Item,
     Requisition, IncomingItem, DepartmentInventory,
     Department, InventoryInsuranceSaleprice,
-    GoodsReceiptNote
+    GoodsReceiptNote, PurchaseOrderItem
 )
 
 admin.site.register(PurchaseOrder)
+admin.site.register(PurchaseOrderItem)
 admin.site.register(Inventory)
 admin.site.register(Supplier)
 admin.site.register(SupplierInvoice)

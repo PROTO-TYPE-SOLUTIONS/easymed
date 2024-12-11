@@ -1,4 +1,3 @@
-
 import os
 from celery import shared_task
 from django.db.models.signals import post_save
@@ -12,8 +11,9 @@ from company.models import Company
 from django.template.loader import get_template
 import tempfile
 from django.core.mail import EmailMultiAlternatives
-from logging import Logger
+import logging
 
+Logger = logging.getLogger(__name__)
 
 from inventory.models import (
     IncomingItem,
@@ -38,9 +38,8 @@ from celery import chain
 @shared_task
 def create_or_update_inventory_record(incoming_item_id):
     incoming_item = IncomingItem.objects.get(id=incoming_item_id)
-    purchase_order_item_id = incoming_item.purchase_order_item_id
     try:
-        purchase_order_item = PurchaseOrderItem.objects.get(id=purchase_order_item_id)
+        purchase_order_item = PurchaseOrderItem.objects.get(purchase_order=incoming_item.purchase_order, requisition_item__item=incoming_item.item)
         inventory, created = Inventory.objects.get_or_create(
             item=purchase_order_item.requisition_item.item
         )
@@ -49,18 +48,14 @@ def create_or_update_inventory_record(incoming_item_id):
         else:
             inventory.purchase_price = incoming_item.purchase_price
             inventory.sale_price = incoming_item.sale_price
-            inventory.quantity_in_stock += incoming_item.quantity  # Increment quantity, from quantity purchased
-            inventory.packed = incoming_item.packed
-            inventory.subpacked = incoming_item.subpacked
-            inventory.category_one = incoming_item.catgeory_1
-            inventory.save()
-            print(f"Inventory record updated for incoming item: {incoming_item}")
+            inventory.quantity_at_hand += incoming_item.quantity  # Increment quantity, from quantity purchased
+            inventory.category_one = incoming_item.category_one
+        inventory.save()
+        Logger.info("Inventory record updated for incoming item: %s", (incoming_item,))
+    except PurchaseOrderItem.DoesNotExist:
+        Logger.warning("PurchaseOrderItem for Purchase Order ID %s and Item ID %s does not exist.", (incoming_item.purchase_order_id, incoming_item.item.id))
 
-    except IncomingItem.DoesNotExist:
-        print(f"Incoming item with ID {incoming_item_id} not found.")
-        # Handle the exception appropriately
 
-        
 '''Task to generated pdf once Invoice tale gets a new entry'''
 @shared_task
 def generate_invoice_pdf(invoice_id):
