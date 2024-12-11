@@ -69,10 +69,10 @@ export default function AssignDoctorModal({
         doctor: parseInt(formValue.doctor.value),
         track: "triage"
       };
-      await updateAttendanceProcesses(formData, selectedData?.id).then(() => {
+      await updateAttendanceProcesses(formData, selectedData?.id, auth).then(() => {
         helpers.resetForm();
         saveInvoiceItem(selectedData.invoice, parseInt(formValue.item.value))
-        dispatch(getAllProcesses())
+        dispatch(getAllProcesses(authUser))
         toast.success("Doctor Assigned Successfully!");
         setLoading(false);
         handleClose();

@@ -79,7 +79,7 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
         await updatePrescribeDrug( payload, auth).then(() => {
 
           setLoading(true);
-          // updateAttendanceProcesses({ pharmacist: auth.user_id }, payload.id)
+          // updateAttendanceProcesses({ pharmacist: auth.user_id }, payload.id, auth)
           toast.success("successfully updated status")
           setOpen(false);
           setLoading(false);

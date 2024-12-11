@@ -43,7 +43,7 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
     try{
       await sendLabRequestsPanels(testReqPanelPayload, auth)
       toast.success("Lab Request Panels saved Successful!");
-      dispatch(getAllProcesses())
+      dispatch(getAllProcesses(auth))
     }catch(error){
       console.log(error)
       toast.error(error)
@@ -66,16 +66,16 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
       if (formValue.test_profile){
         await sendLabRequests(formValue, auth).then((res) => {
           helpers.resetForm();
-          updateAttendanceProcesses({track: "lab"}, selectedData.id)
+          updateAttendanceProcesses({track: "lab"}, selectedData.id, auth)
           savePanels(res.id)
           toast.success("Lab Request Successful!");
-          dispatch(getAllProcesses())
+          dispatch(getAllProcesses(auth))
           setLoading(false);
           handleClose();
         });
       }else {
-        updateAttendanceProcesses({track: "lab"}, selectedData.id)
-        dispatch(getAllProcesses())
+        updateAttendanceProcesses({track: "lab"}, selectedData.id, auth)
+        dispatch(getAllProcesses(auth))
         setLoading(false);
         handleClose();
       }

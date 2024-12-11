@@ -7,13 +7,15 @@ import AuthGuard from "@/assets/hoc/auth-guard";
 import ProtectedRoute from "@/assets/hoc/protected-route";
 import AppointmentCard from "@/components/dashboard/cards/AppointmentCard";
 import { getAllProcesses } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { processes } = useSelector((store)=>store.patient);
 
   useEffect(()=>{
-      dispatch(getAllProcesses())
+      dispatch(getAllProcesses(auth))
   },[])
 
   return (

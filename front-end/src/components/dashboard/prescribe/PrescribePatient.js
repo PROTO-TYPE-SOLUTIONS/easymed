@@ -80,7 +80,7 @@ const PrescribePatient = () => {
 
   useEffect(()=> {
     if(auth){
-      getAllProcesses()
+      getAllProcesses(auth)
       getPatientDetailsForThisTestRequest()
     }
   }, [thisProcess])
@@ -150,7 +150,7 @@ const PrescribePatient = () => {
       console.log(payload)
     
       await updatePrescription(params.prescription_id, payload,  auth).then((res) => {
-        updateAttendanceProcesses({track: "pharmacy"}, params.process_id)
+        updateAttendanceProcesses({track: "pharmacy"}, params.process_id, auth)
         sendEachPrescriptionItemToDb(res)
         toast.success("Prescription Saved Successfully!");
         setLoading(false);

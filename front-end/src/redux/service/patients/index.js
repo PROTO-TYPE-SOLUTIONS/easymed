@@ -272,9 +272,10 @@ export const fetchPatientPrescribeDrugs = (patient_id) =>{
     })
 }
 
-export const fetchAllAttendanceProcesses = () =>{
+export const fetchAllAttendanceProcesses = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`)
+        axiosInstance.get(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -284,9 +285,10 @@ export const fetchAllAttendanceProcesses = () =>{
     })
 }
 
-export const initiateNewAttendanceProcesses = (payload) =>{
+export const initiateNewAttendanceProcesses = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload)
+        axiosInstance.post(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -296,9 +298,10 @@ export const initiateNewAttendanceProcesses = (payload) =>{
     })
 }
 
-export const updateAttendanceProcesses = (payload, process_id) => {
+export const updateAttendanceProcesses = (payload, process_id, auth) => {
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.patch(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload, {
+        axiosInstance.patch(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload, {
             params: {
                 process_id: process_id
             }

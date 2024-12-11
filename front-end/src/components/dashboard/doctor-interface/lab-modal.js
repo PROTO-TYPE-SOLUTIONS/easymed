@@ -76,7 +76,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
       setLoading(true);
       await sendLabRequests(formValue, auth).then((res) => {
         helpers.resetForm();
-        updateAttendanceProcesses({track: "lab"}, selectedRowData.id)
+        updateAttendanceProcesses({track: "lab"}, selectedRowData.id, auth)
         savePanels(res.id)
         toast.success("Lab Request Successful!");
         setLoading(false);

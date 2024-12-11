@@ -87,9 +87,9 @@ export const {
   setPrescriptionItem,
 } = PatientSlice.actions;
 
-export const getAllProcesses = () => async (dispatch) => {
+export const getAllProcesses = (auth) => async (dispatch) => {
   try {
-    const response = await fetchAllAttendanceProcesses();
+    const response = await fetchAllAttendanceProcesses(auth);
     dispatch(setProcesses(response));
   } catch (error) {
     console.log("ATTENDANCE_PROCESSES_ERROR ", error);
