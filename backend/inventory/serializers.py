@@ -10,6 +10,7 @@ from .models import (
     Item,
     Inventory,
     Supplier,
+    SupplierInvoice,
     IncomingItem,
     Department,
     DepartmentInventory,
@@ -36,6 +37,11 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
+        fields = '__all__'
+
+class SupplierInvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierInvoice
         fields = '__all__'
 
 class ItemSerializer(serializers.ModelSerializer):
@@ -67,7 +73,7 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     def get_buying_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.item)
-            return inventory.buying_price
+            return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
@@ -163,7 +169,7 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     def get_requested_amount(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.item)
-            return float(obj.quantity_requested * inventory.buying_price)
+            return float(obj.quantity_requested * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
 
@@ -305,20 +311,20 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseOrderItem
-        fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'quantity_received', 'packed', 'subpacked', 'total_buying_amount', 'date_created']
+        fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'quantity_received', 'total_buying_amount', 'date_created']
 
 
     def get_buying_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return inventory.buying_price
+            return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
     def get_total_buying_amount(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return float(obj.quantity_received * inventory.buying_price)
+            return float(obj.quantity_received * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
 
@@ -339,15 +345,13 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         
         instance.quantity_received = validated_data.get('quantity_received', instance.quantity_received)
-        instance.packed= validated_data.get('packed', instance.packed)
-        instance.subpacked= validated_data.get('subpacked', instance.subpacked)
         instance.save()
         return instance
 
     def get_total_buying_amount(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return float(obj.quantity_received * inventory.buying_price)
+            return float(obj.quantity_received * inventory.pu)
         except Inventory.DoesNotExist:
             return None
     
@@ -445,7 +449,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
                 inventory = Inventory.objects.get(item=item.requisition_item.item)
-                total += item.requisition_item.quantity_approved * inventory.buying_price
+                total += item.requisition_item.quantity_approved * inventory.purchase_price
             except Inventory.DoesNotExist:
                 continue
         return total
@@ -455,7 +459,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
                 inventory = Inventory.objects.get(item=item.requisition_item.item)
-                amount = item.requisition_item.quantity_approved * inventory.buying_price
+                amount = item.requisition_item.quantity_approved * inventory.purchase_price
                 vat = amount * (item.requisition_item.item.vat_rate / 100)
                 total_vat += vat
             except Inventory.DoesNotExist:
@@ -478,7 +482,7 @@ class InventorySerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='item.name')
     class Meta:
         model = Inventory
-        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_at_hand', 'packed', 'subpacked', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_at_hand', 'date_created', 'category_one', 'insurance_sale_prices']
 
     def get_insurance_sale_prices(self, obj):
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
