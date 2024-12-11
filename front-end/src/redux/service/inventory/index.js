@@ -126,9 +126,10 @@ export const fetchOrderBills = () =>{
     })
 }
 
-export const addRequisition = (payload) =>{
+export const addRequisition = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.REQUISITION}`,payload)
+        axiosInstance.post(`${APP_API_URL.REQUISITION}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -138,9 +139,10 @@ export const addRequisition = (payload) =>{
     })
 }
 
-export const updateRequisition = (payload, requisition_id) =>{
+export const updateRequisition = (payload, requisition_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.patch(`${APP_API_URL.REQUISITION}`,payload, {
+        axiosInstance.patch(`${APP_API_URL.REQUISITION}`,payload, {
             params: {
                 requisition_id:requisition_id
             }
@@ -167,9 +169,10 @@ export const fetchAllRequisitionItems = (auth) =>{
     })
 }
 
-export const addRequisitionItem = (payload, requisition_id) =>{
+export const addRequisitionItem = (payload, requisition_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
+        axiosInstance.post(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
             params: {
                 requisition_id: requisition_id
             }
@@ -183,9 +186,10 @@ export const addRequisitionItem = (payload, requisition_id) =>{
     })
 }
 
-export const updateRequisitionItem = (payload, requisition_id, requisition_item_id) =>{
+export const updateRequisitionItem = (payload, requisition_id, requisition_item_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.patch(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
+        axiosInstance.patch(`${APP_API_URL.REQUISITION_ITEM}`,payload, {
             params: {
                 requisition_id: requisition_id,
                 requisition_item_id: requisition_item_id
@@ -200,9 +204,10 @@ export const updateRequisitionItem = (payload, requisition_id, requisition_item_
     })
 }
 
-export const deleteRequisitionItem = (requisition_id, requisition_item_id) =>{
+export const deleteRequisitionItem = (requisition_id, requisition_item_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.delete(`${APP_API_URL.REQUISITION_ITEM}`, {
+        axiosInstance.delete(`${APP_API_URL.REQUISITION_ITEM}`, {
             params: {
                 requisition_id: requisition_id,
                 requisition_item_id: requisition_item_id

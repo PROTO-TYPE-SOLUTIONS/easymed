@@ -50,7 +50,7 @@ const LabResultDataGrid = () => {
 
   const { processes, patients } = useSelector((store)=> store.patient)
 
-  const labTestsResultsSchedules = processes.filter((process)=> process.track==="lab")
+  const labTestsResultsSchedules = processes.filter((process)=> process.track==="lab" || process.track === "pharmacy" || process.track === "doctor")
   const searchedProcesses = labTestsResultsSchedules.filter((process)=> process.patient_number.includes(searchQuery))
 
   const patientNameRender = (cellData) => {

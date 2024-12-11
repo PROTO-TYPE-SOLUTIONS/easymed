@@ -57,7 +57,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
         item: formValue.item.value,
       };
 
-      const response = await updateRequisitionItem(formData, selectedEditRowData.requisition, selectedEditRowData.id)
+      const response = await updateRequisitionItem(formData, selectedEditRowData.requisition, selectedEditRowData.id, auth)
 
       if(PO){
         console.log("THE RESPONSE IS", response)

@@ -40,14 +40,14 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.REQUISITION}`,body)
+            await backendAxiosInstance.post(`${API_URL.REQUISITION}`, body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
@@ -65,15 +65,15 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
             const body = req.body;
             const query = req.query
 
-            await backendAxiosInstance.patch(`${API_URL.REQUISITION}${query.requisition_id}/`,body)
+            await backendAxiosInstance.patch(`${API_URL.REQUISITION}${query.requisition_id}/`, body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

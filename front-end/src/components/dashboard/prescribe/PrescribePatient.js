@@ -116,7 +116,7 @@ const PrescribePatient = () => {
     }
 
     try {
-      await prescribeDrug(payloadData).then(()=>{
+      await prescribeDrug(payloadData, auth).then(()=>{
         billingInvoiceItems(auth, invoiceItemPayload)
         toast.success("Prescribed Drug Added Successfully!");
       })

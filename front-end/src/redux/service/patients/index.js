@@ -170,9 +170,10 @@ export const referPatient = (payload) =>{
     })
 }
 
-export const prescribeDrug = (payload) =>{
+export const prescribeDrug = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.PRESCRIBE_DRUG}`,payload)
+        axiosInstance.post(`${APP_API_URL.PRESCRIBE_DRUG}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -208,11 +209,12 @@ export const createPrescription = (payload) =>{
 }
 
 export const updatePrescription = (prescription_id, payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.patch(`${APP_API_URL.CREATE_PRESCRIPTION}`,payload, {
+        axiosInstance.patch(`${APP_API_URL.CREATE_PRESCRIPTION}`,payload, {
             params: {
                 prescription_id: prescription_id
-            }, auth
+            }
         })
             .then((res) =>{
                 resolve(res.data)
@@ -223,9 +225,10 @@ export const updatePrescription = (prescription_id, payload, auth) =>{
     })
 }
 
-export const fetchPatientTriage = (id) =>{
+export const fetchPatientTriage = (id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.GET_PATIENT_TRIAGE}`,{
+        axiosInstance.get(`${APP_API_URL.GET_PATIENT_TRIAGE}`,{
             params:{
                 id: id
             }
@@ -240,12 +243,12 @@ export const fetchPatientTriage = (id) =>{
 }
 
 export const updatePatientTriage = (id, payload, auth) =>{
-    console.log(id)
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.put(`${APP_API_URL.GET_PATIENT_TRIAGE}`,payload,{
+        axiosInstance.put(`${APP_API_URL.GET_PATIENT_TRIAGE}`, payload,{
             params:{
                 id: id
-            }, auth
+            }
         })
             .then((res) =>{
                 resolve(res.data)

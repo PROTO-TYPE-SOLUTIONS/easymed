@@ -31,7 +31,7 @@ export default function AddTriageModal({
 
   const fetchPatientTriage = async (triage_id)=> {
     try{
-      dispatch(getPatientTriage(triage_id))
+      dispatch(getPatientTriage(triage_id, auth))
     }catch(error){
 
     }

@@ -50,7 +50,7 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
         item: formValue.item.value,
       };
 
-      const response = await addRequisitionItem(formData, requisition.id)
+      const response = await addRequisitionItem(formData, requisition.id, auth)
         // Update the requisition's items array with the new item
         const updatedRequisition = {
             ...requisition,

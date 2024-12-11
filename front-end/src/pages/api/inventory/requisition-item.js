@@ -91,14 +91,14 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
             const query = req.query;
 
-            await backendAxiosInstance.delete(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/${query.requisition_item_id}/`)
+            await backendAxiosInstance.delete(`${API_URL.REQUISITION_ITEM}${query.requisition_id}/requisitionitems/${query.requisition_item_id}/`, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

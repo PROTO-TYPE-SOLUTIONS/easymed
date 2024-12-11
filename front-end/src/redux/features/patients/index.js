@@ -133,9 +133,9 @@ export const getPatientProfile = (userId) => async (dispatch) => {
   }
 };
 
-export const getPatientTriage = (id) => async (dispatch) => {
+export const getPatientTriage = (id, auth) => async (dispatch) => {
   try {
-    const response = await fetchPatientTriage(id);
+    const response = await fetchPatientTriage(id, auth);
     dispatch(setPatientTriage(response));
   } catch (error) {
     console.log("PROFILE_ERROR ", error);

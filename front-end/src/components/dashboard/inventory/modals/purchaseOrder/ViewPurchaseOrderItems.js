@@ -51,7 +51,7 @@ const ViewPurchaseOrderItemsModal = ({ open, setOpen, selectedRowData, setSelect
 
     const deleteReqItem = async (data) => {
         try{
-            await deleteRequisitionItem(selectedRowData.id, data.id)
+            await deleteRequisitionItem(selectedRowData.id, data.id, auth)
             const deletedItemIndex = selectedRowData.items.findIndex((item)=> item.id === data.id)
             if(deletedItemIndex !== -1){
                 const afterDelete = selectedRowData.items.filter((item) => item.id !== data.id);

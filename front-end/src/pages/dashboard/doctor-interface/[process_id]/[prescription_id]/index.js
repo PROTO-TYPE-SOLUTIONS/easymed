@@ -89,7 +89,7 @@ const PrescribeDrug = () => {
     }
 
     try {
-      await prescribeDrug(payloadData).then(()=>{
+      await prescribeDrug(payloadData, auth).then(()=>{
         toast.success("Prescribed Drug Added Successfully!");
       })
 

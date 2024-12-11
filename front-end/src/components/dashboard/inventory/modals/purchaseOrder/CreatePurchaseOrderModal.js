@@ -85,7 +85,7 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
 
         }
         try{
-            await updateRequisition(payload, selectedRowData.id)
+            await updateRequisition(payload, selectedRowData.id, auth)
             const updatedData = {...selectedRowData, procurement_approved: true}
             setSelectedRowData(updatedData)
             dispatch(updateRequisitionAfterPoGenerate(updatedData))
