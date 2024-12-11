@@ -9,6 +9,23 @@ from customuser.models import CustomUser
 from company.models import InsuranceCompany
 from customuser.models import CustomUser
 
+'''
+An item will have a packed and sub-packed properties
+
+You have 1 pack(box) of 20 syringes inside
+packed will be 1 and subpacked will be 20
+If you have 60 syringes in stock ==> quantities_at_hand
+That means you have 3 packs (boxes)
+
+You have one chair
+Packed is 1 subpacked is 1
+If you have three chairs in stock ==> quantities_at_hand
+That means you have 3 chairs
+
+Throughout the system, our BaseUnitofMeasure is the subpacked i.e
+whenever quantity is referred, we're referring to subpacked.
+'''
+
 class Department(models.Model):
     name = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -25,6 +42,9 @@ class Supplier(models.Model):
         return f"{self.id} - {self.official_name} ({self.common_name})"
 
 class Item(models.Model):
+    '''
+    Refer to the docs above
+    '''
     UNIT_CHOICES = [
         ('unit', 'Unit'),
         ('mg', 'Milligram'),
@@ -34,7 +54,6 @@ class Item(models.Model):
         ('L', 'Liter'),
     ]
     CATEGORY_CHOICES = [
-        
         ('SurgicalEquipment', 'Surgical Equipment'),
         ('LabReagent', 'Lab Reagent'),
         ('Drug', 'Drug'),
@@ -51,8 +70,8 @@ class Item(models.Model):
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
-    packed = models.CharField(max_length=255, default=10)
-    subpacked = models.CharField(max_length=255, default=50)
+    packed = models.CharField(max_length=255, default=1)
+    subpacked = models.CharField(max_length=255, default=1)
 
     def save(self, *args, **kwargs):
         ''' Generate unique item code'''
@@ -137,8 +156,12 @@ class PurchaseOrder(models.Model):
 
 
 class PurchaseOrderItem(models.Model):
+    '''
+    On the purchase order pdf, we can create a converter that will
+    display the packed and subpacked so that we only order packed
+    '''
     date_created = models.DateTimeField(auto_now_add=True)
-    quantity_ordered = models.IntegerField(default=0)
+    quantity_ordered = models.IntegerField(default=0) # not packed or subpacked
 
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='purchase_order')
@@ -177,7 +200,7 @@ class GoodsReceiptNote(models.Model):
     note = models.TextField(max_length=255, null=True, blank=True)
     grn_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
 
-    PurchaseOrder = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.pk and not self.grn_number:

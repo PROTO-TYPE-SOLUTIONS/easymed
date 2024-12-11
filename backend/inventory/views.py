@@ -259,6 +259,11 @@ def download_requisition_pdf(request, requisition_id):
 
 
 def download_purchaseorder_pdf(request, purchaseorder_id):
+    '''
+    Picture this, you have 1 crate of 30 eggs
+    Quantity ordered is 60 eggs.
+    But on the LPO pdf we want to see 2 crates. Get it?
+    '''
     purchase_order = get_object_or_404(PurchaseOrder, pk=purchaseorder_id)
     purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=purchase_order)
     company = Company.objects.first()
