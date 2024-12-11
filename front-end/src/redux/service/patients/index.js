@@ -95,7 +95,7 @@ export const createPatient = (payload, auth) =>{
 export const editPatient = (payload, auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.put(`${APP_API_URL.EDIT_PATIENT}`,payload)
+        axiosInstance.patch(`${APP_API_URL.EDIT_PATIENT}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })
