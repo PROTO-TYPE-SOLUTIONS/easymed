@@ -145,7 +145,7 @@ class PurchaseOrderItem(models.Model):
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
     def __str__(self):
-        return f"{self.requisition_item.item.name} - Purchased: {self.requisition_item.item.quantity_approved}"  
+        return f"{self.requisition_item.item.name} - Ordered: {self.quantity_ordered}"  
 
 
 class SupplierInvoice(models.Model):
@@ -174,9 +174,10 @@ class SupplierInvoice(models.Model):
 
 class GoodsReceiptNote(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(upload_to='incoming-item-notes', null=True, blank=True)
     note = models.TextField(max_length=255, null=True, blank=True)
     grn_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
+
+    PurchaseOrder = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.pk and not self.grn_number:
@@ -251,11 +252,9 @@ class InventoryInsuranceSaleprice(models.Model):
     
 class DepartmentInventory(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    packed = models.CharField(max_length=255)
-    subpacked = models.CharField(max_length=255)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-
+    quantity_at_hand = models.PositiveIntegerField()
     def __str__(self):
         return str(self.item)
 

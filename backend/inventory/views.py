@@ -320,7 +320,6 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
         'company': company,
         'company_logo_url': company_logo_url,
         'grn_number': grn_number,
-        'delivery_note': delivery_note,
         'item_details': item_details,
         'total_price_before_vat': total_price_before_vat,
         'total_vat': total_vat,

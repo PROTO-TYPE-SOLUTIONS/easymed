@@ -74,7 +74,7 @@
         </div>
     </div>
 
-    <p>Goods Receipt Note Number: {{ grn_number }}</p>
+    <p>Goods Receipt Note Number: {{ incoming_items.0.goods_receipt_note.grn_number }}</p>
     <p>LPO Number {{ incoming_items.0.purchase_order.PO_number }}</p>
     <p>Invoice Number: {{ incoming_items.0.supplier_invoice.invoice_no }}</p>
     <p>Supplier: {{ incoming_items.0.supplier_invoice.supplier.official_name }}</p>
@@ -98,7 +98,7 @@
         </tr>
         {% endfor %}
     </table>
-    <p>Total Price: {{ total_price_before_vat }}</p>
+    <p>Amount Before VAT: {{ total_price_before_vat }}</p>
     <p>Total VAT: {{ total_vat }}</p>
     <p>Total Amount: {{ total_amount_after_vat }}</p>
         
