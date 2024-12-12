@@ -9,11 +9,13 @@ import { getAllInsurance } from "@/redux/features/insurance";
 import { editPatient } from "@/redux/service/patients";
 import { toast } from 'react-toastify'
 import { getAllPatients } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
   const { insurance } = useSelector((store) => store.insurance);
   const dispatch = useDispatch();
+  const auth = useAuth()
 
   useEffect(() =>{
     dispatch(getAllInsurance());
@@ -61,11 +63,11 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
         id:selectedRowData?.id,
       };
       setLoading(true);
-      await editPatient(formData).then(() => {
+      await editPatient(formData, auth).then(() => {
         helpers.resetForm();
         toast.success("Patient Edited Successfully!");
         setLoading(false);
-        dispatch(getAllPatients());
+        dispatch(getAllPatients(auth));
         handleClose();
       });
     } catch (err) {

@@ -31,7 +31,7 @@ export default function AddTriageModal({
 
   const fetchPatientTriage = async (triage_id)=> {
     try{
-      dispatch(getPatientTriage(triage_id))
+      dispatch(getPatientTriage(triage_id, auth))
     }catch(error){
 
     }
@@ -80,8 +80,8 @@ export default function AddTriageModal({
 
   const sendToDoc = async (payload, process_id)=> {
     try{
-      const response = await updateAttendanceProcesses(payload, process_id)
-      dispatch(getAllProcesses())
+      const response = await updateAttendanceProcesses(payload, process_id, auth)
+      dispatch(getAllProcesses(auth))
       console.log("SUCCESSFULLY SENT TO DOC", response)
 
     }catch(error){

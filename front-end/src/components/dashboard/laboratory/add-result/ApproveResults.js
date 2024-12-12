@@ -20,7 +20,7 @@ const ApproveResults = ({ selectedData, approveOpen, setApproveOpen }) => {
 
     const getPatientDetailsForThisTestRequest = async () => {
         try{
-            const response = await fetchPatientById(selectedData?.patient)
+            const response = await fetchPatientById(selectedData?.patient, auth)
             setTestPatient(response);
         }catch(error){
             console.log("ERROR GETTING PATIENT")

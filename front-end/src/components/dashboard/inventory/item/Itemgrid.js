@@ -48,7 +48,7 @@ const ItemsGrid = () => {
 
   useEffect(()=>{
     if (auth){
-      dispatch(getItems())
+      dispatch(getItems(auth))
     }
 
   }, [auth])

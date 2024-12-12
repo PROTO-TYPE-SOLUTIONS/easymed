@@ -105,8 +105,8 @@ const RequisitionDatagrid = () => {
   useEffect(() => {
     if (auth) {
       dispatch(getAllRequisitions(auth));
-      dispatch(getAllSuppliers());
-      dispatch(getAllItems());
+      dispatch(getAllSuppliers(auth));
+      dispatch(getAllItems(auth));
       dispatch(getAllDoctors(auth))
       dispatch(getAllTheUsers(auth))
     }

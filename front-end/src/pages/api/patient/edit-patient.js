@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             res.status(500).json(e.message);
         }
     }
-    else if (req.method === API_METHODS.PUT) {
+    else if (req.method === API_METHODS.PATCH) {
         try {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.put(`${API_URL.EDIT_PATIENT}/${body.id}/`,body,config)
+            await backendAxiosInstance.patch(`${API_URL.EDIT_PATIENT}/${body.id}/`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

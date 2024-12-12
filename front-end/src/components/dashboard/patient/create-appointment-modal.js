@@ -34,7 +34,7 @@ const CreateAppointmentModal = ({ setOpen, open, selectedRowData }) => {
         ...formValue,
         patient: selectedRowData?.id
       }
-      const response = await initiateNewAttendanceProcesses(payload)
+      const response = await initiateNewAttendanceProcesses(payload, auth)
       console.log(response)
       setLoading(false)
       handleClose()

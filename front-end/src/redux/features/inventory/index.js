@@ -134,9 +134,9 @@ export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInven
   clearPurchaseOrderItemsPdf, setIncoming, setRequisitionsItems } = InventorySlice.actions;
 
 
-export const getAllItems = () => async (dispatch) => {
+export const getAllItems = (auth) => async (dispatch) => {
   try {
-    const response = await fetchItems();
+    const response = await fetchItems(auth);
     dispatch(setItems(response));
   } catch (error) {
     console.log("ITEMS_ERROR ", error);
@@ -188,18 +188,18 @@ export const getAllIncomingItems = (auth) => async (dispatch) => {
   }
 };
 
-export const getItems = () => async (dispatch) => {
+export const getItems = (auth) => async (dispatch) => {
   try {
-    const response = await fetchItem();
+    const response = await fetchItem(auth);
     dispatch(setItem(response));
   } catch (error) {
     console.log("ITEMS_ERROR ", error);
   }
 };
 
-export const getAllSuppliers = () => async (dispatch) => {
+export const getAllSuppliers = (auth) => async (dispatch) => {
   try {
-    const response = await fetchSuppliers();
+    const response = await fetchSuppliers(auth);
     dispatch(setSuppliers(response));
   } catch (error) {
     console.log("SUPPLIERS_ERROR ", error);

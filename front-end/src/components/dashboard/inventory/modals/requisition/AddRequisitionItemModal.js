@@ -9,11 +9,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 import { addRequisitionItem } from "@/redux/service/inventory";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { item, suppliers, inventoryItems } = useSelector(({ inventory }) => inventory);
 
   const handleClickOpen = () => {
@@ -48,7 +50,7 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
         item: formValue.item.value,
       };
 
-      const response = await addRequisitionItem(formData, requisition.id)
+      const response = await addRequisitionItem(formData, requisition.id, auth)
         // Update the requisition's items array with the new item
         const updatedRequisition = {
             ...requisition,
@@ -67,9 +69,9 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
   };
 
   useEffect(() => {
-    dispatch(getAllItems());
-    dispatch(getItems())
-    dispatch(getAllSuppliers());
+    dispatch(getAllItems(auth));
+    dispatch(getItems(auth))
+    dispatch(getAllSuppliers(auth));
     
   }, []);
 

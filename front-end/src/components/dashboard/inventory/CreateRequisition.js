@@ -89,7 +89,7 @@ const CreateRequisition = () => {
     }
 
     try {
-      await addRequisitionItem(payloadData).then(()=>{
+      await addRequisitionItem(payloadData, auth).then(()=>{
         toast.success("Requisition Item Added Successfully!");
       })
 
@@ -119,7 +119,7 @@ const CreateRequisition = () => {
         items: [...inventoryItems]
       }
     
-      await addRequisition(payload).then((res) => {
+      await addRequisition(payload, auth).then((res) => {
         console.log("THIS IS THE RESPONSE", res)
         // sendEachItemToDb(res)
         toast.success("Requisition Added Successfully!");

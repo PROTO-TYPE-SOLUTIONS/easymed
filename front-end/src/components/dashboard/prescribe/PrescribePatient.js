@@ -59,7 +59,7 @@ const PrescribePatient = () => {
 
   const getPatientDetailsForThisTestRequest = async () => {
       try{
-          const response = await fetchPatientById(thisProcess?.patient)
+          const response = await fetchPatientById(thisProcess?.patient, auth)
           setPatient(response);
       }catch(error){
           console.log("ERROR GETTING PATIENT")
@@ -80,7 +80,7 @@ const PrescribePatient = () => {
 
   useEffect(()=> {
     if(auth){
-      getAllProcesses()
+      getAllProcesses(auth)
       getPatientDetailsForThisTestRequest()
     }
   }, [thisProcess])
@@ -116,7 +116,7 @@ const PrescribePatient = () => {
     }
 
     try {
-      await prescribeDrug(payloadData).then(()=>{
+      await prescribeDrug(payloadData, auth).then(()=>{
         billingInvoiceItems(auth, invoiceItemPayload)
         toast.success("Prescribed Drug Added Successfully!");
       })
@@ -150,7 +150,7 @@ const PrescribePatient = () => {
       console.log(payload)
     
       await updatePrescription(params.prescription_id, payload,  auth).then((res) => {
-        updateAttendanceProcesses({track: "pharmacy"}, params.process_id)
+        updateAttendanceProcesses({track: "pharmacy"}, params.process_id, auth)
         sendEachPrescriptionItemToDb(res)
         toast.success("Prescription Saved Successfully!");
         setLoading(false);

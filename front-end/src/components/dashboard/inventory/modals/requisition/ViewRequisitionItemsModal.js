@@ -11,6 +11,7 @@ import EditRequisitionItemModal from './EditRequisitionItemModal';
 import { deleteRequisitionItem, updateRequisition } from '@/redux/service/inventory';
 import { updateRequisitionAfterPoGenerate } from '@/redux/features/inventory';
 import { useDispatch } from 'react-redux';
+import { useAuth } from '@/assets/hooks/use-auth';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -41,6 +42,7 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
     const [showNavButtons, setShowNavButtons] = useState(true);
     const userActions = getActions();
     const dispatch = useDispatch()
+    const auth = useAuth();
     const [editOpen, setEditOpen] = useState(false);
     const [selectedEditRowData, setSelectedEditRowData] = useState({})
 
@@ -50,7 +52,7 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
 
     const deleteReqItem = async (data) => {
         try{
-            await deleteRequisitionItem(selectedRowData.id, data.id)
+            await deleteRequisitionItem(selectedRowData.id, data.id, auth)
             const deletedItemIndex = selectedRowData.items.findIndex((item)=> item.id === data.id)
             if(deletedItemIndex !== -1){
                 const afterDelete = selectedRowData.items.filter((item) => item.id !== data.id);
@@ -93,7 +95,7 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
 
         }
         try{
-            await updateRequisition(payload, selectedRowData.id)
+            await updateRequisition(payload, selectedRowData.id, auth)
             const updatedData = {...selectedRowData, department_approved: true, department_approval_date: new Date().toISOString()}
             setSelectedRowData(updatedData)
             // handleClose()

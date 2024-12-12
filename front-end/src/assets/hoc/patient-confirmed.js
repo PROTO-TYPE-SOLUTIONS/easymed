@@ -17,7 +17,7 @@ const PatientConfirmedProtect = ({ children }) => {
           try {
               if (auth) {
                   dispatch(getCurrentUser(auth));
-                  dispatch(getAllPatients());
+                  dispatch(getAllPatients(auth));
               }
           } catch (error) {
               console.error("Error fetching data:", error);

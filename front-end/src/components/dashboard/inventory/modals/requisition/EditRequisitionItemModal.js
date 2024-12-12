@@ -9,11 +9,13 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
 import { addRequisitionItem, updateRequisitionItem } from "@/redux/service/inventory";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, setSelectedEditRowData, requisition, setSelectedRowData, PO=false }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { item, suppliers, inventoryItems } = useSelector(({ inventory }) => inventory);
 
   const handleClose = () => {
@@ -55,7 +57,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
         item: formValue.item.value,
       };
 
-      const response = await updateRequisitionItem(formData, selectedEditRowData.requisition, selectedEditRowData.id)
+      const response = await updateRequisitionItem(formData, selectedEditRowData.requisition, selectedEditRowData.id, auth)
 
       if(PO){
         console.log("THE RESPONSE IS", response)
@@ -92,9 +94,9 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
   };
 
   useEffect(() => {
-    dispatch(getAllItems());
-    dispatch(getItems())
-    dispatch(getAllSuppliers());
+    dispatch(getAllItems(auth));
+    dispatch(getItems(auth))
+    dispatch(getAllSuppliers(auth));
     
   }, []);
 

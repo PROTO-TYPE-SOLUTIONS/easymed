@@ -13,6 +13,7 @@ import AssignDoctorModal from "./assign-doctor-modal";
 import Link from "next/link";
 import AddPatientModal from "../patient/add-patient-modal";
 import { initiateNewAttendanceProcesses } from "@/redux/service/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -41,6 +42,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRowData, setSelectedRowData] = useState({});
   const userActions = getActions();
+  const auth = useAuth()
   const [open, setOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -52,7 +54,7 @@ const PatientAppointmentDataGrid = ({ patientAppointments }) => {
       const payload = {
         appointment: appointmentID
       }
-      const response = await initiateNewAttendanceProcesses(payload)
+      const response = await initiateNewAttendanceProcesses(payload, auth)
       console.log("SUCCESSFULLY INITIATED", response)
     }catch(error){
       console.log("ERROR INITIATING PROCESS", error)

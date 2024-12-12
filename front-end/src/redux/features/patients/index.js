@@ -87,9 +87,9 @@ export const {
   setPrescriptionItem,
 } = PatientSlice.actions;
 
-export const getAllProcesses = () => async (dispatch) => {
+export const getAllProcesses = (auth) => async (dispatch) => {
   try {
-    const response = await fetchAllAttendanceProcesses();
+    const response = await fetchAllAttendanceProcesses(auth);
     dispatch(setProcesses(response));
   } catch (error) {
     console.log("ATTENDANCE_PROCESSES_ERROR ", error);
@@ -106,9 +106,9 @@ export const getAllServices = () => async (dispatch) => {
   }
 };
 
-export const getAllPatients = () => async (dispatch) => {
+export const getAllPatients = (auth) => async (dispatch) => {
   try {
-    const response = await fetchPatient();
+    const response = await fetchPatient(auth);
     dispatch(setPatients(response));
   } catch (error) {
     console.log("PATIENTS_ERROR ", error);
@@ -133,9 +133,9 @@ export const getPatientProfile = (userId) => async (dispatch) => {
   }
 };
 
-export const getPatientTriage = (id) => async (dispatch) => {
+export const getPatientTriage = (id, auth) => async (dispatch) => {
   try {
-    const response = await fetchPatientTriage(id);
+    const response = await fetchPatientTriage(id, auth);
     dispatch(setPatientTriage(response));
   } catch (error) {
     console.log("PROFILE_ERROR ", error);

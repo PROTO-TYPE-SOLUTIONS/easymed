@@ -43,7 +43,7 @@ const CreateTestPanelModal = () => {
 
   const fetchItems = () => {
     try{
-      dispatch(getItems())
+      dispatch(getItems(auth))
     }catch(error){
       console.log(error)
     }

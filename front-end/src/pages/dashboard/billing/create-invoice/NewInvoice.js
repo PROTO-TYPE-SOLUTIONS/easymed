@@ -48,7 +48,7 @@ const NewInvoice = () => {
     }
 
     useEffect(() => {
-        dispatch(getAllPatients());
+        dispatch(getAllPatients(auth));
 
     }, [selectedOption]);
 

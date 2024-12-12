@@ -8,11 +8,13 @@ import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const AddRequisitionItemModal = () => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { item, suppliers, inventoryItems } = useSelector(({ inventory }) => inventory);
 
   console.log(inventoryItems)
@@ -64,9 +66,9 @@ const AddRequisitionItemModal = () => {
   };
 
   useEffect(() => {
-    dispatch(getAllItems());
-    dispatch(getItems())
-    dispatch(getAllSuppliers());
+    dispatch(getAllItems(auth));
+    dispatch(getItems(auth))
+    dispatch(getAllSuppliers(auth));
     
   }, []);
 

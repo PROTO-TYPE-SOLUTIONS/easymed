@@ -12,7 +12,7 @@ export default function Home() {
   const dispatch = useDispatch();
 
   useEffect(()=>{
-    dispatch(getAllPatients());
+    dispatch(getAllPatients(auth));
     if(auth){
       auth.role === "patient" ? router.push('/patient-overview') : router.push('/dashboard');
     }        

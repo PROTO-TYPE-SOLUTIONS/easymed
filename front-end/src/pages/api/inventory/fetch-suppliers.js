@@ -14,14 +14,14 @@ export default async function handler(req, res) {
             // if (!req.headers?.authorization){
             //     res.status(401).send('Unauthorized');
             // }
-            // const config = {
-            //     headers: {
-            //         'Authorization': req.headers.authorization,
-            //     }
-            // };
+            const config = {
+                headers: {
+                    'Authorization': req.headers.authorization,
+                }
+            };
     
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_SUPPLIERS}`).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_SUPPLIERS}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.ADD_INVENTORY}`,body)
+            await backendAxiosInstance.post(`${API_URL.ADD_INVENTORY}`, body, config )
                 .then(response => {
                     res.status(200).json(response.data);
                 })

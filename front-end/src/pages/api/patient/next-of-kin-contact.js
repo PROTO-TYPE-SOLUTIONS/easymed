@@ -45,7 +45,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.PATIENT_KIN_CONTACT}`,body,config)
+            await backendAxiosInstance.post(`${API_URL.PATIENT_KIN_CONTACT}`, body, config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })

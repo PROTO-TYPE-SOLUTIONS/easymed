@@ -10,12 +10,14 @@ import { useContext } from "react";
 import { authContext } from "@/components/use-context";
 import { useDispatch, useSelector } from "react-redux";
 import { getPatientTriage } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
   const [loading, setLoading] = React.useState(false);
   const { patientTriage } = useSelector((store) => store.patient);
   const { user } = useContext(authContext);
   const dispatch = useDispatch();
+  const auth = useAuth()
 
   const handleClose = () => {
     setOpen(false);
@@ -69,7 +71,7 @@ const ReferPatientModal = ({ selectedRowData, open, setOpen }) => {
   };
 
   useEffect(() => {
-    dispatch(getPatientTriage(selectedRowData?.triage));
+    dispatch(getPatientTriage(selectedRowData?.triage, auth));
   }, [selectedRowData]);
 
   return (
