@@ -311,7 +311,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseOrderItem
-        fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'quantity_received', 'total_buying_amount', 'date_created']
+        fields = ['id', 'PO_number', 'supplier', 'item_name', 'quantity_ordered', 'buying_price', 'total_buying_amount', 'date_created']
 
 
     def get_buying_price(self, obj):

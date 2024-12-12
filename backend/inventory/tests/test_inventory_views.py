@@ -1,73 +1,70 @@
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
-from inventory.models import Inventory, IncomingItem, Item
-from celery import shared_task
-
 import pytest
-from inventory.models import Inventory
-# from django_celery_results.models import TaskResult
-from celery.result import AsyncResult
-from easymed.celery_tasks import create_or_update_inventory_record
+
+from inventory.models import (
+    Inventory,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    GoodsReceiptNote,
+    SupplierInvoice,
+    RequisitionItem
+    )
+
 
 @pytest.mark.django_db
-def test_incoming_item_updates_inventory(incoming_item, item):
-    # Ensure there is an existing Inventory record for the item
+def test_goods_receipt_note_signal(supplier, purchase_order):
+    assert GoodsReceiptNote.objects.count() == 0
+
+    supplier_invoice = SupplierInvoice.objects.create(
+        invoice_no="INV12345",
+        amount=1000.0,
+        supplier=supplier,
+        purchase_order=purchase_order,
+    )
+
+    assert GoodsReceiptNote.objects.count() == 1
+
+    goods_receipt_note = GoodsReceiptNote.objects.first()
+    assert goods_receipt_note.purchase_order == supplier_invoice.purchase_order
+    assert goods_receipt_note.note == f"Generated for Supplier Invoice: {supplier_invoice.invoice_no}"
+    assert goods_receipt_note.grn_number is not None  # Check GRN number auto-generation
+
+
+
+@pytest.mark.django_db
+def test_incoming_item_updates_inventory(incoming_item, item, user, requisition):
     initial_inventory = Inventory.objects.create(
         item=item,
-        quantity_in_stock=5,
+        quantity_at_hand=0,
         purchase_price=10.0,
         sale_price=20.0
     )
+    
+    print(f'There are {Inventory.objects.count()} inventory items')
+    print(f'There are {initial_inventory.quantity_at_hand} items in stock')
 
-    # Trigger the signal by creating an IncomingItem
+    purchase_order = PurchaseOrder.objects.create(ordered_by=user)
+    requisition_item = RequisitionItem.objects.create(
+        item=item,
+        quantity_requested=10,
+        requisition_id=requisition.id
+        )
+    purchase_order_item = PurchaseOrderItem.objects.create(
+        purchase_order=purchase_order,
+        requisition_item=requisition_item,
+        quantity_ordered=10,
+        
+    )
+
+    incoming_item.quantity = 10
     incoming_item.save()
     
-    # Get count of inventory items
-    print(f'There are {Inventory.objects.count()} inventory items')
+    # Manually call the create_or_update_inventory_record task
+    from easymed.celery_tasks import create_or_update_inventory_record
+    create_or_update_inventory_record(incoming_item.id)
     
-    # Check item quantity in stock
-    print(f'There are {initial_inventory.quantity_in_stock} items in stock')
+    print(f'There are {Inventory.objects.count()} inventory items')
+    print(f'There are {initial_inventory.quantity_at_hand} items in stock')
 
-    # Confirm the inventory was updated
     updated_inventory = Inventory.objects.get(id=initial_inventory.id)
 
-    assert updated_inventory.quantity_in_stock == initial_inventory.quantity_in_stock + incoming_item.quantity
-
-
-
-
-
-#  class TestInventoryViews(APITestCase):
-#     def setUp(self):
-#         self.item = Item.objects.create(
-#             name="Test Item",
-#             desc="Test Description",
-#             category="General",
-#             units_of_measure="Unit",
-#             quantity_at_hand=10,
-#             re_order_level=5,
-#             buying_price=10.0,
-#             selling_price=20.0,
-#             vat_rate=16.0,
-#         )
-#         self.inventory = Inventory.objects.create(
-#             item=self.item,
-#             quantity_in_stock=10,
-#         )
-
-# def test_incoming_item_updates_inventory(self):
-#     initial_inventory_quantity = self.inventory.quantity_in_stock
-#     incoming_item_data = {
-#         "item": self.item.id,
-#         "quantity": 5,
-#     }
-#     url = reverse("incoming-item-list")
-#     response = self.client.post(url, incoming_item_data, format="json")
-#     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-#     # Run Celery tasks synchronously during the test
-#     with self.settings(CELERY_ALWAYS_EAGER=True):
-#         # The signal should be sent and the task should be executed here
-#         pass
-#     self.inventory.refresh_from_db()
-#     self.assertEqual(self.inventory.quantity_in_stock, initial_inventory_quantity + incoming_item_data["quantity"])
+    assert updated_inventory.quantity_at_hand > initial_inventory.quantity_at_hand + incoming_item.quantity

@@ -49,13 +49,10 @@ def item():
         desc="Test Description",
         category="General",
         units_of_measure="Unit",
-        quantity_at_hand=10,
-        re_order_level=5,
-        buying_price=10.0,
-        selling_price=20.0,
         vat_rate=16.0,
         item_code="ABC123",
     )
+
 
 @pytest.fixture
 def insurance_company():
@@ -91,6 +88,7 @@ def purchase_order_item(purchase_order, requisition_item, supplier):
         supplier=supplier,
     )
 
+
 @pytest.fixture
 def incoming_item(item, supplier, purchase_order):
     return IncomingItem.objects.create(
@@ -100,17 +98,15 @@ def incoming_item(item, supplier, purchase_order):
         purchase_order=purchase_order,
         quantity=10,
         sale_price=20.0,
-        packed="1",
-        subpacked="12",
         category_one="resale",
-
     )
+
 
 @pytest.fixture
 def inventory(item):
     return Inventory.objects.create(
         item=item,
-        quantity_in_stock=10,
+        quantity_at_hand=10,
     )
 
 @pytest.fixture
@@ -127,3 +123,4 @@ def department_inventory(item, department):
         item=item,
         department=department,
     )
+
