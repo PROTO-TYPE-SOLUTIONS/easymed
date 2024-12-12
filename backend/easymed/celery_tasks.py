@@ -53,8 +53,11 @@ def create_or_update_inventory_record(incoming_item_id):
         inventory.save()
         Logger.info("Inventory record updated for incoming item: %s", (incoming_item,))
     except PurchaseOrderItem.DoesNotExist:
-        Logger.warning("PurchaseOrderItem for Purchase Order ID %s and Item ID %s does not exist.", (incoming_item.purchase_order_id, incoming_item.item.id))
-
+        Logger.warning(
+            "PurchaseOrderItem for Purchase Order ID %s and Item ID %s does not exist.",
+            incoming_item.purchase_order_id,
+            incoming_item.item.id
+        )
 
 '''Task to generated pdf once Invoice tale gets a new entry'''
 @shared_task

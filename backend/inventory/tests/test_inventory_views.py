@@ -41,7 +41,7 @@ def test_incoming_item_updates_inventory(incoming_item, item, user, requisition)
     
     print(f'There are {Inventory.objects.count()} inventory items')
     print(f'There are {initial_inventory.quantity_at_hand} items in stock')
-
+    
     purchase_order = PurchaseOrder.objects.create(ordered_by=user)
     requisition_item = RequisitionItem.objects.create(
         item=item,
@@ -52,9 +52,11 @@ def test_incoming_item_updates_inventory(incoming_item, item, user, requisition)
         purchase_order=purchase_order,
         requisition_item=requisition_item,
         quantity_ordered=10,
-        
+    
     )
-
+    
+    # Update the purchase_order attribute of the incoming_item
+    incoming_item.purchase_order = purchase_order
     incoming_item.quantity = 10
     incoming_item.save()
     
@@ -64,7 +66,7 @@ def test_incoming_item_updates_inventory(incoming_item, item, user, requisition)
     
     print(f'There are {Inventory.objects.count()} inventory items')
     print(f'There are {initial_inventory.quantity_at_hand} items in stock')
-
+    
     updated_inventory = Inventory.objects.get(id=initial_inventory.id)
-
-    assert updated_inventory.quantity_at_hand > initial_inventory.quantity_at_hand + incoming_item.quantity
+    
+    assert updated_inventory.quantity_at_hand == initial_inventory.quantity_at_hand + incoming_item.quantity
