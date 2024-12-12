@@ -9,6 +9,7 @@ from .views import (
     PurchaseOrderItemViewSet,
     InventoryViewSet,
     SupplierViewSet,
+    SupplierInvoiceViewSet,
     DepartmentInventoryViewSet,
     IncomingItemViewSet,
     RequisitionItemViewSet,
@@ -30,6 +31,7 @@ router.register(r'incoming-item', IncomingItemViewSet, basename='incoming-item-l
 router.register(r'insurance-prices', InventoryInsuranceSalepriceViewSet)
 router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
 router.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
+router.register(r'supplier-invoice', SupplierInvoiceViewSet, basename='supplier-invoice')
 
 requisition_url = NestedDefaultRouter(router, 'requisition', lookup='requisition')
 requisition_url.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')

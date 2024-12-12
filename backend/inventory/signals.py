@@ -5,6 +5,9 @@ from .models import (
     PurchaseOrder,
     IncomingItem,
     PurchaseOrderItem,
+    SupplierInvoice,
+    GoodsReceiptNote
+
     )
 from easymed.celery_tasks import (
     generate_requisition_pdf,
@@ -27,9 +30,17 @@ def generate_requisition_note(sender, instance, created, **kwargs):
         generate_requisition_pdf.delay(instance.pk)
         create_purchase_order.delay(instance.pk)
 
-
 '''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''
 @receiver(post_save, sender=PurchaseOrder)
 def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
     if created:
         generate_purchase_order_pdf.delay(instance.pk)
+
+@receiver(post_save, sender=SupplierInvoice)
+def create_goods_receipt_note(sender, instance, created, **kwargs):
+    if created:
+        # Create a GoodsReceiptNote linked to the PurchaseOrder of the SupplierInvoice
+        GoodsReceiptNote.objects.create(
+            purchase_order=instance.purchase_order,
+            note=f"Generated for Supplier Invoice: {instance.invoice_no}"
+        )
