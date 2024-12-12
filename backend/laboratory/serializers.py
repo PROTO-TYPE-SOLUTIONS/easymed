@@ -3,6 +3,7 @@ from rest_framework import serializers
 import pdb
 
 from customuser.models import CustomUser
+from inventory.models import Inventory
 from .models import (
     LabReagent,
     LabTestRequest, 
@@ -78,10 +79,17 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     is_quantitative = serializers.ReadOnlyField(source='test_panel.is_quantitative')
 
     def get_sale_price(self, instance):
-        if instance.test_panel and instance.test_panel.item:
-            inventory = instance.test_panel.item.inventory_set.first()
-            return inventory.sale_price if inventory else None
-        return None
+        try:
+            inventory = instance.test_panel.item.inventory
+            return inventory.sale_price
+        except Inventory.DoesNotExist:
+            return None  # Or a default value
+    
+    # def get_sale_price(self, instance):
+    #     if instance.test_panel and instance.test_panel.item:
+    #         inventory = instance.test_panel.item.inventories.first()
+    #         return inventory.sale_price if inventory else None
+    #     return None
 
     def get_patient_name(self, instance):
         if instance.patient_sample and instance.patient_sample.process:

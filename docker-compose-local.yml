@@ -19,7 +19,6 @@ services:
             dockerfile: ./Dockerfile.local
         container_name: easymed-backend
         command: python manage.py runserver 0.0.0.0:8080
-         #command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
         volumes:
             - ./backend:/app
         ports:
