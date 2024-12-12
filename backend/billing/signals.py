@@ -134,7 +134,7 @@ def get_available_stock(instance):
     Function to get the available inventory stock for passed instance 
     '''
     inventory_item = Inventory.objects.get(item=instance.item)
-    return inventory_item.quantity_in_stock
+    return inventory_item.quantity_at_hand
 
 def check_quantity_availability(instance):
     '''
@@ -183,7 +183,7 @@ def update_stock_quantity_if_stock_is_available(instance, deductions):
 
     if instance.item.category == 'Lab Test':
         inventory_item = Inventory.objects.get(item=instance.item)
-        remainder_quantity = inventory_item.quantity_in_stock - deductions
+        remainder_quantity = inventory_item.quantity_at_hand - deductions
        # Ensure remainder quantity is not negative
         if remainder_quantity < 0:
             raise ValidationError(f"Not enough stock available for {instance.item.name}.")
