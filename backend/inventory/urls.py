@@ -18,7 +18,8 @@ from .views import (
     download_purchaseorder_pdf,
     download_goods_receipt_note_pdf,
     InventoryInsuranceSalepriceViewSet,
-    IncomingItemViewSet
+    IncomingItemViewSet,
+    InventoryFilterView
 )
 
 router = DefaultRouter()
@@ -51,6 +52,7 @@ urlpatterns = [
     path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),
     path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
     path('receipt-note/<int:purchase_order_id>/', download_goods_receipt_note_pdf, name='incoming_items_pdf'),
+    path('inventory-filter/', InventoryFilterView.as_view(), name='inventory-filter'),
 ]
 
 if settings.DEBUG:

@@ -249,13 +249,13 @@ class Inventory(models.Model):
     re_order_level= models.PositiveIntegerField(default=5)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
+    lot_number= models.CharField(max_length=255, null=True, blank=True)
+    expiry_date= models.DateField(null=True, blank=True)
 
     def clean(self):
         if self.purchase_price > self.sale_price:
             raise ValidationError("Buying price cannot exceed selling price")
 
-        if self.re_order_level > self.quantity_at_hand:
-            raise ValidationError("Re-order levels cannot exceed the quantity at hand")
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"
     

@@ -3,17 +3,21 @@ from rest_framework import viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response # type: ignore
+from rest_framework.exceptions import ValidationError
 from weasyprint import HTML
-
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 from django.http import HttpResponse
-from weasyprint import HTML
-from .models import PurchaseOrderItem
-from django.http import HttpResponse
 from django.conf import settings
+from rest_framework.generics import ListAPIView
+from django.utils.timezone import now
+from django.db import models
+from django.db.models import F
+from datetime import timedelta
 
-
+from .models import Inventory, Item
+from .models import IncomingItem, GoodsReceiptNote
+from .models import PurchaseOrderItem
 from .models import Requisition
 from company.models import Company
 from .models import (
@@ -48,6 +52,8 @@ from .serializers import (
     RequisitionListSerializer,
     IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
+    LowQuantityDrugSerializer,
+    NearExpiryDrugSerializer
 )
 
 from .filters import (
@@ -74,7 +80,6 @@ class PurchaseViewSet(viewsets.ModelViewSet):
 class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all()
     serializer_class = IncomingItemSerializer
-
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()
@@ -238,6 +243,43 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
 class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
     queryset = InventoryInsuranceSaleprice.objects.all()
     serializer_class = InventoryInsuranceSalepriceSerializer
+
+
+
+class InventoryFilterView(ListAPIView):
+    '''
+    To get Low Quantity Drugs, use: GET /inventory/filter/?category=Drug&filter_type=low_quantity
+    To get near expiry drugs, use: GET /inventory/filter/?category=Drug&filter_type=near_expiry
+    To get near-expiry Lab Reagents, use: GET /inventory/filter/?category=LabReagent&filter_type=near_expiry
+
+    ...get it?
+    '''
+    serializer_class = InventorySerializer
+
+    def get_queryset(self):
+        category = self.request.query_params.get('category', None)
+        filter_type = self.request.query_params.get('filter_type', None)
+
+        if not category or not filter_type:
+            raise ValidationError({"error": "Both 'category' and 'filter_type' parameters are required."})
+
+        queryset = Inventory.objects.filter(item__category=category)
+
+        # we can add more filter types
+        if filter_type == 'low_quantity':
+            queryset = queryset.filter(quantity_at_hand__lte=F('re_order_level'))
+        elif filter_type == 'near_expiry':
+            today = now().date()
+            three_months_later = today + timedelta(days=90)  # 3 months from now
+            five_months_later = today + timedelta(days=150)  # 5 months from now
+            queryset = queryset.filter(expiry_date__range=[three_months_later, five_months_later])
+        elif not queryset.exists():
+            return Response([], status=status.HTTP_200_OK)
+        else:
+            raise ValidationError({"error": f"Invalid filter_type: {filter_type}. Must be 'low_quantity' or 'near_expiry'."})
+
+        return queryset
+
     
 
 def download_requisition_pdf(request, requisition_id):
@@ -281,9 +323,6 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
 
     return response
 
-
-from django.template.loader import get_template
-from .models import IncomingItem, GoodsReceiptNote
 
 def download_goods_receipt_note_pdf(request, purchase_order_id):
     incoming_items = IncomingItem.objects.filter(purchase_order_id=purchase_order_id)
