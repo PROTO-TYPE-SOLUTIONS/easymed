@@ -52,6 +52,7 @@ from .serializers import (
     RequisitionListSerializer,
     IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
+    GoodsReceiptNoteSerializer,
 )
 
 from .filters import (
@@ -68,19 +69,23 @@ class ItemViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ItemFilter
 
+
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
     serializer_class = PurchaseOrderCreateSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PurchaseOrderFilter
 
+
 class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all()
     serializer_class = IncomingItemSerializer
 
+
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()
     serializer_class = DepartmentInventorySerializer
+
 
 class RequisitionViewSet(viewsets.ModelViewSet):
     """
@@ -171,6 +176,7 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
     
+
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
@@ -178,11 +184,13 @@ class InventoryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['item',]
     filterset_class = InventoryFilter
 
+
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = SupplierFilter
+
 
 class SupplierInvoiceViewSet(viewsets.ModelViewSet):
     queryset = SupplierInvoice.objects.all()
@@ -242,7 +250,6 @@ class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
     serializer_class = InventoryInsuranceSalepriceSerializer
 
 
-
 class InventoryFilterView(ListAPIView):
     '''
     To get Low Quantity Drugs, use: GET /inventory/filter/?category=Drug&filter_type=low_quantity
@@ -277,7 +284,11 @@ class InventoryFilterView(ListAPIView):
 
         return queryset
 
-    
+
+class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
+    queryset = GoodsReceiptNote.objects.all()
+    serializer_class = GoodsReceiptNoteSerializer
+
 
 def download_requisition_pdf(request, requisition_id):
     '''

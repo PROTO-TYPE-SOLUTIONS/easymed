@@ -19,6 +19,7 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
+    GoodsReceiptNote
 )
 
 from .validators import (
@@ -513,17 +514,7 @@ class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-class LowQuantityDrugSerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.name')
-    
+class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Inventory
-        fields = ['item_name', 'lot_number', 'quantity_at_hand']
-
-class NearExpiryDrugSerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.name')
-    
-    class Meta:
-        model = Inventory
-        fields = ['item_name', 'lot_number', 'quantity_at_hand', 'expiry_date']
+        model = GoodsReceiptNote
+        fields = '__all__'
