@@ -52,8 +52,6 @@ from .serializers import (
     RequisitionListSerializer,
     IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
-    LowQuantityDrugSerializer,
-    NearExpiryDrugSerializer
 )
 
 from .filters import (
@@ -63,7 +61,6 @@ from .filters import (
     SupplierFilter,
     RequisitionItemFilter
 )
-from authperms.permissions import IsSystemsAdminUser
 
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()

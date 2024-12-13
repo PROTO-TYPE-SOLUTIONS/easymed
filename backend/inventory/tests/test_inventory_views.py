@@ -1,4 +1,7 @@
 import pytest
+from django.urls import reverse
+from datetime import datetime, timedelta
+from inventory.models import Inventory, Item
 
 from inventory.models import (
     Inventory,
@@ -55,12 +58,10 @@ def test_incoming_item_updates_inventory(incoming_item, item, user, requisition)
     
     )
     
-    # Update the purchase_order attribute of the incoming_item
     incoming_item.purchase_order = purchase_order
     incoming_item.quantity = 10
     incoming_item.save()
-    
-    # Manually call the create_or_update_inventory_record task
+
     from easymed.celery_tasks import create_or_update_inventory_record
     create_or_update_inventory_record(incoming_item.id)
     
@@ -70,11 +71,6 @@ def test_incoming_item_updates_inventory(incoming_item, item, user, requisition)
     updated_inventory = Inventory.objects.get(id=initial_inventory.id)
     
     assert updated_inventory.quantity_at_hand == initial_inventory.quantity_at_hand + incoming_item.quantity
-
-
-from django.urls import reverse
-from datetime import datetime, timedelta
-from inventory.models import Inventory, Item
 
 
 @pytest.mark.django_db
@@ -95,19 +91,17 @@ def test_low_quantity_filter(authenticated_client, inventory, item):
 # TODO: Test that we're actually getting some data
 @pytest.mark.django_db
 def test_near_expiry_filter(authenticated_client, inventory, item):
-    # Add expiry date to the item and simulate near-expiry
-    inventory.expiry_date = datetime.now() + timedelta(days=90)
+    inventory.expiry_date = datetime.now() + timedelta(days=91)
     print(f'Expiry Date: {inventory.expiry_date}')
     inventory.item.category = "Drug"
     print(f'Category: {inventory.item.category} - {inventory.item.name}')
     inventory.item.save()
 
-    # Make the request to the endpoint
     url = reverse('inventory-filter')
     response = authenticated_client.get(url, {'category': 'Drug', 'filter_type': 'near_expiry'})
     print(f'Response: {response.json()}')
 
-    # Check the response
     assert response.status_code == 200
+    #TODO: There's some seriouse headache here!
     # assert len(response.json()) == 1
 
