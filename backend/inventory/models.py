@@ -199,7 +199,6 @@ class GoodsReceiptNote(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(max_length=255, null=True, blank=True)
     grn_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
-
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
