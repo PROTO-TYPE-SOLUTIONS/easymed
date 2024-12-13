@@ -161,14 +161,13 @@ class PurchaseOrderItem(models.Model):
     display the packed and subpacked so that we only order packed
     '''
     date_created = models.DateTimeField(auto_now_add=True)
-    quantity_ordered = models.IntegerField(default=0) # not packed or subpacked
 
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='purchase_order')
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
     def __str__(self):
-        return f"{self.requisition_item.item.name} - Ordered: {self.quantity_ordered}"  
+        return f"{self.requisition_item.item.name} - PO_no: {self.purchase_order.PO_number}"  
 
 
 class SupplierInvoice(models.Model):
