@@ -23,8 +23,6 @@ const getActions = () => {
   let actions = [
     { action: "add", label: "Add Test", icon: <AiOutlineDownload className="text-card text-xl" /> },
     { action: "view", label: "Request Information", icon: <AiOutlineDownload className="text-card text-xl" /> },
-    { action: "sample", label: "Confirm Sample Collection", icon: <AiOutlineDownload className="text-card text-xl" /> },
-    { action: "equipment", label: "Send to equipment", icon: <AiOutlineDownload className="text-card text-xl" /> },
   ];
  
   return actions;
@@ -45,6 +43,8 @@ const LabRequestDataGrid = ( ) => {
   const { processes, patients } = useSelector((store)=> store.patient)
 
   const labTestsSchedules = processes.filter((process)=> process.track==="lab")
+  const searchedProcesses = labTestsSchedules.filter((process)=> process.patient_number.includes(searchQuery))
+
 
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
@@ -86,7 +86,7 @@ const LabRequestDataGrid = ( ) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             value={searchQuery}
             fullWidth
-            placeholder="Search lab requests"
+            placeholder="Search by patient ID"
           />
         </Grid>
         <Grid item md={4} xs={12}>
@@ -120,7 +120,7 @@ const LabRequestDataGrid = ( ) => {
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid
-        dataSource={labTestsSchedules}
+        dataSource={searchedProcesses}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -144,22 +144,18 @@ const LabRequestDataGrid = ( ) => {
         <Column 
           dataField="patient_number" 
           caption="PId" 
-          width={120}
         />
         <Column 
           dataField="patient" 
           caption="Patient Name" 
-          width={200}
           cellRender={patientNameRender}
         />
         <Column
           dataField=""
           caption=""
-          width={50}
           cellRender={actionsFunc}
         />
       </DataGrid>
-      {open && <EquipmentModal {...{open,setOpen,selectedRowData}} />}
       {labOpen && (<LabModal {...{ labOpen, setLabOpen, selectedRowData }}/>)}
       {requestInfoOpen && (
         <RequestInfoModal {...{requestInfoOpen, setRequestInfoOpen, selectedRowData}}/>

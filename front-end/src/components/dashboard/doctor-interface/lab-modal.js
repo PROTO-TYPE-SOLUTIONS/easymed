@@ -76,7 +76,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
       setLoading(true);
       await sendLabRequests(formValue, auth).then((res) => {
         helpers.resetForm();
-        updateAttendanceProcesses({track: "lab"}, selectedRowData.id)
+        updateAttendanceProcesses({track: "lab"}, selectedRowData.id, auth)
         savePanels(res.id)
         toast.success("Lab Request Successful!");
         setLoading(false);
@@ -116,8 +116,8 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   }
 
   useEffect(() => {
-    dispatch(getAllPatients());
-    dispatch(getPatientTriage(selectedRowData?.triage));
+    dispatch(getAllPatients(auth));
+    dispatch(getPatientTriage(selectedRowData?.triage, auth));
     dispatch(getAllLabTestProfiles(auth));
     if(testProfile){
       getTestPanelsByTheProfileId(testProfile, auth);

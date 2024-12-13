@@ -65,7 +65,7 @@ const SamplesAccordion = ({ sample }) => {
       </AccordionSummary>
       <AccordionDetails>
         <Typography>
-          <TestPanelsItem collected={sample.is_sample_collected} sample={sample.id}/>
+          <TestPanelsItem collected={sample.is_sample_collected} sample_id={sample.id} sample={sample.patient_sample_code}/>
         </Typography>
       </AccordionDetails>
     </Accordion>

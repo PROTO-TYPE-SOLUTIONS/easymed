@@ -62,31 +62,26 @@ export default async function handler(req, res) {
             res.status(500).json(e.message);
         }
     }
-    else if (req.method === API_METHODS.PUT) {
+    else if (req.method === API_METHODS.PATCH) {
         try {
-            // if (!req.headers?.authorization){
-            //     res.status(401).send('Unauthorized');
-            // }
             const config = {
                 headers: {
                     'Authorization': req.headers.authorization,
                 }
             };
+    
             const body = req.body;
-
-            console.log("PAY INVOICE BILL BODY ",body)
-            console.log("PAY INVOICE BILL URL ",`${API_URL.BILLING_INVOICES}/${body.id}/`)
-
-            await backendAxiosInstance.put(`${API_URL.BILLING_INVOICES}${body.id}/`,body, config).then(response => {
-                res.status(200).json(response.data);
-
-            }).catch(e => {
-                    res.status(e.response?.status ?? 500).json(e.response?.data)
-                }
-            )
-
-        } catch (e) {
-            res.status(500).json(e.message);
+            const query = req.query;   
+            await backendAxiosInstance.patch(`${API_URL.BILLING_INVOICES}${query.invoice_id}/`, body, config)
+                .then(response => {
+                    res.status(200).json(response.data);
+                })
+                .catch(error => {
+                    res.status(error.response?.status ?? 500).json(error.response?.data);
+                });
+    
+        } catch (error) {
+            res.status(500).json(error.message);
         }
     }
     else {

@@ -6,8 +6,16 @@ from .models import (
     Item,
     PurchaseOrder,
     Supplier,
-    PurchaseOrderItem
+    PurchaseOrderItem,
+    RequisitionItem
+
 )
+
+class RequisitionItemFilter(django_filters.FilterSet):
+    class Meta:
+        model = RequisitionItem
+        fields = ['preferred_supplier']
+
 
 class InventoryFilter(django_filters.FilterSet):
     item = django_filters.CharFilter(field_name='item__id', lookup_expr='icontains')
@@ -32,15 +40,33 @@ class PurchaseOrderFilter(django_filters.FilterSet):
         model = PurchaseOrder
         fields = ('id', 'supplier_ID__name')
 
+class PurchaseOrderSupplierFilter(django_filters.FilterSet):
+    supplier = django_filters.ModelChoiceFilter(
+        queryset=Supplier.objects.all(),
+        method='filter_by_supplier',
+        label='Supplier'
+    )
+
+    class Meta:
+        model = PurchaseOrder
+        fields = ['supplier']  # This field will be used in filtering
+
+    def filter_by_supplier(self, queryset, name, value):
+        """
+        Filters PurchaseOrders by the supplier of their related PurchaseOrderItems.
+        """
+        return queryset.filter(purchase_order__supplier=value).distinct()
+
+
 
 
 class PurchaseOrderItemFilter(django_filters.FilterSet):
     class Meta:
         model = PurchaseOrderItem
-        fields = ('quantity_purchased', 'id', 'item')
+        fields = ( 'id', 'requisition_item')
 
 
 class SupplierFilter(django_filters.FilterSet):
     class Meta:
         model = Supplier
-        fields = ('name',)
+        fields = ('common_name',)

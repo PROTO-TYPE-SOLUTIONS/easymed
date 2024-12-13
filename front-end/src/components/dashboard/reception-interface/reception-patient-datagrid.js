@@ -8,6 +8,7 @@ import DischargePatientModal from "./discharge-patient-modal";
 import Link from "next/link";
 import { getAllPatients } from "@/redux/features/patients";
 import { useSelector,useDispatch } from "react-redux";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -18,6 +19,7 @@ const  ReceptionPatientsDataGrid = () => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { patients } = useSelector((store) => store.patient)
 
 
@@ -70,7 +72,7 @@ const  ReceptionPatientsDataGrid = () => {
   ];
 
   useEffect(() => {
-    dispatch(getAllPatients());
+    dispatch(getAllPatients(auth));
   },[])
 
   //   filter users based on search query

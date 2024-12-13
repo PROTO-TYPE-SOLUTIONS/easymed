@@ -14,6 +14,7 @@ import { getAllTheUsers } from "@/redux/features/users";
 import { downloadPDF } from '@/redux/service/pdfs';
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
+import ViewPurchaseOrderItemsModal from "./modals/purchaseOrder/ViewPurchaseOrderItems";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -23,6 +24,11 @@ const allowedPageSizes = [5, 10, 'all'];
 
 const getActions = () => {
   let actions = [
+    {
+      action: "po_items",
+      label: "View PO items",
+      icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+    },
     {
       action: "print",
       label: "Print",
@@ -41,6 +47,8 @@ const PurchaseOrdersDatagrid = () => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const [open, setOpen]=useState(false)
+  const [selectedRowData, setSelectedRowData] = useState({})
 
   const dispatch = useDispatch()
   const auth = useAuth();
@@ -58,8 +66,7 @@ const PurchaseOrdersDatagrid = () => {
   };
 
   const onMenuClick = async (menu, data) => {
-    if (menu.action === "dispense") {
-      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+    if (menu.action === "po_items") {
       setSelectedRowData(data);
       setOpen(true);
     }else if (menu.action === "print"){
@@ -142,16 +149,20 @@ const PurchaseOrdersDatagrid = () => {
           showNavigationButtons={showNavButtons}
         />
         <Column 
-          dataField="requested_by"
-          caption="Requested By" 
-          cellRender={(cellData) => {
-            const user = usersData.find(user => user.id === cellData.data.requested_by);
-            return user ? `${user.first_name} ${user.last_name}` : 'user not found';
-          }}
-          />
+          dataField="PO_number"
+          caption="Order Number" 
+        />
         <Column 
-          dataField="status"
-          caption="Status"
+          dataField="ordered_by"
+          caption="Ordered By"
+        />
+        <Column 
+          dataField="total_items_ordered"
+          caption="Ordered Quantity"
+        />
+        <Column 
+          dataField="is_dispatched"
+          caption="is Dispatched"
         />
         <Column dataField="date_created" caption="Requested Date" />
         <Column 
@@ -160,6 +171,7 @@ const PurchaseOrdersDatagrid = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
+      <ViewPurchaseOrderItemsModal open={open} setOpen={setOpen} selectedRowData={selectedRowData} setSelectedRowData={setSelectedRowData}/>
     </section>
   );
 };

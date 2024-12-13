@@ -70,6 +70,7 @@ export const API_URL = {
   SAMPLES_BY_process_ID: "/lab/patient-samples-by-process-id/",
   PANELS_BY_SAMPLE_ID: "/lab/labtestrequestpanels/sample/",
   PHLEBOTOMY_PATIENT_SAMPLES:"/lab/patient-samples/",
+  SPECIMENS: "/lab/specimens/",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/inventory/inventories/",
@@ -79,8 +80,9 @@ export const API_URL = {
   DELETE_ITEM: "/inventory/items",
   FETCH_ORDER_BILL: "/inventory/orderbill/",
   REQUISITION: "/inventory/requisition/",
-  REQUISITION_ITEM: "/inventory/requisition-item/",
-  PURCHASE_ORDER: "/inventory/purchase-order/",
+  REQUISITION_ITEM: "/inventory/requisition/",
+  FETCH_ALL_REQUISITION_ITEMS: "/inventory/requisitionitems/all_items/",
+  PURCHASE_ORDER: "/inventory/",
   PURCHASE_ORDER_ITEM: "/inventory/purchase-order-item/",
   FETCH_INCOMING_ITEMS: "/inventory/incoming-item/",
 
@@ -100,6 +102,7 @@ export const API_URL = {
   FETCH_INVOICE_ITEMS_BY_INVOICE: "/billing/invoices/items/",
   TOTALS_OF_THE_DAY: "/reports/total_payment_mode_amount/",
   PAYMENT_MODES: "/billing/payment-modes/",
+  INSURANCE_INVENTORY_PRICES: "/inventory/insurance-prices/",
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
@@ -212,6 +215,7 @@ export const APP_API_URL = {
   SAMPLES_BY_process_ID: "/api/laboratory/samples-by-process-id/",
   PANELS_BY_SAMPLE_ID: "/api/laboratory/panels-by-specific-sample/",
   PHLEBOTOMY_PATIENT_SAMPLES:"/api/laboratory/patient-samples",
+  SPECIMENS: "/api/laboratory/specimens",
 
   /***************** INVENTORY APIS **********************/
   ADD_INVENTORY: "/api/inventory/add-inventory",
@@ -242,6 +246,7 @@ export const APP_API_URL = {
   FETCH_INVOICE_ITEMS_BY_INVOICE: "/api/billing/fetch-invoices-items-by-invoice/",
   TOTALS_OF_THE_DAY: "/api/billing/transactionAday/",
   PAYMENT_MODES: "/api/billing/payment-modes/",
+  INSURANCE_INVENTORY_PRICES: "/api/insurance/insurance-prices/",
 
 
   /***************** PRESCRIPRION **********************/

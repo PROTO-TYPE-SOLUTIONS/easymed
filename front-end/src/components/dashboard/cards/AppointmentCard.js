@@ -15,6 +15,7 @@ import { GiMicroscope } from "react-icons/gi";
 import DirectToTheLabModal from '../doctor-interface/DirectToTheLabModal';
 import { updateAttendanceProcesses } from '@/redux/service/patients';
 import { getAllProcesses } from '@/redux/features/patients';
+import { useAuth } from '@/assets/hooks/use-auth';
 
 const allowedPageSizes = [5, 10, 'all'];
 
@@ -56,6 +57,7 @@ const AppointmentCard = ({ processes }) => {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const dispatch = useDispatch()
+    const auth = useAuth()
     const [selectedData, setSelectedData] = useState({})
     const {patients} =  useSelector((store)=> store.patient)
 
@@ -126,9 +128,9 @@ const AppointmentCard = ({ processes }) => {
 
     const handleSendToPharmacy = async () => {
         try {
-            const response = await updateAttendanceProcesses({track: "pharmacy"}, selectedData.id)
+            const response = await updateAttendanceProcesses({track: "pharmacy"}, selectedData.id, auth)
             console.log(response)
-            dispatch(getAllProcesses())
+            dispatch(getAllProcesses(auth))
             handleClose()
 
         }catch(error){

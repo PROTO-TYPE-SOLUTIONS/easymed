@@ -39,7 +39,7 @@ const BookAppointmentModal = ({loggedInPatient}) => {
 
   useEffect(() => {
     dispatch(getAllOrderBills());
-    dispatch(getItems());
+    dispatch(getItems(auth));
     if (auth) {
       dispatch(getAllDoctors(auth));
     }

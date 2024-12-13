@@ -8,10 +8,12 @@ import { getAllItems, getAllSuppliers } from "@/redux/features/inventory";
 import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const RequisitionModal = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const [open, setOpen] = React.useState(false);
   const { items, suppliers } = useSelector(({ inventory }) => inventory);
 
@@ -82,8 +84,8 @@ const RequisitionModal = () => {
   };
 
   useEffect(() => {
-    dispatch(getAllSuppliers());
-    dispatch(getAllItems());
+    dispatch(getAllSuppliers(auth));
+    dispatch(getAllItems(auth));
   }, []);
 
   return (

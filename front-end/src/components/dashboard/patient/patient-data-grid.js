@@ -22,6 +22,7 @@ import CreateAppointmentModal from "./create-appointment-modal";
 import EditPatientDetails from "../admin-interface/edit-patient-details-modal";
 import { GiMedicinePills } from "react-icons/gi";
 import LabModal from "../doctor-interface/lab-modal";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -51,6 +52,7 @@ const PatientsDataGrid = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const { patients } = useSelector((store) => store.patient);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const userActions = getActions();
   const [open,setOpen] = useState(false)
   const [editOpen,setEditOpen] = useState(false)
@@ -96,7 +98,7 @@ const PatientsDataGrid = () => {
   }
 
   useEffect(() => {
-    dispatch(getAllPatients());
+    dispatch(getAllPatients(auth));
   }, []);
 
   return (

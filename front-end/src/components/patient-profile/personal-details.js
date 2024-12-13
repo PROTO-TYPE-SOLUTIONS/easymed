@@ -64,7 +64,7 @@ const PersonalDetails = () => {
         toast.success("Profile Created Successfully!");
         setLoading(false);
         dispatch(getPatientProfile(auth.user_id));
-        dispatch(getAllPatients());
+        dispatch(getAllPatients(auth));
         handleClose();
       });
     } catch (err) {

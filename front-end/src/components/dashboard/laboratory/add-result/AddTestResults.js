@@ -6,7 +6,7 @@ import { Grid } from '@mui/material';
 import dynamic from "next/dynamic";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import { Column, Paging, Pager } from "devextreme-react/data-grid";
+import { Column, Pager, Editing } from "devextreme-react/data-grid";
 import CmtDropdownMenu from '@/assets/DropdownMenu';
 import { LuMoreHorizontal } from 'react-icons/lu';
 import { SlMinus } from 'react-icons/sl';
@@ -14,9 +14,9 @@ import { SlMinus } from 'react-icons/sl';
 import { useAuth } from '@/assets/hooks/use-auth';
 import LabItemModal from './LabItemModal';
 
-import { removeItemToLabResultsItems, clearItemsToLabResultsItems, getAllLabRequests, getAllLabTestPanelsByTestRequest, getAllPhlebotomySamples, getAllLabTestPanelsBySample } from '@/redux/features/laboratory';
+import { removeItemToLabResultsItems, getAllLabRequests, getAllPhlebotomySamples, getAllLabTestPanelsBySample, updateItemToLabResultsItems, getAllLabTestPanels } from '@/redux/features/laboratory';
 import SeachableSelect from '@/components/select/Searchable';
-import { sendLabResults, addTestResultPanel, sendLabResultQualitative, addQualitativeTestResultPanel, updateLabRequestPanels } from '@/redux/service/laboratory';
+import { updateLabRequestPanels } from '@/redux/service/laboratory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -41,9 +41,9 @@ const getActions = () => {
 
 const AddTestResults = () => {
 
-  const router = useRouter()
   const userActions = getActions();
   const [open, setOpen] = React.useState(false);
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selected, setSelectedItem] = useState(null)
   const [selectedOption, setSelectedOPtion] = useState(null)
@@ -51,7 +51,7 @@ const AddTestResults = () => {
   const { labResultItems  } = useSelector((store) => store.laboratory);
   const { labTestPanels  } = useSelector((store) => store.laboratory);
   const auth = useAuth();
-  const { labRequests, phlebotomySamples } = useSelector((store) => store.laboratory);
+  const { phlebotomySamples } = useSelector((store) => store.laboratory);
 
   const token = useAuth();
   const initialValues = {
@@ -63,16 +63,16 @@ const AddTestResults = () => {
   useEffect(() => {
     if (token) {
       dispatch(getAllLabRequests(token));
+      dispatch(getAllLabTestPanels(auth))
       dispatch(getAllPhlebotomySamples(token))
       if(selected){
-        dispatch(getAllLabTestPanelsBySample(selected.value, token));
+        dispatch(getAllLabTestPanelsBySample(selected.label, token));
       }
     }
   }, [token, selected]);
   
   const validationSchema = Yup.object().shape({
     lab_test_request: Yup.object().required("This field is required!"),
-    title: Yup.string().required("This field is required!"),
   });
 
   const onMenuClick = async (menu, data) => {
@@ -111,13 +111,13 @@ const AddTestResults = () => {
       setLoading(true);
 
       labResultItems.forEach(async(panel)=> {
-
+        if(panel.is_billed){
           const payload = {
             id:panel.id,
             result: panel.result
           }
           const response = await updateLabRequestPanels(payload, auth)
-                 
+        }                 
       })
       setLoading(false);
       router.back() 
@@ -128,6 +128,18 @@ const AddTestResults = () => {
       }
   }
 
+  const updateRow = (e) => {
+    console.log("ROW UPDATED TO", e);
+    e.cancel = true;
+  
+    // Create a new object with updated data instead of mutating the old data
+    const updatedData = { ...e.oldData, result: e.newData.result };
+  
+    console.log("DATA AFTER UPDATE IS", updatedData);
+  
+    // Dispatch the updated object to the store
+    dispatch(updateItemToLabResultsItems(updatedData));
+  };
   return (
     <section>
       <div className="flex gap-4 mb-8 items-center">
@@ -135,7 +147,7 @@ const AddTestResults = () => {
           <h3 className="text-xl"> Lab Result entry </h3>
       </div>
       <div className='flex justify-end'>
-      {selected && (<LabItemModal open={open} setOpen={setOpen} sample_label={selected.label} selected={selectedOption}/>)}
+        {selected && (<LabItemModal open={open} setOpen={setOpen} sample_label={selected.label} selected={selectedOption}/>)}
       </div>
 
       <Formik
@@ -163,7 +175,7 @@ const AddTestResults = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={labResultItems}
+        dataSource={labResultItems.filter((resultItem)=> resultItem.is_billed)}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -173,7 +185,12 @@ const AddTestResults = () => {
         wordWrapEnabled={true}
         allowPaging={true}
         className="shadow-xl"
+        onRowUpdating={updateRow}
       >
+        <Editing
+          mode="cell"
+          allowUpdating={true}
+        />
         <Pager
           visible={false}
           showPageSizeSelector={true}
@@ -186,10 +203,12 @@ const AddTestResults = () => {
             const testPanel = labTestPanels.find(item => item.id === cellData.data.test_panel);
             return testPanel ? `${testPanel.name}` : 'null';
           }}
+          allowEditing={false}
         />
         <Column 
           dataField="result" 
           caption="Result" 
+          allowEditing={true}
         />
         <Column 
           dataField="" 
@@ -237,7 +256,7 @@ const AddTestResults = () => {
                 ></path>
               </svg>
             )}
-            Save Lab Result
+            Save Results
           </button>
         </div>
       </Grid>

@@ -15,7 +15,7 @@ const LabResults = () => {
 
   useEffect(() => {
     if (token) {
-      dispatch(getAllProcesses())
+      dispatch(getAllProcesses(token))
     }
   }, [token]);
 

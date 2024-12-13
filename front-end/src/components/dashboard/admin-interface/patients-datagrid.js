@@ -11,6 +11,7 @@ import { Chip, Grid } from "@mui/material";
 import { getAllPatients } from "@/redux/features/patients";
 import { useSelector,useDispatch } from "react-redux";
 import AddPatientModal from "../patient/add-patient-modal";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -43,6 +44,7 @@ const AdminPatientsDataGrid = () => {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { patients } = useSelector((store) => store.patient);
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
@@ -50,7 +52,7 @@ const AdminPatientsDataGrid = () => {
 
 
   useEffect(() =>{
-    dispatch(getAllPatients());
+    dispatch(getAllPatients(auth));
   },[]);
 
   const onMenuClick = async (menu, data) => {

@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
             const name = req.query.name
 
-            await backendAxiosInstance.get(`${API_URL.FETCH_ITEMS}`).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_ITEMS}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
             };
             const body = req.body;
 
-            await backendAxiosInstance.post(`${API_URL.ADD_INVENTORY}`,body)
+            await backendAxiosInstance.post(`${API_URL.FETCH_ITEMS}`,body , config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
             res.status(500).json(e.message);
         }
     }
-    else if (req.method === API_METHODS.PUT) {
+    else if (req.method === API_METHODS.PATCH) {
         try {
             if (!req.headers?.authorization){
                 res.status(401).send('Unauthorized');
@@ -70,8 +70,9 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
+            const query = req.query;
 
-            await backendAxiosInstance.post(`${API_URL.DELETE_DEPARTMENT}/${body.id}`, config).then(response => {
+            await backendAxiosInstance.patch(`${API_URL.FETCH_ITEMS}${query.item_id}/`, body, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {

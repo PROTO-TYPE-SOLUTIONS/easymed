@@ -5,6 +5,8 @@ from decouple import config
 import os
 from dotenv import load_dotenv
 
+
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,7 +41,9 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt',
     'weasyprint',
+    'django_filters',
     'channels',
+    'django_extensions',
 
     # user apps
     'authperms.apps.AuthpermsConfig',
@@ -150,9 +154,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 REST_FRAMEWORK = {
-    # "DEFAULT_PERMISSION_CLASSES": [
-    #     "rest_framework.permissions.IsAuthenticated",
-    #     ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+        ],
 
     "DEFAULT_AUTHENTICATION_CLASSES": [  
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -166,9 +170,13 @@ AUTH_USER_MODEL = 'customuser.CustomUser'
 
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Make-Easy HMIS",
-    "DESCRIPTION": "Make-Easy HMIS Endpoints",
+    "TITLE": "EasyMed HMIS",
+    "DESCRIPTION": "EasyMed Endpoints",
     "VERSION": "1.0.0",
+    'SWAGGER_UI_SETTINGS': {
+        'docExpansion': 'none',  # This collapses the operations by default
+    },
+
 }
 
 
@@ -225,7 +233,7 @@ DATABASES = {
 # DATABASES = {
 #     "default":{
 #         "ENGINE": config("DB_ENGINE"),
-#         "NAME": config("POSTGRES_DB"),
+#         "NAME": config("POSTGRES_NAME"),
 #         "USER": config("POSTGRES_USER"),
 #         "PASSWORD": config("POSTGRES_PASSWORD"),
 #         "HOST": config("POSTGRES_HOST"),

@@ -42,7 +42,7 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
-            await backendAxiosInstance.post(`${API_URL.PUBLIC_LAB_REQUEST}`,body,config)
+            await backendAxiosInstance.post(`${API_URL.FETCH_LAB_TEST_PROFILE}`,body,config)
                 .then(response => {
                     res.status(200).json(response.data);
                 })
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
             res.status(500).json(e.message);
         }
     }
-    else if (req.method === API_METHODS.PUT) {
+    else if (req.method === API_METHODS.PATCH) {
         try {
             if (!req.headers?.authorization){
                 res.status(401).send('Unauthorized');
@@ -66,8 +66,9 @@ export default async function handler(req, res) {
                 }
             };
             const body = req.body;
+            const query = req.query
 
-            await backendAxiosInstance.post(`${API_URL.DELETE_DEPARTMENT}/${body.id}`, config).then(response => {
+            await backendAxiosInstance.patch(`${API_URL.FETCH_LAB_TEST_PROFILE}${query.profile_id}/`, body, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {

@@ -15,9 +15,10 @@ export const fetchServices = () =>{
     })
 }
 
-export const fetchPatient = () =>{
+export const fetchPatient = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_PATIENT}`)
+        axiosInstance.get(`${APP_API_URL.FETCH_PATIENT}`)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -27,9 +28,10 @@ export const fetchPatient = () =>{
     })
 }
 
-export const fetchPatientById = (patient_id) =>{
+export const fetchPatientById = (patient_id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.FETCH_PATIENT_BY_ID}`, {
+        axiosInstance.get(`${APP_API_URL.FETCH_PATIENT_BY_ID}`, {
             params: {
                 patient_id: patient_id
             }
@@ -77,9 +79,10 @@ export const fetchPatientProfile = (userId) =>{
     })
 }
 
-export const createPatient = (payload) =>{
+export const createPatient = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.CREATE_PATIENT}`,payload)
+        axiosInstance.post(`${APP_API_URL.CREATE_PATIENT}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -89,9 +92,10 @@ export const createPatient = (payload) =>{
     })
 }
 
-export const editPatient = (payload) =>{
+export const editPatient = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.put(`${APP_API_URL.EDIT_PATIENT}`,payload)
+        axiosInstance.patch(`${APP_API_URL.EDIT_PATIENT}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -102,9 +106,10 @@ export const editPatient = (payload) =>{
     })
 }
 
-export const deletePatient = (id) =>{
+export const deletePatient = (id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.DELETE_PATIENT}`,{id})
+        axiosInstance.post(`${APP_API_URL.DELETE_PATIENT}`,{id})
             .then((res) =>{
                 resolve(res.data)
             })
@@ -165,9 +170,10 @@ export const referPatient = (payload) =>{
     })
 }
 
-export const prescribeDrug = (payload) =>{
+export const prescribeDrug = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.PRESCRIBE_DRUG}`,payload)
+        axiosInstance.post(`${APP_API_URL.PRESCRIBE_DRUG}`,payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -203,11 +209,12 @@ export const createPrescription = (payload) =>{
 }
 
 export const updatePrescription = (prescription_id, payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.patch(`${APP_API_URL.CREATE_PRESCRIPTION}`,payload, {
+        axiosInstance.patch(`${APP_API_URL.CREATE_PRESCRIPTION}`,payload, {
             params: {
                 prescription_id: prescription_id
-            }, auth
+            }
         })
             .then((res) =>{
                 resolve(res.data)
@@ -218,9 +225,10 @@ export const updatePrescription = (prescription_id, payload, auth) =>{
     })
 }
 
-export const fetchPatientTriage = (id) =>{
+export const fetchPatientTriage = (id, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.GET_PATIENT_TRIAGE}`,{
+        axiosInstance.get(`${APP_API_URL.GET_PATIENT_TRIAGE}`,{
             params:{
                 id: id
             }
@@ -235,12 +243,12 @@ export const fetchPatientTriage = (id) =>{
 }
 
 export const updatePatientTriage = (id, payload, auth) =>{
-    console.log(id)
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.put(`${APP_API_URL.GET_PATIENT_TRIAGE}`,payload,{
+        axiosInstance.put(`${APP_API_URL.GET_PATIENT_TRIAGE}`, payload,{
             params:{
                 id: id
-            }, auth
+            }
         })
             .then((res) =>{
                 resolve(res.data)
@@ -267,9 +275,10 @@ export const fetchPatientPrescribeDrugs = (patient_id) =>{
     })
 }
 
-export const fetchAllAttendanceProcesses = () =>{
+export const fetchAllAttendanceProcesses = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`)
+        axiosInstance.get(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -279,9 +288,10 @@ export const fetchAllAttendanceProcesses = () =>{
     })
 }
 
-export const initiateNewAttendanceProcesses = (payload) =>{
+export const initiateNewAttendanceProcesses = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload)
+        axiosInstance.post(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload)
             .then((res) =>{
                 resolve(res.data)
             })
@@ -291,9 +301,10 @@ export const initiateNewAttendanceProcesses = (payload) =>{
     })
 }
 
-export const updateAttendanceProcesses = (payload, process_id) => {
+export const updateAttendanceProcesses = (payload, process_id, auth) => {
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.patch(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload, {
+        axiosInstance.patch(`${APP_API_URL.PATIENT_ATTENDANCE_PROCESS}`, payload, {
             params: {
                 process_id: process_id
             }
@@ -307,9 +318,10 @@ export const updateAttendanceProcesses = (payload, process_id) => {
     })
 }
 
-export const patientNextOfKin = (payload) => {
+export const patientNextOfKin = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
     return new Promise ((resolve, reject) => {
-        axios.post(`${APP_API_URL.PATIENT_KIN}`, payload)
+        axiosInstance.post(`${APP_API_URL.PATIENT_KIN}`, payload)
         .then((res)=> {
             resolve(res.data)
         })
@@ -319,9 +331,10 @@ export const patientNextOfKin = (payload) => {
     })
 }
 
-export const patientNextOfKinContact = (payload) => {
+export const patientNextOfKinContact = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
     return new Promise ((resolve, reject) => {
-        axios.post(`${APP_API_URL.PATIENT_KIN_CONTACT}`, payload)
+        axiosInstance.post(`${APP_API_URL.PATIENT_KIN_CONTACT}`, payload)
         .then((res)=> {
             resolve(res.data)
         })

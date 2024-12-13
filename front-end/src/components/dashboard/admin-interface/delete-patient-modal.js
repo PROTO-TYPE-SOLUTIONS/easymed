@@ -5,9 +5,11 @@ import { deletePatient } from "@/redux/service/patients";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { getAllPatients } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const DeletePatientModal = ({ deleteOpen, setDeleteOpen, selectedRowData }) => {
   const dispatch = useDispatch();
+  const auth = useAuth()
   const [loading, setLoading] = useState(false);
 
   const handleClose = () => {
@@ -18,9 +20,9 @@ const DeletePatientModal = ({ deleteOpen, setDeleteOpen, selectedRowData }) => {
     console.log("Deleting patient with ID:", selectedRowData?.id); // Log the ID before making the request
     try {
       setLoading(true);
-      await deletePatient(selectedRowData?.id);
+      await deletePatient(selectedRowData?.id, auth);
       toast.success("Patient Deleted Successfuly");
-      dispatch(getAllPatients());
+      dispatch(getAllPatients(auth));
       setLoading(false);
       handleClose();
     } catch (error) {

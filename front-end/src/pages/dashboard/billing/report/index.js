@@ -7,11 +7,13 @@ import Reports from '@/components/dashboard/billing/reports/Reports';
 import BillingNav from '@/components/dashboard/billing/BillingNav';
 
 import { getAllItems } from "@/redux/features/inventory";
+import { useAuth } from '@/assets/hooks/use-auth';
 
 const ReportsBillingPage = () => {
     const dispatch = useDispatch();
+    const auth = useAuth()
     useEffect(()=> {
-        dispatch(getAllItems());
+        dispatch(getAllItems(auth));
     }, [])
   return (
     <Container maxWidth="xl">

@@ -3,7 +3,7 @@ from random import randrange, choices
 # from patient.models import AttendanceProcess
 from django.conf import settings
 from customuser.models import CustomUser
-from inventory.models import Item
+# from inventory.models import Item
 from datetime import datetime
 from django.core.validators import FileExtensionValidator
 import logging
@@ -34,7 +34,7 @@ class LabReagent(models.Model):
     cas_number = models.CharField(max_length=255)
     molecular_weight = models.DecimalField(max_digits=10, decimal_places=2)
     purity = models.DecimalField(max_digits=10, decimal_places=2)
-    item_number = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item_number = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -50,19 +50,59 @@ class Specimen(models.Model):
     def __str__(self):
         return self.name
 
+
 class LabTestPanel(models.Model):
+    '''
+    This need s whole lot of testing to see if the ref value are actually
+    gotten dynamically using the patients age and sex
+    '''
+    UNITS_OPTIONS = (
+        ('mL', 'mL'),
+        ('uL', 'uL'),
+        ('L', 'L'),
+        ('mg', 'mg'),
+        ('ug', 'ug'),
+        ('g', 'g'),
+        ('IU', 'IU'),
+        ('IU/ml', 'IU/ml'),
+        ('ng/ml', 'ng/ml'),
+        ('ng', 'ng'),
+    )
     name = models.CharField(max_length=255)
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
-    unit = models.CharField(max_length=255)
-    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    unit = models.CharField(max_length=10, choices=UNITS_OPTIONS, default='mL')
+    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} - {self.ref_value_low} - {self.ref_value_high} - {self.specimen.name} - {self.unit} - { self.test_profile.name }"
+        return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
+
+
+class ReferenceValue(models.Model):
+    '''
+    capture different reference values in the LabTestPanel model
+    based on the patient’s sex and age, you can create a related
+    model that stores reference ranges and conditions based on
+    patient sex and age
+    '''
+    SEX_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    )
+
+    lab_test_panel = models.ForeignKey(LabTestPanel, on_delete=models.CASCADE, related_name="reference_values")
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES)
+    age_min = models.IntegerField(null=True, blank=True)  # Minimum age for this reference range
+    age_max = models.IntegerField(null=True, blank=True)  # Maximum age for this reference range
+    ref_value_low = models.DecimalField(max_digits=10, decimal_places=2)
+    ref_value_high = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.lab_test_panel.name} - {self.sex} - {self.age_min}-{self.age_max}: {self.ref_value_low} - {self.ref_value_high}"
+
 
 
 class ProcessTestRequest(models.Model):
@@ -116,13 +156,14 @@ class PatientSample(models.Model):
 
 class LabTestRequestPanel(models.Model):
     patient_sample = models.ForeignKey(PatientSample, null=True, on_delete=models.CASCADE)
-    result = models.CharField(max_length=45, null=True)  # actual result
+    result = models.CharField(max_length=45, null=True)
     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET("Deleted Panel"))
     lab_test_request = models.ForeignKey(LabTestRequest, on_delete=models.CASCADE)
     test_code = models.CharField(max_length=100, null=True)
     category = models.CharField(max_length=30, default="none")
     result_approved=models.BooleanField(default=False)
     approved_on = models.DateTimeField(null=True, blank=True) 
+    is_billed = models.BooleanField(default=False)
 
     def generate_test_code(self):
         while True:
@@ -130,15 +171,23 @@ class LabTestRequestPanel(models.Model):
             test_id = f"TC-{random_number}"
             if not LabTestRequestPanel.objects.filter(test_code=test_id).exists():
                 return test_id
-    ''''
-    Find or Create PatientSample:
-    Attempt to find a PatientSample that matches the current lab_test_request and specimen.
-    If no matching PatientSample is found, create a new one.
-    Assign this PatientSample to the patient_sample field of the LabTestRequestPanel.
-    Set Category: Determine the category (qualitative or quantitative) based on the LabTestPanel's boolean fields.
-    Save the Model: Call the superclass's save method to ensure the object is saved to the database.
-    '''
+            
+    def get_patient_name(self):
+        return self.patient_sample.process.reference  # Should get you the process track_number or reference ID
+
+    def get_patient_info(self):
+        patient = self.patient_sample.process.attendanceprocess.patient
+        return f"{patient.first_name} {patient.second_name}, Age: {patient.age}, Sex: {patient.gender}"
+        
     def save(self, *args, **kwargs):
+        ''''
+        Find or Create PatientSample:
+        Attempt to find a PatientSample that matches the current lab_test_request and specimen.
+        If no matching PatientSample is found, create a new one.
+        Assign this PatientSample to the patient_sample field of the LabTestRequestPanel.
+        Set Category: Determine the category (qualitative or quantitative) based on the LabTestPanel's boolean fields.
+        Save the Model: Call the superclass's save method to ensure the object is saved to the database.
+        '''
         if not self.test_code:
             self.test_code = self.generate_test_code()
 
@@ -149,6 +198,8 @@ class LabTestRequestPanel(models.Model):
                 process=self.lab_test_request.process, 
                 specimen=self.test_panel.specimen
             )
+            print(f"Found matching sample: {matching_sample}")
+
         except PatientSample.DoesNotExist:
             # If not, create a new PatientSample
             matching_sample = PatientSample.objects.create(
@@ -172,7 +223,9 @@ class LabTestRequestPanel(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.test_panel.name
+        return f"{self.test_panel.name}"
+
+
 
 class EquipmentTestRequest(models.Model):
     test_request_panel = models.ForeignKey(LabTestRequestPanel, on_delete=models.CASCADE)
@@ -181,48 +234,6 @@ class EquipmentTestRequest(models.Model):
     def __str__(self):
         return str(self.equipment.name + " " + self.equipment.ip_address + " " + self.equipment.port)
     
-    
-# class LabTestResult(models.Model):
-#     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
-#     title = models.CharField(max_length=45)
-#     date_created = models.DateField(auto_now_add=True)
-#     recorded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name="recorded_by")
-#     note = models.CharField(max_length=255, null=True, blank=True)
-#     approved = models.BooleanField(default=False)
-
-#     def __str__(self):
-#         return self.title
-
-# class ResultsVerification(models.Model):
-#     lab_results = models.OneToOneField(LabTestResult, on_delete=models.CASCADE)
-#     lab_test_request = models.OneToOneField(LabTestRequest, on_delete=models.CASCADE)
-#     is_approved = models.BooleanField(default=False)
-#     approved_by = models.ForeignKey(CustomUser, blank=True, on_delete=models.CASCADE)
-
-
-# class LabTestResultPanel(models.Model):
-#     lab_test_result= models.ForeignKey(LabTestResult, on_delete=models.CASCADE)
-#     test_panel = models.ForeignKey(LabTestPanel, on_delete=models.SET_NULL, null=True, blank=True )
-#     result = models.CharField(max_length=45)
-#     difference = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-
-#     def __str__(self):
-#         return f"{self.test_panel.name} - {self.test_panel.ref_value_low}"
-
-#     def save(self, *args, **kwargs):
-#         if self.test_panel and self.result:
-#             try:
-#                 ref_value_low = float(self.test_panel.ref_value_low)
-#                 ref_value_high = float(self.test_panel.ref_value_high)
-#                 result_value = float(self.result)
-#                 if result_value < ref_value_low:
-#                     self.difference = -round(ref_value_low - result_value, 2)
-#                 elif result_value > ref_value_high:
-#                     self.difference = round(result_value - ref_value_high, 2)
-#             except ValueError:
-#                 pass 
-#         super().save(*args, **kwargs)
-
 
 class PublicLabTestRequest(models.Model):
     STATUS_CHOICES = (
@@ -255,3 +266,4 @@ class PublicLabTestRequest(models.Model):
             patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
             return patient_age
         return None
+

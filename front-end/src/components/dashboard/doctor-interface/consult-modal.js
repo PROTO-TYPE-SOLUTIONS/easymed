@@ -10,6 +10,7 @@ import { authContext } from "@/components/use-context";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { getPatientTriage } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const ConsultPatientModal = ({
   selectedRowData,
@@ -18,6 +19,7 @@ const ConsultPatientModal = ({
 }) => {
   const [loading, setLoading] = React.useState(false);
   const { user } = useContext(authContext);
+  const auth = useAuth()
   const { patientTriage } = useSelector((store) => store.patient);
   const dispatch = useDispatch();
 
@@ -59,7 +61,7 @@ const ConsultPatientModal = ({
   };
 
   useEffect(() => {
-    dispatch(getPatientTriage(selectedRowData?.triage));
+    dispatch(getPatientTriage(selectedRowData?.triage, auth));
   }, [selectedRowData]);
 
   return (

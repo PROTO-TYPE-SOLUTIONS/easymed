@@ -10,8 +10,10 @@ import SeachableSelect from '@/components/select/Searchable';
 import { getAllItems } from "@/redux/features/inventory";
 import { saleByDateRange, saleByDateRangeAndItem } from '@/redux/service/reports'
 import { saleByDateRangePdf, saleByDateRangeAndItemPdf } from '@/redux/service/pdfs'
+import { useAuth } from '@/assets/hooks/use-auth'
 function Reports() {
     const dispatch =  useDispatch()
+    const auth = useAuth()
     const [ loading, setLoading ] = useState();
     const [checked, setChecked] = useState("Sale by Date Range");
     const { items } = useSelector((store) => store.inventory);
@@ -98,7 +100,7 @@ function Reports() {
     }
 
     useEffect(()=> {
-        dispatch(getAllItems());
+        dispatch(getAllItems(auth));
     },[])
 
   return (

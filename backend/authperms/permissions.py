@@ -10,6 +10,16 @@ from customuser.models import (
 )
 
 
+'''
+Permissions will be imported into views like so
+permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+'''
+class IsStaffUser(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+        return bool(request.user and request.user.is_staff)
+    
 
 class IsDoctorUser(BasePermission):
     def has_permission(self, request, view):
@@ -50,10 +60,3 @@ class IsReceptionistUser(BasePermission):
         if request.user.is_superuser:
             return True
         return bool(request.user and request.user.is_staff and request.user.role == Receptionist.BASE_ROLE)
-
-class IsStaffUser(BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_superuser:
-            return True
-        return bool(request.user and request.user.is_staff)
-    

@@ -11,9 +11,11 @@ import { getAllRequisitions, getAllSuppliers, getAllItems } from "@/redux/featur
 import { getAllDoctors } from "@/redux/features/doctors";
 import { getAllTheUsers } from "@/redux/features/users";
 import { downloadPDF } from '@/redux/service/pdfs';
-import { MdLocalPrintshop } from 'react-icons/md'
+import { MdLocalPrintshop } from 'react-icons/md';
+import { CiSquareQuestion } from "react-icons/ci";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
+import ViewRequisitionItemsModal from "./modals/requisition/ViewRequisitionItemsModal";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -28,6 +30,11 @@ const getActions = () => {
       label: "Print",
       icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
     },
+    {
+      action: "r-items",
+      label: "Requisition Items",
+      icon: <CiSquareQuestion className="text-success text-xl mx-2" />,
+    },
   ];
 
   return actions;
@@ -41,13 +48,14 @@ const RequisitionDatagrid = () => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [selectedRowData, setSelectedRowData] = useState({})
 
   const dispatch = useDispatch()
   const auth = useAuth();
 
   const onMenuClick = async (menu, data) => {
-    if (menu.action === "dispense") {
-      dispatch(getAllPrescriptionsPrescribedDrugs(data.id, auth))
+    if (menu.action === "r-items") {
       setSelectedRowData(data);
       setOpen(true);
     }else if (menu.action === "print"){
@@ -69,23 +77,36 @@ const RequisitionDatagrid = () => {
   };
 
   const handlePrint = async (data) => {
-      try{
-          const response = await downloadPDF(data.id, "_requisition_pdf", auth)
-          window.open(response.link, '_blank');
-          toast.success("got pdf successfully")
+    try{
+        const response = await downloadPDF(data.id, "_requisition_pdf", auth)
+        window.open(response.link, '_blank');
+        toast.success("got pdf successfully")
 
-      }catch(error){
-          console.log(error)
-          toast.error(error)
+    }catch(error){
+        console.log(error)
+        toast.error(error)
+    }
+  };
+
+  const calculateTotalAmount = ({ data }) => {
+    let amount = 0
+    data.items.forEach((req)=>{
+      if(data.department_approved){
+        let price = parseInt(req.quantity_approved) * parseInt(req.buying_price)
+        amount += price
+      }else{
+        let price = parseInt(req.quantity_requested) * parseInt(req.buying_price)
+        amount += price
       }
-      
+    })
+    return amount
   };
 
   useEffect(() => {
     if (auth) {
       dispatch(getAllRequisitions(auth));
-      dispatch(getAllSuppliers());
-      dispatch(getAllItems());
+      dispatch(getAllSuppliers(auth));
+      dispatch(getAllItems(auth));
       dispatch(getAllDoctors(auth))
       dispatch(getAllTheUsers(auth))
     }
@@ -144,25 +165,40 @@ const RequisitionDatagrid = () => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
+        <Column
+          dataField="requisition_number"
+          caption="Requisition"
+        />
+        <Column
+          dataField="department"
+          caption="Department"
+        />
         <Column 
-          dataField="requested_by"
+          dataField="ordered_by"
           caption="Requested By" 
-          cellRender={(cellData) => {
-            const user = usersData.find(user => user.id === cellData.data.requested_by);
-            return user ? `${user.first_name} ${user.last_name}` : 'user not found';
-          }}
-          />
-        <Column 
-          dataField="status"
-          caption="Status"
         />
         <Column dataField="date_created" caption="Requested Date" />
         <Column 
+          dataField="total_items_requested" 
+          caption="Items"
+        />
+        <Column 
+          dataField="ordered_by"
+          caption="Requested By" 
+        />
+        <Column dataField="department_approval_date" caption="Department Approval Date" />
+        <Column 
+          dataField="items" 
+          caption="Total Amount"
+          cellRender={calculateTotalAmount} 
+        />
+        <Column
           dataField="" 
           caption=""
           cellRender={actionsFunc}
         />
       </DataGrid>
+      <ViewRequisitionItemsModal open={open} setOpen={setOpen} setSelectedRowData={setSelectedRowData} selectedRowData={selectedRowData}/>
     </section>
   );
 };

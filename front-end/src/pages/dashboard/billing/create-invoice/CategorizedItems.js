@@ -4,13 +4,27 @@ import * as Yup from "yup";
 import { fetchInventories } from '@/redux/service/inventory';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { updateInvoiceItems } from '@/redux/service/billing';
+import { toast } from 'react-toastify';
 
-const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
+const CategorizedItems = ({ 
+  invoiceItem, 
+  patient_insurance,
+  setLabReqSum,
+  setLabReqCashSum,
+  setLabReqInsuranceSum,
+  setAppointmentSum,
+  setAppointmentCashSum,
+  setAppointmentInsuranceSum,
+  setPrescribedDrugsSum,
+  setPrescribedDrugsCashSum,
+  setPrescribedDrugsInsuranceSum,
+ }) => {
   const auth = useAuth();
   const [loading, setLoading] = useState(false);
   const [inventoryPrices, setInventoryPrices] = useState([]);
   const [selectedPrice, setSelectedPrice] = useState(null);
   const [selectedPayMethod, setSelectedPayMethod] = useState(null);
+  const [updatedInvoiceItem, setUpdatedInvoiceItem] = useState(invoiceItem);
 
   const patient_insurance_for_this_item = patient_insurance?.filter((mode) =>
     mode.insurance === null || inventoryPrices[0]?.insurance_sale_prices.some(insurance => insurance.id === mode.insurance)
@@ -26,8 +40,33 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
   };
 
   useEffect(() => {
-    fetchInventoryForPrices(invoiceItem?.item);
+    fetchInventoryForPrices(updatedInvoiceItem?.item);
   }, []);
+
+  const updateInvoiceTotals = (invoiceItem) => {
+    if(invoiceItem.category.toLowerCase().includes("appointment")){
+      setAppointmentSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount));
+      if(invoiceItem.payment_mode_name === "cash"){
+        setAppointmentCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }else{
+        setAppointmentInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }
+    }else if(invoiceItem.category==="Lab Test"){
+      setLabReqSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      if(invoiceItem.payment_mode_name === "cash"){
+        setLabReqCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }else{
+        setLabReqInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }
+    }else if(invoiceItem.category==="Drug"){
+      setPrescribedDrugsSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      if(invoiceItem.payment_mode_name === "cash"){
+        setPrescribedDrugsCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }else{
+        setPrescribedDrugsInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+      }
+    }
+  }
 
   const updateInvoiceItem = async (invoice_item) => {
     try {
@@ -37,57 +76,59 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
         status: "billed"
       }
 
-      const response = await updateInvoiceItems(auth, payload, invoice_item.id )
-
-      console.log("RESPONSE FROM THE UPDATE IS THE FOLLOWING", response)
+      const response = await updateInvoiceItems(auth, payload, invoice_item.id)
+      setUpdatedInvoiceItem(response);
+      updateInvoiceTotals(response)
     } catch (error) {
-      console.log("ERROR SUBMITTING VALUES", error);
-    } finally {
-      console.log("false");
+      toast.error(error);
     }
   };
 
   return (
     <Grid className='flex items-center py-1' container>
       <Grid item xs={4}>
-        <p>{invoiceItem?.item_name}</p>
+        <p>{updatedInvoiceItem?.item_code}</p>
       </Grid>
       <Grid item xs={4}>
-        <select
-          className='p-2 focus:outline-none'
-            name={invoiceItem?.item_name}
-            onChange={(e) => {
-              const selectedOption = patient_insurance_for_this_item.find(
-                (mode) => mode.id === parseInt(e.target.value)
-              );
-              setSelectedPayMethod(selectedOption);
-              if (selectedOption?.paymet_mode === 'cash') {
-                setSelectedPrice(inventoryPrices ? inventoryPrices[0].sale_price : 'NA');
-              } else {
-                const selectedInsurance = inventoryPrices[0].insurance_sale_prices?.find((mode) => 
-                  mode.insurance_name.toLowerCase() === selectedOption?.paymet_mode.toLowerCase()
+        {updatedInvoiceItem?.status !== 'billed' ? (
+          <select
+            className='p-2 focus:outline-none'
+              name={updatedInvoiceItem?.item_name}
+              onChange={(e) => {
+                const selectedOption = patient_insurance_for_this_item.find(
+                  (mode) => mode.id === parseInt(e.target.value)
                 );
-                setSelectedPrice(selectedInsurance ? selectedInsurance.price : 'NA');
-              }
-            }}
-          >
-          <option value="" disabled selected>Payment Method</option>
-          {patient_insurance_for_this_item?.map((mode) => (
-            <option key={mode.id} value={mode.id}>
-              {mode.paymet_mode}
-            </option>
-          ))}
-        </select>
+                setSelectedPayMethod(selectedOption);
+                if (selectedOption?.paymet_mode === 'cash') {
+                  setSelectedPrice(inventoryPrices ? inventoryPrices[0].sale_price : 'NA');
+                } else {
+                  const selectedInsurance = inventoryPrices[0].insurance_sale_prices?.find((mode) => 
+                    mode.insurance_name.toLowerCase() === selectedOption?.paymet_mode.toLowerCase()
+                  );
+                  setSelectedPrice(selectedInsurance ? selectedInsurance.price : 'NA');
+                }
+              }}
+            >
+            <option value="" disabled selected>Payment Method</option>
+            {patient_insurance_for_this_item?.map((mode) => (
+              <option key={mode.id} value={mode.id}>
+                {mode.paymet_mode}
+              </option>
+            ))}
+          </select>
+        ) : (<div className='p-2'>{updatedInvoiceItem.payment_mode_name}</div>)}
       </Grid>
-      <Grid className='px-2 flex justify-end' item xs={3}>
+      {updatedInvoiceItem?.status !== 'billed' ? (
+        <>
+          <Grid className='px-2 flex justify-end' item xs={3}>
+            {selectedPayMethod && selectedPrice && (
+              <div className="mt-2">
+                <p>{selectedPrice}</p>
+              </div>
+            )}
+          </Grid>
+        <Grid item xs={1}>
         {selectedPayMethod && selectedPrice && (
-          <div className="mt-2">
-            <p>{selectedPrice}</p>
-          </div>
-        )}
-      </Grid>
-      <Grid item xs={1}>
-      {selectedPayMethod && selectedPrice && (
         <button
           onClick={() => updateInvoiceItem(invoiceItem)}
           type="button"
@@ -115,6 +156,17 @@ const CategorizedItems = ({ invoiceItem, patient_insurance }) => {
           bill
         </button>)}
       </Grid>
+        </>
+
+      ): (
+        <Grid className='px-2 flex justify-end' item xs={3}>
+            <div className="mt-2">
+              <p>{updatedInvoiceItem.item_amount}</p>
+            </div>
+        </Grid>
+      )}
+
+
     </Grid>
   );
 };

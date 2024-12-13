@@ -8,11 +8,10 @@ import * as Yup from "yup";
 import FormButton from '@/components/common/button/FormButton';
 import { sendToEquipment } from "@/redux/service/laboratory";
 
-const TestPanelsItem = ({sample, collected}) => {
+const TestPanelsItem = ({sample, collected, sample_id}) => {
   const auth = useAuth()
   const [loading, setLoading] = useState(false)
   const [resultItems, setResultItems]=useState([])
-  const [status, setStatus]= useState(false)
   const { labTestPanels, labEquipments } = useSelector((store) => store.laboratory);
 
   const initialValues = {
@@ -33,13 +32,30 @@ const TestPanelsItem = ({sample, collected}) => {
     }
   }
 
+  const approveCollection = async () => {
+    try{
+      const payload = {
+        is_sample_collected: true,
+        id:sample_id
+      }
+      await updatePhlebotomySamples(payload, auth)
+    }catch(error){
+      console.log("ERR APPROVING COLLECTION OF SAMPLE", error)
+    }
+  }
+
   const handleSendEquipment = async (foundPanel, formValue, helpers) => {
+    if(formValue.equipment.value === 'manual' ){
+      approveCollection()
+      return      
+    }
     try {
       const formData = {
         test_request_panel: foundPanel.id,
         equipment: formValue.equipment.value,
       }
       setLoading(true);
+      approveCollection()
       await sendToEquipment(formData, auth).then(() => {
         helpers.resetForm();
         // toast.success("Send to Equipment Successful!");
@@ -79,12 +95,24 @@ const TestPanelsItem = ({sample, collected}) => {
                 <div className='w-full'>
                   <SeachableSelect
                     name="equipment"
-                    options={labEquipments.map((equipment) => ({ value: equipment.id, label: equipment.name }))}
+                    setSelectedItem={(value)=>setSelectedEquip(value)}
+                    options={[{ value: 'manual', label: 'Manual' }, ...labEquipments.map(equipment => ({
+                      value: equipment.id,
+                      label: equipment.name
+                    }))]}
                   />
                 </div>
-                <div className='w-full justify-end flex'>
-                  <FormButton label={`send to equipment`}/>
-                </div>
+                {item.is_billed ? (
+                  <div className='w-full justify-end flex'>
+                    <FormButton loading={loading} label={`send for results`}/>
+                  </div>
+                ) : (
+                  <div className='w-full justify-end flex'>
+                      <div className="bg-primary text-white cursor-default px-3 py-2 text-xs rounded-xl">
+                        NP
+                      </div>
+                  </div>
+                )}
               </form>
             )}
           </Formik>
@@ -92,19 +120,6 @@ const TestPanelsItem = ({sample, collected}) => {
       );
     }
   })
-
-  const approveCollection = async () => {
-    try{
-      const payload = {
-        is_sample_collected: true,
-        id:sample
-      }
-      await updatePhlebotomySamples(payload, auth)
-      setStatus(true)
-    }catch(error){
-      console.log("ERR APPROVING COLLECTION OF SAMPLE", error)
-    }
-  }
 
   return (
     <>
@@ -116,9 +131,6 @@ const TestPanelsItem = ({sample, collected}) => {
           </li>
           {panels}
       </ul>
-      { !collected && !status && (<div className='w-full flex justify-end'>
-        <button onClick={approveCollection} className='bg-primary text-white p-2 rounded-lg'>collect</button>
-      </div>)}
     </>
   )
 }

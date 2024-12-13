@@ -82,7 +82,12 @@ export const updateInvoiceItems = (auth,payloads, invoice_item) =>{
                 resolve(res.data)
             })
             .catch((err) =>{
-                reject(err.message)
+                console.log("THZ THE FUCKING ERROR", err)
+                if(err.response.status === 422){
+                    reject(err.response.data.error)
+                }else{
+                    reject(err.message)
+                }
             })
     })
 }
@@ -104,6 +109,23 @@ export const billingInvoices = (auth,payload) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.post(`${APP_API_URL.BILLING_INVOICES}`,payload,auth)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateInvoices = (auth, invoice, payload) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.BILLING_INVOICES}`,payload,{
+            params: {
+                invoice_id: invoice
+            }
+        })
             .then((res) =>{
                 resolve(res.data)
             })

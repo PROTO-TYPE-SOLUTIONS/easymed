@@ -89,8 +89,8 @@ const DoctorPatientDataGrid = () => {
 
   useEffect(() => {
     if (auth) {
-      dispatch(getAllPatients());
-      dispatch(getAllProcesses())
+      dispatch(getAllPatients(auth));
+      dispatch(getAllProcesses(auth))
     }
   }, [auth]);
 

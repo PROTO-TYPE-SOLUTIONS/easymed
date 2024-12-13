@@ -24,6 +24,7 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
+  const [areBilled, setAreBilled] = useState(false)
   const dispatch = useDispatch();
   const { prescriptionsPrescribed, prescriptions } = useSelector((store) => store.prescription);
   const { doctors } = useSelector((store) => store.doctor);
@@ -39,6 +40,16 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
   );
 
   const handleSelectionChanged = (selectedRowKeys) => {
+    console.log("HADI KWENYE DAMU UPPP", selectedRowKeys)
+    const checkAllBilled = selectedRowKeys?.selectedRowsData?.filter((drug)=> drug.is_billed === false)
+    console.log("HADI KWENYE DAMU", checkAllBilled)
+
+    if(checkAllBilled.length > 0){
+      setAreBilled(false)
+    }else(
+      setAreBilled(true)
+    )
+
     setSelectedItems(selectedRowKeys);
   };
   console.log("CHECKED THE FOLLOWING ITEMS", selectedItems)
@@ -68,7 +79,7 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
         await updatePrescribeDrug( payload, auth).then(() => {
 
           setLoading(true);
-          // updateAttendanceProcesses({ pharmacist: auth.user_id }, payload.id)
+          // updateAttendanceProcesses({ pharmacist: auth.user_id }, payload.id, auth)
           toast.success("successfully updated status")
           setOpen(false);
           setLoading(false);
@@ -210,7 +221,7 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
           <button
             onClick={handleDispense}
             className="bg-primary rounded-xl text-sm px-4 py-2 text-white"
-            disabled={`${prescription.status}` === 'dispensed' }
+            disabled={`${prescription.status}` === 'dispensed' || !areBilled || selectedItems?.selectedRowsData?.length === 0}
           >
             {loading && (
               <svg
@@ -231,7 +242,7 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
                 ></path>
               </svg>
             )}
-            Dispense
+            {areBilled ? (selectedItems?.selectedRowsData?.length > 0 ? "Dispense" : "Select Drug") : (selectedItems?.selectedRowsData?.length > 0 ? "Not Paid" : "Select Drug")}
           </button>
         </div>
       </div>

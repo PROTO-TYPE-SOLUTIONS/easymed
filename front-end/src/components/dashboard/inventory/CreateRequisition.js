@@ -52,7 +52,6 @@ const CreateRequisition = () => {
     requisition_items: inventoryItems,
   };
 
-
   useEffect(() => {
     if (auth) {
       dispatch(getAllDoctors(auth));
@@ -81,38 +80,16 @@ const CreateRequisition = () => {
     );
   };
 
-  const generatePdf = () => {
-    return new Promise((resolve) => {
-      const input = pdfRef.current;  
-      const table = input.children[2].children[0].children[5];
-      const pdfWidth = 210; 
-      const pdfHeight = 297;
-      const scale = 1; 
-  
-      html2canvas(table, { scale: scale }).then((canvas) => {
-        const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
-  
-        const imgWidth = pdf.internal.pageSize.getWidth();
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-  
-        resolve(pdf);
-      });
-    });
-  };
-
   const saveRequisitionItem = async (item, payload) => {
 
     const payloadData = {
-      ...item,
-      requisition: payload.id,
       item: item.item,
-      supplier: parseInt(item.supplier),
+      preferred_supplier: parseInt(item.supplier),
       quantity_requested: item.quantity_requested
     }
 
     try {
-      await addRequisitionItem(payloadData).then(()=>{
+      await addRequisitionItem(payloadData, auth).then(()=>{
         toast.success("Requisition Item Added Successfully!");
       })
 
@@ -126,43 +103,25 @@ const CreateRequisition = () => {
     inventoryItems.forEach(item => saveRequisitionItem(item, payload))
   }
 
-  const saveRequisitionPdf = async (formValue, helpers) => {
-    // generatePdf().then( async (pdf) => {
-    //   try {
-
-    //     const payload = {
-    //       status: "COMPLETED",
-    //       requested_by: 1,
-    //       date_created:5
-    //     }
-    //     await addRequisition(payload).then(() => {
-    //       toast.success("Inventory Added Successfully!");
-    //       setLoading(false);
-    //       router.push('/dashboard/inventory')
-    //     });
-    //   }catch (err) {
-    //     toast.error(err);
-    //     setLoading(false);
-    //   }
-      
-    // });
+  const saveRequisition = async (formValue, helpers) => {
 
     try {
       if (inventoryItems.length <= 0) {
         toast.error("No requisition items");
         return;
-      }      
+      }
     
       setLoading(true);
     
       const payload = {
-        status: formValue.status,
+        department: 1,
         requested_by: auth.user_id,
-        date_created: 5
+        items: [...inventoryItems]
       }
     
-      await addRequisition(payload).then((res) => {
-        sendEachItemToDb(res)
+      await addRequisition(payload, auth).then((res) => {
+        console.log("THIS IS THE RESPONSE", res)
+        // sendEachItemToDb(res)
         toast.success("Requisition Added Successfully!");
         setLoading(false);
         dispatch(clearItemsToInventoryPdf())
@@ -189,7 +148,7 @@ const CreateRequisition = () => {
 
       <Formik
         initialValues={initialValues}
-        onSubmit={saveRequisitionPdf}
+        onSubmit={saveRequisition}
       >
       <Form className="">
       <DataGrid
@@ -218,20 +177,16 @@ const CreateRequisition = () => {
           }}
         />
         <Column 
-          dataField="supplier" 
+          dataField="preferred_supplier" 
           caption="Supplier Name"
           cellRender={(cellData) => {
-            const supplier = suppliers.find(supplier => supplier.id === parseInt(cellData.data.supplier));
-            return supplier ? `${supplier.name}` : 'null';
+            const supplier = suppliers.find(supplier => supplier.id === parseInt(cellData.data.preferred_supplier));
+            return supplier ? `${supplier.official_name}` : 'null';
           }}        
         />
         <Column 
           dataField="quantity_requested" 
           caption="Quantity"
-        />
-        <Column 
-          dataField="date_created" 
-          caption="Created" 
         />
         <Column 
           dataField="" 
@@ -265,7 +220,7 @@ const CreateRequisition = () => {
                 ></path>
               </svg>
             )}
-            Save Requisition Pdf
+            Save Requisition
           </button>
         </div>
       </Grid>

@@ -1,7 +1,12 @@
 from django.db import models
-# from inventory.models import Item
-# from patient.models import Patient
+from django.db import transaction
 from django.db.models import Sum
+from django.apps import apps
+
+# from inventory.models import Inventory
+
+# from laboratory.models import LabTestRequestPanel
+# from patient.models import PrescribedDrug
 
 
 def invoice_file_path(instance, filename):
@@ -13,7 +18,7 @@ class PaymentMode(models.Model):
         ('insurance', 'Insurance'),
         ('mpesa', 'MPesa'),
     )
-    paymet_mode = models.CharField(max_length=20)
+    paymet_mode = models.CharField(max_length=20, blank=True, null=True)
     insurance = models.ForeignKey('company.InsuranceCompany',null=True, on_delete=models.CASCADE)
     payment_category = models.CharField(
         max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
@@ -48,8 +53,9 @@ class Invoice(models.Model):
         self.calculate_invoice_amount()
         super().save(*args, **kwargs) 
 
-    # def __str__(self):
-    #     return self.invoice_number
+    def __str__(self):
+        return self.invoice_number
+
 
 class InvoiceItem(models.Model):
     STATUS_CHOICES = (
@@ -65,12 +71,19 @@ class InvoiceItem(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
 
-
+    @property
+    def sale_price(self):
+        Inventory = apps.get_model('inventory', 'Inventory') 
+        inventory = Inventory.objects.filter(item=self.item).first()
+        if inventory:
+            return inventory.sale_price
+        return 0
+    
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.invoice.calculate_invoice_amount()
-    
+
     def __str__(self):
-        return self.item.name
+        return self.item.name + ' - ' + str(self.item_created_at)
+
     
     

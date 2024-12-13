@@ -10,11 +10,13 @@ import { toast } from "react-toastify";
 import { getAllInsurance } from "@/redux/features/insurance";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllPatients } from "@/redux/features/patients";
+import { useAuth } from "@/assets/hooks/use-auth";
 
 const AddPatientModal = () => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const dispatch = useDispatch();
+  const auth = useAuth()
   const { insurance } = useSelector((store) => store.insurance);
 
   const handleClickOpen = () => {
@@ -36,13 +38,14 @@ const AddPatientModal = () => {
     gender: "",
     phone: "",
     email: "",
-    insurance: null,
+    insurances: [],
     kin_first_name: "",
     kin_second_name: "",
     kin_phone: "",
     kin_email:"",
     residence: "",
     relationship: "",
+    unique_id: ""
   };
 
   const validationSchema = Yup.object().shape({
@@ -53,6 +56,7 @@ const AddPatientModal = () => {
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
     phone: Yup.number().required("Phone Number is required!"),
+    unique_id: Yup.number().required("Id Number is required!"),
     kin_phone: Yup.number().required("Next Kin Phone Number is required!"),
     email: Yup.string().required("Email is required!"),
     kin_email: Yup.string().required("Next Kin Email is required!"),
@@ -68,7 +72,7 @@ const AddPatientModal = () => {
     }
 
     try {
-      const nextOfKin = await patientNextOfKin(payload)
+      const nextOfKin = await patientNextOfKin(payload, auth)
       console.log("SUCCESS CREATING NEXT OF KIN", nextOfKin)
       
     }catch(err){
@@ -86,8 +90,9 @@ const AddPatientModal = () => {
         gender: formValue.gender,
         phone: formValue.phone,
         email: formValue.email,
-        insurance: parseInt(formValue.insurance),
-        user_id: parseInt(formValue.user_id)
+        insurances: formValue.insurances,
+        user_id: parseInt(formValue.user_id),
+        unique_id: parseInt(formValue.unique_id)
       }
 
       const netOfKin = {
@@ -104,14 +109,14 @@ const AddPatientModal = () => {
 
       setLoading(true);
 
-      const nextOfKinContactResponse = await patientNextOfKinContact(nextOfKinContacts)
+      const nextOfKinContactResponse = await patientNextOfKinContact(nextOfKinContacts, auth)
 
-      await createPatient(patientPayload).then((res) => {
+      await createPatient(patientPayload, auth).then((res) => {
         helpers.resetForm();
         createPatientNextOfKin(res.id, netOfKin, nextOfKinContactResponse.id)
         toast.success("Patient Created Successfully!");
         setLoading(false);
-        dispatch(getAllPatients());
+        dispatch(getAllPatients(auth));
         handleClose();
       });
     } catch (err) {
@@ -130,7 +135,7 @@ const AddPatientModal = () => {
       </button>
       <Dialog
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -206,7 +211,21 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={4} xs={12}>
+                  <Grid item md={3} xs={12}>
+                  <label htmlFor="second_name">Id Number</label>
+                    <Field
+                      className="block border border-gray rounded-xl text-sm py-2 px-3 focus:outline-none w-full"
+                      type="number"
+                      placeholder="Id Number"
+                      name="unique_id"
+                    />
+                    <ErrorMessage
+                      name="unique_id"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="second_name">Phone Number</label>
                     <Field
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
@@ -220,7 +239,7 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={4} xs={12}>
+                  <Grid item md={3} xs={12}>
                   <label htmlFor="second_name">Email</label>
                     <Field
                       className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
@@ -234,26 +253,29 @@ const AddPatientModal = () => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={4} xs={12}>
-                  <label htmlFor="insurance">Insurance</label>
+                  <Grid item md={3} xs={12}>
+                    <label htmlFor="insurances">Insurance</label>
                     <Field
-                      as="select"
-                      className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
-                      name="insurance"
+                        as="select"
+                        className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                        name="insurances" 
+                        multiple={true} 
                     >
-                      <option value="">Select Insurance</option>
-                      {insurance.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.name}
+                        <option value="" disabled>
+                            Select Insurance
                         </option>
-                      ))}
+                        {insurance.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.name}
+                            </option>
+                        ))}
                     </Field>
                     <ErrorMessage
-                      name="insurance"
-                      component="div"
-                      className="text-warning text-xs"
+                        name="insurances"
+                        component="div"
+                        className="text-warning text-xs"
                     />
-                  </Grid>
+                </Grid>
                 </Grid>
                 <h2 className="text-sm font-semibold text-primary">Next Of Kin Details</h2>
                 <Grid container spacing={1}>

@@ -7,7 +7,10 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            font-size: 14px;
         }
+        
+        {% comment %} Table styles, this should remain constant for all reports/templates {% endcomment %}
         table {
             width: 100%;
             border-collapse: collapse;
@@ -21,21 +24,49 @@
         th {
             background-color: #f2f2f2;
         }
-        .report-header {
+
+        {% comment %} Header styles, might change depending on the report {% endcomment %}
+        .header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 10px;
             background-color: #e6edf7;
-            padding: 5px;
-            line-height: 1.4;
+            border-bottom: 1px solid #ddd;
         }
-        .header, .footer {
-            text-align: center;
+
+        .company-details {
+            display: flex;
+            align-items: center;
+            gap: 20px;
             margin-bottom: 20px;
         }
-        .logo {
-            max-width: 150px;
-            max-height: 150px;
+
+        .logo-column {
+            flex: 0 0 auto;
+            border-right: 2px solid #ddd;
+            padding-right: 20px;
         }
+
+        .details-column {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .logo {
+            width: 100px;
+            height: auto;
+        }
+
+        .header .column {
+            flex: 1;
+            padding: 0 10px;
+        }
+        .header .column:not(:last-child) {
+            border-right: 2px solid #ddd; /* Add vertical separator */
+        }
+
+        {% comment %} Header styles, might change depending on the report {% endcomment %}
         .footer {
             position: fixed;
             bottom: 0;
@@ -59,20 +90,39 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="https://static.vecteezy.com/system/resources/thumbnails/021/809/795/small/doctors-day-illustration-png.png" alt="Company Logo" class="logo">
-        <h2>{{ company.name }}</h2>
-        <p>{{ company.address1 }}</p>
-        <p>{{ company.phone1 }} | {{ company.email1 }}</p>
-        <h3>Lab Test Report</h3>
+    <div class="company-details">
+        <div class="logo-column">
+            <img src="{{ company_logo_url }}" alt="Company Logo" class="logo">
+        </div>
+        <div class="details-column">
+            <p><strong>{{ company.name }}</strong></p>
+            <p>Address: {{ company.address1 }}</p>
+            <p>{{ company.phone1 }} | {{ company.email1 }}</p>
+        </div>
     </div>
 
-    <div class="report-header">
-        <div>
-            <p><strong>Patient Name:</strong> {{ patient.first_name }} {{ patient.second_name }}</p>
-            <p>Gender: {{ patient.gender }}</p>
-            <p>Age: {{ patient.age }}</p>
-            <p><strong>Process Reference:</strong> {{ processtestrequest.reference }}</p>
+    <div class="header report-header">
+        <div class="column patient-info">
+            <p><strong>Patient Particulars</strong></p>
+            <p>{{ patient.first_name }} {{ patient.second_name }}</p>
+            <p>Gender: {{ patient.gender }}Age: {{ patient.age }}</p>
+            <P>Patient ID: {{ patient.id }}</P>
+            <p>Ref: {{ processtestrequest.reference }}</p>
+        </div> 
+
+        <div class="column sample-details">
+            <h3>Sample details</h3>
+            <p>Sample ID:{{ labtestresult.lab_test_request.sample }}</p>
+            <p>Sample Type:{{ labtestresult.lab_test_request.sample_type }}</p>
+            <p>Sample Date:{{ labtestresult.lab_test_request.sample_date }}</p>
+        </div>
+
+        <div class="column report-title">
+            <h3>Sample details</h3>
+            <p><strong>Posted on:</strong> {{ approved_on }}</p>
+            <p><strong>Requested By:</strong> {% if attendance_process.doctor %}{{ attendance_process.doctor.first_name }}{% endif %}</p>
+            <p><strong>Done By:_______________</strong> {% if attendance_process.lab_tech %}{{ attendance_process.lab_tech.first_name }}{% endif %}</p>
+            <p><strong>Equipment:_______________</strong> {% if labtestrequests.exists %}{{ labtestrequests.first.equipment }}{% endif %}</p>
         </div>
     </div>
 
@@ -87,26 +137,22 @@
             </tr>
         </thead>
         <tbody>
-            {% for labtestrequest in labtestrequests %}
-                {% for panel in panels %}
-                    {% if panel.lab_test_request == labtestrequest %}
-                    <tr>
-                        <td>{{ panel.test_panel.name }}</td>
-                        <td>{{ panel.result }}</td>
-                        <td>
-                            {% if panel.result and panel.result < panel.test_panel.ref_value_low %}
-                                <span style="color: yellow;">Low</span>
-                            {% elif panel.result and panel.result > panel.test_panel.ref_value_high %}
-                                <span style="color: red;">High</span>
-                            {% else %}
-                                <span style="color: green;">Normal</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ panel.test_panel.ref_value_low }} - {{ panel.test_panel.ref_value_high }}</td>
-                        <td>{{ panel.test_panel.unit }}</td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
+            {% for panel in panels %}
+                <tr>
+                    <td>{{ panel.test_panel_name }}</td>
+                    <td>{{ panel.result }}</td>
+                    <td>
+                        {% if panel.flag == 'Low' %}
+                            <span style="color: yellow;">Low</span>
+                        {% elif panel.flag == 'High' %}
+                            <span style="color: red;">High</span>
+                        {% else %}
+                            <span style="color: green;">Normal</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ panel.ref_value_low }} - {{ panel.ref_value_high }}</td>
+                    <td>{{ panel.unit }}</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
