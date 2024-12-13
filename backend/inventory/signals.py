@@ -35,12 +35,3 @@ def generate_requisition_note(sender, instance, created, **kwargs):
 def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
     if created:
         generate_purchase_order_pdf.delay(instance.pk)
-
-# @receiver(post_save, sender=SupplierInvoice)
-# def create_goods_receipt_note(sender, instance, created, **kwargs):
-#     if created:
-#         # Create a GoodsReceiptNote linked to the PurchaseOrder of the SupplierInvoice
-#         GoodsReceiptNote.objects.create(
-#             purchase_order=instance.purchase_order,
-#             note=f"Generated for Supplier Invoice: {instance.invoice_no}"
-#         )

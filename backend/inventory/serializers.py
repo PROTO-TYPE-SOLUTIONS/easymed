@@ -364,7 +364,7 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseOrder
-        fields = ['PO_number', 'ordered_by', 'requisition', 'is_dispatched', 'requisition_items']
+        fields = ['PO_number', 'ordered_by', 'requisition', 'is_dispatched', 'requisition_items', 'created_by',]
         read_only_fields = ['PO_number', 'date_created', 'is_dispatched']
 
     def create(self, validated_data):
