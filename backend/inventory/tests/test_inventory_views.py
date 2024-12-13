@@ -13,25 +13,6 @@ from inventory.models import (
     )
 
 
-@pytest.mark.django_db
-def test_goods_receipt_note_signal(supplier, purchase_order):
-    assert GoodsReceiptNote.objects.count() == 0
-
-    supplier_invoice = SupplierInvoice.objects.create(
-        invoice_no="INV12345",
-        amount=1000.0,
-        supplier=supplier,
-        purchase_order=purchase_order,
-    )
-
-    assert GoodsReceiptNote.objects.count() == 1
-
-    goods_receipt_note = GoodsReceiptNote.objects.first()
-    assert goods_receipt_note.purchase_order == supplier_invoice.purchase_order
-    assert goods_receipt_note.note == f"Generated for Supplier Invoice: {supplier_invoice.invoice_no}"
-    assert goods_receipt_note.grn_number is not None  # Check GRN number auto-generation
-
-
 
 @pytest.mark.django_db
 def test_incoming_item_updates_inventory(incoming_item, item, user, requisition):

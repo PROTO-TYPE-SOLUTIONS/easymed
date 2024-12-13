@@ -135,7 +135,7 @@ def create_purchase_order(purchaseorder_id):
     from inventory.models import PurchaseOrder
     purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
     app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
-    html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchaseorder': purchaseorder})
+    html_content = render_to_string(app_template_dir + 'purchase_order_note.html', {'purchaseorder': purchaseorder})
     pdf_file_path = os.path.join('./easymed/static/purchaseorder/', f'{purchaseorder.id}.pdf')
 
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
@@ -182,7 +182,7 @@ def generate_purchase_order_pdf(purchase_order_id):
     purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
     purchaseorder_items = PurchaseOrderItem.objects.filter(purchase_order=purchase_order_id)
     app_template_dir = apps.get_app_config('inventory').path + '/templates/'
-    html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchase_order': purchase_order, 'purchaseorder_items':purchaseorder_items})
+    html_content = render_to_string(app_template_dir + 'purchase_order_note.html', {'purchase_order': purchase_order, 'purchaseorder_items':purchaseorder_items})
 
     # Define the PDF file path
     pdf_file_path = os.path.join('./easymed/static/purchaseorder/', f'{purchase_order.id}.pdf')
