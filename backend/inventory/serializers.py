@@ -511,3 +511,19 @@ class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryInsuranceSaleprice
         fields = '__all__'
+
+
+
+class LowQuantityDrugSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name')
+    
+    class Meta:
+        model = Inventory
+        fields = ['item_name', 'lot_number', 'quantity_at_hand']
+
+class NearExpiryDrugSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name')
+    
+    class Meta:
+        model = Inventory
+        fields = ['item_name', 'lot_number', 'quantity_at_hand', 'expiry_date']
