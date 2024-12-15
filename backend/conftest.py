@@ -99,7 +99,6 @@ def purchase_order_item(purchase_order, requisition_item, supplier):
 def incoming_item(item, supplier, purchase_order):
     return IncomingItem.objects.create(
         item=item,
-        item_code=item.item_code,
         supplier=supplier,
         purchase_order=purchase_order,
         quantity=10,

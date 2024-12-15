@@ -11,7 +11,8 @@ from company.models import Company
 from easymed.celery_tasks import (
     generate_invoice_pdf,
     send_invoice_created_email,
-    send_invoice_updated_email
+    send_invoice_updated_email,
+    update_stock_quantity_if_stock_is_available,
 )
 
 
@@ -167,29 +168,32 @@ def check_quantity_availability(instance):
 
     return True
 
-def update_stock_quantity_if_stock_is_available(instance, deductions):
-    '''
-    Funtions that deducts stock quantity from billed quantity and updates balances
-    '''
-    if instance.item.category == 'Drug':
-        inventory_item = Inventory.objects.get(item=instance.item)
-        remainder_quantity = inventory_item.quantity_in_stock - deductions
-       # Ensure remainder quantity is not negative
-        if remainder_quantity < 0:
-            raise ValidationError(f"Not enough stock available for {instance.item.name}.")
 
-        inventory_item.quantity_in_stock = remainder_quantity
-        inventory_item.save()  # Save the changes to the inventory
 
-    if instance.item.category == 'Lab Test':
-        inventory_item = Inventory.objects.get(item=instance.item)
-        remainder_quantity = inventory_item.quantity_at_hand - deductions
-       # Ensure remainder quantity is not negative
-        if remainder_quantity < 0:
-            raise ValidationError(f"Not enough stock available for {instance.item.name}.")
 
-         # Update and save the inventory item's stock quantity
-        inventory_item.quantity_in_stock = remainder_quantity
-        inventory_item.save()  # Save the changes to the inventory
+# def update_stock_quantity_if_stock_is_available(instance, deductions):
+#     '''
+#     Funtions that deducts stock quantity from billed quantity and updates balances
+#     '''
+#     if instance.item.category == 'Drug':
+#         inventory_item = Inventory.objects.get(item=instance.item)
+#         remainder_quantity = inventory_item.quantity_in_stock - deductions
+#        # Ensure remainder quantity is not negative
+#         if remainder_quantity < 0:
+#             raise ValidationError(f"Not enough stock available for {instance.item.name}.")
+
+#         inventory_item.quantity_in_stock = remainder_quantity
+#         inventory_item.save()  # Save the changes to the inventory
+
+#     if instance.item.category == 'Lab Test':
+#         inventory_item = Inventory.objects.get(item=instance.item)
+#         remainder_quantity = inventory_item.quantity_at_hand - deductions
+#        # Ensure remainder quantity is not negative
+#         if remainder_quantity < 0:
+#             raise ValidationError(f"Not enough stock available for {instance.item.name}.")
+
+#          # Update and save the inventory item's stock quantity
+#         inventory_item.quantity_in_stock = remainder_quantity
+#         inventory_item.save()  # Save the changes to the inventory
 
 
