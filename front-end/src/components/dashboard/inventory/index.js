@@ -99,9 +99,9 @@ const InventoryDataGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="packed" caption="Packed"/>
-        <Column dataField="subpacked" caption="Subpacked"/>
-        <Column dataField="quantity_in_stock" caption="Quantity"/>
+        <Column dataField="quantity_at_hand" caption="Quantity"/>
+        <Column dataField="re_order_level" caption="re order level"/>
+        <Column dataField="category_one" caption="Category"/>
       </DataGrid>
     </section>
   );

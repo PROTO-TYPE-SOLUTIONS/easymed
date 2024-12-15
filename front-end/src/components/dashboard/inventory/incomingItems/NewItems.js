@@ -9,6 +9,7 @@ import { addIncomingItem } from "@/redux/service/inventory";
 import { toast } from "react-toastify";
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from "@/assets/hooks/use-auth";
+import POListGrid from "./POListGrid";
 
 const NewItems = () => {
 
@@ -85,7 +86,8 @@ const NewItems = () => {
         <img onClick={() => router.back()} className="h-3 w-3 cursor-pointer" src="/images/svgs/back_arrow.svg" alt="go back"/>
         <h3 className="text-xl"> Add New Incoming Item </h3>
         </div>
-        <Formik
+        <POListGrid/>
+        {/* <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleAddIncomingItems}
@@ -242,7 +244,7 @@ const NewItems = () => {
             </Grid>
             </Grid>
         </Form>
-        </Formik>
+        </Formik> */}
     </section>
   )
 }
