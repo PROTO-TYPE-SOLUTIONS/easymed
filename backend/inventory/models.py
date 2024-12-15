@@ -214,12 +214,11 @@ class IncomingItem(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item_code= models.CharField(max_length=255) # so as to hide names from user
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
-    category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES) 
+    category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES, default='Resale') 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
@@ -257,6 +256,7 @@ class Inventory(models.Model):
     class Meta:
         verbose_name_plural = 'Inventory'
     
+
 class InventoryInsuranceSaleprice(models.Model):
     inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
     insurance_company = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
@@ -268,6 +268,7 @@ class InventoryInsuranceSaleprice(models.Model):
     class Meta:
         unique_together = ('inventory_item', 'insurance_company')
     
+
 class DepartmentInventory(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
