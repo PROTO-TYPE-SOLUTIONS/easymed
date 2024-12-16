@@ -86,6 +86,7 @@ const IncomingItemsGrid = () => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
+        <Column dataField="item_code" caption="Item Code"/>
         <Column 
           dataField="item" 
           caption="Product Name"
@@ -94,15 +95,11 @@ const IncomingItemsGrid = () => {
             return prodName ? `${prodName.name}` : 'NA';
           }}   
         />
+        <Column dataField="category_one" caption="Category"/>
         <Column dataField="purchase_price" caption="Purchase Price"/>
-        <Column
-          dataField="sale_price"
-          caption="Sale price"
-          allowFiltering={true}
-          allowSearch={true}
-        />
-        <Column dataField="packed" caption="Packed"/>
-        <Column dataField="subpacked" caption="Subpacked"/>
+        <Column dataField="sale_price" caption="Sale price"  />
+        <Column dataField="lot_no" caption="LOT NO"/>
+        <Column dataField="expiry_date" caption="Expiry DAte"/>
         <Column dataField="quantity" caption="Quantity"/>
       </DataGrid>
     </section>

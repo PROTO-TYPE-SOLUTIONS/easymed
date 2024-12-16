@@ -333,3 +333,16 @@ export const createSupplierInvoice = (payload, auth) =>{
             })
     })
 }
+
+export const createGRNote = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.FETCH_GOODS_RECEIPT_NOTE}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

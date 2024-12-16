@@ -3,18 +3,21 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { Grid } from "@mui/material";
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { useRouter } from 'next/router';
+import { toast } from "react-toastify";
 
 import ViewPOItemsModal from './ViewPOItemsModal'
 import GRNote from './GRNote'
 import SupplierInvoice from './SupplierInvoice'
-import { toast } from 'react-toastify';
-import { addIncomingItem, createSupplierInvoice } from '@/redux/service/inventory';
+import { addIncomingItem, createGRNote, createSupplierInvoice } from '@/redux/service/inventory';
 import { useAuth } from '@/assets/hooks/use-auth';
+
 
 const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowData }) => {
     const [loading, setLoading] = useState(false);
     const [selectedItems, setSelectedItems] = useState(null)
     const auth = useAuth()
+    const router = useRouter()
 
     const handleClose = () => {
         setOpen(false);
@@ -36,18 +39,19 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
         amount: Yup.string().required("This field is required!"),
     });
 
-    const postIncomings =  async (item, supplierInvoice) => {
+    const postIncomings =  async (item, supplierInvoice, gRNote) => {
         const payload = {
             "item_code": item.item_code,
             "purchase_price": item.buying_price,
             "sale_price": item.selling_price,
-            "quantity": item.quantity_received,
+            "quantity": item.quantity_received ? item.quantity_received : item.quantity_approved,
             "category_one": "Resale",
             "item": item.item,
             "purchase_order": supplierInvoice.purchase_order,
-            "supplier_invoice": supplierInvoice.purchase_order,
-            "lot_no": item.lot_no,
-            "expiry_date": new Date(item.expiry_date).toISOString().split('T')[0]
+            "supplier_invoice": supplierInvoice.id,
+            "goods_receipt_note": gRNote.id,
+            "lot_no": item.lot_no ? item.lot_no : "",
+            "expiry_date": item.expiry_date ? new Date(item.expiry_date).toISOString().split('T')[0] : ""
         }
         try {
             const response = await addIncomingItem(payload, auth)
@@ -57,8 +61,8 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
         }
     }
 
-    const saveIncomingItems = (incomingItems, supplierInvoice) => {
-        incomingItems.forEach((item)=> postIncomings(item, supplierInvoice))        
+    const saveIncomingItems = (incomingItems, supplierInvoice, gRNote) => {
+        incomingItems.forEach((item)=> postIncomings(item, supplierInvoice, gRNote))        
     }
 
     const handleAddIncomingItem = async ( formvalues ) => {
@@ -74,9 +78,14 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
         try{
 
             const supplierInvoiceResponse = await createSupplierInvoice(payload, auth)
-            console.log("CREATED A SUPPLIER INVOICE AND IS", supplierInvoiceResponse)
-            // const gRNoteResponse = await createSupplierInvoice(payload, auth)
-            saveIncomingItems(selectedItems.selectedRowsData, supplierInvoiceResponse)
+            
+            const gRNoteResponse = await createGRNote(payload, auth)
+            
+            saveIncomingItems(selectedItems.selectedRowsData, supplierInvoiceResponse, gRNoteResponse)
+
+            toast.success("Purchase order Created Successfully");
+
+            router.push("/dashboard/inventory/incoming-items");
 
         }catch(error){
             console.log("ERROE", error)
@@ -147,7 +156,7 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
                             ></path>
                             </svg>
                         )}
-                        Add Inventory
+                        Receive Items
                         </button>
                     </div>
                 </Grid>

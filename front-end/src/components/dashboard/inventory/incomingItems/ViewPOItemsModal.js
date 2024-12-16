@@ -117,20 +117,20 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
             />
             <Column dataField="preferred_supplier_name" caption="Preferred Supplier" />
             <Column 
-                dataField="quantity_at_hand"
-                caption="Re order Level" 
+                dataField="expiry_date"
+                caption="Expiry Date" 
             />
             <Column 
-                dataField="quantity_at_hand"
-                caption="Quantity At Hand" 
-            />
-            <Column 
-                dataField="quantity_requested"
-                caption="Quantity Requested" 
+                dataField="lot_no"
+                caption="LOT No" 
             />
             <Column
                 dataField="quantity_approved"
                 caption="Quantity Approved" 
+            />
+            <Column 
+                dataField="quantity_received"
+                caption="Quantity Received" 
             />
             <Column 
                 dataField="buying_price"
@@ -138,10 +138,10 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
             />
             <Column 
                 dataField="selling_price"
-                caption="Selling Price" 
+                caption="Selling Price"
             />
             <Column 
-                calculateCellValue={(rowData) => !selectedRowData.department_approved ? rowData.quantity_requested * rowData.buying_price : rowData.quantity_approved * rowData.buying_price}
+                calculateCellValue={(rowData) => rowData.quantity_received ? rowData.quantity_received * rowData.buying_price : rowData.quantity_approved * rowData.buying_price}
                 caption="Amount" 
             />
             {/* <Column 
