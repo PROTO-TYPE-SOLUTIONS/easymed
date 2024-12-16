@@ -455,8 +455,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
     
     def get_total_items_ordered(self, obj):
         purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
-        distinct_items = purchase_order_items.values('requisition_item__item').distinct()
-        return len(distinct_items)
+        return purchase_order_items.count()
 
     def get_total_amount_before_vat(self, obj):
         total = 0
