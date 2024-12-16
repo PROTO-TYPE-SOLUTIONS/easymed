@@ -60,6 +60,4 @@ urlpatterns = [
 
     path('reports/appointments/', generate_appointments_report, name='generate_appointments_report'),
     path('reports/lab-tests/', generate_lab_tests_report, name='generate_lab_tests_report'),
-
-
 ]

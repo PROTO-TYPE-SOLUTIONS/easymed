@@ -1,15 +1,18 @@
 import pytest
 from django.urls import reverse
 from datetime import datetime, timedelta
-from inventory.models import Inventory, Item
 
+
+from inventory.models import Inventory, Item
+from inventory.signals import update_inventory_after_incomingitem_creation
 from inventory.models import (
     Inventory,
     PurchaseOrder,
     PurchaseOrderItem,
     GoodsReceiptNote,
     SupplierInvoice,
-    RequisitionItem
+    RequisitionItem,
+    IncomingItem
     )
 
 
@@ -43,8 +46,7 @@ def test_incoming_item_updates_inventory(incoming_item, item, user, requisition)
     incoming_item.quantity = 10
     incoming_item.save()
 
-    from easymed.celery_tasks import create_or_update_inventory_record
-    create_or_update_inventory_record(incoming_item.id)
+    update_inventory_after_incomingitem_creation(sender=IncomingItem, instance=incoming_item, created=True)
     
     print(f'There are {Inventory.objects.count()} inventory items')
     print(f'There are {initial_inventory.quantity_at_hand} items in stock')

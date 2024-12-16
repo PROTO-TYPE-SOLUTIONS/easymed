@@ -134,7 +134,6 @@ class PublicAppointment(models.Model):
 
 class Triage(models.Model):
     created_by = models.CharField(max_length=45)
-    # patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     height = models.DecimalField(max_digits=5, decimal_places=2, null=True)
