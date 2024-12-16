@@ -251,7 +251,7 @@ class Inventory(models.Model):
             raise ValidationError("Buying price cannot exceed selling price")
 
     def __str__(self):
-        return f"{self.item.name} - {self.date_created}"
+        return f"{self.item.name} - {self.id} - {self.date_created}"
     
     class Meta:
         verbose_name_plural = 'Inventory'
