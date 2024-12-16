@@ -1,5 +1,7 @@
 import os
-from celery import shared_task
+import logging
+import tempfile
+from celery import shared_task, chain
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
@@ -7,13 +9,13 @@ from weasyprint import HTML
 from django.apps import apps
 from django.conf import settings
 from decouple import config
-from company.models import Company
 from django.template.loader import get_template
-import tempfile
 from django.core.mail import EmailMultiAlternatives
-import logging
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-Logger = logging.getLogger(__name__)
 
 from inventory.models import (
     IncomingItem,
@@ -23,37 +25,55 @@ from inventory.models import (
     Requisition,
     RequisitionItem,
 )
-from billing.models import Invoice, InvoiceItem
+from billing.models import Invoice
 from patient.models import Appointment
 
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 
-
-
-from celery import chain
+logger = logging.getLogger(__name__)
 
 
 """Creates a new Inventory record or updates an existing one based on the IncomingItem."""
-@shared_task
-def create_or_update_inventory_record(incoming_item_id):
-    incoming_item = IncomingItem.objects.get(id=incoming_item_id)
+# Helper function to get inventory safely
+def get_inventory_or_error(item):
     try:
-        purchase_order_item = PurchaseOrderItem.objects.get(purchase_order=incoming_item.purchase_order, requisition_item__item=incoming_item.item)
-        inventory, created = Inventory.objects.get_or_create(
-            item=purchase_order_item.requisition_item.item
+        return Inventory.objects.get(item=item)
+    except Inventory.DoesNotExist:
+        raise ValidationError(f"No inventory record found for item: {item.name}.")
+
+
+# Deduct stock from inventory
+def update_stock_quantity_if_stock_is_available(instance, deductions):
+    """
+    Deducts stock quantity based on the billed quantity and validates stock levels.
+    """
+    try:
+        inventory_item = get_inventory_or_error(instance.item)
+        category_field = (
+            "quantity_in_stock" if instance.item.category == "Drug" else "quantity_at_hand"
         )
-        if created:
-            inventory.quantity_at_hand = purchase_order_item.quantity_received
-        else:
-            inventory.purchase_price = incoming_item.purchase_price
-            inventory.sale_price = incoming_item.sale_price
-            inventory.quantity_at_hand += incoming_item.quantity  # Increment quantity, from quantity purchased
-            inventory.category_one = incoming_item.category_one
-        inventory.save()
-        Logger.info("Inventory record updated for incoming item: %s", (incoming_item,))
-    except PurchaseOrderItem.DoesNotExist:
-        Logger.warning("PurchaseOrderItem for Purchase Order ID %s and Item ID %s does not exist.", (incoming_item.purchase_order_id, incoming_item.item.id))
+        current_quantity = getattr(inventory_item, category_field)
+        remainder_quantity = current_quantity - deductions
+
+        if remainder_quantity < 0:
+            raise ValidationError(f"Not enough stock available for {instance.item.name}.")
+
+        setattr(inventory_item, category_field, remainder_quantity)
+
+        with transaction.atomic():
+            inventory_item.save()
+            logger.info(
+                "Stock updated successfully for item: %s, Remaining: %d",
+                instance.item.name,
+                remainder_quantity,
+            )
+    except ObjectDoesNotExist:
+        raise ValidationError(f"No inventory record found for item: {instance.item.name}.")
+    except ValidationError as e:
+        logger.error("Stock update failed: %s", e)
+        raise
+    except Exception as e:
+        logger.exception("Unexpected error during stock update: %s", e)
+        raise
 
 
 '''Task to generated pdf once Invoice tale gets a new entry'''
@@ -132,7 +152,7 @@ def create_purchase_order(purchaseorder_id):
     from inventory.models import PurchaseOrder
     purchaseorder = PurchaseOrder.objects.get(pk=purchaseorder_id)
     app_template_dir  = apps.get_app_config('inventory').path + '/templates/'
-    html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchaseorder': purchaseorder})
+    html_content = render_to_string(app_template_dir + 'purchase_order_note.html', {'purchaseorder': purchaseorder})
     pdf_file_path = os.path.join('./easymed/static/purchaseorder/', f'{purchaseorder.id}.pdf')
 
     os.makedirs(os.path.dirname(pdf_file_path), exist_ok=True)
@@ -179,7 +199,7 @@ def generate_purchase_order_pdf(purchase_order_id):
     purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
     purchaseorder_items = PurchaseOrderItem.objects.filter(purchase_order=purchase_order_id)
     app_template_dir = apps.get_app_config('inventory').path + '/templates/'
-    html_content = render_to_string(app_template_dir + 'purchaseorder.html', {'purchase_order': purchase_order, 'purchaseorder_items':purchaseorder_items})
+    html_content = render_to_string(app_template_dir + 'purchase_order_note.html', {'purchase_order': purchase_order, 'purchaseorder_items':purchaseorder_items})
 
     # Define the PDF file path
     pdf_file_path = os.path.join('./easymed/static/purchaseorder/', f'{purchase_order.id}.pdf')

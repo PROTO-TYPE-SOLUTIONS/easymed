@@ -30,9 +30,15 @@ def user():
         phone="+1234567890"
         )
 
-# @pytest.fixture
-# def custom_user():
-#     return CustomUser.objects.create_user(email="test@example.com", password="password")
+@pytest.fixture
+def authenticated_client(client, django_user_model, user):
+    from rest_framework_simplejwt.tokens import RefreshToken
+    
+    # Generate a token
+    refresh = RefreshToken.for_user(user)
+    client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {refresh.access_token}'
+    return client
+
 
 @pytest.fixture
 def department():
@@ -93,7 +99,6 @@ def purchase_order_item(purchase_order, requisition_item, supplier):
 def incoming_item(item, supplier, purchase_order):
     return IncomingItem.objects.create(
         item=item,
-        item_code=item.item_code,
         supplier=supplier,
         purchase_order=purchase_order,
         quantity=10,

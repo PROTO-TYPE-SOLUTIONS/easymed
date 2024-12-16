@@ -1,8 +1,10 @@
+import pdb
 from random import randrange, choices
 from rest_framework import serializers
-import pdb
+from rest_framework.exceptions import NotFound
 
 from customuser.models import CustomUser
+from inventory.models import Inventory
 from .models import (
     LabReagent,
     LabTestRequest, 
@@ -23,6 +25,7 @@ class LabReagentSerializer(serializers.ModelSerializer):
     class Meta:
         model = LabReagent
         fields = '__all__'
+
 
 class LabTestProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,11 +81,12 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     is_quantitative = serializers.ReadOnlyField(source='test_panel.is_quantitative')
 
     def get_sale_price(self, instance):
-        if instance.test_panel and instance.test_panel.item:
-            inventory = instance.test_panel.item.inventory_set.first()
-            return inventory.sale_price if inventory else None
-        return None
-
+        try:
+            inventory = instance.test_panel.item.inventory
+            return inventory.sale_price
+        except Inventory.DoesNotExist:
+            raise NotFound('Inventory record not found for this item.')
+    
     def get_patient_name(self, instance):
         if instance.patient_sample and instance.patient_sample.process:
             patient = instance.patient_sample.process.attendanceprocess.patient

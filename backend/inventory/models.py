@@ -140,6 +140,8 @@ class PurchaseOrder(models.Model):
     ordered_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ordered_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='po_approved_by')
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True, related_name='requisition')
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
 
     def save(self, *args, **kwargs):
         '''Generate purchase order number'''
@@ -161,29 +163,24 @@ class PurchaseOrderItem(models.Model):
     display the packed and subpacked so that we only order packed
     '''
     date_created = models.DateTimeField(auto_now_add=True)
-
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
+    quantity_ordered = models.IntegerField(default=0) # not packed or subpacked
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='purchase_order')
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
     def __str__(self):
         return f"{self.requisition_item.item.name} - PO_no: {self.purchase_order.PO_number}"  
 
-
+# TODO: amount should be captured as a sum total of the 
+# incoming items associated with this invoice
 class SupplierInvoice(models.Model):
-    '''
-    Create signal to update this from IncomingItem"
-    '''
     STATUS=[
         ('pending', 'Pending'),
         ('paid', 'Paid'),
     ]
-
     invoice_no = models.CharField(max_length=255, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=255, choices=STATUS, default="pending")
-    
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='supplier_invoices')
 
@@ -198,7 +195,6 @@ class GoodsReceiptNote(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     note = models.TextField(max_length=255, null=True, blank=True)
     grn_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
-
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -218,12 +214,11 @@ class IncomingItem(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item_code= models.CharField(max_length=255) # so as to hide names from user
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
-    category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES) 
+    category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES, default='Resale') 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
@@ -248,19 +243,20 @@ class Inventory(models.Model):
     re_order_level= models.PositiveIntegerField(default=5)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
+    lot_number= models.CharField(max_length=255, null=True, blank=True)
+    expiry_date= models.DateField(null=True, blank=True)
 
     def clean(self):
         if self.purchase_price > self.sale_price:
             raise ValidationError("Buying price cannot exceed selling price")
 
-        if self.re_order_level > self.quantity_at_hand:
-            raise ValidationError("Re-order levels cannot exceed the quantity at hand")
     def __str__(self):
-        return f"{self.item.name} - {self.date_created}"
+        return f"{self.item.name} - {self.id} - {self.date_created}"
     
     class Meta:
         verbose_name_plural = 'Inventory'
     
+
 class InventoryInsuranceSaleprice(models.Model):
     inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
     insurance_company = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
@@ -272,6 +268,7 @@ class InventoryInsuranceSaleprice(models.Model):
     class Meta:
         unique_together = ('inventory_item', 'insurance_company')
     
+
 class DepartmentInventory(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)

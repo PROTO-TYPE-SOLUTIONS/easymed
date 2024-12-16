@@ -18,7 +18,9 @@ from .views import (
     download_purchaseorder_pdf,
     download_goods_receipt_note_pdf,
     InventoryInsuranceSalepriceViewSet,
-    IncomingItemViewSet
+    IncomingItemViewSet,
+    InventoryFilterView,
+    GoodsReceiptNoteViewSet
 )
 
 router = DefaultRouter()
@@ -32,6 +34,7 @@ router.register(r'insurance-prices', InventoryInsuranceSalepriceViewSet)
 router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
 router.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
 router.register(r'supplier-invoice', SupplierInvoiceViewSet, basename='supplier-invoice')
+router.register(r'goods-receipt-note', GoodsReceiptNoteViewSet, basename='goods-receipt-note')
 
 requisition_url = NestedDefaultRouter(router, 'requisition', lookup='requisition')
 requisition_url.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
@@ -46,11 +49,12 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(requisition_url.urls)),
     path('', include(purchase_orders_url.urls)),
-    path('download__requisition_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
+    path('requisition_note_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
     path('purchase-orders/all_purchase_orders/', PurchaseOrderViewSet.as_view({'get': 'all_purchase_orders'}), name='all_purchase_orders'),
     path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),
-    path('download_purchaseorder_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
-    path('receipt-note/<int:purchase_order_id>/', download_goods_receipt_note_pdf, name='incoming_items_pdf'),
+    path('purchase_order_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
+    path('receipt_note_pdf/<int:purchase_order_id>/', download_goods_receipt_note_pdf, name='incoming_items_pdf'),
+    path('inventory_filter/', InventoryFilterView.as_view(), name='inventory-filter'),
 ]
 
 if settings.DEBUG:
