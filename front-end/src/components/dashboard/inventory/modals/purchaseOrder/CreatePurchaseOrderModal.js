@@ -105,6 +105,8 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
         const payload = {
             "requisition_items": req_ids,
             "ordered_by": parseInt(auth.user_id),
+            "supplier": selectedItems?.selectedRowKeys[0].preferred_supplier,
+            "created_by": auth.user_id
         };
         
         try {
