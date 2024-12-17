@@ -79,6 +79,23 @@ class PurchaseViewSet(viewsets.ModelViewSet):
 class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all()
     serializer_class = IncomingItemSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['supplier_invoice', 'purchase_order', 'supplier']
+
+    def perform_create(self, serializer):
+        """
+        When creating an IncomingItem, ensure it's linked to the correct supplier_invoice
+        and the supplier matches the one on the invoice
+        """
+        supplier_invoice = serializer.validated_data.get('supplier_invoice')
+        supplier = serializer.validated_data.get('supplier')
+        
+        if supplier_invoice and supplier != supplier_invoice.supplier:
+            raise ValidationError(
+                "Supplier must match the supplier on the invoice"
+            )
+        
+        serializer.save()
 
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
@@ -194,7 +211,18 @@ class SupplierViewSet(viewsets.ModelViewSet):
 class SupplierInvoiceViewSet(viewsets.ModelViewSet):
     queryset = SupplierInvoice.objects.all()
     serializer_class = SupplierInvoiceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['supplier', 'purchase_order', 'status']
 
+    def get_queryset(self):
+        queryset = SupplierInvoice.objects.all().select_related(
+            'supplier',
+            'purchase_order',
+            'purchase_order__requisition'
+        ).prefetch_related(
+            'incomingitem_set__goods_receipt_note'
+        )
+        return queryset
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseOrderCreateSerializer
@@ -363,7 +391,7 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
         total_amount_after_vat += amount_with_vat
         item_details.append({
             'supplier': item.supplier,
-            'item_code': item.item_code,
+            'item_code': item.item.item_code,  # Fixed: Access item_code through the item relationship
             'lot_number': item.lot_no,
             'item_name': item.item.name,
             'quantity_received': item.quantity,
