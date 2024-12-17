@@ -1,9 +1,11 @@
 import pytest
 from unittest.mock import patch
 from django.test import TestCase
+from django.utils import timezone
+from decimal import Decimal
 
 from customuser.models import CustomUser
-from inventory.models import IncomingItem, Inventory, Item, Supplier, PurchaseOrder
+from inventory.models import IncomingItem, Inventory, Item, Supplier, PurchaseOrder, Department, Requisition, SupplierInvoice
 from inventory.signals import update_inventory_after_incomingitem_creation
 
 
@@ -41,18 +43,39 @@ def supplier(db):
     return Supplier.objects.create(official_name="Test Supplier", common_name="Test")
 
 @pytest.fixture
+def supplier_invoice(db, supplier, purchase_order):
+    return SupplierInvoice.objects.create(
+        invoice_no="INV-2024-002",
+        status="pending",
+        supplier= 1,
+        purchase_order= 1
+    )
+
+@pytest.fixture
 def purchase_order(db, user):
     return PurchaseOrder.objects.create(ordered_by=user)
 
 @pytest.fixture
-def incoming_item(db, item, supplier, purchase_order):
+def requisition(db, user):
+    department = Department.objects.create(name="Nursing")
+    return Requisition.objects.create(
+        requisition_number="REQ001",
+        department=department,
+        requested_by=user
+    )
+
+@pytest.fixture
+def incoming_item(db, item, supplier, purchase_order, requisition, supplier_invoice):
     return IncomingItem.objects.create(
         item=item,
         supplier=supplier,
         purchase_order=purchase_order,
-        quantity=10,
-        sale_price=20.0,
-        category_one="resale",
+        supplier_invoice=supplier_invoice,
+        purchase_price=Decimal('100.00'),
+        sale_price=Decimal('150.00'),
+        quantity=2,
+        lot_no="LOT001",
+        expiry_date=timezone.now().date()
     )
 
 def test_inventory_created(incoming_item):

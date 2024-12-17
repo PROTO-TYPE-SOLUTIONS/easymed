@@ -179,7 +179,7 @@ class SupplierInvoice(models.Model):
     ]
     invoice_no = models.CharField(max_length=255, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=255, choices=STATUS, default="pending")
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='supplier_invoices')
