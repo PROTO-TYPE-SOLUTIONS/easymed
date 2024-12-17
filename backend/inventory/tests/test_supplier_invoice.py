@@ -1,28 +1,7 @@
 import pytest
 from decimal import Decimal
 from django.utils import timezone
-from django.db.models.signals import post_save, post_delete
-from django.contrib.auth import get_user_model
-
-from inventory.models import (
-    SupplierInvoice,
-    IncomingItem,
-    Requisition,
-    Department,
-    Inventory  
-)
-from inventory import signals  
-
-from inventory.tests.test_inventory_signals import supplier, purchase_order, requisition, incoming_item
-
-@pytest.fixture
-def supplier_invoice(db, supplier, purchase_order):
-    return SupplierInvoice.objects.create(
-        invoice_no="INV-2024-002",
-        status="pending",
-        supplier=supplier,
-        purchase_order=purchase_order
-    )
+from inventory.models import SupplierInvoice, IncomingItem, PurchaseOrder, SupplierInvoice
 
 @pytest.mark.django_db
 def test_create_incoming_item_updates_invoice_amount(supplier_invoice, item, supplier, purchase_order):
