@@ -453,7 +453,6 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
         for req_item in requisition_items:
             PurchaseOrderItem.objects.create(
                 purchase_order=purchase_order,
-                supplier=req_item.preferred_supplier,
                 requisition_item=req_item
             )
             req_item.ordered = True
