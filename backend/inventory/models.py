@@ -168,7 +168,7 @@ class PurchaseOrderItem(models.Model):
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
     def __str__(self):
-        return f"{self.requisition_item.item.name} - Ordered: {self.quantity_ordered}"  
+        return f"{self.requisition_item.item.name} - PO_no: {self.purchase_order.PO_number}"  
 
 # TODO: amount should be captured as a sum total of the 
 # incoming items associated with this invoice
@@ -179,7 +179,7 @@ class SupplierInvoice(models.Model):
     ]
     invoice_no = models.CharField(max_length=255, unique=True)
     date_created = models.DateTimeField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=255, choices=STATUS, default="pending")
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='supplier_invoices')
