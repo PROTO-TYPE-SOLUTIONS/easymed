@@ -168,7 +168,7 @@ class PurchaseOrderItem(models.Model):
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
     def __str__(self):
-        return f"{self.requisition_item.item.name} - Ordered: {self.quantity_ordered}"  
+        return f"{self.requisition_item.item.name} - PO_no: {self.purchase_order.PO_number}"  
 
 # TODO: amount should be captured as a sum total of the 
 # incoming items associated with this invoice
