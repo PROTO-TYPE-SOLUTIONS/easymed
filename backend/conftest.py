@@ -12,6 +12,7 @@ from inventory.models import (
     PurchaseOrderItem,
     IncomingItem,
     Inventory,
+    SupplierInvoice,
     InventoryInsuranceSaleprice,
     DepartmentInventory,
 )
@@ -113,6 +114,16 @@ def inventory(item):
         item=item,
         quantity_at_hand=10,
     )
+
+@pytest.fixture
+def supplier_invoice(db, supplier, purchase_order):
+    return SupplierInvoice.objects.create(
+        invoice_no="INV-2024-002",
+        status="pending",
+        supplier=supplier,
+        purchase_order=purchase_order
+    )
+
 
 @pytest.fixture
 def inventory_insurance_saleprice(inventory, insurance_company):
