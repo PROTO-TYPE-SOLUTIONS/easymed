@@ -39,19 +39,6 @@ def item(db):
     )
 
 @pytest.fixture
-def supplier(db):
-    return Supplier.objects.create(official_name="Test Supplier", common_name="Test")
-
-@pytest.fixture
-def supplier_invoice(db, supplier, purchase_order):
-    return SupplierInvoice.objects.create(
-        invoice_no="INV-2024-002",
-        status="pending",
-        supplier= 1,
-        purchase_order= 1
-    )
-
-@pytest.fixture
 def purchase_order(db, user):
     return PurchaseOrder.objects.create(ordered_by=user)
 
