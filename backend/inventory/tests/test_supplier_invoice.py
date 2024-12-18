@@ -75,6 +75,18 @@ def test_update_incoming_item_updates_invoice_amount(supplier_invoice, item, sup
 @pytest.mark.django_db
 def test_delete_incoming_item_updates_invoice_amount(incoming_item, supplier_invoice):
     # Create an additional incoming item
+    item1 = IncomingItem.objects.create(
+        item=incoming_item.item,
+        supplier=incoming_item.supplier,
+        purchase_order=incoming_item.purchase_order,
+        supplier_invoice=supplier_invoice,
+        purchase_price=Decimal('50.00'),
+        sale_price=Decimal('75.00'),
+        quantity=3,
+        lot_no="LOT002",
+        expiry_date=timezone.now().date()
+    )
+    
     item2 = IncomingItem.objects.create(
         item=incoming_item.item,
         supplier=incoming_item.supplier,
@@ -90,13 +102,13 @@ def test_delete_incoming_item_updates_invoice_amount(incoming_item, supplier_inv
     # Calculate the initial amount
     supplier_invoice.refresh_from_db()
     initial_amount = supplier_invoice.amount
-    assert initial_amount == (incoming_item.purchase_price * incoming_item.quantity + 
+    assert initial_amount == (item1.purchase_price * item1.quantity + 
                                item2.purchase_price * item2.quantity)
     
-    incoming_item.delete()
+    item1.delete()
     supplier_invoice.refresh_from_db()
     
-    updated_amount = initial_amount - (incoming_item.purchase_price * incoming_item.quantity)
+    updated_amount = initial_amount - (item1.purchase_price * item1.quantity)
     assert supplier_invoice.amount == updated_amount
 
 @pytest.mark.django_db
