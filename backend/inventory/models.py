@@ -3,7 +3,7 @@ import random
 from datetime import datetime
 from django.db import models
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, status
 
 from customuser.models import CustomUser
 from company.models import InsuranceCompany
@@ -133,12 +133,18 @@ class RequisitionItem(models.Model):
 
 
 class PurchaseOrder(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        PARTIAL = 'partial', 'Partial'
+        COMPLETED = 'completed', 'Completed'
+
     PO_number = models.CharField(unique=True, max_length=255, editable=False)
     date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     is_dispatched = models.BooleanField(default=False)
     ordered_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ordered_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='po_approved_by')
+    status = models.CharField(max_length=10,choices=Status.choices,default=Status.PENDING)
     requisition = models.ForeignKey(Requisition, on_delete=models.SET_NULL, null=True, blank=True, related_name='requisition')
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
@@ -153,6 +159,21 @@ class PurchaseOrder(models.Model):
         self.PO_number= f"PO/{year}/{month:02d}/{day:02d}/{random_code}"
         super().save(*args, **kwargs)
 
+    def update_status(self):
+        items = self.po_items.all() 
+        print("Items:", items)
+        for item in items:
+            print(f"received: {item.quantity_received}, ordered: {item.quantity_ordered}") #, item.quantity_received, item.quantity_ordered)
+ 
+        if not items.exists() or all(item.quantity_received == 0 for item in items):
+            self.status = self.status.PENDING
+        elif any(item.quantity_received < item.quantity_ordered for item in items):
+            self.status = self.status.PARTIAL
+        elif all(item.quantity_received == item.quantity_ordered for item in items):
+            self.status = self.status.COMPLETED
+        print(f"Setting status to: {self.status}") 
+        self.save()
+
     def __str__(self):
         return f"Purchase Order by {self.ordered_by} - Status: {self.PO_number}"
 
@@ -164,8 +185,13 @@ class PurchaseOrderItem(models.Model):
     '''
     date_created = models.DateTimeField(auto_now_add=True)
     quantity_ordered = models.IntegerField(default=0) # not packed or subpacked
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='purchase_order')
+    quantity_received = models.IntegerField(default=0)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='po_items')
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
+
+    def clean(self):
+        if self.quantity_received > self.quantity_ordered:
+            raise ValidationError("Quantity received cannot exceed quantity ordered")
 
     def __str__(self):
         return f"{self.requisition_item.item.name} - PO_no: {self.purchase_order.PO_number}"  
@@ -209,6 +235,7 @@ class GoodsReceiptNote(models.Model):
     
 
 # 1.Update Inventory 2.Associate PO 3.Update Supplier Invoice
+# update quantity received on purchase order item
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
