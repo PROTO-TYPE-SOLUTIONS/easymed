@@ -91,8 +91,7 @@ def purchase_order(user, requisition):
 def purchase_order_item(purchase_order, requisition_item, supplier):
     return PurchaseOrderItem.objects.create(
         purchase_order=purchase_order,
-        requisition_item=requisition_item,
-        supplier=supplier,
+        requisition_item=requisition_item
     )
 
 

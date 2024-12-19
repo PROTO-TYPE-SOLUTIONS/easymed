@@ -125,8 +125,10 @@ def update_purchase_order_item_quantity_received(sender, instance, **kwargs):
 
         if purchase_order_item:
             if instance.quantity:
-                purchase_order_item.quantity_received += instance.quantity
+                purchase_order_item.quantity_received = instance.quantity
                 purchase_order_item.save()
+
+                update_purchase_order_status(purchase_order_item.purchase_order)
 
 @receiver(post_delete, sender=IncomingItem)
 def update_purchase_order_item_quantity_received_on_delete(sender, instance, **kwargs):
@@ -139,17 +141,34 @@ def update_purchase_order_item_quantity_received_on_delete(sender, instance, **k
 
         if purchase_order_item:
             # Subtract the quantity_received field
-            purchase_order_item.quantity_received -= instance.quantity
+            purchase_order_item.quantity_received = instance.quantity
             purchase_order_item.save()
-                
-@receiver([post_save, post_delete], sender=PurchaseOrderItem)
-def update_purchase_order_status(sender, instance, **kwargs):
-    print("WTF")
-    purchase_order = instance.purchase_order
-    print(f"Updating status for PurchaseOrder {purchase_order.PO_number} after modifying PurchaseOrderItem {instance.id}")
-    purchase_order.update_status()
+
+            update_purchase_order_status(purchase_order_item.purchase_order)
+
+
+def update_purchase_order_status(purchase_order):
+    items = purchase_order.po_items.all()
+    
+    for item in items:
+        if item.quantity_received == item.quantity_ordered:
+            print(f'Qty Received: {item.quantity_received}, Qty Ordered: {item.quantity_ordered}')
+            purchase_order.status = PurchaseOrder.Status.COMPLETED
+            print(f'All items are received; status set to COMPLETED.')
+        elif item.quantity_received == 0:
+            print(f'Qty Received: {item.quantity_received}, Qty Ordered: {item.quantity_ordered}')
+            purchase_order.status = PurchaseOrder.Status.PENDING
+            print(f'No items received; status set to PENDING.')
+        else:
+            purchase_order.status = PurchaseOrder.Status.PARTIAL
+            print(f'Qty Received: {item.quantity_received}, Qty Ordered: {item.quantity_ordered}')
+            print(f'Some items received; status set to PARTIAL.')
+            break
+
     purchase_order.save()
-    print(f"Purchase Order status updated to: {purchase_order.status}")
+    print(f'Status set to {purchase_order.status}')
+
+
 
 
 '''signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry'''
@@ -158,6 +177,7 @@ def generate_requisition_note(sender, instance, created, **kwargs):
     if created:
         generate_requisition_pdf.delay(instance.pk)
         create_purchase_order.delay(instance.pk)
+
 
 '''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''
 @receiver(post_save, sender=PurchaseOrder)
