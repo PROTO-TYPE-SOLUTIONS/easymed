@@ -1,3 +1,4 @@
+import logging
 from django.dispatch import receiver
 from django.db import transaction
 from django.db.models.signals import post_save, post_delete
@@ -7,6 +8,7 @@ from django.db import models
 from .models import (
     Requisition,
     PurchaseOrder,
+    PurchaseOrderItem,
     IncomingItem,
     Inventory,
  
@@ -17,6 +19,8 @@ from easymed.celery_tasks import (
     create_purchase_order,
 
 )
+
+logger=logging.getLogger(__name__)
 
 # There's a painful Race Condition whne this is moved to celery
 @receiver(post_save, sender=IncomingItem)
@@ -75,6 +79,41 @@ def update_supplier_invoice_amount(sender, instance, **kwargs):
                 supplier_invoice.save()
         except Exception as e:
             print(f"Error updating supplier invoice amount: {e}")
+
+@receiver([post_save], sender=IncomingItem)
+def update_purchase_order_item_quantity_received(sender, instance, **kwargs):
+    with transaction.atomic():
+        purchase_order_item = PurchaseOrderItem.objects.filter(purchase_order=instance.purchase_order,
+                        requisition_item__item=instance.item).first()
+
+        if purchase_order_item:
+            if instance.quantity:
+                purchase_order_item.quantity_received += instance.quantity
+                purchase_order_item.save()
+
+@receiver(post_delete, sender=IncomingItem)
+def update_purchase_order_item_quantity_received_on_delete(sender, instance, **kwargs):
+    with transaction.atomic():
+        # Get the associated PurchaseOrderItem related to the deleted IncomingItem
+        purchase_order_item = PurchaseOrderItem.objects.filter(
+            purchase_order=instance.purchase_order,
+            requisition_item__item=instance.item  # Match the item in the PurchaseOrderItem
+        ).first()
+
+        if purchase_order_item:
+            # Subtract the quantity_received field
+            purchase_order_item.quantity_received -= instance.quantity
+            purchase_order_item.save()
+                
+@receiver([post_save, post_delete], sender=PurchaseOrderItem)
+def update_purchase_order_status(sender, instance, **kwargs):
+    print("WTF")
+    purchase_order = instance.purchase_order
+    print(f"Updating status for PurchaseOrder {purchase_order.PO_number} after modifying PurchaseOrderItem {instance.id}")
+    purchase_order.update_status()
+    purchase_order.save()
+    print(f"Purchase Order status updated to: {purchase_order.status}")
+
 
 '''signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry'''
 @receiver(post_save, sender=Requisition)

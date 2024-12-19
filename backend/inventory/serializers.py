@@ -361,7 +361,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
             'id', 'PO_number', 'requisition_number', 'requisition_date_created', 
             'requested_by', 'approved_by', 'ordered', 'item', 'item_code', 
             'item_name', 'desc', 'quantity_at_hand', 'quantity_requested', 'quantity_approved',
-            'quantity_ordered', 'preferred_supplier', 'buying_price', 'vat_rate', 
+            'quantity_ordered', 'quantity_received', 'preferred_supplier', 'buying_price', 'vat_rate', 
             'selling_price', 'requested_amount', 'department_name', 'requested_by_name',
             'preferred_supplier_name', 'total_buying_amount', 'date_created'
         ]
@@ -508,7 +508,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchaseOrder
         fields = [
-            'id', 'PO_number', 'is_dispatched', 'total_items_ordered', 
+            'id', 'PO_number', 'is_dispatched', 'status',  'total_items_ordered',
             'total_amount_before_vat', 'total_vat_amount', 'total_amount', 
             'ordered_by', 'approved_by', 'items', 'requisition'
         ]
