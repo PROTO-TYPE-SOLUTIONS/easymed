@@ -153,8 +153,8 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequisitionItem
         fields = [
-            'id', 'requisition_number', 'requisition_date_created', 'requested_by', 'approved_by', 'ordered', 'item', 'item_code', 'item_name', 'ordered', 'desc', 'ordered', 
-            'quantity_at_hand', 'quantity_requested', 'quantity_approved', 
+            'id', 'requisition_number', 'requisition_date_created', 'requested_by', 'approved_by', 'ordered', 'item', 'item_code', 'item_name', 'ordered', 
+            'desc', 'ordered', 'quantity_at_hand', 'quantity_requested', 'quantity_approved', 
             'preferred_supplier', 'buying_price', 
             'vat_rate', 'selling_price', 'requested_amount', 'date_created', 
             'department_name', 'requested_by_name', 'requisition', 'preferred_supplier_name']
@@ -207,6 +207,20 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
         if obj.requisition.approved_by:  
             return f"{obj.requisition.approved_by.first_name} {obj.requisition.approved_by.last_name}"
         return None  
+
+class RequisitionItemPurchaseOrderSerializer(RequisitionItemListUpdateSerializer):
+    quantity_ordered = serializers.IntegerField(source='quantity_approved')
+    
+    class Meta(RequisitionItemListUpdateSerializer.Meta):
+        model = RequisitionItem
+        fields = [
+            'id', 'requisition_number', 'requisition_date_created', 'requested_by', 
+            'approved_by', 'ordered', 'item', 'item_code', 'item_name', 'ordered', 
+            'desc', 'ordered', 'quantity_at_hand', 'quantity_requested', 'quantity_ordered', 
+            'preferred_supplier', 'buying_price', 'vat_rate', 'selling_price', 
+            'requested_amount', 'date_created', 'department_name', 'requested_by_name', 
+            'requisition', 'preferred_supplier_name'
+        ]
 
 class RequisitionCreateSerializer(serializers.ModelSerializer):
     items = RequisitionItemCreateSerializer(many=True)
@@ -347,7 +361,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
             'id', 'PO_number', 'requisition_number', 'requisition_date_created', 
             'requested_by', 'approved_by', 'ordered', 'item', 'item_code', 
             'item_name', 'desc', 'quantity_at_hand', 'quantity_requested', 'quantity_approved',
-            'quantity_ordered', 'preferred_supplier', 'buying_price', 'vat_rate', 
+            'quantity_ordered', 'quantity_received', 'preferred_supplier', 'buying_price', 'vat_rate', 
             'selling_price', 'requested_amount', 'department_name', 'requested_by_name',
             'preferred_supplier_name', 'total_buying_amount', 'date_created'
         ]
@@ -478,7 +492,7 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
     def get_items(self, obj):
         purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
         requisition_items = [purchase_order_item.requisition_item for purchase_order_item in purchase_order_items]
-        return RequisitionItemListUpdateSerializer(requisition_items, many=True).data
+        return RequisitionItemPurchaseOrderSerializer(requisition_items, many=True).data
     
 class PurchaseOrderListSerializer(serializers.ModelSerializer):
     PO_number = serializers.CharField()
@@ -494,7 +508,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchaseOrder
         fields = [
-            'id', 'PO_number', 'is_dispatched', 'total_items_ordered', 
+            'id', 'PO_number', 'is_dispatched', 'status',  'total_items_ordered',
             'total_amount_before_vat', 'total_vat_amount', 'total_amount', 
             'ordered_by', 'approved_by', 'items', 'requisition'
         ]
@@ -513,8 +527,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
     
     def get_total_items_ordered(self, obj):
         purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=obj)
-        distinct_items = purchase_order_items.values('requisition_item__item').distinct()
-        return len(distinct_items)
+        return purchase_order_items.count()
 
     def get_total_amount_before_vat(self, obj):
         total = 0
