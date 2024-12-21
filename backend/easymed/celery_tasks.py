@@ -11,6 +11,8 @@ from django.conf import settings
 from decouple import config
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -244,5 +246,28 @@ def send_invoice_updated_email(invoice_id):
     message = f'Your invoice #{invoice.invoice_number} has been updated to {invoice.status}.'
     from_email = config('EMAIL_HOST_USER')
     to_email = invoice.patient.email
-    send_mail(subject, message, from_email, [to_email])    
+    send_mail(subject, message, from_email, [to_email])   
+
+
+@shared_task
+def check_inventory_reorder_levels():
+    """
+    Periodically checks all inventory items for reorder levels and sends notifications if needed.
+    """
+    items = Inventory.objects.all()
+    print(items)
+
+    channel_layer = get_channel_layer()
+    for item in items:
+        if item.quantity_at_hand <= item.re_order_level:
+            message = f"Low stock alert for {item.item.name}: Only {item.quantity_at_hand} items left."
+            
+            async_to_sync(channel_layer.group_send)(
+                "inventory_notifications",
+                {
+                    "type": "send_notification",
+                    "message": message,
+                }
+            )
+            print({message})
     
