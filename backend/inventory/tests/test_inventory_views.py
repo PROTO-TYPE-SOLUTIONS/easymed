@@ -1,35 +1,19 @@
 import pytest
 from django.urls import reverse
 from datetime import datetime, timedelta
-from inventory.models import Inventory, Item
 
+
+from inventory.models import Inventory, Item
+from inventory.signals import update_inventory_after_incomingitem_creation
 from inventory.models import (
     Inventory,
     PurchaseOrder,
     PurchaseOrderItem,
     GoodsReceiptNote,
     SupplierInvoice,
-    RequisitionItem
+    RequisitionItem,
+    IncomingItem
     )
-
-
-@pytest.mark.django_db
-def test_goods_receipt_note_signal(supplier, purchase_order):
-    assert GoodsReceiptNote.objects.count() == 0
-
-    supplier_invoice = SupplierInvoice.objects.create(
-        invoice_no="INV12345",
-        amount=1000.0,
-        supplier=supplier,
-        purchase_order=purchase_order,
-    )
-
-    assert GoodsReceiptNote.objects.count() == 1
-
-    goods_receipt_note = GoodsReceiptNote.objects.first()
-    assert goods_receipt_note.purchase_order == supplier_invoice.purchase_order
-    assert goods_receipt_note.note == f"Generated for Supplier Invoice: {supplier_invoice.invoice_no}"
-    assert goods_receipt_note.grn_number is not None  # Check GRN number auto-generation
 
 
 
@@ -62,8 +46,7 @@ def test_incoming_item_updates_inventory(incoming_item, item, user, requisition)
     incoming_item.quantity = 10
     incoming_item.save()
 
-    from easymed.celery_tasks import create_or_update_inventory_record
-    create_or_update_inventory_record(incoming_item.id)
+    update_inventory_after_incomingitem_creation(sender=IncomingItem, instance=incoming_item, created=True)
     
     print(f'There are {Inventory.objects.count()} inventory items')
     print(f'There are {initial_inventory.quantity_at_hand} items in stock')

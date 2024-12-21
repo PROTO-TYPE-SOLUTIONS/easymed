@@ -142,12 +142,13 @@ class PrescribedDrugSerializer(serializers.ModelSerializer):
         model = PrescribedDrug
         fields = '__all__'
 
-
-    def get_sale_price(self, instance):
-        inventory = instance.item.inventory_set.first()
-        return inventory.sale_price if inventory else None
-
-
+    def get_sale_price(self, obj):
+        try:
+            inventory = Inventory.objects.get(item=obj.item)
+            return inventory.sale_price
+        except Inventory.DoesNotExist:
+            return None
+                
 class ReferralSerializer(serializers.ModelSerializer):
     class Meta:
         model = Referral

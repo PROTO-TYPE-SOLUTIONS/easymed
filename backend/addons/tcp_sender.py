@@ -1,6 +1,6 @@
 import socket
 
-HOST = "192.168.100.56"
+HOST = "172.16.4.137"
 PORT = 9000
 
 # Data to send (convert to bytes before sending)

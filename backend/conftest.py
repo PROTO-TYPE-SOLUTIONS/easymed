@@ -12,6 +12,7 @@ from inventory.models import (
     PurchaseOrderItem,
     IncomingItem,
     Inventory,
+    SupplierInvoice,
     InventoryInsuranceSaleprice,
     DepartmentInventory,
 )
@@ -90,8 +91,7 @@ def purchase_order(user, requisition):
 def purchase_order_item(purchase_order, requisition_item, supplier):
     return PurchaseOrderItem.objects.create(
         purchase_order=purchase_order,
-        requisition_item=requisition_item,
-        supplier=supplier,
+        requisition_item=requisition_item
     )
 
 
@@ -99,7 +99,6 @@ def purchase_order_item(purchase_order, requisition_item, supplier):
 def incoming_item(item, supplier, purchase_order):
     return IncomingItem.objects.create(
         item=item,
-        item_code=item.item_code,
         supplier=supplier,
         purchase_order=purchase_order,
         quantity=10,
@@ -114,6 +113,16 @@ def inventory(item):
         item=item,
         quantity_at_hand=10,
     )
+
+@pytest.fixture
+def supplier_invoice(db, supplier, purchase_order):
+    return SupplierInvoice.objects.create(
+        invoice_no="INV-2024-002",
+        status="pending",
+        supplier=supplier,
+        purchase_order=purchase_order
+    )
+
 
 @pytest.fixture
 def inventory_insurance_saleprice(inventory, insurance_company):

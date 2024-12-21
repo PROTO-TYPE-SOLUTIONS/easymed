@@ -15,11 +15,9 @@ from django.db import models
 from django.db.models import F
 from datetime import timedelta
 
-from .models import Inventory, Item
-from .models import IncomingItem, GoodsReceiptNote
-from .models import PurchaseOrderItem
-from .models import Requisition
+
 from company.models import Company
+from customuser.models import CustomUser
 from .models import (
     Item,
     Inventory,
@@ -32,6 +30,7 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
+    GoodsReceiptNote
     
 
 )
@@ -52,6 +51,7 @@ from .serializers import (
     RequisitionListSerializer,
     IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
+    GoodsReceiptNoteSerializer,
 )
 
 from .filters import (
@@ -68,19 +68,40 @@ class ItemViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ItemFilter
 
+
 class PurchaseViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
     serializer_class = PurchaseOrderCreateSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PurchaseOrderFilter
 
+
 class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all()
     serializer_class = IncomingItemSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['supplier_invoice', 'purchase_order', 'supplier']
+
+    def perform_create(self, serializer):
+        """
+        When creating an IncomingItem, ensure it's linked to the correct supplier_invoice
+        and the supplier matches the one on the invoice
+        """
+        supplier_invoice = serializer.validated_data.get('supplier_invoice')
+        supplier = serializer.validated_data.get('supplier')
+        
+        if supplier_invoice and supplier != supplier_invoice.supplier:
+            raise ValidationError(
+                "Supplier must match the supplier on the invoice"
+            )
+        
+        serializer.save()
+
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()
     serializer_class = DepartmentInventorySerializer
+
 
 class RequisitionViewSet(viewsets.ModelViewSet):
     """
@@ -171,6 +192,7 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
     
+
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
@@ -178,15 +200,29 @@ class InventoryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['item',]
     filterset_class = InventoryFilter
 
+
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = SupplierFilter
 
+
 class SupplierInvoiceViewSet(viewsets.ModelViewSet):
     queryset = SupplierInvoice.objects.all()
     serializer_class = SupplierInvoiceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['supplier', 'purchase_order', 'status']
+
+    def get_queryset(self):
+        queryset = SupplierInvoice.objects.all().select_related(
+            'supplier',
+            'purchase_order',
+            'purchase_order__requisition'
+        ).prefetch_related(
+            'incomingitem_set__goods_receipt_note'
+        )
+        return queryset
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseOrderCreateSerializer
@@ -216,7 +252,7 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         serializer = PurchaseOrderCreateSerializer(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
         try:
-            serializer.save()
+            serializer.save(created_by=self.request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)},status=status.HTTP_400_BAD_REQUEST)
@@ -240,7 +276,6 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
 class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
     queryset = InventoryInsuranceSaleprice.objects.all()
     serializer_class = InventoryInsuranceSalepriceSerializer
-
 
 
 class InventoryFilterView(ListAPIView):
@@ -277,7 +312,11 @@ class InventoryFilterView(ListAPIView):
 
         return queryset
 
-    
+
+class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
+    queryset = GoodsReceiptNote.objects.all()
+    serializer_class = GoodsReceiptNoteSerializer
+
 
 def download_requisition_pdf(request, requisition_id):
     '''
@@ -307,14 +346,22 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
     purchase_order = get_object_or_404(PurchaseOrder, pk=purchaseorder_id)
     purchase_order_items = PurchaseOrderItem.objects.filter(purchase_order=purchase_order)
     company = Company.objects.first()
+    user = CustomUser.objects.first()
 
-    html_template = get_template('purchaseorder.html').render({
+    company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
+
+    context = {
         'purchaseorder': purchase_order,
         'purchaseorder_items': purchase_order_items,
-        'company': company
-    })
+        'company': company,
+        'company_logo_url': company_logo_url,
+        'user': user
+    }
+
+    html_template = get_template('purchase_order_note.html').render(context)
     
     pdf_file = HTML(string=html_template).write_pdf()
+
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="purchase_order_report_{purchaseorder_id}.pdf"'
 
@@ -344,7 +391,7 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
         total_amount_after_vat += amount_with_vat
         item_details.append({
             'supplier': item.supplier,
-            'item_code': item.item_code,
+            'item_code': item.item.item_code,  # Fixed: Access item_code through the item relationship
             'lot_number': item.lot_no,
             'item_name': item.item.name,
             'quantity_received': item.quantity,
