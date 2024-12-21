@@ -31,7 +31,6 @@ from .models import (
     ContactDetails,
     Patient,
     NextOfKin,
-    Appointment,
     Prescription,
     PrescribedDrug,
     PublicAppointment,
@@ -44,21 +43,17 @@ from .serializers import (
     ContactDetailsSerializer,
     PatientSerializer,
     NextOfKinSerializer,
-    AppointmentSerializer,
     PrescriptionSerializer,
     PrescribedDrugSerializer,
     PublicAppointmentSerializer,
     ConsultationSerializer,
     ReferralSerializer,
     TriageSerializer,
-    ConvertToAppointmentsSerializer,
-    SendConfirmationMailSerializer,
     AttendanceProcessSerializer,
 )
 
 # filters
 from .filters import (
-    AppointmentFilter,
     PatientFilter,
     ConsultationFilter,
     TriageFilter,
@@ -71,9 +66,6 @@ from authperms.permissions import IsPatientUser
 from drf_spectacular.utils import (
     extend_schema,
 )
-
-# utils
-from .utils import send_appointment_email
 
 
 class ConsultationViewSet(viewsets.ModelViewSet):
@@ -97,19 +89,19 @@ class PatientViewSet(viewsets.ModelViewSet):
     permission_classes = (IsReceptionistUser,)
 
 
-class ConvertToAppointmentAPIView(APIView):
-    @extend_schema(
-        request=ConvertToAppointmentsSerializer,
-        responses=ConvertToAppointmentsSerializer,
-    )
-    def post(self, request: Request, *args, **kwargs):
-        data = request.data
-        serializer = ConvertToAppointmentsSerializer(data=data)
-        if serializer.is_valid():
-            code = serializer.create_patient_appointment()
-            if code == 400:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            return Response(status=status.HTTP_201_CREATED)
+# class ConvertToAppointmentAPIView(APIView):
+#     @extend_schema(
+#         request=ConvertToAppointmentsSerializer,
+#         responses=ConvertToAppointmentsSerializer,
+#     )
+#     def post(self, request: Request, *args, **kwargs):
+#         data = request.data
+#         serializer = ConvertToAppointmentsSerializer(data=data)
+#         if serializer.is_valid():
+#             code = serializer.create_patient_appointment()
+#             if code == 400:
+#                 return Response(status=status.HTTP_400_BAD_REQUEST)
+#             return Response(status=status.HTTP_201_CREATED)
 
 
 class PatientByUserIdAPIView(APIView):
@@ -135,26 +127,6 @@ class PatientByUserIdAPIView(APIView):
         serializer = PatientSerializer(patient.first())
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class AppointmentsByPatientIdAPIView(APIView):
-    def get_object(self, patient_id: int):
-        try:
-            return Patient.objects.get(id=patient_id)
-        except Patient.DoesNotExist:
-            return None
-    @extend_schema(
-        responses=AppointmentSerializer,
-    )
-    def get(self, request: Request, *args, **kwargs):
-        patient_id = self.kwargs.get('patient_id')
-        patient = self.get_object(patient_id)
-        if patient is None:
-            return Response({"error_message": f"patient id {patient_id} doesn't exist"})
-        appointments = Appointment.objects.filter(patient=patient)
-        if not appointments.exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = AppointmentSerializer(appointments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PrescribedDrugByPatientIdAPIView(APIView):
     def get_prescribed_drugs_by_patient(self, patient_id: int):
@@ -202,13 +174,6 @@ class NextOfKinViewSet(viewsets.ModelViewSet):
     queryset = NextOfKin.objects.all()
     serializer_class = NextOfKinSerializer
 
-
-class AppointmentViewSet(viewsets.ModelViewSet):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = AppointmentFilter
-
         
 class ConsultationViewSet(viewsets.ModelViewSet):
     queryset = Consultation.objects.all()
@@ -246,37 +211,12 @@ class TriageViewSet(viewsets.ModelViewSet):
     filterset_class = TriageFilter
 
 
-class SendAppointmentConfirmationAPIView(APIView):
-    @extend_schema(
-        request=SendConfirmationMailSerializer,
-        responses=str,
-    )
-
-    def post(self, request: Request, *args, **kwargs):
-        data = request.data
-        serializer = SendConfirmationMailSerializer(data=data)
-
-        if serializer.is_valid():
-            print(serializer.validated_data)
-            appointments = serializer.validated_data.get("appointments")
-            send_appointment_email(appointments)
-            return Response("email sent successfully", status=status.HTTP_200_OK)
-
 class AttendanceProcessViewSet(viewsets.ModelViewSet):
     queryset = AttendanceProcess.objects.all().order_by('-id')
     serializer_class = AttendanceProcessSerializer
 
-class AppointmentByDoctorView(generics.ListAPIView):
-    serializer_class = AppointmentSerializer
-
-    def get_queryset(self):
-        assigned_doctor_id = self.kwargs['assigned_doctor_id']
-        return Appointment.objects.filter(assigned_doctor_id=assigned_doctor_id)
-    
 
 # VIEWS FOR REPORTS GENERATION WILL GO HERE
-
-
 def download_prescription_pdf(request, prescription_id):
     '''
     This view gets the geneated pdf and downloads it locally
@@ -304,52 +244,52 @@ def download_prescription_pdf(request, prescription_id):
 
 
 
-def generate_appointments_report(request):
-    '''
-    This will give you all appointments by given doctor and date range
-    http://127.0.0.1:8080/patients/reports/appointments/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
+# def generate_appointments_report(request):
+#     '''
+#     This will give you all appointments by given doctor and date range
+#     http://127.0.0.1:8080/patients/reports/appointments/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
 
-    If no date range is specified it will get you a report for all appointments
-    http://127.0.0.1:8080/patients/reports/appointments/?doctor_id=2
-    '''
-    doctor_id = request.GET.get('doctor_id')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    company = Company.objects.first()
+#     If no date range is specified it will get you a report for all appointments
+#     http://127.0.0.1:8080/patients/reports/appointments/?doctor_id=2
+#     '''
+#     doctor_id = request.GET.get('doctor_id')
+#     start_date = request.GET.get('start_date')
+#     end_date = request.GET.get('end_date')
+#     company = Company.objects.first()
 
-    if not doctor_id:
-        return HttpResponseBadRequest("Missing doctor_id parameter.")
+#     if not doctor_id:
+#         return HttpResponseBadRequest("Missing doctor_id parameter.")
     
-    if start_date and end_date:
-        try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
-            end_date = datetime.strptime(end_date, '%Y-%m-%d')
-            end_date = end_date.replace(hour=23, minute=59, second=59)
-            appointments = Appointment.objects.filter(
-                assigned_doctor_id=doctor_id,
-                appointment_date_time__range=(start_date, end_date)
-            ).order_by('appointment_date_time')
-        except ValueError:
-            return HttpResponseBadRequest("Invalid date format. Please use YYYY-MM-DD.")
-    else:
-        appointments = Appointment.objects.filter(
-            assigned_doctor_id=doctor_id
-        ).order_by('appointment_date_time')
+#     if start_date and end_date:
+#         try:
+#             start_date = datetime.strptime(start_date, '%Y-%m-%d')
+#             end_date = datetime.strptime(end_date, '%Y-%m-%d')
+#             end_date = end_date.replace(hour=23, minute=59, second=59)
+#             appointments = Appointment.objects.filter(
+#                 assigned_doctor_id=doctor_id,
+#                 appointment_date_time__range=(start_date, end_date)
+#             ).order_by('appointment_date_time')
+#         except ValueError:
+#             return HttpResponseBadRequest("Invalid date format. Please use YYYY-MM-DD.")
+#     else:
+#         appointments = Appointment.objects.filter(
+#             assigned_doctor_id=doctor_id
+#         ).order_by('appointment_date_time')
 
-    if not appointments.exists():
-        return HttpResponse("No appointments found for the given doctor.", content_type="text/plain")
+#     if not appointments.exists():
+#         return HttpResponse("No appointments found for the given doctor.", content_type="text/plain")
 
-    html_content = render_to_string('appointments_report.html',{'appointments': appointments, 'company': company}, )
-    html = HTML(string=html_content)
+#     html_content = render_to_string('appointments_report.html',{'appointments': appointments, 'company': company}, )
+#     html = HTML(string=html_content)
 
-    try:
-        pdf_bytes = html.write_pdf()
+#     try:
+#         pdf_bytes = html.write_pdf()
 
-        response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename="appointments_report_{doctor_id}.pdf"'
-        return response
-    except Exception as e:
-        return HttpResponseBadRequest(f"Error generating PDF: {str(e)}")
+#         response = HttpResponse(pdf_bytes, content_type='application/pdf')
+#         response['Content-Disposition'] = f'inline; filename="appointments_report_{doctor_id}.pdf"'
+#         return response
+#     except Exception as e:
+#         return HttpResponseBadRequest(f"Error generating PDF: {str(e)}")
     
 
 def generate_lab_tests_report(request):
