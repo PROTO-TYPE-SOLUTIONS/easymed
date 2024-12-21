@@ -68,32 +68,7 @@ class NextOfKin(models.Model):
     contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
 
 
-class Appointment(models.Model):
-    class Meta:
-        ordering = ("-date_created",)
-
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
-        ('cancelled', 'Cancelled'),
-        ('completed', 'Completed'),
-    )
-    appointment_date_time = models.DateTimeField(null=True)
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    assigned_doctor = models.ForeignKey(
-        CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default='pending')
-    reason = models.TextField(max_length=300, null=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_changed = models.DateTimeField(auto_now=True)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, default=22)
-
-    def __str__(self):
-        return f"Appointment #{self.patient.first_name}"
-
-
-
+# Once confirmed will trigger an AttendanceProcess
 class PublicAppointment(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),

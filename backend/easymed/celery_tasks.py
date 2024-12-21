@@ -13,6 +13,7 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
@@ -26,7 +27,7 @@ from inventory.models import (
     RequisitionItem,
 )
 from billing.models import Invoice
-from patient.models import Appointment
+from patient.models import AttendanceProcess
 
 
 logger = logging.getLogger(__name__)
@@ -212,43 +213,6 @@ def generate_purchase_order_pdf(purchase_order_id):
     purchase_order.save()
 
 
-'''task to send the appointment assigned notification'''
-@shared_task
-def appointment_assign_notification(appointment_id):
-    appointment = Appointment.objects.get(id=appointment_id)
-    message = f"You have been assigned appointment {appointment.appointment_date_time}."
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        "doctor_notifications",
-        {
-            'type': 'send_notification',
-            'message':message
-        }
-    )
-
-
-'''Send email notifications on Appointment updated'''
-from django.core.mail import send_mail
-@shared_task
-def send_appointment_status_email(appointment_id):
-    appointment = Appointment.objects.get(id=appointment_id)
-    subject = f'Appointment #{appointment.id} Status Changed'
-    message = f'Your appointment status has been changed to {appointment.status}.'
-    from_email = config('EMAIL_HOST_USER')
-    to_email = appointment.patient.email
-    send_mail(subject, message, from_email, [to_email])
-
-
-'''Send email notifications on Appointment created'''
-@shared_task
-def send_appointment_status_email(appointment_id):
-    appointment = Appointment.objects.get(id=appointment_id)
-    subject = f'Appointment #{appointment.id} created'
-    message = f'Appointment has been created for #{appointment.appointment_date_time}. Reason #{appointment.reason}'
-    from_email = config('EMAIL_HOST_USER')
-    to_email = appointment.patient.email
-    send_mail(subject, message, from_email, [to_email])    
-
 
 
 ''''
@@ -282,5 +246,28 @@ def send_invoice_updated_email(invoice_id):
     message = f'Your invoice #{invoice.invoice_number} has been updated to {invoice.status}.'
     from_email = config('EMAIL_HOST_USER')
     to_email = invoice.patient.email
-    send_mail(subject, message, from_email, [to_email])    
+    send_mail(subject, message, from_email, [to_email])   
+
+
+@shared_task
+def check_inventory_reorder_levels():
+    """
+    Periodically checks all inventory items for reorder levels and sends notifications if needed.
+    """
+    items = Inventory.objects.all()
+    print(items)
+
+    channel_layer = get_channel_layer()
+    for item in items:
+        if item.quantity_at_hand <= item.re_order_level:
+            message = f"Low stock alert for {item.item.name}: Only {item.quantity_at_hand} items left."
+            
+            async_to_sync(channel_layer.group_send)(
+                "inventory_notifications",
+                {
+                    "type": "send_notification",
+                    "message": message,
+                }
+            )
+            print({message})
     

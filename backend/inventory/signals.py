@@ -50,11 +50,13 @@ def generate_requisition_note(sender, instance, created, **kwargs):
         generate_requisition_pdf.delay(instance.pk)
         create_purchase_order.delay(instance.pk)
 
+
 #signal to fire up celery task to  to generated pdf once PurchaseOrder table gets a new entry
 @receiver(post_save, sender=PurchaseOrder)
 def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
     if created:
         generate_purchase_order_pdf.delay(instance.pk)
+
 
 @receiver([post_save, post_delete], sender=IncomingItem)
 def update_supplier_invoice_amount(sender, instance, **kwargs):
@@ -79,6 +81,7 @@ def update_supplier_invoice_amount(sender, instance, **kwargs):
                 supplier_invoice.save()
         except Exception as e:
             print(f"Error updating supplier invoice amount: {e}")
+
 
 '''signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry'''
 @receiver(post_save, sender=Requisition)
@@ -87,11 +90,13 @@ def generate_requisition_note(sender, instance, created, **kwargs):
         generate_requisition_pdf.delay(instance.pk)
         create_purchase_order.delay(instance.pk)
 
+
 '''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''
 @receiver(post_save, sender=PurchaseOrder)
 def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
     if created:
         generate_purchase_order_pdf.delay(instance.pk)
+
 
 @receiver([post_save, post_delete], sender=IncomingItem)
 def update_supplier_invoice_amount(sender, instance, **kwargs):
@@ -116,6 +121,7 @@ def update_supplier_invoice_amount(sender, instance, **kwargs):
                 supplier_invoice.save()
         except Exception as e:
             print(f"Error updating supplier invoice amount: {e}")
+
 
 @receiver([post_save], sender=IncomingItem)
 def update_purchase_order_item_quantity_received(sender, instance, **kwargs):
@@ -130,17 +136,16 @@ def update_purchase_order_item_quantity_received(sender, instance, **kwargs):
 
                 update_purchase_order_status(purchase_order_item.purchase_order)
 
+
 @receiver(post_delete, sender=IncomingItem)
 def update_purchase_order_item_quantity_received_on_delete(sender, instance, **kwargs):
     with transaction.atomic():
-        # Get the associated PurchaseOrderItem related to the deleted IncomingItem
         purchase_order_item = PurchaseOrderItem.objects.filter(
             purchase_order=instance.purchase_order,
-            requisition_item__item=instance.item  # Match the item in the PurchaseOrderItem
+            requisition_item__item=instance.item  
         ).first()
 
         if purchase_order_item:
-            # Subtract the quantity_received field
             purchase_order_item.quantity_received = instance.quantity
             purchase_order_item.save()
 
@@ -149,7 +154,8 @@ def update_purchase_order_item_quantity_received_on_delete(sender, instance, **k
 
 def update_purchase_order_status(purchase_order):
     items = purchase_order.po_items.all()
-    
+
+
     for item in items:
         if item.quantity_received == item.quantity_ordered:
             print(f'Qty Received: {item.quantity_received}, Qty Ordered: {item.quantity_ordered}')
