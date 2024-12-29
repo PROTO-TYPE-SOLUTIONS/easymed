@@ -13,6 +13,9 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+
 
 from django.db import transaction
 from django.db.models import F
@@ -256,6 +259,15 @@ def check_inventory_reorder_levels():
     Periodically checks all inventory items for reorder levels and sends notifications if needed.
     """
     items = Inventory.objects.filter(quantity_at_hand__lte=F('re_order_level'))
+    User = get_user_model()
+
+    users_to_notify = User.objects.filter(role__in=[User.SYS_ADMIN, User.LAB_TECH])
+
+    if not users_to_notify.exists():
+        print("No sysadmins or lab technicians found to send notifications.")
+        return
+
+    user_emails = list(users_to_notify.values_list('email', flat=True))
 
     if not items.exists():
         raise Exception("No items found below reorder levels.")
@@ -276,5 +288,15 @@ def check_inventory_reorder_levels():
             raise Exception(
                 f"Failed to send WebSocket notification for {item.item.name}: {ws_error}"
             )
+
+        try:
+            send_mail(
+                subject="Inventory Notification",
+                message=message,
+                from_email=config('EMAIL_HOST_USER'),  # Replace with your email
+                recipient_list=user_emails, 
+            )
+        except Exception as e:
+            print(f"Error sending email: {e}")
 
        
