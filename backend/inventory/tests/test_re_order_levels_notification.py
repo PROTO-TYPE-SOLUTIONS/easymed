@@ -1,31 +1,30 @@
 import pytest
-from inventory.models import Inventory
+from unittest.mock import AsyncMock, patch
+from asgiref.sync import sync_to_async
+from django.db import transaction
+from easymed.celery_tasks import check_inventory_reorder_levels
 
+@pytest.mark.asyncio
 @pytest.mark.django_db
-def test_reorder_signal_triggered(inventory):
+@patch("inventory.consumers.get_channel_layer")
+async def test_check_inventory_reorder_levels(mock_get_channel_layer, inventory):
     """
-    Test that the reorder notification is triggered when quantity_at_hand <= re_order_level.
+    Test Celery task sending notifications via WebSocket channels.
     """
-    inventory.re_order_level = 5
-    inventory.quantity_at_hand = 10
-    inventory.save()
-
+    mock_channel_layer = AsyncMock()
+    mock_get_channel_layer.return_value = mock_channel_layer
+    
     inventory.quantity_at_hand = 5
-    inventory.save()
+    inventory.re_order_level = 10
+    
+    await sync_to_async(inventory.save)()
 
-    assert inventory.quantity_at_hand <= inventory.re_order_level
+    await check_inventory_reorder_levels()
 
-
-@pytest.mark.django_db
-def test_reorder_signal_not_triggered(inventory):
-    """
-    Test that the reorder notification is NOT triggered when quantity_at_hand > re_order_level.
-    """
-    inventory.re_order_level = 5
-    inventory.quantity_at_hand = 10
-    inventory.save()
-
-    inventory.quantity_at_hand = 6
-    inventory.save()
-
-    assert inventory.quantity_at_hand > inventory.re_order_level
+    mock_channel_layer.group_send.assert_called_once_with(
+        "inventory_notifications",
+        {
+            "type": "send_notification",
+            "message": f"Low stock alert for {inventory.item.name}: Only {inventory.quantity_at_hand} items left.",
+        },
+    )

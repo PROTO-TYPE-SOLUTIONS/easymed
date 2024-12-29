@@ -15,6 +15,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from django.db import transaction
+from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
@@ -254,14 +255,16 @@ def check_inventory_reorder_levels():
     """
     Periodically checks all inventory items for reorder levels and sends notifications if needed.
     """
-    items = Inventory.objects.all()
-    print(items)
+    items = Inventory.objects.filter(quantity_at_hand__lte=F('re_order_level'))
+
+    if not items.exists():
+        raise Exception("No items found below reorder levels.")
 
     channel_layer = get_channel_layer()
     for item in items:
-        if item.quantity_at_hand <= item.re_order_level:
-            message = f"Low stock alert for {item.item.name}: Only {item.quantity_at_hand} items left."
-            
+        message = f"Low stock alert for {item.item.name}: Only {item.quantity_at_hand} items left."
+
+        try:
             async_to_sync(channel_layer.group_send)(
                 "inventory_notifications",
                 {
@@ -269,5 +272,9 @@ def check_inventory_reorder_levels():
                     "message": message,
                 }
             )
-            print({message})
-    
+        except Exception as ws_error:
+            raise Exception(
+                f"Failed to send WebSocket notification for {item.item.name}: {ws_error}"
+            )
+
+       
