@@ -35,8 +35,6 @@ services:
         env_file:
             - ./.env    
         command: celery -A easymed worker --loglevel=INFO        
-        environment:
-            - CELERY_BROKER_URL=redis://redis:6379/0 
         depends_on:
             - redis
         networks:
@@ -49,8 +47,6 @@ services:
         env_file:
             - ./.env
         restart: unless-stopped
-        environment:
-         - CELERY_BROKER_URL=redis://redis:6379/0 
         depends_on:
             - redis
         networks:
