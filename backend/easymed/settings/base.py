@@ -213,7 +213,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [('redis', 6379)],
         },
     },
 }
@@ -224,7 +224,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_BEAT_SCHEDULE = {
     "check_inventory_reorder_levels": {
     "task": "easymed.celery_tasks.check_inventory_reorder_levels",            
-    "schedule": crontab(minute='*/5'),  # run at every 5th minute
+    "schedule": crontab(minute='*/5'),  
     },
 }
 
