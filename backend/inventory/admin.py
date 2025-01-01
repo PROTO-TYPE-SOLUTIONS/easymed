@@ -3,7 +3,8 @@ from .models import (
     PurchaseOrder, Inventory, Supplier, SupplierInvoice, Item,
     Requisition, IncomingItem, DepartmentInventory,
     Department, InventoryInsuranceSaleprice,
-    GoodsReceiptNote, PurchaseOrderItem
+    GoodsReceiptNote, PurchaseOrderItem, Quotation, QuotationItem,
+    QuotationCustomer
 )
 
 admin.site.register(PurchaseOrder)
@@ -18,5 +19,8 @@ admin.site.register(DepartmentInventory)
 admin.site.register(Department)
 admin.site.register(InventoryInsuranceSaleprice)
 admin.site.register(GoodsReceiptNote)
+admin.site.register(Quotation)
+admin.site.register(QuotationItem)
+admin.site.register(QuotationCustomer)
 
 

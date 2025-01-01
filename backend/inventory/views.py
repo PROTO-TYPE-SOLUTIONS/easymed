@@ -30,7 +30,9 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
-    GoodsReceiptNote
+    GoodsReceiptNote,
+    Quotation,
+    QuotationItem
     
 
 )
@@ -52,6 +54,8 @@ from .serializers import (
     IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
     GoodsReceiptNoteSerializer,
+    QuotationSerializer,
+    QuotationItemSerializer
 )
 
 from .filters import (
@@ -421,3 +425,13 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="incoming_items.pdf"'
     return response
+
+
+class QuotationViewSet(viewsets.ModelViewSet):
+    queryset = Quotation.objects.all()
+    serializer_class = QuotationSerializer
+
+
+class QuotationItemViewSet(viewsets.ModelViewSet):
+    queryset = QuotationItem.objects.all()
+    serializer_class = QuotationItemSerializer
