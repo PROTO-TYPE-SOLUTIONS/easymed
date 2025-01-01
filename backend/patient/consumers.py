@@ -6,7 +6,7 @@ import json
 consumer opens up socket connection and sends notifs to doctor_notifications group members who's joined the
 socket connection in this case, doctors
 '''
-class NotificationConsumer(AsyncWebsocketConsumer):
+class DoctorAppointmentNotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.group_name = "doctor_notifications"
         await self.channel_layer.group_add(
