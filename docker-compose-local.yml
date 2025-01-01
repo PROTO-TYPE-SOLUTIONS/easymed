@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
     redis:
         image: redis:7.0-alpine
@@ -18,8 +16,8 @@ services:
             context: ./backend
             dockerfile: ./Dockerfile.local
         container_name: easymed-backend
-        # command: uvicorn --port 8080 easymed.asgi:application
-        command: python manage.py runserver 0.0.0.0:8080
+        command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
+        # command: python manage.py runserver 0.0.0.0:8080
         volumes:
             - ./backend:/app
         ports:
@@ -37,6 +35,18 @@ services:
         env_file:
             - ./.env    
         command: celery -A easymed worker --loglevel=INFO        
+        depends_on:
+            - redis
+        networks:
+            - mks   
+    
+    celery-beat:
+        build: ./backend
+        container_name: celery-beat
+        command: celery -A easymed beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+        env_file:
+            - ./.env
+        restart: unless-stopped
         depends_on:
             - redis
         networks:

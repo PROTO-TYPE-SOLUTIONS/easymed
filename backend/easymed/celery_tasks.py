@@ -11,8 +11,14 @@ from django.conf import settings
 from decouple import config
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+
 
 from django.db import transaction
+from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
@@ -244,5 +250,53 @@ def send_invoice_updated_email(invoice_id):
     message = f'Your invoice #{invoice.invoice_number} has been updated to {invoice.status}.'
     from_email = config('EMAIL_HOST_USER')
     to_email = invoice.patient.email
-    send_mail(subject, message, from_email, [to_email])    
-    
+    send_mail(subject, message, from_email, [to_email])   
+
+
+@shared_task
+def check_inventory_reorder_levels():
+    """
+    Periodically checks all inventory items for reorder levels and sends notifications if needed.
+    """
+    items = Inventory.objects.filter(quantity_at_hand__lte=F('re_order_level'))
+    User = get_user_model()
+
+    users_to_notify = User.objects.filter(role__in=[User.SYS_ADMIN, User.LAB_TECH])
+
+    if not users_to_notify.exists():
+        print("No sysadmins or lab technicians found to send notifications.")
+        return
+
+    user_emails = list(users_to_notify.values_list('email', flat=True))
+
+    if not items.exists():
+        raise Exception("No items found below reorder levels.")
+
+    channel_layer = get_channel_layer()
+    for item in items:
+        message = f"Low stock alert for {item.item.name}: Only {item.quantity_at_hand} items left."
+
+        try:
+            async_to_sync(channel_layer.group_send)(
+                "inventory_notifications",
+                {
+                    "type": "send_notification",
+                    "message": message,
+                }
+            )
+        except Exception as ws_error:
+            raise Exception(
+                f"Failed to send WebSocket notification for {item.item.name}: {ws_error}"
+            )
+
+        try:
+            send_mail(
+                subject="Inventory Notification",
+                message=message,
+                from_email=config('EMAIL_HOST_USER'),  # Replace with your email
+                recipient_list=user_emails, 
+            )
+        except Exception as e:
+            print(f"Error sending email: {e}")
+
+       
