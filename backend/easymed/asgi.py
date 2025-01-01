@@ -22,12 +22,14 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from django.urls import path
 from channels.auth import AuthMiddlewareStack
 from patient.consumers import NotificationConsumer
+from inventory.consumers import InventoryNotificationConsumer
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter([
             path("ws/doctor_notifications/", NotificationConsumer.as_asgi()),
+            path("ws/inventory_notifications/", InventoryNotificationConsumer.as_asgi()),
         ])
     ),
 })
