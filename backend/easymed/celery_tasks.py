@@ -293,7 +293,7 @@ def check_inventory_reorder_levels():
             send_mail(
                 subject="Inventory Notification",
                 message=message,
-                from_email=config('EMAIL_HOST_USER'),  # Replace with your email
+                from_email=config('EMAIL_HOST_USER'),
                 recipient_list=user_emails, 
             )
         except Exception as e:

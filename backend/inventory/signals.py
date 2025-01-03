@@ -1,6 +1,8 @@
 import logging
 from django.dispatch import receiver
 from django.db import transaction
+from django.db.models import Q
+from django.db.models import F
 from django.db.models.signals import post_save, post_delete
 from django.db.models import Sum
 from django.db import models
@@ -22,25 +24,40 @@ from easymed.celery_tasks import (
 
 logger=logging.getLogger(__name__)
 
-# There's a painful Race Condition whne this is moved to celery
+# There's a painful Race Condition when this is moved to celery
 @receiver(post_save, sender=IncomingItem)
 def update_inventory_after_incomingitem_creation(sender, instance, created, **kwargs):
     if created:
         try:
             with transaction.atomic():
-                inventory, created = Inventory.objects.get_or_create(
-                    item=instance.item
-                )
-                if created:
-                    inventory.quantity_at_hand = instance.quantity
-                else:
+                # Check if there is an existing inventory record for the same item and lot number
+                # TODO: Add another check, expiry date, but could be redundand
+                inventory = Inventory.objects.filter(
+                    item=instance.item,
+                    lot_number=instance.lot_no
+                ).first()
+
+                if inventory:
+                    # Update the existing inventory record
+                    inventory.quantity_at_hand += instance.quantity
                     inventory.purchase_price = instance.purchase_price
                     inventory.sale_price = instance.sale_price
-                    inventory.quantity_at_hand += instance.quantity
-                inventory.save()
+                    inventory.expiry_date = instance.expiry_date
+                    inventory.save()
+                else:
+                    # Create a new inventory record if lot number does not exist
+                    Inventory.objects.create(
+                        item=instance.item,
+                        purchase_price=instance.purchase_price,
+                        sale_price=instance.sale_price,
+                        quantity_at_hand=instance.quantity,
+                        category_one=instance.category_one,
+                        lot_number=instance.lot_no,
+                        expiry_date=instance.expiry_date
+                    )
         except Exception as e:
             # Handle the exception appropriately (e.g., log the error)
-            print(f"Error updating inventory for incoming item: {instance.id}, Error: {e}") 
+            print(f"Error updating inventory for incoming item: {instance.id}, Error: {e}")
 
 
 #signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry
