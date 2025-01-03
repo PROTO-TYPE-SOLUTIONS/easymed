@@ -219,8 +219,6 @@ class GoodsReceiptNote(models.Model):
         return f"{self.note} - {self.grn_number} - {self.date_created}"
     
 
-# 1.Update Inventory 2.Associate PO 3.Update Supplier Invoice
-# update quantity received on purchase order item
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
@@ -248,7 +246,7 @@ class Inventory(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='inventory')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='inventory_item')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed

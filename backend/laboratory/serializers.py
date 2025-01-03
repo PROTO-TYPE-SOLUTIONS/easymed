@@ -79,6 +79,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     reference_values = serializers.SerializerMethodField()
     is_qualitative = serializers.ReadOnlyField(source='test_panel.is_qualitative')
     is_quantitative = serializers.ReadOnlyField(source='test_panel.is_quantitative')
+    eta = serializers.DurationField(source='test_panel.eta', read_only=True)
 
     def get_sale_price(self, instance):
         try:
@@ -146,7 +147,8 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
             'lab_test_request',
             'is_billed',
             'is_quantitative',
-            'is_qualitative'
+            'is_qualitative',
+            'eta',
         ]
 
 
@@ -161,11 +163,11 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
     patient_last_name = serializers.ReadOnlyField(source='patient.second_name')
     test_profile_name = serializers.ReadOnlyField(source='test_profile.name')
     category = serializers.CharField(source='test_profile.category', read_only=True)
+    
 
     class Meta:
         model = LabTestRequest
         fields = "__all__"
-        #Removed id and sample as they were readonly
 
 
 class ProcessTestRequestSerializer(serializers.ModelSerializer):

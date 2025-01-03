@@ -43,6 +43,7 @@ class SupplierSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = '__all__'
 
+
 class SupplierInvoiceSerializer(serializers.ModelSerializer):
     total_amount = serializers.DecimalField(source='amount', read_only=True, max_digits=10, decimal_places=2)
     supplier_name = serializers.CharField(source='supplier.official_name', read_only=True)
