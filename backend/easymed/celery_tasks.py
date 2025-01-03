@@ -32,6 +32,8 @@ from inventory.models import (
 )
 from billing.models import Invoice
 from patient.models import AttendanceProcess
+from authperms.models import Group
+
 
 
 logger = logging.getLogger(__name__)
@@ -259,23 +261,27 @@ def check_inventory_reorder_levels():
     Periodically checks all inventory items for reorder levels and sends notifications if needed.
     """
     items = Inventory.objects.filter(quantity_at_hand__lte=F('re_order_level'))
-    User = get_user_model()
-
-    users_to_notify = User.objects.filter(role__in=[User.SYS_ADMIN, User.LAB_TECH])
-
-    if not users_to_notify.exists():
-        print("No sysadmins or lab technicians found to send notifications.")
+    if not items.exists():
+        print("No items found below reorder levels.")
         return
 
-    user_emails = list(users_to_notify.values_list('email', flat=True))
+    groups_with_notification_permission = Group.objects.filter(
+        permissions__name='CAN_RECEIVE_INVENTORY_NOTIFICATIONS'
+    )
+    if not groups_with_notification_permission.exists():
+        print("No groups found with the required notification permission.")
+        return
 
-    if not items.exists():
-        raise Exception("No items found below reorder levels.")
+    User = get_user_model()
+    users_to_notify = User.objects.filter(group__in=groups_with_notification_permission).distinct()
+    if not users_to_notify.exists():
+        print("No users found in groups with notification permissions.")
+        return
+    user_emails = list(users_to_notify.values_list('email', flat=True))
 
     channel_layer = get_channel_layer()
     for item in items:
         message = f"Low stock alert for {item.item.name}: Only {item.quantity_at_hand} items left."
-
         try:
             async_to_sync(channel_layer.group_send)(
                 "inventory_notifications",
@@ -293,10 +299,8 @@ def check_inventory_reorder_levels():
             send_mail(
                 subject="Inventory Notification",
                 message=message,
-                from_email=config('EMAIL_HOST_USER'),  # Replace with your email
-                recipient_list=user_emails, 
+                from_email=settings.EMAIL_HOST_USER, 
+                recipient_list=user_emails,
             )
-        except Exception as e:
-            print(f"Error sending email: {e}")
-
-       
+        except Exception as email_error:
+            print(f"Error sending email for {item.item.name}: {email_error}")
