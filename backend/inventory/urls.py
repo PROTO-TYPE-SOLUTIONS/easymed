@@ -24,6 +24,7 @@ from .views import (
     download_requisition_pdf,
     download_purchaseorder_pdf,
     download_goods_receipt_note_pdf,
+    download_supplier_invoice_pdf,
 
 )
 
@@ -55,12 +56,16 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(requisition_url.urls)),
     path('', include(purchase_orders_url.urls)),
-    path('requisition_note_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
+
+    path('inventory_filter/', InventoryFilterView.as_view(), name='inventory-filter'),
     path('purchase-orders/all_purchase_orders/', PurchaseOrderViewSet.as_view({'get': 'all_purchase_orders'}), name='all_purchase_orders'),
     path('all_items', RequisitionItemViewSet.as_view({'get': 'all_items'}), name='all_items'),
+
     path('purchase_order_pdf/<int:purchaseorder_id>/', download_purchaseorder_pdf, name='download_purchaseorder_pdf'),
     path('receipt_note_pdf/<int:purchase_order_id>/', download_goods_receipt_note_pdf, name='incoming_items_pdf'),
-    path('inventory_filter/', InventoryFilterView.as_view(), name='inventory-filter'),
+    path('requisition_note_pdf/<int:requisition_id>/', download_requisition_pdf, name='download__requisition_pdf'),
+    path('supplier_invoice_pdf/<int:supplier_id>/', download_supplier_invoice_pdf, name='download_supplier_invoice_pdf'),
+    
 ]
 
 if settings.DEBUG:
