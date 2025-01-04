@@ -580,9 +580,12 @@ class IncomingItemSerializer(serializers.ModelSerializer):
 class InventorySerializer(serializers.ModelSerializer):
     insurance_sale_prices = serializers.SerializerMethodField()
     item_name = serializers.ReadOnlyField(source='item.name')
+    total_quantity = serializers.SerializerMethodField()
     class Meta:
         model = Inventory
-        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_at_hand', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 
+                 'quantity_at_hand', 'lot_number', 'expiry_date', 'date_created', 
+                 'category_one', 'insurance_sale_prices', 'total_quantity']
 
     def get_insurance_sale_prices(self, obj):
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
@@ -597,6 +600,11 @@ class InventorySerializer(serializers.ModelSerializer):
             insurance_prices.append(insurance_price)
         return insurance_prices
 
+    def get_total_quantity(self, obj):
+        '''Get total quantity across all lots for this item'''
+        total = Inventory.objects.filter(item=obj.item).aggregate(
+            total_qty=Sum('quantity_at_hand'))['total_qty'] or 0
+        return total
 
 class DepartmentInventorySerializer(serializers.ModelSerializer):
     class Meta:
