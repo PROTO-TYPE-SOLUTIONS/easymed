@@ -15,8 +15,6 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
-
-
 from django.db import transaction
 from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -33,11 +31,9 @@ from inventory.models import (
 from billing.models import Invoice
 from patient.models import AttendanceProcess
 
-
 logger = logging.getLogger(__name__)
 
 
-"""Creates a new Inventory record or updates an existing one based on the IncomingItem."""
 # Helper function to get inventory safely
 def get_inventory_or_error(item):
     try:
@@ -50,29 +46,51 @@ def get_inventory_or_error(item):
 def update_stock_quantity_if_stock_is_available(instance, deductions):
     """
     Deducts stock quantity based on the billed quantity and validates stock levels.
+    Prioritizes inventory records with the nearest expiry date.
     """
     try:
-        inventory_item = get_inventory_or_error(instance.item)
-        category_field = (
-            "quantity_in_stock" if instance.item.category == "Drug" else "quantity_at_hand"
-        )
-        current_quantity = getattr(inventory_item, category_field)
-        remainder_quantity = current_quantity - deductions
+        # Get inventory records for the item, ordered by expiry date (nearest first)
+        inventory_records = Inventory.objects.filter(item=instance.item).order_by('expiry_date')
 
-        if remainder_quantity < 0:
-            raise ValidationError(f"Not enough stock available for {instance.item.name}.")
+        if not inventory_records.exists():
+            raise ValidationError(f"No inventory record found for item: {instance.item.name}.")
 
-        setattr(inventory_item, category_field, remainder_quantity)
+        remaining_deduction = deductions
+
 
         with transaction.atomic():
-            inventory_item.save()
-            logger.info(
-                "Stock updated successfully for item: %s, Remaining: %d",
-                instance.item.name,
-                remainder_quantity,
-            )
-    except ObjectDoesNotExist:
-        raise ValidationError(f"No inventory record found for item: {instance.item.name}.")
+            # Iterate through the inventory records.
+            # Deduct from the current record until the required quantity is fulfilled.
+            # If a record’s quantity_at_hand is insufficient, it is set to 0, and the deduction continues with the next record.
+            for inventory_record in inventory_records:
+                if remaining_deduction <= 0:
+                    break
+
+                if inventory_record.quantity_at_hand >= remaining_deduction:
+                    # Deduct from the current record
+                    inventory_record.quantity_at_hand -= remaining_deduction
+                    inventory_record.save()
+                    logger.info(
+                        "Stock updated successfully for item: %s, Lot: %s, Remaining: %d",
+                        instance.item.name,
+                        inventory_record.lot_number,
+                        inventory_record.quantity_at_hand,
+                    )
+                    remaining_deduction = 0
+                else:
+                    # Use up the current record's stock and move to the next
+                    remaining_deduction -= inventory_record.quantity_at_hand
+                    inventory_record.quantity_at_hand = 0
+                    inventory_record.save()
+                    logger.info(
+                        "Stock exhausted for item: %s, Lot: %s",
+                        instance.item.name,
+                        inventory_record.lot_number,
+                    )
+
+            if remaining_deduction > 0:
+                raise ValidationError(f"Not enough stock available for {instance.item.name}.")
+
     except ValidationError as e:
         logger.error("Stock update failed: %s", e)
         raise
