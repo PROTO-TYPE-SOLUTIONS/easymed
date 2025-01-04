@@ -10,6 +10,11 @@ import logging
 
 
 class LabEquipment(models.Model):
+    COM_MODE_CHOICE = (
+        ("serial", "Serial"),
+        ("tcp", "Parallel"),
+        ("network_directory", "Network Dorectory"),
+    )
     FORMAT_CHOICE = (
         ("hl7", "HL7"),
         ("astm", "ASTM"),
@@ -18,6 +23,7 @@ class LabEquipment(models.Model):
     ip_address = models.GenericIPAddressField(null=True) 
     port = models.CharField(max_length=20, null=True)
     data_format = models.CharField(max_length=10, choices=FORMAT_CHOICE, default="hl7")
+    com_mode = models.CharField(max_length=10, choices=COM_MODE_CHOICE, default="tcp")
 
     def __str__(self):
         return self.name
