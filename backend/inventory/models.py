@@ -183,6 +183,7 @@ class PurchaseOrderItem(models.Model):
 
 # TODO: amount should be captured as a sum total of the 
 # incoming items associated with this invoice
+# update_supplier_invoice_amount() signal will be called
 class SupplierInvoice(models.Model):
     STATUS=[
         ('pending', 'Pending'),
@@ -219,6 +220,7 @@ class GoodsReceiptNote(models.Model):
         return f"{self.note} - {self.grn_number} - {self.date_created}"
     
 
+# update_supplier_invoice_amount() signal will be called on create
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),

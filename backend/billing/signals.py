@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.apps import apps
 from django.core.exceptions import ValidationError
 
-from utils import check_quantity_availability, update_service_billed_status
+from .utils import check_quantity_availability, update_service_billed_status
 from inventory.models import Inventory
 from .models import Invoice, InvoiceItem
 from easymed.celery_tasks import (
