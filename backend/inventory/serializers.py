@@ -19,7 +19,10 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
-    GoodsReceiptNote
+    GoodsReceiptNote,
+    Quotation,
+    QuotationItem,
+    QuotationCustomer
 )
 
 from .validators import (
@@ -39,6 +42,7 @@ class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = '__all__'
+
 
 class SupplierInvoiceSerializer(serializers.ModelSerializer):
     total_amount = serializers.DecimalField(source='amount', read_only=True, max_digits=10, decimal_places=2)
@@ -330,6 +334,7 @@ class RequisitionListSerializer(serializers.ModelSerializer):
     def get_total_amount(self, obj):
         return sum(item.get('requested_amount') for item in RequisitionItemListUpdateSerializer(obj.items, many=True).data)
 
+
 class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     requisition_number = serializers.CharField(source='requisition_item.requisition.requisition_number', read_only=True)
     requisition_date_created = serializers.DateTimeField(source='requisition_item.requisition.date_created', read_only=True)
@@ -611,4 +616,16 @@ class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
 class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodsReceiptNote
+        fields = '__all__'
+
+
+class QuotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quotation
+        fields = '__all__'
+
+
+class QuotationItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuotationItem
         fields = '__all__'

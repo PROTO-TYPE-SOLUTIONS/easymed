@@ -14,13 +14,17 @@ from .views import (
     IncomingItemViewSet,
     RequisitionItemViewSet,
     RequisitionViewSet,
-    download_requisition_pdf,
-    download_purchaseorder_pdf,
-    download_goods_receipt_note_pdf,
     InventoryInsuranceSalepriceViewSet,
     IncomingItemViewSet,
     InventoryFilterView,
-    GoodsReceiptNoteViewSet
+    GoodsReceiptNoteViewSet,
+    QuotationViewSet,
+    QuotationItemViewSet,
+
+    download_requisition_pdf,
+    download_purchaseorder_pdf,
+    download_goods_receipt_note_pdf,
+
 )
 
 router = DefaultRouter()
@@ -35,6 +39,8 @@ router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-ord
 router.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
 router.register(r'supplier-invoice', SupplierInvoiceViewSet, basename='supplier-invoice')
 router.register(r'goods-receipt-note', GoodsReceiptNoteViewSet, basename='goods-receipt-note')
+router.register(r'quotation', QuotationViewSet, basename='quotation')
+router.register(r'quotationitem', QuotationItemViewSet, basename='quotationitems')
 
 requisition_url = NestedDefaultRouter(router, 'requisition', lookup='requisition')
 requisition_url.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')

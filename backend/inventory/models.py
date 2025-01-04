@@ -219,8 +219,6 @@ class GoodsReceiptNote(models.Model):
         return f"{self.note} - {self.grn_number} - {self.date_created}"
     
 
-# 1.Update Inventory 2.Associate PO 3.Update Supplier Invoice
-# update quantity received on purchase order item
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
@@ -248,7 +246,7 @@ class Inventory(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='inventory')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='inventory_item')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
@@ -290,8 +288,60 @@ class DepartmentInventory(models.Model):
         return str(self.item)
 
 
+class QuotationCustomer(models.Model):
+    customer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=255, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    contact_person = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.email} - {self.phone} - {self.address}"
 
 
+class Quotation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    quotation_number = models.CharField(max_length=50, unique=True, editable=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='quotations', null=True, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='quotation_created_by'
+        )
+    approved_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='quotation_approved_by'
+        )
+    customer = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='customer'
+        )
+    customer2 = models.ForeignKey(QuotationCustomer, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.quotation_number} - {self.date_created}"
+
+
+class QuotationItem(models.Model):
+    quantity = models.IntegerField()    
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='items')
+    # by default should pick price from Inventory
+    quotation_price = models.DecimalField(max_digits=10, decimal_places=2) 
+
+    def __str__(self):
+        return f"{self.item.name} - {self.quantity}"
 
 
 
