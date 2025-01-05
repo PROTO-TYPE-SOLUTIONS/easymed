@@ -183,6 +183,7 @@ class PurchaseOrderItem(models.Model):
 
 # TODO: amount should be captured as a sum total of the 
 # incoming items associated with this invoice
+# update_supplier_invoice_amount() signal will be called
 class SupplierInvoice(models.Model):
     STATUS=[
         ('pending', 'Pending'),
@@ -219,6 +220,7 @@ class GoodsReceiptNote(models.Model):
         return f"{self.note} - {self.grn_number} - {self.date_created}"
     
 
+# update_supplier_invoice_amount() signal will be called on create
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
@@ -246,7 +248,7 @@ class Inventory(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='inventory_item')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
@@ -265,7 +267,31 @@ class Inventory(models.Model):
     
     class Meta:
         verbose_name_plural = 'Inventory'
+
+
+# Any record in the Inventory that has zero value in the 
+# quantity_at_hand field should be moved here
+class InventoryArchive(models.Model):
+    CATEGORY_ONE_CHOICES = [
+        ('Resale', 'resale'),
+        ('Internal', 'internal'),
+    ]
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='archived_inventory_items')
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
+    quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
+    re_order_level= models.PositiveIntegerField(default=5)
+    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
+    lot_number= models.CharField(max_length=255, null=True, blank=True)
+    expiry_date= models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.item.name} - {self.id} - {self.date_created}"
     
+    class Meta:
+        verbose_name_plural = 'Inventory Archive'
+
 
 class InventoryInsuranceSaleprice(models.Model):
     inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
