@@ -205,7 +205,11 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
         return None  
 
     def get_quantity_at_hand(self, obj):
-        return obj.item.inventory.quantity_at_hand
+        try:
+            inventory = obj.item.active_inventory_items.first()
+            return inventory.quantity_at_hand if inventory else 0
+        except Exception as e:
+            return 0
 
     def get_approved_by(self, obj):
         if obj.requisition.approved_by:  
