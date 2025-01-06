@@ -336,8 +336,13 @@ class RequisitionListSerializer(serializers.ModelSerializer):
         return len(distinct_items)
     
     def get_total_amount(self, obj):
-        return sum(item.get('requested_amount') for item in RequisitionItemListUpdateSerializer(obj.items, many=True).data)
-
+        total = 0
+        items_data = RequisitionItemListUpdateSerializer(obj.items.all(), many=True).data
+        for item in items_data:
+            amount = item.get('requested_amount')
+            if amount is not None:
+                total += float(amount)
+        return total
 
 class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     requisition_number = serializers.CharField(source='requisition_item.requisition.requisition_number', read_only=True)
@@ -387,35 +392,35 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     def get_quantity_at_hand(self, obj):
         try:
-            inventory = Inventory.objects.filter(item=obj.requisition_item.item).latest('date_created')
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return inventory.quantity_at_hand
         except (Inventory.DoesNotExist, Exception) as e:
             return 0
 
     def get_buying_price(self, obj):
         try:
-            inventory = Inventory.objects.filter(item=obj.requisition_item.item).latest('date_created')
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return inventory.purchase_price
         except (Inventory.DoesNotExist, Exception) as e:
             return 0
 
     def get_selling_price(self, obj):
         try:
-            inventory = Inventory.objects.filter(item=obj.requisition_item.item).latest('date_created')
+            inventory = Inventory.objects.get(item=obj.requisition_item.item)
             return inventory.sale_price
         except (Inventory.DoesNotExist, Exception) as e:
             return 0
 
     def get_requested_amount(self, obj):
         try:
-            inventory = Inventory.objects.filter(item=obj.requisition_item.item).latest('date_created')
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return float(obj.requisition_item.quantity_requested * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
 
     def get_total_buying_amount(self, obj):
         try:
-            inventory = Inventory.objects.filter(item=obj.requisition_item.item).latest('date_created')
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return float(obj.requisition_item.quantity_approved * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -447,7 +452,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     def get_total_buying_amount(self, obj):
         try:
-            inventory = Inventory.objects.filter(item=obj.requisition_item.item).latest('date_created')
+            inventory = Inventory.objects.get(item=obj.requisition_item.item)
             return float(obj.quantity_ordered * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -542,8 +547,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         total = 0
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
-                # Get the latest inventory record for this item
-                inventory = Inventory.objects.filter(item=item.requisition_item.item).latest('date_created')
+                inventory = item.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
                 if inventory:
                     total += item.requisition_item.quantity_approved * inventory.purchase_price
             except (Inventory.DoesNotExist, Exception) as e:
@@ -554,7 +558,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         total_vat = 0
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
-                inventory = Inventory.objects.filter(item=item.requisition_item.item).latest('date_created')
+                inventory = item.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
                 amount = item.requisition_item.quantity_approved * inventory.purchase_price
                 vat = amount * (item.requisition_item.item.vat_rate / 100)
                 total_vat += vat
