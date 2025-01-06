@@ -336,8 +336,13 @@ class RequisitionListSerializer(serializers.ModelSerializer):
         return len(distinct_items)
     
     def get_total_amount(self, obj):
-        return sum(item.get('requested_amount') for item in RequisitionItemListUpdateSerializer(obj.items, many=True).data)
-
+        total = 0
+        items_data = RequisitionItemListUpdateSerializer(obj.items.all(), many=True).data
+        for item in items_data:
+            amount = item.get('requested_amount')
+            if amount is not None:
+                total += float(amount)
+        return total
 
 class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     requisition_number = serializers.CharField(source='requisition_item.requisition.requisition_number', read_only=True)
@@ -387,9 +392,9 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     def get_quantity_at_hand(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return inventory.quantity_at_hand
-        except Inventory.DoesNotExist:
+            inventory = obj.requisition_item.item.active_inventory_items.first()
+            return inventory.quantity_at_hand if inventory else 0
+        except Exception as e:
             return 0
 
     def get_buying_price(self, obj):

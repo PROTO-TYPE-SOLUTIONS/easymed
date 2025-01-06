@@ -15,12 +15,6 @@ from .models import (
     Inventory,
  
 )
-from easymed.celery_tasks import (
-    generate_requisition_pdf,
-    generate_purchase_order_pdf,
-    create_purchase_order,
-
-)
 
 logger=logging.getLogger(__name__)
 
@@ -38,14 +32,12 @@ def update_inventory_after_incomingitem_creation(sender, instance, created, **kw
                 ).first()
 
                 if inventory:
-                    # Update the existing inventory record
                     inventory.quantity_at_hand += instance.quantity
                     inventory.purchase_price = instance.purchase_price
                     inventory.sale_price = instance.sale_price
                     inventory.expiry_date = instance.expiry_date
                     inventory.save()
                 else:
-                    # Create a new inventory record if lot number does not exist
                     Inventory.objects.create(
                         item=instance.item,
                         purchase_price=instance.purchase_price,
@@ -58,21 +50,6 @@ def update_inventory_after_incomingitem_creation(sender, instance, created, **kw
         except Exception as e:
             # Handle the exception appropriately (e.g., log the error)
             print(f"Error updating inventory for incoming item: {instance.id}, Error: {e}")
-
-
-#signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry
-@receiver(post_save, sender=Requisition)
-def generate_requisition_note(sender, instance, created, **kwargs):
-    if created:
-        generate_requisition_pdf.delay(instance.pk)
-        create_purchase_order.delay(instance.pk)
-
-
-#signal to fire up celery task to  to generated pdf once PurchaseOrder table gets a new entry
-@receiver(post_save, sender=PurchaseOrder)
-def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
-    if created:
-        generate_purchase_order_pdf.delay(instance.pk)
 
 
 @receiver([post_save, post_delete], sender=IncomingItem)
@@ -98,21 +75,6 @@ def update_supplier_invoice_amount(sender, instance, **kwargs):
                 supplier_invoice.save()
         except Exception as e:
             print(f"Error updating supplier invoice amount: {e}")
-
-
-'''signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry'''
-@receiver(post_save, sender=Requisition)
-def generate_requisition_note(sender, instance, created, **kwargs):
-    if created:
-        generate_requisition_pdf.delay(instance.pk)
-        create_purchase_order.delay(instance.pk)
-
-
-'''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''
-@receiver(post_save, sender=PurchaseOrder)
-def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
-    if created:
-        generate_purchase_order_pdf.delay(instance.pk)
 
 
 @receiver([post_save, post_delete], sender=IncomingItem)
@@ -190,20 +152,3 @@ def update_purchase_order_status(purchase_order):
 
     purchase_order.save()
     print(f'Status set to {purchase_order.status}')
-
-
-
-
-'''signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry'''
-@receiver(post_save, sender=Requisition)
-def generate_requisition_note(sender, instance, created, **kwargs):
-    if created:
-        generate_requisition_pdf.delay(instance.pk)
-        create_purchase_order.delay(instance.pk)
-
-
-'''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''
-@receiver(post_save, sender=PurchaseOrder)
-def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
-    if created:
-        generate_purchase_order_pdf.delay(instance.pk)
