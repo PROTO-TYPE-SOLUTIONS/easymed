@@ -66,9 +66,7 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
         model = LabTestProfile
         fields = '__all__'        
 
-'''
-TODO: 
-'''
+
 class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     test_panel_name = serializers.ReadOnlyField(source='test_panel.name')
     item = serializers.CharField(source='test_panel.item.id', read_only=True)
@@ -83,7 +81,7 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
 
     def get_sale_price(self, instance):
         try:
-            inventory = instance.test_panel.item.active_inventory_items.first()  # Use the correct related_name
+            inventory = instance.test_panel.item.active_inventory_items.first()
             if inventory:
                 return inventory.sale_price
             return None  # Handle case where no inventory is found

@@ -4,7 +4,7 @@ from .models import (
     Requisition, IncomingItem, DepartmentInventory,
     Department, InventoryInsuranceSaleprice,
     GoodsReceiptNote, PurchaseOrderItem, Quotation, QuotationItem,
-    QuotationCustomer
+    QuotationCustomer, RequisitionItem
 )
 
 admin.site.register(PurchaseOrder)
@@ -22,5 +22,5 @@ admin.site.register(GoodsReceiptNote)
 admin.site.register(Quotation)
 admin.site.register(QuotationItem)
 admin.site.register(QuotationCustomer)
-
+admin.site.register(RequisitionItem)
 
