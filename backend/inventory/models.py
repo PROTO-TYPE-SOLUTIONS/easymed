@@ -248,7 +248,7 @@ class Inventory(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='inventory_item')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
@@ -276,7 +276,7 @@ class InventoryArchive(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='inventory_item')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='archived_inventory_items')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
@@ -290,8 +290,7 @@ class InventoryArchive(models.Model):
         return f"{self.item.name} - {self.id} - {self.date_created}"
     
     class Meta:
-        verbose_name_plural = 'Inventory'
-
+        verbose_name_plural = 'Inventory Archive'
 
 
 class InventoryInsuranceSaleprice(models.Model):
