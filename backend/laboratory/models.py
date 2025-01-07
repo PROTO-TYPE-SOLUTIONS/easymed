@@ -69,6 +69,7 @@ class LabTestPanel(models.Model):
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=10, choices=UNITS_OPTIONS, default='mL')
+    # TODO: To get back to. Change to Inventory from 'inventory.Item'
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)

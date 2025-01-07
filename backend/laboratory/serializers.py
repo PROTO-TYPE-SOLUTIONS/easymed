@@ -83,11 +83,13 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
 
     def get_sale_price(self, instance):
         try:
-            inventory = instance.test_panel.item.inventory
-            return inventory.sale_price
+            inventory = instance.test_panel.item.active_inventory_items.first()  # Use the correct related_name
+            if inventory:
+                return inventory.sale_price
+            return None  # Handle case where no inventory is found
         except Inventory.DoesNotExist:
             raise NotFound('Inventory record not found for this item.')
-    
+        
     def get_patient_name(self, instance):
         if instance.patient_sample and instance.patient_sample.process:
             patient = instance.patient_sample.process.attendanceprocess.patient
