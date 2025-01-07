@@ -150,17 +150,19 @@ class PurchaseOrder(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
 
     def save(self, *args, **kwargs):
-        '''Generate purchase order number'''
-        today = timezone.now()
-        year = today.year % 100
-        month = today.month
-        day = today.day
-        random_code = random.randint(1000, 9999)
-        self.PO_number= f"PO/{year}/{month:02d}/{day:02d}/{random_code}"
+        """Generate purchase order number only on creation."""
+        if not self.PO_number:  # Only generate if PO_number is empty
+            today = timezone.now()
+            year = today.year % 100
+            month = today.month
+            day = today.day
+            random_code = random.randint(1000, 9999)
+            self.PO_number = f"PO/{year}/{month:02d}/{day:02d}/{random_code}"
+        
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Purchase Order by {self.ordered_by} - Status: {self.PO_number}"
+        return f"Purchase Order by {self.ordered_by} - PO Number: {self.PO_number} - Status {self.status}"
 
 
 class PurchaseOrderItem(models.Model):
