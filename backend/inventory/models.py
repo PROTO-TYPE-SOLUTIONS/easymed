@@ -308,12 +308,23 @@ class InventoryInsuranceSaleprice(models.Model):
     
 
 class DepartmentInventory(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_at_hand = models.PositiveIntegerField()
+    lot_number = models.CharField(max_length=100)
+    expiry_date = models.DateField()
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    main_inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True,
+                                       help_text="Main inventory record this was transferred from")
+
+    class Meta:
+        verbose_name_plural = "Department Inventories"
+        ordering = ['expiry_date', 'lot_number']  # FIFO ordering
+
     def __str__(self):
-        return str(self.item)
+        return f"{self.department.name} - {self.item.name} ({self.quantity_at_hand}) - Lot: {self.lot_number}"
 
 
 class QuotationCustomer(models.Model):
