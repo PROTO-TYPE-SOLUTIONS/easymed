@@ -173,21 +173,21 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
 
     def get_buying_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
     def get_selling_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.sale_price
         except Inventory.DoesNotExist:
             return None
 
     def get_requested_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return float(obj.quantity_requested * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -452,7 +452,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     def get_total_buying_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            inventory = Inventory.objects.filter(item=obj.requisition_item.item).order_by('expiry_date').first()
             return float(obj.quantity_ordered * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -612,7 +612,7 @@ class InventorySerializer(serializers.ModelSerializer):
 
     def get_total_quantity(self, obj):
         '''Get total quantity across all lots for this item'''
-        total = Inventory.objects.filter(item=obj.item).aggregate(
+        total = Inventory.objects.filter(item=obj.item).order_by('expiry_date').aggregate(
             total_qty=Sum('quantity_at_hand'))['total_qty'] or 0
         return total
 
