@@ -226,6 +226,11 @@ CELERY_BEAT_SCHEDULE = {
     "task": "easymed.celery_tasks.check_inventory_reorder_levels",            
     "schedule": crontab(minute='*/600'),  
     },
+
+    "inventory_garbage_collection": {
+        "task": "easymed.celery_tasks.inventory_garbage_collection",            
+        "schedule": crontab(minute='*/5'),  
+    },
 }
 
 
