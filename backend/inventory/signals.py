@@ -31,7 +31,7 @@ def update_inventory_after_incomingitem_creation(sender, instance, created, **kw
         try:
             with transaction.atomic():
                 # Check if there is an existing inventory record for the same item and lot number
-                # TODO: Add another check, expiry date, but could be redundand
+                # TODO: Add another check, expiry date, but could be redundant
                 inventory = Inventory.objects.filter(
                     item=instance.item,
                     lot_number=instance.lot_no
@@ -168,13 +168,14 @@ def update_purchase_order_item_quantity_received_on_delete(sender, instance, **k
 
             update_purchase_order_status(purchase_order_item.purchase_order)
 
-'''
-Determine the status based on the aggregate state:
-If all items are fully received, set the status to COMPLETED.
-If none are received, set the status to PENDING.
-Otherwise, set the status to PARTIAL.
-'''
+
 def update_purchase_order_status(purchase_order):
+    '''
+    Determine the status based on the aggregate state:
+        - If all items are fully received, set the status to COMPLETED.
+        - If none are received, set the status to PENDING.
+        - Otherwise, set the status to PARTIAL.
+    '''
     items = purchase_order.po_items.all()
     
     all_completed = True
