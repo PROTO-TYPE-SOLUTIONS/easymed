@@ -205,6 +205,13 @@ class InventoryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['item',]
     filterset_class = InventoryFilter
 
+    def get_queryset(self):
+        """
+        Returns only inventory items with quantity greater than 0.
+        Zero-quantity items are periodically moved to archive by the garbage collection task.
+        """
+        return super().get_queryset().filter(quantity_at_hand__gt=0).select_related('item')
+
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()

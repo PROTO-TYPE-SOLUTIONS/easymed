@@ -3,13 +3,14 @@ import logging
 # import tempfile
 from celery import shared_task, chain
 from django.db.models.signals import post_save
-# from django.dispatch import receiver
-# from django.template.loader import render_to_string
-# from weasyprint import HTML
-# from django.apps import apps
+from django.dispatch import receiver
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.apps import apps
 from django.conf import settings
 from decouple import config
 from django.template.loader import get_template
+from django.core.mail import EmailMultiAlternatives
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.core.mail import send_mail
@@ -25,7 +26,10 @@ from inventory.models import (
     PurchaseOrderItem,
     Requisition,
     RequisitionItem,
+    InventoryArchive,
 )
+from billing.models import Invoice
+from patient.models import AttendanceProcess
 from authperms.models import Group
 
 
@@ -149,39 +153,80 @@ def check_inventory_reorder_levels():
 
 
 @shared_task
-def create_purchase_order_task(requisition_id):
+def inventory_garbage_collection():
     """
-    Task to create a Purchase Order and generate a PDF.
+    Archives inventory records with zero quantity and removes them from the active inventory.
+    This helps maintain database efficiency while preserving historical data.
     """
+    logger.info("Starting inventory garbage collection")
+    
     try:
-        # Retrieve the requisition
-        requisition = Requisition.objects.get(id=requisition_id)
-        requisition_items = RequisitionItem.objects.filter(requisition=requisition)
+        try:
+            current_archive_count = InventoryArchive.objects.count()
+            logger.info(f"Current archive count before task: {current_archive_count}")
+        except Exception as e:
+            logger.error(f"Error accessing InventoryArchive table: {str(e)}")
+            raise
         
-        # Create a new purchase order linked to the requisition
-        purchase_order = PurchaseOrder.objects.create(
-            requested_by=requisition.requested_by,
-            requisition=requisition,
-            status='PENDING'
-        )
-        for item in requisition_items:
-            PurchaseOrderItem.objects.create(
-                item=item.item,
-                quantity_purchased=item.quantity_requested,
-                supplier=item.supplier,
-                purchase_order=purchase_order
-            )
-        
-
-        # # Generate PDF for the purchase order
-        # generate_purchase_order_pdf(purchase_order.id)  # Call the PDF generation function with the purchase_order
-    except Requisition.DoesNotExist:
-        print(f"Requisition with id {requisition_id} does not exist.")
-       
-        
-    except Requisition.DoesNotExist:
-        # Handle the case where the requisition does not exist
-        raise ValueError(f"Requisition with ID {requisition_id} does not exist.")
+        with transaction.atomic():
+            # Find records with zero quantity
+            zero_quantity_items = list(Inventory.objects.filter(quantity_at_hand=0))
+            count = len(zero_quantity_items)
+            
+            logger.info(f"Found {count} items with zero quantity")
+            
+            if count == 0:
+                logger.info("No zero-quantity items found to archive")
+                return "No items to archive"
+            
+            # Log the items that will be archived
+            for item in zero_quantity_items:
+                logger.info(f"Preparing to archive: Item={item.item.name}, Lot={item.lot_number}")
+            
+            # Create archive records
+            archive_objects = []
+            for item in zero_quantity_items:
+                archive = InventoryArchive(
+                    item=item.item,
+                    purchase_price=item.purchase_price,
+                    sale_price=item.sale_price,
+                    quantity_at_hand=item.quantity_at_hand,
+                    re_order_level=item.re_order_level,
+                    date_created=item.date_created,  # Original creation date
+                    category_one=item.category_one,
+                    lot_number=item.lot_number,
+                    expiry_date=item.expiry_date,
+                )
+                try:
+                    # Try to save each archive individually to catch any validation errors
+                    archive.save()
+                    archive_objects.append(archive)
+                except Exception as e:
+                    raise Exception(f"Error archiving item {item.item.name}: {str(e)}")
+            
+            # Verify archives were created
+            if len(archive_objects) != count:
+                raise Exception(f"Expected to create {count} archives but only created {len(archive_objects)}")
+            
+            # Delete the zero quantity records
+            for item in zero_quantity_items:
+                try:
+                    item.delete()
+                    logger.info(f"Deleted item {item.item.name} with lot {item.lot_number}")
+                except Exception as e:
+                    logger.error(f"Error deleting item {item.item.name}: {str(e)}")
+                    raise
+            
+            # Verify final archive count
+            final_archive_count = InventoryArchive.objects.count()
+            logger.info(f"Final archive count after task: {final_archive_count}")
+            if final_archive_count != current_archive_count + count:
+                raise Exception(f"Archive count mismatch. Expected {current_archive_count + count} but got {final_archive_count}")
+            
+            logger.info(f"Successfully archived and deleted {count} zero-quantity items")
+            return f"{count} items archived and deleted"
+            
     except Exception as e:
-        # Handle other exceptions that may arise
-        raise ValueError(f"An error occurred while creating the purchase order: {str(e)}")
+        logger.error(f"Error during inventory garbage collection: {str(e)}")
+        logger.exception("Full traceback:")
+        raise
