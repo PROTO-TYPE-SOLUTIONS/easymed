@@ -10,18 +10,10 @@ from django.db import models
 
 from .utils import update_purchase_order_status
 from .models import (
-    Requisition,
-    PurchaseOrder,
     PurchaseOrderItem,
     IncomingItem,
     Inventory,
  
-)
-from easymed.celery_tasks import (
-    generate_requisition_pdf,
-    generate_purchase_order_pdf,
-    create_purchase_order,
-
 )
 
 logger=logging.getLogger(__name__)
@@ -62,21 +54,6 @@ def update_inventory_after_incomingitem_creation(sender, instance, created, **kw
             print(f"Error updating inventory for incoming item: {instance.id}, Error: {e}")
 
 
-#signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry
-@receiver(post_save, sender=Requisition)
-def generate_requisition_note(sender, instance, created, **kwargs):
-    if created:
-        generate_requisition_pdf.delay(instance.pk)
-        create_purchase_order.delay(instance.pk)
-
-
-#signal to fire up celery task to  to generated pdf once PurchaseOrder table gets a new entry
-@receiver(post_save, sender=PurchaseOrder)
-def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
-    if created:
-        generate_purchase_order_pdf.delay(instance.pk)
-
-
 @receiver([post_save, post_delete], sender=IncomingItem)
 def update_supplier_invoice_amount(sender, instance, **kwargs):
     """
@@ -100,21 +77,6 @@ def update_supplier_invoice_amount(sender, instance, **kwargs):
                 supplier_invoice.save()
         except Exception as e:
             print(f"Error updating supplier invoice amount: {e}")
-
-
-'''signal to fire up celery task to  to generated pdf once Requisition tale gets a new entry'''
-@receiver(post_save, sender=Requisition)
-def generate_requisition_note(sender, instance, created, **kwargs):
-    if created:
-        generate_requisition_pdf.delay(instance.pk)
-        create_purchase_order.delay(instance.pk)
-
-
-'''signal to fire up celery task to  to generated pdf once PurchaseOrder tale gets a new entry'''
-@receiver(post_save, sender=PurchaseOrder)
-def generate_purchaseorder_pdf(sender, instance, created, **kwargs):
-    if created:
-        generate_purchase_order_pdf.delay(instance.pk)
 
 
 @receiver([post_save, post_delete], sender=IncomingItem)

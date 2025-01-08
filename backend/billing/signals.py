@@ -7,17 +7,16 @@ from .utils import check_quantity_availability, update_service_billed_status
 from inventory.models import Inventory
 from .models import Invoice, InvoiceItem
 from easymed.celery_tasks import (
-    generate_invoice_pdf,
     send_invoice_created_email,
     send_invoice_updated_email,
 )
 
 
-'''signal to fire up celery task to  to generated pdf once Invoice tale gets a new entry'''
-@receiver(post_save, sender=Invoice)
-def generate_invoice(sender, instance, created, **kwargs):
-    if created:
-        generate_invoice_pdf.delay(instance.pk,)
+# '''signal to fire up celery task to  to generated pdf once Invoice tale gets a new entry'''
+# @receiver(post_save, sender=Invoice)
+# def generate_invoice(sender, instance, created, **kwargs):
+#     if created:
+#         generate_invoice_pdf.delay(instance.pk,)
 
 
 ''''

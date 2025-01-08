@@ -10,19 +10,16 @@ from .models import (
     AttendanceProcess
 )
 from inventory.models import Inventory
-from easymed.celery_tasks import (
-    generate_prescription_pdf,
-)
 
 
 logger = logging.getLogger(__name__)
 
 
-'''signal to fire up celery task to  to generated pdf once Prescription tale gets a new entry'''
-@receiver(post_save, sender=Prescription)
-def generate_precription(sender, instance, created, **kwargs):
-    if created:
-        generate_prescription_pdf.delay(instance.pk)
+# '''signal to fire up celery task to  to generated pdf once Prescription tale gets a new entry'''
+# @receiver(post_save, sender=Prescription)
+# def generate_precription(sender, instance, created, **kwargs):
+#     if created:
+#         generate_prescription_pdf.delay(instance.pk)
 
 
 @receiver(pre_save, sender=AttendanceProcess)
