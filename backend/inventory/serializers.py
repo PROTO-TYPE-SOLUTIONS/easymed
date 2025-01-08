@@ -357,7 +357,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     quantity_at_hand = serializers.SerializerMethodField()
     quantity_requested = serializers.IntegerField(source='requisition_item.quantity_requested', read_only=True)
     quantity_approved = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
-    quantity_ordered = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
+    quantity_ordered = serializers.IntegerField(read_only=True)  
     preferred_supplier = serializers.CharField(source='requisition_item.preferred_supplier.official_name', read_only=True)
     buying_price = serializers.SerializerMethodField()
     vat_rate = serializers.DecimalField(source='requisition_item.item.vat_rate', max_digits=5, decimal_places=2, read_only=True)
@@ -495,8 +495,9 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
         for req_item in requisition_items:
             PurchaseOrderItem.objects.create(
                 purchase_order=purchase_order,
-                requisition_item=req_item
-            )
+                requisition_item=req_item,
+                quantity_ordered=req_item.quantity_approved
+            )   
             req_item.ordered = True
             req_item.save()
 
