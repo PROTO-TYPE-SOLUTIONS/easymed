@@ -173,21 +173,21 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
 
     def get_buying_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
     def get_selling_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.sale_price
         except Inventory.DoesNotExist:
             return None
 
     def get_requested_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return float(obj.quantity_requested * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -452,7 +452,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     def get_total_buying_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            inventory = Inventory.objects.filter(item=obj.requisition_item.item).order_by('expiry_date').first()
             return float(obj.quantity_ordered * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -612,15 +612,103 @@ class InventorySerializer(serializers.ModelSerializer):
 
     def get_total_quantity(self, obj):
         '''Get total quantity across all lots for this item'''
-        total = Inventory.objects.filter(item=obj.item).aggregate(
+        total = Inventory.objects.filter(item=obj.item).order_by('expiry_date').aggregate(
             total_qty=Sum('quantity_at_hand'))['total_qty'] or 0
         return total
 
 class DepartmentInventorySerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    transfer_quantity = serializers.IntegerField(write_only=True, required=True)
+
     class Meta:
         model = DepartmentInventory
-        fields = '__all__'
+        fields = ['id', 'department', 'department_name', 'item', 'item_name',
+                 'quantity_at_hand', 'lot_number', 'expiry_date', 'purchase_price',
+                 'sale_price', 'date_created', 'transfer_quantity']
+        read_only_fields = ['quantity_at_hand', 'lot_number', 'expiry_date', 
+                          'purchase_price', 'sale_price', 'date_created']
 
+    def validate(self, attrs):
+        if not attrs.get('department'):
+            raise serializers.ValidationError({
+                "department": "Department is required"
+            })
+
+        if not attrs.get('item'):
+            raise serializers.ValidationError({
+                "item": "Item is required"
+            })
+
+        transfer_quantity = attrs['transfer_quantity']
+        if transfer_quantity <= 0:
+            raise serializers.ValidationError({
+                "transfer_quantity": "Transfer quantity must be greater than 0"
+            })
+
+        available_inventory = Inventory.objects.filter(
+            item=attrs['item'],
+            quantity_at_hand__gt=0
+        ).order_by('expiry_date')
+
+        if not available_inventory.exists():
+            raise serializers.ValidationError({
+                "item": "No inventory available for this item"
+            })
+
+        total_available = sum(inv.quantity_at_hand for inv in available_inventory)
+        if total_available < transfer_quantity:
+            raise serializers.ValidationError({
+                "transfer_quantity": f"Insufficient quantity available. Requested: {transfer_quantity}, Available: {total_available}"
+            })
+
+        attrs['available_inventory'] = available_inventory
+        return attrs
+
+    def create(self, validated_data):
+        transfer_quantity = validated_data.pop('transfer_quantity')
+        available_inventory = validated_data.pop('available_inventory')
+        department = validated_data['department']
+        item = validated_data['item']
+        remaining_quantity = transfer_quantity
+        created_records = []
+
+        with transaction.atomic():
+            for inventory in available_inventory:
+                if remaining_quantity <= 0:
+                    break
+
+                batch_quantity = min(remaining_quantity, inventory.quantity_at_hand)
+                
+                dept_inventory = DepartmentInventory.objects.filter(
+                    department=department,
+                    item=item,
+                    lot_number=inventory.lot_number
+                ).first()
+
+                if dept_inventory:
+                    dept_inventory.quantity_at_hand += batch_quantity
+                    dept_inventory.save()
+                    created_records.append(dept_inventory)
+                else:
+                    dept_inventory = DepartmentInventory.objects.create(
+                        department=department,
+                        item=item,
+                        quantity_at_hand=batch_quantity,
+                        lot_number=inventory.lot_number,
+                        expiry_date=inventory.expiry_date,
+                        purchase_price=inventory.purchase_price,
+                        sale_price=inventory.sale_price,
+                        main_inventory=inventory
+                    )
+                    created_records.append(dept_inventory)
+
+                inventory.quantity_at_hand -= batch_quantity
+                inventory.save()
+                
+                remaining_quantity -= batch_quantity
+
+        return created_records[0]
 
 class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='inventory_item.item.name')
