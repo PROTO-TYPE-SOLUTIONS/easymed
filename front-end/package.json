@@ -23,6 +23,7 @@
     "devextreme-react": "^23.1.5",
     "formik": "^2.4.5",
     "html2canvas": "^1.4.1",
+    "json-socket": "^0.3.0",
     "jspdf": "^2.5.1",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
