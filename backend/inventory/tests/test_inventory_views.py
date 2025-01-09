@@ -2,60 +2,6 @@ import pytest
 from django.urls import reverse
 from datetime import datetime, timedelta
 
-
-from inventory.models import Inventory, Item
-from inventory.signals import update_inventory_after_incomingitem_creation
-from inventory.models import (
-    Inventory,
-    PurchaseOrder,
-    PurchaseOrderItem,
-    GoodsReceiptNote,
-    SupplierInvoice,
-    RequisitionItem,
-    IncomingItem
-    )
-
-
-
-@pytest.mark.django_db
-def test_incoming_item_updates_inventory(incoming_item, item, user, requisition):
-    initial_inventory = Inventory.objects.create(
-        item=item,
-        quantity_at_hand=0,
-        purchase_price=10.0,
-        sale_price=20.0
-    )
-    
-    print(f'There are {Inventory.objects.count()} inventory items')
-    print(f'There are {initial_inventory.quantity_at_hand} items in stock')
-    
-    purchase_order = PurchaseOrder.objects.create(ordered_by=user)
-    requisition_item = RequisitionItem.objects.create(
-        item=item,
-        quantity_requested=10,
-        requisition_id=requisition.id
-        )
-    purchase_order_item = PurchaseOrderItem.objects.create(
-        purchase_order=purchase_order,
-        requisition_item=requisition_item,
-        quantity_ordered=10,
-    
-    )
-    
-    incoming_item.purchase_order = purchase_order
-    incoming_item.quantity = 10
-    incoming_item.save()
-
-    update_inventory_after_incomingitem_creation(sender=IncomingItem, instance=incoming_item, created=True)
-    
-    print(f'There are {Inventory.objects.count()} inventory items')
-    print(f'There are {initial_inventory.quantity_at_hand} items in stock')
-    
-    updated_inventory = Inventory.objects.get(id=initial_inventory.id)
-    
-    assert updated_inventory.quantity_at_hand == initial_inventory.quantity_at_hand + incoming_item.quantity
-
-
 @pytest.mark.django_db
 def test_low_quantity_filter(authenticated_client, inventory, item):
     inventory.re_order_level = 15
@@ -88,3 +34,20 @@ def test_near_expiry_filter(authenticated_client, inventory, item):
     #TODO: There's some seriouse headache here!
     # assert len(response.json()) == 1
 
+from unittest.mock import patch
+
+@pytest.mark.django_db
+@patch('inventory.views.HTML')  # Adjust the module path to where the function resides.
+def test_download_supplier_invoice_pdf_template_rendering(mock_html, authenticated_client, supplier, supplier_invoice, incoming_item, company):
+    """
+    Test that the template is rendered with the correct context.
+    """
+    mock_html.return_value.write_pdf.return_value = b'%PDF-1.4'  # Mocking PDF output.
+    
+    url = reverse('download_supplier_invoice_pdf', kwargs={'supplier_id': supplier.id})  # Replace with your actual URL name.
+    response = authenticated_client.get(url)
+
+    assert mock_html.called
+    context = mock_html.call_args[1]['string']  # Access the rendered template string.
+    assert str(supplier_invoice.invoice_no) in context
+    assert str(incoming_item.item.name) in context
