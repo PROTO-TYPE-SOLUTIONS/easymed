@@ -199,6 +199,7 @@ export const APP_API_URL = {
   FETCH_LAB_REQUESTS_BY_PATIENT_ID: "/api/laboratory/labRequestsByPatientId",
   SEND_LAB_REQUESTS: "/api/laboratory/get-lab-requests",
   FETCH_LAB_EQUIPMENT: "/api/laboratory/get-lab-equipment",
+  LAB_EQUIPMENT_PARSER: "/api/laboratory/get-lab-parser",
   SEND_TO_EQUIPMENT: "/api/laboratory/send-to-equipment",
   PUBLIC_LAB_REQUEST: "/api/laboratory/public-lab-request",
   FETCH_LAB_TEST_PROFILE: "/api/laboratory/get-lab-test-profile",

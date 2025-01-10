@@ -274,18 +274,38 @@ export const addQualitativeTestResultPanel = (payload,auth) =>{
     })
 }
 
-export const sendToEquipment = (payload,auth) =>{
-    const axiosInstance = UseAxios(auth);
-    return new Promise((resolve,reject) =>{
-        axiosInstance.post(`${APP_API_URL.SEND_TO_EQUIPMENT}`,payload,auth)
-            .then((res) =>{
-                resolve(res.data)
-            })
-            .catch((err) =>{
-                reject(err.message)
-            })
-    })
-}
+export const sendToEquipment = (payload) => {
+    return new Promise((resolve, reject) => {
+        fetch(APP_API_URL.LAB_EQUIPMENT_PARSER, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'error') {
+                reject({ 
+                    status: 'error',
+                    message: result.message || 'Equipment communication error'
+                });
+            } else {
+                resolve({
+                    status: 'success',
+                    message: result.message || 'Successfully sent to equipment'
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Equipment communication error:', err);
+            reject({ 
+                status: 'error',
+                message: err.message || 'Failed to communicate with equipment'
+            });
+        });
+    });
+};
 
 export const publicLabRequest = (payload) =>{
 
