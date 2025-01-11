@@ -95,6 +95,20 @@ const PurchaseOrdersDatagrid = () => {
     }
   }, [auth]);
 
+     /**
+   * Gets datagrid row data
+   * Checks if its dispached or not
+   * if dispatched, display a green circle
+   * else orange circle
+   */
+     const showStatusColorCode = ({ data })=> {
+      if(data.is_dispatched){
+        return <div className="h-4 w-4 bg-success rounded-full"></div>
+      }else{
+        return <div className="h-4 w-4 bg-amber rounded-full"></div>
+      }
+    }
+
   return (
     <section className=" my-8">
       <h3 className="text-xl mb-8"> Purchase Orders </h3>
@@ -161,9 +175,14 @@ const PurchaseOrdersDatagrid = () => {
           caption="Ordered Quantity"
         />
         <Column 
+          dataField="is_dispatched" 
+          caption="Dispatched"
+          cellRender={showStatusColorCode} 
+        />
+        {/* <Column 
           dataField="is_dispatched"
           caption="is Dispatched"
-        />
+        /> */}
         <Column dataField="date_created" caption="Requested Date" />
         <Column 
           dataField="" 
