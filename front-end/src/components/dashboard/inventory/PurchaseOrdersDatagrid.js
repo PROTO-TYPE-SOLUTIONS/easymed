@@ -30,8 +30,13 @@ const getActions = () => {
       icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
     },
     {
-      action: "print",
-      label: "Print",
+      action: "print_po",
+      label: "Print PO",
+      icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
+    },
+    {
+      action: "print_grn",
+      label: "Print GRN",
       icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
     },
   ];
@@ -53,9 +58,21 @@ const PurchaseOrdersDatagrid = () => {
   const dispatch = useDispatch()
   const auth = useAuth();
 
-  const handlePrint = async (data) => {
+  const handlePrintPO = async (data) => {
     try{
         const response = await downloadPDF(data.id, "_purchaseorder_pdf", auth)
+        window.open(response.link, '_blank');
+        toast.success("got pdf successfully")
+
+    }catch(error){
+        console.log(error)
+        toast.error(error)
+    }      
+  };
+
+  const handlePrintGRN = async (data) => {
+    try{
+        const response = await downloadPDF(data.id, "_receipt_note_pdf", auth)
         window.open(response.link, '_blank');
         toast.success("got pdf successfully")
 
@@ -69,8 +86,11 @@ const PurchaseOrdersDatagrid = () => {
     if (menu.action === "po_items") {
       setSelectedRowData(data);
       setOpen(true);
-    }else if (menu.action === "print"){
-      handlePrint(data);
+    }else if (menu.action === "print_po"){
+      handlePrintPO(data);
+    }
+    else if (menu.action === "print_grn"){
+      handlePrintGRN(data);
     }
   };
 
@@ -136,7 +156,7 @@ const PurchaseOrdersDatagrid = () => {
         </Grid>
         <Grid className="w-full bg-primary rounded-md flex items-center text-white" item md={4} xs={4}>
           <Link className="mx-4 w-full text-center" href='/dashboard/inventory/add-purchase'>
-            Purchase Product
+            Create LPO
           </Link>
         </Grid>
       </Grid>
