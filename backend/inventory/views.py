@@ -74,11 +74,11 @@ class ItemViewSet(viewsets.ModelViewSet):
     filterset_class = ItemFilter
 
 
-class PurchaseViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderCreateSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = PurchaseOrderFilter
+# class PurchaseViewSet(viewsets.ModelViewSet):
+#     queryset = PurchaseOrder.objects.all().order_by('-id')
+#     serializer_class = PurchaseOrderCreateSerializer
+#     filter_backends = (DjangoFilterBackend,)
+#     filterset_class = PurchaseOrderFilter
 
 
 class IncomingItemViewSet(viewsets.ModelViewSet):
@@ -136,7 +136,9 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
     """
 
-    queryset = Requisition.objects.all()
+    queryset = Requisition.objects.all().order_by('-id')
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['requested_by', 'department']
 
     def get_serializer_class(self):
         if self.action in ['create']:

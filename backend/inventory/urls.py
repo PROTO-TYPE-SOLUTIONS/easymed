@@ -25,7 +25,6 @@ from .views import (
     download_purchaseorder_pdf,
     download_goods_receipt_note_pdf,
     download_supplier_invoice_pdf,
-
 )
 
 router = DefaultRouter()

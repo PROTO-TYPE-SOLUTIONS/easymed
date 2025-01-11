@@ -2,9 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
-from decimal import Decimal
 from django.utils import timezone
-import random
 from django.contrib.auth import get_user_model
 from .models import (
     Item,
@@ -22,7 +20,6 @@ from .models import (
     GoodsReceiptNote,
     Quotation,
     QuotationItem,
-    QuotationCustomer
 )
 
 from .validators import (
