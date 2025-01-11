@@ -295,10 +295,14 @@ export const addPurchaseOrdersItem = (payload) =>{
     })
 }
 
-export const fetchIncomingItems = (auth) =>{
+export const fetchIncomingItems = (auth, filter={}) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axiosInstance.get(`${APP_API_URL.FETCH_INCOMING_ITEMS}`,auth)
+        axiosInstance.get(`${APP_API_URL.FETCH_INCOMING_ITEMS}`, {
+            params: {
+                purchase_order: filter.purchase_order
+            }
+        } )
             .then((res) =>{
                 resolve(res.data)
             })
@@ -312,6 +316,23 @@ export const addIncomingItem = (payload, auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.post(`${APP_API_URL.FETCH_INCOMING_ITEMS}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updateIncomingItem = (incoming_item, payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.FETCH_INCOMING_ITEMS}`, payload, {
+            params: {
+                incoming_item: incoming_item
+            }
+        } )
             .then((res) =>{
                 resolve(res.data)
             })

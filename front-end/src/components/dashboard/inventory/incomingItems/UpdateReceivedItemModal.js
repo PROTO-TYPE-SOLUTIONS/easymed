@@ -11,7 +11,7 @@ import SeachableSelect from "@/components/select/Searchable";
 import { addRequisitionItem, updateRequisitionItem } from "@/redux/service/inventory";
 import { useAuth } from "@/assets/hooks/use-auth";
 
-const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, setSelectedEditRowData, po, setSelectedRowData }) => {
+const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, setSelectedEditRowData, po, setSelectedRowData, createdIncomings }) => {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -125,7 +125,7 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle>
-            <h3 className="text-xl font-bold my-4"> Edit Item </h3>
+            <h3 className="text-xl font-bold my-4"> {`Edit ${selectedEditRowData.item_name}`} </h3>
         </DialogTitle>
         <DialogContent>
             <Formik
@@ -177,35 +177,42 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
                         className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
-                    <label>Lot Number</label>
-                    <Field
+                  
+                  {createdIncomings.length <= 0 && (
+                    <Grid item md={6} xs={12}>
+                      <label>Lot Number</label>
+                      <Field
+                          className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                          maxWidth="sm"
+                          placeholder="Lot Number"
+                          name="lot_no"
+                      />
+                      <ErrorMessage
+                          name="lot_no"
+                          component="div"
+                          className="text-warning text-xs"
+                      />
+                    </Grid>                    
+                  )}
+
+                  {createdIncomings.length <= 0 && (
+                    <Grid item md={6} xs={12}>
+                      <label htmlFor="expiry_date">Expiry Date</label>
+                      <Field
+                        type="datetime-local"
+                        id="expiry_date"
                         className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                        maxWidth="sm"
-                        placeholder="Lot Number"
-                        name="lot_no"
-                    />
-                    <ErrorMessage
-                        name="lot_no"
+                        placeholder="Expiry Date"
+                        name="expiry_date"
+                      />
+                      <ErrorMessage
+                        name="expiry_date"
                         component="div"
                         className="text-warning text-xs"
-                    />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <label htmlFor="expiry_date">Expiry Date</label>
-                    <Field
-                      type="datetime-local"
-                      id="expiry_date"
-                      className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                      placeholder="Expiry Date"
-                      name="expiry_date"
-                    />
-                    <ErrorMessage
-                      name="expiry_date"
-                      component="div"
-                      className="text-warning text-xs"
-                    />
-                  </Grid>
+                      />
+                    </Grid>                    
+                  )}
+
                   <Grid item md={12} xs={12}>
                     <label>Quantity approved</label>
                     <Field
