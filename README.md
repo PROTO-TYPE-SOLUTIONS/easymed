@@ -196,9 +196,13 @@ Generates a receipt note for incoming items
 
 
 # 1.6.0 Laboratory Integration
-When you click Send to Equipment and select the equiment in the dashboard, the test request gets converted to HL7 or ASTM and sent to the equipment.
-
-The laboratory>addons>lis_list2.py will listen for any incoming data, then check the format, convert that format to json then send to the results endpoint
+Due to the complexity of the lab module, the integration will be handled by a parser which 
+is hosted on a separate repository [here](https://github.com/mosesmbadi/hl7_astm_parser).
+Here's an overview of the process;
+1. The parser listens to a specific port for incoming messages
+2. If incoming message is HL7 or ASTM, it convirts to JSON and sends to the backend
+3. The backend receives the JSON and saves to the database
+4. If the incoming message is JSON, the parser will extract the equipment name, convirts the JSON to HL7 or ASTM and sends to the equipment.
 
 # 1.7.0  System Requirements
 Minimum system specifications
