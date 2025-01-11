@@ -19,7 +19,9 @@ module.exports = {
       cardSecondary: '#0E4F82',
       gray: '#CCCCCC',
       link: '#26A0F8',
-      orange: '#FF7E54'
+      orange: '#FF7E54',
+      amber: '#FFBF00',
+      yellow: '#FFFF00'
     },
     fontSize: {
       xxs: '0.6rem',

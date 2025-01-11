@@ -87,6 +87,23 @@ const POListGrid = () => {
     );
   };
 
+  /**
+   * Gets datagrid row data
+   * Checks purchase order status
+   * if completed, display a green circle
+   * if partial, display a orange circle
+   * else yellow circle
+   */
+  const showStatusColorCode = ({ data })=> {
+    if(data.status === "COMPLETED"){
+      return <div className="h-4 w-4 bg-success rounded-full"></div>
+    } else if (data.status === "PARTIAL"){
+      return <div className="h-4 w-4 bg-orange rounded-full"></div>
+    } else {
+      return <div className="h-4 w-4 bg-amber rounded-full"></div>
+    }
+  }
+
   useEffect(() => {
     if (auth) {
       dispatch(getAllPurchaseOrders(auth));
@@ -121,7 +138,7 @@ const POListGrid = () => {
         </Grid>
       </Grid>
       <DataGrid
-        dataSource={purchaseOrders}
+        dataSource={purchaseOrders.filter((po)=>po.total_items_ordered > 0 && po.is_dispatched && po.status !== 'COMPLETED')}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -155,8 +172,9 @@ const POListGrid = () => {
           caption="Ordered Quantity"
         />
         <Column 
-          dataField="is_dispatched"
-          caption="is Dispatched"
+          dataField="status"
+          caption="Dispatched"
+          cellRender={showStatusColorCode}
         />
         <Column dataField="date_created" caption="Requested Date" />
         <Column 
@@ -165,7 +183,7 @@ const POListGrid = () => {
           cellRender={actionsFunc}
         />
       </DataGrid>
-      <ReceiveIncomingItems open={open} setOpen={setOpen} selectedRowData={selectedRowData} setSelectedRowData={setSelectedRowData}/>
+      {open && (<ReceiveIncomingItems open={open} setOpen={setOpen} selectedRowData={selectedRowData} setSelectedRowData={setSelectedRowData}/>)}
     </section>
   );
 };

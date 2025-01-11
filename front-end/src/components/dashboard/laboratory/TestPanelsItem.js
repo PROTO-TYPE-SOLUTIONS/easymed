@@ -57,20 +57,20 @@ const TestPanelsItem = ({ sample, collected, sample_id }) => {
     }
     try {
       const formData = {
-        test_request_panel: foundPanel.id,
-        equipment: formValue.equipment.value,
+        ...foundPanel,
+        patient_id: foundPanel.patient_id,
+        equipment: formValue.equipment.label,
       };
-
+      console.log(formData);
       setLoading(true);
       approveCollection();
-      await sendToEquipment(formData, auth).then(() => {
+      await sendToEquipment(formData).then(() => {
         helpers?.resetForm();
         toast.success("Send to Equipment Successful!");
         setLoading(false);
-        handleClose();
       });
     } catch (err) {
-      //toast.error("Failed to send to equipment");
+      toast.error("Failed to send to equipment");
       console.log("ERROR SENDING TO EQUIPMENT", err);
       setLoading(false);
     }
@@ -101,7 +101,7 @@ const TestPanelsItem = ({ sample, collected, sample_id }) => {
                 onSubmit={handleSubmit}
                 className="w-full flex items-center bg-red-400"
               >
-                <span className="w-full">{foundPanel.name}</span>
+                <span className="w-10/12">{foundPanel.name}</span>
                 <div className="w-full">
                   <SeachableSelect
                     name="equipment"
@@ -116,23 +116,20 @@ const TestPanelsItem = ({ sample, collected, sample_id }) => {
                   />
                 </div>
                 {item.is_billed ? (
-                  <div className="w-full justify-end flex">
-                    <FormButton loading={loading} label={`send for results`} />
-                  </div>
-                ) : (
-                  <>
                     <div className="w-full justify-end flex">
                       <button
                         disabled={!values.equipment || loading}
                         type="submit"
                         className={`${!values.equipment ? "bg-gray cursor-not-allowed" : "bg-primary"} text-white cursor-pointer w-10/12 text-center py-2 text-xs rounded-xl flex justify-center items-center`}
                       >
-                        request
+                        {loading ? "Sending..." : "send"}
                       </button>
-                    </div>
-                    <div className="w-5/12 justify-end flex">
-                      <div className="bg-primary text-white cursor-default px-3 py-2 text-xs rounded-xl">
-                        NP
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-full justify-center flex">
+                      <div className="w-10/12 bg-primary text-white cursor-default px-3 py-2 text-xs rounded-xl text-center">
+                        Not Applicable
                       </div>
                     </div>
                   </>
@@ -151,7 +148,7 @@ const TestPanelsItem = ({ sample, collected, sample_id }) => {
         <li className="flex justify-between">
           <span className="text-primary w-full">panel name</span>
           <span className="text-primary w-full">select equipment</span>
-          <span className="text-primary w-8/12 text-center mx-auto ">
+          <span className="text-primary w-full text-center ">
             action
           </span>
           <span className="text-primary w-5/12"></span>

@@ -90,6 +90,20 @@ const AddProductPurchase = () => {
     return amount
   };
 
+   /**
+   * Gets datagrid row data
+   * Checks if its procurement approved or not
+   * if procurement approved, display a green circle
+   * else orange circle
+   */
+   const showStatusColorCode = ({ data })=> {
+    if(data.procurement_approved){
+      return <div className="h-4 w-4 bg-success rounded-full"></div>
+    }else{
+      return <div className="h-4 w-4 bg-amber rounded-full"></div>
+    }
+  }
+
   return (
     <section ref={pdfRef}>
       <div className="flex gap-4 mb-8 items-center">
@@ -139,7 +153,12 @@ const AddProductPurchase = () => {
           dataField="ordered_by"
           caption="Requested By" 
         />
-        <Column dataField="procurement_approval_date" caption="Approval Date" />
+        {/* <Column dataField="procurement_approval_date" caption="Approval Date" /> */}
+        <Column 
+          dataField="procurement_approved" 
+          caption="Procurement Approved"
+          cellRender={showStatusColorCode} 
+        />
         <Column 
           dataField="items" 
           caption="Total Amount"
