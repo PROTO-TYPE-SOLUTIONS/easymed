@@ -3,11 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from patient.models import Patient
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema
 
 from .models import (
     LabReagent,
@@ -158,7 +157,7 @@ class LabTestRequestByPatientIdAPIView(APIView):
 class LabTestRequestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequestPanel.objects.all()
     serializer_class = LabTestRequestPanelSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsSystemsAdminUser,)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
