@@ -57,12 +57,16 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
     name: selectedRowData?.name || "",
     category: getCategory() || "",
     units_of_measure: getUnit() || "",
-    desc: selectedRowData?.desc || ""
+    desc: selectedRowData?.desc || "",
+    packed: selectedRowData?.packed || "",
+    subpacked: selectedRowData?.subpacked || ""
   };
 
   const validationSchema = Yup.object().shape({
     item_code: Yup.string().required("Field is Required!"),
     name: Yup.string().required("Field is Required!"),
+    packed: Yup.string().required("Field is Required!"),
+    subpacked: Yup.string().required("Field is Required!"),
     category: Yup.object().required("Field is Required!"),
     units_of_measure: Yup.object().required("Field is Required!"),
     desc: Yup.string().required("Field is Required!"),
@@ -134,6 +138,34 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                 />
             </Grid>
             <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="item_name">Packed</label>
+                <Field
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="Packed"
+                name="packed"
+                />
+                <ErrorMessage
+                name="packed"
+                component="div"
+                className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="item_name">Sub Packed</label>
+                <Field
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                maxWidth="sm"
+                placeholder="Sub Packed"
+                name="subpacked"
+                />
+                <ErrorMessage
+                name="subpacked"
+                component="div"
+                className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
                 <SeachableSelect
                     label="Select Category"
                     name="category"
@@ -198,7 +230,7 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                         ></path>
                     </svg>
                     )}
-                    Add Item
+                    Update Item
                 </button>
                 </div>
             </Grid>
