@@ -65,14 +65,35 @@ If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
 Run Celery: `celery -A easymed worker --loglevel=INFO`
 Run Redis: `redis-cli -h 127.0.0.1 -p 6379`
 
+## Running celery beat
+If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
+`pip install celery redis`
+Run Celery: `celery -A easymed beat --loglevel=INFO`
+
 ## Testing Socket connection for notifications
 Django's runserver does not support asgi (socket connections required for notifications)
 run with uvicorn to have the notifications working
 `uvicorn --port 8080 easymed.asgi:application`
 
+Currently, the notifications are sent to the group `doctor_notifications` and `inventory_notifications`
+
 On a separate terminal
 `npm install -g wscat`
+
+# Patient Notifications
+on a separate terminal
 `wscat -c ws://localhost:8080/ws/doctor_notifications/` <-- appointment assigned notification will be seen here
+
+# Inventory Notifications
+First navigate to the admin panel and assign permission`CAN_RECEIVE_INVENTORY_NOTIFICATIONS` to a group to ensure specific users receive notifications via email
+
+Example:
+- Group: `LAB_TECH`
+- Permission: `CAN_RECEIVE_INVENTORY_NOTIFICATIONS`
+
+on a separate terminal
+`wscat -c ws://localhost:8080/ws/inventory_notifications/` <-- inventory notification will be seen here
+
 
 ## Adding Permissions
 You need to create groups and associate permissions. make sure groups follow this order `SYS_ADMIN`, `PATIENT` group then the rest ie `DOCTOR`,`PHARMACIST`, `RECEPTIONIST`, `LAB_TECH` , `NURSE`
@@ -92,6 +113,7 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 - Pharmacy Dashboard => `CAN_ACCESS_PHARMACY_DASHBOARD`
 - Inventory Dashboard => `CAN_ACCESS_INVENTORY_DASHBOARD`
 - Billing Dashboard => `CAN_ACCESS_BILLING_DASHBOARD`
+-`CAN_RECEIVE_INVENTORY_NOTIFICATIONS`
 
 You will notice that we have a Role and a Group. A group is associated with permissions which determines which specific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
 
@@ -174,9 +196,13 @@ Generates a receipt note for incoming items
 
 
 # 1.6.0 Laboratory Integration
-When you click Send to Equipment and select the equiment in the dashboard, the test request gets converted to HL7 or ASTM and sent to the equipment.
-
-The laboratory>addons>lis_list2.py will listen for any incoming data, then check the format, convert that format to json then send to the results endpoint
+Due to the complexity of the lab module, the integration will be handled by a parser which 
+is hosted on a separate repository [here](https://github.com/mosesmbadi/hl7_astm_parser).
+Here's an overview of the process;
+1. The parser listens to a specific port for incoming messages
+2. If incoming message is HL7 or ASTM, it convirts to JSON and sends to the backend
+3. The backend receives the JSON and saves to the database
+4. If the incoming message is JSON, the parser will extract the equipment name, convirts the JSON to HL7 or ASTM and sends to the equipment.
 
 # 1.7.0  System Requirements
 Minimum system specifications

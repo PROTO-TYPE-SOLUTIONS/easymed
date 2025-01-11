@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from django.test import TestCase
+from django.db import transaction
 from django.utils import timezone
 from decimal import Decimal
 
@@ -59,7 +59,7 @@ def requisition(db, user):
     )
 
 @pytest.fixture
-def incoming_item(db, item, supplier, purchase_order, requisition, supplier_invoice):
+def incoming_item2(db, item, supplier, purchase_order, requisition, supplier_invoice):
     return IncomingItem.objects.create(
         item=item,
         supplier=supplier,
@@ -72,34 +72,40 @@ def incoming_item(db, item, supplier, purchase_order, requisition, supplier_invo
         expiry_date=timezone.now().date()
     )
 
-def test_inventory_created(incoming_item):
-    print(f'Incoming Item is: {incoming_item.id}')
-    
-    inventory, created = Inventory.objects.get_or_create(
-        item=incoming_item.item,
-        defaults={
-            'purchase_price': incoming_item.purchase_price,
-            'sale_price': incoming_item.sale_price,
-            'quantity_at_hand': 20 # initial quantity
-        }
+@pytest.mark.django_db
+def test_inventory_signal_on_incoming_item_creation(incoming_item2):
+    # Create an IncomingItem instance
+    incoming_item = IncomingItem(
+        item=incoming_item2.item,
+        supplier=incoming_item2.supplier,
+        purchase_order=incoming_item2.purchase_order,
+        supplier_invoice=incoming_item2.supplier_invoice,
+        quantity=10,
+        purchase_price=50.00,
+        sale_price=100.00,
+        lot_no="LOT123"
     )
+    print(f'Incoming Item is: {incoming_item.id}, Lot: {incoming_item.lot_no}')
 
-    if not created:
-        inventory.purchase_price = incoming_item.purchase_price
-        inventory.sale_price = incoming_item.sale_price
-        inventory.quantity_at_hand += incoming_item.quantity
-        inventory.save()
-    
-    print(f'Inventory ID is: {inventory.id}, Quantity: {inventory.quantity_at_hand}')
+    # Trigger the save operation to invoke the signal
+    with transaction.atomic():
+        incoming_item.save()
 
-    update_inventory_after_incomingitem_creation(sender=IncomingItem, instance=incoming_item, created=True)
+    # Verify if inventory was created or updated
+    inventory = Inventory.objects.filter(
+        item=incoming_item.item,
+        lot_number=incoming_item.lot_no
+    ).first()
 
-    updated_inventory = Inventory.objects.get(item=incoming_item.item)
-    print(f'Updated Inventory: {updated_inventory.id}, Quantity: {updated_inventory.quantity_at_hand}')
+    assert inventory is not None, "Inventory record should be created or updated"
+    assert inventory.quantity_at_hand == incoming_item.quantity, \
+        f"Expected quantity {incoming_item.quantity}, but got {inventory.quantity_at_hand}"
+    assert inventory.purchase_price == incoming_item.purchase_price, \
+        f"Expected purchase price {incoming_item.purchase_price}, but got {inventory.purchase_price}"
+    assert inventory.sale_price == incoming_item.sale_price, \
+        f"Expected sale price {incoming_item.sale_price}, but got {inventory.sale_price}"
 
-    assert updated_inventory.quantity_at_hand == incoming_item.quantity+20
-
-
+    print(f"Inventory ID: {inventory.id}, Quantity: {inventory.quantity_at_hand}")
 
 
 @pytest.mark.django_db
@@ -133,6 +139,7 @@ def test_update_purchase_order_status_partial(purchase_order, purchase_order_ite
     update_purchase_order_status(purchase_order)
 
     assert purchase_order.status == PurchaseOrder.Status.PARTIAL
+
 
 
 @pytest.mark.django_db

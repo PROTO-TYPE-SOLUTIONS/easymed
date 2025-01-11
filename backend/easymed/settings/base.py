@@ -4,7 +4,8 @@ from datetime import timedelta
 from decouple import config
 import os
 from dotenv import load_dotenv
-
+from celery.schedules import crontab
+from celery.schedules import schedule
 
 
 load_dotenv()
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'django_filters',
     'channels',
     'django_extensions',
+    'django_celery_beat',
 
     # user apps
     'authperms.apps.AuthpermsConfig',
@@ -197,6 +199,8 @@ EMAIL_PORT = config("EMAIL_PORT", cast=int)
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", cast=str)
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", cast=str)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", cast=str)
+
 
 
 CELERY_ACCEPT_CONTENT = ['application/json']
@@ -204,16 +208,23 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Nairobi'
 
-
-
-
-CHANNELS_ROUTING = 'patient.routing.application'
+CHANNELS_ROUTING = 'easymed.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('localhost', 6379)],
+            'hosts': [('redis', 6379)],
         },
+    },
+}
+
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+CELERY_BEAT_SCHEDULE = {
+    "check_inventory_reorder_levels": {
+    "task": "easymed.celery_tasks.check_inventory_reorder_levels",            
+    "schedule": crontab(minute='*/600'),  
     },
 }
 

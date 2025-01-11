@@ -150,17 +150,19 @@ class PurchaseOrder(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
 
     def save(self, *args, **kwargs):
-        '''Generate purchase order number'''
-        today = timezone.now()
-        year = today.year % 100
-        month = today.month
-        day = today.day
-        random_code = random.randint(1000, 9999)
-        self.PO_number= f"PO/{year}/{month:02d}/{day:02d}/{random_code}"
+        """Generate purchase order number only on creation."""
+        if not self.PO_number:  # Only generate if PO_number is empty
+            today = timezone.now()
+            year = today.year % 100
+            month = today.month
+            day = today.day
+            random_code = random.randint(1000, 9999)
+            self.PO_number = f"PO/{year}/{month:02d}/{day:02d}/{random_code}"
+        
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Purchase Order by {self.ordered_by} - Status: {self.PO_number}"
+        return f"Purchase Order by {self.ordered_by} - PO Number: {self.PO_number} - Status {self.status}"
 
 
 class PurchaseOrderItem(models.Model):
@@ -183,6 +185,7 @@ class PurchaseOrderItem(models.Model):
 
 # TODO: amount should be captured as a sum total of the 
 # incoming items associated with this invoice
+# update_supplier_invoice_amount() signal will be called
 class SupplierInvoice(models.Model):
     STATUS=[
         ('pending', 'Pending'),
@@ -219,8 +222,7 @@ class GoodsReceiptNote(models.Model):
         return f"{self.note} - {self.grn_number} - {self.date_created}"
     
 
-# 1.Update Inventory 2.Associate PO 3.Update Supplier Invoice
-# update quantity received on purchase order item
+# update_supplier_invoice_amount() signal will be called on create
 class IncomingItem(models.Model):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
@@ -248,7 +250,7 @@ class Inventory(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='inventory')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
@@ -267,7 +269,31 @@ class Inventory(models.Model):
     
     class Meta:
         verbose_name_plural = 'Inventory'
+
+
+# Any record in the Inventory that has zero value in the 
+# quantity_at_hand field should be moved here
+class InventoryArchive(models.Model):
+    CATEGORY_ONE_CHOICES = [
+        ('Resale', 'resale'),
+        ('Internal', 'internal'),
+    ]
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='archived_inventory_items')
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
+    quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
+    re_order_level= models.PositiveIntegerField(default=5)
+    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
+    lot_number= models.CharField(max_length=255, null=True, blank=True)
+    expiry_date= models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.item.name} - {self.id} - {self.date_created}"
     
+    class Meta:
+        verbose_name_plural = 'Inventory Archive'
+
 
 class InventoryInsuranceSaleprice(models.Model):
     inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
@@ -282,16 +308,79 @@ class InventoryInsuranceSaleprice(models.Model):
     
 
 class DepartmentInventory(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_at_hand = models.PositiveIntegerField()
+    lot_number = models.CharField(max_length=100)
+    expiry_date = models.DateField()
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    main_inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True,
+                                       help_text="Main inventory record this was transferred from")
+
+    class Meta:
+        verbose_name_plural = "Department Inventories"
+        ordering = ['expiry_date', 'lot_number']  # FIFO ordering
+
     def __str__(self):
-        return str(self.item)
+        return f"{self.department.name} - {self.item.name} ({self.quantity_at_hand}) - Lot: {self.lot_number}"
 
 
+class QuotationCustomer(models.Model):
+    customer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=255, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    contact_person = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.email} - {self.phone} - {self.address}"
 
 
+class Quotation(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    quotation_number = models.CharField(max_length=50, unique=True, editable=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='quotations', null=True, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='quotation_created_by'
+        )
+    approved_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='quotation_approved_by'
+        )
+    customer = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='customer'
+        )
+    customer2 = models.ForeignKey(QuotationCustomer, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.quotation_number} - {self.date_created}"
+
+
+class QuotationItem(models.Model):
+    quantity = models.IntegerField()    
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='items')
+    # by default should pick price from Inventory
+    quotation_price = models.DecimalField(max_digits=10, decimal_places=2) 
+
+    def __str__(self):
+        return f"{self.item.name} - {self.quantity}"
 
 
 

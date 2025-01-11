@@ -30,7 +30,10 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
-    GoodsReceiptNote
+    GoodsReceiptNote,
+    Quotation,
+    QuotationItem,
+    SupplierInvoice
     
 
 )
@@ -52,6 +55,8 @@ from .serializers import (
     IncomingItemSerializer,
     InventoryInsuranceSalepriceSerializer,
     GoodsReceiptNoteSerializer,
+    QuotationSerializer,
+    QuotationItemSerializer
 )
 
 from .filters import (
@@ -69,11 +74,11 @@ class ItemViewSet(viewsets.ModelViewSet):
     filterset_class = ItemFilter
 
 
-class PurchaseViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderCreateSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = PurchaseOrderFilter
+# class PurchaseViewSet(viewsets.ModelViewSet):
+#     queryset = PurchaseOrder.objects.all().order_by('-id')
+#     serializer_class = PurchaseOrderCreateSerializer
+#     filter_backends = (DjangoFilterBackend,)
+#     filterset_class = PurchaseOrderFilter
 
 
 class IncomingItemViewSet(viewsets.ModelViewSet):
@@ -131,7 +136,9 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
     """
 
-    queryset = Requisition.objects.all()
+    queryset = Requisition.objects.all().order_by('-id')
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['requested_by', 'department']
 
     def get_serializer_class(self):
         if self.action in ['create']:
@@ -317,6 +324,14 @@ class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
     queryset = GoodsReceiptNote.objects.all()
     serializer_class = GoodsReceiptNoteSerializer
 
+class QuotationViewSet(viewsets.ModelViewSet):
+    queryset = Quotation.objects.all()
+    serializer_class = QuotationSerializer
+
+
+class QuotationItemViewSet(viewsets.ModelViewSet):
+    queryset = QuotationItem.objects.all()
+    serializer_class = QuotationItemSerializer
 
 def download_requisition_pdf(request, requisition_id):
     '''
@@ -420,4 +435,30 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="incoming_items.pdf"'
+    return response
+
+
+def download_supplier_invoice_pdf(request, supplier_id):
+    supplier = get_object_or_404(Supplier, pk=supplier_id)
+    supplier_invoices = SupplierInvoice.objects.filter(supplier=supplier).prefetch_related('incomingitem_set')
+    incoming_items = IncomingItem.objects.filter(supplier_invoice__supplier=supplier)
+    company = Company.objects.first()
+
+    company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
+
+    context = {
+        'supplier': supplier,
+        'supplier_invoices': supplier_invoices,
+        'company': company,
+        'company_logo_url': company_logo_url,
+        'incoming_items': incoming_items,
+    }
+
+    html_template = get_template('supplier_invoice.html').render(context)
+
+    pdf_file = HTML(string=html_template).write_pdf()
+
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="supplier_invoice_report_{supplier_id}.pdf"'
+
     return response

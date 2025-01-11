@@ -88,6 +88,12 @@ const RequisitionDatagrid = () => {
     }
   };
 
+  /**
+   * Gets datagrid row data
+   * Calculates the price depending on quantity approved or quantity requested
+   * if is department approved, uses quantity approved
+   * else uses quantity requested
+  */
   const calculateTotalAmount = ({ data }) => {
     let amount = 0
     data.items.forEach((req)=>{
@@ -101,6 +107,20 @@ const RequisitionDatagrid = () => {
     })
     return amount
   };
+
+  /**
+   * Gets datagrid row data
+   * Checks if its department approved or not
+   * if department approved, display a green circle
+   * else orange circle
+   */
+  const showStatusColorCode = ({ data })=> {
+    if(data.department_approved){
+      return <div className="h-4 w-4 bg-success rounded-full"></div>
+    }else{
+      return <div className="h-4 w-4 bg-amber rounded-full"></div>
+    }
+  }
 
   useEffect(() => {
     if (auth) {
@@ -186,7 +206,12 @@ const RequisitionDatagrid = () => {
           dataField="ordered_by"
           caption="Requested By" 
         />
-        <Column dataField="department_approval_date" caption="Department Approval Date" />
+        {/* <Column dataField="department_approval_date" caption="Department Approval Date" /> */}
+        <Column 
+          dataField="department_approved" 
+          caption="Department Approved"
+          cellRender={showStatusColorCode} 
+        />
         <Column 
           dataField="items" 
           caption="Total Amount"

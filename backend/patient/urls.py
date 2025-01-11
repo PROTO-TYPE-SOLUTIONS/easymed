@@ -4,7 +4,6 @@ from .views import (
     ContactDetailsViewSet,
     PatientViewSet,
     NextOfKinViewSet,
-    AppointmentViewSet,
     PrescriptionViewSet,
     PrescribedDrugViewSet,
     PublicAppointmentViewSet,
@@ -12,15 +11,11 @@ from .views import (
     ReferralViewSet,
     TriageViewSet,
     PatientByUserIdAPIView,
-    ConvertToAppointmentAPIView,
-    SendAppointmentConfirmationAPIView,
-    AppointmentsByPatientIdAPIView,
+    # ConvertToAppointmentAPIView,
     PrescribedDrugByPatientIdAPIView,
     PrescribedDrugByPrescriptionViewSet,
     AttendanceProcessViewSet,
-    AppointmentByDoctorView,
-    
-    generate_appointments_report,
+
     download_prescription_pdf,
     generate_lab_tests_report,
 )
@@ -36,8 +31,6 @@ router.register(r'prescribed-drugs', PrescribedDrugViewSet)
 router.register(r'consultations', ConsultationViewSet)
 router.register(r'referrals', ReferralViewSet)
 router.register(r'triage', TriageViewSet)
-router.register(r'appointments', AppointmentViewSet)
-router.register(r'appointments', AppointmentViewSet, basename='appointments')
 router.register(r'initiate-attendance-process', AttendanceProcessViewSet)
 
 
@@ -46,18 +39,16 @@ urlpatterns = [
     path('', include(router.urls)),
     path('patients/<int:user_id>/', PatientByUserIdAPIView.as_view(), name="patient-by-userid"),
     
-    path('appointments/by_patient_id/<int:patient_id>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
-    path('appointments/by_doctor/<int:assigned_doctor_id>/', AppointmentByDoctorView.as_view(), name='appointments-by-doctor'),
+    # path('appointments/by_patient_id/<int:patient_id>/', AppointmentsByPatientIdAPIView.as_view(), name="appointment-by-patientid"),
+    # path('appointments/by_doctor/<int:assigned_doctor_id>/', AppointmentByDoctorView.as_view(), name='appointments-by-doctor'),
 
     path('prescribed-drugs/by_patient_id/<int:patient_id>/', PrescribedDrugByPatientIdAPIView.as_view(), name="prescribed-drug-by-patientid"),
 
-    path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
-    path('send-appointment-confirmation/', SendAppointmentConfirmationAPIView.as_view(), name="send-appointment-confirmation"),
+    # path('convert-to-appointment/', ConvertToAppointmentAPIView.as_view(), name="convert-to-appointment"),
     
     path('prescribed-drugs/by-prescription/<int:prescription_id>/', PrescribedDrugByPrescriptionViewSet.as_view({'get': 'list'}), name='prescribed_drugs_by_prescription'),
 
     path('reports/download_prescription_pdf/<int:prescription_id>/', download_prescription_pdf, name='download_prescription_pdf'),
 
-    path('reports/appointments/', generate_appointments_report, name='generate_appointments_report'),
     path('reports/lab-tests/', generate_lab_tests_report, name='generate_lab_tests_report'),
 ]

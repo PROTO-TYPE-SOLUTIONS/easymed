@@ -10,24 +10,24 @@ import logging
 
 
 class LabEquipment(models.Model):
-    CATEGORY_CHOICE = (
-        ("none", "None"),
-        ("rs232", "RS232"),
-        ("tcp", "TCP"),
-        ("netshare", "NETSHARE"),
+    COM_MODE_CHOICE = (
+        ("serial", "Serial"),
+        ("tcp", "Parallel"),
+        ("network_directory", "Network Directory"),
     )
     FORMAT_CHOICE = (
         ("hl7", "HL7"),
         ("astm", "ASTM"),
     )
     name = models.CharField(max_length=250)
-    category = models.CharField(max_length=10, default="none", choices=CATEGORY_CHOICE,)
     ip_address = models.GenericIPAddressField(null=True) 
     port = models.CharField(max_length=20, null=True)
     data_format = models.CharField(max_length=10, choices=FORMAT_CHOICE, default="hl7")
+    com_mode = models.CharField(max_length=20, choices=COM_MODE_CHOICE, default="tcp")
 
     def __str__(self):
         return self.name
+
 
 class LabReagent(models.Model):
     name = models.CharField(max_length=255)
@@ -38,6 +38,7 @@ class LabReagent(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
@@ -52,10 +53,6 @@ class Specimen(models.Model):
 
 
 class LabTestPanel(models.Model):
-    '''
-    This need s whole lot of testing to see if the ref value are actually
-    gotten dynamically using the patients age and sex
-    '''
     UNITS_OPTIONS = (
         ('mL', 'mL'),
         ('uL', 'uL'),
@@ -72,9 +69,11 @@ class LabTestPanel(models.Model):
     specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, null=True, blank=True)
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE)
     unit = models.CharField(max_length=10, choices=UNITS_OPTIONS, default='mL')
+    # TODO: To get back to. Change to Inventory from 'inventory.Item'
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
+    eta = models.DurationField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
@@ -110,6 +109,7 @@ class ProcessTestRequest(models.Model):
 
     def __str__(self):
         return self.reference
+
 
 class LabTestRequest(models.Model):
     process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True) # from patient app
@@ -164,7 +164,7 @@ class LabTestRequestPanel(models.Model):
     result_approved=models.BooleanField(default=False)
     approved_on = models.DateTimeField(null=True, blank=True) 
     is_billed = models.BooleanField(default=False)
-
+    
     def generate_test_code(self):
         while True:
             random_number = ''.join(choices('0123456789', k=4))

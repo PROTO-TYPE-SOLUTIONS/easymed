@@ -3,11 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from patient.models import Patient
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema
 
 from .models import (
     LabReagent,
@@ -58,11 +57,6 @@ from django.template.loader import get_template
 from company.models import Company
 from patient.models import AttendanceProcess
 
-# utils
-from .utils import (
-    send_through_rs232,
-    send_through_tcp
-)
 
 # filters
 from .filters import (
@@ -133,29 +127,6 @@ class LabTestRequestViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LabTestRequestFilter
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='equipment', type=int,
-                            location=OpenApiParameter.PATH)
-        ],
-    )
-    @action(methods=['post'], detail=True)
-    def send_to_equipment(self, request: Request,  equipment_id, pk=None):
-        instance: LabTestRequest = self.get_object()
-        try:
-            equipment: LabEquipment = LabEquipment.objects.get(pk=equipment_id)
-        except LabEquipment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        if(equipment.data_format == "hl7"):
-            data = json_to_hl7(instance)
-            if equipment.category == "rs32":
-                send_through_rs232(data=data)
-                return Response({"message": "Data sent to RS232 equipment"}, status=status.HTTP_200_OK)
-            if equipment.category == 'tcp':
-                send_through_tcp(data=data)
-                return Response({"message": "Data sent to TCP equipment"}, status=status.HTTP_200_OK)
-        return Response({"message": "Functionality coming soon"}, status=status.HTTP_200_OK)
-
 
 class LabTestRequestByPatientIdAPIView(APIView):
     def get_lab_test_requests_by_patient(self, patient_id: int):
@@ -186,7 +157,7 @@ class LabTestRequestByPatientIdAPIView(APIView):
 class LabTestRequestPanelViewSet(viewsets.ModelViewSet):
     queryset = LabTestRequestPanel.objects.all()
     serializer_class = LabTestRequestPanelSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsSystemsAdminUser,)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

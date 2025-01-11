@@ -66,9 +66,7 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
         model = LabTestProfile
         fields = '__all__'        
 
-'''
-TODO: 
-'''
+
 class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     test_panel_name = serializers.ReadOnlyField(source='test_panel.name')
     item = serializers.CharField(source='test_panel.item.id', read_only=True)
@@ -79,14 +77,17 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     reference_values = serializers.SerializerMethodField()
     is_qualitative = serializers.ReadOnlyField(source='test_panel.is_qualitative')
     is_quantitative = serializers.ReadOnlyField(source='test_panel.is_quantitative')
+    eta = serializers.DurationField(source='test_panel.eta', read_only=True)
 
     def get_sale_price(self, instance):
         try:
-            inventory = instance.test_panel.item.inventory
-            return inventory.sale_price
+            inventory = instance.test_panel.item.active_inventory_items.first()
+            if inventory:
+                return inventory.sale_price
+            return None  # Handle case where no inventory is found
         except Inventory.DoesNotExist:
             raise NotFound('Inventory record not found for this item.')
-    
+        
     def get_patient_name(self, instance):
         if instance.patient_sample and instance.patient_sample.process:
             patient = instance.patient_sample.process.attendanceprocess.patient
@@ -146,7 +147,8 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
             'lab_test_request',
             'is_billed',
             'is_quantitative',
-            'is_qualitative'
+            'is_qualitative',
+            'eta',
         ]
 
 
@@ -161,11 +163,11 @@ class LabTestRequestSerializer(serializers.ModelSerializer):
     patient_last_name = serializers.ReadOnlyField(source='patient.second_name')
     test_profile_name = serializers.ReadOnlyField(source='test_profile.name')
     category = serializers.CharField(source='test_profile.category', read_only=True)
+    
 
     class Meta:
         model = LabTestRequest
         fields = "__all__"
-        #Removed id and sample as they were readonly
 
 
 class ProcessTestRequestSerializer(serializers.ModelSerializer):

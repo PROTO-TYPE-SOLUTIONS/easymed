@@ -64,7 +64,7 @@ const EditTestPanelModal = ({ open, setOpen, selectedRowData }) => {
     name: selectedRowData?.name || "",
     unit: getUnits() || "",
     is_qualitative: selectedRowData?.is_qualitative || false,
-    is_quantitative: selectedRowData?.is_qualitative || true
+    is_quantitative: selectedRowData?.is_quantitative || true
   };
 
   const validationSchema = Yup.object().shape({
@@ -82,7 +82,7 @@ const EditTestPanelModal = ({ open, setOpen, selectedRowData }) => {
         test_profile: formValue.test_profile.value,
         unit: formValue.unit.value,
         item: formValue.item.value,
-        is_quantitative: formValue.is_qualitative ? false : formValue.is_quantitative
+        is_quantitative: formValue.is_quantitative ? false : true
     };
 
     try {

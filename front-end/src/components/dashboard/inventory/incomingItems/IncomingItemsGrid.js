@@ -87,20 +87,14 @@ const IncomingItemsGrid = () => {
           showNavigationButtons={showNavButtons}
         />
         <Column dataField="item_code" caption="Item Code"/>
-        <Column 
-          dataField="item" 
-          caption="Product Name"
-          cellRender={(cellData) => {
-            const prodName = item.find(prod => prod.id === cellData.data.item);
-            return prodName ? `${prodName.name}` : 'NA';
-          }}   
-        />
+        <Column dataField="item_name" caption="Product Name" />
         <Column dataField="category_one" caption="Category"/>
+        <Column dataField="lot_no" caption="LOT NO"/>
+        <Column dataField="supplier_name" caption="Supplier"/>
+        <Column dataField="quantity" caption="Quantity"/>
         <Column dataField="purchase_price" caption="Purchase Price"/>
         <Column dataField="sale_price" caption="Sale price"  />
-        <Column dataField="lot_no" caption="LOT NO"/>
         <Column dataField="expiry_date" caption="Expiry DAte"/>
-        <Column dataField="quantity" caption="Quantity"/>
       </DataGrid>
     </section>
 

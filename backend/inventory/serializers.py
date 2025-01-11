@@ -2,9 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
-from decimal import Decimal
 from django.utils import timezone
-import random
 from django.contrib.auth import get_user_model
 from .models import (
     Item,
@@ -19,7 +17,9 @@ from .models import (
     PurchaseOrder,
     PurchaseOrderItem,
     InventoryInsuranceSaleprice,
-    GoodsReceiptNote
+    GoodsReceiptNote,
+    Quotation,
+    QuotationItem,
 )
 
 from .validators import (
@@ -39,6 +39,7 @@ class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = '__all__'
+
 
 class SupplierInvoiceSerializer(serializers.ModelSerializer):
     total_amount = serializers.DecimalField(source='amount', read_only=True, max_digits=10, decimal_places=2)
@@ -87,14 +88,14 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
 
     def get_buying_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
     def get_selling_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.sale_price
         except Inventory.DoesNotExist:
             return None
@@ -169,21 +170,21 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
 
     def get_buying_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.purchase_price
         except Inventory.DoesNotExist:
             return None
 
     def get_selling_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.sale_price
         except Inventory.DoesNotExist:
             return None
 
     def get_requested_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return float(obj.quantity_requested * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -201,7 +202,11 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
         return None  
 
     def get_quantity_at_hand(self, obj):
-        return obj.item.inventory.quantity_at_hand
+        try:
+            inventory = obj.item.active_inventory_items.first()
+            return inventory.quantity_at_hand if inventory else 0
+        except Exception as e:
+            return 0
 
     def get_approved_by(self, obj):
         if obj.requisition.approved_by:  
@@ -328,7 +333,13 @@ class RequisitionListSerializer(serializers.ModelSerializer):
         return len(distinct_items)
     
     def get_total_amount(self, obj):
-        return sum(item.get('requested_amount') for item in RequisitionItemListUpdateSerializer(obj.items, many=True).data)
+        total = 0
+        items_data = RequisitionItemListUpdateSerializer(obj.items.all(), many=True).data
+        for item in items_data:
+            amount = item.get('requested_amount')
+            if amount is not None:
+                total += float(amount)
+        return total
 
 class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     requisition_number = serializers.CharField(source='requisition_item.requisition.requisition_number', read_only=True)
@@ -343,8 +354,8 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     quantity_at_hand = serializers.SerializerMethodField()
     quantity_requested = serializers.IntegerField(source='requisition_item.quantity_requested', read_only=True)
     quantity_approved = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
-    quantity_ordered = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
-    preferred_supplier = serializers.CharField(source='requisition_item.preferred_supplier.official_name', read_only=True)
+    quantity_ordered = serializers.IntegerField(read_only=True)  
+    preferred_supplier = serializers.CharField(source='requisition_item.preferred_supplier.id', read_only=True)
     buying_price = serializers.SerializerMethodField()
     vat_rate = serializers.DecimalField(source='requisition_item.item.vat_rate', max_digits=5, decimal_places=2, read_only=True)
     selling_price = serializers.SerializerMethodField()
@@ -378,35 +389,35 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     def get_quantity_at_hand(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return inventory.quantity_at_hand
-        except Inventory.DoesNotExist:
+        except (Inventory.DoesNotExist, Exception) as e:
             return 0
 
     def get_buying_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return inventory.purchase_price
-        except Inventory.DoesNotExist:
-            return None
+        except (Inventory.DoesNotExist, Exception) as e:
+            return 0
 
     def get_selling_price(self, obj):
         try:
             inventory = Inventory.objects.get(item=obj.requisition_item.item)
             return inventory.sale_price
-        except Inventory.DoesNotExist:
-            return None
+        except (Inventory.DoesNotExist, Exception) as e:
+            return 0
 
     def get_requested_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return float(obj.requisition_item.quantity_requested * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
 
     def get_total_buying_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
             return float(obj.requisition_item.quantity_approved * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -438,7 +449,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
     def get_total_buying_amount(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
+            inventory = Inventory.objects.filter(item=obj.requisition_item.item).order_by('expiry_date').first()
             return float(obj.quantity_ordered * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
@@ -481,8 +492,9 @@ class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
         for req_item in requisition_items:
             PurchaseOrderItem.objects.create(
                 purchase_order=purchase_order,
-                requisition_item=req_item
-            )
+                requisition_item=req_item,
+                quantity_ordered=req_item.quantity_approved
+            )   
             req_item.ordered = True
             req_item.save()
 
@@ -533,9 +545,10 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         total = 0
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
-                inventory = Inventory.objects.get(item=item.requisition_item.item)
-                total += item.requisition_item.quantity_approved * inventory.purchase_price
-            except Inventory.DoesNotExist:
+                inventory = item.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
+                if inventory:
+                    total += item.requisition_item.quantity_approved * inventory.purchase_price
+            except (Inventory.DoesNotExist, Exception) as e:
                 continue
         return total
 
@@ -543,11 +556,11 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         total_vat = 0
         for item in PurchaseOrderItem.objects.filter(purchase_order=obj):
             try:
-                inventory = Inventory.objects.get(item=item.requisition_item.item)
+                inventory = item.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
                 amount = item.requisition_item.quantity_approved * inventory.purchase_price
                 vat = amount * (item.requisition_item.item.vat_rate / 100)
                 total_vat += vat
-            except Inventory.DoesNotExist:
+            except (Inventory.DoesNotExist, Exception) as e:
                 continue
         return total_vat
 
@@ -566,7 +579,7 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         model = IncomingItem
         fields = ['id', 'item', 'item_name', 'item_code', 'supplier', 'supplier_name', 'purchase_price', 
                  'sale_price', 'quantity', 'supplier_invoice', 'purchase_order', 
-                 'lot_no', 'expiry_date', 'total_price', 'date_created']
+                 'lot_no', 'expiry_date', 'total_price', 'date_created', 'category_one']
         read_only_fields = ['date_created', 'total_price', 'item_code']
     
     def get_total_price(self, obj):
@@ -575,9 +588,12 @@ class IncomingItemSerializer(serializers.ModelSerializer):
 class InventorySerializer(serializers.ModelSerializer):
     insurance_sale_prices = serializers.SerializerMethodField()
     item_name = serializers.ReadOnlyField(source='item.name')
+    total_quantity = serializers.SerializerMethodField()
     class Meta:
         model = Inventory
-        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 'quantity_at_hand', 'date_created', 'category_one', 'insurance_sale_prices']
+        fields = ['id', 'item', 'item_name', 'purchase_price', 'sale_price', 
+                 'quantity_at_hand', 'lot_number', 'expiry_date', 'date_created', 
+                 'category_one', 'insurance_sale_prices', 'total_quantity']
 
     def get_insurance_sale_prices(self, obj):
         sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
@@ -592,12 +608,105 @@ class InventorySerializer(serializers.ModelSerializer):
             insurance_prices.append(insurance_price)
         return insurance_prices
 
+    def get_total_quantity(self, obj):
+        '''Get total quantity across all lots for this item'''
+        total = Inventory.objects.filter(item=obj.item).order_by('expiry_date').aggregate(
+            total_qty=Sum('quantity_at_hand'))['total_qty'] or 0
+        return total
 
 class DepartmentInventorySerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    department_name = serializers.CharField(source='department.name', read_only=True)
+    transfer_quantity = serializers.IntegerField(write_only=True, required=True)
+
     class Meta:
         model = DepartmentInventory
-        fields = '__all__'
+        fields = ['id', 'department', 'department_name', 'item', 'item_name',
+                 'quantity_at_hand', 'lot_number', 'expiry_date', 'purchase_price',
+                 'sale_price', 'date_created', 'transfer_quantity']
+        read_only_fields = ['quantity_at_hand', 'lot_number', 'expiry_date', 
+                          'purchase_price', 'sale_price', 'date_created']
 
+    def validate(self, attrs):
+        if not attrs.get('department'):
+            raise serializers.ValidationError({
+                "department": "Department is required"
+            })
+
+        if not attrs.get('item'):
+            raise serializers.ValidationError({
+                "item": "Item is required"
+            })
+
+        transfer_quantity = attrs['transfer_quantity']
+        if transfer_quantity <= 0:
+            raise serializers.ValidationError({
+                "transfer_quantity": "Transfer quantity must be greater than 0"
+            })
+
+        available_inventory = Inventory.objects.filter(
+            item=attrs['item'],
+            quantity_at_hand__gt=0
+        ).order_by('expiry_date')
+
+        if not available_inventory.exists():
+            raise serializers.ValidationError({
+                "item": "No inventory available for this item"
+            })
+
+        total_available = sum(inv.quantity_at_hand for inv in available_inventory)
+        if total_available < transfer_quantity:
+            raise serializers.ValidationError({
+                "transfer_quantity": f"Insufficient quantity available. Requested: {transfer_quantity}, Available: {total_available}"
+            })
+
+        attrs['available_inventory'] = available_inventory
+        return attrs
+
+    def create(self, validated_data):
+        transfer_quantity = validated_data.pop('transfer_quantity')
+        available_inventory = validated_data.pop('available_inventory')
+        department = validated_data['department']
+        item = validated_data['item']
+        remaining_quantity = transfer_quantity
+        created_records = []
+
+        with transaction.atomic():
+            for inventory in available_inventory:
+                if remaining_quantity <= 0:
+                    break
+
+                batch_quantity = min(remaining_quantity, inventory.quantity_at_hand)
+                
+                dept_inventory = DepartmentInventory.objects.filter(
+                    department=department,
+                    item=item,
+                    lot_number=inventory.lot_number
+                ).first()
+
+                if dept_inventory:
+                    dept_inventory.quantity_at_hand += batch_quantity
+                    dept_inventory.save()
+                    created_records.append(dept_inventory)
+                else:
+                    dept_inventory = DepartmentInventory.objects.create(
+                        department=department,
+                        item=item,
+                        quantity_at_hand=batch_quantity,
+                        lot_number=inventory.lot_number,
+                        expiry_date=inventory.expiry_date,
+                        purchase_price=inventory.purchase_price,
+                        sale_price=inventory.sale_price,
+                        main_inventory=inventory
+                    )
+                    created_records.append(dept_inventory)
+
+                inventory.quantity_at_hand -= batch_quantity
+                inventory.save()
+                
+                remaining_quantity -= batch_quantity
+
+        return created_records[0]
 
 class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='inventory_item.item.name')
@@ -611,4 +720,16 @@ class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
 class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = GoodsReceiptNote
+        fields = '__all__'
+
+
+class QuotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quotation
+        fields = '__all__'
+
+
+class QuotationItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuotationItem
         fields = '__all__'

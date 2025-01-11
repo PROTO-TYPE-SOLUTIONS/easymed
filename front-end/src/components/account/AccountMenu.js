@@ -36,7 +36,7 @@ const AccMenuChild = ({ collapsed, menu, index }) => {
       ) : (
         <>
           <Link
-            className={`${currentPath === menu.href ? 'bg-light text-primary_light' : ''} flex text-xs items-center gap-2 hover:bg-yellow hover:text-black rounded py-2 px-8`}
+            className={`${currentPath === menu.href ? 'bg-light text-primary_light' : ''} flex text-xs items-center gap-2 hover:bg-light hover:text-black rounded py-2 px-8`}
             href={menu.href}
           >
             <span className="w-6">{menu.icon}</span>{" "}

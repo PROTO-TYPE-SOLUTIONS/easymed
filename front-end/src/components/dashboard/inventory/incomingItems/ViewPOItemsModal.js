@@ -36,7 +36,7 @@ const getActions = () => {
     return actions;
   };
 
-const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItems }) => {
+const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItems, createdIncomings }) => {
     const auth = useAuth()
     const dispatch = useDispatch()
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -75,6 +75,27 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
             />
         );
       };
+
+     const renderLotNumber = ({ data }) => {
+        const relatedItem = createdIncomings.find((incoming)=> incoming.item === data.item)
+        if(relatedItem){
+            return relatedItem.lot_no
+        }
+     }
+
+     const renderExpiryDate = ( {data} ) => {
+        const relatedItem = createdIncomings.find((incoming)=> incoming.item === data.item)
+        if(relatedItem){
+            return relatedItem.expiry_date
+        }
+     }
+
+     const renderCategory = ( {data} ) => {
+        const relatedItem = createdIncomings.find((incoming)=> incoming.item === data.item)
+        if(relatedItem){
+            return relatedItem.category_one
+        }
+      }
 
     return (
         <section>
@@ -116,14 +137,45 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
                 caption="Item name"
             />
             <Column dataField="preferred_supplier_name" caption="Preferred Supplier" />
-            <Column 
-                dataField="expiry_date"
-                caption="Expiry Date" 
-            />
-            <Column 
-                dataField="lot_no"
-                caption="LOT No" 
-            />
+            { createdIncomings.length <= 0 && (
+                    <Column 
+                        dataField="category_one"
+                        caption="Category"
+                    />
+            )}
+            { createdIncomings.length <= 0 && (
+                    <Column 
+                        dataField="expiry_date"
+                        caption="Expiry Date"
+                    />
+            )}
+            { createdIncomings.length <= 0 && (
+                    <Column 
+                        dataField="lot_no"
+                        caption="LOT No"
+                    />
+            )}
+            { createdIncomings.length > 0 && (
+                    <Column 
+                        dataField="category_one"
+                        caption="Category"
+                        cellRender={renderCategory}
+                    />
+            )}
+            { createdIncomings.length > 0 && (
+                    <Column 
+                        dataField="expiry_date"
+                        caption="Expiry Date"
+                        cellRender={renderExpiryDate}
+                    />
+            )}
+            { createdIncomings.length > 0 && (
+                    <Column 
+                        dataField="lot_no"
+                        caption="LOT No"
+                        cellRender={renderLotNumber}
+                    />
+            )}
             <Column
                 dataField="quantity_approved"
                 caption="Quantity Approved" 
@@ -158,6 +210,7 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
             editOpen={editOpen} setEditOpen={setEditOpen} selectedEditRowData={selectedEditRowData} 
             setSelectedEditRowData={setSelectedEditRowData}
             po={selectedRowData} setSelectedRowData={setSelectedRowData}
+            createdIncomings={createdIncomings}
 
         />
         </section>

@@ -1,7 +1,12 @@
 import pytest
+from datetime import date
+
 from django.contrib.auth import get_user_model
-from customuser.models import CustomUser
+
+from customuser.models import CustomUser, Doctor, DoctorProfile, PatientUser
 from company.models import InsuranceCompany
+from patient.models import Patient
+from company.models import Company
 from inventory.models import (
     Department,
     Supplier,
@@ -39,6 +44,55 @@ def authenticated_client(client, django_user_model, user):
     refresh = RefreshToken.for_user(user)
     client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {refresh.access_token}'
     return client
+
+@pytest.fixture
+def company(db):
+    return Company.objects.create(
+        name="Test Company",
+        logo=None  # Update with a valid file or `None` to test missing logo behavior.
+    )
+
+@pytest.fixture
+def patient(db):
+    user = PatientUser.objects.create(
+        email="patientuser@example.com",
+        password="password123",
+        first_name="Alice",
+        last_name="Smith",
+        role=CustomUser.PATIENT,
+        date_of_birth=date(1990, 1, 1),
+        phone="1234567890",
+    )
+
+    insurance_1 = InsuranceCompany.objects.create(name="Insurance A")
+    insurance_2 = InsuranceCompany.objects.create(name="Insurance B")
+
+    patient = Patient.objects.create(
+        first_name=user.first_name,
+        second_name=user.last_name,
+        date_of_birth=user.date_of_birth,
+        gender="F",
+        user=user
+    )
+
+    patient.insurances.add(insurance_1, insurance_2)
+
+    return patient
+
+@pytest.fixture
+def doctor(db):
+    user = Doctor.objects.create(
+        email="doctoruser@example.com",
+        password="password123",
+        first_name="John",
+        last_name="Doe",
+        role=CustomUser.DOCTOR,
+        date_of_birth=date(1985, 5, 15),
+        phone="0987654321",
+    )
+
+    doctor_profile = DoctorProfile.objects.create(user=user)
+    return user
 
 
 @pytest.fixture
@@ -87,6 +141,7 @@ def purchase_order(user, requisition):
         requisition=requisition,
     )
 
+
 @pytest.fixture
 def purchase_order_item(purchase_order, requisition_item, supplier):
     return PurchaseOrderItem.objects.create(
@@ -94,12 +149,22 @@ def purchase_order_item(purchase_order, requisition_item, supplier):
         requisition_item=requisition_item
     )
 
+@pytest.fixture
+def supplier_invoice(db, supplier, purchase_order):
+    return SupplierInvoice.objects.create(
+        invoice_no="INV-2024-002",
+        status="pending",
+        supplier=supplier,
+        purchase_order=purchase_order
+    )
+
 
 @pytest.fixture
-def incoming_item(item, supplier, purchase_order):
+def incoming_item(item, supplier, purchase_order, supplier_invoice):
     return IncomingItem.objects.create(
         item=item,
         supplier=supplier,
+        supplier_invoice=supplier_invoice,
         purchase_order=purchase_order,
         quantity=10,
         sale_price=20.0,
@@ -114,14 +179,6 @@ def inventory(item):
         quantity_at_hand=10,
     )
 
-@pytest.fixture
-def supplier_invoice(db, supplier, purchase_order):
-    return SupplierInvoice.objects.create(
-        invoice_no="INV-2024-002",
-        status="pending",
-        supplier=supplier,
-        purchase_order=purchase_order
-    )
 
 
 @pytest.fixture
