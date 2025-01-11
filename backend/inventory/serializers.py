@@ -2,9 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
-from decimal import Decimal
 from django.utils import timezone
-import random
 from django.contrib.auth import get_user_model
 from .models import (
     Item,
@@ -22,7 +20,6 @@ from .models import (
     GoodsReceiptNote,
     Quotation,
     QuotationItem,
-    QuotationCustomer
 )
 
 from .validators import (
@@ -358,7 +355,7 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     quantity_requested = serializers.IntegerField(source='requisition_item.quantity_requested', read_only=True)
     quantity_approved = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
     quantity_ordered = serializers.IntegerField(read_only=True)  
-    preferred_supplier = serializers.CharField(source='requisition_item.preferred_supplier.official_name', read_only=True)
+    preferred_supplier = serializers.CharField(source='requisition_item.preferred_supplier.id', read_only=True)
     buying_price = serializers.SerializerMethodField()
     vat_rate = serializers.DecimalField(source='requisition_item.item.vat_rate', max_digits=5, decimal_places=2, read_only=True)
     selling_price = serializers.SerializerMethodField()
@@ -582,7 +579,7 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         model = IncomingItem
         fields = ['id', 'item', 'item_name', 'item_code', 'supplier', 'supplier_name', 'purchase_price', 
                  'sale_price', 'quantity', 'supplier_invoice', 'purchase_order', 
-                 'lot_no', 'expiry_date', 'total_price', 'date_created']
+                 'lot_no', 'expiry_date', 'total_price', 'date_created', 'category_one']
         read_only_fields = ['date_created', 'total_price', 'item_code']
     
     def get_total_price(self, obj):

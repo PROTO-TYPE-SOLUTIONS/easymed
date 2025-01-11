@@ -146,6 +146,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
                     />
                     </Grid>
                     <Grid item md={12} xs={12}>
+                    <label>Quantity Requested</label>
                     <Field
                         className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                         maxWidth="sm"
@@ -159,6 +160,7 @@ const EditRequisitionItemModal = ({ editOpen, setEditOpen, selectedEditRowData, 
                     />
                     </Grid>
                     <Grid item md={12} xs={12}>
+                    <label>Quantity Approved</label>
                     <Field
                         className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                         maxWidth="sm"

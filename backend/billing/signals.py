@@ -42,6 +42,7 @@ def update_related_models(sender, instance, **kwargs):
         update_service_billed_status(instance)     
 
 
+
 @receiver(pre_save, sender=InvoiceItem)
 def check_quantity_before_billing(sender, instance, **kwargs):
     '''
@@ -66,6 +67,7 @@ def check_quantity_before_billing(sender, instance, **kwargs):
     else:
         # Handle new creation logic if needed
         pass
+
 
 
 

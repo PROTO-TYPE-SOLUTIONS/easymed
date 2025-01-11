@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from easymed.celery_tasks import update_stock_quantity_if_stock_is_available
 from inventory.models import Inventory
 from patient.models import AttendanceProcess, PrescribedDrug
@@ -44,11 +46,18 @@ def update_service_billed_status(instance):
 
 
 def get_available_stock(instance):
-    '''
-    Function to get the available inventory stock for passed instance 
-    '''
-    inventory_item = Inventory.objects.get(item=instance.item)
-    return inventory_item.quantity_at_hand
+    inventory_items = Inventory.objects.filter(item=instance.item)
+    if not inventory_items.exists():
+        return 0
+
+    current_date = datetime.now().date()
+    closest_item = min(
+        (item for item in inventory_items if item.expiry_date is not None),
+        key=lambda x: abs(x.expiry_date - current_date),
+        default=None  # in case all items have None expiry_date, this avoids an error
+    )
+
+    return closest_item.quantity_at_hand
 
 
 def check_quantity_availability(instance):

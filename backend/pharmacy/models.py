@@ -37,3 +37,13 @@ class PublicPrescriptionRequest(models.Model):
             patient_age:int = (datetime.now().year - self.patient.date_of_birth.year)
             return patient_age
         return None
+
+class DrugsFeedback(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    drug = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
+    date_created = models.DateField(auto_now_add=True)
+    date_changed = models.DateField(auto_now=True)
+    feedback = models.TextField(max_length=1000, null=True, blank=True)  
+
+    def __str__(self):
+        return f"DrugsFeedback #{self.drug.name}"
