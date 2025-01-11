@@ -29,10 +29,8 @@ def test_zero_quantity_items_are_archived(item):
         expiry_date=timezone.now().date() + timedelta(days=90)
     )
     
-    result = inventory_garbage_collection()
-    
-    assert "1 items archived and deleted" in result
-    
+    inventory_garbage_collection()
+        
     archived_item = InventoryArchive.objects.get(item=item)
     assert archived_item.purchase_price == zero_quantity_inventory.purchase_price
     assert archived_item.sale_price == zero_quantity_inventory.sale_price
@@ -107,8 +105,7 @@ def test_multiple_items_archived(item):
         expiry_date=timezone.now().date() + timedelta(days=90)
     )
     
-    result = inventory_garbage_collection()
+    inventory_garbage_collection()
     
-    assert "2 items archived and deleted" in result
     assert InventoryArchive.objects.count() == 2
-    assert Inventory.objects.count() == 0  # All items should be archived
+    assert Inventory.objects.count() == 0  

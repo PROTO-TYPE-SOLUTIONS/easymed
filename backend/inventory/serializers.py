@@ -20,6 +20,8 @@ from .models import (
     GoodsReceiptNote,
     Quotation,
     QuotationItem,
+    QuotationCustomer,
+    InventoryArchive
 )
 
 from .validators import (
@@ -716,6 +718,10 @@ class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
         model = InventoryInsuranceSaleprice
         fields = '__all__'
 
+class InventoryArchiveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryArchive
+        fields = '__all__'
 
 class GoodsReceiptNoteSerializer(serializers.ModelSerializer):
     class Meta:
