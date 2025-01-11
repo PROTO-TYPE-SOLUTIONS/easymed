@@ -1,27 +1,37 @@
-# 1.0.0 Getting Started
-
+# Getting Started
 Repository for Make-Easy HMIS
 
-Checkout the Wiki page for the technical implementation
+# 1. How to Run the Project
+The project is divided into two parts, the frontend and the backend.
+The frontend is built with Next.js and the backend with Django.
+The backend is a Django hat serves the frontend. 
+The frontend is a NextJs dashboard that consumes the API.
+The easiest way to get started is to use Docker. In teh root directory
+there is a `docker-compose-local.yml` file that will set up all
+the services you need including celery and redis. As of September,
+backend uses sqlite, so no need to set up external postgres,.
+This will however be changed when deployed. However, for local
+development, I advice you use `docker-compose-local.yml`. 
 
-## 1.2.0 Running with Docker
-
-If you're running with docker, inside ./src/assets/backend-axios-instance/index.js
-with docker baseURL = baseURL: "http://backend:8000",
-Make sure you have the .env filed specified in the `docker-compose-local.yml` or `docker-compose.yml`
+## i. Running with Docker
+If you're running with docker, inside `./src/assets/backend-axios-instance/index.js`
+update the `baseURL` with `baseURL = baseURL: "http://backend:8000"`. Frontend will use the backend
+container's name as the baseURL.
+Make sure you have the `.env` file specified in the `docker-compose-local.yml` or `docker-compose.yml`.
+You can simply rename the `.env.local` to `.env` and update the variables accordingly.
 In the root directory run;
 `docker compose up` 
 If you want to run the development version, run:
-`docker compose -f docker-compose-local.yml`
-Frontend will be running on http://backend:3000 and backend on http://backend:8000
-This well set up all the services you need including celery and redis. As of September, backend uses sqlite, so no need to set up external postgres,. This will however be changed when deployed.
+`docker compose -f docker-compose-local.yml up`
+Frontend will be running on `http://127.0.0.1:3000` and backend on `http://127.0.0.1:8000`
+This well set up all the services you need including celery and redis. As of the latest revision of this docs, backend uses sqlite, so no need to set up external postgres,. This will however be changed when deployed.
 
-After the steps above, jump to Adding Permissions and add permissions.
+After the steps above, jump to Adding Permissions and add permissions. You can also check notifications while at it.
 
-## 1.3.0 Running Manually
-I highly suggest you use docker. However, if for some reason or the other you're not able to use docker, follow the steps below to run manually.
+## ii. Running Manually
+I highly suggest you use docker as explained above. However, if for some reason or the other you're not able to use docker, follow the steps below to run manually.
 
-## 1.3.1 Running Backend
+### Backend
 First rename the `./backend/.env.local` to `.env` with the sample code inside
 
 ### i) Windows
@@ -32,7 +42,7 @@ virtualenv venv
 venv\scripts\activate
 cd backend
 pip install -r requirements.txt
-python manage.py makemigrations
+python manage.py makemigrations customuser authperms patient pharmacy inventory laboratory company receptions billing announcement
 python manage.py migrate
 python manage.py runserver
 ```
@@ -49,53 +59,51 @@ python manage.py makemigrations customuser authperms patient pharmacy inventory 
 python manage.py migrate
 python manage.py runserver
 ```
-
-Create a superuser with `python manage.py createsuperuser`
+All looks good if you can see the djago admin panel at `127.0.0.1:8080/admin`
+Kill the server for now and create a superuser with `python manage.py createsuperuser`
 You'll use this account to log into the dashboard in frontend
 
-To register patients using landing page, create a group in django Admin called PATIENT
+To register patients using landing page, create a group in django Admin called PATIENT, but we'll dive deeper in this in the permissions section.
 
-API Endpoints:
+To browse available endpoints, visit:
 ```
 127.0.0.1:8085/docs/swagger/
 ```
-## Running celery
+### Celery and Redis
 If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
 `pip install celery redis`
 Run Celery: `celery -A easymed worker --loglevel=INFO`
 Run Redis: `redis-cli -h 127.0.0.1 -p 6379`
 
-## Running celery beat
+### Celery beat
 If not installed already, install celery and redis INSIDE YOUR VIRTUAL ENV
 `pip install celery redis`
 Run Celery: `celery -A easymed beat --loglevel=INFO`
 
-## Testing Socket connection for notifications
-Django's runserver does not support asgi (socket connections required for notifications)
-run with uvicorn to have the notifications working
-`uvicorn --port 8080 easymed.asgi:application`
 
-Currently, the notifications are sent to the group `doctor_notifications` and `inventory_notifications`
+## Frontend
+Update the baseURL inside `./src/assets/backend-axios-instance/index.js` to `"http://127.0.0.1:8000",`
 
-On a separate terminal
-`npm install -g wscat`
+#### First, create a .env file in the same directory as the src folder then add the following:
+- NEXT_PUBLIC_HMIS_VERSION=v0.0.1-alpha-0.1
+- NEXT_PUBLIC_BASE_URL=""
 
-# Patient Notifications
-on a separate terminal
-`wscat -c ws://localhost:8080/ws/doctor_notifications/` <-- appointment assigned notification will be seen here
+Install dependencies:
+```
+npm install
+```
+Lastly run the development server using:
+```
+npm run dev
+```
+Dev version can be a little slow. To run a faster build version, use the following commands:
+```
+npm run build
+npm start
+```
+Visit localhost `127.0.0.1:3000/dashboard`
 
-# Inventory Notifications
-First navigate to the admin panel and assign permission`CAN_RECEIVE_INVENTORY_NOTIFICATIONS` to a group to ensure specific users receive notifications via email
-
-Example:
-- Group: `LAB_TECH`
-- Permission: `CAN_RECEIVE_INVENTORY_NOTIFICATIONS`
-
-on a separate terminal
-`wscat -c ws://localhost:8080/ws/inventory_notifications/` <-- inventory notification will be seen here
-
-
-## Adding Permissions
+# 2.  Adding Permissions
 You need to create groups and associate permissions. make sure groups follow this order `SYS_ADMIN`, `PATIENT` group then the rest ie `DOCTOR`,`PHARMACIST`, `RECEPTIONIST`, `LAB_TECH` , `NURSE`
 Then create permissions below and link to the `GROUPS`.
 N/B: Frontend will not work without permissions and Groups set up.
@@ -117,27 +125,37 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 
 You will notice that we have a Role and a Group. A group is associated with permissions which determines which specific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
 
-## 1.3.2 Running FrontEnd
-Inside ./src/assets/backend-axios-instance/index.js
-running manually = baseURL: "http://127.0.0.1:8000",
+# 3. Notifications
 
-#### First, create a .env file in the same directory as the src folder then add the following:
-- NEXT_PUBLIC_HMIS_VERSION=v0.0.1-alpha-0.1
-- NEXT_PUBLIC_BASE_URL=""
+### i. Testing Socket connection for notifications
+Django's runserver does not support asgi (socket connections required for notifications)
+run with uvicorn to have the notifications working
+`uvicorn --port 8080 easymed.asgi:application`
 
-Lastly run the development server using:
-```
-npm run dev
-```
-Dev version can be a little slow. To run a faster build version, use the follwoing commands:
-```
-npm run build
-npm start
-```
-Visit localhost 127.0.0.1:3000/dashboard
+Currently, the notifications are sent to the group `doctor_notifications` and `inventory_notifications`
+
+On a separate terminal
+`npm install -g wscat`
 
 
-## a word on patient processes
+### ii. Patient Notifications
+on a separate terminal
+`wscat -c ws://localhost:8080/ws/doctor_notifications/` <-- appointment assigned notification will be seen here
+
+### iii. Inventory Notifications
+First navigate to the admin panel and assign permission`CAN_RECEIVE_INVENTORY_NOTIFICATIONS` to a group to ensure specific users receive notifications via email
+
+Example:
+- Group: `LAB_TECH`
+- Permission: `CAN_RECEIVE_INVENTORY_NOTIFICATIONS`
+
+on a separate terminal
+`wscat -c ws://localhost:8080/ws/inventory_notifications/` <-- inventory notification will be seen here
+
+
+
+
+# 4. A word on patient processes
 Each process starting form Appointment, should be billed first before it's actioned.
 For Billing to work, these should be updated in order.
 Patient must have Insurance if not, cash will be picked by default.
@@ -147,7 +165,7 @@ Add Inventory for that item
 Add InsuranceSalePrise for specific Items depending on the Insurance
 
 
-# 1.5.0 Reporting
+# 5.  Reporting
 ## Sale by Date Range
 To generate sales by given date, send sample request as shown below
 `curl -X POST http://localhost:8080/reports/sale_by_date/   -H "Content-Type: application/json"   -d '{"start_date": "2024-02-01", "end_date": "2024-02-18"}' > report-log.txt`
@@ -195,7 +213,7 @@ Generates a receipt note for incoming items
 
 
 
-# 1.6.0 Laboratory Integration
+# 6. Laboratory Integration
 Due to the complexity of the lab module, the integration will be handled by a parser which 
 is hosted on a separate repository [here](https://github.com/mosesmbadi/hl7_astm_parser).
 Here's an overview of the process;
@@ -204,7 +222,7 @@ Here's an overview of the process;
 3. The backend receives the JSON and saves to the database
 4. If the incoming message is JSON, the parser will extract the equipment name, convirts the JSON to HL7 or ASTM and sends to the equipment.
 
-# 1.7.0  System Requirements
+# 7  System Requirements
 Minimum system specifications
 RAM 8GB
 Disk SSD 250GB
@@ -216,5 +234,9 @@ For equipment with any other form of coms other than TCP/Ethernet,
 will need to be configured with additional hardware that converts
 the coms to TCP
 A device such us [this](https://www.whizz.co.ke/product/1443079/usr-tcp232-302-tiny-size-rs232-to-tcp-ip-converter-serial-rs232-to-ethernet-server-module-ethernet-converter-support-dhcp-dns/), can work.
+
+
+Last Revised January, 11, 2025, by [Moses Mbadi](https://www.linkedin.com/in/moses-mbadi-0b8500198/)
+
 
 
