@@ -90,6 +90,13 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
         }
      }
 
+     const renderCategory = ( {data} ) => {
+        const relatedItem = createdIncomings.find((incoming)=> incoming.item === data.item)
+        if(relatedItem){
+            return relatedItem.category_one
+        }
+      }
+
     return (
         <section>
 
@@ -132,6 +139,12 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
             <Column dataField="preferred_supplier_name" caption="Preferred Supplier" />
             { createdIncomings.length <= 0 && (
                     <Column 
+                        dataField="category_one"
+                        caption="Category"
+                    />
+            )}
+            { createdIncomings.length <= 0 && (
+                    <Column 
                         dataField="expiry_date"
                         caption="Expiry Date"
                     />
@@ -140,6 +153,13 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
                     <Column 
                         dataField="lot_no"
                         caption="LOT No"
+                    />
+            )}
+            { createdIncomings.length > 0 && (
+                    <Column 
+                        dataField="category_one"
+                        caption="Category"
+                        cellRender={renderCategory}
                     />
             )}
             { createdIncomings.length > 0 && (

@@ -44,6 +44,7 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
     // item_code: selectedEditRowData.item_code || "",
     // selling_price: selectedEditRowData.selling_price || "",
     // buying_price: selectedEditRowData.buying_price || "", 
+    category_one: selectedEditRowData.lot_no || "", 
     lot_no: selectedEditRowData.lot_no || "",
     expiry_date: selectedEditRowData.expiry_date || "",
     quantity_received: selectedEditRowData.quantity_received || ""
@@ -79,9 +80,10 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
         
           // Create a copy of the items array and update the specific item
           const updatedItems = [...po.items];
-          updatedItems[gottenReqItemIndex] = formValue;
-
-          console.log(" UPDATED THE FUCKING ITEM TOOOOOO", updatedItems[gottenReqItemIndex])
+          updatedItems[gottenReqItemIndex] = {
+            ...formValue,
+            category_one: formValue.category_one.value
+          };
         
           // Create a new requisition object with the updated items array
           const updatedRequisition = {
@@ -177,6 +179,19 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
                         className="text-warning text-xs"
                     />
                   </Grid>
+                  {createdIncomings.length <= 0 && (
+                  <Grid className='my-2' item md={12} xs={12}>
+                    <SeachableSelect
+                      label="Select Category"
+                      name="category_one"
+                      options={[{value: "Resale", name: "Resale"}, {value: "Internal", name: "Internal"}].map((cat) => ({ value: cat.value, label: `${cat?.name}` }))}
+                    />
+                    <ErrorMessage
+                      name="category_one"
+                      component="div"
+                      className="text-warning text-xs"
+                    />
+                  </Grid>)}
                   
                   {createdIncomings.length <= 0 && (
                     <Grid item md={6} xs={12}>
