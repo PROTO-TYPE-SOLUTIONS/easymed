@@ -141,6 +141,7 @@ def purchase_order(user, requisition):
         requisition=requisition,
     )
 
+
 @pytest.fixture
 def purchase_order_item(purchase_order, requisition_item, supplier):
     return PurchaseOrderItem.objects.create(

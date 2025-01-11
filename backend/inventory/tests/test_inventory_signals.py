@@ -141,6 +141,7 @@ def test_update_purchase_order_status_partial(purchase_order, purchase_order_ite
     assert purchase_order.status == PurchaseOrder.Status.PARTIAL
 
 
+
 @pytest.mark.django_db
 def test_update_purchase_order_status_multiple_items(purchase_order):
     purchase_order_item1 = PurchaseOrderItem.objects.create(
