@@ -18,7 +18,7 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
   const auth = useAuth()
 
   useEffect(() =>{
-    dispatch(getAllInsurance());
+    dispatch(getAllInsurance(auth));
   },[])
 
   const handleClose = () => {
@@ -35,12 +35,24 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
     }
   }
 
+  const patientInsurances = () =>{
+    if(selectedRowData?.insurances?.length > 0){
+      let ids = [];
+      selectedRowData?.insurances.forEach((insurance)=> {
+        ids.push(`${insurance.id}`)
+      })
+      return ids 
+    }else{
+      return null
+    }
+  }
+
   const initialValues = {
     first_name: selectedRowData?.first_name || "",
     second_name: selectedRowData?.second_name || "",
     date_of_birth: selectedRowData?.date_of_birth || "",
     gender: getGenderValue() || "",
-    insurance: selectedRowData?.insurance || null,
+    insurances: patientInsurances(),
     user_id: selectedRowData?.user_id || null,
     phone: selectedRowData?.phone || null,
     email: selectedRowData?.email || null
@@ -176,23 +188,27 @@ const EditPatientDetails = ({ open, setOpen, selectedRowData }) => {
                       className="text-warning text-xs"
                     />
                   </Grid>
-                  <Grid item md={4} xs={12}>
+                  <Grid item md={3} xs={12}>
+                    <label htmlFor="insurances">Insurance</label>
                     <Field
-                      as="select"
-                      className="block pr-9 border border-gray py-3 px-4 focus:outline-none w-full"
-                      name="insurance"
+                        as="select"
+                        className="block pr-9 border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                        name="insurances" 
+                        multiple={true} 
                     >
-                      <option value="">Select Insurance</option>
-                      {insurance.map((item) => (
-                        <option key={item?.id} value={item.id}>
-                          {item?.name}
+                        <option value="" disabled>
+                            Select Insurance
                         </option>
-                      ))}
+                        {insurance.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.name}
+                            </option>
+                        ))}
                     </Field>
                     <ErrorMessage
-                      name="insurance"
-                      component="div"
-                      className="text-warning text-xs"
+                        name="insurances"
+                        component="div"
+                        className="text-warning text-xs"
                     />
                   </Grid>
                 </Grid>
