@@ -338,12 +338,19 @@ def download_requisition_pdf(request, requisition_id):
     This view gets the geneated pdf and downloads it locally
     pdf accessed here http://127.0.0.1:8080/download_requisition_pdf/26/
     '''
-    print(requisition_id)
+    company = Company.objects.first()
+    company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
     requisition = get_object_or_404(Requisition, pk=requisition_id)
-    print(requisition)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
-    print(requisition_items)
-    html_template = get_template('requisition.html').render({'requisition': requisition, 'requisition_items': requisition_items})
+
+    context = {
+        'requisition': requisition,
+        'requisition_items': requisition_items,
+        'company': company,
+        'company_logo_url': company_logo_url
+    }
+
+    html_template = get_template('requisition.html').render(context)
     
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')

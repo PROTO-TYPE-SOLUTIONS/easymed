@@ -96,7 +96,6 @@ class Requisition(models.Model):
     procurement_approved = models.BooleanField(default=False)
     department_approval_date = models.DateTimeField(null=True, blank=True)
     procurement_approval_date = models.DateTimeField(null=True, blank=True)
-    
     department = models.ForeignKey(Department, on_delete=models.CASCADE, max_length=255, null=False, blank=False)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='req_requested_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='req_approved_by')
@@ -123,7 +122,6 @@ class RequisitionItem(models.Model):
     quantity_approved = models.IntegerField(default=0)  
     date_created = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=False)
-
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)

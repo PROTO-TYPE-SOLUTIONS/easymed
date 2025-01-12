@@ -11,15 +11,15 @@ from .models import InvoiceItem
 @receiver(post_save, sender=InvoiceItem)
 def handle_invoice_item_created(sender, instance, created, **kwargs):
     ''''
-    whenever an invoice item is created add the resulting price for the item to the invoice
+    whenever an invoice item is created, add the resulting price for the item to the invoice
     '''
     if created:  # Only proceed if the InvoiceItem instance was created
         if instance.invoice:
             invoice = instance.invoice
-            # Fetch the related Inventory instance for the Item
-            try:
-                inventory = Inventory.objects.get(item=instance.item)
-            except Inventory.DoesNotExist:
+            # Fetch the related Inventory instance for the Item using filter() instead of get()
+            inventory = Inventory.objects.filter(item=instance.item).first()  # Get the first match or None
+
+            if not inventory:
                 # Handle the case where no Inventory instance is found for the Item
                 return
 

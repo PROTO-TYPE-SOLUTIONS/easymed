@@ -1,19 +1,28 @@
-from rest_framework import viewsets, status
+import os
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
-from patient.models import Patient
-from rest_framework import generics
+from rest_framework import generics, viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from django.template.loader import get_template
+
+from company.models import Company
+from patient.models import Patient
+from patient.models import AttendanceProcess
+
 
 from .models import (
     LabReagent,
     LabTestRequest,
     LabTestProfile,
     LabEquipment,
-    EquipmentTestRequest,
     PublicLabTestRequest,
     LabTestPanel,
     LabTestRequestPanel,
@@ -27,7 +36,6 @@ from .serializers import (
     LabTestRequestSerializer,
     LabTestProfileSerializer,
     LabEquipmentSerializer,
-    EquipmentTestRequestSerializer,
     PublicLabTestRequestSerializer,
     LabTestPanelSerializer,
     LabTestRequestPanelSerializer,
@@ -46,16 +54,6 @@ from authperms.permissions import (
     IsPatientUser
 )
 
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.conf import settings
-import os
-
-from django.template.loader import render_to_string
-from weasyprint import HTML
-from django.template.loader import get_template
-from company.models import Company
-from patient.models import AttendanceProcess
 
 
 # filters
@@ -188,11 +186,6 @@ class LabTestRequestByProcessId(generics.ListAPIView):
     def get_queryset(self):
         process_id = self.kwargs['process_id']
         return LabTestRequest.objects.filter(process_id=process_id)
-
-class EquipmentTestRequestViewSet(viewsets.ModelViewSet):
-    queryset = EquipmentTestRequest.objects.all()
-    serializer_class = EquipmentTestRequestSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
 class PublicLabTestRequestViewSet(viewsets.ModelViewSet):
     queryset = PublicLabTestRequest.objects.all()

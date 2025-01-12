@@ -54,7 +54,7 @@ class Invoice(models.Model):
         super().save(*args, **kwargs) 
 
     def __str__(self):
-        return self.invoice_number
+        return f"{self.invoice_number} - {self.invoice_date} - {self.invoice_amount} - {self.patient.first_name}"
 
 
 class InvoiceItem(models.Model):

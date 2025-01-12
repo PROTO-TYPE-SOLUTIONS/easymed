@@ -10,7 +10,6 @@ from .models import (
     LabTestRequest, 
     LabTestProfile, 
     LabEquipment, 
-    EquipmentTestRequest, 
     PublicLabTestRequest, 
     LabTestPanel, 
     LabTestRequestPanel,
@@ -150,12 +149,6 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
             'is_qualitative',
             'eta',
         ]
-
-
-class EquipmentTestRequestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EquipmentTestRequest
-        fields = '__all__'
 
 
 class LabTestRequestSerializer(serializers.ModelSerializer):

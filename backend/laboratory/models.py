@@ -1,13 +1,11 @@
+import logging
 from django.db import models
 from random import randrange, choices
-# from patient.models import AttendanceProcess
 from django.conf import settings
-from customuser.models import CustomUser
-# from inventory.models import Item
 from datetime import datetime
 from django.core.validators import FileExtensionValidator
-import logging
 
+from customuser.models import CustomUser
 
 class LabEquipment(models.Model):
     COM_MODE_CHOICE = (
@@ -225,15 +223,6 @@ class LabTestRequestPanel(models.Model):
     def __str__(self):
         return f"{self.test_panel.name}"
 
-
-
-class EquipmentTestRequest(models.Model):
-    test_request_panel = models.ForeignKey(LabTestRequestPanel, on_delete=models.CASCADE)
-    equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.equipment.name + " " + self.equipment.ip_address + " " + self.equipment.port)
-    
 
 class PublicLabTestRequest(models.Model):
     STATUS_CHOICES = (
