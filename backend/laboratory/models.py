@@ -227,12 +227,12 @@ class LabTestRequestPanel(models.Model):
 
 
 
-class EquipmentTestRequest(models.Model):
-    test_request_panel = models.ForeignKey(LabTestRequestPanel, on_delete=models.CASCADE)
-    equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
+# class EquipmentTestRequest(models.Model):
+#     test_request_panel = models.ForeignKey(LabTestRequestPanel, on_delete=models.CASCADE)
+#     equipment = models.ForeignKey(LabEquipment, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return str(self.equipment.name + " " + self.equipment.ip_address + " " + self.equipment.port)
+#     def __str__(self):
+#         return str(self.equipment.name + " " + self.equipment.ip_address + " " + self.equipment.port)
     
 
 class PublicLabTestRequest(models.Model):
