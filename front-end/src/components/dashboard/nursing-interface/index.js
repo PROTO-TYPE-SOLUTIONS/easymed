@@ -130,12 +130,10 @@ const NursePatientDataGrid = () => {
         <Column
           dataField="patient_number"
           caption="PId"
-          width={120}
         />
         <Column
           dataField="patient"
           caption="Patient Name"
-          width={140}
           allowFiltering={true}
           allowSearch={true}
           cellRender={patientNameRender}
@@ -143,7 +141,6 @@ const NursePatientDataGrid = () => {
         <Column
           dataField="doctor"
           caption="Assigned Doctor"
-          width={120}
           allowFiltering={true}
           allowSearch={true}
           cellRender={doctorNameRender}
@@ -151,7 +148,6 @@ const NursePatientDataGrid = () => {
         <Column
           dataField=""
           caption="Action"
-          width={140}
           cellRender={actionsFunc}
         />
       </DataGrid>

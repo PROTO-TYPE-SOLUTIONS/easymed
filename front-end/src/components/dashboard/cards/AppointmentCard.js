@@ -171,13 +171,11 @@ const AppointmentCard = ({ processes }) => {
         <Column
           dataField="patient_number"
           caption="PID"
-          width={120}
           allowSearch={true}
         />
         <Column
           dataField="patient"
           caption="Patient Name"
-          width={150}
           allowSearch={true}
           cellRender={patientNameRender}
         />
@@ -185,7 +183,6 @@ const AppointmentCard = ({ processes }) => {
         <Column
           dataField=""
           caption="Action"
-          width={140}
           cellRender={actionsFunc}
         />
       </DataGrid>
