@@ -4,6 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response # type: ignore
 from rest_framework.exceptions import ValidationError
+from rest_framework.views import APIView
 from weasyprint import HTML
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
@@ -320,9 +321,33 @@ class InventoryFilterView(ListAPIView):
         return queryset
 
 
+class SlowMovingInventoryView(APIView):
+    """ View to get slow moving inventory that have not had any incoming items in the last 3 months """
+    def get(self, request):
+        three_months_ago = now().date() - timedelta(days=90)  
+        inventory_items = Inventory.objects.all()
+        
+        slow_moving_items = []
+        for item in inventory_items:
+            recent_incoming = IncomingItem.objects.filter(
+                item=item.item,
+                date_created__gte=three_months_ago
+            ).exists()
+            
+            if not recent_incoming and item.quantity_at_hand > 0:
+                slow_moving_items.append(item)
+        
+        serializer = InventorySerializer(slow_moving_items, many=True)
+        return Response({
+            'count': len(slow_moving_items),
+            'results': serializer.data
+        }, status=status.HTTP_200_OK)
+
+
 class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
     queryset = GoodsReceiptNote.objects.all()
     serializer_class = GoodsReceiptNoteSerializer
+
 
 class QuotationViewSet(viewsets.ModelViewSet):
     queryset = Quotation.objects.all()
@@ -332,6 +357,7 @@ class QuotationViewSet(viewsets.ModelViewSet):
 class QuotationItemViewSet(viewsets.ModelViewSet):
     queryset = QuotationItem.objects.all()
     serializer_class = QuotationItemSerializer
+
 
 def download_requisition_pdf(request, requisition_id):
     '''
