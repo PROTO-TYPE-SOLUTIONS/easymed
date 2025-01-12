@@ -166,7 +166,7 @@ Add InsuranceSalePrise for specific Items depending on the Insurance
 
 
 # 5.  Reporting
-## Sale by Date Range
+### Sale by Date Range
 To generate sales by given date, send sample request as shown below
 `curl -X POST http://localhost:8080/reports/sale_by_date/   -H "Content-Type: application/json"   -d '{"start_date": "2024-02-01", "end_date": "2024-02-18"}' > report-log.txt`
 curl
@@ -177,18 +177,18 @@ You can access the generated report here
 `http://127.0.0.1:8080/sale_by_date/pdf/`
 
 
-## Sale by Date Range and Item Id
+### Sale by Date Range and Item Id
 To generated sales report by date range and given item id;
 `curl -X POST http://localhost:8080/reports/sale_by_item_and_date/   -H "Content-Type: application/json"   -d '{"item_id": "1", "start_date": "2024-02-01", "end_date": "2024-02-10"}'`
 
 You can access the generated pdf here ``/serve_sales_by_item_id_pdf/``
 
-## sales by payment mode
+### Sales by payment mode
 Send POST request to the endpoint below, teh response will have the total amount 
 for a given payment mode
 ```/reports/total_payment_mode_amount/?payment_mode=insurance&date=2024-02-18```
 
-## Lab reports
+### Lab reports
 By default, or when explicitly specified, all lab test will be quantitative and will use the following endpoints.  In the same order, create a report, add test-panel-results to that report
 then generate the pdf report
 ```/lab/lab-test-results/```
@@ -199,7 +199,7 @@ To get  a test result report for a particular patient, you send a GET request to
 ``http://127.0.0.1:8080/download_labtestresult_pdf/{processtestrequest_id}``
 
 
-## Doctor Reports
+### Doctor Reports
 This will give you all appointments by given doctor and date range
 http://127.0.0.1:8080/patients/report/appointments/?doctor_id=1&start_date=2024-08-01&end_date=2024-08-31
 
@@ -207,10 +207,14 @@ If no date range is specified it will get you a report for all appointments
 http://127.0.0.1:8080/patients/report/appointments/?doctor_id=2
 
 
-## Goods Receipt note
+### Goods Receipt note
 Generates a receipt note for incoming items
 ``http://127.0.0.1:8080/inventory/receipt-note/{purchade_order_id}/``
 
+### Supplier Invoice Report
+This will give us a report of all invoices by a given supplier. Can be used to
+show account details for a given supplier
+``http://127.0.0.1:8080/inventory/supplier-invoice-report/{supplier_id}/``
 
 
 # 6. Laboratory Integration
