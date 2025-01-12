@@ -107,7 +107,7 @@ class PrescribedDrugSerializer(serializers.ModelSerializer):
 
     def get_sale_price(self, obj):
         try:
-            inventory = Inventory.objects.get(item=obj.item)
+            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
             return inventory.sale_price
         except Inventory.DoesNotExist:
             return None
