@@ -279,7 +279,7 @@ export default function AddTriageModal({
                     ></path>
                   </svg>
                 )}
-                Create Triage
+                Update Triage
               </button>
             </Form>
               );
