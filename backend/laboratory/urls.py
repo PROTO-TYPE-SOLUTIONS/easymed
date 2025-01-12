@@ -5,7 +5,6 @@ from .views import (
     LabTestRequestViewSet,
     LabTestProfileViewSet,
     LabEquipmentViewSet,
-    EquipmentTestRequestViewSet,
     PublicLabTestRequestViewSet,
     LabTestProfileViewSet,
     LabTestRequestByPatientIdAPIView,
@@ -28,7 +27,6 @@ router.register(r'lab-test-panel', LabTestPanelViewSet)
 router.register(r'lab-test-requests', LabTestRequestViewSet)
 router.register(r'lab-test-requests-panel', LabTestRequestPanelViewSet)
 router.register(r'lab-equipment', LabEquipmentViewSet)
-router.register(r'equipment-test-request', EquipmentTestRequestViewSet)
 router.register(r'public-lab-test-request', PublicLabTestRequestViewSet)
 router.register(r'process-test-request', ProcessTestRequestViewSet)
 router.register(r'patient-samples', PatientSampleViewSet)
