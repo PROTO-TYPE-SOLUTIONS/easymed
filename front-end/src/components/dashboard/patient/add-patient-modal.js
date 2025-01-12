@@ -28,7 +28,7 @@ const AddPatientModal = () => {
   };
 
   useEffect(() => {
-    dispatch(getAllInsurance());
+    dispatch(getAllInsurance(auth));
   }, []);
 
   const initialValues = {
