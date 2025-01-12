@@ -66,20 +66,24 @@ def check_quantity_availability(instance):
     Returns True if sufficient quantity is available, otherwise False.
     Finaly, updates Inventory stock
     '''
+    # TODO: The first if sttment is called even when we're only billing  a Lab Test
     if instance.item.category == 'Drug' or instance.item.category == 'Lab Test':
-        # For drugs, check the available stock
         stock_quantity = get_available_stock(instance)
-        #check the prescribed drug quantity
         prescription = instance.invoice.attendanceprocess.prescription
-        prescribed_drug = PrescribedDrug.objects.get(
-                prescription=prescription,  # Use the retrieved prescription object
-                item=instance.item
-            )
-        if prescribed_drug.quantity > stock_quantity:
-            return False  # Insufficient stock
+        prescribed_drug = PrescribedDrug.objects.filter(
+            prescription=prescription,
+            item=instance.item
+        ).first()
+
+        if prescribed_drug:
+            if prescribed_drug.quantity > stock_quantity:
+                return False  # Insufficient stock
+            else:
+                update_stock_quantity_if_stock_is_available(instance, prescribed_drug.quantity)
+                return True
         else:
-            update_stock_quantity_if_stock_is_available(instance, prescribed_drug.quantity)
-            return True
+            # Handle the case where the PrescribedDrug does not exist
+            pass
     
     if instance.item.category == 'Lab Test':
         # Check Quantity available for instance drug
