@@ -149,6 +149,9 @@ class PurchaseOrder(models.Model):
     created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='supplier')
 
+    class Meta:
+        ordering = ['-date_created']
+
     def save(self, *args, **kwargs):
         """Generate purchase order number only on creation."""
         if not self.PO_number:  # Only generate if PO_number is empty

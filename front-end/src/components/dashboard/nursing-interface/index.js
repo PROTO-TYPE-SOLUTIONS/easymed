@@ -12,6 +12,7 @@ import { useSelector,useDispatch } from "react-redux";
 import AddTriageModal from './add-triage-modal';
 import { getAllDoctors } from "@/redux/features/doctors";
 import { useAuth } from "@/assets/hooks/use-auth";
+import ProcessFilter from "@/components/common/process/ProcessFilter";
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -44,6 +45,7 @@ const NursePatientDataGrid = () => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const [processFilter, setProcessFilter] = useState('triage')
   const auth = useAuth()
 
 
@@ -79,14 +81,14 @@ const NursePatientDataGrid = () => {
   };
 
   // filter users based on search query
-  const filteredProcesses = processes.filter((process) => process.track === "triage");
+  const filteredProcesses = processes.filter((process) => process.track.includes(processFilter));
 
   const billedDocSchedules = filteredProcesses.filter(schedule => {
     const hasAppointment = schedule.invoice_items.some(item =>  
         item.category.toLowerCase().includes('appointment') && item.status.toLowerCase() === "billed"
     );
     
-    return hasAppointment;
+    return hasAppointment
   });
 
   const patientNameRender = (cellData) => {
@@ -101,6 +103,7 @@ const NursePatientDataGrid = () => {
 
   return (
     <section>
+      <ProcessFilter   selectedFilter={processFilter} setProcessFilter={setProcessFilter}/>
       <DataGrid
         dataSource={billedDocSchedules}
         allowColumnReordering={true}

@@ -58,9 +58,9 @@ export const {
  } = InsuranceSlice.actions;
 
 
-export const getAllInsurance = () => async (dispatch) => {
+export const getAllInsurance = (auth) => async (dispatch) => {
   try {
-    const response = await fetchInsurance();
+    const response = await fetchInsurance(auth);
     dispatch(setInsurance(response));
   } catch (error) {
     console.log("INSURANCE_ERROR ", error);

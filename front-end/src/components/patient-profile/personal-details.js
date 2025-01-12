@@ -18,7 +18,7 @@ const PersonalDetails = () => {
   const auth = useAuth();
 
   useEffect(() => {
-    dispatch(getAllInsurance());
+    dispatch(getAllInsurance(auth));
   }, []);
 
   const initialValues = {

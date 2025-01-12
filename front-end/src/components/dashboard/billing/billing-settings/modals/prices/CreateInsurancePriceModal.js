@@ -23,7 +23,7 @@ const CreateInsurancePriceModal = () => {
   useEffect(() => {
     if(auth){
         dispatch(getAllInventories(auth))
-        dispatch(getAllInsurance())
+        dispatch(getAllInsurance(auth))
     }
   },[])
 
