@@ -1,17 +1,15 @@
-from datetime import datetime
-from uuid import uuid4
+
 import random
+from datetime import datetime
+from django.utils import timezone
+from uuid import uuid4
 from django.db import models
+
 from customuser.models import CustomUser
-# from pharmacy.models import Drug
 from inventory.models import Item
 from billing.models import Invoice
 from company.models import InsuranceCompany
 from laboratory.models import ProcessTestRequest
-from django.dispatch import receiver
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-
 
 
 class ContactDetails(models.Model):

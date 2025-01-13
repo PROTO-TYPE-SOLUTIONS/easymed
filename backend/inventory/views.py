@@ -64,7 +64,6 @@ from .serializers import (
 from .filters import (
     InventoryFilter,
     ItemFilter,
-    PurchaseOrderFilter,
     SupplierFilter,
     RequisitionItemFilter
 )
@@ -74,13 +73,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ItemFilter
-
-
-# class PurchaseViewSet(viewsets.ModelViewSet):
-#     queryset = PurchaseOrder.objects.all().order_by('-id')
-#     serializer_class = PurchaseOrderCreateSerializer
-#     filter_backends = (DjangoFilterBackend,)
-#     filterset_class = PurchaseOrderFilter
 
 
 class IncomingItemViewSet(viewsets.ModelViewSet):
