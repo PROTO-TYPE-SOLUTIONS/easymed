@@ -173,7 +173,7 @@ const POListGrid = () => {
         />
         <Column 
           dataField="status"
-          caption="Dispatched"
+          caption="Received Status"
           cellRender={showStatusColorCode}
         />
         <Column dataField="date_created" caption="Requested Date" />
