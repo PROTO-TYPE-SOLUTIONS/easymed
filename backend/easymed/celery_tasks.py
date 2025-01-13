@@ -44,7 +44,7 @@ def update_stock_quantity_if_stock_is_available(instance, deductions):
         # Get department inventory records for the item, ordered by expiry date (nearest first)
         department_inventory_records = DepartmentInventory.objects.filter(
             item=instance.item,
-            department=instance.invoice.attendanceprocess.department
+            # department=instance.invoice.attendanceprocess.department
         ).order_by('expiry_date')
 
         if not department_inventory_records.exists():
