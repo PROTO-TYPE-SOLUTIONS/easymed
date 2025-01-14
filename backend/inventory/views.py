@@ -25,6 +25,7 @@ from .models import (
     SupplierInvoice,
     IncomingItem,
     DepartmentInventory,
+    Department,
     RequisitionItem,
     Requisition,
     PurchaseOrder,
@@ -46,6 +47,7 @@ from .serializers import (
     InventorySerializer,
     SupplierSerializer,
     SupplierInvoiceSerializer,
+    DepartmentSerializer,
     RequisitionItemCreateSerializer,
     DepartmentInventorySerializer,
     RequisitionCreateSerializer,
@@ -94,6 +96,9 @@ class IncomingItemViewSet(viewsets.ModelViewSet):
         
         serializer.save()
 
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()

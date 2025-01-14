@@ -11,6 +11,7 @@ from .views import (
     SupplierViewSet,
     SupplierInvoiceViewSet,
     DepartmentInventoryViewSet,
+    DepartmentViewSet,
     IncomingItemViewSet,
     RequisitionItemViewSet,
     RequisitionViewSet,
@@ -32,6 +33,7 @@ router.register(r'items', ItemViewSet)
 router.register(r'inventories', InventoryViewSet)
 router.register(r'suppliers', SupplierViewSet)
 router.register(r'department-inventory', DepartmentInventoryViewSet)
+router.register(r'departments', DepartmentViewSet)
 router.register(r'requisition', RequisitionViewSet, basename='requisition')
 router.register(r'incoming-item', IncomingItemViewSet, basename='incoming-item-list')
 router.register(r'insurance-prices', InventoryInsuranceSalepriceViewSet)
