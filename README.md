@@ -244,3 +244,14 @@ Last Revised January, 11, 2025, by [Moses Mbadi](https://www.linkedin.com/in/mos
 
 
 
+## Invoicing process
+InvoiceItem
+--> post_save - update_item_price_on_invoice()
+--> post_save - update_is_billed_status() -> update_service_billed_status()
+--> pre_save - check_quantity_before_billing() -> check_quantity_availability()
+
+check_quantity_availability()
+	-> get_available_stock()
+		-> get_available_stock()
+			-> update_stock_quantity_if_stock_is_available()
+		-> update_stock_quantity_if_stock_is_available()	

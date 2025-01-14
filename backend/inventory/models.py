@@ -100,7 +100,6 @@ class Requisition(models.Model):
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='req_requested_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='req_approved_by')
 
-
     def save(self, *args, **kwargs):
         '''Generate requisition number'''
         today = timezone.now()
@@ -125,6 +124,7 @@ class RequisitionItem(models.Model):
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    unit_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"{self.item.name} - Requested: {self.quantity_requested}, Approved: {self.quantity_approved}"

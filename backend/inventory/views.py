@@ -335,11 +335,23 @@ def download_requisition_pdf(request, requisition_id):
     requisition = get_object_or_404(Requisition, pk=requisition_id)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
 
+    # Calculate the total cost of the requisition
+    total_cost = 0
+    for item in requisition_items:
+        # Ensure both unit_cost and quantity_approved are valid before multiplying
+        unit_cost = item.unit_cost if item.unit_cost is not None else 0
+        quantity_approved = item.quantity_approved if item.quantity_approved is not None else 0
+        total_cost += unit_cost * quantity_approved
+    print(f'Total cost: {total_cost}')    
+    
+
     context = {
         'requisition': requisition,
         'requisition_items': requisition_items,
         'company': company,
-        'company_logo_url': company_logo_url
+        'company_logo_url': company_logo_url,
+        'total_cost': total_cost,
+
     }
 
     html_template = get_template('requisition.html').render(context)

@@ -84,8 +84,9 @@
         <thead>
             <tr>
                 <th>Item</th>
-                <th>Qty Requested</th>
-                <th>Qty Approved</th>
+                <th>Qty Req</th>
+                <th>Qty App</th>
+                <th>Unit Price</th>
                 <th>Supplier</th>
             </tr>
         </thead>
@@ -95,11 +96,16 @@
                     <td>{{ item.item.name }}</td>
                     <td>{{ item.quantity_requested }}</td>
                     <td>{{ item.quantity_approved }}</td>
+                    <td>{{ item.unit_price }}</td>
                     <td>{{ item.preferred_supplier.official_name}}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <p><strong>Requisition Summary</strong></p>
+    <p>Total Items: {{ requisition_items|length }}</p>
+    <p>Total Cost: {{ total_cost }}</p>
 
     <p><strong>Created By:</strong> {{ requisition.requested_by.first_name }}.  <strong>Sign:</strong> ___________________________</p>
     <p><strong>Approved By:</strong> {{ requisition.approved_by.first_name }}. <strong>Sign:</strong> ___________________________</p>
