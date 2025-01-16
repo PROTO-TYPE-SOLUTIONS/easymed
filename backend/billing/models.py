@@ -1,16 +1,11 @@
 from django.db import models
-from django.db import transaction
 from django.db.models import Sum
 from django.apps import apps
-
-# from inventory.models import Inventory
-
-# from laboratory.models import LabTestRequestPanel
-# from patient.models import PrescribedDrug
 
 
 def invoice_file_path(instance, filename):
     return f'invoices/{instance.invoice_number}/{filename}'
+
 
 class PaymentMode(models.Model):
     PAYMENT_CATEGORY_CHOICES = (
@@ -19,7 +14,12 @@ class PaymentMode(models.Model):
         ('mpesa', 'MPesa'),
     )
     paymet_mode = models.CharField(max_length=20, blank=True, null=True)
-    insurance = models.ForeignKey('company.InsuranceCompany',null=True, on_delete=models.CASCADE)
+    insurance = models.ForeignKey(
+            'company.InsuranceCompany',
+            null=True,
+            blank=True,
+            on_delete=models.CASCADE
+            )
     payment_category = models.CharField(
         max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
     
@@ -54,7 +54,7 @@ class Invoice(models.Model):
         super().save(*args, **kwargs) 
 
     def __str__(self):
-        return self.invoice_number
+        return f"{self.invoice_number} - {self.invoice_date} - {self.invoice_amount} - {self.patient.first_name}"
 
 
 class InvoiceItem(models.Model):

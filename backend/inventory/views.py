@@ -25,6 +25,7 @@ from .models import (
     SupplierInvoice,
     IncomingItem,
     DepartmentInventory,
+    Department,
     RequisitionItem,
     Requisition,
     PurchaseOrder,
@@ -46,6 +47,7 @@ from .serializers import (
     InventorySerializer,
     SupplierSerializer,
     SupplierInvoiceSerializer,
+    DepartmentSerializer,
     RequisitionItemCreateSerializer,
     DepartmentInventorySerializer,
     RequisitionCreateSerializer,
@@ -63,7 +65,6 @@ from .serializers import (
 from .filters import (
     InventoryFilter,
     ItemFilter,
-    PurchaseOrderFilter,
     SupplierFilter,
     RequisitionItemFilter
 )
@@ -73,13 +74,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ItemFilter
-
-
-# class PurchaseViewSet(viewsets.ModelViewSet):
-#     queryset = PurchaseOrder.objects.all().order_by('-id')
-#     serializer_class = PurchaseOrderCreateSerializer
-#     filter_backends = (DjangoFilterBackend,)
-#     filterset_class = PurchaseOrderFilter
 
 
 class IncomingItemViewSet(viewsets.ModelViewSet):
@@ -103,6 +97,9 @@ class IncomingItemViewSet(viewsets.ModelViewSet):
         
         serializer.save()
 
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
 
 class DepartmentInventoryViewSet(viewsets.ModelViewSet):
     queryset = DepartmentInventory.objects.all()
@@ -342,12 +339,31 @@ def download_requisition_pdf(request, requisition_id):
     This view gets the geneated pdf and downloads it locally
     pdf accessed here http://127.0.0.1:8080/download_requisition_pdf/26/
     '''
-    print(requisition_id)
+    company = Company.objects.first()
+    company_logo_url = request.build_absolute_uri(company.logo.url) if company.logo else None
     requisition = get_object_or_404(Requisition, pk=requisition_id)
-    print(requisition)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition)
-    print(requisition_items)
-    html_template = get_template('requisition.html').render({'requisition': requisition, 'requisition_items': requisition_items})
+
+    # Calculate the total cost of the requisition
+    total_cost = 0
+    for item in requisition_items:
+        # Ensure both unit_cost and quantity_approved are valid before multiplying
+        unit_cost = item.unit_cost if item.unit_cost is not None else 0
+        quantity_approved = item.quantity_approved if item.quantity_approved is not None else 0
+        total_cost += unit_cost * quantity_approved
+    print(f'Total cost: {total_cost}')    
+    
+
+    context = {
+        'requisition': requisition,
+        'requisition_items': requisition_items,
+        'company': company,
+        'company_logo_url': company_logo_url,
+        'total_cost': total_cost,
+
+    }
+
+    html_template = get_template('requisition.html').render(context)
     
     pdf_file = HTML(string=html_template).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')

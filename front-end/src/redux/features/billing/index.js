@@ -51,6 +51,23 @@ const BillingSlice = createSlice({
     setPayModes: (state, action) => {
       state.paymodes = action.payload;
     },
+    setPaymentModeStoreOnCreate: (state, action) => {
+      state.paymodes = [action.payload, ...state.paymodes]
+    },
+
+    setPaymentModeStoreOnUpdate: (state, action) => {
+
+      // Find the index of the item with the same id as action.payload.id
+      const index = state.paymodes.findIndex(paymode => parseInt(paymode.id) === parseInt(action.payload.id));
+    
+      if (index !== -1) {
+        // Update the item at the found index with the new data from action.payload
+        state.paymodes[index] = {
+          ...state.paymodes[index], // Keep existing properties
+          ...action.payload    // Override with new data
+        };
+      }
+    },
   },
 });
 
@@ -62,7 +79,7 @@ export const {
   setSelectedLabRequest,
   setSelectedPrescribedDrug,
   setInvoices,
-  setInvoiceItems, setPayModes,
+  setInvoiceItems, setPayModes, setPaymentModeStoreOnCreate, setPaymentModeStoreOnUpdate
 } = BillingSlice.actions;
 
 export const getAllPatientBillingAppointments =
@@ -137,8 +154,17 @@ export const getPaymentModes = (auth) => async (dispatch) => {
     const response = await fetchPaymentModes(auth);
     dispatch(setPayModes(response));
   } catch (error) {
-    console.log("BILLINGI_ERROR ", error);
+    console.log("PAYMENT_MODES_ERROR ", error);
   }
+};
+
+export const createPaymentModeStore = (payload) => (dispatch) => {
+  dispatch(setPaymentModeStoreOnCreate(payload));
+};
+
+
+export const updatePaymentModeStore = (payload) => (dispatch) => {
+  dispatch(setPaymentModeStoreOnUpdate(payload));
 };
 
 export default BillingSlice.reducer;

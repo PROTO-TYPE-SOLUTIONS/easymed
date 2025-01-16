@@ -79,31 +79,6 @@ def update_supplier_invoice_amount(sender, instance, **kwargs):
             print(f"Error updating supplier invoice amount: {e}")
 
 
-@receiver([post_save, post_delete], sender=IncomingItem)
-def update_supplier_invoice_amount(sender, instance, **kwargs):
-    """
-    Update the SupplierInvoice amount whenever an IncomingItem is created, updated, or deleted.
-    The amount is calculated as the sum of (purchase_price * quantity) for all related IncomingItems.
-    """
-    if instance.supplier_invoice:
-        try:
-            with transaction.atomic():
-                supplier_invoice = instance.supplier_invoice
-
-                # Calculate total amount from all related IncomingItems
-                total_amount = IncomingItem.objects.filter(
-                    supplier_invoice=supplier_invoice
-                ).aggregate(
-                    total=Sum(models.F('purchase_price') * models.F('quantity'))
-                )['total'] or 0.00
-                
-                # Update the supplier invoice amount
-                supplier_invoice.amount = total_amount
-                supplier_invoice.save()
-        except Exception as e:
-            print(f"Error updating supplier invoice amount: {e}")
-
-
 @receiver([post_save], sender=IncomingItem)
 def update_purchase_order_item_quantity_received(sender, instance, **kwargs):
     with transaction.atomic():

@@ -99,7 +99,7 @@ const CategorizedItems = ({
                   (mode) => mode.id === parseInt(e.target.value)
                 );
                 setSelectedPayMethod(selectedOption);
-                if (selectedOption?.paymet_mode === 'cash') {
+                if (selectedOption?.paymet_mode.toLowerCase() === 'cash' || selectedOption?.paymet_mode.toLowerCase() === 'mpesa') {
                   setSelectedPrice(inventoryPrices ? inventoryPrices[0].sale_price : 'NA');
                 } else {
                   const selectedInsurance = inventoryPrices[0].insurance_sale_prices?.find((mode) => 

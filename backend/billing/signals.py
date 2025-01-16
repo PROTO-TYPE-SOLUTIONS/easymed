@@ -1,6 +1,5 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from django.apps import apps
 from django.core.exceptions import ValidationError
 
 from .utils import check_quantity_availability, update_service_billed_status
@@ -9,17 +8,17 @@ from .models import InvoiceItem
 
 
 @receiver(post_save, sender=InvoiceItem)
-def handle_invoice_item_created(sender, instance, created, **kwargs):
+def update_item_price_on_invoice(sender, instance, created, **kwargs):
     ''''
-    whenever an invoice item is created add the resulting price for the item to the invoice
+    whenever an invoice item is created, add the resulting price for the item to the invoice
     '''
     if created:  # Only proceed if the InvoiceItem instance was created
         if instance.invoice:
             invoice = instance.invoice
-            # Fetch the related Inventory instance for the Item
-            try:
-                inventory = Inventory.objects.get(item=instance.item)
-            except Inventory.DoesNotExist:
+            # Fetch the related Inventory instance for the Item using filter() instead of get()
+            inventory = Inventory.objects.filter(item=instance.item).first()  # Get the first match or None
+
+            if not inventory:
                 # Handle the case where no Inventory instance is found for the Item
                 return
 
@@ -30,7 +29,7 @@ def handle_invoice_item_created(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=InvoiceItem)
-def update_related_models(sender, instance, **kwargs):
+def update_is_billed_status(sender, instance, **kwargs):
     '''
     When an InvoiceItem is saved, and the status field is changed to billed,
     we check if it's a Drug or a Lab Test. If it is, we update the is_billed

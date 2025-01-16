@@ -620,15 +620,16 @@ class DepartmentInventorySerializer(serializers.ModelSerializer):
     item_name = serializers.CharField(source='item.name', read_only=True)
     department_name = serializers.CharField(source='department.name', read_only=True)
     transfer_quantity = serializers.IntegerField(write_only=True, required=True)
+    main_inventory_stock = serializers.SerializerMethodField()
 
     class Meta:
         model = DepartmentInventory
         fields = ['id', 'department', 'department_name', 'item', 'item_name',
                  'quantity_at_hand', 'lot_number', 'expiry_date', 'purchase_price',
-                 'sale_price', 'date_created', 'transfer_quantity']
+                 'sale_price', 'date_created', 'transfer_quantity', 'main_inventory_stock']
         read_only_fields = ['quantity_at_hand', 'lot_number', 'expiry_date', 
                           'purchase_price', 'sale_price', 'date_created']
-
+    
     def validate(self, attrs):
         if not attrs.get('department'):
             raise serializers.ValidationError({
@@ -709,6 +710,12 @@ class DepartmentInventorySerializer(serializers.ModelSerializer):
                 remaining_quantity -= batch_quantity
 
         return created_records[0]
+    
+    def get_main_inventory_stock(self, obj):
+        # Fetch the first Inventory record related to this DepartmentInventory
+        inventory = obj.item.active_inventory_items.order_by('expiry_date').first()
+        return inventory.quantity_at_hand if inventory else 0
+
 
 class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='inventory_item.item.name')

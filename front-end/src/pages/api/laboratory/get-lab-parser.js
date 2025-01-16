@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const host = '127.0.0.1';
+        const host = '192.168.100.56';
         const port = 9091;
         const socket = new JsonSocket(new net.Socket());
         

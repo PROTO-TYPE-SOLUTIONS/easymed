@@ -36,7 +36,7 @@ const getActions = () => {
     return actions;
   };
 
-const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItems, createdIncomings }) => {
+const ViewPOItemsModal = ({ values, selectedRowData, setSelectedRowData, setSelectedItems, createdIncomings }) => {
     const auth = useAuth()
     const dispatch = useDispatch()
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -51,7 +51,16 @@ const ViewPOItemsModal = ({ selectedRowData, setSelectedRowData, setSelectedItem
     // );
 
     const handleSelectionChanged = (selectedRowKeys) => {
+        let totalAmounts = 0;
         setSelectedItems(selectedRowKeys);
+        if(selectedRowKeys.selectedRowsData.length > 0){
+            selectedRowKeys.selectedRowsData.forEach((selected)=>{
+                totalAmounts = totalAmounts + (parseInt(selected.quantity_received) * parseInt(selected.buying_price))
+                values.amount = totalAmounts
+            })
+        }else{
+            values.amount = 0;
+        }
     };
 
     const onMenuClick = async (menu, data) => {

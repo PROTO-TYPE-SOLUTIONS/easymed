@@ -20,6 +20,7 @@ import { useRouter } from "next/router";
 import LabModal from "./lab-modal";
 import ViewAddedResults from "./ViewAddedResults";
 import ApproveResults from "../laboratory/add-result/ApproveResults";
+import ProcessFilter from "@/components/common/process/ProcessFilter";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -76,11 +77,11 @@ const DoctorPatientDataGrid = () => {
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const { processes, patients } = useSelector((store)=> store.patient)
-  const [processTrack, setProcessTrack] = useState("doctor")
+  const [processFilter, setProcessFilter] = useState("doctor")
   const actionsWhenOnDoctorTrack = userActions.filter((action)=> action.action !== "results")
   const actionsWhenOnResultedTrack = userActions.filter((action)=> action.action !== "send to lab")
 
-  const doctorsSchedules = processes.filter((process)=> process.track===processTrack)
+  const doctorsSchedules = processes.filter((process)=> process.track.includes(processFilter))
 
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
@@ -117,7 +118,7 @@ const DoctorPatientDataGrid = () => {
       <>
         <CmtDropdownMenu
           sx={{ cursor: "pointer" }}
-          items={processTrack === 'doctor' ? actionsWhenOnDoctorTrack : actionsWhenOnResultedTrack }
+          items={processFilter === 'lab' ?  actionsWhenOnResultedTrack : actionsWhenOnDoctorTrack }
           onItemClick={(menu) => onMenuClick(menu, data)}
           TriggerComponent={
             <LuMoreHorizontal className="cursor-pointer text-xl" />
@@ -134,10 +135,11 @@ const DoctorPatientDataGrid = () => {
 
   return (
     <section>
-      <div className="capitalize flex gap-4 py-4">
+      {/* <div className="capitalize flex gap-4 py-4">
         <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("doctor")}>New Appointments</p>
         <p className="cursor-pointer text-primary border-b border-primary px-2" onClick={()=> setProcessTrack("lab")}>From The Lab</p>
-      </div>
+      </div> */}
+      <ProcessFilter selectedFilter={processFilter} setProcessFilter={setProcessFilter}/>
       <DataGrid
         dataSource={doctorsSchedules}
         allowColumnReordering={true}
@@ -166,14 +168,12 @@ const DoctorPatientDataGrid = () => {
         <Column
           dataField="patient_number"
           caption="PId"
-          width={120}
           allowFiltering={true}
           allowSearch={true}
         />
         <Column
           dataField="patient"
           caption="Patient Name"
-          width={150}
           allowFiltering={true}
           allowSearch={true}
           cellRender={patientNameRender}
@@ -182,7 +182,6 @@ const DoctorPatientDataGrid = () => {
         <Column
           dataField=""
           caption="Action"
-          width={140}
           cellRender={actionsFunc}
         />
       </DataGrid>

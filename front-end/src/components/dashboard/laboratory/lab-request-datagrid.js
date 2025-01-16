@@ -12,6 +12,7 @@ import EquipmentModal from "./equipment-modal";
 
 import RequestInfoModal from "./RequestInfoModal";
 import LabModal from "../doctor-interface/lab-modal";
+import ProcessFilter from "@/components/common/process/ProcessFilter";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -39,10 +40,11 @@ const LabRequestDataGrid = ( ) => {
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
+  const [processsFilter, setProcessFilter] = useState("lab")
 
   const { processes, patients } = useSelector((store)=> store.patient)
 
-  const labTestsSchedules = processes.filter((process)=> process.track==="lab")
+  const labTestsSchedules = processes.filter((process)=> process.track.includes(processsFilter))
   const searchedProcesses = labTestsSchedules.filter((process)=> process.patient_number.includes(searchQuery))
 
 
@@ -117,6 +119,8 @@ const LabRequestDataGrid = ( ) => {
           </div>
         </Grid>
       </Grid>
+
+      <ProcessFilter setProcessFilter={setProcessFilter} selectedFilter={processsFilter}/>
 
       {/* DATAGRID STARTS HERE */}
       <DataGrid

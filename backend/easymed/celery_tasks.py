@@ -1,14 +1,8 @@
 # import os
 import logging
-# import tempfile
-from celery import shared_task, chain
+from celery import shared_task
 from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.template.loader import render_to_string
-from weasyprint import HTML
-from django.apps import apps
 from django.conf import settings
-from decouple import config
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from asgiref.sync import async_to_sync
@@ -26,7 +20,7 @@ from inventory.models import (
     PurchaseOrderItem,
     Requisition,
     RequisitionItem,
-    InventoryArchive,
+    DepartmentInventory
 )
 from billing.models import Invoice
 from patient.models import AttendanceProcess
@@ -44,50 +38,51 @@ def get_inventory_or_error(item):
         raise ValidationError(f"No inventory record found for item: {item.name}.")
 
 
-# Deduct stock from inventory
 def update_stock_quantity_if_stock_is_available(instance, deductions):
     """
     Deducts stock quantity based on the billed quantity and validates stock levels.
     Prioritizes inventory records with the nearest expiry date.
     """
     try:
-        # Get inventory records for the item, ordered by expiry date (nearest first)
-        inventory_records = Inventory.objects.filter(item=instance.item).order_by('expiry_date')
+        # Get department inventory records for the item, ordered by expiry date (nearest first)
+        department_inventory_records = DepartmentInventory.objects.filter(
+            item=instance.item,
+            # department=instance.invoice.attendanceprocess.department
+        ).order_by('expiry_date')
 
-        if not inventory_records.exists():
-            raise ValidationError(f"No inventory record found for item: {instance.item.name}.")
+        if not department_inventory_records.exists():
+            raise ValidationError(f"No department inventory record found for item: {instance.item.name}.")
 
         remaining_deduction = deductions
 
-
         with transaction.atomic():
-            # Iterate through the inventory records.
+            # Iterate through the department inventory records.
             # Deduct from the current record until the required quantity is fulfilled.
             # If a record’s quantity_at_hand is insufficient, it is set to 0, and the deduction continues with the next record.
-            for inventory_record in inventory_records:
+            for department_inventory_record in department_inventory_records:
                 if remaining_deduction <= 0:
                     break
 
-                if inventory_record.quantity_at_hand >= remaining_deduction:
+                if department_inventory_record.quantity_at_hand >= remaining_deduction:
                     # Deduct from the current record
-                    inventory_record.quantity_at_hand -= remaining_deduction
-                    inventory_record.save()
+                    department_inventory_record.quantity_at_hand -= remaining_deduction
+                    department_inventory_record.save()
                     logger.info(
                         "Stock updated successfully for item: %s, Lot: %s, Remaining: %d",
                         instance.item.name,
-                        inventory_record.lot_number,
-                        inventory_record.quantity_at_hand,
+                        department_inventory_record.lot_number,
+                        department_inventory_record.quantity_at_hand,
                     )
                     remaining_deduction = 0
                 else:
                     # Use up the current record's stock and move to the next
-                    remaining_deduction -= inventory_record.quantity_at_hand
-                    inventory_record.quantity_at_hand = 0
-                    inventory_record.save()
+                    remaining_deduction -= department_inventory_record.quantity_at_hand
+                    department_inventory_record.quantity_at_hand = 0
+                    department_inventory_record.save()
                     logger.info(
                         "Stock exhausted for item: %s, Lot: %s",
                         instance.item.name,
-                        inventory_record.lot_number,
+                        department_inventory_record.lot_number,
                     )
 
             if remaining_deduction > 0:

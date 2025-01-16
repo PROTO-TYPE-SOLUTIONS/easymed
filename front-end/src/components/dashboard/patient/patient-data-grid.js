@@ -97,6 +97,18 @@ const PatientsDataGrid = () => {
     return rowData.first_name + " " + rowData.second_name;
   }
 
+  const renderInsurances = ({ data }) => {
+    if(data.insurances.length > 0){
+      let insuranceString = ''
+      data.insurances.forEach((insurance)=> {
+        insuranceString = insuranceString + `${insurance.name}, `
+      })
+
+      return insuranceString
+      
+    }else return 'NA'
+  }
+
   useEffect(() => {
     dispatch(getAllPatients(auth));
   }, []);
@@ -157,7 +169,12 @@ const PatientsDataGrid = () => {
           width={80}
         />
         <Column dataField="gender" caption="Gender" width={100} />
-        <Column dataField="insurance" caption="Insurance" width={100} />
+        <Column 
+          dataField="" 
+          caption="Insurance"
+          cellRender={renderInsurances}
+          width={100} 
+        />
         <Column
           dataField=""
           caption=""

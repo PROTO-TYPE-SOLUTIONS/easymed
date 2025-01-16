@@ -76,7 +76,7 @@ class InvoiceItemsByInvoiceId(generics.ListAPIView):
 class PaymentModeViewset(viewsets.ModelViewSet):
         queryset = PaymentMode.objects.all()
         serializer_class = PaymentModeSerializer
-        permission_classes = (IsDoctorUser | IsNurseUser | IsReceptionistUser |  IsLabTechUser,)
+        # permission_classes = (IsDoctorUser | IsNurseUser | IsReceptionistUser |  IsLabTechUser,)
 
 
 def download_invoice_pdf(request, invoice_id,):

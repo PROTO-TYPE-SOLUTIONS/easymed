@@ -18,6 +18,8 @@ import AddRequisitionItemModal from "./create-requisition-dialog";
 import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { SlMinus } from "react-icons/sl";
 import { LuMoreHorizontal } from "react-icons/lu";
+import { getAllTheDepartments } from "@/redux/features/auth";
+import SeachableSelect from "@/components/select/Searchable";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -44,13 +46,18 @@ const CreateRequisition = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const { item, suppliers, inventoryItems } = useSelector(({ inventory }) => inventory);
+  const { departments } = useSelector(({ auth }) => auth);
   const doctorsData = useSelector((store)=>store.doctor.doctors)
   const auth = useAuth();
 
   const initialValues = {
-    status: "COMPLETED",
     requisition_items: inventoryItems,
+    department: ''
   };
+
+  const validationSchema = Yup.object().shape({
+    department: Yup.object().required("This field is required!"),
+  });
 
   useEffect(() => {
     if (auth) {
@@ -114,7 +121,7 @@ const CreateRequisition = () => {
       setLoading(true);
     
       const payload = {
-        department: 1,
+        department: formValue.department.value,
         requested_by: auth.user_id,
         items: [...inventoryItems]
       }
@@ -135,6 +142,10 @@ const CreateRequisition = () => {
     }
   };
 
+  useEffect(()=> {
+    dispatch(getAllTheDepartments(auth));
+  }, [])
+
   return (
     <section ref={pdfRef}>
       <div className="flex gap-4 mb-8 items-center">
@@ -148,52 +159,65 @@ const CreateRequisition = () => {
 
       <Formik
         initialValues={initialValues}
+        validationSchema={validationSchema}
         onSubmit={saveRequisition}
       >
       <Form className="">
-      <DataGrid
-        dataSource={inventoryItems}
-        allowColumnReordering={true}
-        rowAlternationEnabled={true}
-        showBorders={true}
-        remoteOperations={true}
-        showColumnLines={true}
-        showRowLines={true}
-        wordWrapEnabled={true}
-        allowPaging={true}
-        className="shadow-xl"
-      >
-        <Pager
-          visible={false}
-          showPageSizeSelector={true}
-          showNavigationButtons={true}
-        />
-        <Column 
-          dataField="item" 
-          caption="Item Name" 
-          cellRender={(cellData) => {
-            const productItem = item.find(item => item.id === cellData.data.item);
-            return productItem ? `${productItem.name}` : 'null';
-          }}
-        />
-        <Column 
-          dataField="preferred_supplier" 
-          caption="Supplier Name"
-          cellRender={(cellData) => {
-            const supplier = suppliers.find(supplier => supplier.id === parseInt(cellData.data.preferred_supplier));
-            return supplier ? `${supplier.official_name}` : 'null';
-          }}        
-        />
-        <Column 
-          dataField="quantity_requested" 
-          caption="Quantity"
-        />
-        <Column 
-          dataField="" 
-          caption=""
-          cellRender={actionsFunc}
-        />
-      </DataGrid>
+        <Grid className='my-2' item md={12} xs={12}>
+          <SeachableSelect
+            label="Select Department"
+            name="department"
+            options={departments.map((department) => ({ value: department.id, label: `${department?.name}` }))}
+          />
+          <ErrorMessage
+            name="department"
+            component="div"
+            className="text-warning text-xs"
+          />
+        </Grid>
+        <DataGrid
+          dataSource={inventoryItems}
+          allowColumnReordering={true}
+          rowAlternationEnabled={true}
+          showBorders={true}
+          remoteOperations={true}
+          showColumnLines={true}
+          showRowLines={true}
+          wordWrapEnabled={true}
+          allowPaging={true}
+          className="shadow-xl"
+        >
+          <Pager
+            visible={false}
+            showPageSizeSelector={true}
+            showNavigationButtons={true}
+          />
+          <Column 
+            dataField="item" 
+            caption="Item Name" 
+            cellRender={(cellData) => {
+              const productItem = item.find(item => item.id === cellData.data.item);
+              return productItem ? `${productItem.name}` : 'null';
+            }}
+          />
+          <Column 
+            dataField="preferred_supplier" 
+            caption="Supplier Name"
+            cellRender={(cellData) => {
+              const supplier = suppliers.find(supplier => supplier.id === parseInt(cellData.data.preferred_supplier));
+              return supplier ? `${supplier.official_name}` : 'null';
+            }}        
+          />
+          <Column 
+            dataField="quantity_requested" 
+            caption="Quantity"
+          />
+          <Column 
+            dataField="" 
+            caption=""
+            cellRender={actionsFunc}
+          />
+        </DataGrid>
 
       <Grid className="mt-8" item md={12} xs={12}>
         <div className="flex items-center justify-start">

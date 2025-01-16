@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
@@ -8,123 +8,147 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify'
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from '@/assets/hooks/use-auth';
-import { updateAInsurancePriceStore } from "@/redux/features/insurance";
-import { updateInventoryInsurancePrices } from "@/redux/service/insurance";
-const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
+import { IoMdAdd } from "react-icons/io";
+import { createAInsurancePriceStore, getAllInsurance } from "@/redux/features/insurance";
+import { getAllInventories } from "@/redux/features/inventory";
+import { createInventoryInsurancePrices } from "@/redux/service/insurance";
+import { createPaymentModeStore } from "@/redux/features/billing";
+import { createPaymentModes } from "@/redux/service/billing";
+const CreatePaymodeModal = () => {
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
-  const { inventories } = useSelector((store)=> store.inventory)
-  const { insurance } = useSelector((store)=> store.insurance)
+  const { inventories } = useSelector((store) => store.inventory);
+  const { insurance } = useSelector((store) => store.insurance)
 
-    const getInsurance = ()=> {
-        const ins = insurance.find((insurance)=> insurance.id === selectedRowData?.insurance_company)
-        return {value: ins?.id, label: ins?.name}
-    }
+  const paymentCateries = [
 
-    const getInventoryItem = ()=> {
-        const inventory = inventories.find((inventory)=> inventory.id === selectedRowData?.inventory_item)
-        return {value: inventory?.id, label: inventory?.item_name}
+    {value: "cash", label: "Cash"},
+    {value: "insurance", label: "Insurance"},
+    {value: "mpesa", label: "Mpesa"},
+
+  ]
+
+  useEffect(() => {
+    if(auth){
+        dispatch(getAllInsurance(auth))
     }
+  },[])
 
   const handleClose = () => {
     setOpen(false);
   };
 
+  const handleClickOpen = () => {
+    setOpen(true);
+  }
+
   const initialValues = {
-    sale_price: selectedRowData?.sale_price || "",
-    insurance_company: getInsurance() || "",
-    inventory_item: getInventoryItem() || "",
+    payment_category: "",
+    insurance: "",
+    paymet_mode: "",
   };
 
   const validationSchema = Yup.object().shape({
-    sale_price: Yup.number().required("Field is Required!"),
-    insurance_company: Yup.object().required("Field is Required!"),
-    inventory_item: Yup.object().required("Field is Required!"),
+    paymet_mode: Yup.string().required("Field is Required!"),
+    payment_category: Yup.object().required("Field is Required!"),
   });
 
-  const handleEditInsuracePrice = async (formValue, helpers) => {
+  const paymentModesCreation = async (formValue, helpers) => {
     const formData = {
-        sale_price: formValue.sale_price
+        ...formValue,
+        insurance: formValue.insurance.value,
+        payment_category: formValue.payment_category.value
     };
 
+    console.log(formValue)
     try {
       setLoading(true);
-      const response = await updateInventoryInsurancePrices(parseInt(selectedRowData?.id), formData, auth)
-      dispatch(updateAInsurancePriceStore(response))
+      const response = await createPaymentModes( auth, formData )
+      dispatch(createPaymentModeStore(response))
       setLoading(false);
-      toast.success("Item Updated Successfully!");
+      toast.success("Payment Mode Created Successfully!");
       handleClose();
 
     } catch (err) {
+        setLoading(false);
       toast.error(err);
-      console.log("EDIT_ERROR ", err);
+      console.log("CREATE_PAYMENT_MODE_ERROR ", err);
     }
   };
 
   return (
-    <section>
-      <Dialog
-        fullWidth
-        maxWidth="md"
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogContent>
-        <h1 className="text-xl font-bold my-10">{selectedRowData?.name}</h1>
-
-        <section className="flex items-center justify-center gap-8">
+        <>
+        <button
+          onClick={handleClickOpen}
+          className="bg-primary rounded-xl text-white px-4 py-2 text-sm flex items-center gap-1"
+        >
+          <IoMdAdd /> Create Payment Mode
+        </button>
+        <Dialog
+          fullWidth
+          maxWidth="md"
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          sx={{
+            '& .MuiDialog-paper': {
+              minHeight: '70vh',
+            },
+          }}
+        >
+          <DialogContent>
+            <section className="flex items-center justify-center gap-8 overflow-hidden">
               <div className="w-full space-y-4 px-4">
-                <h1 className="text-xl text-center">Update Insurance Price</h1>
+                <h1 className="text-xl text-center">Create New Payment Modes </h1>
                 <Formik
                     initialValues={initialValues}
                     validationSchema={validationSchema}
-                    onSubmit={handleEditInsuracePrice}
+                    onSubmit={paymentModesCreation}
                     >
                     <Form className="">
                         <Grid container spacing={2}>
-                        <Grid className='my-2' item md={6} xs={12}>
+                        <Grid className='my-2 h-full' item md={6} xs={12}>
                             <SeachableSelect
-                                label="Select Inventory"
-                                name="inventory_item"
-                                isDisabled={true} // Makes the select component read-only
-                                options={inventories.map((inventory) => ({ value: inventory.id, label: `${inventory?.item_name}` }))}
+                                label="Select Payment Category"
+                                name="payment_category"
+                                options={paymentCateries.map((category) => ({ value: category.value, label: `${category?.label}` }))}
                             />
                             <ErrorMessage
-                                name="inventory_item"
+                                name="payment_category"
                                 component="div"
                                 className="text-warning text-xs"
                             />
                         </Grid>
-                        <Grid className='my-2' item md={6} xs={12}>
+                        <Grid className='my-2 h-full' item md={6} xs={12}>
                             <SeachableSelect
                                 label="Select Insurance"
-                                name="insurance_company"
-                                isDisabled={true} // Makes the select component read-only
+                                name="insurance"
                                 options={insurance.map((insurance) => ({ value: insurance.id, label: `${insurance?.name}` }))}
                             />
                             <ErrorMessage
-                                name="insurance_company"
+                                name="insurance"
                                 component="div"
                                 className="text-warning text-xs"
                             />
                         </Grid>
                         <Grid className='my-2' item md={12} xs={12}>
-                        <label htmlFor="item_code">Sale Price</label>
+                        <label htmlFor="item_code"> Payment Mode Name</label>
                             <Field
                             className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
                             maxWidth="sm"
-                            placeholder="Sale Price"
-                            name="sale_price"
+                            placeholder="Payment Mode Name"
+                            name="paymet_mode"
                             />
                             <ErrorMessage
-                            name="sale_price"
+                            name="paymet_mode"
                             component="div"
                             className="text-warning text-xs"
                             />
                         </Grid>
+
                         <Grid className='my-2' item md={12} xs={12}>
                             <div className="flex items-center justify-end">
                             <button
@@ -150,7 +174,7 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
                                     ></path>
                                 </svg>
                                 )}
-                                Edit Insurance price
+                                Create PayMode
                             </button>
                             </div>
                         </Grid>
@@ -159,10 +183,10 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
                 </Formik>
               </div>
             </section>
-        </DialogContent>
-      </Dialog>
-    </section>
+          </DialogContent>
+        </Dialog>
+      </>
   );
 };
 
-export default EditInsurancePricesModal;
+export default CreatePaymodeModal;
