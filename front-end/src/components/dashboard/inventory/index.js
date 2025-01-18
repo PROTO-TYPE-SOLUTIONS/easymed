@@ -18,9 +18,9 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const allowedPageSizes = [5, 10, 'all'];
 
-const InventoryDataGrid = () => {
+const InventoryDataGrid = ({department}) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { item, inventories } = useSelector((store) => store.inventory);
+  const { inventories } = useSelector((store) => store.inventory);
   const dispatch = useDispatch()
   const auth = useAuth();
   const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -31,14 +31,11 @@ const InventoryDataGrid = () => {
 
   useEffect(() => {
     if (auth) {
-      dispatch(getAllInventories(auth));
-      dispatch(getAllInvoiceItems(auth));
-      dispatch(getAllPurchaseOrders(auth));
+      dispatch(getAllInventories(auth, department));
+      // dispatch(getAllInvoiceItems(auth));
+      // dispatch(getAllPurchaseOrders(auth));
     }
   }, [auth]);
-
-  console.log(item)
-
 
   const inventorySummaryInfo = InventoryDisplayStats().map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
 
@@ -60,11 +57,11 @@ const InventoryDataGrid = () => {
             placeholder="Search referrals by facility"
           />
         </Grid>
-        <Grid className="bg-primary rounded-md flex items-center text-white w-full" item md={4} xs={4}>
+        {/* <Grid className="bg-primary rounded-md flex items-center text-white w-full" item md={4} xs={4}>
           <Link className="mx-4 w-full text-center" href='/dashboard/inventory/add-inventory'>
             Add Inventory
           </Link>
-        </Grid>
+        </Grid> */}
       </Grid>
       <DataGrid
         dataSource={filteredInventories}
@@ -88,10 +85,7 @@ const InventoryDataGrid = () => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column 
-          dataField="item_name"
-          caption="Product Name" 
-        />
+        <Column dataField="item_name"  caption="Product Name" />
         <Column dataField="purchase_price" caption="Purchase Price"/>
         <Column
           dataField="sale_price"
@@ -99,9 +93,12 @@ const InventoryDataGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="quantity_at_hand" caption="Quantity"/>
-        <Column dataField="re_order_level" caption="re order level"/>
+        <Column dataField="lot_number" caption="Lot No" />
+        <Column dataField="department_name" caption="Department"/>
+        <Column dataField="quantity_at_hand" caption="Lot Quantity"/>
+        <Column dataField="total_quantity" caption="Total Quantity"/>
         <Column dataField="category_one" caption="Category"/>
+        <Column dataField="expiry_date" caption="Expiry Date"/>
       </DataGrid>
     </section>
   );

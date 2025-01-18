@@ -16,12 +16,12 @@ export const addInventory = (payload) =>{
     })
 }
 
-export const fetchInventories = (auth, params=null) =>{
+export const fetchInventories = (auth, department) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
         axiosInstance.get(`${APP_API_URL.FETCH_INVENTORY}`,{
             params: {
-                item: params
+                department_name: department
             }
         })
             .then((res) =>{

@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
             const query = req.query
 
-            const searchQuery = query.item ? `?item=${query.item}` : "?item"
+            const searchQuery = query.department_name ? `?department_name=${query.department_name}` : "?department_name"
 
             console.log("PRESCRIPTION_HEADERS ",config);
     

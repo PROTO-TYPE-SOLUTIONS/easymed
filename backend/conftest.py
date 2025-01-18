@@ -177,6 +177,13 @@ def inventory(item):
     return Inventory.objects.create(
         item=item,
         quantity_at_hand=10,
+        purchase_price=10.0,
+        sale_price=20.0,
+        lot_no="LOT-001",
+        expiry_date="2024-01-01",
+        category_one="resale",
+        department=department,
+        
     )
 
 
