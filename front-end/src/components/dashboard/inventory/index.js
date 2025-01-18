@@ -57,11 +57,11 @@ const InventoryDataGrid = ({department}) => {
             placeholder="Search referrals by facility"
           />
         </Grid>
-        <Grid className="bg-primary rounded-md flex items-center text-white w-full" item md={4} xs={4}>
+        {/* <Grid className="bg-primary rounded-md flex items-center text-white w-full" item md={4} xs={4}>
           <Link className="mx-4 w-full text-center" href='/dashboard/inventory/add-inventory'>
             Add Inventory
           </Link>
-        </Grid>
+        </Grid> */}
       </Grid>
       <DataGrid
         dataSource={filteredInventories}
