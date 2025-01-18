@@ -251,7 +251,6 @@ class Inventory(models.Model):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
@@ -260,6 +259,9 @@ class Inventory(models.Model):
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
     lot_number= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
+
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='department_items')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
 
     def clean(self):
         if self.purchase_price > self.sale_price:
