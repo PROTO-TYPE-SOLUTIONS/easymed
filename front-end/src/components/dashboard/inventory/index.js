@@ -28,18 +28,18 @@ const InventoryDataGrid = ({department}) => {
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const { departments } = useSelector(({ auth }) => auth);
-  const [selectedDepartment, setSelectedDepartment]= useState("")
+  const [selectedDepartment, setSelectedDepartment]= useState(department)
 
   const filteredInventories = inventories.filter((inventory)=> inventory.item_name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   useEffect(() => {
     if (auth) {
-      dispatch(selectedDepartment !== "All" ? getAllInventories(auth, selectedDepartment) : getAllInventories(auth, department));
+      dispatch(selectedDepartment !== "All" ? getAllInventories(auth, selectedDepartment, "") : getAllInventories(auth, department, ""));
       dispatch(getAllTheDepartments(auth));
       // dispatch(getAllInvoiceItems(auth));
       // dispatch(getAllPurchaseOrders(auth));
     }
-  }, [auth, selectedDepartment]);
+  }, [auth, selectedDepartment, department]);
 
   const inventorySummaryInfo = InventoryDisplayStats().map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item}/>)
 

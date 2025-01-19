@@ -143,7 +143,8 @@ export const getAllItems = (auth) => async (dispatch) => {
   }
 };
 
-export const getAllInventories = (auth, department='', item='') => async (dispatch) => {
+export const getAllInventories = (auth, department, item) => async (dispatch) => {
+
   try {
     const response = await fetchInventories(auth, department, item);
     dispatch(setInventories(response));
