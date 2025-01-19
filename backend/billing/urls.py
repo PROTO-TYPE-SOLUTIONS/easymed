@@ -12,6 +12,7 @@ from .views import (
     PaymentModeViewset,
     InvoicesByPatientId,
     InvoiceItemsByInvoiceId,
+    PaymentBreakdownView
 )
 
 router = DefaultRouter()
@@ -25,6 +26,7 @@ urlpatterns = [
     path('download_invoice_pdf/<int:invoice_id>/', download_invoice_pdf, name='download_invoice_pdf'),
     path('invoices/patient/<int:patient_id>/', InvoicesByPatientId.as_view()),
     path('invoices/items/<int:invoice_id>/', InvoiceItemsByInvoiceId.as_view()),
+    path('payment-modes-breakdown/', PaymentBreakdownView.as_view(), name='payment-breakdown'),
 ]
 
 if settings.DEBUG:

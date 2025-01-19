@@ -11,17 +11,17 @@ from django.conf import settings
 from weasyprint import HTML
 from rest_framework import serializers
 from rest_framework.response import Response
+from django.db.models import Sum, Q
+from rest_framework.views import APIView
 
-from inventory.models import Inventory, Item
+
+from .models import InvoiceItem, Invoice
 from company.models import Company
-
-
+from inventory.models import Inventory, Item
 from authperms.permissions import (
-    IsStaffUser,
     IsDoctorUser,
     IsLabTechUser,
     IsNurseUser,
-    IsSystemsAdminUser,
     IsReceptionistUser
 )
 from .serializers import (InvoiceItemSerializer, InvoiceSerializer, PaymentModeSerializer,)
@@ -79,6 +79,42 @@ class PaymentModeViewset(viewsets.ModelViewSet):
         permission_classes = (IsDoctorUser | IsNurseUser | IsReceptionistUser |  IsLabTechUser,)
 
 
+class PaymentBreakdownView(APIView):
+    """
+    API View to return the total payments breakdown per PaymentMode.
+    """
+
+    def get(self, request, *args, **kwargs):
+        # Aggregate total amounts per payment mode
+        payment_modes = PaymentMode.objects.all()
+        breakdown = []
+
+        for payment_mode in payment_modes:
+            # Get all invoice items associated with the current payment mode
+            invoice_items = InvoiceItem.objects.filter(payment_mode=payment_mode)
+
+            # Calculate total amounts based on invoice status
+            total_paid = invoice_items.filter(invoice__status='paid').aggregate(
+                total=Sum('item_amount')
+            )['total'] or 0
+
+            total_pending = invoice_items.filter(invoice__status='pending').aggregate(
+                total=Sum('item_amount')
+            )['total'] or 0
+
+            total_amount = total_paid + total_pending
+
+            # Build response for the current payment mode
+            breakdown.append({
+                "payment_mode": payment_mode.paymet_mode,
+                "payment_category": payment_mode.payment_category,
+                "total_amount": total_amount,
+                "total_paid": total_paid,
+                "total_pending": total_pending,
+            })
+
+        return Response(breakdown, status=status.HTTP_200_OK)
+
 def download_invoice_pdf(request, invoice_id,):
     '''
     This view gets the geneated pdf and downloads it ocally
@@ -104,3 +140,5 @@ def download_invoice_pdf(request, invoice_id,):
     response['Content-Disposition'] = f'filename="invoice_report_{invoice_id}.pdf"'
 
     return response
+
+

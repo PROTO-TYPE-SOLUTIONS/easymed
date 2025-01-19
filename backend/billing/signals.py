@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 
 from .utils import check_quantity_availability, update_service_billed_status
 from inventory.models import Inventory
-from .models import InvoiceItem
+from .models import InvoiceItem, InsuranceCoPay
 
 
 @receiver(post_save, sender=InvoiceItem)
@@ -68,5 +68,13 @@ def check_quantity_before_billing(sender, instance, **kwargs):
         pass
 
 
+@receiver(pre_save, sender=InvoiceItem)
+def check_copay(sender, instance, **kwargs):
+    if instance.status == 'billed':
+        #check if item is in InsuranceCoPay
+        co_pay = InsuranceCoPay.objects.filter(item=instance.item).first()
+        print(f'co_pay: {co_pay}')
+        if co_pay:
+            instance.actual_total = instance.item_amount - co_pay.co_pay
 
 
