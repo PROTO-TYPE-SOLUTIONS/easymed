@@ -32,7 +32,7 @@ const CategorizedItems = ({
 
   const fetchInventoryForPrices = async (item) => {
     try {
-      const response = await fetchInventories(auth, item);
+      const response = await fetchInventories(auth, '', item);
       setInventoryPrices(response);
     } catch (error) {
       console.log("ERROR FETCHING INVENTORY PRICES", error);

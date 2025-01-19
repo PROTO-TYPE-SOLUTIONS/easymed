@@ -21,12 +21,8 @@ export default async function handler(req, res) {
             };
 
             const query = req.query
-
-            const searchQuery = query.department_name ? `?department_name=${query.department_name}` : "?department_name"
-
-            console.log("PRESCRIPTION_HEADERS ",config);
     
-            await backendAxiosInstance.get(`${API_URL.FETCH_INVENTORY}${searchQuery}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_INVENTORY}?department_name=${query.department_name}&item=${query.item}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
