@@ -4,6 +4,7 @@ from celery import shared_task
 from django.db.models.signals import post_save
 from django.conf import settings
 from django.template.loader import get_template
+from django.core.mail import EmailMultiAlternatives
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.core.mail import send_mail
@@ -21,6 +22,8 @@ from inventory.models import (
     RequisitionItem,
     DepartmentInventory
 )
+from billing.models import Invoice
+from patient.models import AttendanceProcess
 from authperms.models import Group
 
 
@@ -100,20 +103,20 @@ def check_inventory_reorder_levels():
     """
     items = Inventory.objects.filter(quantity_at_hand__lte=F('re_order_level'))
     if not items.exists():
-        print("No items found below reorder levels.")
+        logger.info("No items found below reorder levels.")
         return
 
     groups_with_notification_permission = Group.objects.filter(
         permissions__name='CAN_RECEIVE_INVENTORY_NOTIFICATIONS'
     )
     if not groups_with_notification_permission.exists():
-        print("No groups found with the required notification permission.")
+        logger.info("No groups found with the required notification permission.")
         return
 
     User = get_user_model()
     users_to_notify = User.objects.filter(group__in=groups_with_notification_permission).distinct()
     if not users_to_notify.exists():
-        print("No users found in groups with notification permissions.")
+        logger.info("No users found in groups with notification permissions.")
         return
     user_emails = list(users_to_notify.values_list('email', flat=True))
 
@@ -141,43 +144,68 @@ def check_inventory_reorder_levels():
                 recipient_list=user_emails,
             )
         except Exception as email_error:
-            print(f"Error sending email for {item.item.name}: {email_error}")
+            logger.error(f"Error sending email for {item.item.name}: {email_error}")
 
 
-@shared_task
-def create_purchase_order_task(requisition_id):
+@shared_task(bind=True, max_retries=3)
+def inventory_garbage_collection(self):
     """
-    Task to create a Purchase Order and generate a PDF.
+    Periodically checks and archives inventory items with zero quantity.
     """
+
     try:
-        # Retrieve the requisition
-        requisition = Requisition.objects.get(id=requisition_id)
-        requisition_items = RequisitionItem.objects.filter(requisition=requisition)
+        zero_quantity_items = Inventory.objects.filter(quantity_at_hand=0)
         
-        # Create a new purchase order linked to the requisition
-        purchase_order = PurchaseOrder.objects.create(
-            requested_by=requisition.requested_by,
-            requisition=requisition,
-            status='PENDING'
-        )
-        for item in requisition_items:
-            PurchaseOrderItem.objects.create(
-                item=item.item,
-                quantity_purchased=item.quantity_requested,
-                supplier=item.supplier,
-                purchase_order=purchase_order
-            )
+        if not zero_quantity_items.exists():
+            logger.info("No zero-quantity items found to archive")
+            return
         
-
-        # # Generate PDF for the purchase order
-        # generate_purchase_order_pdf(purchase_order.id)  # Call the PDF generation function with the purchase_order
-    except Requisition.DoesNotExist:
-        print(f"Requisition with id {requisition_id} does not exist.")
-       
+        archived_count = 0
+        for item in zero_quantity_items:
+            try:
+                with transaction.atomic():
+                    archive = InventoryArchive.objects.create(
+                        item=item.item,
+                        purchase_price=item.purchase_price,
+                        sale_price=item.sale_price,
+                        quantity_at_hand=item.quantity_at_hand,
+                        re_order_level=item.re_order_level,
+                        date_created=item.date_created,
+                        category_one=item.category_one,
+                        lot_number=item.lot_number,
+                        expiry_date=item.expiry_date,
+                    )
+                    
+                    logger.info(
+                        "Created archive record for item: %s (ID: %s)",
+                        item.item.name,
+                        item.item.id
+                    )
+                    
+                    item.delete()
+                    archived_count += 1
+                    logger.info(
+                        "Deleted original inventory record for: %s",
+                        item.item.name
+                    )
+                
+            except Exception as e:
+                logger.error(
+                    "Error processing item %s: %s",
+                    item.item.name,
+                    str(e),
+                    exc_info=True
+                )
+                continue
         
-    except Requisition.DoesNotExist:
-        # Handle the case where the requisition does not exist
-        raise ValueError(f"Requisition with ID {requisition_id} does not exist.")
+        logger.info("Successfully archived %d items", archived_count)
+        return f"Archived {archived_count} items"
+        
     except Exception as e:
-        # Handle other exceptions that may arise
-        raise ValueError(f"An error occurred while creating the purchase order: {str(e)}")
+        logger.error(
+            "Error in inventory garbage collection: %s",
+            str(e),
+            exc_info=True
+        )
+        # Retry the task if it fails
+        self.retry(exc=e, countdown=60 * 5)
