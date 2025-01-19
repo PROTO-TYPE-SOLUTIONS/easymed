@@ -47,7 +47,8 @@ def update_inventory_after_incomingitem_creation(sender, instance, created, **kw
                         quantity_at_hand=instance.quantity,
                         category_one=instance.category_one,
                         lot_number=instance.lot_no,
-                        expiry_date=instance.expiry_date
+                        expiry_date=instance.expiry_date,
+                        department=instance.purchase_order.requisition.department
                     )
         except Exception as e:
             # Handle the exception appropriately (e.g., log the error)

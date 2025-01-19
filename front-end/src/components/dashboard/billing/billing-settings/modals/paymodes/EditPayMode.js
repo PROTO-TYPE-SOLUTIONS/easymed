@@ -10,21 +10,31 @@ import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from '@/assets/hooks/use-auth';
 import { updateAInsurancePriceStore } from "@/redux/features/insurance";
 import { updateInventoryInsurancePrices } from "@/redux/service/insurance";
-const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
+import { updatePaymentModes } from "@/redux/service/billing";
+import { updatePaymentModeStore } from "@/redux/features/billing";
+const EditPaymodeModal = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
   const { inventories } = useSelector((store)=> store.inventory)
   const { insurance } = useSelector((store)=> store.insurance)
 
+  const paymentCateries = [
+
+    {value: "cash", label: "Cash"},
+    {value: "insurance", label: "Insurance"},
+    {value: "mpesa", label: "Mpesa"},
+
+  ]
+
     const getInsurance = ()=> {
         const ins = insurance.find((insurance)=> insurance.id === selectedRowData?.insurance_company)
         return {value: ins?.id, label: ins?.name}
     }
 
-    const getInventoryItem = ()=> {
-        const inventory = inventories.find((inventory)=> inventory.id === selectedRowData?.inventory_item)
-        return {value: inventory?.id, label: inventory?.item_name}
+    const getPaymentCategory = ()=> {
+        const category = paymentCateries.find((category)=> category.value === selectedRowData?.payment_category)
+        return {value: category?.value, label: category?.label}
     }
 
   const handleClose = () => {
@@ -32,28 +42,29 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
   };
 
   const initialValues = {
-    sale_price: selectedRowData?.sale_price || "",
-    insurance_company: getInsurance() || "",
-    inventory_item: getInventoryItem() || "",
+    paymet_mode: selectedRowData?.paymet_mode || "",
+    insurance: getInsurance() || "",
+    payment_category: getPaymentCategory() || "",
   };
 
   const validationSchema = Yup.object().shape({
-    sale_price: Yup.number().required("Field is Required!"),
-    insurance_company: Yup.object().required("Field is Required!"),
-    inventory_item: Yup.object().required("Field is Required!"),
+    paymet_mode: Yup.string().required("Field is Required!"),
+    payment_category: Yup.object().required("Field is Required!"),
   });
 
-  const handleEditInsuracePrice = async (formValue, helpers) => {
+  const handleEditPaymentMode = async (formValue, helpers) => {
     const formData = {
-        sale_price: formValue.sale_price
+        ...formValue,
+        payment_category: formValue.payment_category.value,
+        insurance: formValue.insurance.value,
     };
 
     try {
       setLoading(true);
-      const response = await updateInventoryInsurancePrices(parseInt(selectedRowData?.id), formData, auth)
-      dispatch(updateAInsurancePriceStore(response))
+      const response = await updatePaymentModes(auth, formData, parseInt(selectedRowData?.id))
+      dispatch(updatePaymentModeStore(response))
       setLoading(false);
-      toast.success("Item Updated Successfully!");
+      toast.success("<ode Updated Successfully!");
       handleClose();
 
     } catch (err) {
@@ -73,58 +84,57 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
         aria-describedby="alert-dialog-description"
       >
         <DialogContent>
-        <h1 className="text-xl font-bold my-10">{selectedRowData?.name}</h1>
+        <h1 className="text-xl font-bold my-10">{selectedRowData?.paymet_mode}</h1>
 
         <section className="flex items-center justify-center gap-8">
               <div className="w-full space-y-4 px-4">
-                <h1 className="text-xl text-center">Update Insurance Price</h1>
+                <h1 className="text-xl text-center">Update Payment Mode</h1>
                 <Formik
                     initialValues={initialValues}
                     validationSchema={validationSchema}
-                    onSubmit={handleEditInsuracePrice}
+                    onSubmit={handleEditPaymentMode}
                     >
                     <Form className="">
                         <Grid container spacing={2}>
-                        <Grid className='my-2' item md={6} xs={12}>
+                        <Grid className='my-2 h-full' item md={6} xs={12}>
                             <SeachableSelect
-                                label="Select Inventory"
-                                name="inventory_item"
-                                isDisabled={true} // Makes the select component read-only
-                                options={inventories.map((inventory) => ({ value: inventory.id, label: `${inventory?.item_name}` }))}
+                                label="Select Payment Category"
+                                name="payment_category"
+                                options={paymentCateries.map((category) => ({ value: category.value, label: `${category?.label}` }))}
                             />
                             <ErrorMessage
-                                name="inventory_item"
+                                name="payment_category"
                                 component="div"
                                 className="text-warning text-xs"
                             />
                         </Grid>
-                        <Grid className='my-2' item md={6} xs={12}>
+                        <Grid className='my-2 h-full' item md={6} xs={12}>
                             <SeachableSelect
                                 label="Select Insurance"
-                                name="insurance_company"
-                                isDisabled={true} // Makes the select component read-only
+                                name="insurance"
                                 options={insurance.map((insurance) => ({ value: insurance.id, label: `${insurance?.name}` }))}
                             />
                             <ErrorMessage
-                                name="insurance_company"
+                                name="insurance"
                                 component="div"
                                 className="text-warning text-xs"
                             />
                         </Grid>
                         <Grid className='my-2' item md={12} xs={12}>
-                        <label htmlFor="item_code">Sale Price</label>
+                        <label htmlFor="item_code"> Payment Mode Name</label>
                             <Field
                             className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
                             maxWidth="sm"
-                            placeholder="Sale Price"
-                            name="sale_price"
+                            placeholder="Payment Mode Name"
+                            name="paymet_mode"
                             />
                             <ErrorMessage
-                            name="sale_price"
+                            name="paymet_mode"
                             component="div"
                             className="text-warning text-xs"
                             />
                         </Grid>
+
                         <Grid className='my-2' item md={12} xs={12}>
                             <div className="flex items-center justify-end">
                             <button
@@ -150,7 +160,7 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
                                     ></path>
                                 </svg>
                                 )}
-                                Edit Insurance price
+                                Update PayMode
                             </button>
                             </div>
                         </Grid>
@@ -165,4 +175,4 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
   );
 };
 
-export default EditInsurancePricesModal;
+export default EditPaymodeModal;

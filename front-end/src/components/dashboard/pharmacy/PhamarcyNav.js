@@ -20,6 +20,9 @@ const PhamarcyNav = () => {
         <Link href='/dashboard/phamarcy/create-requisition' className={`${pathName === '/dashboard/phamarcy/create-requisition' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
             Create Requisition
         </Link>
+        <Link href='/dashboard/phamarcy/pharmacy-inventory' className={`${pathName === '/dashboard/phamarcy/pharmacy-inventory' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+            Pharmacy Inventory
+        </Link>
     </div>
   )
 }

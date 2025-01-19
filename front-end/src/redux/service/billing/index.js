@@ -209,3 +209,33 @@ export const fetchPaymentModes = (auth) =>{
             })
     })
 }
+
+export const createPaymentModes = (auth, payload) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.PAYMENT_MODES}`,payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}
+
+export const updatePaymentModes = (auth, payload, payment_mode_id) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.patch(`${APP_API_URL.PAYMENT_MODES}`,payload, {
+            params: {
+                mode_id: payment_mode_id
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err.message)
+            })
+    })
+}

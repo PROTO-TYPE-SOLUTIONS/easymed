@@ -19,10 +19,9 @@ export default async function handler(req, res) {
                     'Authorization': req.headers.authorization,
                 }
             };
-
-            const query = req.query
+            const query = req.query;
     
-            await backendAxiosInstance.get(`${API_URL.FETCH_INVENTORY}?department_name=${query.department_name}&item=${query.item}`, config).then(response => {
+            await backendAxiosInstance.get(`${API_URL.FETCH_DEPARTMENTS}`, config).then(response => {
                 res.status(200).json(response.data);
 
             }).catch(e => {
