@@ -259,7 +259,8 @@ class Inventory(models.Model):
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
     lot_number= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
-
+    slow_moving_period = models.IntegerField(null=True, blank=True)
+    
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='department_items')
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
 

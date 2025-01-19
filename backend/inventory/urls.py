@@ -30,9 +30,9 @@ from .views import (
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet)
-router.register(r'inventories', InventoryViewSet)
+router.register(r'inventories', InventoryViewSet, basename='inventory')
 router.register(r'suppliers', SupplierViewSet)
-router.register(r'department-inventory', DepartmentInventoryViewSet)
+router.register(r'department-inventory', DepartmentInventoryViewSet, basename='department-inventory')
 router.register(r'departments', DepartmentViewSet)
 router.register(r'requisition', RequisitionViewSet, basename='requisition')
 router.register(r'incoming-item', IncomingItemViewSet, basename='incoming-item-list')
@@ -43,7 +43,6 @@ router.register(r'supplier-invoice', SupplierInvoiceViewSet, basename='supplier-
 router.register(r'goods-receipt-note', GoodsReceiptNoteViewSet, basename='goods-receipt-note')
 router.register(r'quotation', QuotationViewSet, basename='quotation')
 router.register(r'quotationitem', QuotationItemViewSet, basename='quotationitems')
-router.register(r'department-inventory', DepartmentInventoryViewSet, basename='department-inventory')
 
 requisition_url = NestedDefaultRouter(router, 'requisition', lookup='requisition')
 requisition_url.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
