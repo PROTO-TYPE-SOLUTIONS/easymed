@@ -1,4 +1,18 @@
 services:
+    postgres:
+        image: postgres:15
+        container_name: postgres
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_HOST=${POSTGRES_HOST}
+        ports:
+        - "5433:5432"
+        volumes:
+        - postgres_data:/var/lib/postgresql/data
+        networks:
+        - mks
     redis:
         image: redis:7.0-alpine
         container_name: redis
@@ -34,7 +48,7 @@ services:
         restart: unless-stopped
         env_file:
             - ./.env    
-        command: celery -A easymed worker --loglevel=INFO        
+        command: celery -A easymed worker --loglevel=INFO
         depends_on:
             - redis
         networks:
@@ -50,7 +64,7 @@ services:
         depends_on:
             - redis
         networks:
-            - mks   
+            - mks    
 
     frontend:
         build:
@@ -66,6 +80,9 @@ services:
         #     - ./front-end:/app    
         networks:
             - mks    
+
+volumes:
+    postgres_data:
 
 networks:
     mks:
