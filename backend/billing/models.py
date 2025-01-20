@@ -68,6 +68,8 @@ class InvoiceItem(models.Model):
     item_updated_at = models.DateTimeField(auto_now=True)
     payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
     item_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # amount after co-pay is deducted
+    actual_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
 
@@ -86,4 +88,12 @@ class InvoiceItem(models.Model):
         return self.item.name + ' - ' + str(self.item_created_at)
 
     
-    
+class InsuranceCoPay(models.Model):
+    '''
+    When an InvoiceItem is billed, check if it exists here. If it does, check its co-pay value
+    then deduct that value from the InvoiceItem.item_amount and update the actual_total
+    as a result of the subtraction
+    '''
+    insurance = models.ForeignKey('company.InsuranceCompany', on_delete=models.SET_NULL, null=True)
+    co_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)  
