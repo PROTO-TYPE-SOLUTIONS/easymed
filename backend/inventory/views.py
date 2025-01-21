@@ -34,8 +34,8 @@ from .models import (
     GoodsReceiptNote,
     Quotation,
     QuotationItem,
-    SupplierInvoice
-    
+    SupplierInvoice,
+    InventoryArchive
 
 )
 
@@ -58,7 +58,8 @@ from .serializers import (
     InventoryInsuranceSalepriceSerializer,
     GoodsReceiptNoteSerializer,
     QuotationSerializer,
-    QuotationItemSerializer
+    QuotationItemSerializer,
+    InventoryArchiveSerializer
 )
 
 from .filters import (
@@ -316,7 +317,10 @@ class InventoryFilterView(ListAPIView):
 
         return queryset
 
-
+class InventoryArchiveViewSet(viewsets.ModelViewSet):
+    queryset = InventoryArchive.objects.all()
+    serializer_class = InventoryArchiveSerializer
+    
 class GoodsReceiptNoteViewSet(viewsets.ModelViewSet):
     queryset = GoodsReceiptNote.objects.all()
     serializer_class = GoodsReceiptNoteSerializer
