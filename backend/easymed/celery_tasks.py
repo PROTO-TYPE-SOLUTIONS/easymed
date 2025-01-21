@@ -40,53 +40,50 @@ def get_inventory_or_error(item):
 
 def update_stock_quantity_if_stock_is_available(instance, deductions):
     """
-    Deducts stock quantity based on the billed quantity and validates stock levels.
+    Deducts stock quantity from the Inventory model based on the billed quantity.
     Prioritizes inventory records with the nearest expiry date.
     """
     try:
-        # Get department inventory records for the item, ordered by expiry date (nearest first)
-        department_inventory_records = DepartmentInventory.objects.filter(
-            item=instance.item,
-            # department=instance.invoice.attendanceprocess.department
+        # Get inventory records for the item, ordered by expiry date (nearest first)
+        inventory_records = Inventory.objects.filter(
+            item=instance.item
         ).order_by('expiry_date')
 
-        if not department_inventory_records.exists():
-            raise ValidationError(f"No department inventory record found for item: {instance.item.name}.")
+        if not inventory_records.exists():
+            raise ValidationError(f"No inventory record found for item: {instance.item.name}.")
 
         remaining_deduction = deductions
 
         with transaction.atomic():
-            # Iterate through the department inventory records.
-            # Deduct from the current record until the required quantity is fulfilled.
-            # If a record’s quantity_at_hand is insufficient, it is set to 0, and the deduction continues with the next record.
-            for department_inventory_record in department_inventory_records:
+            for inventory_record in inventory_records:
                 if remaining_deduction <= 0:
-                    break
+                    break  # Stop when all deductions are fulfilled
 
-                if department_inventory_record.quantity_at_hand >= remaining_deduction:
-                    # Deduct from the current record
-                    department_inventory_record.quantity_at_hand -= remaining_deduction
-                    department_inventory_record.save()
+                if inventory_record.quantity_at_hand >= remaining_deduction:
+                    # Deduct the required quantity from this record
+                    inventory_record.quantity_at_hand -= remaining_deduction
+                    inventory_record.save()
                     logger.info(
                         "Stock updated successfully for item: %s, Lot: %s, Remaining: %d",
                         instance.item.name,
-                        department_inventory_record.lot_number,
-                        department_inventory_record.quantity_at_hand,
+                        inventory_record.lot_number,
+                        inventory_record.quantity_at_hand,
                     )
                     remaining_deduction = 0
                 else:
-                    # Use up the current record's stock and move to the next
-                    remaining_deduction -= department_inventory_record.quantity_at_hand
-                    department_inventory_record.quantity_at_hand = 0
-                    department_inventory_record.save()
+                    # Use up the stock of the current record and continue with the remaining quantity
+                    remaining_deduction -= inventory_record.quantity_at_hand
+                    inventory_record.quantity_at_hand = 0
+                    inventory_record.save()
                     logger.info(
                         "Stock exhausted for item: %s, Lot: %s",
                         instance.item.name,
-                        department_inventory_record.lot_number,
+                        inventory_record.lot_number,
                     )
 
             if remaining_deduction > 0:
-                raise ValidationError(f"Not enough stock available for {instance.item.name}.")
+                # If there is still stock to deduct, raise an error
+                raise ValidationError(f"Not enough stock available for {instance.item.name}. Missing quantity: {remaining_deduction}.")
 
     except ValidationError as e:
         logger.error("Stock update failed: %s", e)
@@ -94,7 +91,7 @@ def update_stock_quantity_if_stock_is_available(instance, deductions):
     except Exception as e:
         logger.exception("Unexpected error during stock update: %s", e)
         raise
-
+    
 
 @shared_task
 def check_inventory_reorder_levels():

@@ -27,6 +27,14 @@ whenever quantity is referred, we're referring to subpacked.
 '''
 
 class Department(models.Model):
+    '''
+    Strict naming should be employed as frontend Inventory query
+    is dependent on it. Choices can be
+    Lab
+    Pharmacy
+    General
+    Main
+    '''
     name = models.CharField(max_length=100, unique=True)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
@@ -271,7 +279,7 @@ class Inventory(models.Model):
             raise ValidationError("Buying price cannot exceed selling price")
 
     def __str__(self):
-        return f"{self.item.name} - {self.id} - {self.date_created}"
+        return f"{self.item.name} - {self.quantity_at_hand} - {self.expiry_date}"
     
     class Meta:
         verbose_name_plural = 'Inventory'
