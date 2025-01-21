@@ -1,5 +1,6 @@
 import pytest
 from datetime import date
+from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 
@@ -112,6 +113,7 @@ def item():
         units_of_measure="Unit",
         vat_rate=16.0,
         item_code="ABC123",
+        slow_moving_period=30
     )
 
 
@@ -173,17 +175,18 @@ def incoming_item(item, supplier, purchase_order, supplier_invoice):
 
 
 @pytest.fixture
-def inventory(item):
+def inventory(item, department):
     return Inventory.objects.create(
         item=item,
         quantity_at_hand=10,
+        last_deducted_at=None,
         purchase_price=10.0,
         sale_price=20.0,
-        lot_no="LOT-001",
+        lot_number="LOT-001",
         expiry_date="2024-01-01",
         category_one="resale",
         department=department,
-        
+        date_created=timezone.now()
     )
 
 
