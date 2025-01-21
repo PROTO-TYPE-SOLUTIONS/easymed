@@ -10,7 +10,7 @@ from django.template.loader import get_template
 from django.http import HttpResponse
 from django.conf import settings
 from rest_framework.generics import ListAPIView
-from django.utils import timezone, now
+from django.utils import timezone
 from django.db import models
 from django.db.models import F
 from datetime import timedelta
@@ -210,14 +210,15 @@ class InventoryViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='slow-moving-items')
     def slow_moving_items(self, request):
         """
-        Get items that haven't been sold within their specified slow_moving_period.
-        Each item can have its own slow_moving_period (in days).
-
+        
         URL: /inventory/inventories/slow-moving-items/
         """
+        # Fetch all inventory items with non-zero quantity and slow_moving_period set.
+        # Also, select related 'item' and 'department' fields.
+        # This query can be optimized by using a more efficient database query.
         inventory_items = Inventory.objects.filter(
             quantity_at_hand__gt=0,
-            slow_moving_period__isnull=False
+            item__slow_moving_period__isnull=False
         ).select_related('item', 'department')
 
         current_time = timezone.now()
@@ -225,32 +226,28 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
         for inv in inventory_items:
             try:
-                last_sale = InvoiceItem.objects.filter(
-                    item=inv.item,
-                    status='billed',
-                    invoice__status='billed'
-                ).order_by('-item_created_at').first()
+                if inv.last_deducted_at:
+                    days_without_transactions = (current_time - inv.last_deducted_at).days
+                    print(f"Days without transaction would be this : {days_without_transactions}")
+                    if days_without_transactions > inv.item.slow_moving_period:
+                        slow_moving_items.append({
+                            'item_id': inv.item.id,
+                            'item_name': inv.item.name,
+                            'category': inv.item.category,
+                            'department': inv.department.name,
+                            'quantity': inv.quantity_at_hand,
+                            'days_without_transactions': days_without_transactions,
+                            'slow_moving_period': inv.item.slow_moving_period,
+                            'lot_number': inv.lot_number,
+                            'expiry_date': inv.expiry_date,
+                            'purchase_price': inv.purchase_price,
+                            'sale_price': inv.sale_price
+                        })
 
-                last_sale_date = last_sale.item_created_at if last_sale else inv.date_created
-                days_without_sale = (current_time - last_sale_date).days
-
-                if days_without_sale > inv.slow_moving_period:
-                    slow_moving_items.append({
-                        'item_id': inv.item.id,
-                        'item_name': inv.item.name,
-                        'category': inv.item.category,
-                        'department': inv.department.name,
-                        'quantity': inv.quantity_at_hand,
-                        'last_sale_date': last_sale_date,
-                        'days_without_sale': days_without_sale,
-                        'slow_moving_period': inv.slow_moving_period,
-                        'lot_number': inv.lot_number,
-                        'expiry_date': inv.expiry_date,
-                        'purchase_price': inv.purchase_price,
-                        'sale_price': inv.sale_price
-                    })
+                else:
+                    print("PLEASE GO")
             except Exception as e:
-                print(f"Error getting slow moving items: {e}")
+                    print(f"Error getting slow moving items: {e}")
         return Response(slow_moving_items)
 
 

@@ -6,6 +6,7 @@ from django.db.models import F
 from django.db.models.signals import post_save, post_delete
 from django.db.models import Sum
 from django.db import models
+from django.utils import timezone
 
 
 from .utils import update_purchase_order_status
@@ -108,5 +109,13 @@ def update_purchase_order_item_quantity_received_on_delete(sender, instance, **k
 
             update_purchase_order_status(purchase_order_item.purchase_order)
 
+@receiver(post_save, sender=Inventory)
+def update_last_deducted_on(sender, instance, **kwargs):
+        old_instance = Inventory.objects.get(pk=instance.pk)
+
+        if instance.quantity_at_hand < old_instance.quantity_at_hand:
+            instance.last_deducted_on = timezone.now()
+            instance.save()
+    
 
 

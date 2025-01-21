@@ -113,6 +113,7 @@ def item():
         units_of_measure="Unit",
         vat_rate=16.0,
         item_code="ABC123",
+        slow_moving_period=30
     )
 
 
@@ -178,6 +179,7 @@ def inventory(item, department):
     return Inventory.objects.create(
         item=item,
         quantity_at_hand=10,
+        last_deducted_at=None,
         purchase_price=10.0,
         sale_price=20.0,
         lot_number="LOT-001",

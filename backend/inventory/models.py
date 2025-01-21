@@ -72,6 +72,7 @@ class Item(models.Model):
     vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
     packed = models.CharField(max_length=255, default=1)
     subpacked = models.CharField(max_length=255, default=1)
+    slow_moving_period = models.IntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         ''' Generate unique item code'''
@@ -245,7 +246,8 @@ class IncomingItem(models.Model):
     def __str__(self):
         return f"{self.item.name} - {self.date_created}"    
 
-
+#Take duration of slow moving period to the item table
+# make sure everytime the quanity at hnad in the iventory changes the duration is updated to track the last movement of the item
 class Inventory(models.Model):
     CATEGORY_ONE_CHOICES = [
         ('Resale', 'resale'),
@@ -254,12 +256,12 @@ class Inventory(models.Model):
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
+    last_deducted_at = models.DateTimeField(null=True, blank=True)
     re_order_level= models.PositiveIntegerField(default=5)
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
     lot_number= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
-    slow_moving_period = models.IntegerField(null=True, blank=True)
     
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='department_items')
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
