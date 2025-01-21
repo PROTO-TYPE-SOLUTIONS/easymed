@@ -47,7 +47,7 @@ def update_stock_quantity_if_stock_is_available(instance, deductions):
         # Get inventory records for the item, ordered by expiry date (nearest first)
         inventory_records = Inventory.objects.filter(
             item=instance.item
-        ).order_by('expiry_date')
+        ).exclude(expiry_date__isnull=True).order_by('expiry_date')
 
         if not inventory_records.exists():
             raise ValidationError(f"No inventory record found for item: {instance.item.name}.")
