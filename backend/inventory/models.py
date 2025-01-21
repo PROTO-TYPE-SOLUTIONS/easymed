@@ -26,7 +26,11 @@ Throughout the system, our BaseUnitofMeasure is the subpacked i.e
 whenever quantity is referred, we're referring to subpacked.
 '''
 
-class Department(models.Model):
+class AbstractBaseModel(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        abstract = True
+class Department(AbstractBaseModel):
     '''
     Strict naming should be employed as frontend Inventory query
     is dependent on it. Choices can be
@@ -36,20 +40,18 @@ class Department(models.Model):
     Main
     '''
     name = models.CharField(max_length=100, unique=True)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f"{self.id} - {self.name}"
     
-class Supplier(models.Model):
+class Supplier(AbstractBaseModel):
     official_name = models.CharField(max_length=255)  
     common_name = models.CharField(max_length=30) 
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f"{self.id} - {self.official_name} ({self.common_name})"
 
-class Item(models.Model):
+class Item(AbstractBaseModel):
     '''
     Refer to the docs above
     '''
@@ -76,7 +78,6 @@ class Item(models.Model):
     desc = models.CharField(max_length=255)
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     units_of_measure = models.CharField(max_length=255, choices=UNIT_CHOICES)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
     packed = models.CharField(max_length=255, default=1)
     subpacked = models.CharField(max_length=255, default=1)
@@ -96,9 +97,8 @@ class Item(models.Model):
         return f"{self.id} - {self.name}"
 
 
-class Requisition(models.Model):
+class Requisition(AbstractBaseModel):
     requisition_number = models.CharField(max_length=50, unique=True, editable=False)
-    date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
     department_approved = models.BooleanField(default=False)
     procurement_approved = models.BooleanField(default=False)
@@ -124,10 +124,9 @@ class Requisition(models.Model):
         return self.requisition_number
       
         
-class RequisitionItem(models.Model):
+class RequisitionItem(AbstractBaseModel):
     quantity_requested = models.IntegerField()
     quantity_approved = models.IntegerField(default=0)  
-    date_created = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=False)
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
@@ -138,14 +137,13 @@ class RequisitionItem(models.Model):
         return f"{self.item.name} - Requested: {self.quantity_requested}, Approved: {self.quantity_approved}"
 
 
-class PurchaseOrder(models.Model):
+class PurchaseOrder(AbstractBaseModel):
     class Status(models.TextChoices):
         PENDING = 'PENDING', 'Pending'
         PARTIAL = 'PARTIAL', 'Partial'
         COMPLETED = 'COMPLETED', 'Completed'
 
     PO_number = models.CharField(unique=True, max_length=255, editable=False)
-    date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='purchase-orders', null=True, blank=True)
     is_dispatched = models.BooleanField(default=False)
     ordered_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ordered_by')
@@ -174,12 +172,11 @@ class PurchaseOrder(models.Model):
         return f"Purchase Order by {self.ordered_by} - PO Number: {self.PO_number} - Status {self.status}"
 
 
-class PurchaseOrderItem(models.Model):
+class PurchaseOrderItem(AbstractBaseModel):
     '''
     On the purchase order pdf, we can create a converter that will
     display the packed and subpacked so that we only order packed
     '''
-    date_created = models.DateTimeField(auto_now_add=True)
     quantity_ordered = models.IntegerField(default=0) # not packed or subpacked
     quantity_received = models.IntegerField(default=0)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='po_items')
@@ -195,13 +192,12 @@ class PurchaseOrderItem(models.Model):
 # TODO: amount should be captured as a sum total of the 
 # incoming items associated with this invoice
 # update_supplier_invoice_amount() signal will be called
-class SupplierInvoice(models.Model):
+class SupplierInvoice(AbstractBaseModel):
     STATUS=[
         ('pending', 'Pending'),
         ('paid', 'Paid'),
     ]
     invoice_no = models.CharField(max_length=255, unique=True)
-    date_created = models.DateTimeField(auto_now_add=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=255, choices=STATUS, default="pending")
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
@@ -214,8 +210,7 @@ class SupplierInvoice(models.Model):
         return f"{self.invoice_no} - PO: {self.purchase_order.PO_number}"
 
 
-class GoodsReceiptNote(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True)
+class GoodsReceiptNote(AbstractBaseModel):
     note = models.TextField(max_length=255, null=True, blank=True)
     grn_number = models.CharField(max_length=50, null=True, blank=True, unique=True)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.SET_NULL, null=True, blank=True)
@@ -232,14 +227,13 @@ class GoodsReceiptNote(models.Model):
     
 
 # update_supplier_invoice_amount() signal will be called on create
-class IncomingItem(models.Model):
+class IncomingItem(AbstractBaseModel):
     CATEGORY_1_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     quantity = models.IntegerField()
     category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES, default='Resale') 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -254,7 +248,7 @@ class IncomingItem(models.Model):
         return f"{self.item.name} - {self.date_created}"    
 
 
-class Inventory(models.Model):
+class Inventory(AbstractBaseModel):
     CATEGORY_ONE_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
@@ -263,7 +257,6 @@ class Inventory(models.Model):
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
     re_order_level= models.PositiveIntegerField(default=5)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
     lot_number= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
@@ -284,7 +277,7 @@ class Inventory(models.Model):
 
 # Any record in the Inventory that has zero value in the 
 # quantity_at_hand field should be moved here
-class InventoryArchive(models.Model):
+class InventoryArchive(AbstractBaseModel):
     CATEGORY_ONE_CHOICES = [
         ('Resale', 'resale'),
         ('Internal', 'internal'),
@@ -294,7 +287,6 @@ class InventoryArchive(models.Model):
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
     re_order_level= models.PositiveIntegerField(default=5)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
     lot_number= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
@@ -318,7 +310,7 @@ class InventoryInsuranceSaleprice(models.Model):
         unique_together = ('inventory_item', 'insurance_company')
     
 
-class DepartmentInventory(models.Model):
+class DepartmentInventory(AbstractBaseModel):
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity_at_hand = models.PositiveIntegerField()
@@ -326,7 +318,6 @@ class DepartmentInventory(models.Model):
     expiry_date = models.DateField()
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     main_inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True,
                                        help_text="Main inventory record this was transferred from")
 
@@ -350,14 +341,13 @@ class QuotationCustomer(models.Model):
         return f"{self.name} - {self.email} - {self.phone} - {self.address}"
 
 
-class Quotation(models.Model):
+class Quotation(AbstractBaseModel):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
     quotation_number = models.CharField(max_length=50, unique=True, editable=False)
-    date_created = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='quotations', null=True, blank=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
     created_by = models.ForeignKey(
