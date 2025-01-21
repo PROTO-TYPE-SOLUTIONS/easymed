@@ -305,6 +305,8 @@ class InventoryInsuranceSaleprice(models.Model):
     insurance_company = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     
+    co_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
     def __str__(self):
         return f"{self.inventory_item.item.name} - {self.insurance_company.name}"
     
