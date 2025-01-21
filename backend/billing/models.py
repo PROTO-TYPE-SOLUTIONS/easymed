@@ -10,7 +10,7 @@ def invoice_file_path(instance, filename):
 class PaymentMode(models.Model):
     '''
     For total_cash under Invoice to work,
-    Cash PaymentMode should be cash
+    Cash PaymentMode.payment_category should be cash
     '''
     PAYMENT_CATEGORY_CHOICES = (
         ('cash', 'Cash'),
