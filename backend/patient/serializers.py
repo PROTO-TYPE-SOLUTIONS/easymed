@@ -32,6 +32,7 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = "__all__"
+        ordering = "id"
 
     def get_age(self, obj: Patient):
         if obj.age:

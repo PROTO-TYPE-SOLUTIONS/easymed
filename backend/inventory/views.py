@@ -24,13 +24,12 @@ from .models import (
     Supplier,
     SupplierInvoice,
     IncomingItem,
-    DepartmentInventory,
     Department,
     RequisitionItem,
     Requisition,
     PurchaseOrder,
     PurchaseOrderItem,
-    InventoryInsuranceSaleprice,
+    InsuranceItemSalePrice,
     GoodsReceiptNote,
     Quotation,
     QuotationItem,
@@ -49,13 +48,12 @@ from .serializers import (
     SupplierInvoiceSerializer,
     DepartmentSerializer,
     RequisitionItemCreateSerializer,
-    DepartmentInventorySerializer,
     RequisitionCreateSerializer,
     RequisitionUpdateSerializer,
     RequisitionItemListUpdateSerializer,
     RequisitionListSerializer,
     IncomingItemSerializer,
-    InventoryInsuranceSalepriceSerializer,
+    InsuranceItemSalePriceSerializer,
     GoodsReceiptNoteSerializer,
     QuotationSerializer,
     QuotationItemSerializer,
@@ -102,10 +100,6 @@ class IncomingItemViewSet(viewsets.ModelViewSet):
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-
-class DepartmentInventoryViewSet(viewsets.ModelViewSet):
-    queryset = DepartmentInventory.objects.all()
-    serializer_class = DepartmentInventorySerializer
 
 
 class RequisitionViewSet(viewsets.ModelViewSet):
@@ -323,9 +317,9 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
         return PurchaseOrderItem.objects.filter(purchase_order=purchase_order_id)
 
     
-class InventoryInsuranceSalepriceViewSet(viewsets.ModelViewSet):
-    queryset = InventoryInsuranceSaleprice.objects.all()
-    serializer_class = InventoryInsuranceSalepriceSerializer
+class InsuranceItemSalePriceViewSet(viewsets.ModelViewSet):
+    queryset = InsuranceItemSalePrice.objects.all()
+    serializer_class = InsuranceItemSalePriceSerializer
 
 
 class InventoryFilterView(ListAPIView):

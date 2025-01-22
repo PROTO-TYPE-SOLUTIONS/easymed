@@ -16,11 +16,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from inventory.models import (
     Inventory,
-    PurchaseOrder,
-    PurchaseOrderItem,
-    Requisition,
-    RequisitionItem,
-    DepartmentInventory
 )
 from billing.models import Invoice
 from patient.models import AttendanceProcess

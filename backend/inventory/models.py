@@ -300,15 +300,14 @@ class InventoryArchive(AbstractBaseModel):
         verbose_name_plural = 'Inventory Archive'
 
 
-class InventoryInsuranceSaleprice(models.Model):
-    inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+class InsuranceItemSalePrice(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     insurance_company = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    
     co_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     def __str__(self):
-        return f"{self.inventory_item.item.name} - {self.insurance_company.name}"
+        return f"{self.item.name} - {self.insurance_company.name}"
     
     class Meta:
         unique_together = ('inventory_item', 'insurance_company')
