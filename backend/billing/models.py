@@ -17,7 +17,7 @@ class PaymentMode(models.Model):
         ('insurance', 'Insurance'),
         ('mpesa', 'MPesa'),
     )
-    paymet_mode = models.CharField(max_length=20, blank=True, null=True)
+    paymet_mode = models.CharField(max_length=20, blank=True, null=True, default='cash')
     insurance = models.ForeignKey(
             'company.InsuranceCompany',
             null=True,
@@ -100,14 +100,3 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return self.item.name + ' - ' + str(self.item_created_at)
-
-    
-class InsuranceCoPay(models.Model):
-    '''
-    When an InvoiceItem is billed, check if it exists here. If it does, check its co-pay value
-    then deduct that value from the InvoiceItem.item_amount and update the actual_total
-    as a result of the subtraction
-    '''
-    insurance = models.ForeignKey('company.InsuranceCompany', on_delete=models.SET_NULL, null=True)
-    co_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)  
