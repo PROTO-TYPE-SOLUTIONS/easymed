@@ -306,38 +306,17 @@ class InventoryArchive(models.Model):
         verbose_name_plural = 'Inventory Archive'
 
 
-class InventoryInsuranceSaleprice(models.Model):
-    inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+class InsuranceItemSalePrice(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     insurance_company = models.ForeignKey(InsuranceCompany, on_delete=models.CASCADE)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    
     co_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     def __str__(self):
-        return f"{self.inventory_item.item.name} - {self.insurance_company.name}"
+        return f"{self.item.name} - {self.insurance_company.name}"
     
     class Meta:
-        unique_together = ('inventory_item', 'insurance_company')
-    
-
-class DepartmentInventory(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity_at_hand = models.PositiveIntegerField()
-    lot_number = models.CharField(max_length=100)
-    expiry_date = models.DateField()
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    main_inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True,
-                                       help_text="Main inventory record this was transferred from")
-
-    class Meta:
-        verbose_name_plural = "Department Inventories"
-        ordering = ['expiry_date', 'lot_number']  # FIFO ordering
-
-    def __str__(self):
-        return f"{self.department.name} - {self.item.name} ({self.quantity_at_hand}) - Lot: {self.lot_number}"
+        unique_together = ('item', 'insurance_company')    
 
 
 class QuotationCustomer(models.Model):

@@ -22,12 +22,11 @@ from authperms.permissions import (
     IsDoctorUser,
     IsLabTechUser,
     IsNurseUser,
-    IsReceptionistUser
 )
 from .serializers import (InvoiceItemSerializer, InvoiceSerializer, PaymentModeSerializer,)
 
 class InvoiceViewset(viewsets.ModelViewSet):
-    queryset = Invoice.objects.all()
+    queryset = Invoice.objects.all().order_by('-id')
     serializer_class = InvoiceSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
@@ -40,7 +39,7 @@ class InvoicesByPatientId(generics.ListAPIView):
         return Invoice.objects.filter(patient_id=patient_id)
 
 class InvoiceItemViewset(viewsets.ModelViewSet):
-    queryset = InvoiceItem.objects.all()
+    queryset = InvoiceItem.objects.all().order_by('-id')
     serializer_class = InvoiceItemSerializer
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser,)
 
@@ -76,7 +75,6 @@ class InvoiceItemsByInvoiceId(generics.ListAPIView):
 class PaymentModeViewset(viewsets.ModelViewSet):
         queryset = PaymentMode.objects.all()
         serializer_class = PaymentModeSerializer
-        # permission_classes = (IsDoctorUser | IsNurseUser | IsReceptionistUser |  IsLabTechUser,)
 
 
 class PaymentBreakdownView(APIView):
