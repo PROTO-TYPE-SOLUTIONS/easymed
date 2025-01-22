@@ -101,9 +101,7 @@ def check_quantity_before_billing(sender, instance, **kwargs):
 def check_copay(sender, instance, **kwargs):
     if instance.status == 'billed':
 
-        co_pay = InventoryInsuranceSaleprice.objects.filter(item=instance.inventory_item.item).first()
+        co_pay = InventoryInsuranceSaleprice.objects.filter(inventory_item__item=instance.item).first()
         print(f'co_pay: {co_pay}')
         if co_pay:
             instance.actual_total = instance.item_amount - co_pay.co_pay
-
-
