@@ -4,8 +4,8 @@ from django.core.exceptions import ValidationError
 from django.db.models import Sum
 
 from .utils import check_quantity_availability, update_service_billed_status
-from inventory.models import Inventory
-from .models import InvoiceItem, InsuranceCoPay, Invoice
+from inventory.models import InsuranceItemSalePrice
+from .models import InvoiceItem
 
 
 @receiver(post_save, sender=InvoiceItem)
@@ -97,13 +97,25 @@ def check_quantity_before_billing(sender, instance, **kwargs):
         pass
 
 
+def calculate_actual_total(invoice_item):
+    try:
+        # Retrieve the insurance company from the payment mode
+        insurance_company = invoice_item.payment_mode.insurance if invoice_item.payment_mode else None
+        
+        if insurance_company:
+            insurance_sale_price = InsuranceItemSalePrice.objects.get(
+                item=invoice_item.item,
+                insurance_company=insurance_company
+            )
+            co_pay = insurance_sale_price.co_pay
+        else:
+            co_pay = 0
+    except InsuranceItemSalePrice.DoesNotExist:
+        co_pay = 0
+
+    invoice_item.actual_total = invoice_item.item_amount - co_pay
+
+
 @receiver(pre_save, sender=InvoiceItem)
-def check_copay(sender, instance, **kwargs):
-    if instance.status == 'billed':
-        #check if item is in InsuranceCoPay
-        co_pay = InsuranceCoPay.objects.filter(item=instance.item).first()
-        print(f'co_pay: {co_pay}')
-        if co_pay:
-            instance.actual_total = instance.item_amount - co_pay.co_pay
-
-
+def update_invoice_item_actual_total(sender, instance, **kwargs):
+    calculate_actual_total(instance)
