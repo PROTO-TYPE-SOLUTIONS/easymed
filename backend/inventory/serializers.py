@@ -598,7 +598,7 @@ class InventorySerializer(serializers.ModelSerializer):
                  'category_one', 'insurance_sale_prices', 'total_quantity']
 
     def get_insurance_sale_prices(self, obj):
-        sale_prices = InsuranceItemSalePrice.objects.filter(item=obj)
+        sale_prices = InsuranceItemSalePrice.objects.filter(item=obj.item)
         insurance_prices = []
         for sale in sale_prices:
 
