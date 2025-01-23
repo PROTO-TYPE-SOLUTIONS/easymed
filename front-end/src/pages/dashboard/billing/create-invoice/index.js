@@ -14,13 +14,7 @@ import ProtectedRoute from '@/assets/hoc/protected-route';
 import { useAuth } from '@/assets/hooks/use-auth';
 
 const CreateNewInvoice = () => {
-    const dispatch = useDispatch()
     const auth = useAuth()
-
-    useEffect(() => {
-        dispatch(getAllPatients(auth));
-    }, []);
-    
 
   return (
     <Container className='my-8' maxWidth="xl">
