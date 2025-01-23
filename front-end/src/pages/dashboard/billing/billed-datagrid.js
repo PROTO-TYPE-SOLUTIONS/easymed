@@ -106,7 +106,7 @@ const BilledDataGrid = () => {
                 date: formattedDate,
                 payment_method: payment_method
             }
-            await dayTransaction(payload).then((res)=> {
+            await dayTransaction(payload, auth).then((res)=> {
                 console.log("PAY FOR THE DAY", res)
                 setInfoAsPerPayMode(res)
             })

@@ -23,6 +23,7 @@ const CategorizedItems = ({
   const [loading, setLoading] = useState(false);
   const [inventoryPrices, setInventoryPrices] = useState([]);
   const [selectedPrice, setSelectedPrice] = useState(null);
+  const [selectedCoPay, setSelectedCoPay] = useState(null);
   const [selectedPayMethod, setSelectedPayMethod] = useState(null);
   const [updatedInvoiceItem, setUpdatedInvoiceItem] = useState(invoiceItem);
 
@@ -86,7 +87,7 @@ const CategorizedItems = ({
 
   return (
     <Grid className='flex items-center py-1' container>
-      <Grid item xs={4}>
+      <Grid item xs={3}>
         <p>{updatedInvoiceItem?.item_code}</p>
       </Grid>
       <Grid item xs={4}>
@@ -101,11 +102,13 @@ const CategorizedItems = ({
                 setSelectedPayMethod(selectedOption);
                 if (selectedOption?.paymet_mode.toLowerCase() === 'cash' || selectedOption?.paymet_mode.toLowerCase() === 'mpesa') {
                   setSelectedPrice(inventoryPrices ? inventoryPrices[0].sale_price : 'NA');
+                  setSelectedCoPay(0)
                 } else {
                   const selectedInsurance = inventoryPrices[0].insurance_sale_prices?.find((mode) => 
                     mode.insurance_name.toLowerCase() === selectedOption?.paymet_mode.toLowerCase()
                   );
                   setSelectedPrice(selectedInsurance ? selectedInsurance.price : 'NA');
+                  setSelectedCoPay(selectedInsurance ? selectedInsurance.co_pay : 0)
                 }
               }}
             >
@@ -120,7 +123,14 @@ const CategorizedItems = ({
       </Grid>
       {updatedInvoiceItem?.status !== 'billed' ? (
         <>
-          <Grid className='px-2 flex justify-end' item xs={3}>
+          <Grid className='px-2 flex justify-end' item xs={2}>
+            {selectedPayMethod && selectedPrice && (
+              <div className="mt-2">
+                <p>{parseInt(selectedCoPay) + parseInt(selectedPrice)}</p>
+              </div>
+            )}
+          </Grid>
+          <Grid className='px-2 flex justify-end' item xs={2}>
             {selectedPayMethod && selectedPrice && (
               <div className="mt-2">
                 <p>{selectedPrice}</p>
@@ -159,11 +169,20 @@ const CategorizedItems = ({
         </>
 
       ): (
-        <Grid className='px-2 flex justify-end' item xs={3}>
+        <>
+        <Grid className='flex justify-center' item xs={2}>
+          <div className="mt-2">
+            <p>{updatedInvoiceItem.item_amount}</p>
+          </div>
+      </Grid>
+        <Grid className='flex justify-center' item xs={2}>
             <div className="mt-2">
-              <p>{updatedInvoiceItem.item_amount}</p>
+              <p>{updatedInvoiceItem.actual_total}</p>
             </div>
         </Grid>
+        <Grid className='flex justify-center' item xs={1}>
+        </Grid>
+        </>
       )}
 
 
