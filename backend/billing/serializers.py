@@ -42,7 +42,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Invoice
-        fields = ['id', 'invoice_number', 'invoice_date', 'patient', 'invoice_items']
+        fields = ['id', 'invoice_number', 'invoice_date', 'patient', 'invoice_items', 'cash_paid', 'total_cash']
 
 
 class PaymentModeSerializer(serializers.ModelSerializer):

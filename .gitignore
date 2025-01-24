@@ -18,6 +18,7 @@ static/
 /.pnp
 .pnp.js
 
+*.code-workspace
 
 backend/easymed/static/
 
@@ -35,6 +36,13 @@ migrations/
 # **/db.sqlite3
 
 
+#terraform files
+terraform/.terraform/
+/terraform/terraform.tfstate
+/terraform/terraform.tfstate.backup
+/terraform/.terraform.lock.hcl
+*.terraform.lock.hcl
+*.terraform
 
 
 # dependencies
