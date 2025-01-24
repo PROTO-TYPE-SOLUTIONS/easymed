@@ -47,7 +47,8 @@ class Invoice(models.Model):
     invoice_created_at = models.DateTimeField(auto_now_add=True)
     invoice_updated_at = models.DateTimeField(auto_now=True)
     # get total amount with Payment Mode "Cash"
-    total_cash = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_cash = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
+    cash_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
 
     def calculate_invoice_totals(self):
         if self.pk:
