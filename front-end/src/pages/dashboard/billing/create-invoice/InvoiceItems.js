@@ -63,14 +63,17 @@ const InvoiceItems = ({
                 Object.keys(groupedItems)?.map(category => (
                     <section key={category} className='py-2'>
                         <Grid className='flex items-center py-1' container spacing={2}>
-                        <Grid item md={4} xs={4}>
+                        <Grid item md={3} xs={3}>
                           <h2 className='font-bold text-primary'>{category}</h2>
                         </Grid>
                         <Grid item xs={4}>
                           <h2 className='font-bold text-primary'>{'Payment Mode'}</h2>
                         </Grid>
-                        <Grid className='px-2 flex justify-end' item xs={3}>
-                            <h2 className='font-bold text-primary'>{'Price'}</h2>
+                        <Grid className='px-2 flex justify-end' item xs={2}>
+                            <h2 className='font-bold text-primary'>{'Actual Total'}</h2>
+                        </Grid>
+                        <Grid className='px-2 flex justify-end' item xs={2}>
+                            <h2 className='font-bold text-primary'>{'Item Amount'}</h2>
                         </Grid>
                         <Grid item xs={1}>
                         </Grid>

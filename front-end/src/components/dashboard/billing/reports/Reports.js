@@ -77,7 +77,7 @@ function Reports() {
 
             if(checked === "Sale by Date Range and Item Id"){
 
-                await saleByDateRangeAndItem(payloadWithId).then((res)=> {
+                await saleByDateRangeAndItem(payloadWithId, auth).then((res)=> {
                     console.log("RESPONSE IS", res)
                     handlePrint()
                 })

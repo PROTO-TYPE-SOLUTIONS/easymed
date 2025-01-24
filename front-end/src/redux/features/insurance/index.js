@@ -67,9 +67,9 @@ export const getAllInsurance = (auth) => async (dispatch) => {
   }
 };
 
-export const getAllInventoryInsurancePrices = () => async (dispatch) => {
+export const getAllInventoryInsurancePrices = (auth) => async (dispatch) => {
   try {
-    const response = await fetchInventoryInsurancePrices();
+    const response = await fetchInventoryInsurancePrices(auth);
     dispatch(setInsurancePrices(response));
   } catch (error) {
     console.log("INSURANCE_PRICES_ERROR ", error);

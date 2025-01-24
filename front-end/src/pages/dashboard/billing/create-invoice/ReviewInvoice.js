@@ -44,6 +44,7 @@ const ReviewInvoice = ({
 
     const validationSchema = Yup.object().shape({
         invoice_description: Yup.string().required("This field is required!"),
+        cash_paid: Yup.number().required("This field is required!"),
       });
 
     function sumArray(array) {
@@ -62,7 +63,9 @@ const ReviewInvoice = ({
                 if(item.payment_mode_name === "cash"){
                     cashFees.push(parseInt(item.item_amount))
                 }else {
-                    insuranceFees.push(parseInt(item.item_amount))
+                    const co_pay = parseInt(item.item_amount) - parseInt(item.actual_total)
+                    cashFees.push(parseInt(co_pay))
+                    insuranceFees.push(parseInt(item.item_amount) - parseInt(co_pay))
                 }
 
             }
@@ -85,7 +88,10 @@ const ReviewInvoice = ({
                 if(item.payment_mode_name === "cash"){
                     cashFees.push(parseInt(item.item_amount))
                 }else {
-                    insuranceFees.push(parseInt(item.item_amount))
+                    const co_pay = parseInt(item.item_amount) - parseInt(item.actual_total)
+                    cashFees.push(parseInt(co_pay))
+                    insuranceFees.push(parseInt(item.item_amount) - (parseInt(co_pay)))
+
                 }
 
             }
@@ -107,7 +113,9 @@ const ReviewInvoice = ({
                 if(item.payment_mode_name === "cash"){
                     cashFees.push(parseInt(item.item_amount))
                 }else {
-                    insuranceFees.push(parseInt(item.item_amount))
+                    const co_pay = parseInt(item.item_amount) - parseInt(item.actual_total)
+                    cashFees.push(parseInt(co_pay))
+                    insuranceFees.push(parseInt(item.item_amount) - (parseInt(co_pay)))
                 }
 
             }
@@ -148,7 +156,7 @@ const ReviewInvoice = ({
 
   return (
     <Formik
-        initialValues={{ invoice_description: '', status:"paid" }}
+        initialValues={{ invoice_description: '', status:"paid", cash_paid: "" }}
         validationSchema={validationSchema}
         onSubmit={updateInvoice}
     >

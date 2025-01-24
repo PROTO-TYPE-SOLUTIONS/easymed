@@ -82,7 +82,7 @@ const NewInvoice = () => {
                     const date = invoice.invoice_created_at
                     return (
                       <li onClick={()=> selectInvoice(invoice)} className={`my-2 p-1 cursor-pointer  ${selectedInvoice?.id === invoice.id ? "bg-primary text-white" : ""}`} key={invoice.id}>
-                        {formatDate(date)}
+                        {invoice.invoice_date}
                       </li>
                       )
                   })}
