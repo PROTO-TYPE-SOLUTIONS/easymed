@@ -52,7 +52,7 @@ def test_requisition_successful_creation(requisition, item, item2, inventory2, i
     assert len(response.data['items']) == 2  # Check if two items are returned in the response
 
 @pytest.mark.django_db
-def test_requsition_item_with_mising_supplier(requisition, user, supplier, department, item):
+def test_requsition_item_with_mising_supplier(requisition, user, supplier, inventory, authenticated_client, department, item):
     """
     Test that if a RequisitionItem is created without a preferred supplier,
     the first supplier in the database is automatically assigned via the serializer.
