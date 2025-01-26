@@ -87,6 +87,7 @@ export const API_URL = {
   FETCH_INCOMING_ITEMS: "/inventory/incoming-item/",
   FETCH_SUPPLIER_INVOICE: "/inventory/supplier-invoice/",
   FETCH_GOODS_RECEIPT_NOTE: "/inventory/goods-receipt-note/",
+  FETCH_DEPARTMENTS: "/inventory/departments/",
 
 
 
@@ -105,7 +106,7 @@ export const API_URL = {
   FETCH_INVOICE_ITEMS_BY_INVOICE: "/billing/invoices/items/",
   TOTALS_OF_THE_DAY: "/reports/total_payment_mode_amount/",
   PAYMENT_MODES: "/billing/payment-modes/",
-  INSURANCE_INVENTORY_PRICES: "/inventory/insurance-prices/",
+  INSURANCE_INVENTORY_PRICES: "/inventory/insurance-item-prices/",
 
   /***************** PRESCRIPRION **********************/
   FETCH_PRESCRIPTION: "/patients/prescriptions",
@@ -236,6 +237,7 @@ export const APP_API_URL = {
   FETCH_INCOMING_ITEMS: "/api/inventory/incomingItem",
   FETCH_SUPPLIER_INVOICE: "/api/inventory/supplier-invoice/",
   FETCH_GOODS_RECEIPT_NOTE: "/api/inventory/goods-receipt-note/",
+  FETCH_DEPARTMENTS: "/api/groups/department/",
 
 
 

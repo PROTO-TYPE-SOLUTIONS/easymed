@@ -37,4 +37,5 @@ def assign_default_supplier(attrs):
         default_supplier = Supplier.objects.first()
         if not default_supplier:
             raise ValidationError("No supplier is available. Please add a supplier first.")
+        print(f"Assigning default supplier: {default_supplier.official_name}")
         attrs['preferred_supplier'] = default_supplier

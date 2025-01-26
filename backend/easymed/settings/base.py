@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
@@ -226,28 +225,34 @@ CELERY_BEAT_SCHEDULE = {
     "task": "easymed.celery_tasks.check_inventory_reorder_levels",            
     "schedule": crontab(minute='*/600'),  
     },
+
+    "inventory_garbage_collection": {
+        "task": "easymed.celery_tasks.inventory_garbage_collection",            
+        "schedule": crontab(minute='*/45'),  
+    },
 }
 
+
+''' You need to have the environemnt variables defined in your .env
+'''
+DATABASES = {
+    "default":{
+        "ENGINE": config("DB_ENGINE"),
+        "NAME": config("POSTGRES_DB"),
+        "USER": config("POSTGRES_USER"),
+        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "HOST": config("POSTGRES_HOST"),
+        "PORT": config("POSTGRES_PORT"),
+    }
+}
 
 ''''
 For some reason, docker is not able to differentiate db configs 
 '''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-''' You need to have the environemnt variables defined in your .env
-'''
 # DATABASES = {
-#     "default":{
-#         "ENGINE": config("DB_ENGINE"),
-#         "NAME": config("POSTGRES_NAME"),
-#         "USER": config("POSTGRES_USER"),
-#         "PASSWORD": config("POSTGRES_PASSWORD"),
-#         "HOST": config("POSTGRES_HOST"),
-#         "PORT": config("POSTGRES_PORT"),
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+

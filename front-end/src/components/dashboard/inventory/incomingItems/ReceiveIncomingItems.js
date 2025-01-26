@@ -28,7 +28,7 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
     const initialValues = {
 
         invoice_no : "",
-        amount : "",
+        amount : 0,
         note: "",
         status : "pending",
         supplier : selectedRowData ? selectedRowData?.items[0].preferred_supplier : "",
@@ -163,10 +163,11 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
                 validationSchema={validationSchema}
                 onSubmit={handleAddIncomingItem}
             >
+            {({ values, handleChange }) => (
               <Form className="">
                 <div>
                     <h2 className='text-lg font-bold'>Supplier Invoice Details</h2>
-                    <SupplierInvoice/>
+                    <SupplierInvoice />
                 </div>
                 <div>
                     <h2 className='text-lg font-bold'>Goods Received Note Details</h2>
@@ -176,6 +177,7 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
                     selectedRowData={selectedRowData} setSelectedRowData={setSelectedRowData}
                     setSelectedItems={setSelectedItems}
                     createdIncomings={poIncomingItems}
+                    values={values}
                 />
                 <Grid className='my-2' item md={12} xs={12}>
                     <div className="flex items-center justify-end">
@@ -206,7 +208,7 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
                         </button>
                     </div>
                 </Grid>
-              </Form>
+              </Form>)}
             </Formik>
             )}
 

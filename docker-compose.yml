@@ -1,4 +1,19 @@
 services:
+    postgres:
+    # Will be moved to bare-metal install in prod
+        image: postgres:15
+        container_name: postgres
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_HOST=${POSTGRES_HOST}
+        ports:
+        - "5433:5432"
+        volumes:
+        - postgres_data:/var/lib/postgresql/data
+        networks:
+        - mks
     redis:
         image: redis:7.0-alpine
         container_name: redis2
@@ -14,14 +29,14 @@ services:
     backend:
         image: mosesmbadi/easymedbackend
         container_name: backend
-        #command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
+        command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
         ports:
             - 8080:8080
         env_file:
             - ./.env
-        depends_on:
-            - db
         restart: unless-stopped
+        depends_on:
+            - redis
         networks:
             - mks
 

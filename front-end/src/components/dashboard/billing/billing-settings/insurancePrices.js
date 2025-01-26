@@ -136,6 +136,12 @@ const InsurancePrices = () => {
           allowSearch={true}
         />
         <Column
+          dataField="co_pay"
+          caption="Co Pay"
+          allowFiltering={true}
+          allowSearch={true}
+        />
+        <Column
           dataField=""
           caption=""
           width={80}

@@ -10,20 +10,20 @@ import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from '@/assets/hooks/use-auth';
 import { IoMdAdd } from "react-icons/io";
 import { createAInsurancePriceStore, getAllInsurance } from "@/redux/features/insurance";
-import { getAllInventories } from "@/redux/features/inventory";
+import { getAllInventories, getAllItems } from "@/redux/features/inventory";
 import { createInventoryInsurancePrices } from "@/redux/service/insurance";
 const CreateInsurancePriceModal = () => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
-  const { inventories } = useSelector((store) => store.inventory);
+  const { items } = useSelector((store) => store.inventory);
   const { insurance } = useSelector((store) => store.insurance)
 
   useEffect(() => {
     if(auth){
-        dispatch(getAllInventories(auth))
-        dispatch(getAllInsurance())
+        dispatch(getAllItems(auth))
+        dispatch(getAllInsurance(auth))
     }
   },[])
 
@@ -36,22 +36,23 @@ const CreateInsurancePriceModal = () => {
   }
 
   const initialValues = {
-    inventory_item: "",
+    item: "",
     insurance_company: "",
     sale_price: "",
+    co_pay: "",
   };
 
   const validationSchema = Yup.object().shape({
     sale_price: Yup.number().required("Field is Required!"),
     insurance_company: Yup.object().required("Field is Required!"),
-    inventory_item: Yup.object().required("Field is Required!"),
+    item: Yup.object().required("Field is Required!"),
   });
 
   const insuranceSalePrice = async (formValue, helpers) => {
     const formData = {
         ...formValue,
         insurance_company: formValue.insurance_company.value,
-        inventory_item: formValue.inventory_item.value
+        item: formValue.item.value
     };
 
     console.log(formValue)
@@ -104,12 +105,12 @@ const CreateInsurancePriceModal = () => {
                         <Grid container spacing={2}>
                         <Grid className='my-2' item md={6} xs={12}>
                             <SeachableSelect
-                                label="Select Inventory"
-                                name="inventory_item"
-                                options={inventories.map((inventory) => ({ value: inventory.id, label: `${inventory?.item_name}` }))}
+                                label="Select Item"
+                                name="item"
+                                options={items.map((item) => ({ value: item.id, label: `${item?.name}` }))}
                             />
                             <ErrorMessage
-                                name="inventory_item"
+                                name="item"
                                 component="div"
                                 className="text-warning text-xs"
                             />
@@ -126,7 +127,7 @@ const CreateInsurancePriceModal = () => {
                                 className="text-warning text-xs"
                             />
                         </Grid>
-                        <Grid className='my-2' item md={12} xs={12}>
+                        <Grid className='my-2' item md={6} xs={6}>
                         <label htmlFor="item_code">Sale Price</label>
                             <Field
                             className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
@@ -136,6 +137,20 @@ const CreateInsurancePriceModal = () => {
                             />
                             <ErrorMessage
                             name="sale_price"
+                            component="div"
+                            className="text-warning text-xs"
+                            />
+                        </Grid>
+                        <Grid className='my-2' item md={6} xs={6}>
+                        <label htmlFor="item_code">Co Pay Amount</label>
+                            <Field
+                            className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                            maxWidth="sm"
+                            placeholder="Co Pay Amount"
+                            name="co_pay"
+                            />
+                            <ErrorMessage
+                            name="co_pay"
                             component="div"
                             className="text-warning text-xs"
                             />

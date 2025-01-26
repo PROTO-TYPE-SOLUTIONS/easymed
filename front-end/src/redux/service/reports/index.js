@@ -1,9 +1,11 @@
 import axios from "axios";
 import { APP_API_URL } from "@/assets/api-endpoints";
+import UseAxios from "@/assets/hooks/use-axios";
 
-export const saleByDateRange = (payload) => {
+export const saleByDateRange = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.SALE_BY_DATE_RANGE_GENERATE_REPORTS}`, payload)
+        axiosInstance.post(`${APP_API_URL.SALE_BY_DATE_RANGE_GENERATE_REPORTS}`, payload)
         .then((res) =>{
             resolve(res.data)
         })
@@ -13,10 +15,10 @@ export const saleByDateRange = (payload) => {
     })
 }
 
-export const saleByDateRangeAndItem = (payload) =>{
-
+export const saleByDateRangeAndItem = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.post(`${APP_API_URL.SALE_BY_DATE_RANGE_AND_ITEM_ID_GENERATE_REPORTS}`, payload)
+        axiosInstance.post(`${APP_API_URL.SALE_BY_DATE_RANGE_AND_ITEM_ID_GENERATE_REPORTS}`, payload)
         .then((res) =>{
             resolve(res.data)
         })
@@ -26,10 +28,10 @@ export const saleByDateRangeAndItem = (payload) =>{
     })
 }
 
-export const dayTransaction = (payload) =>{
-
+export const dayTransaction = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.TOTALS_OF_THE_DAY}`, {
+        axiosInstance.get(`${APP_API_URL.TOTALS_OF_THE_DAY}`, {
             params: {
                 payment_method: payload.payment_method,
                 date: payload.date

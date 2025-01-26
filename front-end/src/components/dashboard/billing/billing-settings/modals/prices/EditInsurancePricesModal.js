@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
@@ -8,13 +8,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from 'react-toastify'
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from '@/assets/hooks/use-auth';
-import { updateAInsurancePriceStore } from "@/redux/features/insurance";
+import { getAllInsurance, updateAInsurancePriceStore } from "@/redux/features/insurance";
 import { updateInventoryInsurancePrices } from "@/redux/service/insurance";
+import { getAllItems } from "@/redux/features/inventory";
 const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
-  const { inventories } = useSelector((store)=> store.inventory)
+  const { items } = useSelector((store)=> store.inventory)
   const { insurance } = useSelector((store)=> store.insurance)
 
     const getInsurance = ()=> {
@@ -22,9 +23,9 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
         return {value: ins?.id, label: ins?.name}
     }
 
-    const getInventoryItem = ()=> {
-        const inventory = inventories.find((inventory)=> inventory.id === selectedRowData?.inventory_item)
-        return {value: inventory?.id, label: inventory?.item_name}
+    const getItem = ()=> {
+        const item = items.find((item)=> item.id === selectedRowData?.item)
+        return {value: item?.id, label: item?.name}
     }
 
   const handleClose = () => {
@@ -33,19 +34,21 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
 
   const initialValues = {
     sale_price: selectedRowData?.sale_price || "",
+    co_pay: selectedRowData?.co_pay || "",
     insurance_company: getInsurance() || "",
-    inventory_item: getInventoryItem() || "",
+    item: getItem() || "",    
   };
 
   const validationSchema = Yup.object().shape({
     sale_price: Yup.number().required("Field is Required!"),
     insurance_company: Yup.object().required("Field is Required!"),
-    inventory_item: Yup.object().required("Field is Required!"),
+    item: Yup.object().required("Field is Required!"),
   });
 
   const handleEditInsuracePrice = async (formValue, helpers) => {
     const formData = {
-        sale_price: formValue.sale_price
+      sale_price: formValue.sale_price,
+      co_pay: formValue.co_pay
     };
 
     try {
@@ -62,6 +65,13 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
     }
   };
 
+  useEffect(() => {
+    if(auth){
+      dispatch(getAllItems(auth))
+      dispatch(getAllInsurance(auth))
+    }
+  },[])
+
   return (
     <section>
       <Dialog
@@ -77,7 +87,7 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
 
         <section className="flex items-center justify-center gap-8">
               <div className="w-full space-y-4 px-4">
-                <h1 className="text-xl text-center">Update Test Panel</h1>
+                <h1 className="text-xl text-center">Update Insurance Price</h1>
                 <Formik
                     initialValues={initialValues}
                     validationSchema={validationSchema}
@@ -88,12 +98,12 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
                         <Grid className='my-2' item md={6} xs={12}>
                             <SeachableSelect
                                 label="Select Inventory"
-                                name="inventory_item"
+                                name="item"
                                 isDisabled={true} // Makes the select component read-only
-                                options={inventories.map((inventory) => ({ value: inventory.id, label: `${inventory?.item_name}` }))}
+                                options={items.map((item) => ({ value: item.id, label: `${item?.name}` }))}
                             />
                             <ErrorMessage
-                                name="inventory_item"
+                                name="item"
                                 component="div"
                                 className="text-warning text-xs"
                             />
@@ -111,7 +121,7 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
                                 className="text-warning text-xs"
                             />
                         </Grid>
-                        <Grid className='my-2' item md={12} xs={12}>
+                        <Grid className='my-2' item md={6} xs={6}>
                         <label htmlFor="item_code">Sale Price</label>
                             <Field
                             className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
@@ -121,6 +131,20 @@ const EditInsurancePricesModal = ({ open, setOpen, selectedRowData }) => {
                             />
                             <ErrorMessage
                             name="sale_price"
+                            component="div"
+                            className="text-warning text-xs"
+                            />
+                        </Grid>
+                        <Grid className='my-2' item md={6} xs={6}>
+                        <label htmlFor="item_code">Co Pay Amount</label>
+                            <Field
+                            className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                            maxWidth="sm"
+                            placeholder="Co Pay Amount"
+                            name="co_pay"
+                            />
+                            <ErrorMessage
+                            name="co_pay"
                             component="div"
                             className="text-warning text-xs"
                             />

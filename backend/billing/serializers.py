@@ -3,12 +3,6 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
 
-class InvoiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Invoice
-        fields = '__all__'       
-
-
 class InvoiceItemSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
@@ -41,6 +35,14 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
         except ValidationError as e:
             raise serializers.ValidationError({'detail': str(e)})
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    invoice_items = InvoiceItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Invoice
+        fields = ['id', 'invoice_number', 'invoice_date', 'patient', 'invoice_items', 'cash_paid', 'total_cash']
 
 
 class PaymentModeSerializer(serializers.ModelSerializer):

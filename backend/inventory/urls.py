@@ -10,11 +10,11 @@ from .views import (
     InventoryViewSet,
     SupplierViewSet,
     SupplierInvoiceViewSet,
-    DepartmentInventoryViewSet,
+    DepartmentViewSet,
     IncomingItemViewSet,
     RequisitionItemViewSet,
     RequisitionViewSet,
-    InventoryInsuranceSalepriceViewSet,
+    InsuranceItemSalePriceViewSet,
     IncomingItemViewSet,
     InventoryFilterView,
     GoodsReceiptNoteViewSet,
@@ -31,10 +31,10 @@ router = DefaultRouter()
 router.register(r'items', ItemViewSet)
 router.register(r'inventories', InventoryViewSet)
 router.register(r'suppliers', SupplierViewSet)
-router.register(r'department-inventory', DepartmentInventoryViewSet)
+router.register(r'departments', DepartmentViewSet)
 router.register(r'requisition', RequisitionViewSet, basename='requisition')
 router.register(r'incoming-item', IncomingItemViewSet, basename='incoming-item-list')
-router.register(r'insurance-prices', InventoryInsuranceSalepriceViewSet)
+router.register(r'insurance-item-prices', InsuranceItemSalePriceViewSet)
 router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
 router.register(r'requisitionitems', RequisitionItemViewSet, basename='requisitionitems')
 router.register(r'supplier-invoice', SupplierInvoiceViewSet, basename='supplier-invoice')

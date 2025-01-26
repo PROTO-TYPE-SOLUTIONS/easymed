@@ -19,6 +19,7 @@ import { MdAddCircle } from "react-icons/md";
 import { LuMoreHorizontal } from "react-icons/lu";
 import ViewPrescribedDrugsModal from "./view-prescribed-drugs-modal";
 import { GiMedicinePills } from "react-icons/gi";
+import ProcessFilter from "@/components/common/process/ProcessFilter";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -60,11 +61,10 @@ const PharmacyDataGrid = () => {
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const { processes, patients } = useSelector((store)=> store.patient)
-  const filteredProcesses = processes.filter((process) => process.track === "pharmacy");
+  const [processsFilter, setProcessFilter] = useState("pharmacy")
+  const filteredProcesses = processes.filter((process) => process.track.includes(processsFilter));
 
   const searchedProcesses = filteredProcesses.filter((process)=> process.patient_number.includes(searchQuery))
-
-  console.log("FILTERED PROCESSES TRIAGE", filteredProcesses)
 
   const patientNameRender = (cellData) => {
     const patient = patients.find((patient) => patient.id === cellData.data.patient);
@@ -140,6 +140,7 @@ const PharmacyDataGrid = () => {
           />
         </Grid>
       </Grid>
+      <ProcessFilter setProcessFilter={setProcessFilter} selectedFilter={processsFilter}/>
       <DataGrid
         dataSource={searchedProcesses}
         allowColumnReordering={true}

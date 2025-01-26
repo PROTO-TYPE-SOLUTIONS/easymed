@@ -58,7 +58,6 @@
             font-style: italic;
             color: gray;
             font-weight: bold;
-
         }
     </style>
 </head>
@@ -77,6 +76,10 @@
     <h2>Purchase Order Note</h2>
     <p>PO Number: {{ purchaseorder.PO_number }}</p>
     <p>Date Created: {{ purchaseorder.date_created }}</p>
+    <h2>Supplier Details</h2>
+    <p>Supplier Name: {{ purchaseorder.supplier.official_name }}</p>
+    <p>Supplier Address: {{ purchaseorder.supplier.address }}</p>
+    <p>Supplier Phone: {{ purchaseorder.supplier.phone }}</p>
 
     <table>
         <thead>

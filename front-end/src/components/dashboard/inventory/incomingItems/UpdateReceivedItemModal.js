@@ -32,9 +32,6 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
     return supplier ? {value:supplier.id, label: supplier.official_name}: null
   }
 
-  console.log("YDBHK", selectedEditRowData)
-
-
   const initialValues = {
     ...selectedEditRowData,
     // item: getItem() || null,
@@ -50,8 +47,6 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
     quantity_received: selectedEditRowData.quantity_received || ""
 
   };
-
-  console.log("GAAALLLAAA", initialValues)
 
   const validationSchema = Yup.object().shape({
     // item: Yup.object().required("This field is required!"),

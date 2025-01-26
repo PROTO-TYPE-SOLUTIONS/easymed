@@ -16,6 +16,7 @@ import DirectToTheLabModal from '../doctor-interface/DirectToTheLabModal';
 import { updateAttendanceProcesses } from '@/redux/service/patients';
 import { getAllProcesses } from '@/redux/features/patients';
 import { useAuth } from '@/assets/hooks/use-auth';
+import ProcessFilter from '@/components/common/process/ProcessFilter';
 
 const allowedPageSizes = [5, 10, 'all'];
 
@@ -48,6 +49,7 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const AppointmentCard = ({ processes }) => {
 
+    const [processsFilter, setProcessFilter]=useState('reception')
     const [assignOpen, setAssignOpen]=useState(false)
     const userActions = getActions();
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
@@ -138,10 +140,11 @@ const AppointmentCard = ({ processes }) => {
         }
     }
 
-    const receptionProcesses = processes.filter((process)=> process.track === "reception")
+    const receptionProcesses = processes.filter((process)=> process.track.includes(processsFilter))
 
   return (
     <>
+    <ProcessFilter setProcessFilter={setProcessFilter} selectedFilter={processsFilter}/>
     <DataGrid
         dataSource={receptionProcesses}
         allowColumnReordering={true}
@@ -168,13 +171,11 @@ const AppointmentCard = ({ processes }) => {
         <Column
           dataField="patient_number"
           caption="PID"
-          width={120}
           allowSearch={true}
         />
         <Column
           dataField="patient"
           caption="Patient Name"
-          width={150}
           allowSearch={true}
           cellRender={patientNameRender}
         />
@@ -182,7 +183,6 @@ const AppointmentCard = ({ processes }) => {
         <Column
           dataField=""
           caption="Action"
-          width={140}
           cellRender={actionsFunc}
         />
       </DataGrid>

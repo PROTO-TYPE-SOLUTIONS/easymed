@@ -19,10 +19,12 @@ class RequisitionItemFilter(django_filters.FilterSet):
 
 class InventoryFilter(django_filters.FilterSet):
     item = django_filters.CharFilter(field_name='item__id', lookup_expr='icontains')
+    department = django_filters.NumberFilter(field_name='department__id')
+    department_name = django_filters.CharFilter(field_name='department__name', lookup_expr='icontains')
 
     class Meta:
         model = Inventory
-        fields = ['item']
+        fields = ['item', 'department', 'department_name']
 
 
 class ItemFilter(django_filters.FilterSet):

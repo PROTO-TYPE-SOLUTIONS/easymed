@@ -81,8 +81,8 @@ const NewInvoice = () => {
                   {invoices.map((invoice) => {
                     const date = invoice.invoice_created_at
                     return (
-                      <li onClick={()=> selectInvoice(invoice)} className='my-2 py-2 cursor-pointer border-b border-[#D3D3D3]' key={invoice.id}>
-                        {formatDate(date)}
+                      <li onClick={()=> selectInvoice(invoice)} className={`my-2 p-1 cursor-pointer  ${selectedInvoice?.id === invoice.id ? "bg-primary text-white" : ""}`} key={invoice.id}>
+                        {invoice.invoice_date}
                       </li>
                       )
                   })}

@@ -11,6 +11,7 @@ import { getAllPatients, getAllProcesses } from "@/redux/features/patients";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllLabTestProfiles, getAllLabTestPanelsByProfile } from "@/redux/features/laboratory";
 import { updateAttendanceProcesses } from "@/redux/service/patients";
+import { billingInvoiceItems } from "@/redux/service/billing";
 
 const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
   const { labTestProfiles, labTestPanelsById } = useSelector((store) => store.laboratory);
@@ -41,9 +42,14 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
 
   const saveAllPanels = async (testReqPanelPayload) => {
     try{
-      await sendLabRequestsPanels(testReqPanelPayload, auth)
+      const response = await sendLabRequestsPanels(testReqPanelPayload, auth)
       toast.success("Lab Request Panels saved Successful!");
       dispatch(getAllProcesses(auth))
+      const payload = {
+        invoice: selectedData.invoice,
+        item: parseInt(response.item)
+      }
+      billingInvoiceItems(auth, payload)
     }catch(error){
       console.log(error)
       toast.error(error)

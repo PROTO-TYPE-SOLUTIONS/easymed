@@ -1,36 +1,63 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
-from django.apps import apps
 from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
 from .utils import check_quantity_availability, update_service_billed_status
-from inventory.models import Inventory
+from inventory.models import InsuranceItemSalePrice
 from .models import InvoiceItem
 
 
 @receiver(post_save, sender=InvoiceItem)
-def handle_invoice_item_created(sender, instance, created, **kwargs):
-    ''''
-    whenever an invoice item is created add the resulting price for the item to the invoice
-    '''
-    if created:  # Only proceed if the InvoiceItem instance was created
-        if instance.invoice:
-            invoice = instance.invoice
-            # Fetch the related Inventory instance for the Item
-            try:
-                inventory = Inventory.objects.get(item=instance.item)
-            except Inventory.DoesNotExist:
-                # Handle the case where no Inventory instance is found for the Item
-                return
+def update_invoice_on_item_save(sender, instance, created, **kwargs):
+    """
+    Update the total_cash and invoice_amount fields in the Invoice model
+    when an InvoiceItem is created or updated.
+    """
+    if instance.invoice:
+        invoice = instance.invoice
 
-            # Accessing the sale price through the fetched Inventory instance
-            item_price = inventory.sale_price
-            invoice.invoice_amount += item_price
-            invoice.save()  # Save the updated invoice
+        # Recalculate total invoice amount
+        invoice.invoice_amount = invoice.invoice_items.aggregate(
+            total_amount=Sum('actual_total')
+        )['total_amount'] or 0
+
+        # Recalculate total_cash (sum of items with payment mode "Cash")
+        invoice.total_cash = invoice.invoice_items.filter(
+            payment_mode__payment_category='cash'
+        ).aggregate(
+            total_cash=Sum('actual_total')
+        )['total_cash'] or 0
+
+        invoice.save()
+
+
+@receiver(post_delete, sender=InvoiceItem)
+def update_invoice_on_item_delete(sender, instance, **kwargs):
+    """
+    Update the total_cash and invoice_amount fields in the Invoice model
+    when an InvoiceItem is deleted.
+    """
+    if instance.invoice:
+        invoice = instance.invoice
+
+        # Recalculate totals after deletion
+        invoice.invoice_amount = invoice.invoice_items.aggregate(
+            total_amount=Sum('actual_total')
+        )['total_amount'] or 0
+
+        invoice.total_cash = invoice.invoice_items.filter(
+            payment_mode__payment_category='cash'
+        ).aggregate(
+            total_cash=Sum('actual_total')
+        )['total_cash'] or 0
+
+        invoice.save()
+
 
 
 @receiver(post_save, sender=InvoiceItem)
-def update_related_models(sender, instance, **kwargs):
+def update_is_billed_status(sender, instance, **kwargs):
     '''
     When an InvoiceItem is saved, and the status field is changed to billed,
     we check if it's a Drug or a Lab Test. If it is, we update the is_billed
@@ -49,13 +76,14 @@ def check_quantity_before_billing(sender, instance, **kwargs):
     Before an InvoiceItem is saved, check if the status field is being updated to "billed".
     Ensure that the available quantity is sufficient before proceeding.
     '''
+    
     # Check if it's an update, not a new creation
     if instance.pk:
         try:
             previous_instance = InvoiceItem.objects.get(pk=instance.pk)
         except InvoiceItem.DoesNotExist:
             previous_instance = None
-        
+        print("check_quantity_before_billing Signal fired")
         # Check if the status is being updated to 'billed'
         if previous_instance and previous_instance.status != instance.status and instance.status == 'billed':
             # Check if the item is a Drug or Lab Test
@@ -69,5 +97,25 @@ def check_quantity_before_billing(sender, instance, **kwargs):
         pass
 
 
+def calculate_actual_total(invoice_item):
+    try:
+        # Retrieve the insurance company from the payment mode
+        insurance_company = invoice_item.payment_mode.insurance if invoice_item.payment_mode else None
+        
+        if insurance_company:
+            insurance_sale_price = InsuranceItemSalePrice.objects.get(
+                item=invoice_item.item,
+                insurance_company=insurance_company
+            )
+            co_pay = insurance_sale_price.co_pay
+        else:
+            co_pay = 0
+    except InsuranceItemSalePrice.DoesNotExist:
+        co_pay = 0
+
+    invoice_item.actual_total = invoice_item.item_amount - co_pay
 
 
+@receiver(pre_save, sender=InvoiceItem)
+def update_invoice_item_actual_total(sender, instance, **kwargs):
+    calculate_actual_total(instance)

@@ -82,7 +82,7 @@ class ContactDetailsViewSet(viewsets.ModelViewSet):
 
 
 class PatientViewSet(viewsets.ModelViewSet):
-    queryset = Patient.objects.all()
+    queryset = Patient.objects.all().order_by('-id')
     serializer_class = PatientSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = PatientFilter
