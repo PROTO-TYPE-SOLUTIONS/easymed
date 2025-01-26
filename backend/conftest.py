@@ -18,8 +18,7 @@ from inventory.models import (
     IncomingItem,
     Inventory,
     SupplierInvoice,
-    InventoryInsuranceSaleprice,
-    DepartmentInventory,
+    InsuranceItemSalePrice,
 )
 
 User = get_user_model()
@@ -190,16 +189,10 @@ def inventory(item, department):
 
 @pytest.fixture
 def inventory_insurance_saleprice(inventory, insurance_company):
-    return InventoryInsuranceSaleprice.objects.create(
+    return InsuranceItemSalePrice.objects.create(
         inventory_item=inventory,
         insurance_company=insurance_company,
         sale_price=20.0,
     )
 
-@pytest.fixture
-def department_inventory(item, department):
-    return DepartmentInventory.objects.create(
-        item=item,
-        department=department,
-    )
 

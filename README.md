@@ -255,3 +255,21 @@ check_quantity_availability()
 		-> get_available_stock()
 			-> update_stock_quantity_if_stock_is_available()
 		-> update_stock_quantity_if_stock_is_available()	
+
+
+# 8 Terraform
+Commands to run terraform
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+To destroy all resources created
+``
+terraform destroy
+``
+
+
+List AMIs available in your region:
+``aws ec2 describe-images --owners amazon --filters "Name=name,Values=ubuntu/images/*" --region us-east-1``
+

@@ -1,12 +1,13 @@
 # USER DEFINED=========================================
 
 #terraform files
-terraform/.terraform/
-/terraform/terraform.tfstate
-/terraform/terraform.tfstate.backup
-/terraform/.terraform.lock.hcl
+/deployment/linux_amd64/
+/deployment/.terraform/
+/deployment/terraform.tfstate
+/deployment/terraform.tfstate.backup
+/deployment/.terraform.lock.hcl
 *.terraform.lock.hcl
-*.terraform
+
 
 # static
 static/

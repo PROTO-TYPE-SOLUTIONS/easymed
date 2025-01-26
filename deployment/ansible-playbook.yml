@@ -1,0 +1,42 @@
+- name: Deploy Easymed Services
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Install PostgreSQL
+      apt:
+        name: postgresql postgresql-contrib
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Install Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64"
+        dest: "/usr/local/bin/docker-compose"
+        mode: '0755'
+
+    - name: Copy env file
+      copy:
+        src: ../../.env
+        dest: /home/ubuntu/.env
+
+    - name: Copy Docker Compose file
+      copy:
+        src: ../../docker-compose.yml
+        dest: /home/ubuntu/docker-compose.yml
+
+    - name: Deploy services
+      command: docker-compose -f /home/ubuntu/docker-compose.yml up -d
