@@ -59,7 +59,7 @@ export default function AddTriageModal({
     pulse: Yup.number().required("Pulse is required!"),
     systolic: Yup.number().required("Systolic is required!"),
     diastolic: Yup.number().required("Diastolic is required!"),
-    notes: Yup.string().required("Notes is required!"),
+    // notes: Yup.string().required("Notes is required!"),
   });
 
   const calculateBMI = (height, weight) => {

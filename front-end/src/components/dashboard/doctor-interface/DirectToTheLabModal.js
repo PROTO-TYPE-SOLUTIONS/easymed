@@ -37,7 +37,7 @@ const DirectToTheLabModal = ({ labOpen, setLabOpen, selectedData }) => {
   };
 
   const validationSchema = Yup.object().shape({
-    note: Yup.string().required("This field is required!"),
+    // note: Yup.string().required("This field is required!"),
   });
 
   const saveAllPanels = async (testReqPanelPayload) => {
