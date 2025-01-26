@@ -7,7 +7,7 @@ import CategorizedItems from "./CategorizedItems";
 const { Container, Grid } = require("@mui/material");
 
 const InvoiceItems = ({ 
-    items, selectedPatient,
+    items, selectedPatient, selectedInvoice,
     totalLabReqSum,
     totalAppointmentSum,
     totalPrescribedDrugsSum,
@@ -43,7 +43,20 @@ const InvoiceItems = ({
         return acc;
     }, {});
 
+    const resetTotals = ()=> {
+        setPrescribedDrugsSum(0)
+        setPrescribedDrugsCashSum(0)
+        setPrescribedDrugsInsuranceSum(0)
+        setLabReqSum(0)
+        setLabReqCashSum(0)
+        setLabReqInsuranceSum(0)
+        setAppointmentSum(0)
+        setAppointmentCashSum(0)
+        setAppointmentInsuranceSum(0)
+    }
+
     useEffect(() => {
+        resetTotals();
         if (groupedItems) {
             Object.keys(groupedItems).forEach((category) => {
                 if (category.toLowerCase().includes("appointment")) {
@@ -55,7 +68,7 @@ const InvoiceItems = ({
                 }
             });
         }
-    }, [items]);
+    }, [items, selectedInvoice]);
 
     return (
         <div>
@@ -63,20 +76,20 @@ const InvoiceItems = ({
                 Object.keys(groupedItems)?.map(category => (
                     <section key={category} className='py-2'>
                         <Grid className='flex items-center py-1' container spacing={2}>
-                        <Grid item md={3} xs={3}>
-                          <h2 className='font-bold text-primary'>{category}</h2>
-                        </Grid>
-                        <Grid item xs={4}>
-                          <h2 className='font-bold text-primary'>{'Payment Mode'}</h2>
-                        </Grid>
-                        <Grid className='px-2 flex justify-end' item xs={2}>
-                            <h2 className='font-bold text-primary'>{'Actual Total'}</h2>
-                        </Grid>
-                        <Grid className='px-2 flex justify-end' item xs={2}>
-                            <h2 className='font-bold text-primary'>{'Item Amount'}</h2>
-                        </Grid>
-                        <Grid item xs={1}>
-                        </Grid>
+                            <Grid item md={3} xs={3}>
+                                <h2 className='font-bold text-primary'>{category}</h2>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <h2 className='font-bold text-primary'>{'Payment Mode'}</h2>
+                            </Grid>
+                            <Grid className='px-2 flex justify-end' item xs={2}>
+                                <h2 className='font-bold text-primary'>{'Actual Total'}</h2>
+                            </Grid>
+                            <Grid className='px-2 flex justify-end' item xs={2}>
+                                <h2 className='font-bold text-primary'>{'Item Amount'}</h2>
+                            </Grid>
+                            <Grid item xs={1}>
+                            </Grid>
                         </Grid>
                         <section>
                             {groupedItems[category].map(item => (
@@ -93,7 +106,7 @@ const InvoiceItems = ({
                                     setPrescribedDrugsSum={setPrescribedDrugsSum}
                                     setPrescribedDrugsCashSum={setPrescribedDrugsCashSum}
                                     setPrescribedDrugsInsuranceSum={setPrescribedDrugsInsuranceSum}
-                                    />
+                                />
                             ))}
                         </section>
                     </section>
