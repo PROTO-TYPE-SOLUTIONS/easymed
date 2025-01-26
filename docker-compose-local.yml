@@ -1,4 +1,18 @@
 services:
+    postgres:
+        image: postgres:15
+        container_name: postgres
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_HOST=${POSTGRES_HOST}
+        ports:
+        - "5433:5432"
+        volumes:
+        - postgres_data:/var/lib/postgresql/data
+        networks:
+        - mks
     redis:
         image: redis:7.0-alpine
         container_name: redis

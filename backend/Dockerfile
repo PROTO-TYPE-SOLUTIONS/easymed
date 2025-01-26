@@ -25,9 +25,7 @@ EXPOSE 8080
 
 RUN chmod +x ./entrypoint.sh
 ENTRYPOINT [ "./entrypoint.sh" ]
-CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8080", "easymed.asgi:application"]
 
-# fro troubleshooting
-# CMD ["python", "manage.py", "runserver", "0.0.0.0:8080"]
+
 
 
