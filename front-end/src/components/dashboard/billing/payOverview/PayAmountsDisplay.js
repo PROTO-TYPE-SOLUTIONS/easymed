@@ -17,7 +17,7 @@ const PayAmountsDisplay = (
 
     ) => {
   return (
-    <div className='flex gap-4 w-full'>
+    <div className='flex flex-col gap-4 w-full'>
 
         <div className='flex flex-col justify-end space-y-2 w-full'>
             <div className='flex justify-end'>
@@ -41,18 +41,20 @@ const PayAmountsDisplay = (
             </div>
         </div>
 
-        <div className='h-full w-full'>
-            <Field
-                className="block border rounded-md text-sm border-gray py-4 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Cash Paid"
-                name="cash_paid"
-            />
-            <ErrorMessage
-                name="cash_paid"
-                component="div"
-                className="text-warning text-xs"
-            />
+        <div className='flex h-full w-full justify-end'>
+            <div className='w-48'>
+                <Field
+                    className="block border rounded-md text-sm border-gray py-4 px-4 focus:outline-card w-full"
+                    maxWidth="sm"
+                    placeholder="Cash Paid"
+                    name="cash_paid"
+                />
+                <ErrorMessage
+                    name="cash_paid"
+                    component="div"
+                    className="text-warning text-xs"
+                />
+            </div>
         </div>
 
  
