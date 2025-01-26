@@ -42,7 +42,7 @@ class Invoice(models.Model):
     invoice_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending')
-    invoice_description = models.CharField(max_length=200, null=True)
+    invoice_description = models.CharField(max_length=200, null=True, blank=True)
     invoice_file = models.FileField(upload_to=invoice_file_path, null=True, blank=True)
     invoice_created_at = models.DateTimeField(auto_now_add=True)
     invoice_updated_at = models.DateTimeField(auto_now=True)

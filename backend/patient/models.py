@@ -59,11 +59,11 @@ class Patient(models.Model):
 
 
 class NextOfKin(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=40)
-    second_name = models.CharField(max_length=40)
-    relationship = models.CharField(max_length=40)   
-    contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
+    first_name = models.CharField(max_length=40, null=True, blank=True)
+    second_name = models.CharField(max_length=40, null=True, blank=True)
+    relationship = models.CharField(max_length=40, null=True, blank=True)   
+    contacts = models.ForeignKey(ContactDetails, on_delete=models.CASCADE, null=True, blank=True)
 
 
 # Once confirmed will trigger an AttendanceProcess
