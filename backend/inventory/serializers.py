@@ -11,12 +11,11 @@ from .models import (
     SupplierInvoice,
     IncomingItem,
     Department,
-    DepartmentInventory,
     Requisition,
     RequisitionItem,
     PurchaseOrder,
     PurchaseOrderItem,
-    InventoryInsuranceSaleprice,
+    InsuranceItemSalePrice,
     GoodsReceiptNote,
     Quotation,
     QuotationItem,
@@ -603,14 +602,15 @@ class InventorySerializer(serializers.ModelSerializer):
                  'category_one', 'insurance_sale_prices', 'total_quantity']
 
     def get_insurance_sale_prices(self, obj):
-        sale_prices = InventoryInsuranceSaleprice.objects.filter(inventory_item=obj)
+        sale_prices = InsuranceItemSalePrice.objects.filter(item=obj.item)
         insurance_prices = []
         for sale in sale_prices:
 
             insurance_price = {
                 "id": sale.insurance_company.id,
                 "insurance_name": sale.insurance_company.name.lower().replace(" ", "_"),
-                "price": str(sale.sale_price)
+                "price": str(sale.sale_price),
+                "co_pay": str(sale.co_pay)
             }
             insurance_prices.append(insurance_price)
         return insurance_prices
@@ -621,18 +621,13 @@ class InventorySerializer(serializers.ModelSerializer):
             total_qty=Sum('quantity_at_hand'))['total_qty'] or 0
         return total
 
-class DepartmentInventorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DepartmentInventory
-        fields = ['__all__']
-    
 
-class InventoryInsuranceSalepriceSerializer(serializers.ModelSerializer):
-    item_name = serializers.ReadOnlyField(source='inventory_item.item.name')
-    item_id = serializers.ReadOnlyField(source='inventory_item.item.id')
+class InsuranceItemSalePriceSerializer(serializers.ModelSerializer):
+    item_name = serializers.ReadOnlyField(source='item.name')
+    item_id = serializers.ReadOnlyField(source='item.id')
     insurance_name = serializers.ReadOnlyField(source='insurance_company.name')
     class Meta:
-        model = InventoryInsuranceSaleprice
+        model = InsuranceItemSalePrice
         fields = '__all__'
 
 class InventoryArchiveSerializer(serializers.ModelSerializer):

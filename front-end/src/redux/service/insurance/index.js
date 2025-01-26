@@ -16,9 +16,10 @@ export const fetchInsurance = (auth) =>{
     })
 }
 
-export const fetchInventoryInsurancePrices = () =>{
+export const fetchInventoryInsurancePrices = (auth) =>{
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
-        axios.get(`${APP_API_URL.INSURANCE_INVENTORY_PRICES}`)
+        axiosInstance.get(`${APP_API_URL.INSURANCE_INVENTORY_PRICES}`)
             .then((res) =>{
                 resolve(res.data)
             })
