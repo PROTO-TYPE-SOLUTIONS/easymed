@@ -266,7 +266,11 @@ class RequisitionCreateSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items')
         requested_by = validated_data.pop('requested_by') 
         department = validated_data.pop('department')
-        requisition = Requisition.objects.create(requested_by=requested_by, department=department, **validated_data)
+
+        try:
+            requisition = Requisition.objects.create(requested_by=requested_by, department=department, **validated_data)
+        except Exception as e:
+            raise ValidationError(f"Error creating requisition: {e}")
         
         items_by_supplier = {}
         for item_data in items_data:
