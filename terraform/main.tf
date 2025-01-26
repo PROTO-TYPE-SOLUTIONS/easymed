@@ -1,30 +1,36 @@
 provider "aws" {
-  region = "us-east-1"  # Change to your preferred region
+  region = "us-east-1"
 }
 
-resource "aws_instance" "app_server" {
-  ami           = "ami-0c55b159cbfafe1f0"  # Example for Ubuntu 22.04 LTS, update as needed
-  instance_type = "t2.medium"
-  key_name      = "your-aws-key"  # Replace with your AWS key pair name
 
-  security_groups = [aws_security_group.app_sg.name]
-
-  user_data = file("user-data.sh")
-
+# ================== NETWORK ==================
+resource "aws_vpc" "app_vpc" {
+  cidr_block = "10.0.0.0/16"
   tags = {
-    Name = "EasymedAppServer"
+    Name = "EasymedAppVPC"
+  }
+}
+
+resource "aws_subnet" "app_subnet" {
+  vpc_id            = aws_vpc.app_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+  tags = {
+    Name = "EasymedAppSubnet"
   }
 }
 
 resource "aws_security_group" "app_sg" {
   name        = "easymed-security-group"
   description = "Allow inbound traffic for app"
+  vpc_id      = aws_vpc.app_vpc.id
+
 
   ingress {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Restrict to your IP in production
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -55,6 +61,28 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_key_pair" "app_server_key" {
+  key_name   = "app-server-key"
+  public_key = file("~/.ssh/id_rsa.pub")
+}
+
+
+# ================== SERVER ==================
+resource "aws_instance" "app_server" {
+  ami           = "ami-006a0fdfea2775802"
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.app_server_key.key_name
+  subnet_id     = aws_subnet.app_subnet.id
+  vpc_security_group_ids = [aws_security_group.app_sg.id]
+
+  user_data = file("user-data.sh")
+
+  tags = {
+    Name = "EasymedAppServer"
+  }
+}
+
 
 output "ec2_public_ip" {
   value = aws_instance.app_server.public_ip
