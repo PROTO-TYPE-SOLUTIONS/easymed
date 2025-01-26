@@ -1,5 +1,13 @@
 # USER DEFINED=========================================
 
+#terraform files
+terraform/.terraform/
+/terraform/terraform.tfstate
+/terraform/terraform.tfstate.backup
+/terraform/.terraform.lock.hcl
+*.terraform.lock.hcl
+*.terraform
+
 # static
 static/
 
@@ -26,9 +34,6 @@ backend/easymed/static/
 
 env/
 
-migrations/
-*/migrations/
-**/migrations/
 **/__pycache__/
 
 # For development let's include this in repo
