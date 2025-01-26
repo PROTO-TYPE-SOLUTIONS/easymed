@@ -37,7 +37,7 @@ const LabModal = ({ labOpen, setLabOpen, selectedRowData }) => {
   };
 
   const validationSchema = Yup.object().shape({
-    note: Yup.string().required("This field is required!"),
+    // note: Yup.string().required("This field is required!"),
     test_profile:Yup.number().required("This field is required!"),
   });
 
