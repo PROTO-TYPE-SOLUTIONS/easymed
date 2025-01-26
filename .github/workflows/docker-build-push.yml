@@ -19,6 +19,7 @@ jobs:
 
       - name: Run tests
         run: |
+          cp .env.sample .env
           cd ./backend
           pytest .
 
