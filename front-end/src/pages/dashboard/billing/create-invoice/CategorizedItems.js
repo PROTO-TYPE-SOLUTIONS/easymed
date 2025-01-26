@@ -41,30 +41,37 @@ const CategorizedItems = ({
   };
 
   useEffect(() => {
+    setUpdatedInvoiceItem(invoiceItem)
     fetchInventoryForPrices(updatedInvoiceItem?.item);
-  }, []);
+  }, [invoiceItem]);
 
   const updateInvoiceTotals = (invoiceItem) => {
     if(invoiceItem.category.toLowerCase().includes("appointment")){
       setAppointmentSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount));
-      if(invoiceItem.payment_mode_name === "cash"){
+      if(invoiceItem.payment_mode_name.toLowerCase() === "cash"){
         setAppointmentCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
       }else{
-        setAppointmentInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+        const co_pay = parseInt(invoiceItem.item_amount) - parseInt(invoiceItem.actual_total)
+        setAppointmentCashSum((prevSum) => prevSum + parseInt(co_pay))
+        setAppointmentInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.actual_total))
       }
     }else if(invoiceItem.category==="Lab Test"){
       setLabReqSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
-      if(invoiceItem.payment_mode_name === "cash"){
+      if(invoiceItem.payment_mode_name.toLowerCase() === "cash"){
         setLabReqCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
       }else{
-        setLabReqInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+        const co_pay = parseInt(invoiceItem.item_amount) - parseInt(invoiceItem.actual_total)
+        setLabReqCashSum((prevSum) => prevSum + parseInt(co_pay))
+        setLabReqInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.actual_total))
       }
     }else if(invoiceItem.category==="Drug"){
       setPrescribedDrugsSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
-      if(invoiceItem.payment_mode_name === "cash"){
+      if(invoiceItem.payment_mode_name.toLowerCase() === "cash"){
         setPrescribedDrugsCashSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
       }else{
-        setPrescribedDrugsInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.item_amount))
+        const co_pay = parseInt(invoiceItem.item_amount) - parseInt(invoiceItem.actual_total)
+        setPrescribedDrugsCashSum((prevSum) => prevSum + parseInt(co_pay))
+        setPrescribedDrugsInsuranceSum((prevSum) => prevSum + parseInt(invoiceItem.actual_total))
       }
     }
   }
@@ -123,21 +130,21 @@ const CategorizedItems = ({
       </Grid>
       {updatedInvoiceItem?.status !== 'billed' ? (
         <>
-          <Grid className='px-2 flex justify-end' item xs={2}>
-            {selectedPayMethod && selectedPrice && (
-              <div className="mt-2">
-                <p>{parseInt(selectedCoPay) + parseInt(selectedPrice)}</p>
-              </div>
-            )}
-          </Grid>
-          <Grid className='px-2 flex justify-end' item xs={2}>
+          <Grid className='px-2 flex justify-center' item xs={2}>
             {selectedPayMethod && selectedPrice && (
               <div className="mt-2">
                 <p>{selectedPrice}</p>
               </div>
             )}
           </Grid>
-        <Grid item xs={1}>
+          <Grid className='px-2 flex justify-center' item xs={2}>
+            {selectedPayMethod && selectedPrice && (
+              <div className="mt-2">
+                <p>{parseInt(selectedPrice) - parseInt(selectedCoPay) }</p>
+              </div>
+            )}
+          </Grid>
+        <Grid className='px-2 flex justify-center' item xs={1}>
         {selectedPayMethod && selectedPrice && (
         <button
           onClick={() => updateInvoiceItem(invoiceItem)}

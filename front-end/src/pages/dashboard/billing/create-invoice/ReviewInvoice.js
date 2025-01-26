@@ -60,7 +60,7 @@ const ReviewInvoice = ({
         selectedAppointments.forEach((item)=>{
             if(item.payment_mode){
                 totalFees.push(parseInt(item.item_amount))
-                if(item.payment_mode_name === "cash"){
+                if(item.payment_mode_name.toLowerCase() === "cash"){
                     cashFees.push(parseInt(item.item_amount))
                 }else {
                     const co_pay = parseInt(item.item_amount) - parseInt(item.actual_total)
@@ -85,7 +85,7 @@ const ReviewInvoice = ({
         selectedPrescribedDrugs.forEach((item)=>{
             if(item.payment_mode){
                 totalFees.push(parseInt(item.item_amount))
-                if(item.payment_mode_name === "cash"){
+                if(item.payment_mode_name.toLowerCase() === "cash"){
                     cashFees.push(parseInt(item.item_amount))
                 }else {
                     const co_pay = parseInt(item.item_amount) - parseInt(item.actual_total)
@@ -110,7 +110,7 @@ const ReviewInvoice = ({
         selectedLabRequests.forEach((item)=>{
             if(item.payment_mode){
                 totalFees.push(parseInt(item.item_amount))
-                if(item.payment_mode_name === "cash"){
+                if(item.payment_mode_name.toLowerCase() === "cash"){
                     cashFees.push(parseInt(item.item_amount))
                 }else {
                     const co_pay = parseInt(item.item_amount) - parseInt(item.actual_total)
@@ -184,9 +184,10 @@ const ReviewInvoice = ({
                 />
                 </div>
             </div>
-            {InvoiceItems.length > 0 && (
+            {InvoiceItems.length > 0 && selectedInvoice && (
                 <InvoiceItems 
                     selectedPatient={selectedPatient} 
+                    selectedInvoice={selectedInvoice}
                     items={invoiceItems}    
                     setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}
                     setSelectedLabRequests={setSelectedLabRequests}
@@ -207,8 +208,8 @@ const ReviewInvoice = ({
             )}
             </div>
 
-            <section className='mt-auto space-y-4 bottom-0'>
-                <PayAmountsDisplay 
+            <section className='mt-auto mr-4 space-y-4 bottom-0'>
+                <PayAmountsDisplay
                     appointmentCashSum={appointmentCashSum}
                     prescribedDrugsCashSum={prescribedDrugsCashSum}
                     labReqCashSum={labReqCashSum}
