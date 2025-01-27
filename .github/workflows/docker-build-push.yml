@@ -19,6 +19,7 @@ jobs:
 
       - name: Run tests
         run: |
+          pwd
           cp .env.sample .env
           cd ./backend
           pytest .
@@ -65,10 +66,10 @@ jobs:
           terraform_version: 1.5.0
 
       - name: Initialize Terraform
-        run: terraform init
+        run: terraform init -chdir=deployment
 
       - name: Apply Terraform changes
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -chdir=deployment
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

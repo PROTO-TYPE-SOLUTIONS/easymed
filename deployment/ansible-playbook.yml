@@ -66,9 +66,6 @@
         owner: ubuntu
         group: ubuntu
 
-
-
-
     - name: Copy env file
       copy:
         src: ../../.env
