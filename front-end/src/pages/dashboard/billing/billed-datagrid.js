@@ -156,8 +156,8 @@ const BilledDataGrid = () => {
                     caption="Date" 
                 />
                 <Column
-                    dataField="invoice_description"
-                    caption="Description" 
+                    dataField="patient_name"
+                    caption="Patient" 
                 />
                 <Column dataField="invoice_amount" caption="Amount" />
                 <Column 
