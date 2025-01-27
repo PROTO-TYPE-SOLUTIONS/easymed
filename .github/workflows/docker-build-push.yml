@@ -16,13 +16,13 @@ jobs:
           cd ./backend
           pip install -r requirements.txt
           pip install pytest
-
-      - name: Run tests
-        run: |
-          pwd
-          cp .env.sample .env
-          cd ./backend
           pytest .
+
+      # - name: Run tests
+      #   run: |
+      #     cp .env.sample .env
+      #     cd ./backend
+      #     pytest .
 
   build-and-push:
     runs-on: ubuntu-latest
@@ -66,17 +66,21 @@ jobs:
           terraform_version: 1.5.0
 
       - name: Initialize Terraform
-        run: terraform init -chdir=deployment
+        run: terraform init
+        working-directory: deployment
 
       - name: Apply Terraform changes
-        run: terraform apply -auto-approve -chdir=deployment
+        run: terraform apply -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+        working-directory: deployment
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+
       - name: Save Terraform output
         id: get_ip
         run: echo "SERVER_IP=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
+        working-directory: deployment
 
   ansible:
     runs-on: ubuntu-latest
@@ -89,8 +93,14 @@ jobs:
       - name: Install Ansible
         run: sudo apt update && sudo apt install -y ansible
 
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
       - name: Run Ansible Playbook
         run: |
           echo "[app_server]" > inventory.ini
-          echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
-          ansible-playbook -i inventory.ini ansible-playbook.yml        
+          ansible-playbook -i deployment/inventory.ini ansible-playbook.yml
+        working-directory: deployment     

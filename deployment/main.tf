@@ -107,8 +107,13 @@ resource "aws_route_table_association" "app_subnet_assoc" {
 
 resource "aws_key_pair" "app_server_key" {
   key_name   = "app-server-key"
-  public_key = file("~/.ssh/id_rsa.pub")
+  public_key = var.ssh_public_key
 }
+
+# resource "aws_key_pair" "app_server_key" {
+#   key_name   = "app-server-key"
+#   public_key = file("~/.ssh/id_rsa.pub")
+# }
 
 
 # ================== SERVER ==================
@@ -140,4 +145,12 @@ EOT
 
   filename = "${path.module}/inventory.ini"
 }
+# resource "local_file" "ansible_inventory" {
+#   content = <<EOT
+# [server]
+# ${aws_instance.app_server.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa
+# EOT
+
+#   filename = "${path.module}/inventory.ini"
+# }
 
