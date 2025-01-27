@@ -110,6 +110,7 @@ resource "aws_key_pair" "app_server_key" {
   public_key = var.ssh_public_key
 }
 
+# If we go with local key
 # resource "aws_key_pair" "app_server_key" {
 #   key_name   = "app-server-key"
 #   public_key = file("~/.ssh/id_rsa.pub")
@@ -136,7 +137,7 @@ output "ec2_public_ip" {
   value = aws_instance.app_server.public_ip
 }
 
-# ============ GEN inventory.ini for ansible ============
+# ============ GEN inventory.ini in CI for ansible ============
 resource "local_file" "ansible_inventory" {
   content = <<EOT
 [server]
@@ -145,6 +146,8 @@ EOT
 
   filename = "${path.module}/inventory.ini"
 }
+
+# For testing locally
 # resource "local_file" "ansible_inventory" {
 #   content = <<EOT
 # [server]

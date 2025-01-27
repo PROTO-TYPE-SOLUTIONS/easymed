@@ -12,7 +12,7 @@
         name: nginx
         state: present
 
-
+    # ========  Instll Docker and Docker Compose =======
     - name: install dependencies
       apt:
         name: "{{item}}"
@@ -66,6 +66,7 @@
         owner: ubuntu
         group: ubuntu
 
+# ======== Deploy Services =======
     - name: Copy env file
       copy:
         src: ../../.env
