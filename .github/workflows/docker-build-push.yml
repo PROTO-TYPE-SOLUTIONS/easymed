@@ -34,7 +34,13 @@ jobs:
 
 # ==================== Deployment ============================
   terraform:
+    name: "Terraform Infrastructure Change Management"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        # We keep Terraform files in the terraform directory.
+        working-directory: ./easymed/deployment
 
     steps:
       - name: Checkout repository
@@ -47,7 +53,6 @@ jobs:
 
       - name: Initialize Terraform
         run: terraform init
-        working-directory: ./deployment
 
       # # FOR EXPERIMENTAL PURPOSES
       # - name: Destroy existing infrastructure
@@ -59,7 +64,6 @@ jobs:
 
       - name: Apply Terraform changes
         run: terraform apply -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-        working-directory: ./deployment
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -68,12 +72,11 @@ jobs:
         run: |
           echo "[app_server]" > deployment/inventory.ini
           echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./deployment/inventory.ini
-        working-directory: ./deployment
 
       - name: Save Terraform output
         id: get_ip
         run: echo "SERVER_IP=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
-        working-directory: deployment
+
 
       - name: Check Inventory
         run: cat ./deployment/inventory.ini
@@ -98,6 +101,6 @@ jobs:
           
       - name: Run Ansible Playbook
         run: |
-          echo "[app_server]" > inventory.ini
-          ansible-playbook -i ./deployment/inventory.ini ansible-playbook.yml
-        working-directory: ./deployment     
+          echo "[app_server]" > ./project-name/deployment/inventory.ini
+          ansible-playbook -i ./easymed/deployment/inventory.ini ansible-playbook.yml
+        working-directory: ./easymed/deployment
