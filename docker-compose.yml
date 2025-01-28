@@ -11,7 +11,7 @@ services:
         ports:
         - "5433:5432"
         volumes:
-        - postgres_data:/var/lib/postgresql/data
+        - pg_data:/var/lib/postgresql/data
         networks:
         - mks
     redis:
@@ -64,6 +64,9 @@ services:
         networks:
             - mks    
 
+volumes:
+    pg_data:
+    
 networks:
     mks:
         name: mks

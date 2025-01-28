@@ -47,19 +47,19 @@ jobs:
 
       - name: Initialize Terraform
         run: terraform init
-        working-directory: deployment
+        working-directory: ./deployment
 
-      # FOR EXPERIMENTAL PURPOSES
-      - name: Destroy existing infrastructure
-        run: terraform destroy -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-        working-directory: deployment
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # # FOR EXPERIMENTAL PURPOSES
+      # - name: Destroy existing infrastructure
+      #   run: terraform destroy -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+      #   working-directory: deployment
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Apply Terraform changes
         run: terraform apply -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-        working-directory: deployment
+        working-directory: ./deployment
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -67,8 +67,8 @@ jobs:
       - name: Generate Ansible Inventory
         run: |
           echo "[app_server]" > deployment/inventory.ini
-          echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> deployment/inventory.ini
-        working-directory: deployment
+          echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./deployment/inventory.ini
+        working-directory: ./deployment
 
       - name: Save Terraform output
         id: get_ip
@@ -76,7 +76,7 @@ jobs:
         working-directory: deployment
 
       - name: Check Inventory
-        run: cat deployment/inventory.ini
+        run: cat ./deployment/inventory.ini
 
 
   ansible:
@@ -99,5 +99,5 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           echo "[app_server]" > inventory.ini
-          ansible-playbook -i deployment/inventory.ini ansible-playbook.yml
-        working-directory: deployment     
+          ansible-playbook -i ./deployment/inventory.ini ansible-playbook.yml
+        working-directory: ./deployment     
