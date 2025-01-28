@@ -17,8 +17,8 @@ jobs:
 
       - name: Run tests
         run: |
-          copy .env.sample ./backend/.env
-          cd ./backend
+          cp ${GITHUB_WORKSPACE}/.env.sample ${GITHUB_WORKSPACE}/backend/.env
+          cd ${GITHUB_WORKSPACE}/backend
           pwd
           pytest .
 
@@ -71,14 +71,6 @@ jobs:
       - name: Initialize Terraform
         run: terraform init
 
-      # # FOR EXPERIMENTAL PURPOSES
-      # - name: Destroy existing infrastructure
-      #   run: terraform destroy -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-      #   working-directory: deployment
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
       - name: Apply Terraform changes
         run: terraform apply -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
         env:
@@ -119,6 +111,6 @@ jobs:
           
       - name: Run Ansible Playbook
         run: |
-          echo "[app_server]" > ./deployment/inventory.ini
-          ansible-playbook -i ./deployment/inventory.ini ansible-playbook.yml
+          echo "[app_server]" > inventory.ini
+          ansible-playbook -i inventory.ini ansible-playbook.yml
         working-directory: ./deployment
