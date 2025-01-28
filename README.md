@@ -245,6 +245,9 @@ Last Revised January, 11, 2025, by [Moses Mbadi](https://www.linkedin.com/in/mos
 
 
 ## Invoicing process
+For Invoicing to work appropriately, you need to create an Item, then add the item to the inventory 
+and an InsuranceSalePrice for that item.
+
 InvoiceItem
 --> post_save - update_item_price_on_invoice()
 --> post_save - update_is_billed_status() -> update_service_billed_status()
@@ -255,3 +258,35 @@ check_quantity_availability()
 		-> get_available_stock()
 			-> update_stock_quantity_if_stock_is_available()
 		-> update_stock_quantity_if_stock_is_available()	
+
+
+# 8 Deployment with Terraform, ansible and Github Action
+First things first, you need to configure your AWS credentials. You can do this by running `aws configure` and entering your credentials.
+You can also set the credentials in the `~/.aws/credentials` file.
+
+Next, you need to have terraform and ansible installed. You can install terraform by following the instructions [here](https://learn.hashicorp.com/tutorials/terraform/install-cli) and ansible by following the instructions [here](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
+
+After the prerequisites are out of the way, you can now proceed to deploy the application. The deployment process is divided into two parts, the infrastructure and the application.
+
+First CD into /deployment directory and run the following commands:
+
+Commands to run terraform
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+That will provision our infrastracture. We then let ansible take care of the rest:
+``ansible-playbook -i inventory.ini ansible-playbook.yml``
+
+Ofcourse that is if you want to deploy manually. However, with the Github actions set up,
+the entire deployment proxes is handled by the actions. You can check the actions in the `.github/workflows` directory.
+
+To destroy all resources created
+``terraform destroy``
+
+### Trubleshooting
+If you get an error saying invalid AMI, you can check the available AMIs in your region by running the command below:
+``aws ec2 describe-images --owners amazon --filters "Name=name,Values=ubuntu/images/*" --region us-east-1``
+

@@ -39,29 +39,29 @@ const AddPatientModal = () => {
     phone: "",
     email: "",
     insurances: [],
-    kin_first_name: "",
-    kin_second_name: "",
-    kin_phone: "",
-    kin_email:"",
-    residence: "",
-    relationship: "",
+    kin_first_name: null,
+    kin_second_name: null,
+    kin_phone: null,
+    kin_email:null,
+    residence: null,
+    relationship: null,
     unique_id: ""
   };
 
   const validationSchema = Yup.object().shape({
     first_name: Yup.string().required("First Name is required!"),
     second_name: Yup.string().required("Second Name is required!"),
-    kin_first_name: Yup.string().required("Next Kin First Name is required!"),
-    kin_second_name: Yup.string().required("Next Kin Second Name is required!"),
+    // kin_first_name: Yup.string().required("Next Kin First Name is required!"),
+    // kin_second_name: Yup.string().required("Next Kin Second Name is required!"),
     date_of_birth: Yup.string().required("Date is required!"),
     gender: Yup.string().required("Select gender!"),
     phone: Yup.number().required("Phone Number is required!"),
     unique_id: Yup.number().required("Id Number is required!"),
-    kin_phone: Yup.number().required("Next Kin Phone Number is required!"),
+    // kin_phone: Yup.number().required("Next Kin Phone Number is required!"),
     email: Yup.string().required("Email is required!"),
-    kin_email: Yup.string().required("Next Kin Email is required!"),
-    relationship: Yup.string().required("Relationship is required!"),
-    residence: Yup.string().required("location is required!"),
+    // kin_email: Yup.string().required("Next Kin Email is required!"),
+    // relationship: Yup.string().required("Relationship is required!"),
+    // residence: Yup.string().required("location is required!"),
   });
 
   const createPatientNextOfKin = async (patient_id, next_of_kin, contact) => {

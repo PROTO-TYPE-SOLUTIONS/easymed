@@ -28,10 +28,16 @@ const NewInvoice = () => {
 
 
     const handleChange = (selectedOption) => {
+      if (selectedOption){
         setSelectedOption(selectedOption);
         dispatch(getPatientInvoices(auth, selectedOption?.value))
         const selectedPatient = _.find(patients, { id: selectedOption?.value });
         setPatient(selectedPatient);
+      }else{
+        setSelectedOption(selectedOption);
+        setPatient(null);
+        setSelectedInvoice(null);
+      }
 
     };
 
@@ -96,20 +102,21 @@ const NewInvoice = () => {
           }
 
           
-        
       </Grid>
       <Grid className='h-[80vh]' item md={9} xs={12}>
-        <ReviewInvoice 
-          selectedOption={selectedOption}
-          selectedInvoice={selectedInvoice}
-          selectedPatient={patient} 
-          selectedAppointments={selectedAppointments} 
-          selectedLabRequests={selectedLabRequests}
-          selectedPrescribedDrugs={selectedPrescribedDrugs}
-          setSelectedAppointments={setSelectedAppointments}
-          setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}
-          setSelectedLabRequests={setSelectedLabRequests}
-        />
+        {selectedOption && selectedInvoice && (
+          <ReviewInvoice 
+            selectedOption={selectedOption}
+            selectedInvoice={selectedInvoice}
+            selectedPatient={patient} 
+            selectedAppointments={selectedAppointments} 
+            selectedLabRequests={selectedLabRequests}
+            selectedPrescribedDrugs={selectedPrescribedDrugs}
+            setSelectedAppointments={setSelectedAppointments}
+            setSelectedPrescribedDrugs={setSelectedPrescribedDrugs}
+            setSelectedLabRequests={setSelectedLabRequests}
+          />
+        )}
       </Grid>
 
     </Grid>

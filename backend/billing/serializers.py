@@ -39,10 +39,17 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
 
 class InvoiceSerializer(serializers.ModelSerializer):
     invoice_items = InvoiceItemSerializer(many=True, read_only=True)
+    patient_name = serializers.SerializerMethodField()
+
+    def get_patient_name(self, obj):
+        return obj.patient.first_name
 
     class Meta:
         model = Invoice
-        fields = ['id', 'invoice_number', 'invoice_date', 'patient', 'invoice_items', 'cash_paid', 'total_cash']
+        fields = ['id', 'invoice_number', 'invoice_date', 'patient',
+                'invoice_items', 'cash_paid', 'total_cash', 'patient_name',
+                'invoice_amount', 'status', 'invoice_description',
+                'invoice_file', 'invoice_created_at', 'invoice_updated_at']
 
 
 class PaymentModeSerializer(serializers.ModelSerializer):
