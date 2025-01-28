@@ -16,8 +16,28 @@ jobs:
           pip install -r ./backend/requirements.txt
 
       - name: Run tests
+        env:
+            SECRET_KEY: ${{ secrets.SECRET_KEY }}
+            EMAIL_BACKEND: ${{ secrets.EMAIL_BACKEND }}
+            EMAIL_USE_TLS: ${{ secrets.EMAIL_USE_TLS }}
+            EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+            EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+            EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+            EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+            DEFAULT_FROM_EMAIL: ${{ secrets.DEFAULT_FROM_EMAIL }}
+            DEBUG: ${{ secrets.DEBUG }}
+            CELERY_BROKER_URL: ${{ secrets.CELERY_BROKER_URL }}
+            CELERY_RESULT_BACKEND: ${{ secrets.CELERY_RESULT_BACKEND }}
+            DB_ENGINE: ${{ secrets.DB_ENGINE }}
+            DJANGO_DB: ${{ secrets.DJANGO_DB }}
+            POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+            POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+            POSTGRES_NAME: ${{ secrets.POSTGRES_NAME }}
+            POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+            POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+            DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
         run: |
-          cp ${GITHUB_WORKSPACE}/.env.sample ${GITHUB_WORKSPACE}/backend/.env
           cd ${GITHUB_WORKSPACE}/backend
           pwd
           pytest .
