@@ -13,7 +13,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install -r ./backend/requirements.txt
 
       - name: Run tests
         run: |
@@ -85,6 +85,7 @@ jobs:
 
       - name: Generate Ansible Inventory
         run: |
+          mkdir -p ./deployment
           echo "[app_server]" > ./deployment/inventory.ini
           echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./deployment/inventory.ini
 
