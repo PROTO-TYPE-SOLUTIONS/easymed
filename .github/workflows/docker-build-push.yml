@@ -17,7 +17,9 @@ jobs:
 
       - name: Run tests
         run: |
+          copy .env.sample ./backend/.env
           cd ./backend
+          pwd
           pytest .
 
   build-and-push:
