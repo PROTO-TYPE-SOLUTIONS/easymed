@@ -49,13 +49,13 @@ jobs:
 
 # ==================== Deployment ============================
   terraform:
-    name: "Terraform Infrastructure Change Management"
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
         # We keep Terraform files in the terraform directory.
-        working-directory: ./easymed/deployment
+        working-directory: ./deployment
+
 
     steps:
       - name: Checkout repository
@@ -85,7 +85,7 @@ jobs:
 
       - name: Generate Ansible Inventory
         run: |
-          echo "[app_server]" > deployment/inventory.ini
+          echo "[app_server]" > ./deployment/inventory.ini
           echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./deployment/inventory.ini
 
       - name: Save Terraform output
@@ -116,6 +116,6 @@ jobs:
           
       - name: Run Ansible Playbook
         run: |
-          echo "[app_server]" > ./easymed/deployment/inventory.ini
-          ansible-playbook -i ./easymed/deployment/inventory.ini ansible-playbook.yml
-        working-directory: ./easymed/deployment
+          echo "[app_server]" > ./deployment/inventory.ini
+          ansible-playbook -i ./deployment/inventory.ini ansible-playbook.yml
+        working-directory: ./deployment
