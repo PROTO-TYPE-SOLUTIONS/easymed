@@ -1,9 +1,7 @@
 name: Build, Test, and Push to Registry
-name: Build, Test, and Push to Registry
 
 on:
   push:
-    branches: [ dev-moses ]
     branches: [ dev-moses ]
 
 jobs:
@@ -118,6 +116,6 @@ jobs:
           
       - name: Run Ansible Playbook
         run: |
-          echo "[app_server]" > ./project-name/deployment/inventory.ini
+          echo "[app_server]" > ./easymed/deployment/inventory.ini
           ansible-playbook -i ./easymed/deployment/inventory.ini ansible-playbook.yml
         working-directory: ./easymed/deployment
