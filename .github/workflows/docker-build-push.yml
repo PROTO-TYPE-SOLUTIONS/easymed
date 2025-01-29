@@ -90,24 +90,25 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           ansible-playbook -i ./deployment/inventory.ini ansible-playbook.yml \
-            --extra-vars SECRET_KEY=${{ secrets.SECRET_KEY }} \
-          EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend' \
-          EMAIL_USE_TLS=True \
-          EMAIL_HOST=${{ secrets.EMAIL_HOST }} \
-          EMAIL_PORT=${{ secrets.EMAIL_PORT }} \
-          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }} \
-          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} \
-          DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }} \
-          DEBUG=${{ secrets.DEBUG }} \
-          CELERY_BROKER_URL=redis://redis:6379/0 \
-          CELERY_RESULT_BACKEND=redis://redis:6379/0 \
-          DJANGO_DB=postgresql \
-          DB_ENGINE=django.db.backends.postgresql \
-          POSTGRES_HOST=postgres \
-          POSTGRES_DB=postgres \
-          POSTGRES_NAME=postgres \
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-          POSTGRES_PORT=5432 \
-          DJANGO_SETTINGS_MODULE=easymed.settings.base
+            --extra-vars "SECRET_KEY='${{ secrets.SECRET_KEY }}' \
+            EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend' \
+            EMAIL_USE_TLS=True \
+            EMAIL_HOST='${{ secrets.EMAIL_HOST }}' \
+            EMAIL_PORT=${{ secrets.EMAIL_PORT }} \
+            EMAIL_HOST_USER='${{ secrets.EMAIL_HOST_USER }}' \
+            EMAIL_HOST_PASSWORD='${{ secrets.EMAIL_HOST_PASSWORD }}' \
+            DEFAULT_FROM_EMAIL='${{ secrets.DEFAULT_FROM_EMAIL }}' \
+            DEBUG='${{ secrets.DEBUG }}' \
+            CELERY_BROKER_URL='redis://redis:6379/0' \
+            CELERY_RESULT_BACKEND='redis://redis:6379/0' \
+            DJANGO_DB='postgresql' \
+            DB_ENGINE='django.db.backends.postgresql' \
+            POSTGRES_HOST='postgres' \
+            POSTGRES_DB='postgres' \
+            POSTGRES_NAME='postgres' \
+            POSTGRES_USER='${{ secrets.POSTGRES_USER }}' \
+            POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}' \
+            POSTGRES_PORT=5432 \
+            DJANGO_SETTINGS_MODULE='easymed.settings.base'"
+
         working-directory: ./deployment  
