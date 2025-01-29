@@ -19,6 +19,11 @@
         name: postgresql
         state: present
 
+    - name: Install psycopg2
+      apt:
+        name: python3-psycopg2
+        state: present
+        
     - name: Start PostgreSQL
       service:
         name: postgresql
