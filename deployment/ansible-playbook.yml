@@ -7,12 +7,36 @@
       apt:
         update_cache: yes
 
+    # ========  Install Nginx =======
     - name: Install Nginx
       apt:
         name: nginx
         state: present
 
-    # ========  Instll Docker and Docker Compose =======
+    # ========  Install PostgreSQL =======
+    - name: Install PostgreSQL
+      apt:
+        name: postgresql
+        state: present
+
+    - name: Start PostgreSQL
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: Create PostgreSQL user
+      postgresql_user:
+        db: postgres
+        name: "{{ POSTGRES_USER }}"
+        password: "{{ POSTGRES_PASSWORD }}"
+        state: present      
+
+    - name: Backup PostgreSQL Database
+      command: pg_dump -U postgres -d postgres > /home/ubuntu/postgres.sql
+      become: yes      
+
+    # ========  Install Docker and Docker Compose =======
     - name: install dependencies
       apt:
         name: "{{item}}"
