@@ -107,10 +107,11 @@ jobs:
         id: get_ip
         run: echo "SERVER_IP=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
 
-
-      - name: Check Inventory
-        run: cat ./deployment/inventory.ini
-
+      - name: Upload inventory file as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: inventory
+          path: ./deployment/inventory.ini
 
   ansible:
     runs-on: ubuntu-latest
@@ -119,6 +120,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Download inventory file artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: inventory
+          path: ./deployment
 
       - name: Install Ansible
         run: sudo apt update && sudo apt install -y ansible
@@ -131,6 +138,68 @@ jobs:
           
       - name: Run Ansible Playbook
         run: |
-          echo "[app_server]" > inventory.ini
-          ansible-playbook -i inventory.ini ansible-playbook.yml
+          ansible-playbook -i ./deployment/inventory.ini ansible-playbook.yml
         working-directory: ./deployment
+  # terraform:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       shell: bash
+  #       # We keep Terraform files in the terraform directory.
+  #       working-directory: ./deployment
+
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: 1.5.0
+
+  #     - name: Initialize Terraform
+  #       run: terraform init
+
+  #     - name: Apply Terraform changes
+  #       run: terraform apply -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+  #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  #     - name: Generate Ansible Inventory
+  #       run: |
+  #         mkdir -p ./deployment
+  #         echo "[app_server]" > ./deployment/inventory.ini
+  #         echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./deployment/inventory.ini
+
+  #     - name: Save Terraform output
+  #       id: get_ip
+  #       run: echo "SERVER_IP=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
+
+
+  #     - name: Check Inventory
+  #       run: cat ./deployment/inventory.ini
+
+
+  # ansible:
+  #   runs-on: ubuntu-latest
+  #   needs: terraform
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Install Ansible
+  #       run: sudo apt update && sudo apt install -y ansible
+
+  #     - name: Configure SSH Key
+  #       run: |
+  #         mkdir -p ~/.ssh
+  #         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+  #         chmod 600 ~/.ssh/id_rsa
+          
+  #     - name: Run Ansible Playbook
+  #       run: |
+  #         ansible-playbook -i ./deployment/inventory.ini ansible-playbook.yml
+  #       working-directory: ./deployment
