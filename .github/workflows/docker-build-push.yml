@@ -102,7 +102,11 @@ jobs:
         run: |
           mkdir -p ./deployment
           echo "[app_server]" > ./deployment/inventory.ini
-          echo "${{ env.SERVER_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./deployment/inventory.ini
+          echo "${{ env.SERVER_IP }}" >> ./deployment/inventory.ini
+          echo "" >> ./deployment/inventory.ini
+          echo "[app_server:vars]" >> ./deployment/inventory.ini
+          echo "ansible_user=ubuntu" >> ./deployment/inventory.ini
+          echo "ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./deployment/inventory.ini
 
       - name: Save Terraform output
         id: get_ip
