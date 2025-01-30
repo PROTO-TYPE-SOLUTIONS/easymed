@@ -1,0 +1,27 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['api:8085']
+  - job_name: 'celery'
+    static_configs:
+      - targets: ['celery:8085']
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+# Example for Redis (requires redis_exporter)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis:6379']
+
+  # Example for PostgreSQL (requires postgres_exporter)
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres_exporter:9187']  # Assuming postgres_exporter is running
+
+rule_files:
+  - ./rules.yml

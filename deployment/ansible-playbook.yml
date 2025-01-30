@@ -30,15 +30,6 @@
         state: started
         enabled: yes
 
-    - name: Create PostgreSQL user
-      postgresql_user:
-        db: postgres
-        name: "{{ POSTGRES_USER }}"
-        password: "{{ POSTGRES_PASSWORD }}"
-        state: present
-        become_user: postgres
-        become_method: sudo    
-
     - name: Backup PostgreSQL Database
       command: pg_dump -U postgres -d postgres > /home/ubuntu/postgres.sql
       become: yes      

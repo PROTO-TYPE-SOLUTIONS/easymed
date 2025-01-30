@@ -1,0 +1,22 @@
+groups:
+- name: BackendDown
+  rules:
+  - alert: BackendDown
+    expr: up{job="backend"} == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Backend instance down (instance {{ $labels.instance }})"
+      description: "A backend instance has been down for more than 5 minutes."
+
+- name: HighCPUUsage
+  rules:
+  - alert: HighCPUUsage
+    expr: process_cpu_seconds_total{job="backend"} > 0.8
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage on backend (instance {{ $labels.instance }})"
+      description: "CPU usage on a backend instance is above 80% for more than 5 minutes."
