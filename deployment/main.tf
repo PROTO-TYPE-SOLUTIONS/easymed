@@ -127,6 +127,12 @@ resource "aws_instance" "app_server" {
 
   associate_public_ip_address = true
 
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = 50
+    encrypted = true
+  }
+
   tags = {
     Name = "EasymedAppServer"
   }
