@@ -120,7 +120,7 @@ resource "aws_key_pair" "app_server_key" {
 # ================== SERVER ==================
 resource "aws_instance" "app_server" {
   ami           = "ami-04b4f1a9cf54c11d0"
-  instance_type = "t2.micro"
+  instance_type = "t2.medium"
   key_name      = aws_key_pair.app_server_key.key_name
   subnet_id     = aws_subnet.app_subnet.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
