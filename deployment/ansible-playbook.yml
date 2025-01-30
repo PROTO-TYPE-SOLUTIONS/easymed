@@ -28,11 +28,7 @@
       service:
         name: postgresql
         state: started
-        enabled: yes
-
-    - name: Backup PostgreSQL Database
-      command: pg_dump -U postgres -d postgres > /home/ubuntu/postgres.sql
-      become: yes      
+        enabled: yes 
 
     # ========  Install Docker and Docker Compose =======
     - name: install dependencies
