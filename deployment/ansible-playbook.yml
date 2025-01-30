@@ -132,11 +132,15 @@
         src: "/home/runner/work/easymed/easymed/docker-compose.yml"
         dest: "/home/ubuntu/docker-compose.yml"
 
-    - name: Copy prometheus directory
+    - name: Copy prometheus.yml file
       copy:
-        src: "/home/runner/work/easymed/easymed/prometheus/"
-        dest: "/home/ubuntu/prometheus"
-        mode: 'directory'
+        src: "/home/runner/work/easymed/easymed/prometheus.yml"
+        dest: "/home/ubuntu/prometheus/prometheus.yml"
+
+    - name: Copy rules.yml file
+      copy:
+        src: "/home/runner/work/easymed/easymed/rules.yml"
+        dest: "/home/ubuntu/prometheus/rules.yml"    
 
     - name: Deploy services
       command: docker-compose -f /home/ubuntu/docker-compose.yml up -d
