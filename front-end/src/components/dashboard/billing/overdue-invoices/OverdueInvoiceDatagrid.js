@@ -145,7 +145,7 @@ const OverdueInvoicesDatagrid = () => {
     return (
         <section clasName="">
             <DataGrid
-                dataSource={filterOlderThanNinetyDays}
+                dataSource={invoices}
                 allowColumnReordering={true}
                 rowAlternationEnabled={true}
                 showBorders={true}
