@@ -134,12 +134,12 @@
 
     - name: Copy prometheus.yml file
       copy:
-        src: "/home/runner/work/easymed/easymed/prometheus.yml"
+        src: "/home/runner/work/easymed/easymed/prometheus/prometheus.yml"
         dest: "/home/ubuntu/prometheus/prometheus.yml"
 
     - name: Copy rules.yml file
       copy:
-        src: "/home/runner/work/easymed/easymed/rules.yml"
+        src: "/home/runner/work/easymed/easymed/prometheus/rules.yml"
         dest: "/home/ubuntu/prometheus/rules.yml"    
 
     - name: Deploy services
