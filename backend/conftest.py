@@ -19,7 +19,6 @@ from inventory.models import (
     IncomingItem,
     Inventory,
     SupplierInvoice,
-    InventoryInsuranceSaleprice,
     DepartmentInventory,
 )
 
