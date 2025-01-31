@@ -132,6 +132,11 @@
         src: "/home/runner/work/easymed/easymed/docker-compose.yml"
         dest: "/home/ubuntu/docker-compose.yml"
 
+    - name: Create prometheus directory
+      file:
+        path: /home/ubuntu/prometheus
+        state: directory
+
     - name: Copy prometheus.yml file
       copy:
         src: "/home/runner/work/easymed/easymed/prometheus/prometheus.yml"
