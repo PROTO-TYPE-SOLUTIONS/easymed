@@ -67,6 +67,20 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 3030
+    to_port     = 3030
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -120,12 +134,18 @@ resource "aws_key_pair" "app_server_key" {
 # ================== SERVER ==================
 resource "aws_instance" "app_server" {
   ami           = "ami-04b4f1a9cf54c11d0"
-  instance_type = "t2.micro"
+  instance_type = "t2.medium"
   key_name      = aws_key_pair.app_server_key.key_name
   subnet_id     = aws_subnet.app_subnet.id
   vpc_security_group_ids = [aws_security_group.app_sg.id]
 
   associate_public_ip_address = true
+
+  root_block_device {
+    volume_type = "gp2"
+    volume_size = 50
+    encrypted = true
+  }
 
   tags = {
     Name = "EasymedAppServer"
@@ -146,14 +166,3 @@ EOT
 
   filename = "${path.module}/inventory.ini"
 }
-
-# For testing locally
-# resource "local_file" "ansible_inventory" {
-#   content = <<EOT
-# [server]
-# ${aws_instance.app_server.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa
-# EOT
-
-#   filename = "${path.module}/inventory.ini"
-# }
-
