@@ -166,14 +166,3 @@ EOT
 
   filename = "${path.module}/inventory.ini"
 }
-
-# For testing locally
-# resource "local_file" "ansible_inventory" {
-#   content = <<EOT
-# [server]
-# ${aws_instance.app_server.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa
-# EOT
-
-#   filename = "${path.module}/inventory.ini"
-# }
-
