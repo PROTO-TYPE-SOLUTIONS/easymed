@@ -30,11 +30,11 @@ const getActions = () => {
             label: "Print",
             icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
         },
-        // {
-        //     action: "pay",
-        //     label: "Pay",
-        //     icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
-        // },
+        {
+            action: "pay",
+            label: "Pay",
+            icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
+        },
     ];
 
     return actions;
@@ -87,9 +87,21 @@ const OverdueInvoicesDatagrid = () => {
         
     };
 
+    const handlePay = async (data) => {
+        try{
+            const response = await dayTransaction(data.id, auth)
+            setInfoAsPerPayMode(response)
+            setSelectedPayMethod(payment_method)
+            setTotalsViewOPen(true)
+        }catch(error){
+            console.log(error)
+            toast.error(error)
+        }
+
+    };
     const onMenuClick = async (menu, data) => {
         if (menu.action === "pay") {
-          setSelectedRowData(data);
+          handlePay(data);
           setOpen(true);
         }else if (menu.action === "print"){
           handlePrint(data);
@@ -184,7 +196,7 @@ const OverdueInvoicesDatagrid = () => {
                     caption="Status"
                 />
                 <Column 
-                    dataField="" 
+                    dataField="..." 
                     caption=""
                     cellRender={actionsFunc}
                 />
