@@ -21,7 +21,7 @@ groups:
       summary: "High CPU usage on backend (instance {{ $labels.instance }})"
       description: "CPU usage on a backend instance is above 80% for more than 5 minutes."
 
-- name: APIMetrics
+- name: APIMetrics 
   rules:
   - alert: HighLatency
     expr: histogram_quantile(0.99, rate(http_response_time_seconds_bucket{job="backend"}[5m])) > 500
