@@ -9,3 +9,5 @@ variable "instance_type" {
 variable "key_name" {
   default = "your-aws-key"
 }
+
+variable "ssh_public_key" {}

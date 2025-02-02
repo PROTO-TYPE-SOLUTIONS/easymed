@@ -50,14 +50,21 @@ def get_available_stock(instance):
     if not inventory_items.exists():
         return 0
 
-    current_date = datetime.now().date()
-    closest_item = min(
-        (item for item in inventory_items if item.expiry_date is not None),
-        key=lambda x: abs(x.expiry_date - current_date),
-        default=None  # in case all items have None expiry_date, this avoids an error
-    )
+    return sum(item.quantity_at_hand for item in inventory_items)
 
-    return closest_item.quantity_at_hand
+# def get_available_stock(instance):
+#     inventory_items = Inventory.objects.filter(item=instance.item)
+#     if not inventory_items.exists():
+#         return 0
+
+#     current_date = datetime.now().date()
+#     closest_item = min(
+#         (item for item in inventory_items if item.expiry_date is not None),
+#         key=lambda x: abs(x.expiry_date - current_date),
+#         default=None  # in case all items have None expiry_date, this avoids an error
+#     )
+
+#     return closest_item.quantity_at_hand
 
 
 def check_quantity_availability(instance):

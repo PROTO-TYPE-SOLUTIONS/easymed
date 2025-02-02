@@ -59,7 +59,7 @@ def test_requsition_item_with_mising_supplier(requisition, user, supplier, inven
     """
     default_supplier = Supplier.objects.first()
     requisition_data = {
-        "requested_by": 1,
+        "requested_by": user.id,
         "department": department.id,
         "items":[
             {
@@ -85,7 +85,7 @@ def test_requsition_item_with_mising_supplier(requisition, user, supplier, inven
 
 @pytest.mark.django_db
 def test_creating_requisition_with_same_item_same_supplier(
-    requisition, item, inventory, supplier, department, authenticated_client
+    requisition, item, user, inventory, supplier, department, authenticated_client
 ):
     """
     Items with the same supplier and item should be combined into a single RequisitionItem.
@@ -95,7 +95,7 @@ def test_creating_requisition_with_same_item_same_supplier(
     )
 
     requisition_data = {
-        "requested_by": 1,
+        "requested_by": user.id,
         "department": department.id,
         "items": [
             {
