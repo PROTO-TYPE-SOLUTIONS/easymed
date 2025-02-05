@@ -30,11 +30,11 @@ const getActions = () => {
             label: "Print",
             icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
         },
-        // {
-        //     action: "pay",
-        //     label: "Pay",
-        //     icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
-        // },
+        {
+            action: "pay",
+            label: "Pay",
+            icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
+        },
     ];
 
     return actions;
@@ -54,6 +54,22 @@ const OverdueInvoicesDatagrid = () => {
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
     const [showInfo, setShowInfo] = useState(true);
     const [showNavButtons, setShowNavButtons] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        if (auth) {
+            dispatch(getAllInvoices(auth));
+        }
+    }, [auth]);
+
+    // Filter invoices by patient name
+    const filteredInvoices = invoices.filter((invoice) =>
+        invoice.patient_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const handleSearch = (event) => {
+        setSearchQuery(event.target.value);
+    };
 
     console.log("THESE ARE THE INVOICES", invoices)
 
@@ -87,9 +103,21 @@ const OverdueInvoicesDatagrid = () => {
         
     };
 
+    const handlePay = async (data) => {
+        try{
+            const response = await dayTransaction(data.id, auth)
+            setInfoAsPerPayMode(response)
+            setSelectedPayMethod(payment_method)
+            setTotalsViewOPen(true)
+        }catch(error){
+            console.log(error)
+            toast.error(error)
+        }
+
+    };
     const onMenuClick = async (menu, data) => {
         if (menu.action === "pay") {
-          setSelectedRowData(data);
+          handlePay(data);
           setOpen(true);
         }else if (menu.action === "print"){
           handlePrint(data);
@@ -144,8 +172,18 @@ const OverdueInvoicesDatagrid = () => {
 
     return (
         <section clasName="">
+            {/* Search Input */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Search by Patient Name"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
             <DataGrid
-                dataSource={filterOlderThanNinetyDays}
+                dataSource={invoices}
                 allowColumnReordering={true}
                 rowAlternationEnabled={true}
                 showBorders={true}
@@ -184,14 +222,15 @@ const OverdueInvoicesDatagrid = () => {
                     caption="Status"
                 />
                 <Column 
-                    dataField="" 
+                    dataField="..." 
                     caption=""
                     cellRender={actionsFunc}
                 />
             </DataGrid>
+            {open && <InvoicePayModal {...{setOpen,open,selectedRowData}} />}
             {/* <div className='w-full mt-4 flex justify-between h-12 gap-4'>
                 <div onClick={()=> getTransactionPerDayForAPaymentMethod("cash")} className='w-full gap-2 flex justify-center items-center bg-white rounded-lg cursor-pointer'>
-                    <button>
+                    <button>i
                         Daily Cash Total.
                     </button>
                 </div>
