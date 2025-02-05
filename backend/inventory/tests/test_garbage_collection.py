@@ -13,13 +13,13 @@ from inventory.models import (
 )
 from easymed.celery_tasks import inventory_garbage_collection
 
-
 @pytest.mark.django_db
-def test_zero_quantity_items_are_archived(item):
+def test_zero_quantity_items_are_archived(item, department):
     """Test that items with zero quantity are moved to archive"""
 
     zero_quantity_inventory = Inventory.objects.create(
         item=item,
+        department=department,
         purchase_price=Decimal('100.00'),
         sale_price=Decimal('150.00'),
         quantity_at_hand=0,
@@ -39,12 +39,14 @@ def test_zero_quantity_items_are_archived(item):
     assert archived_item.expiry_date == zero_quantity_inventory.expiry_date
     assert archived_item.category_one == zero_quantity_inventory.category_one
 
+
 @pytest.mark.django_db
-def test_zero_quantity_items_are_deleted(item):
+def test_zero_quantity_items_are_deleted(item, department):
     """Test that items are deleted from inventory after archiving"""
 
     Inventory.objects.create(
         item=item,
+        department=department,
         purchase_price=Decimal('100.00'),
         sale_price=Decimal('150.00'),
         quantity_at_hand=0,
@@ -58,12 +60,14 @@ def test_zero_quantity_items_are_deleted(item):
     
     assert not Inventory.objects.filter(item=item).exists()
 
+
 @pytest.mark.django_db
-def test_non_zero_quantity_items_are_preserved(item):
+def test_non_zero_quantity_items_are_preserved(item, department):
     """Test that items with non-zero quantity are not affected"""
 
     non_zero_inventory = Inventory.objects.create(
         item=item,
+        department=department,
         purchase_price=Decimal('200.00'),
         sale_price=Decimal('250.00'),
         quantity_at_hand=10,
@@ -80,11 +84,12 @@ def test_non_zero_quantity_items_are_preserved(item):
 
 
 @pytest.mark.django_db
-def test_multiple_items_archived(item):
+def test_multiple_items_archived(item, department):
     """Test that multiple zero-quantity items are archived correctly"""
     # Create two zero-quantity inventory items
     Inventory.objects.create(
         item=item,
+        department=department,
         purchase_price=Decimal('100.00'),
         sale_price=Decimal('150.00'),
         quantity_at_hand=0,
@@ -96,6 +101,7 @@ def test_multiple_items_archived(item):
     
     Inventory.objects.create(
         item=item,
+        department=department,
         purchase_price=Decimal('200.00'),
         sale_price=Decimal('250.00'),
         quantity_at_hand=0,

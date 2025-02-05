@@ -20,44 +20,6 @@ from inventory.signals import (
 Given the complexity of database transactions and potential race conditions,
 it's important to simulate conditions in a controlled environment.
 '''
-
-
-@pytest.fixture
-def user(db):
-    return CustomUser.objects.create_user(
-        email="9jg4t@example.com",
-        password="password",
-        first_name="Test",
-        last_name="User",
-        role="patient",
-        profession="Test Profession",
-        phone="+1234567890"
-    )
-
-@pytest.fixture
-def item(db):
-    return Item.objects.create(
-        name="Test Item",
-        desc="Test Description",
-        category="General",
-        units_of_measure="Unit",
-        vat_rate=16.0,
-        item_code="ABC123",
-    )
-
-@pytest.fixture
-def purchase_order(db, user):
-    return PurchaseOrder.objects.create(ordered_by=user)
-
-@pytest.fixture
-def requisition(db, user):
-    department = Department.objects.create(name="Nursing")
-    return Requisition.objects.create(
-        requisition_number="REQ001",
-        department=department,
-        requested_by=user
-    )
-
 @pytest.fixture
 def incoming_item2(db, item, supplier, purchase_order, requisition, supplier_invoice):
     return IncomingItem.objects.create(
@@ -85,13 +47,12 @@ def test_inventory_signal_on_incoming_item_creation(incoming_item2):
         sale_price=100.00,
         lot_no="LOT123"
     )
-    print(f'Incoming Item is: {incoming_item.id}, Lot: {incoming_item.lot_no}')
+    print(f'Incoming Item is: {incoming_item.item}, Lot: {incoming_item.lot_no}')
 
     # Trigger the save operation to invoke the signal
     with transaction.atomic():
         incoming_item.save()
 
-    # Verify if inventory was created or updated
     inventory = Inventory.objects.filter(
         item=incoming_item.item,
         lot_number=incoming_item.lot_no
@@ -156,6 +117,5 @@ def test_update_purchase_order_status_multiple_items(purchase_order):
     )
 
     update_purchase_order_status(purchase_order)
-
 
     assert purchase_order.status == PurchaseOrder.Status.PARTIAL

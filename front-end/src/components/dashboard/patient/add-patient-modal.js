@@ -39,12 +39,12 @@ const AddPatientModal = () => {
     phone: "",
     email: "",
     insurances: [],
-    kin_first_name: "",
-    kin_second_name: "",
-    kin_phone: "",
-    kin_email:"",
-    residence: "",
-    relationship: "",
+    kin_first_name: null,
+    kin_second_name: null,
+    kin_phone: null,
+    kin_email:null,
+    residence: null,
+    relationship: null,
     unique_id: ""
   };
 
