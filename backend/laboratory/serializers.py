@@ -183,6 +183,9 @@ class PatientSampleSerializer(serializers.ModelSerializer):
             'lab_test_request',
             'process'
         ]
+        read_only_fields = [
+            'patient_sample_code',
+        ]
 
     def get_specimen_name(self, obj):
         return obj.specimen.name

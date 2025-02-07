@@ -1,5 +1,3 @@
-
-
 import pytest
 
 from inventory.models import RequisitionItem, Item, Supplier, Inventory
