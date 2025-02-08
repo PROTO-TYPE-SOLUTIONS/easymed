@@ -286,6 +286,10 @@ the entire deployment proxes is handled by the actions. You can check the action
 To destroy all resources created
 ``terraform destroy``
 
+### Monitoring 
+Monitoring will be handled by Prometheus and Grafana.
+To test the backend metrics manually, hit this endpoint ``/metrics``
+
 ### Trubleshooting
 If you get an error saying invalid AMI, you can check the available AMIs in your region by running the command below:
 ``aws ec2 describe-images --owners amazon --filters "Name=name,Values=ubuntu/images/*" --region us-east-1``
