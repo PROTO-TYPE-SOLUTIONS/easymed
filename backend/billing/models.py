@@ -1,6 +1,8 @@
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Sum
 from django.apps import apps
+from django.utils import timezone
+
 
 
 def invoice_file_path(instance, filename):
@@ -65,8 +67,45 @@ class Invoice(models.Model):
                 total_cash=Sum('actual_total')
             )['total_cash'] or 0
 
+    def generate_invoice_number(self):
+        """Generates a unique invoice number.
+
+        The format is DDLIXXXXX/YYYY, where XXXXX is a 5-digit sequential
+        number and YYYY is the current year. The sequence resets to 00001
+        at the beginning of each year.
+        """
+        if not self.pk:
+            prefix = "DDLI"
+            current_year = timezone.now().year
+
+            with transaction.atomic():
+                last_invoice = Invoice.objects.filter(
+                    invoice_number__startswith=prefix
+                    ).order_by('-invoice_number').select_for_update().first()
+                    
+                if last_invoice:
+                    try:
+                        last_invoice_year = int(last_invoice.invoice_number.split('/')[1])
+                        if last_invoice_year == current_year:
+                            last_invoice_number = int(last_invoice.invoice_number[4:9])
+                            next_invoice_number = last_invoice_number + 1
+                        else:
+                            next_invoice_number = 1 
+                    except (IndexError, ValueError):
+                        next_invoice_number = 1
+                else:
+                    next_invoice_number = 1
+                
+                invoice_number = f"{prefix}{next_invoice_number:05d}/{current_year}"
+                return invoice_number
+        return None
+
     def save(self, *args, **kwargs):
         self.calculate_invoice_totals()
+
+        if not self.invoice_number:
+            self.invoice_number = self.generate_invoice_number()
+
         super().save(*args, **kwargs)
 
     def __str__(self):
