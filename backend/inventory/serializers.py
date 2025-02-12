@@ -88,18 +88,10 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
         ]
 
     def get_buying_price(self, obj):
-        try:
-            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
-            return inventory.purchase_price
-        except Inventory.DoesNotExist:
-            return None
+        return obj.item.buying_price if obj.item else None
 
-    def get_selling_price(self, obj):
-        try:
-            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
-            return inventory.sale_price
-        except Inventory.DoesNotExist:
-            return None
+    def get_selling_price(self, obj):  
+        return obj.item.selling_price if obj.item else None
 
     def validate_quantity_requested(self, value):
         return validate_quantity_requested(value)
@@ -170,18 +162,10 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def get_buying_price(self, obj):
-        try:
-            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
-            return inventory.purchase_price
-        except Inventory.DoesNotExist:
-            return None
+        return obj.item.buying_price if obj.item else None
 
     def get_selling_price(self, obj):
-        try:
-            inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
-            return inventory.sale_price
-        except Inventory.DoesNotExist:
-            return None
+        return obj.item.selling_price if obj.item else None
 
     def get_requested_amount(self, obj):
         try:
@@ -400,18 +384,10 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
             return 0
 
     def get_buying_price(self, obj):
-        try:
-            inventory = obj.requisition_item.item.active_inventory_items.order_by("expiry_date").first()
-            return inventory.purchase_price
-        except (Inventory.DoesNotExist, Exception) as e:
-            return 0
+        return obj.requisition_item.item.buying_price if obj.requisition_item.item else None
 
     def get_selling_price(self, obj):
-        try:
-            inventory = Inventory.objects.get(item=obj.requisition_item.item)
-            return inventory.sale_price
-        except (Inventory.DoesNotExist, Exception) as e:
-            return 0
+        return obj.requisition_item.item.selling_price if obj.requisition_item.item else None
 
     def get_requested_amount(self, obj):
         try:
@@ -427,6 +403,13 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
         except Inventory.DoesNotExist:
             return None
 
+    def get_total_buying_amount(self, obj):
+        try:
+            inventory = Inventory.objects.filter(item=obj.requisition_item.item).order_by('expiry_date').first()
+            return float(obj.quantity_ordered * inventory.purchase_price)
+        except Inventory.DoesNotExist:
+            return None
+            
     def get_requested_by_name(self, obj):
         if obj.requisition_item.requisition.requested_by:
             return f"{obj.requisition_item.requisition.requested_by.first_name} {obj.requisition_item.requisition.requested_by.last_name}"
@@ -447,17 +430,10 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
 
 
     def update(self, instance, validated_data):
-        
         instance.quantity_ordered = validated_data.get('quantity_ordered', instance.quantity_received)
         instance.save()
         return instance
 
-    def get_total_buying_amount(self, obj):
-        try:
-            inventory = Inventory.objects.filter(item=obj.requisition_item.item).order_by('expiry_date').first()
-            return float(obj.quantity_ordered * inventory.purchase_price)
-        except Inventory.DoesNotExist:
-            return None
     
 class PurchaseOrderCreateSerializer(serializers.ModelSerializer):
     requisition_items = serializers.ListField(
