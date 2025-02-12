@@ -30,6 +30,8 @@ const InventoryNav = () => {
       <Link href='/dashboard/inventory/supplier-invoices' className={`${pathName === '/dashboard/inventory/supplier-invoices' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
         Suppliers
       </Link>
+        Supplier Invoices
+      </Link>
     </div>
   )
 }
