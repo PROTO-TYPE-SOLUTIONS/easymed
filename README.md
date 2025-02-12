@@ -121,6 +121,7 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 - Pharmacy Dashboard => `CAN_ACCESS_PHARMACY_DASHBOARD`
 - Inventory Dashboard => `CAN_ACCESS_INVENTORY_DASHBOARD`
 - Billing Dashboard => `CAN_ACCESS_BILLING_DASHBOARD`
+- Settings Dashboard => `CAN_ACCESS_ADMIN_DASHBOARD`
 -`CAN_RECEIVE_INVENTORY_NOTIFICATIONS`
 
 You will notice that we have a Role and a Group. A group is associated with permissions which determines which specific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
