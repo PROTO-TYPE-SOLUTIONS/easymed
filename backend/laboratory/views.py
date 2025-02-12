@@ -310,7 +310,7 @@ def download_labtestresult_pdf(request, processtestrequest_id):
         'approved_on': panels.first().approved_on if panels.exists() else None
     }
 
-    html_template = get_template('labtestresult.html').render(context)
+    html_template = get_template('labtestresultquantitative.html').render(context)
 
     pdf_file = HTML(string=html_template).write_pdf()
 
