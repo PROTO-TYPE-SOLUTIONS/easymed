@@ -7,7 +7,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'users', UserListViewSet)
 
-
+from .views import ResetPasswordView
 
 urlpatterns = [
     path('doctors/', DoctorsAPIView.as_view(), name='doctors'),
@@ -17,6 +17,8 @@ urlpatterns = [
     path('register/', RegistrationAPIView.as_view(), name='register'),
     path('login/', LoginAPIView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
+
+    path('password-reset/', ResetPasswordView.as_view(), name='password_reset'),
 
     path('', include(router.urls)),
 ]

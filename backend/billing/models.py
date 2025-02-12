@@ -48,6 +48,7 @@ class Invoice(models.Model):
     invoice_updated_at = models.DateTimeField(auto_now=True)
     # get total amount with Payment Mode "Cash"
     total_cash = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
+    # TODO: Signal to update  cash_paid once InvoicePayments is updated
     cash_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
 
     def calculate_invoice_totals(self):
@@ -72,6 +73,18 @@ class Invoice(models.Model):
         return f"{self.invoice_number} - {self.invoice_date} - {self.invoice_amount} - {self.patient.first_name}"
 
 
+class InvoicePayment(models.Model):
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
+    payment_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_date = models.DateField(null=True)
+    payment_created_at = models.DateTimeField(auto_now_add=True)
+    payment_updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.invoice.invoice_number
+    
+    
 class InvoiceItem(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),

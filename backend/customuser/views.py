@@ -13,13 +13,6 @@ from rest_framework.permissions import (
 
 # rest views
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.views import APIView
-
-
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.request import Request
-
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # models
@@ -161,3 +154,19 @@ class ReceptionistAPIView(APIView):
 class UserListViewSet(viewsets.ModelViewSet):
     serializer_class = CustomUserSerializer
     queryset = CustomUser.objects.all()
+
+
+class ResetPasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        password = request.data.get('password')
+
+        if not password:
+            return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(password)
+        user.save()
+
+        return Response({"message": "Password reset successful"}, status=status.HTTP_200_OK)

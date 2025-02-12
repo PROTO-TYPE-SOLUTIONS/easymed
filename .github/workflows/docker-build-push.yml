@@ -2,7 +2,7 @@ name: Build, Test, and Push to Registry
 
 on:
   push:
-    branches: [ dev-moses ]
+    branches: [ main ]
 
 jobs:
   build-and-push:

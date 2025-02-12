@@ -121,6 +121,7 @@ Create super user then navigate to localhost:8080/admin and add permissions;
 - Pharmacy Dashboard => `CAN_ACCESS_PHARMACY_DASHBOARD`
 - Inventory Dashboard => `CAN_ACCESS_INVENTORY_DASHBOARD`
 - Billing Dashboard => `CAN_ACCESS_BILLING_DASHBOARD`
+- Settings Dashboard => `CAN_ACCESS_ADMIN_DASHBOARD`
 -`CAN_RECEIVE_INVENTORY_NOTIFICATIONS`
 
 You will notice that we have a Role and a Group. A group is associated with permissions which determines which specific dashboards a user is allowed to access. A role helps differentiate staff from patients hence redirecting to patient profile if patient and to general dashboard if staff.
@@ -285,6 +286,10 @@ the entire deployment proxes is handled by the actions. You can check the action
 
 To destroy all resources created
 ``terraform destroy``
+
+### Monitoring 
+Monitoring will be handled by Prometheus and Grafana.
+To test the backend metrics manually, hit this endpoint ``/metrics``
 
 ### Trubleshooting
 If you get an error saying invalid AMI, you can check the available AMIs in your region by running the command below:

@@ -10,7 +10,8 @@ from .models import (
     Specimen,
     PatientSample,
     ReferenceValue,
-    ProcessTestRequest
+    ProcessTestRequest,
+    LabTestKit
 )
 
 admin.site.register(LabReagent)
@@ -23,3 +24,4 @@ admin.site.register(LabEquipment)
 admin.site.register(Specimen)
 admin.site.register(PatientSample)
 admin.site.register(ReferenceValue)
+admin.site.register(LabTestKit)
