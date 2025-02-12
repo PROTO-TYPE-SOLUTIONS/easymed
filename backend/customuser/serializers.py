@@ -1,16 +1,24 @@
-from rest_framework import serializers
 from django.contrib.auth import authenticate
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.conf import settings
 
 from authperms.models import Group
 from .models import (
     CustomUser,
+    PasswordReset,
     Doctor,
     Nurse,
     LabTech,
-    Receptionist
-)
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+    Receptionist,
 
+)
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import serializers
+
+User = get_user_model()
 
 class CustomUserSerializer(serializers.ModelSerializer):
     age = serializers.SerializerMethodField()
@@ -72,6 +80,37 @@ class CustomUserLoginSerializer(serializers.Serializer):
         return {
             'user': user
         }
+
+
+
+class ResetPasswordRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, email):
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist")
+        return email
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.RegexField(
+        regex=r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+        write_only=True,
+        error_messages={'weak_password': ('Password must be at least 8 characters long with at least one capital letter, one number, and one symbol.')}
+    )
+
+    confirm_password = serializers.CharField(write_only=True, required=True,)
+
+    def validate(self, data):
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+
+        if new_password != confirm_password:
+            raise serializers.ValidationError({'confirm_password': ['Passwords do not match.']})  # More specific error message
+
+        return data
 
 
 class DoctorSerializer(serializers.ModelSerializer):

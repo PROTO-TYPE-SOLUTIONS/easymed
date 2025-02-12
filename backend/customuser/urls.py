@@ -4,6 +4,8 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+app_name = 'customuser'
+
 router = DefaultRouter()
 router.register(r'users', UserListViewSet)
 
@@ -17,6 +19,8 @@ urlpatterns = [
     path('register/', RegistrationAPIView.as_view(), name='register'),
     path('login/', LoginAPIView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
+    path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
+    path('password-reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 
     path('', include(router.urls)),
 ]
