@@ -7,6 +7,34 @@ from django.core.validators import FileExtensionValidator
 
 from customuser.models import CustomUser
 
+
+class LabTestKit(models.Model):
+    '''
+    This model stores infrmation about a Test kit
+    '''
+    supplier = models.ForeignKey('inventory.Supplier', on_delete=models.CASCADE)
+    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    number_of_tests = models.IntegerField()
+
+    def __str__(self):
+        return self.name
+
+
+class LabTestKitCounter(models.Model):
+    '''
+    The intention is to keep track of test kits, their respective number of 
+    tests then update this model with a counter of how many tests are remaining
+    signaled by LabTestRequest on billed
+    Will need to be updated manually everytime a kit is bought, or update with IncomingItem
+    '''
+    lab_test_kit = models.ForeignKey(LabTestKit, on_delete=models.CASCADE)
+    counter = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.lab_test_kit.name} - {self.counter}"
+    
+
 class LabEquipment(models.Model):
     COM_MODE_CHOICE = (
         ("serial", "Serial"),
