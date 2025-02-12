@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth import get_user_model
 from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.request import Request
@@ -60,8 +61,8 @@ from .serializers import (
 # utils
 from utils.group_perms import user_in_group
 from django.urls import reverse
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 
 
 # permissions
@@ -124,10 +125,6 @@ class PasswordResetRequestView(generics.GenericAPIView):
     serializer_class = ResetPasswordRequestSerializer
     permission_classes = (AllowAny,)
 
-    @extend_schema(
-        request=ResetPasswordRequestSerializer,
-        responses={200: {"message": "Password reset link sent to email."}},
-    )
     def post(self, request: Request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
