@@ -112,7 +112,7 @@ class ProcessTestRequest(models.Model):
 class LabTestRequest(models.Model):
     process = models.ForeignKey(ProcessTestRequest, on_delete=models.CASCADE, null=True, blank=True) # from patient app
     test_profile = models.ForeignKey(LabTestProfile, on_delete=models.CASCADE, null=True, blank=True)
-    note = models.TextField(null=True)
+    note = models.TextField(null=True, blank=True)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     requested_on = models.TimeField(auto_now_add=True, null=True, blank=True)
     has_result = models.BooleanField(default=False)
