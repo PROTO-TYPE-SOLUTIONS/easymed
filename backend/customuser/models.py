@@ -3,8 +3,8 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
-
 from django.contrib.auth.models import BaseUserManager
+from django.conf import settings
 
 from authperms.models import Group, Permission
 
@@ -215,3 +215,18 @@ class PatientUser(CustomUser):
     objects = PatientManager()
     BASE_ROLE = CustomUser.PATIENT
 
+class PasswordReset(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reset token for {self.user.email}"
+
+class PasswordHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    password_hash = models.CharField(max_length=128)  
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp'] 
