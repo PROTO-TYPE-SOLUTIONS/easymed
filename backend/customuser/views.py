@@ -134,10 +134,13 @@ class PasswordResetRequestView(generics.GenericAPIView):
         token = PasswordResetTokenGenerator().make_token(user)
 
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-        password_reset_confirm_url = reverse('customuser:password_reset_confirm', kwargs={  # Use namespace:name
+        password_reset_confirm_url = reverse(
+            'customuser:password_reset_confirm', 
+            kwargs={  
             'uidb64': uidb64,
             'token': token
-        })
+            }
+        )
         full_url = request.build_absolute_uri(password_reset_confirm_url)
 
         send_mail(

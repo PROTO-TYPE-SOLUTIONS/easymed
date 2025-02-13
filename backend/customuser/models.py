@@ -225,7 +225,7 @@ class PasswordReset(models.Model):
 
 class PasswordHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    password_hash = models.CharField(max_length=128)  # Store the hashed password
+    password_hash = models.CharField(max_length=128)  
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
