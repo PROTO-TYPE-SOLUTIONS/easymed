@@ -6,6 +6,13 @@ from django.contrib.auth import get_user_model
 from customuser.models import CustomUser, Doctor, DoctorProfile, PatientUser
 from company.models import InsuranceCompany
 from patient.models import Patient
+from laboratory.models import (
+    LabTestRequest,
+    PatientSample,  
+    ProcessTestRequest, 
+    Specimen,
+    LabTestProfile
+    )
 from company.models import Company
 from inventory.models import (
     Department,
@@ -140,7 +147,6 @@ def purchase_order(user, requisition):
         requisition=requisition,
     )
 
-
 @pytest.fixture
 def purchase_order_item(purchase_order, requisition_item, supplier):
     return PurchaseOrderItem.objects.create(
@@ -157,7 +163,6 @@ def supplier_invoice(db, supplier, purchase_order):
         purchase_order=purchase_order
     )
 
-
 @pytest.fixture
 def incoming_item(item, supplier, purchase_order, supplier_invoice):
     return IncomingItem.objects.create(
@@ -169,7 +174,6 @@ def incoming_item(item, supplier, purchase_order, supplier_invoice):
         sale_price=20.0,
         category_one="resale",
     )
-
 
 @pytest.fixture
 def inventory(item, department):
@@ -185,8 +189,6 @@ def inventory(item, department):
         
     )
 
-
-
 @pytest.fixture
 def inventory_insurance_saleprice(inventory, insurance_company):
     return InsuranceItemSalePrice.objects.create(
@@ -195,4 +197,44 @@ def inventory_insurance_saleprice(inventory, insurance_company):
         sale_price=20.0,
     )
 
+
+# Laboratory fixtures
+@pytest.fixture
+def process_test_request():
+    return ProcessTestRequest.objects.create(
+        reference="Test Reference",
+    )
+
+@pytest.fixture
+def lab_test_profile(process_test_request):
+    return LabTestProfile.objects.create(
+        name="Test Profile",
+    )
+
+@pytest.fixture
+def lab_test_request(process_test_request, user,lab_test_profile):
+    return LabTestRequest.objects.create(
+        process=process_test_request,
+        test_profile=lab_test_profile,
+        note = "Test Note",
+        requested_by = user,
+        requested_on = date.today(),
+        has_result = True,
+        created_on = date.today(),
+    )
+
+@pytest.fixture
+def specimen():
+    return Specimen.objects.create(
+        name = "Specimen Name",
+    )
+
+@pytest.fixture
+def patient_sample(lab_test_request, process_test_request, specimen):
+    return PatientSample.objects.create(
+        lab_test_request=lab_test_request,
+        specimen=specimen,
+        process = process_test_request,
+        is_sample_collected=True
+    )
 

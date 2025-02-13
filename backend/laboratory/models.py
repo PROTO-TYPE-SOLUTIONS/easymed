@@ -3,6 +3,8 @@ from django.db import models
 from random import randrange, choices
 from django.conf import settings
 from datetime import datetime
+from django.utils import timezone
+from django.db import transaction
 from django.core.validators import FileExtensionValidator
 
 from customuser.models import CustomUser
@@ -158,13 +160,30 @@ class PatientSample(models.Model):
     is_sample_collected = models.BooleanField(default=False)
 
     def generate_sample_code(self):
-        while True:
-            random_number = "".join([str(randrange(0, 9)) for _ in range(4)])
-            sp_id = f"SC-{random_number}"
-            # Check if the generated sample code already exists in PatientSample
-            if not PatientSample.objects.filter(patient_sample_code=sp_id).exists():
-                break
-        return sp_id
+        prefix = "DDLR"
+        current_year = timezone.now().year
+
+        with transaction.atomic():
+            last_sample = PatientSample.objects.filter(
+                patient_sample_code__startswith=prefix
+            ).order_by('-patient_sample_code').select_for_update().first()
+
+            if last_sample:
+                try:
+                    last_sample_year_str = last_sample.patient_sample_code.split('/')[1] 
+                    if last_sample_year_str == str(current_year): 
+                        last_number = int(last_sample.patient_sample_code[4:9])
+                        next_number = last_number + 1
+                    else:
+                        next_number = 1  
+                except (ValueError, IndexError): 
+                    next_number = 1
+            else:
+                next_number = 1
+
+            new_number_str = f"{next_number:05d}"
+            sp_id = f"{prefix}{new_number_str}/{current_year}"  
+            return sp_id
 
     def save(self, *args, **kwargs):
         if not self.patient_sample_code:

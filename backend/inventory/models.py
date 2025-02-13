@@ -82,6 +82,16 @@ class Item(AbstractBaseModel):
     packed = models.CharField(max_length=255, default=1)
     subpacked = models.CharField(max_length=255, default=1)
 
+    @property
+    def buying_price(self):
+        inventory = self.active_inventory_items.first()
+        return inventory.purchase_price if inventory else 0
+
+    @property
+    def selling_price(self):
+        inventory = self.active_inventory_items.first()
+        return inventory.sale_price if inventory else 0
+
     def save(self, *args, **kwargs):
         ''' Generate unique item code'''
         name_abbr = ''.join([part[:3].upper() for part in self.name.split()[:2]])
