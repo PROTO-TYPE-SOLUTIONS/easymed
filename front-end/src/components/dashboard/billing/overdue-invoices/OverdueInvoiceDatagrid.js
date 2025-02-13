@@ -45,7 +45,7 @@ const OverdueInvoicesDatagrid = () => {
     const dispatch = useDispatch();
     const auth = useAuth()
     const { invoices } = useSelector((store) => store.billing);
-    const [open,setOpen] = useState(false)
+    const [open, setOpen] = useState(false)
     const [totalsViewOPen, setTotalsViewOPen] = useState(false)
     const [selectedRowData, setSelectedRowData] = useState({})
     const [infoAsPerPayMode, setInfoAsPerPayMode] = useState({})
@@ -56,90 +56,88 @@ const OverdueInvoicesDatagrid = () => {
     const [showNavButtons, setShowNavButtons] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        if (auth) {
-            dispatch(getAllInvoices(auth));
-        }
-    }, [auth]);
+    // useEffect(() => {
+    //     if (auth) {
+    //         dispatch(getAllInvoices(auth));
+    //     }
+    // }, [auth]);
 
-    // Filter invoices by patient name
-    const filteredInvoices = invoices.filter((invoice) =>
-        invoice.patient_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Ensure invoices is an array before filtering
+    const filteredInvoices = Array.isArray(invoices)
+        ? invoices.filter((invoice) =>
+            invoice?.patient_name?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : [];
 
     const handleSearch = (event) => {
         setSearchQuery(event.target.value);
+        console.log("Search Query:", event.target.value); // Debugging
     };
-
     console.log("THESE ARE THE INVOICES", invoices)
 
     const filterOlderThanNinetyDays = invoices.filter((invoice) => {
         // Get the current date
         const currentDate = new Date();
-        
+
         // Get the invoice creation date
         const invoiceCreationDate = new Date(invoice.invoice_created_at);
-        
+
         // Calculate the difference in milliseconds
         const differenceInMilliseconds = currentDate - invoiceCreationDate;
-        
+
         // Convert milliseconds to days
         const differenceInDays = differenceInMilliseconds / (1000 * 60 * 60 * 24);
-        
+
         // Check if the difference is greater than 90 days
         return differenceInDays >= 90;
     });
 
     const handlePrint = async (data) => {
-        try{
+        try {
             const response = await downloadPDF(data.id, "_invoice_pdf", auth)
             window.open(response.link, '_blank');
             toast.success("got pdf successfully")
 
-        }catch(error){
-            console.log(error)
-            toast.error(error)
-        }
-        
-    };
-
-    const handlePay = async (data) => {
-        try{
-            const response = await dayTransaction(data.id, auth)
-            setInfoAsPerPayMode(response)
-            setSelectedPayMethod(payment_method)
-            setTotalsViewOPen(true)
-        }catch(error){
+        } catch (error) {
             console.log(error)
             toast.error(error)
         }
 
     };
-    const onMenuClick = async (menu, data) => {
+
+
+    const handlePay = async (formValue) => {
+        const payload = {
+            ...formValue,
+        }
+
+
+    };
+    const onMenuClick = async (menu, data, formValue) => {
         if (menu.action === "pay") {
-          handlePay(data);
-          setOpen(true);
-        }else if (menu.action === "print"){
-          handlePrint(data);
+            handlePay(formValue);
+            setOpen(true);
+        } else if (menu.action === "print") {
+            handlePrint(data);
         }
-      };
-    
-      const actionsFunc = ({ data }) => {
+    };
+
+    const actionsFunc = ({ data }) => {
         return (
             <CmtDropdownMenu
-              sx={{ cursor: "pointer" }}
-              items={userActions}
-              onItemClick={(menu) => onMenuClick(menu, data)}
-              TriggerComponent={
-                <LuMoreHorizontal className="cursor-pointer text-xl flex items-center" />
-              }
+                sx={{ cursor: "pointer" }}
+                items={userActions}
+                onItemClick={(menu) => onMenuClick(menu, data)}
+                TriggerComponent={
+                    <LuMoreHorizontal className="cursor-pointer text-xl flex items-center" />
+                }
             />
         );
-      };
+    };
 
-      const getTransactionPerDayForAPaymentMethod = async (payment_method) => {
+    const getTransactionPerDayForAPaymentMethod = async (payment_method) => {
         console.log("Payment method is", payment_method)
-        
+
         try {
             setSelectedPayMethod(payment_method)
             setTotalsViewOPen(true)
@@ -153,22 +151,22 @@ const OverdueInvoicesDatagrid = () => {
                 date: formattedDate,
                 payment_method: payment_method
             }
-            await dayTransaction(payload).then((res)=> {
+            await dayTransaction(payload).then((res) => {
                 console.log("PAY FOR THE DAY", res)
                 setInfoAsPerPayMode(res)
             })
-        }catch(e){
+        } catch (e) {
             console.log("Error", e)
         }
 
-      }
-    
+    }
 
-    useEffect(()=> {
-        if(auth){
+
+    useEffect(() => {
+        if (auth) {
             dispatch(getAllInvoices(auth));
         }
-    }, [auth]);
+    }, [auth, dispatch]);
 
     return (
         <section clasName="">
@@ -183,7 +181,7 @@ const OverdueInvoicesDatagrid = () => {
                 />
             </div>
             <DataGrid
-                dataSource={invoices}
+                dataSource={searchQuery ? filteredInvoices : invoices}
                 allowColumnReordering={true}
                 rowAlternationEnabled={true}
                 showBorders={true}
@@ -193,7 +191,7 @@ const OverdueInvoicesDatagrid = () => {
                 wordWrapEnabled={true}
                 allowPaging={true}
                 className="shadow-xl"
-                // height={"70vh"}
+            // height={"70vh"}
             >
                 <Scrolling rowRenderingMode='virtual'></Scrolling>
                 <Paging defaultPageSize={10} />
@@ -206,28 +204,32 @@ const OverdueInvoicesDatagrid = () => {
                 />
                 <Column
                     dataField="invoice_number"
-                    caption="Invoice Number" 
+                    caption="Invoice Number"
+                />
+                <Column
+                    dataField="patient_name"
+                    caption="Patient"
                 />
                 <Column
                     dataField="invoice_date"
-                    caption="Date" 
+                    caption="Date"
                 />
                 <Column
                     dataField="invoice_description"
-                    caption="Description" 
+                    caption="Description"
                 />
                 <Column dataField="invoice_amount" caption="Amount" />
-                <Column 
+                <Column
                     dataField="status"
                     caption="Status"
                 />
-                <Column 
-                    dataField="..." 
+                <Column
+                    dataField="..."
                     caption=""
                     cellRender={actionsFunc}
                 />
             </DataGrid>
-            {open && <InvoicePayModal {...{setOpen,open,selectedRowData}} />}
+            {open && <InvoicePayModal {...{ setOpen, open, selectedRowData }} />}
             {/* <div className='w-full mt-4 flex justify-between h-12 gap-4'>
                 <div onClick={()=> getTransactionPerDayForAPaymentMethod("cash")} className='w-full gap-2 flex justify-center items-center bg-white rounded-lg cursor-pointer'>
                     <button>i
