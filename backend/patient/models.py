@@ -13,9 +13,9 @@ from laboratory.models import ProcessTestRequest
 
 
 class ContactDetails(models.Model):
-    tel_no = models.IntegerField()
-    email_address = models.EmailField()
-    residence = models.CharField(max_length=30)
+    tel_no = models.IntegerField(null=True, blank=True)
+    email_address = models.EmailField(null=True, blank=True)
+    residence = models.CharField(max_length=30, null=True, blank=True)
 
 
 class Patient(models.Model):
