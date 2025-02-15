@@ -65,7 +65,7 @@ class Item(AbstractBaseModel):
     ]
     CATEGORY_CHOICES = [
         ('SurgicalEquipment', 'Surgical Equipment'),
-        ('LabReagent', 'Lab Reagent'),
+        ('LabReagent', 'Lab Reagent'), # lab Test Kit
         ('Drug', 'Drug'),
         ('Furniture', 'Furniture'),
         ('Lab Test', 'Lab Test'),

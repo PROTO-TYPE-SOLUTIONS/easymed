@@ -11,7 +11,8 @@ from .models import (
     PatientSample,
     ReferenceValue,
     ProcessTestRequest,
-    LabTestKit
+    TestKit,
+    TestKitCounter
 )
 
 admin.site.register(LabReagent)
@@ -24,4 +25,5 @@ admin.site.register(LabEquipment)
 admin.site.register(Specimen)
 admin.site.register(PatientSample)
 admin.site.register(ReferenceValue)
-admin.site.register(LabTestKit)
+admin.site.register(TestKit)
+admin.site.register(TestKitCounter)
