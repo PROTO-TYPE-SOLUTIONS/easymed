@@ -65,4 +65,4 @@ class PaymentModeSerializer(serializers.ModelSerializer):
 class InvoicePaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvoicePayment
-        fields = ['invoice', 'payment_mode', 'amount', 'payment_date']
+        fields = ['invoice', 'payment_mode', 'payment_amount', 'payment_date']
