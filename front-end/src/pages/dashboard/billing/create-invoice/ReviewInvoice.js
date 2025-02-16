@@ -43,7 +43,7 @@ const ReviewInvoice = ({
     const router = useRouter();
 
     const validationSchema = Yup.object().shape({
-        invoice_description: Yup.string().required("This field is required!"),
+        // invoice_description: Yup.string().required("This field is required!"),
         cash_paid: Yup.number().required("This field is required!"),
       });
 
