@@ -34,11 +34,11 @@ const getActions = () => {
       label: "Edit",
       icon: <BiEdit className="text-xl text-success  mx-2" />,
     },
-    {
-      action:"reset-password",
-      label: "Reset Password",
-      icon: <RiLockPasswordFill className="text-xl text-info  mx-2" />,
-    }
+    // {
+    //   action:"reset-password",
+    //   label: "Reset Password",
+    //   icon: <RiLockPasswordFill className="text-xl text-info  mx-2" />,
+    // }
   ];
 
   return actions;

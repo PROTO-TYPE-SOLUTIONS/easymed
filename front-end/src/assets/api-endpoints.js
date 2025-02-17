@@ -4,6 +4,7 @@ export const API_URL = {
   REGISTER_USER: "/users/register/",
   CREATE_USER: "/users/register/",
   LOGIN: "/users/login/",
+  PASSWORD_RESET: "/customuser/password-reset",
   REFRESH_TOKEN: "/api/token/refresh/",
   GET_USER_PERMISSIONS: "/authperms/permissions/user",
   FETCH_GROUP: "/authperms/groups",
