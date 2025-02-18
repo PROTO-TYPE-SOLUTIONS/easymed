@@ -3,6 +3,9 @@ from datetime import date
 
 from django.contrib.auth import get_user_model
 
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
 from customuser.models import CustomUser, Doctor, DoctorProfile, PatientUser
 from company.models import InsuranceCompany
 from patient.models import Patient
@@ -43,13 +46,37 @@ def user():
         )
 
 @pytest.fixture
-def authenticated_client(client, django_user_model, user):
-    from rest_framework_simplejwt.tokens import RefreshToken
-    
+def authenticated_client(client, django_user_model, user):    
     # Generate a token
     refresh = RefreshToken.for_user(user)
     client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {refresh.access_token}'
     return client
+
+@pytest.fixture
+def admin_user(db):
+    try:
+        admin_user = User.objects.filter(is_superuser=True).first()
+        if not admin_user:
+            admin_user = User.objects.create_user(
+                password="test_admin_password",
+                email="test_admin@example.com",
+                role="SYS_ADMIN",  
+            )
+            admin_user.is_superuser = True
+            admin_user.is_staff = True
+            admin_user.save()
+        return admin_user
+    except Exception as e:
+        print(f"Error creating admin user: {e}")
+        return None
+
+@pytest.fixture
+def authenticated_admin_client(client, admin_user):
+    if admin_user:
+        refresh = RefreshToken.for_user(admin_user)
+        client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {refresh.access_token}'
+        return client
+
 
 @pytest.fixture
 def company(db):
