@@ -2,8 +2,6 @@ import axios from "axios";
 import { APP_API_URL } from "@/assets/api-endpoints";
 import UseAxios from "@/assets/hooks/use-axios";
 
-
-
 export const registerUser = (payload) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.REGISTER_USER}`,payload)
@@ -117,3 +115,20 @@ export const fetchDepartments = (auth) =>{
             })
     })
 }
+export const resetPassword = async (email) => {
+    try {
+        const response = await axios.post(`${APP_API_URL.PASSWORD_RESET}`, { email });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to reset password");
+    }
+};
+
+export const updatePassword = async ({password, confirmPassword }) => {
+    try {
+        const response = await axios.post(`${APP_API_URL.CHANGE_PASSWORD}`, {password,confirmPassword});
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || "Failed to update password");
+    }
+};

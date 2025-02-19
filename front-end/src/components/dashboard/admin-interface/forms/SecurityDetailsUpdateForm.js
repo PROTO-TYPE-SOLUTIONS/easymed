@@ -62,21 +62,6 @@ const SecurityDetailsUpdateForm = ({ auth, loading, setLoading, handleClose, sel
 
         <section className="space-y-2">
           <Grid container spacing={2}>
-            <Grid item md={12} xs={12}>
-              <label className="font-semibold p-2">Enter Your Email</label>
-              <Field
-                className="border border-gray focus:outline-none p-4 rounded-lg w-full"
-                type="text"
-                placeholder="email"
-                name="email"
-                value={selectedRowData?.email}
-              />
-              <ErrorMessage
-                name="email"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
               <Grid item md={12} xs={12}>
                 <label className="font-semibold p-2">Enter New Password</label>
                 <Field

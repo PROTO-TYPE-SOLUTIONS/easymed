@@ -1,145 +1,108 @@
-import { Grid } from "@mui/material";
-import { useDispatch } from "react-redux";
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import React from "react";
+import React, { useState } from "react";
+import { resetPassword } from "@/redux/service/auth";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as Yup from "yup"; // Import Yup for validation
 import { toast } from "react-toastify";
-import * as Yup from "yup";
-import { updateUser } from "@/redux/service/user";
-import { getAllTheUsers } from "@/redux/features/users";
 
-const Reset = ({ auth, loading, setLoading, handleClose, selectedRowData }) => {
-  const dispatch = useDispatch();
+const Reset = () => {
+  // Define state for loading
+  const [loading, setLoading] = useState(false);
 
+  // Define initial form values
   const initialValues = {
-    password: "",
-    conf_new_password: "",
+    email: "",
   };
 
-  const validationSchema = Yup.object().shape({
-    password: Yup.string().required("This field is required"),
-    conf_new_password: Yup.string()
-      .required("Please confirm your password.")
-      .oneOf([Yup.ref("password")], "Your passwords do not match."),
+  // Define validation schema
+  const validationSchema = Yup.object({
+    email: Yup.string().email("Invalid email format").required("Email is required"),
   });
 
-  const updateUserDetails = async (formValue) => {
-    const payloadData = {
-      password: formValue.password,
-      detail: "password change",
-      id: selectedRowData?.id,
-    };
-
-    console.log("USER UPDATE ACTION", payloadData);
-
+  
+  const handleReset = async (values, { setSubmitting }) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await updateUser(payloadData, auth);
-      dispatch(getAllTheUsers(auth));
-      toast.success("User successfully updated");
-      setLoading(false);
-      handleClose();
+      const response = await resetPassword(values.email);
+      console.log('Response data:', response);
+      toast.success("Password reset link sent successfully!");
     } catch (error) {
-      toast.error(error);
+      console.error("Reset Password Error:", error.response?.data || error.message); // Log the error
+      toast.error("Failed to send reset link. Please try again.");
+    } finally {
       setLoading(false);
+      setSubmitting(false);
     }
-  };
+};
 
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 h-screen">
-      {/* Left Side - Form */}
-      <div className="flex items-center justify-center p-8">
+    <section className="flex items-center gap-8 h-screen overflow-hidden">
+      <div className="md:w-1/2 w-full space-y-8 px-4">
+        <div className="w-7/12 mx-auto">
+          <h1 className="text-xl text-center">Reset Password</h1>
+        </div>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={updateUserDetails}
+          onSubmit={handleReset}
         >
-          <Form className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
-
-            <div className="mb-4">
-              <label className="font-semibold">Enter Your Email</label>
-              <Field
-                className="border border-gray-300 focus:outline-none p-2 rounded-md w-full"
-                type="text"
-                placeholder="Email"
-                name="email"
-                value={selectedRowData?.email}
-              />
-              <ErrorMessage
-                name="email"
-                component="div"
-                className="text-red-500 text-xs mt-1"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="font-semibold">Enter New Password</label>
-              <Field
-                className="border border-gray-300 focus:outline-none p-2 rounded-md w-full"
-                type="password"
-                placeholder="New Password"
-                name="password"
-              />
-              <ErrorMessage
-                name="password"
-                component="div"
-                className="text-red-500 text-xs mt-1"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="font-semibold">Confirm New Password</label>
-              <Field
-                className="border border-gray-300 focus:outline-none p-2 rounded-md w-full"
-                type="password"
-                placeholder="Confirm New Password"
-                name="conf_new_password"
-              />
-              <ErrorMessage
-                name="conf_new_password"
-                component="div"
-                className="text-red-500 text-xs mt-1"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md w-full flex items-center justify-center"
-            >
-              {loading && (
-                <svg
-                  aria-hidden="true"
-                  role="status"
-                  className="inline mr-2 w-4 h-4 text-gray-200 animate-spin"
-                  viewBox="0 0 100 101"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+          {({ isSubmitting }) => (
+            <Form className="md:w-9/12 w-full mx-auto">
+              <section className="flex flex-col items-center justify-center space-y-4">
+                <div className="w-full">
+                  <Field
+                    className="block border border-gray rounded-xl text-sm py-2 px-4 focus:outline-none w-full"
+                    type="email"
+                    placeholder="Email"
+                    name="email"
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="text-warning text-xs"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-primary w-full rounded-xl text-sm px-8 py-3 text-white"
+                  disabled={isSubmitting || loading}
                 >
-                  <path
-                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                    fill="#ffffff"
-                  />
-                </svg>
-              )}
-              Update Password
-            </button>
-          </Form>
+                  {loading && (
+                    <svg
+                      aria-hidden="true"
+                      role="status"
+                      className="inline mr-2 w-4 h-4 text-gray-200 animate-spin dark:text-gray-600"
+                      viewBox="0 0 100 101"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                        fill="currentColor"
+                      ></path>
+                      <path
+                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                        fill="#1C64F2"
+                      ></path>
+                    </svg>
+                  )}
+                  Reset Password
+                </button>
+              </section>
+            </Form>
+          )}
         </Formik>
       </div>
-
-      {/* Right Side - Image or Welcome Section */}
-      <div className="hidden md:flex items-center justify-center bg-blue-600 h-full">
-        <div className="text-center text-white p-6">
-          <h1 className="text-3xl font-bold uppercase">Welcome to</h1>
-          <h2 className="text-2xl border-b border-white py-2">Make - Easy HMIS</h2>
-          <p className="mt-4 text-sm">
-            If you forgot your password, please contact your system administrator for a password reset.
-          </p>
-        </div>
+      <div className="md:block hidden w-1/2">
+        <section className="loginPage h-screen rounded-2xl flex items-center justify-center p-4">
+          <div className="text-white">
+            <div className="space-y-4">
+              <h1 className="text-2xl text-center">
+                Welcome to Make Easy-HMIS
+              </h1>
+              <p className="text-sm text-center">We make Easy-HMIS</p>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
   );

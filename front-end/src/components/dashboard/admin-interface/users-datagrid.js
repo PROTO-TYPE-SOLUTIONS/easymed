@@ -9,9 +9,9 @@ import { LuMoreHorizontal } from "react-icons/lu";
 import EditUserDetailsModal from "./edit-user-details-modal";
 import DeleteUserModal from "./delete-user-modal";
 import AdminCreateUser from "./admin-create-user";
+import ResetUserPassword from "./reset-user-password";
 import { Grid } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-
 import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllTheUsers } from "@/redux/features/users";
 import { set } from "lodash";
@@ -34,11 +34,11 @@ const getActions = () => {
       label: "Edit",
       icon: <BiEdit className="text-xl text-success  mx-2" />,
     },
-    // {
-    //   action:"reset-password",
-    //   label: "Reset Password",
-    //   icon: <RiLockPasswordFill className="text-xl text-info  mx-2" />,
-    // }
+    {
+      action:"reset-password",
+      label: "Reset Password",
+      icon: <RiLockPasswordFill className="text-xl text-info  mx-2" />,
+    }
   ];
 
   return actions;
@@ -72,10 +72,12 @@ const AdminUsersDataGrid = () => {
       setSelectedRowData(data);
       setDeleteOpen(true);
     } 
-    if (menu.action === "reset-password"){
+    else if (menu.action === "reset-password"){
       setSelectedRowData(data);
+      console.log("Reset Password clicked");
       setReset(true);
-    }else if (menu.action === "edit") {
+    }
+    else if (menu.action === "edit") {
       setSelectedRowData(data);
       setOpen(true);
     }
@@ -162,6 +164,7 @@ const AdminUsersDataGrid = () => {
       </DataGrid>
       <EditUserDetailsModal {...{ open, setOpen, selectedRowData }} />
       <DeleteUserModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} />
+      <ResetUserPassword open={reset} setOpen={setReset} selectedRowData={selectedRowData} />
     </section>
   );
 };

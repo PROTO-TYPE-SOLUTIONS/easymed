@@ -20,7 +20,7 @@ urlpatterns = [
     path('login/', LoginAPIView.as_view(), name='login'),
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
     path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
-    path('password-reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('password-reset/confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 
     path('', include(router.urls)),
 ]
