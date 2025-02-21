@@ -50,6 +50,7 @@ class Invoice(models.Model):
     invoice_updated_at = models.DateTimeField(auto_now=True)
     # get total amount with Payment Mode "Cash"
     total_cash = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
+    
     # TODO: Signal to update  cash_paid once InvoicePayments is updated
     cash_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
 
