@@ -21,6 +21,8 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='refresh-token'),
     path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('users/admin-reset-password/', AdminInitiatePasswordResetView.as_view(), name='admin_reset_password'), # Correct URL
+
 
     path('', include(router.urls)),
 ]
