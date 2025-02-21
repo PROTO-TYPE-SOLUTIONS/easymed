@@ -83,6 +83,16 @@ class Item(AbstractBaseModel):
     subpacked = models.CharField(max_length=255, default=1)
     slow_moving_period = models.IntegerField(null=True, blank=True)
 
+    @property
+    def buying_price(self):
+        inventory = self.active_inventory_items.first()
+        return inventory.purchase_price if inventory else 0
+
+    @property
+    def selling_price(self):
+        inventory = self.active_inventory_items.first()
+        return inventory.sale_price if inventory else 0
+
     def save(self, *args, **kwargs):
         ''' Generate unique item code'''
         name_abbr = ''.join([part[:3].upper() for part in self.name.split()[:2]])
@@ -325,11 +335,7 @@ class DepartmentInventory(AbstractBaseModel):
                                        help_text="Main inventory record this was transferred from")
 
     class Meta:
-        verbose_name_plural = "Department Inventories"
-        ordering = ['expiry_date', 'lot_number']  # FIFO ordering
-
-    def __str__(self):
-        return f"{self.department.name} - {self.item.name} ({self.quantity_at_hand}) - Lot: {self.lot_number}"
+        unique_together = ('item', 'insurance_company')    
 
 
 class QuotationCustomer(models.Model):

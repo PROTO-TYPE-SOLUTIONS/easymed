@@ -302,7 +302,8 @@ def download_labtestresult_pdf(request, processtestrequest_id):
     context = {
         'processtestrequest': processtestrequest,
         'labtestrequests': labtestrequests,
-        'panels': panel_data,
+        'qualitative_panels': [],
+        'quantitative_panels': [],
         'patient': patient,
         'company': company,
         'company_logo_url': company_logo_url,
@@ -310,7 +311,46 @@ def download_labtestresult_pdf(request, processtestrequest_id):
         'approved_on': panels.first().approved_on if panels.exists() else None
     }
 
+    for panel in panels:
+        panel_data = {
+            'test_panel_name': panel.test_panel.name,
+            'result': panel.result,
+            'flag': 'N/A',
+            'ref_value_low': 'N/A',
+            'ref_value_high': 'N/A',
+            'unit': panel.test_panel.unit
+        }
+
+        if panel.test_panel.is_qualitative == True:
+            context['qualitative_panels'].append(panel_data)
+        else:
+            # Fetch reference values based on the patient
+            reference_value = panel.test_panel.reference_values.filter(
+                sex=patient.gender,
+                age_min__lte=patient.age,
+                age_max__gte=patient.age
+            ).first()
+
+            if reference_value:
+                result = panel.result
+                if result:
+                    if float(result) < reference_value.ref_value_low:
+                        flag = 'Low'
+                    elif float(result) > reference_value.ref_value_high:
+                        flag = 'High'
+                    else:
+                        flag = 'Normal'
+                else:
+                    flag = 'N/A'
+
+                panel_data['flag'] = flag
+                panel_data['ref_value_low'] = reference_value.ref_value_low
+                panel_data['ref_value_high'] = reference_value.ref_value_high
+
+            context['quantitative_panels'].append(panel_data)
+
     html_template = get_template('labtestresult.html').render(context)
+
 
     pdf_file = HTML(string=html_template).write_pdf()
 

@@ -1,6 +1,9 @@
-from .models import Invoice, InvoiceItem, PaymentMode
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
+from .models import (
+    Invoice, InvoiceItem,
+    PaymentMode, InvoicePayment
+)
 
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
@@ -39,13 +42,27 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
 
 class InvoiceSerializer(serializers.ModelSerializer):
     invoice_items = InvoiceItemSerializer(many=True, read_only=True)
+    patient_name = serializers.SerializerMethodField()
+
+    def get_patient_name(self, obj):
+        return obj.patient.first_name
 
     class Meta:
         model = Invoice
-        fields = ['id', 'invoice_number', 'invoice_date', 'patient', 'invoice_items', 'cash_paid', 'total_cash']
+        fields = ['id', 'invoice_number', 'invoice_date', 'patient',
+                'invoice_items', 'cash_paid', 'total_cash', 'patient_name',
+                'invoice_amount', 'status', 'invoice_description',
+                'invoice_file', 'invoice_created_at', 'invoice_updated_at']
+        read_only_fields = ['invoice_number']
 
 
 class PaymentModeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentMode 
         fields = '__all__'       
+
+
+class InvoicePaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoicePayment
+        fields = ['invoice', 'payment_mode', 'payment_amount', 'payment_date']

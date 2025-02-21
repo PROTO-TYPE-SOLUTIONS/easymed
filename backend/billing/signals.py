@@ -5,7 +5,7 @@ from django.db.models import Sum
 
 from .utils import check_quantity_availability, update_service_billed_status
 from inventory.models import InsuranceItemSalePrice
-from .models import InvoiceItem
+from .models import InvoiceItem, InvoicePayment
 
 
 @receiver(post_save, sender=InvoiceItem)
@@ -119,3 +119,12 @@ def calculate_actual_total(invoice_item):
 @receiver(pre_save, sender=InvoiceItem)
 def update_invoice_item_actual_total(sender, instance, **kwargs):
     calculate_actual_total(instance)
+
+
+# update Invoice.cash_paid when InvoicePayment is saved
+@receiver(post_save, sender=InvoicePayment)
+def update_invoice_cash_paid(sender, instance, created, **kwargs):
+    if created:
+        instance.invoice.cash_paid += instance.payment_amount
+        instance.invoice.save()
+

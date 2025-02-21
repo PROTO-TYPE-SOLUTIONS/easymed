@@ -128,13 +128,24 @@
             <tr>
                 <th>Test Panel</th>
                 <th>Result</th>
-                <th>Flag</th>
-                <th>Ref Value</th>
-                <th>Unit</th>
+                {% if quantitative_panels %}
+                    <th>Flag</th>
+                    <th>Ref Value</th>
+                    <th>Unit</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
-            {% for panel in panels %}
+            {% for panel in qualitative_panels %}
+                <tr>
+                    <td>{{ panel.test_panel_name }}</td>
+                    <td>{{ panel.result }}</td>
+                    {% if quantitative_panels %}
+                        <td colspan="3"></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            {% for panel in quantitative_panels %}
                 <tr>
                     <td>{{ panel.test_panel_name }}</td>
                     <td>{{ panel.result }}</td>

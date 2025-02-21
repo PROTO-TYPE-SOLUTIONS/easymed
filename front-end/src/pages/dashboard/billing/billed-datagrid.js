@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux';
 import dynamic from "next/dynamic";
 import { Column, Paging, Pager, Scrolling } from "devextreme-react/data-grid";
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { MdLocalPrintshop } from 'react-icons/md'
 
 import { getAllInvoices } from '@/redux/features/billing';
@@ -12,10 +12,11 @@ import { useAuth } from '@/assets/hooks/use-auth';
 import CmtDropdownMenu from '@/assets/DropdownMenu';
 import { LuMoreHorizontal } from 'react-icons/lu';
 import { CiMoneyCheck1 } from "react-icons/ci";
-import InvoicePayModal from '@/components/dashboard/billing/invoicePayModal';
 
 import { dayTransaction } from '@/redux/service/reports';
 import DayTotalsPerPayMode from '@/components/dashboard/billing/DayTotalsPerPayMode';
+import { getAllPatients } from '@/redux/features/patients';
+import ViewInvoiceItems from '@/components/dashboard/billing/ViewInvoiceItemsModal';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
@@ -31,8 +32,8 @@ const getActions = () => {
             icon: <MdLocalPrintshop className="text-success text-xl mx-2" />,
         },
         {
-            action: "pay",
-            label: "Pay",
+            action: "invoice_items",
+            label: "Invoice Items",
             icon: <CiMoneyCheck1 className="text-success text-xl mx-2" />,
         },
     ];
@@ -45,6 +46,7 @@ const BilledDataGrid = () => {
     const dispatch = useDispatch();
     const auth = useAuth()
     const { invoices } = useSelector((store) => store.billing);
+    const { patients } = useSelector((store) => store.patient);
     const [open,setOpen] = useState(false)
     const [totalsViewOPen, setTotalsViewOPen] = useState(false)
     const [selectedRowData, setSelectedRowData] = useState({})
@@ -69,7 +71,7 @@ const BilledDataGrid = () => {
     };
 
     const onMenuClick = async (menu, data) => {
-        if (menu.action === "pay") {
+        if (menu.action === "invoice_items") {
           setSelectedRowData(data);
           setOpen(true);
         }else if (menu.action === "print"){
@@ -120,6 +122,7 @@ const BilledDataGrid = () => {
     useEffect(()=> {
         if(auth){
             dispatch(getAllInvoices(auth));
+            dispatch(getAllPatients(auth));
         }
     }, [auth]);
 
@@ -156,8 +159,8 @@ const BilledDataGrid = () => {
                     caption="Date" 
                 />
                 <Column
-                    dataField="invoice_description"
-                    caption="Description" 
+                    dataField="patient_name"
+                    caption="Patient" 
                 />
                 <Column dataField="invoice_amount" caption="Amount" />
                 <Column 
@@ -187,7 +190,7 @@ const BilledDataGrid = () => {
                     </button>
                 </div>
             </div>
-            {open && <InvoicePayModal {...{setOpen,open,selectedRowData}} />}
+            {open && <ViewInvoiceItems {...{setOpen,open,selectedRowData}} />}
             {totalsViewOPen &&  <DayTotalsPerPayMode {...{setTotalsViewOPen, totalsViewOPen, infoAsPerPayMode, selectedPayMethod}} />}
         </section>
     )
