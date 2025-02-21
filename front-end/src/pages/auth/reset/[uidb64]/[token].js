@@ -4,7 +4,6 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { updatePassword } from "@/redux/service/auth";
 import { GoEye, GoEyeClosed } from "react-icons/go";
-import { APP_API_URL } from "@/assets/api-endpoints";
 import { useRouter } from "next/router";
 
 const ChangePassword = () => {
@@ -14,51 +13,74 @@ const ChangePassword = () => {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
+    // Ensure uidb64 and token are properly decoded
+    const decodedUidb64 = uidb64 ? decodeURIComponent(uidb64) : "";
+    const decodedToken = token ? decodeURIComponent(token) : "";
+
   const togglePasswordVisibility = () => setPasswordVisible(!passwordVisible);
   const toggleConfirmPasswordVisibility = () => setConfirmPasswordVisible(!confirmPasswordVisible);
 
   const initialValues = {
-    password: "",
-    confirmPassword: "",
+    new_password: "",
+    confirm_password: "",
   };
 
   const passwordRegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   const validationSchema = Yup.object({
-    password: Yup.string()
+    new_password: Yup.string()
       .required("New password is required")
       .min(8, "Password must be at least 8 characters")
       .matches(
         passwordRegExp,
         "Password must have at least 1 capital letter, 1 number, and 1 symbol"
       ),
-    confirmPassword: Yup.string()
+    confirm_password: Yup.string()
       .required("Confirm password is required")
-      .oneOf([Yup.ref("password"), null], "Passwords do not match"),
+      .oneOf([Yup.ref("new_password"), null], "Passwords do not match"),
   });
 
   const handleSubmit = async (values, { resetForm }) => {
     setLoading(true);
+    const finalURL = `/customuser/password-reset/confirm/${uidb64}/${token}/`;
+    console.log(`Final API URL: ${finalURL}`);
+    console.log("Payload:", values); // Debugging
+   
+    // try {
+    //   const response = await fetch('/api/reset-password', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ uidb: decodeURIComponent(uidb), token: decodeURIComponent(token) }),
+    //   });
+    //   const data = await response.json();
+    //   console.log(data);
+    // } catch (error) {.......
+
     try {
-      const response = await fetch(
-        `/customuser/password-reset/confirm/${uidb64}/${token}/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: values.password }),
-        }
-      );
-      if (response.ok) {
-        toast.success("Password reset successfully!");
-        resetForm();
-      } else {
-        toast.error("Failed to reset password. Please try again.");
-      }
+      const response = await fetch('api/register/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decodedUidb64: decodeURIComponent(uidb), token: decodeURIComponent(token) }),
+      });
+      const data = await response.json();
+      console.log(data);
     } catch (error) {
-      toast.error("Error resetting password. Please try again.");
-    } finally {
-      setLoading(false);
+      console.error('Error:', error);
     }
+    
+  //     const response = await updatePassword(values);
+
+  //     if (response.ok) {
+  //       toast.success("Password reset successfully!");
+  //       resetForm();
+  //     } else {
+  //       toast.error("Failed to reset password. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error resetting password. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
   };
 
   return (
@@ -81,7 +103,7 @@ const ChangePassword = () => {
                       className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
                       type={passwordVisible ? "text" : "password"}
                       placeholder="New Password"
-                      name="password"
+                      name="new_password"
                     />
                     {passwordVisible ? (
                       <GoEye onClick={togglePasswordVisibility} className="cursor-pointer" />
@@ -89,7 +111,7 @@ const ChangePassword = () => {
                       <GoEyeClosed onClick={togglePasswordVisibility} className="cursor-pointer" />
                     )}
                   </div>
-                  <ErrorMessage name="password" component="div" className="text-warning text-xs" />
+                  <ErrorMessage name="new_password" component="div" className="text-warning text-xs" />
                 </div>
                 <div className="w-full">
                   <div className="flex justify-between border border-gray rounded-xl items-center pr-2">
@@ -97,7 +119,7 @@ const ChangePassword = () => {
                       className="block text-sm py-2 rounded-xl px-4 focus:outline-none w-full"
                       type={confirmPasswordVisible ? "text" : "password"}
                       placeholder="Confirm Password"
-                      name="confirmPassword"
+                      name="confirm_password"
                     />
                     {confirmPasswordVisible ? (
                       <GoEye onClick={toggleConfirmPasswordVisibility} className="cursor-pointer" />
@@ -105,9 +127,13 @@ const ChangePassword = () => {
                       <GoEyeClosed onClick={toggleConfirmPasswordVisibility} className="cursor-pointer" />
                     )}
                   </div>
-                  <ErrorMessage name="confirmPassword" component="div" className="text-warning text-xs" />
+                  <ErrorMessage name="confirm_Password" component="div" className="text-warning text-xs" />
                 </div>
-                <button type="submit" className="bg-primary w-full rounded-xl text-sm px-8 py-3 text-white" disabled={loading}>
+                <button
+                  type="submit"
+                  className="bg-primary w-full rounded-xl text-sm px-8 py-3 text-white"
+                  disabled={loading}
+                >
                   {loading && <span className="animate-spin">🔄</span>} Reset
                 </button>
               </section>

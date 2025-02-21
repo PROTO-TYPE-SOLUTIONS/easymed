@@ -124,11 +124,14 @@ export const resetPassword = async (email) => {
     }
 };
 
-export const updatePassword = async ({password, confirmPassword }) => {
+
+export const updatePassword = async (new_password, confirm_password ) => {
     try {
-        const response = await axios.post(`${APP_API_URL.CHANGE_PASSWORD}`, {password,confirmPassword});
+        const response = await axios.post(`${APP_API_URL.CHANGE_PASSWORD}`, {new_password, confirm_password });
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || "Failed to update password");
     }
 };
+
+
