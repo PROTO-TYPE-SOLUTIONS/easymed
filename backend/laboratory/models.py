@@ -70,6 +70,7 @@ class LabReagent(models.Model):
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
+    
     def __str__(self):
         return self.name
 
@@ -101,10 +102,15 @@ class LabTestPanel(models.Model):
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
-    eta = models.DurationField(null=True, blank=True)
+    # turn around time
+    tat = models.DurationField(null=True, blank=True)
+
 
     def __str__(self):
-        return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
+        return f"{self.name} {self.unit} - {self.test_profile.name}"
+
+    # def __str__(self):
+    #     return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
 
 
 class ReferenceValue(models.Model):
