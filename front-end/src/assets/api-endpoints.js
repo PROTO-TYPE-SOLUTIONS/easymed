@@ -7,7 +7,7 @@ export const API_URL = {
   REFRESH_TOKEN: "/api/token/refresh/",
   GET_USER_PERMISSIONS: "/authperms/permissions/user",
   PASSWORD_RESET: "/customuser/password-reset/request/",
-  CHANGE_PASSWORD: "/customuser/password-reset/confirm/<str:uidb64>/<str:token>/",
+  CHANGE_PASSWORD: "/customuser/password-reset/confirm/",
   FETCH_GROUP: "/authperms/groups",
   FETCH_ALL_PERMISSIONS: "/authperms/permissions",
   FETCH_GROUP_PERMISSIONS: "/authperms/groups/",

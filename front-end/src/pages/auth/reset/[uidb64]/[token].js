@@ -40,47 +40,20 @@ const ChangePassword = () => {
       .oneOf([Yup.ref("new_password"), null], "Passwords do not match"),
   });
 
+
   const handleSubmit = async (values, { resetForm }) => {
     setLoading(true);
-    const finalURL = `/customuser/password-reset/confirm/${uidb64}/${token}/`;
-    console.log(`Final API URL: ${finalURL}`);
-    console.log("Payload:", values); // Debugging
-   
-    // try {
-    //   const response = await fetch('/api/reset-password', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ uidb: decodeURIComponent(uidb), token: decodeURIComponent(token) }),
-    //   });
-    //   const data = await response.json();
-    //   console.log(data);
-    // } catch (error) {.......
-
-    try {
-      const response = await fetch('api/register/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decodedUidb64: decodeURIComponent(uidb), token: decodeURIComponent(token) }),
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.error('Error:', error);
-    }
     
-  //     const response = await updatePassword(values);
-
-  //     if (response.ok) {
-  //       toast.success("Password reset successfully!");
-  //       resetForm();
-  //     } else {
-  //       toast.error("Failed to reset password. Please try again.");
-  //     }
-  //   } catch (error) {
-  //     toast.error("Error resetting password. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
+    try {
+      const response = await updatePassword(decodedUidb64, decodedToken, values.new_password, values.confirm_password);
+      
+      toast.success("Password reset successfully!");
+      resetForm();
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
