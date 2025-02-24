@@ -71,7 +71,7 @@ class Invoice(models.Model):
     def generate_invoice_number(self):
         """Generates a unique invoice number.
 
-        The format is DDLIXXXXX/YYYY, where XXXXX is a 5-digit sequential
+        The format is DDLIXXXXX-YYYY, where XXXXX is a 5-digit sequential
         number and YYYY is the current year. The sequence resets to 00001
         at the beginning of each year.
         """
@@ -86,7 +86,7 @@ class Invoice(models.Model):
                     
                 if last_invoice:
                     try:
-                        last_invoice_year = int(last_invoice.invoice_number.split('/')[1])
+                        last_invoice_year = int(last_invoice.invoice_number.split('-')[1])
                         if last_invoice_year == current_year:
                             last_invoice_number = int(last_invoice.invoice_number[4:9])
                             next_invoice_number = last_invoice_number + 1
@@ -97,7 +97,7 @@ class Invoice(models.Model):
                 else:
                     next_invoice_number = 1
                 
-                invoice_number = f"{prefix}{next_invoice_number:05d}/{current_year}"
+                invoice_number = f"{prefix}{next_invoice_number:05d}-{current_year}"
                 return invoice_number
         return None
 

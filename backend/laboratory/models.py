@@ -170,7 +170,7 @@ class PatientSample(models.Model):
 
             if last_sample:
                 try:
-                    last_sample_year_str = last_sample.patient_sample_code.split('/')[1] 
+                    last_sample_year_str = last_sample.patient_sample_code.split('-')[1] 
                     if last_sample_year_str == str(current_year): 
                         last_number = int(last_sample.patient_sample_code[4:9])
                         next_number = last_number + 1
@@ -182,7 +182,7 @@ class PatientSample(models.Model):
                 next_number = 1
 
             new_number_str = f"{next_number:05d}"
-            sp_id = f"{prefix}{new_number_str}/{current_year}"  
+            sp_id = f"{prefix}{new_number_str}-{current_year}"  
             return sp_id
 
     def save(self, *args, **kwargs):
