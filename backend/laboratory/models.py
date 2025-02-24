@@ -20,7 +20,7 @@ class TestKit(models.Model):
     number_of_tests = models.IntegerField()
 
     def __str__(self):
-        return self.name
+        return self.item.name
 
 
 class TestKitCounter(models.Model):
@@ -34,7 +34,7 @@ class TestKitCounter(models.Model):
     counter = models.IntegerField(default=0) # number os tests remaining
 
     def __str__(self):
-        return f"{self.lab_test_kit.name} - {self.counter}"
+        return f"{self.lab_test_kit.item.name} - {self.counter}"
     
 
 class LabEquipment(models.Model):

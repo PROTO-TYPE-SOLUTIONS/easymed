@@ -210,7 +210,7 @@ def deduct_test_kit(lab_test_panel_id):
     lab_test_panel = LabTestRequestPanel.objects.get(id=lab_test_panel_id)
     
     if lab_test_panel.is_billed:
-        test_kit = TestKit.objects.filter(item=lab_test_panel.test_panel.test_kit_item).first()
+        test_kit = TestKit.objects.filter(item=lab_test_panel.test_panel.item).first()
         
         if test_kit:
             test_kit_counters = TestKitCounter.objects.filter(lab_test_kit=test_kit, counter__gt=0).order_by('id')
