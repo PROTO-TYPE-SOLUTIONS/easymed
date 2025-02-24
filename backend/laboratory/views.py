@@ -28,7 +28,9 @@ from .models import (
     LabTestRequestPanel,
     ProcessTestRequest,
     PatientSample,
-    Specimen
+    Specimen,
+    TestKit,
+    TestKitCounter
 )
 
 from .serializers import (
@@ -41,9 +43,10 @@ from .serializers import (
     LabTestRequestPanelSerializer,
     ProcessTestRequestSerializer,
     PatientSampleSerializer,
-    SpecimenSerializer
+    SpecimenSerializer,
+    TestKitCounterSerializer,
+    TestKitSerializer
 )
-
 
 from authperms.permissions import (
     IsStaffUser,
@@ -54,12 +57,21 @@ from authperms.permissions import (
     IsPatientUser
 )
 
-
-
 # filters
 from .filters import (
     LabTestRequestFilter,
 )
+
+
+class TestKitViewSet(viewsets.ModelViewSet):
+    queryset = TestKit.objects.all()
+    serializer_class = TestKitSerializer
+
+
+class TestKitCounterViewSet(viewsets.ModelViewSet):
+    queryset = TestKitCounter.objects.all()
+    serializer_class = TestKitCounterSerializer
+
 
 class LabReagentViewSet(viewsets.ModelViewSet):
     queryset = LabReagent.objects.all()

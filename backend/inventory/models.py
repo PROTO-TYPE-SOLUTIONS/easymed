@@ -319,8 +319,8 @@ class InsuranceItemSalePrice(models.Model):
     def __str__(self):
         return f"{self.item.name} - {self.insurance_company.name}"
     
-    class Meta:
-        unique_together = ('inventory_item', 'insurance_company')
+    # class Meta:
+    #     unique_together = ('inventory_item', 'item')
     
 
 class DepartmentInventory(AbstractBaseModel):
@@ -334,8 +334,8 @@ class DepartmentInventory(AbstractBaseModel):
     main_inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True,
                                        help_text="Main inventory record this was transferred from")
 
-    class Meta:
-        unique_together = ('item', 'insurance_company')    
+    # class Meta:
+    #     unique_together = ('item')    
 
 
 class QuotationCustomer(models.Model):
