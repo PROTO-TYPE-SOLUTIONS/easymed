@@ -102,7 +102,8 @@ class LabTestPanel(models.Model):
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
-    eta = models.DurationField(null=True, blank=True)
+    # turn around time
+    tat = models.DurationField(null=True, blank=True)
 
 
     def __str__(self):
