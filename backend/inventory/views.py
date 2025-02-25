@@ -145,26 +145,6 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
     
 class RequisitionItemViewSet(viewsets.ModelViewSet):
-    """
-    Provides CRUD operations for requisition items.
-
-    1. **Retrieve or Create Requisition Items Linked to a Specific Requisition**
-       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/`
-       - **Example Request Body for POST**:
-         ```json
-         {
-           "item": 1,
-           "quantity_requested": 10,
-           "preferred_supplier": 3
-         }
-         ```
-
-    2. **Retrieve, Update, or Delete a Specific Requisition Item**
-       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/<requisitionitem_id>/`
-
-    3. **Retrieve All Requisition Items with Pending Status**
-       - **Endpoint**: `/inventory/requisitionitems/all_items/`
-    """
 
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemListUpdateSerializer
@@ -192,6 +172,7 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
         items = RequisitionItem.objects.filter(status='PENDING')
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
+    # Make this a filter ??
     
 
 class InventoryViewSet(viewsets.ModelViewSet):
