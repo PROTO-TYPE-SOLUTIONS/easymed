@@ -127,3 +127,4 @@ def update_invoice_cash_paid(sender, instance, created, **kwargs):
     if created:
         instance.invoice.cash_paid += instance.payment_amount
         instance.invoice.save()
+

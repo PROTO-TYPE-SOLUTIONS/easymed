@@ -65,7 +65,7 @@ class Item(AbstractBaseModel):
     ]
     CATEGORY_CHOICES = [
         ('SurgicalEquipment', 'Surgical Equipment'),
-        ('LabReagent', 'Lab Reagent'),
+        ('LabReagent', 'Lab Reagent'), # lab Test Kit
         ('Drug', 'Drug'),
         ('Furniture', 'Furniture'),
         ('Lab Test', 'Lab Test'),
@@ -81,6 +81,7 @@ class Item(AbstractBaseModel):
     vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
     packed = models.CharField(max_length=255, default=1)
     subpacked = models.CharField(max_length=255, default=1)
+    slow_moving_period = models.IntegerField(null=True, blank=True)
 
     @property
     def buying_price(self):
@@ -266,11 +267,12 @@ class Inventory(AbstractBaseModel):
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=10)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, default=20)
     quantity_at_hand = models.PositiveIntegerField() # packed*sub_packed
+    last_deducted_at = models.DateTimeField(null=True, blank=True)
     re_order_level= models.PositiveIntegerField(default=5)
     category_one = models.CharField(max_length=255, choices=CATEGORY_ONE_CHOICES)
     lot_number= models.CharField(max_length=255, null=True, blank=True)
     expiry_date= models.DateField(null=True, blank=True)
-
+    
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='department_items')
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='active_inventory_items')
 
@@ -317,8 +319,23 @@ class InsuranceItemSalePrice(models.Model):
     def __str__(self):
         return f"{self.item.name} - {self.insurance_company.name}"
     
-    class Meta:
-        unique_together = ('item', 'insurance_company')    
+    # class Meta:
+    #     unique_together = ('inventory_item', 'item')
+    
+
+class DepartmentInventory(AbstractBaseModel):
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity_at_hand = models.PositiveIntegerField()
+    lot_number = models.CharField(max_length=100)
+    expiry_date = models.DateField()
+    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    main_inventory = models.ForeignKey(Inventory, on_delete=models.SET_NULL, null=True,
+                                       help_text="Main inventory record this was transferred from")
+
+    # class Meta:
+    #     unique_together = ('item')    
 
 
 class QuotationCustomer(models.Model):

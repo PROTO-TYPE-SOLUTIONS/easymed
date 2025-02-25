@@ -16,8 +16,21 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
-
+    TestKit,
+    TestKitCounter
     )
+
+
+class TestKitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestKit
+        fields = '__all__'
+
+
+class TestKitCounterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestKitCounter
+        fields = '__all__'
 
 
 class LabReagentSerializer(serializers.ModelSerializer):

@@ -10,7 +10,7 @@ from django.template.loader import get_template
 from django.http import HttpResponse
 from django.conf import settings
 from rest_framework.generics import ListAPIView
-from django.utils.timezone import now
+from django.utils import timezone
 from django.db import models
 from django.db.models import F
 from datetime import timedelta
@@ -66,6 +66,8 @@ from .filters import (
     SupplierFilter,
     RequisitionItemFilter
 )
+
+from billing.models import InvoiceItem
 
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
@@ -143,26 +145,6 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
     
 class RequisitionItemViewSet(viewsets.ModelViewSet):
-    """
-    Provides CRUD operations for requisition items.
-
-    1. **Retrieve or Create Requisition Items Linked to a Specific Requisition**
-       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/`
-       - **Example Request Body for POST**:
-         ```json
-         {
-           "item": 1,
-           "quantity_requested": 10,
-           "preferred_supplier": 3
-         }
-         ```
-
-    2. **Retrieve, Update, or Delete a Specific Requisition Item**
-       - **Endpoint**: `/inventory/requisition/<requisition_pk>/requisitionitems/<requisitionitem_id>/`
-
-    3. **Retrieve All Requisition Items with Pending Status**
-       - **Endpoint**: `/inventory/requisitionitems/all_items/`
-    """
 
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemListUpdateSerializer
@@ -190,6 +172,7 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
         items = RequisitionItem.objects.filter(status='PENDING')
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
+    # Make this a filter ??
     
 
 class InventoryViewSet(viewsets.ModelViewSet):
@@ -198,6 +181,49 @@ class InventoryViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['item',]
     filterset_class = InventoryFilter
+
+    @action(detail=False, methods=['get'], url_path='slow-moving-items')
+    def slow_moving_items(self, request):
+        """
+        
+        URL: /inventory/inventories/slow-moving-items/
+        """
+        # Fetch all inventory items with non-zero quantity and slow_moving_period set.
+        # Also, select related 'item' and 'department' fields.
+        # This query can be optimized by using a more efficient database query.
+        inventory_items = Inventory.objects.filter(
+            quantity_at_hand__gt=0,
+            item__slow_moving_period__isnull=False
+        ).select_related('item', 'department')
+
+        current_time = timezone.now()
+        slow_moving_items = []
+
+        for inv in inventory_items:
+            try:
+                if inv.last_deducted_at:
+                    days_without_transactions = (current_time - inv.last_deducted_at).days
+                    print(f"Days without transaction would be this : {days_without_transactions}")
+                    if days_without_transactions > inv.item.slow_moving_period:
+                        slow_moving_items.append({
+                            'item_id': inv.item.id,
+                            'item_name': inv.item.name,
+                            'category': inv.item.category,
+                            'department': inv.department.name,
+                            'quantity': inv.quantity_at_hand,
+                            'days_without_transactions': days_without_transactions,
+                            'slow_moving_period': inv.item.slow_moving_period,
+                            'lot_number': inv.lot_number,
+                            'expiry_date': inv.expiry_date,
+                            'purchase_price': inv.purchase_price,
+                            'sale_price': inv.sale_price
+                        })
+
+                else:
+                    print("PLEASE GO")
+            except Exception as e:
+                    print(f"Error getting slow moving items: {e}")
+        return Response(slow_moving_items)
 
 
 class SupplierViewSet(viewsets.ModelViewSet):

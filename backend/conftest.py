@@ -1,7 +1,11 @@
 import pytest
 from datetime import date
+from django.utils import timezone
 
 from django.contrib.auth import get_user_model
+
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from customuser.models import CustomUser, Doctor, DoctorProfile, PatientUser
 from company.models import InsuranceCompany
@@ -25,6 +29,7 @@ from inventory.models import (
     IncomingItem,
     Inventory,
     SupplierInvoice,
+    DepartmentInventory,
     InsuranceItemSalePrice,
 )
 
@@ -43,13 +48,37 @@ def user():
         )
 
 @pytest.fixture
-def authenticated_client(client, django_user_model, user):
-    from rest_framework_simplejwt.tokens import RefreshToken
-    
+def authenticated_client(client, django_user_model, user):    
     # Generate a token
     refresh = RefreshToken.for_user(user)
     client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {refresh.access_token}'
     return client
+
+@pytest.fixture
+def admin_user(db):
+    try:
+        admin_user = User.objects.filter(is_superuser=True).first()
+        if not admin_user:
+            admin_user = User.objects.create_user(
+                password="test_admin_password",
+                email="test_admin@example.com",
+                role="SYS_ADMIN",  
+            )
+            admin_user.is_superuser = True
+            admin_user.is_staff = True
+            admin_user.save()
+        return admin_user
+    except Exception as e:
+        print(f"Error creating admin user: {e}")
+        return None
+
+@pytest.fixture
+def authenticated_admin_client(client, admin_user):
+    if admin_user:
+        refresh = RefreshToken.for_user(admin_user)
+        client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {refresh.access_token}'
+        return client
+
 
 @pytest.fixture
 def company(db):
@@ -118,6 +147,7 @@ def item():
         units_of_measure="Unit",
         vat_rate=16.0,
         item_code="ABC123",
+        slow_moving_period=30
     )
 
 
@@ -180,13 +210,14 @@ def inventory(item, department):
     return Inventory.objects.create(
         item=item,
         quantity_at_hand=10,
+        last_deducted_at=None,
         purchase_price=10.0,
         sale_price=20.0,
         lot_number="LOT-001",
         expiry_date="2024-01-01",
         category_one="resale",
         department=department,
-        
+        date_created=timezone.now()
     )
 
 @pytest.fixture

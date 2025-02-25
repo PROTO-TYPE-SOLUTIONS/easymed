@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-
 from .models import (
     Invoice, InvoiceItem,
     PaymentMode, InvoicePayment
@@ -54,6 +53,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
                 'invoice_items', 'cash_paid', 'total_cash', 'patient_name',
                 'invoice_amount', 'status', 'invoice_description',
                 'invoice_file', 'invoice_created_at', 'invoice_updated_at']
+        read_only_fields = ['invoice_number']
 
 
 class PaymentModeSerializer(serializers.ModelSerializer):

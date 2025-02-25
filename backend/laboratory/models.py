@@ -10,31 +10,31 @@ from django.core.validators import FileExtensionValidator
 from customuser.models import CustomUser
 
 
-class LabTestKit(models.Model):
+class TestKit(models.Model):
     '''
     This model stores infrmation about a Test kit
+    Will be updated manually after an Inventory record of that 
+    kit is created
     '''
-    supplier = models.ForeignKey('inventory.Supplier', on_delete=models.CASCADE)
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
     number_of_tests = models.IntegerField()
 
     def __str__(self):
-        return self.name
+        return self.item.name
 
 
-class LabTestKitCounter(models.Model):
+class TestKitCounter(models.Model):
     '''
     The intention is to keep track of test kits, their respective number of 
     tests then update this model with a counter of how many tests are remaining
-    signaled by LabTestRequest on billed
+    signaled by LabTestRequest on billed. Deduct from TestKit, nearest expiry starting.
     Will need to be updated manually everytime a kit is bought, or update with IncomingItem
     '''
-    lab_test_kit = models.ForeignKey(LabTestKit, on_delete=models.CASCADE)
-    counter = models.IntegerField(default=0)
+    lab_test_kit = models.ForeignKey(TestKit, on_delete=models.CASCADE)
+    counter = models.IntegerField(default=0) # number os tests remaining
 
     def __str__(self):
-        return f"{self.lab_test_kit.name} - {self.counter}"
+        return f"{self.lab_test_kit.item.name} - {self.counter}"
     
 
 class LabEquipment(models.Model):
@@ -70,6 +70,7 @@ class LabReagent(models.Model):
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
+    
     def __str__(self):
         return self.name
 
@@ -101,10 +102,15 @@ class LabTestPanel(models.Model):
     item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
     is_qualitative = models.BooleanField(default=False)
     is_quantitative = models.BooleanField(default=True)
-    eta = models.DurationField(null=True, blank=True)
+    # turn around time
+    tat = models.DurationField(null=True, blank=True)
+
 
     def __str__(self):
-        return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
+        return f"{self.name} {self.unit} - {self.test_profile.name}"
+
+    # def __str__(self):
+    #     return f"{self.name} - {self.specimen.name} - {self.unit} - {self.test_profile.name}"
 
 
 class ReferenceValue(models.Model):
@@ -170,7 +176,7 @@ class PatientSample(models.Model):
 
             if last_sample:
                 try:
-                    last_sample_year_str = last_sample.patient_sample_code.split('/')[1] 
+                    last_sample_year_str = last_sample.patient_sample_code.split('-')[1] 
                     if last_sample_year_str == str(current_year): 
                         last_number = int(last_sample.patient_sample_code[4:9])
                         next_number = last_number + 1
@@ -182,7 +188,7 @@ class PatientSample(models.Model):
                 next_number = 1
 
             new_number_str = f"{next_number:05d}"
-            sp_id = f"{prefix}{new_number_str}/{current_year}"  
+            sp_id = f"{prefix}{new_number_str}-{current_year}"  
             return sp_id
 
     def save(self, *args, **kwargs):
