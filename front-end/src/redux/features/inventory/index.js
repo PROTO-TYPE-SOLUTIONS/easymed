@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions,
-   fetchPurchaseOrders, fetchIncomingItems, fetchAllRequisitionItems } from "@/redux/service/inventory";
+   fetchPurchaseOrders, fetchIncomingItems, fetchAllRequisitionItems,fetchSupplierInvoice } from "@/redux/service/inventory";
 
 
 const initialState = {
@@ -15,6 +15,7 @@ const initialState = {
   orderBills: [],
   item: [],
   incomingItems: [],
+  supplierInvoice: [],
 };
 
 const InventorySlice = createSlice({
@@ -125,13 +126,16 @@ const InventorySlice = createSlice({
         state.purchaseOrderItems = [...state.purchaseOrderItems, action.payload];
       }
     },
+    setSupplierInvoice: (state, action) => {
+      state.supplierInvoice = action.payload;
+    }
   },
 });
 
 export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, 
   setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, 
   setPurchaseOrderItems, setPurchaseOrderItemsPdf, setRequisitionsAfterPoGenerate, setPoAfterDispatch,
-  clearPurchaseOrderItemsPdf, setIncoming, setRequisitionsItems } = InventorySlice.actions;
+  clearPurchaseOrderItemsPdf, setIncoming, setRequisitionsItems, setSupplierInvoice } = InventorySlice.actions;
 
 
 export const getAllItems = (auth) => async (dispatch) => {
@@ -251,5 +255,15 @@ export const updatePOAfterDispatch = (po) => (dispatch) => {
   dispatch(setPoAfterDispatch(po));
 };
 
+export const getAllSupplierInvoice = (auth) => async (dispatch) => {
+  try {
+    console.log("Fetching supplier invoices with token:", auth?.token);
+    const response = await fetchSupplierInvoice(auth);
+    dispatch(setSupplierInvoice(response));
+  } catch (error) {
+    console.error("SUPPLIERS_ERROR:", error);
+    toast.error("Failed to fetch supplier invoices");
+  }
+};
 
 export default InventorySlice.reducer;

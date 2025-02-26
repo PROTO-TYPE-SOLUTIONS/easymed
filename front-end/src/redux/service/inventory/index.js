@@ -89,7 +89,6 @@ export const updateItem = (item_id, payload, auth) =>{
             })
     })
 }
-
 export const deleteItem = (id) =>{
     return new Promise((resolve,reject) =>{
         axios.post(`${APP_API_URL.DELETE_ITEM}`,{id})
@@ -368,3 +367,20 @@ export const createGRNote = (payload, auth) =>{
             })
     })
 }
+
+export const fetchSupplierInvoice = (auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.get(`${APP_API_URL.FETCH_SUPPLIER_INVOICE}`, {
+            headers: {
+                Authorization: `Bearer ${auth.token}` 
+            }
+        })
+        .then((res) => {
+            resolve(res.data);
+        })
+        .catch((err) => {
+            reject(err.message);
+        });
+    });
+};
