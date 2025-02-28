@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { API_URL } from "@/assets/api-endpoints";
 import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions,
-   fetchPurchaseOrders, fetchIncomingItems, fetchAllRequisitionItems,fetchSupplierInvoice } from "@/redux/service/inventory";
+   fetchPurchaseOrders, fetchIncomingItems, fetchAllRequisitionItems,fetchSupplierInvoice,fetchInvoice } from "@/redux/service/inventory";
 
 
 const initialState = {
@@ -16,6 +17,7 @@ const initialState = {
   item: [],
   incomingItems: [],
   supplierInvoice: [],
+  invoice: [],
 };
 
 const InventorySlice = createSlice({
@@ -34,6 +36,10 @@ const InventorySlice = createSlice({
     setItem: (state, action) => {
       state.item = action.payload;
     },
+    setInvoice: (state, action) => {
+      state.invoice = action.payload;
+    },
+
     updateItem: (state, action) => {
       // Find the index of the item with the same id as action.payload.id
       const index = state.item.findIndex(item => parseInt(item.id) === parseInt(action.payload.id));
@@ -135,7 +141,7 @@ const InventorySlice = createSlice({
 export const { updateItem, setItems,setSuppliers,setOrderBills,setItem, setInventories, setRequisitions, 
   setPurchaseOrders, setInventoryItems, setInventoryItemsPdf, clearInventoryItemsPdf, 
   setPurchaseOrderItems, setPurchaseOrderItemsPdf, setRequisitionsAfterPoGenerate, setPoAfterDispatch,
-  clearPurchaseOrderItemsPdf, setIncoming, setRequisitionsItems, setSupplierInvoice } = InventorySlice.actions;
+  clearPurchaseOrderItemsPdf, setIncoming, setRequisitionsItems, setSupplierInvoice, setInvoice} = InventorySlice.actions;
 
 
 export const getAllItems = (auth) => async (dispatch) => {
@@ -202,14 +208,33 @@ export const getItems = (auth) => async (dispatch) => {
   }
 };
 
-export const getAllSuppliers = (auth) => async (dispatch) => {
+export const getInvoice = (supplier_id) => async (dispatch) => {
   try {
-    const response = await fetchSuppliers(auth);
-    dispatch(setSuppliers(response));
+      const auth = { token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyNzQ5ODM4LCJpYXQiOjE3NDA1ODk4MzgsImp0aSI6ImFkNWJkNjNkYmNmMTQ0YmNiMTcwODYyNGIwZjVhN2U3IiwidXNlcl9pZCI6MSwiZW1haWwiOiJhZG1pbkBtYWlsLmNvbSIsImZpcnN0X25hbWUiOiJDbGFpcmUiLCJyb2xlIjoic3lzYWRtaW4ifQ.O31c2ghqg0C7RhzHC9oWQPJWvL1r3iB5f8Dj3iRMYao" }; // TEMPORARY TEST
+      console.log("Testing with Auth Token:", auth.token);
+      console.log(`${API_URL.FETCH_INVOICE}${supplier_id}/`);
+
+      // Fetch Invoice as ArrayBuffer
+      const response = await fetchInvoice(auth, supplier_id);
+
+      // Convert response to a Blob
+      const fileBlob = new Blob([response], { type: "application/pdf" });
+
+      // Create Object URL
+      const fileURL = window.URL.createObjectURL(fileBlob);
+
+      // Dispatch Action
+      dispatch(setInvoice(response));
+
+      // Open the file in a new tab
+      window.open(fileURL, "_blank");
+
   } catch (error) {
-    console.log("SUPPLIERS_ERROR ", error);
+      console.error("INVOICE_ERROR ", error);
   }
 };
+
+
 
 export const getAllOrderBills = () => async (dispatch) => {
   try {

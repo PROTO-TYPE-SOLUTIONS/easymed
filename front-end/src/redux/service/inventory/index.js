@@ -384,3 +384,31 @@ export const fetchSupplierInvoice = (auth) => {
         });
     });
 };
+
+export const fetchInvoice = (auth, supplier_id) => {
+    const axiosInstance = UseAxios(auth);
+
+    if (!auth?.token) {
+        console.error("Auth token is missing");
+        return Promise.reject("Authentication token is required");
+    }
+
+    const url = `${APP_API_URL.FETCH_INVOICE}?supplier_id=${supplier_id}`;
+    console.log(`Fetching invoice from: ${url}`);
+
+    return axiosInstance
+        .get(url, {
+            headers: {
+                Authorization: `Bearer ${auth.token}`,
+            },
+            responseType: "arraybuffer",
+        })
+        .then((res) => res.data)
+        .catch((err) => {
+            console.error("Error fetching invoice:", err);
+            return Promise.reject(err.message);
+        });
+};
+
+
+

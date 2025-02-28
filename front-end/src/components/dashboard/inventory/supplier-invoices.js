@@ -6,7 +6,8 @@ import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import { Grid } from "@mui/material";
 import { months } from "@/assets/dummy-data/laboratory";
 import { useAuth } from "@/assets/hooks/use-auth";
-import { getAllSupplierInvoice } from "@/redux/features/inventory";
+import { getAllSupplierInvoice, getInvoice } from "@/redux/features/inventory";
+import { API_URL } from "@/assets/api-endpoints";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -16,27 +17,10 @@ const allowedPageSizes = [5, 10, 'all'];
 
 function SupplierInvoicesDatagrid() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
-  const [showInfo, setShowInfo] = useState(true);
-  const [showNavButtons, setShowNavButtons] = useState(true);
-
   const dispatch = useDispatch();
   const auth = useAuth();
   const supplierInvoice = useSelector(({ inventory }) => inventory.supplierInvoice);
-
-  // useEffect(() => {
-  //   console.log("Supplier Invoices:", supplierInvoices);
-
-  //   const fetchSupplierInvoice = async () =>{
-  //     try {
-  //     dispatch(getAllSupplierInvoice());
-  //     } catch (error) {
-  //       toast.error('Failed to fetch supplier invoices');
-  //     }
-  //   }
-  //   fetchSupplierInvoice();
-  // }, [dispatch]);
+  // const invoice = useSelector(({ inventory }) => inventory.invoice);
 
   useEffect(() => {
     if (!auth || !auth.token) {
@@ -46,49 +30,23 @@ function SupplierInvoicesDatagrid() {
     dispatch(getAllSupplierInvoice(auth));
   }, [auth, dispatch]);
 
-
-  const handleDownloadReport = async (supplierId) => {
-    if (isDownloading) return;
-
-    setIsDownloading(true);
-    try {
-      const response = await fetch(`/inventory/supplier_invoice_pdf/${supplierId}`, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to download report');
-      }
-
-      const data = await response.json();
-
-      // trigger download
-      const link = document.createElement('a');
-      link.href = data.link;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success("PDF downloaded successfully");
-    } catch (error) {
-      console.error('Error downloading report:', error);
-      toast.error(error.message || "Failed to download report");
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   const fullReportButton = ({ data }) => (
     <button
-      onClick={() => handleDownloadReport(data.supplier)}
+      onClick={() => {
+        if (!auth || !auth.token) {
+          console.error("Missing auth token");
+          return;
+        }
+        const config = {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        };
+        dispatch(getInvoice(data.id, config)); // Pass supplier_id and config
+      }}
       className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
-      disabled={isDownloading}
     >
-      {isDownloading ? 'Downloading...' : 'Full Report'}
+      Full Report
     </button>
   );
 
@@ -132,9 +90,9 @@ function SupplierInvoicesDatagrid() {
         <Pager
           visible={true}
           allowedPageSizes={allowedPageSizes}
-          showPageSizeSelector={showPageSizeSelector}
-          showInfo={showInfo}
-          showNavigationButtons={showNavButtons}
+          showPageSizeSelector={true}
+          showInfo={true}
+          showNavigationButtons={true}
         />
         <Column dataField="invoice_no" caption="Invoice No." />
         <Column dataField="supplier_name" caption="Supplier" />
@@ -144,8 +102,7 @@ function SupplierInvoicesDatagrid() {
           dataField="status"
           caption="Status"
           cellRender={({ value }) => (
-            <span className={`px-2 py-1 rounded-full text-sm ${value === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-              }`}>
+            <span className={`px-2 py-1 rounded-full text-sm ${value === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>  
               {value}
             </span>
           )}
