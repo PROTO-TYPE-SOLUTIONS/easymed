@@ -1,14 +1,7 @@
 
 from rest_framework.exceptions import ValidationError
+from rest_framework import serializers
 from .models import RequisitionItem, Supplier
-
-def validate_quantity_requested(value):
-    """
-    Ensure that the quantity requested is greater than 0.
-    """
-    if value <= 0:
-        raise ValidationError("The quantity requested must be greater than 0.")
-    return value
 
 def validate_requisition_item_uniqueness(requisition_id, item, preferred_supplier, quantity_requested):
     """
@@ -39,3 +32,19 @@ def assign_default_supplier(attrs):
             raise ValidationError("No supplier is available. Please add a supplier first.")
         print(f"Assigning default supplier: {default_supplier.official_name}")
         attrs['preferred_supplier'] = default_supplier
+
+
+def greater_than_zero(field_name):
+    def validator(value):
+        if value is None:
+            return value
+
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            raise serializers.ValidationError("Invalid quantity. Please enter a number.") #Changed Here!
+
+        if value <= 0:
+            raise serializers.ValidationError(f"{field_name} must be greater than 0.") #Changed Here!
+        return value
+    return validator
