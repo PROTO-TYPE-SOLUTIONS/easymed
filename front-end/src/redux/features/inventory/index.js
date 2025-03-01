@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { API_URL } from "@/assets/api-endpoints";
 import { fetchItem, fetchItems, fetchOrderBills, fetchSuppliers, fetchInventories, fetchRequisitions,
    fetchPurchaseOrders, fetchIncomingItems, fetchAllRequisitionItems,fetchSupplierInvoice,fetchInvoice } from "@/redux/service/inventory";
 
@@ -208,33 +207,20 @@ export const getItems = (auth) => async (dispatch) => {
   }
 };
 
-export const getInvoice = (supplier_id) => async (dispatch) => {
+export const getInvoice = (supplier_id, auth) => async (dispatch) => {
   try {
-      const auth = { token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyNzQ5ODM4LCJpYXQiOjE3NDA1ODk4MzgsImp0aSI6ImFkNWJkNjNkYmNmMTQ0YmNiMTcwODYyNGIwZjVhN2U3IiwidXNlcl9pZCI6MSwiZW1haWwiOiJhZG1pbkBtYWlsLmNvbSIsImZpcnN0X25hbWUiOiJDbGFpcmUiLCJyb2xlIjoic3lzYWRtaW4ifQ.O31c2ghqg0C7RhzHC9oWQPJWvL1r3iB5f8Dj3iRMYao" }; // TEMPORARY TEST
-      console.log("Testing with Auth Token:", auth.token);
-      console.log(`${API_URL.FETCH_INVOICE}${supplier_id}/`);
-
-      // Fetch Invoice as ArrayBuffer
+      if (!auth?.token) {
+          return;
+      }
       const response = await fetchInvoice(auth, supplier_id);
-
-      // Convert response to a Blob
       const fileBlob = new Blob([response], { type: "application/pdf" });
-
-      // Create Object URL
       const fileURL = window.URL.createObjectURL(fileBlob);
-
-      // Dispatch Action
       dispatch(setInvoice(response));
-
-      // Open the file in a new tab
       window.open(fileURL, "_blank");
-
   } catch (error) {
-      console.error("INVOICE_ERROR ", error);
+      console.error("INVOICE_ERROR", error);
   }
 };
-
-
 
 export const getAllOrderBills = () => async (dispatch) => {
   try {
@@ -282,7 +268,6 @@ export const updatePOAfterDispatch = (po) => (dispatch) => {
 
 export const getAllSupplierInvoice = (auth) => async (dispatch) => {
   try {
-    console.log("Fetching supplier invoices with token:", auth?.token);
     const response = await fetchSupplierInvoice(auth);
     dispatch(setSupplierInvoice(response));
   } catch (error) {
@@ -290,5 +275,6 @@ export const getAllSupplierInvoice = (auth) => async (dispatch) => {
     toast.error("Failed to fetch supplier invoices");
   }
 };
+
 
 export default InventorySlice.reducer;

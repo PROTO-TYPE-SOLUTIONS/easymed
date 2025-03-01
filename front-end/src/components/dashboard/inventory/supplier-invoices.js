@@ -37,12 +37,7 @@ function SupplierInvoicesDatagrid() {
           console.error("Missing auth token");
           return;
         }
-        const config = {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
-        };
-        dispatch(getInvoice(data.id, config)); // Pass supplier_id and config
+        dispatch(getInvoice(data.id, auth));
       }}
       className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
     >
