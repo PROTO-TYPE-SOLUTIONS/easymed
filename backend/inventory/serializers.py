@@ -73,8 +73,8 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
     quantity_at_hand = serializers.IntegerField(source='inventory.quantity_at_hand', read_only=True)
     quantity_requested = serializers.IntegerField()
     preferred_supplier_name = serializers.CharField(source='preferred_supplier.official_name', read_only=True)
-    buying_price = serializers.SerializerMethodField()
-    selling_price = serializers.SerializerMethodField()
+    buying_price = serializers.DecimalField(source='item.buying_price', max_digits=10, decimal_places=2, read_only=True)
+    selling_price = serializers.DecimalField(source='item.selling_price', max_digits=10, decimal_places=2, read_only=True)
     vat_rate = serializers.DecimalField(source='item.vat_rate', max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
@@ -86,12 +86,6 @@ class RequisitionItemCreateSerializer(serializers.ModelSerializer):
             'preferred_supplier', 'preferred_supplier_name',
             'buying_price', 'selling_price', 'vat_rate', 'date_created', 
         ]
-
-    def get_buying_price(self, obj):
-        return obj.item.buying_price if obj.item else None
-
-    def get_selling_price(self, obj):  
-        return obj.item.selling_price if obj.item else None
 
     def validate(self, attrs):
         requisition_id = self.context.get('requisition_id')
@@ -133,8 +127,8 @@ class RequisitionItemListUpdateSerializer(serializers.ModelSerializer):
     preferred_supplier_name = serializers.CharField(source='preferred_supplier.official_name', read_only=True)
     item_code = serializers.CharField(source='item.item_code', read_only=True)
     item_name = serializers.CharField(source='item.name', read_only=True)
-    buying_price = serializers.CharField(source='item.active_inventory_items.first().purchase_price', read_only=True)
-    selling_price = serializers.CharField(source='item.active_inventory_items.first().sale_price', read_only=True)
+    buying_price = serializers.DecimalField(source='item.buying_price', max_digits=10, decimal_places=2, read_only=True)
+    selling_price = serializers.DecimalField(source='item.selling_price', max_digits=10, decimal_places=2, read_only=True)
     desc = serializers.CharField(source='item.desc', read_only=True)
     vat_rate = serializers.DecimalField(source='item.vat_rate', max_digits=10, decimal_places=2, read_only=True)
     quantity_approved = serializers.IntegerField(validators=[greater_than_zero("quantity_approved")], required=False)
@@ -195,7 +189,7 @@ class RequisitionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Requisition
         fields = ['requested_by', 'department', 'department_name', 'items']
-        read_only_fields = ['id', 'date_created', 'department_name']
+        read_only_fields = ['id', 'date_created']
 
     def validate(self, attrs):
         """
@@ -274,8 +268,8 @@ class RequisitionUpdateSerializer(serializers.ModelSerializer):
     
 class RequisitionListSerializer(serializers.ModelSerializer):
     items = RequisitionItemListUpdateSerializer(many=True, read_only=True)
-    ordered_by = serializers.SerializerMethodField()
-    approved_by = serializers.SerializerMethodField()
+    ordered_by = serializers.CharField(source='requested_by.get_fullname', read_only=True)
+    approved_by = serializers.CharField(source='approved_by.get_fullname', read_only=True)   
     department = serializers.CharField(source='department.name')
     total_items_requested = serializers.SerializerMethodField()
     total_amount = serializers.SerializerMethodField()
@@ -284,12 +278,7 @@ class RequisitionListSerializer(serializers.ModelSerializer):
         model = Requisition
         fields = ['id', 'requisition_number', 'total_amount', 'department', 'total_items_requested', 'ordered_by', 'approved_by', 'department_approved','procurement_approved', "department_approval_date" , "procurement_approval_date", 'items', 'date_created']
         
-    def get_ordered_by(self, obj):
-        return f"{obj.requested_by.first_name} {obj.requested_by.last_name}"
-    
-    def get_approved_by(self, obj):
-        return f"{obj.requested_by.first_name} {obj.requested_by.last_name}"
-    
+   
     def get_total_items_requested(self, obj):
         requisition_items = RequisitionItem.objects.filter(requisition=obj)
         distinct_items = requisition_items.values('item').distinct()  
@@ -304,11 +293,12 @@ class RequisitionListSerializer(serializers.ModelSerializer):
                 total += float(amount)
         return total
 
+
 class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     requisition_number = serializers.CharField(source='requisition_item.requisition.requisition_number', read_only=True)
     requisition_date_created = serializers.DateTimeField(source='requisition_item.requisition.date_created', read_only=True)
-    requested_by = serializers.SerializerMethodField()
-    approved_by = serializers.SerializerMethodField()
+    requested_by = serializers.CharField(source='requisition_item.requisition.requested_by.get_fullname', read_only=True)
+    approved_by = serializers.CharField(source='requisition_item.requisition.approved_by.get_fullname', read_only=True)
     ordered = serializers.BooleanField(source='requisition_item.ordered', read_only=True)
     item = serializers.PrimaryKeyRelatedField(source='requisition_item.item', read_only=True)
     item_code = serializers.CharField(source='requisition_item.item.item_code', read_only=True)
@@ -319,12 +309,12 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
     quantity_approved = serializers.IntegerField(source='requisition_item.quantity_approved', read_only=True)
     quantity_ordered = serializers.IntegerField(read_only=True)  
     preferred_supplier = serializers.CharField(source='requisition_item.preferred_supplier.id', read_only=True)
-    buying_price = serializers.SerializerMethodField()
+    buying_price = serializers.CharField(source='requisition_item.item.buying_price', read_only=True)
     vat_rate = serializers.DecimalField(source='requisition_item.item.vat_rate', max_digits=5, decimal_places=2, read_only=True)
-    selling_price = serializers.SerializerMethodField()
+    selling_price = serializers.CharField(source='requisition_item.item.selling_price', read_only=True)
     requested_amount = serializers.SerializerMethodField()
     department_name = serializers.CharField(source='requisition_item.requisition.department.name', read_only=True)
-    requested_by_name = serializers.SerializerMethodField()
+    requested_by_name = serializers.CharField(source='requisition_item.requisition.requested_by.get_fullname', read_only=True)
     preferred_supplier_name = serializers.CharField(source='requisition_item.preferred_supplier.official_name', read_only=True)
     PO_number = serializers.CharField(source='purchase_order.PO_number', read_only=True)
     total_buying_amount = serializers.SerializerMethodField()
@@ -340,15 +330,25 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
             'preferred_supplier_name', 'total_buying_amount', 'date_created'
         ]
 
-    def get_requested_by(self, obj):
-        if obj.requisition_item.requisition.requested_by:
-            return f"{obj.requisition_item.requisition.requested_by.first_name} {obj.requisition_item.requisition.requested_by.last_name}"
-        return " "
 
-    def get_approved_by(self, obj):
-        if obj.requisition_item.requisition.approved_by:
-            return f"{obj.requisition_item.requisition.approved_by.first_name} {obj.requisition_item.requisition.approved_by.last_name}"
-        return None
+    def validate(self, attrs):
+            """
+            Validates the incoming data during updates.
+            Ensures that quantity_received is valid relative to quantity_ordered.
+            """
+            quantity_ordered = attrs.get('quantity_ordered')
+            quantity_received = attrs.get("quantity_received")
+
+            requisition_item = self.instance.requisition_item if self.instance else None
+            quantity_ordered = requisition_item.quantity_approved if requisition_item else None
+
+            if quantity_received is not None and quantity_received <= 0:
+                raise serializers.ValidationError('Quantity received must be greater than 0.')
+
+            if quantity_ordered is not None and quantity_received is not None and quantity_ordered > quantity_received:
+                raise serializers.ValidationError('Quantity received cannot exceed the quantity ordered.')
+
+            return attrs
 
     def get_quantity_at_hand(self, obj):
         try:
@@ -356,12 +356,6 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
             return inventory.quantity_at_hand
         except (Inventory.DoesNotExist, Exception) as e:
             return 0
-
-    def get_buying_price(self, obj):
-        return obj.requisition_item.item.buying_price if obj.requisition_item.item else None
-
-    def get_selling_price(self, obj):
-        return obj.requisition_item.item.selling_price if obj.requisition_item.item else None
 
     def get_requested_amount(self, obj):
         try:
@@ -376,27 +370,11 @@ class PurchaseOrderItemListUPdateSerializer(serializers.ModelSerializer):
             return float(obj.quantity_ordered * inventory.purchase_price)
         except Inventory.DoesNotExist:
             return None
-            
-    def get_requested_by_name(self, obj):
-        if obj.requisition_item.requisition.requested_by:
-            return f"{obj.requisition_item.requisition.requested_by.first_name} {obj.requisition_item.requisition.requested_by.last_name}"
-        return " "
-
-    def validate(self, attrs):
-        quantity_ordered = attrs.get('quantity_ordered')
-        requisition_item = self.instance.requisition_item if self.instance else None
-        quantity_ordered = requisition_item.quantity_approved if requisition_item else None
-
-        if quantity_ordered is not None and quantity_received <= 0:
-            raise serializers.ValidationError('Quantity ordered must be greater than 0.')
-
-        if quantity_ordered is not None and quantity_ordered is not None and quantity_ordered > quantity_ordered:
-            raise serializers.ValidationError('Quantity received cannot exceed the quantity ordered.')
-
-        return attrs
-
 
     def update(self, instance, validated_data):
+        """
+        Updates the PurchaseOrderItem instance with the validated data.
+        """
         instance.quantity_ordered = validated_data.get('quantity_ordered', instance.quantity_received)
         instance.save()
         return instance

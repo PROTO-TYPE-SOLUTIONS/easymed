@@ -6,6 +6,8 @@ export const API_URL = {
   LOGIN: "/users/login/",
   REFRESH_TOKEN: "/api/token/refresh/",
   GET_USER_PERMISSIONS: "/authperms/permissions/user",
+  PASSWORD_RESET: "/customuser/password-reset/request/",
+  CHANGE_PASSWORD: "/customuser/password-reset/confirm/",
   FETCH_GROUP: "/authperms/groups",
   FETCH_ALL_PERMISSIONS: "/authperms/permissions",
   FETCH_GROUP_PERMISSIONS: "/authperms/groups/",
@@ -86,6 +88,7 @@ export const API_URL = {
   PURCHASE_ORDER_ITEM: "/inventory/purchase-order-item/",
   FETCH_INCOMING_ITEMS: "/inventory/incoming-item/",
   FETCH_SUPPLIER_INVOICE: "/inventory/supplier-invoice/",
+  FETCH_INVOICE: "/inventory/supplier_invoice_pdf/",
   FETCH_GOODS_RECEIPT_NOTE: "/inventory/goods-receipt-note/",
   FETCH_DEPARTMENTS: "/inventory/departments/",
 
@@ -151,6 +154,8 @@ export const APP_API_URL = {
   /***************** AUTH **********************/
   REGISTER_USER: "/api/register",
   CREATE_USER: "/api/auth/create-user",
+  PASSWORD_RESET: "/api/register/reset-password",
+  CHANGE_PASSWORD: "/api/register/change-password",
   LOGIN: "/api/register/login",
   REFRESH_TOKEN: "/api/auth/refresh",
   GET_USER_PERMISSIONS: "/api/auth/user-permissions",
@@ -237,6 +242,7 @@ export const APP_API_URL = {
   PURCHASE_ORDER_ITEM: "/api/inventory/purchase-order-item",
   FETCH_INCOMING_ITEMS: "/api/inventory/incomingItem",
   FETCH_SUPPLIER_INVOICE: "/api/inventory/supplier-invoice/",
+  FETCH_INVOICE:"/api/inventory/fetch-invoice/",
   FETCH_GOODS_RECEIPT_NOTE: "/api/inventory/goods-receipt-note/",
   FETCH_DEPARTMENTS: "/api/groups/department/",
 
