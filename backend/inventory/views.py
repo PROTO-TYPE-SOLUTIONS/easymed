@@ -103,33 +103,6 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
 
 class RequisitionViewSet(viewsets.ModelViewSet):
-    """
-    Allows CRUD operations for a requisition and individual requisition items. 
-    It also facilitates the creation of a purchase order linked to a specific requisition.
-
-                                **URL Patterns**
-    1. **Create Requisition** (`POST /inventory/requisition/`):
-        Example Request:
-         {
-           "requested_by": 1,
-           "department": 3,
-           "items": [
-             {"item": 3, "quantity_requested": 10, "preferred_supplier": 1}
-           ]
-         }
-
-    2. **List All Requisitions** (`GET /inventory/requisition/`)
-
-    3. **Retrieve, Update, or Delete a Requisition** (`GET/PUT/PATCH/DELETE /inventory/requisition/<id>/`)
-
-    4. **Retrieve, Update, or Delete a RequisitionItems** `/inventory/requisition/<id>/requisitionitems/`
-
-    5. **Retrieve, Update, or Delete a a single requisition item** `/inventory/requisition/<id>/requisitionitems/<id>`
-
-    6. **Retrieve all or create purchase orders linked to the requisition** `/inventory/requisition/<id>/purchase-orders/`
-
-    """
-
     queryset = Requisition.objects.all().order_by('-id')
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['requested_by', 'department']
@@ -145,7 +118,6 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
     
 class RequisitionItemViewSet(viewsets.ModelViewSet):
-
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemListUpdateSerializer
     filter_backends = [DjangoFilterBackend]
@@ -172,7 +144,6 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
         items = RequisitionItem.objects.filter(status='PENDING')
         serializer = self.get_serializer(items, many=True)
         return Response(serializer.data)
-    # Make this a filter ??
     
 
 class InventoryViewSet(viewsets.ModelViewSet):
