@@ -137,14 +137,7 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         requisition_id = self.kwargs.get('requisition_pk')
         return {'requisition_id': requisition_id}
-    
-    @action(detail=False, methods=['get'], url_path='all_items')
-    def all_items(self, request):
-        """Custom endpoint to return all requisition items ordered by status"""
-        items = RequisitionItem.objects.filter(status='PENDING')
-        serializer = self.get_serializer(items, many=True)
-        return Response(serializer.data)
-    
+
 
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
@@ -174,7 +167,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
             try:
                 if inv.last_deducted_at:
                     days_without_transactions = (current_time - inv.last_deducted_at).days
-                    print(f"Days without transaction would be this : {days_without_transactions}")
+                    print(f"Days without transaction: {days_without_transactions}")
                     if days_without_transactions > inv.item.slow_moving_period:
                         slow_moving_items.append({
                             'item_id': inv.item.id,
@@ -220,6 +213,7 @@ class SupplierInvoiceViewSet(viewsets.ModelViewSet):
         )
         return queryset
 
+
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseOrderCreateSerializer
     http_method_names = ['get', 'post', 'put', 'patch', 'delete']
@@ -252,12 +246,6 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)},status=status.HTTP_400_BAD_REQUEST)
-        
-    @action(detail=False, methods=['get'])
-    def all_purchase_orders(self, request):
-        purchase_orders = PurchaseOrder.objects.all()
-        serializer = PurchaseOrderListSerializer(purchase_orders, many=True)
-        return Response(serializer.data)
 
    
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
