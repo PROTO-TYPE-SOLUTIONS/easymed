@@ -13,6 +13,9 @@ const BillingNav = () => {
     <Link href='/dashboard/billing/create-invoice' className={`${pathName === '/dashboard/billing/create-invoice' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
       New Invoice
     </Link>
+    <Link href='/dashboard/billing/payments' className={`${ pathName === '/dashboard/billing/payments'  ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+      Receive Payments
+    </Link>
     <Link href='/dashboard/billing/overdue-invoices' className={`${pathName === '/dashboard/billing/overdue-invoices' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
       Overdue Invoices
     </Link>

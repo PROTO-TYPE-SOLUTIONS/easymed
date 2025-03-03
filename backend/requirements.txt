@@ -24,6 +24,7 @@ django-extensions==3.2.3
 django-filter==23.3
 django-guardian==2.4.0
 django-ledger==0.5.6.2
+django-prometheus==2.3.1
 django-timezone-field==7.0
 django-treebeard==4.7.1
 djangorestframework==3.14.0
@@ -58,6 +59,7 @@ ofxtools==0.9.5
 packaging==24.2
 Pillow==10.1.0
 pluggy==1.5.0
+prometheus_client==0.21.1
 prompt_toolkit==3.0.48
 psycopg2-binary==2.9.9
 pyasn1==0.6.1

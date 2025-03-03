@@ -15,7 +15,7 @@ from django.db.models import Sum, Q
 from rest_framework.views import APIView
 
 
-from .models import InvoiceItem, Invoice
+from .models import InvoiceItem, Invoice, InvoicePayment
 from company.models import Company
 from inventory.models import Inventory, Item
 from authperms.permissions import (
@@ -23,7 +23,11 @@ from authperms.permissions import (
     IsLabTechUser,
     IsNurseUser,
 )
-from .serializers import (InvoiceItemSerializer, InvoiceSerializer, PaymentModeSerializer,)
+from .serializers import (
+    InvoiceItemSerializer, InvoiceSerializer,
+    PaymentModeSerializer, InvoicePaymentSerializer
+    )
+
 
 class InvoiceViewset(viewsets.ModelViewSet):
     queryset = Invoice.objects.all().order_by('-id')
@@ -71,6 +75,12 @@ class InvoiceItemsByInvoiceId(generics.ListAPIView):
     def get_queryset(self):
         invoice_id = self.kwargs['invoice_id']
         return InvoiceItem.objects.filter(invoice_id=invoice_id)
+
+
+class InvoicePaymentViewset(viewsets.ModelViewSet):
+    queryset = InvoicePayment.objects.all()
+    serializer_class = InvoicePaymentSerializer
+
 
 class PaymentModeViewset(viewsets.ModelViewSet):
         queryset = PaymentMode.objects.all()

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'channels',
     'django_extensions',
     'django_celery_beat',
+    'django_prometheus',
 
     # user apps
     'authperms.apps.AuthpermsConfig',
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'easymed.urls'
@@ -168,7 +171,7 @@ REST_FRAMEWORK = {
 
 SESSION_COOKIE_AGE = 30000
 AUTH_USER_MODEL = 'customuser.CustomUser'
-
+PASSWORD_RESET_TIMEOUT = 600
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "EasyMed HMIS",
