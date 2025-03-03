@@ -207,6 +207,14 @@ export const getItems = (auth) => async (dispatch) => {
   }
 };
 
+export const getAllSuppliers = (auth) => async (dispatch) => {
+  try {
+    const response = await fetchSuppliers(auth);
+    dispatch(setSuppliers(response));
+  } catch (error) {
+    console.log("SUPPLIERS_ERROR ", error);
+  }
+};
 export const getInvoice = (supplier_id, auth) => async (dispatch) => {
   try {
       if (!auth?.token) {
