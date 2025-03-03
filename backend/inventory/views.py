@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from rest_framework.generics import ListAPIView
 from django.utils import timezone
-from django.db import models
+from django.db.models.functions import Now
 from django.db.models import F
 from datetime import timedelta
 
@@ -67,8 +67,6 @@ from .filters import (
     RequisitionItemFilter
 )
 
-from billing.models import InvoiceItem
-
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
@@ -103,33 +101,6 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
 
 class RequisitionViewSet(viewsets.ModelViewSet):
-    """
-    Allows CRUD operations for a requisition and individual requisition items. 
-    It also facilitates the creation of a purchase order linked to a specific requisition.
-
-                                **URL Patterns**
-    1. **Create Requisition** (`POST /inventory/requisition/`):
-        Example Request:
-         {
-           "requested_by": 1,
-           "department": 3,
-           "items": [
-             {"item": 3, "quantity_requested": 10, "preferred_supplier": 1}
-           ]
-         }
-
-    2. **List All Requisitions** (`GET /inventory/requisition/`)
-
-    3. **Retrieve, Update, or Delete a Requisition** (`GET/PUT/PATCH/DELETE /inventory/requisition/<id>/`)
-
-    4. **Retrieve, Update, or Delete a RequisitionItems** `/inventory/requisition/<id>/requisitionitems/`
-
-    5. **Retrieve, Update, or Delete a a single requisition item** `/inventory/requisition/<id>/requisitionitems/<id>`
-
-    6. **Retrieve all or create purchase orders linked to the requisition** `/inventory/requisition/<id>/purchase-orders/`
-
-    """
-
     queryset = Requisition.objects.all().order_by('-id')
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['requested_by', 'department']
@@ -145,7 +116,6 @@ class RequisitionViewSet(viewsets.ModelViewSet):
 
     
 class RequisitionItemViewSet(viewsets.ModelViewSet):
-
     queryset = RequisitionItem.objects.all()
     serializer_class = RequisitionItemListUpdateSerializer
     filter_backends = [DjangoFilterBackend]
@@ -165,15 +135,7 @@ class RequisitionItemViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         requisition_id = self.kwargs.get('requisition_pk')
         return {'requisition_id': requisition_id}
-    
-    @action(detail=False, methods=['get'], url_path='all_items')
-    def all_items(self, request):
-        """Custom endpoint to return all requisition items ordered by status"""
-        items = RequisitionItem.objects.filter(status='PENDING')
-        serializer = self.get_serializer(items, many=True)
-        return Response(serializer.data)
-    # Make this a filter ??
-    
+
 
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
@@ -184,45 +146,30 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='slow-moving-items')
     def slow_moving_items(self, request):
-        """
-        
-        URL: /inventory/inventories/slow-moving-items/
-        """
-        # Fetch all inventory items with non-zero quantity and slow_moving_period set.
-        # Also, select related 'item' and 'department' fields.
-        # This query can be optimized by using a more efficient database query.
         inventory_items = Inventory.objects.filter(
             quantity_at_hand__gt=0,
-            item__slow_moving_period__isnull=False
+            item__slow_moving_period__isnull=False,
+            last_deducted_at__isnull=False,
+        ).annotate(
+            days_without_transactions=(Now() - F('last_deducted_at'))
+        ).filter(
+            days_without_transactions__gte=F('item__slow_moving_period') * timedelta(days=1)
         ).select_related('item', 'department')
 
-        current_time = timezone.now()
-        slow_moving_items = []
+        slow_moving_items = [{
+            'item_id': inv.item.id,
+            'item_name': inv.item.name,
+            'category': inv.item.category,
+            'department': inv.department.name,
+            'quantity': inv.quantity_at_hand,
+            'days_without_transactions': inv.days_without_transactions.days,
+            'slow_moving_period': inv.item.slow_moving_period,
+            'lot_number': inv.lot_number,
+            'expiry_date': inv.expiry_date,
+            'purchase_price': inv.purchase_price,
+            'sale_price': inv.sale_price
+        } for inv in inventory_items]
 
-        for inv in inventory_items:
-            try:
-                if inv.last_deducted_at:
-                    days_without_transactions = (current_time - inv.last_deducted_at).days
-                    print(f"Days without transaction would be this : {days_without_transactions}")
-                    if days_without_transactions > inv.item.slow_moving_period:
-                        slow_moving_items.append({
-                            'item_id': inv.item.id,
-                            'item_name': inv.item.name,
-                            'category': inv.item.category,
-                            'department': inv.department.name,
-                            'quantity': inv.quantity_at_hand,
-                            'days_without_transactions': days_without_transactions,
-                            'slow_moving_period': inv.item.slow_moving_period,
-                            'lot_number': inv.lot_number,
-                            'expiry_date': inv.expiry_date,
-                            'purchase_price': inv.purchase_price,
-                            'sale_price': inv.sale_price
-                        })
-
-                else:
-                    print("PLEASE GO")
-            except Exception as e:
-                    print(f"Error getting slow moving items: {e}")
         return Response(slow_moving_items)
 
 
@@ -248,6 +195,7 @@ class SupplierInvoiceViewSet(viewsets.ModelViewSet):
             'incomingitem_set__goods_receipt_note'
         )
         return queryset
+
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseOrderCreateSerializer
@@ -281,12 +229,6 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)},status=status.HTTP_400_BAD_REQUEST)
-        
-    @action(detail=False, methods=['get'])
-    def all_purchase_orders(self, request):
-        purchase_orders = PurchaseOrder.objects.all()
-        serializer = PurchaseOrderListSerializer(purchase_orders, many=True)
-        return Response(serializer.data)
 
    
 class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
@@ -326,7 +268,7 @@ class InventoryFilterView(ListAPIView):
         if filter_type == 'low_quantity':
             queryset = queryset.filter(quantity_at_hand__lte=F('re_order_level'))
         elif filter_type == 'near_expiry':
-            today = now().date()
+            today = timezone.now().date()
             three_months_later = today + timedelta(days=90)  # 3 months from now
             five_months_later = today + timedelta(days=150)  # 5 months from now
             queryset = queryset.filter(expiry_date__range=[three_months_later, five_months_later])
