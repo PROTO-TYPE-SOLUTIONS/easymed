@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { menus } from "@/assets/menu";
 import MenuChild from "./menu-children";
-import { IoMdSettings } from "react-icons/io";
+import { IoMdSettings, IoMdBook } from "react-icons/io";
 import Link from "next/link";
 import SupportModal from "./SupportModal";
 import VersionModal from "./VersionModal";
@@ -76,6 +76,13 @@ const Sidebar = () => {
                   <p>Settings</p>
                 </Link>
               )}
+              <Link
+                href="/dashboard/admin-interface/docs"
+                className="flex items-center gap-2"
+              >
+                <IoMdBook className="" />
+                <p>Docs</p>
+              </Link>
               <SupportModal />
               <VersionModal />
             </div>

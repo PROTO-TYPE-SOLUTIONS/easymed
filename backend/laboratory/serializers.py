@@ -7,16 +7,15 @@ from customuser.models import CustomUser
 from inventory.models import Inventory
 from .models import (
     LabReagent,
-    LabTestRequest, 
-    LabTestProfile, 
-    LabEquipment, 
-    PublicLabTestRequest, 
-    LabTestPanel, 
+    LabTestRequest,
+    LabTestProfile,
+    LabEquipment,
+    PublicLabTestRequest,
+    LabTestPanel,
     LabTestRequestPanel,
     ProcessTestRequest,
     PatientSample,
     Specimen,
-    TestKit,
     TestKitCounter,
     LabTestInterpretation,
     ReferenceValue,
@@ -32,12 +31,6 @@ from .models import (
     RetestSample,
     ReleasedSample
     )
-
-
-class TestKitSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TestKit
-        fields = '__all__'
 
 
 class TestKitCounterSerializer(serializers.ModelSerializer):
@@ -60,6 +53,7 @@ class LabTestProfileSerializer(serializers.ModelSerializer):
 
 class LabTestPanelSerializer(serializers.ModelSerializer):
     reference_values = serializers.SerializerMethodField()
+    available_runs = serializers.SerializerMethodField()
     item_name = serializers.ReadOnlyField(source='item.name')
     test_profile_name = serializers.ReadOnlyField(source='test_profile.name')
     specimen_name = serializers.ReadOnlyField(source='specimen.name')
@@ -70,11 +64,13 @@ class LabTestPanelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_reference_values(self, obj):
-        # Assuming `patient` is passed to the serializer context
         patient = self.context.get('patient')
         if patient:
             return obj.get_reference_values(patient)
         return None
+
+    def get_available_runs(self, obj):
+        return obj.available_runs()
     
 
 class PublicLabTestRequestSerializer(serializers.ModelSerializer):

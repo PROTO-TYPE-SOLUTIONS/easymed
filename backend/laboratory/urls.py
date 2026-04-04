@@ -6,7 +6,6 @@ from .views import (
     LabTestProfileViewSet,
     LabEquipmentViewSet,
     PublicLabTestRequestViewSet,
-    LabTestProfileViewSet,
     LabTestRequestByPatientIdAPIView,
     LabTestPanelViewSet,
     LabTestRequestPanelViewSet,
@@ -19,7 +18,6 @@ from .views import (
     LabTestRequestPanelBySampleView,
     SpecimenViewSet,
     ReferenceValueViewSet,
-    TestKitViewSet,
     TestKitCounterViewSet,
     ReagentConsumptionLogViewSet,
     LowStockReagentViewSet,
@@ -51,7 +49,6 @@ router.register(r'patient-samples', PatientSampleViewSet)
 router.register(r'specimens', SpecimenViewSet)
 router.register(r'reference-values', ReferenceValueViewSet)
 router.register(r'lab-test-interpretations', LabTestInterpretationViewSet)
-router.register(r'testkits', TestKitViewSet)
 router.register(r'testkitcounters', TestKitCounterViewSet)
 router.register(r'reagent-consumption', ReagentConsumptionLogViewSet, basename='reagent-consumption')
 router.register(r'low-stock-reagents', LowStockReagentViewSet, basename='low-stock-reagents')

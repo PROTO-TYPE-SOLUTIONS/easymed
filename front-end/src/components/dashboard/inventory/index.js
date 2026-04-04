@@ -18,6 +18,7 @@ import {
 } from '@mui/icons-material';
 import { months } from "@/assets/dummy-data/laboratory";
 import { InventoryDisplayStats } from "@/assets/menu";
+import { formatPackQuantity } from "@/functions/inventory";
 import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
 import { getAllInventories, getAllPurchaseOrders } from "@/redux/features/inventory";
 import { useDispatch } from "react-redux";
@@ -150,6 +151,14 @@ const InventoryDataGrid = ({ department }) => {
     return parseInt(data.purchase_price) * parseInt(data.quantity_at_hand)
   };
 
+  const renderPackQuantity = ({ data }) => {
+    return formatPackQuantity(data, data.quantity_at_hand);
+  };
+
+  const renderTotalPackQuantity = ({ data }) => {
+    return formatPackQuantity(data, data.total_quantity);
+  };
+
   const inventorySummaryInfo = InventoryDisplayStats().map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item} />)
 
   return (
@@ -185,31 +194,13 @@ const InventoryDataGrid = ({ department }) => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={2} className="flex flex-wrap items-center justify-between my-4">
-        {/* Department Filter */}
-        {!department && (
-          <Grid item className="flex flex-wrap items-center gap-2">
-            {[{ id: 0, name: "All" }, ...departments].map((dept) => (
-              <p
-                key={dept.id}
-                className="rounded-md py-1 px-2 bg-primary text-white cursor-pointer text-sm"
-                onClick={() => setSelectedDepartment(dept.name)}
-              >
-                {dept.name}
-              </p>
-            ))}
-          </Grid>
-        )}
-
-        {/* Add Inventory Button */}
-        <Grid item>
-          <Link href="/dashboard/inventory/add-inventory">
-            <div className="bg-primary text-white rounded-md px-4 py-2 text-sm cursor-pointer">
-              Add Inventory
-            </div>
-          </Link>
-        </Grid>
-      </Grid>
+      <div className="flex justify-end my-4">
+        <Link href="/dashboard/inventory/add-inventory">
+          <div className="bg-primary text-white rounded-md px-4 py-2 text-sm cursor-pointer">
+            Add Inventory
+          </div>
+        </Link>
+      </div>
       <SearchOnlyFilter
         selectedFilter={processFilter}
         setProcessFilter={setProcessFilter}
@@ -253,8 +244,8 @@ const InventoryDataGrid = ({ department }) => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="quantity_at_hand" caption="Lot Quantity" />
-        <Column dataField="total_quantity" caption="Total Quantity" />
+        <Column dataField="quantity_at_hand" caption="Lot Quantity" cellRender={renderPackQuantity} />
+        <Column dataField="total_quantity" caption="Total Quantity" cellRender={renderTotalPackQuantity} />
         <Column dataField="" caption="Total Amount" cellRender={calculateLotValue} />
       </DataGrid>
     </section>

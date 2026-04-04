@@ -20,12 +20,27 @@ from .tasks import (create_insurance_prices_for_inventory)
 
 logger=logging.getLogger(__name__)
 
+def _base_units_received(instance):
+    """
+    Convert IncomingItem.quantity to base units (subpacked).
+
+    - quantity_unit == 'packs': staff entered number of boxes → multiply by subpacked
+    - quantity_unit == 'units': staff entered base units directly → use as-is
+    """
+    if instance.quantity_unit == 'packs':
+        subpacked = instance.item.subpacked or 1
+        return instance.quantity * subpacked
+    return instance.quantity
+
+
 # There's a painful Race Condition when this is moved to celery
 @receiver(post_save, sender=IncomingItem)
 def update_inventory_after_incomingitem_creation(sender, instance, created, **kwargs):
     if created:
         try:
             with transaction.atomic():
+                base_units = _base_units_received(instance)
+
                 # Check if there is an existing inventory record for the same item and lot number
                 # TODO: Add another check, expiry date, but could be redundant
                 inventory = Inventory.objects.filter(
@@ -35,7 +50,7 @@ def update_inventory_after_incomingitem_creation(sender, instance, created, **kw
 
                 if inventory:
                     # Update the existing inventory record
-                    inventory.quantity_at_hand += instance.quantity
+                    inventory.quantity_at_hand += base_units
                     inventory.purchase_price = instance.purchase_price
                     inventory.sale_price = instance.sale_price
                     inventory.expiry_date = instance.expiry_date
@@ -46,7 +61,7 @@ def update_inventory_after_incomingitem_creation(sender, instance, created, **kw
                         item=instance.item,
                         purchase_price=instance.purchase_price,
                         sale_price=instance.sale_price,
-                        quantity_at_hand=instance.quantity,
+                        quantity_at_hand=base_units,
                         category_one=instance.category_one,
                         lot_number=instance.lot_no,
                         expiry_date=instance.expiry_date,
@@ -123,30 +138,26 @@ def update_last_deducted_on(sender, instance, **kwargs):
 def update_reagent_test_counter(sender, instance, created, **kwargs):
     """
     Update TestKitCounter when lab reagent kits are received.
-    Calculates available_tests based on: quantity (kits) × subpacked (tests per kit)
+    Uses _base_units_received() so quantity_unit='packs' and 'units' are both handled.
     """
     if created and instance.item.category == 'LabReagent':
         try:
             from laboratory.models import TestKitCounter
-            
+
             with transaction.atomic():
-                # Get or create counter for this reagent
-                counter, counter_created = TestKitCounter.objects.get_or_create(
+                counter, _ = TestKitCounter.objects.get_or_create(
                     reagent_item=instance.item,
                     defaults={'available_tests': 0}
                 )
-                
-                # Calculate tests added: kits received × tests per kit
-                tests_per_kit = int(instance.item.subpacked) if instance.item.subpacked else 1
-                tests_added = instance.quantity * tests_per_kit
-                
-                # Update available tests
+
+                tests_added = _base_units_received(instance)
                 counter.available_tests += tests_added
                 counter.save()
-                
+
                 logger.info(
                     f"Updated TestKitCounter for {instance.item.name}: "
-                    f"Added {tests_added} tests ({instance.quantity} kits × {tests_per_kit} tests/kit). "
+                    f"Added {tests_added} tests (quantity={instance.quantity}, "
+                    f"unit={instance.quantity_unit}, subpacked={instance.item.subpacked}). "
                     f"Total available: {counter.available_tests}"
                 )
         except Exception as e:
