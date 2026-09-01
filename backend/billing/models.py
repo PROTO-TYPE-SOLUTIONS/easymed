@@ -157,6 +157,8 @@ class InvoiceItem(models.Model):
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)
     payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
+    # quantity is in subpacked (base) units — e.g. 20 tablets, not 1 box of 20
+    quantity = models.PositiveIntegerField(default=1)
     item_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     # amount after co-pay is deducted
     actual_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -169,11 +171,9 @@ class InvoiceItem(models.Model):
 
     @property
     def sale_price(self):
-        """Return the default cash price for this item from active Inventory.
+        """Return the per-unit cash price from active Inventory (unaffected by quantity).
 
-        Per simplified billing rules, pricing is determined elsewhere based on
-        selected PaymentMode. This property intentionally returns only the
-        Inventory.sale_price (or 0 if unavailable) for display/fallback uses.
+        Use item_amount for the billed total (unit_price × quantity).
         """
         Inventory = apps.get_model('inventory', 'Inventory')
         inv = Inventory.objects.filter(item=self.item).order_by('-id').first()
@@ -197,14 +197,19 @@ class InvoiceItem(models.Model):
     def get_pricing_for_item(self):
         """
         Centralized pricing logic with explicit fallback chain.
-        
+
+        All returned amounts are already multiplied by self.quantity so callers
+        can store them directly without further calculation.
+
         Returns a dict with:
-        - item_amount: The price to display/bill
-        - actual_total: The amount patient pays (after insurance/co-pay)
-        - price_source: Where the price came from ('insurance', 'cash', 'cash_fallback')
+        - item_amount: Total price to bill (unit_price × quantity)
+        - actual_total: Amount patient pays after insurance/co-pay (× quantity)
+        - price_source: Where the unit price came from ('insurance', 'cash', 'cash_fallback')
         """
         Inventory = apps.get_model('inventory', 'Inventory')
         InsuranceItemSalePrice = apps.get_model('inventory', 'InsuranceItemSalePrice')
+
+        qty = self.quantity or 1
 
         # Get base cash price from inventory
         inv = Inventory.objects.filter(item=self.item).order_by('-id').first()
@@ -214,28 +219,28 @@ class InvoiceItem(models.Model):
         if self.payment_mode and self.payment_mode.payment_category == 'insurance':
             if self.payment_mode.insurance_id:
                 ins_price = InsuranceItemSalePrice.objects.filter(
-                    item=self.item, 
+                    item=self.item,
                     insurance_company_id=self.payment_mode.insurance_id
                 ).first()
-                
+
                 if ins_price:
                     return {
-                        'item_amount': ins_price.sale_price or 0,
-                        'actual_total': ins_price.co_pay or 0,
+                        'item_amount': (ins_price.sale_price or 0) * qty,
+                        'actual_total': (ins_price.co_pay or 0) * qty,
                         'price_source': 'insurance'
                     }
-                
-                # Insurance selected but no price configured - fallback to cash
+
+                # Insurance selected but no price configured — fallback to cash
                 return {
-                    'item_amount': base_price,
-                    'actual_total': base_price,
+                    'item_amount': base_price * qty,
+                    'actual_total': base_price * qty,
                     'price_source': 'cash_fallback'
                 }
-        
-        # Default to cash price (Cash/MPesa/Cheque/Direct-to-bank etc.)
+
+        # Default: Cash / MPesa / Cheque / Direct-to-bank etc.
         return {
-            'item_amount': base_price,
-            'actual_total': base_price,
+            'item_amount': base_price * qty,
+            'actual_total': base_price * qty,
             'price_source': 'cash'
         }
     

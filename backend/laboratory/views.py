@@ -32,7 +32,6 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
-    TestKit,
     TestKitCounter,
     ReagentConsumptionLog,
     ReferenceValue,
@@ -61,7 +60,6 @@ from .serializers import (
     PatientSampleSerializer,
     SpecimenSerializer,
     TestKitCounterSerializer,
-    TestKitSerializer,
     ReagentConsumptionLogSerializer,
     LowStockReagentSerializer,
     ReferenceValueSerializer,
@@ -92,11 +90,6 @@ from authperms.permissions import (
 from .filters import (
     LabTestRequestFilter,
 )
-
-
-class TestKitViewSet(viewsets.ModelViewSet):
-    queryset = TestKit.objects.all()
-    serializer_class = TestKitSerializer
 
 
 class TestKitCounterViewSet(viewsets.ModelViewSet):
@@ -465,87 +458,130 @@ class ReagentConsumptionLogViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=False, methods=['get'])
     def recent_usage(self, request):
-        """Get recently used reagents with their current stock levels"""
-        from django.db.models import Max
+        """Get recently used reagents with their current stock levels (from Inventory)."""
+        from django.db.models import Max, Sum
         from datetime import timedelta
         from django.utils import timezone
-        
-        # Get reagents used in the last 24 hours
+        from inventory.models import Item
+
         recent_time = timezone.now() - timedelta(hours=24)
-        
+
         recent_consumptions = ReagentConsumptionLog.objects.filter(
             consumed_at__gte=recent_time
         ).values('reagent_item').annotate(
             last_used=Max('consumed_at')
         ).order_by('-last_used')[:10]
-        
-        # Get full details for these reagents
+
         reagent_ids = [item['reagent_item'] for item in recent_consumptions]
-        counters = TestKitCounter.objects.filter(
-            reagent_item_id__in=reagent_ids
-        ).select_related('reagent_item')
-        
-        # Build response with stock levels
+        items = Item.objects.filter(id__in=reagent_ids)
+
         result = []
-        for counter in counters:
-            # Find the last used time for this reagent
+        for item in items:
+            total_stock = Inventory.objects.filter(
+                item=item, quantity_at_hand__gt=0
+            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
+
             last_used = next(
-                (item['last_used'] for item in recent_consumptions if item['reagent_item'] == counter.reagent_item_id),
+                (c['last_used'] for c in recent_consumptions if c['reagent_item'] == item.id),
                 None
             )
-            
+
+            # Use TestKitCounter threshold if it exists, otherwise default to 10
+            try:
+                threshold = item.test_counter.minimum_threshold
+            except TestKitCounter.DoesNotExist:
+                threshold = 10
+
             result.append({
-                'reagent_name': counter.reagent_item.name,
-                'reagent_code': counter.reagent_item.item_code,
-                'available_tests': counter.available_tests,
-                'minimum_threshold': counter.minimum_threshold,
-                'is_low_stock': counter.is_low_stock(),
-                'is_out_of_stock': counter.is_out_of_stock(),
-                'stock_percentage': (counter.available_tests / counter.minimum_threshold * 100) if counter.minimum_threshold > 0 else 100,
-                'last_used': last_used
+                'reagent_name': item.name,
+                'reagent_code': item.item_code,
+                'available_stock': total_stock,
+                'minimum_threshold': threshold,
+                'is_low_stock': total_stock <= threshold,
+                'is_out_of_stock': total_stock <= 0,
+                'stock_percentage': (total_stock / threshold * 100) if threshold > 0 else 100,
+                'last_used': last_used,
             })
-        
-        # Sort by last_used descending
+
         result.sort(key=lambda x: x['last_used'] if x['last_used'] else timezone.now(), reverse=True)
-        
         return Response(result)
 
 
-class LowStockReagentViewSet(viewsets.ReadOnlyModelViewSet):
+class LowStockReagentViewSet(viewsets.ViewSet):
     """
-    ViewSet for low stock reagent alerts.
-    Returns reagents that are low or out of stock.
+    Returns lab reagent items that are low or out of stock,
+    using Inventory as the source of truth.
     """
-    serializer_class = LowStockReagentSerializer
-    
-    def get_queryset(self):
-        queryset = TestKitCounter.objects.filter(
-            reagent_item__isnull=False
-        ).select_related('reagent_item')
-        
-        # Filter by stock status if provided
-        status_filter = self.request.query_params.get('status', None)
-        if status_filter == 'low':
-            queryset = [q for q in queryset if q.is_low_stock() and not q.is_out_of_stock()]
-        elif status_filter == 'out':
-            queryset = [q for q in queryset if q.is_out_of_stock()]
-        else:
-            # Return all low or out of stock
-            queryset = [q for q in queryset if q.is_low_stock() or q.is_out_of_stock()]
-        
-        return queryset
-    
+
+    def list(self, request):
+        from django.db.models import Sum
+        from inventory.models import Item
+
+        status_filter = request.query_params.get('status', None)
+
+        reagent_items = Item.objects.filter(category='LabReagent')
+        result = []
+
+        for item in reagent_items:
+            total_stock = Inventory.objects.filter(
+                item=item, quantity_at_hand__gt=0
+            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
+
+            try:
+                threshold = item.test_counter.minimum_threshold
+            except TestKitCounter.DoesNotExist:
+                threshold = 10
+
+            is_out = total_stock <= 0
+            is_low = total_stock <= threshold
+
+            if status_filter == 'low' and not (is_low and not is_out):
+                continue
+            elif status_filter == 'out' and not is_out:
+                continue
+            elif status_filter is None and not (is_low or is_out):
+                continue
+
+            stock_status = 'out_of_stock' if is_out else ('low_stock' if is_low else 'in_stock')
+            result.append({
+                'id': item.id,
+                'reagent_item': item.id,
+                'reagent_name': item.name,
+                'available_stock': total_stock,
+                'minimum_threshold': threshold,
+                'stock_status': stock_status,
+            })
+
+        return Response(result)
+
     @action(detail=False, methods=['get'])
     def count(self, request):
         """Get count of low/out of stock reagents"""
-        all_counters = TestKitCounter.objects.filter(reagent_item__isnull=False)
-        low_stock = sum(1 for c in all_counters if c.is_low_stock() and not c.is_out_of_stock())
-        out_of_stock = sum(1 for c in all_counters if c.is_out_of_stock())
-        
+        from django.db.models import Sum
+        from inventory.models import Item
+
+        low_stock = 0
+        out_of_stock = 0
+
+        for item in Item.objects.filter(category='LabReagent'):
+            total = Inventory.objects.filter(
+                item=item, quantity_at_hand__gt=0
+            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
+
+            try:
+                threshold = item.test_counter.minimum_threshold
+            except TestKitCounter.DoesNotExist:
+                threshold = 10
+
+            if total <= 0:
+                out_of_stock += 1
+            elif total <= threshold:
+                low_stock += 1
+
         return Response({
             'low_stock': low_stock,
             'out_of_stock': out_of_stock,
-            'total_alerts': low_stock + out_of_stock
+            'total_alerts': low_stock + out_of_stock,
         })
 
 class LabSettingsViewSet(viewsets.ModelViewSet):

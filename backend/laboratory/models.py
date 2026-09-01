@@ -1,46 +1,32 @@
 import logging
 from django.db import models
+from django.db.models import Sum
 from random import randrange, choices
 from django.conf import settings
 from datetime import datetime
 from django.utils import timezone
 from django.db import transaction, IntegrityError
 from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 
 from customuser.models import CustomUser
 
 
-# TODO: Redundant. Should be removed.
-class TestKit(models.Model):
-    '''
-    This model stores infrmation about a Test kit
-    Will be updated manually after an Inventory record of that 
-    kit is created
-    '''
-    item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
-    number_of_tests = models.IntegerField()
-
-    def __str__(self):
-        return self.item.name
-
-
 class TestKitCounter(models.Model):
     '''
-    Tracks available tests for lab reagents.
-    Updated when:
-    - Reagent kits are received (increase available_tests)
-    - Lab tests are performed and billed (decrease available_tests)
-    
-    available_tests = total tests that can be run with current stock
-    Calculated as: (number of kits in stock) × (subpacked = tests per kit)
+    Tracks available tests for lab reagents (kept in sync with Inventory).
+
+    Inventory.quantity_at_hand is the source of truth for stock.
+    This counter is maintained in parallel for backward-compatible
+    dashboard/alert queries and will be phased out over time.
     '''
-    reagent_item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE, 
-                                      limit_choices_to={'category': 'LabReagent'},
-                                      related_name='test_counter',
-                                      null=True, blank=True)  # Temporary for migration
-    lab_test_kit = models.ForeignKey(TestKit, on_delete=models.CASCADE, null=True, blank=True)  # Keep for migration
+    reagent_item = models.OneToOneField(
+        'inventory.Item',
+        on_delete=models.CASCADE,
+        limit_choices_to={'category': 'LabReagent'},
+        related_name='test_counter',
+    )
     available_tests = models.IntegerField(default=0, help_text="Total number of tests available across all kits in stock")
-    counter = models.IntegerField(default=0, null=True, blank=True)  # Old field, keep for migration
     minimum_threshold = models.IntegerField(default=10, help_text="Alert when available tests fall below this number")
     last_updated = models.DateTimeField(auto_now=True)
     
@@ -49,11 +35,7 @@ class TestKitCounter(models.Model):
         verbose_name_plural = "Reagent Test Counters"
     
     def __str__(self):
-        if self.reagent_item:
-            return f"{self.reagent_item.name} - {self.available_tests} tests available"
-        elif self.lab_test_kit:
-            return f"{self.lab_test_kit.item.name} - {self.counter} tests (legacy)"
-        return "Test Counter"
+        return f"{self.reagent_item.name} - {self.available_tests} tests available"
     
     def is_low_stock(self):
         """Check if reagent tests are below minimum threshold"""
@@ -117,11 +99,15 @@ class LabEquipment(models.Model):
 
 
 class LabReagent(models.Model):
+    """
+    Chemistry metadata for lab reagents (CAS number, molecular weight, purity).
+    NOT used for stock tracking — Inventory is the source of truth for stock.
+    """
     name = models.CharField(max_length=255)
     cas_number = models.CharField(max_length=255)
     molecular_weight = models.DecimalField(max_digits=10, decimal_places=2)
     purity = models.DecimalField(max_digits=10, decimal_places=2)
-    item_number = models.ForeignKey('inventory.Item', on_delete=models.CASCADE)
+    item = models.OneToOneField('inventory.Item', on_delete=models.CASCADE, related_name='lab_reagent_metadata')
 
     def __str__(self):
         return self.name
@@ -129,9 +115,15 @@ class LabReagent(models.Model):
 
 class LabTestProfile(models.Model):
     name = models.CharField(max_length=255)
-    
+
     def __str__(self):
         return self.name
+
+    def billing_items(self):
+        """Return the set of billing Items for all panels in this profile."""
+        from inventory.models import Item
+        item_ids = self.labtestpanel_set.values_list('item_id', flat=True)
+        return Item.objects.filter(id__in=item_ids)
 
 
 class Specimen(models.Model):
@@ -149,7 +141,7 @@ class TestPanelReagent(models.Model):
     """
     test_panel = models.ForeignKey('LabTestPanel', on_delete=models.CASCADE, related_name='reagent_links')
     reagent_item = models.ForeignKey('inventory.Item', on_delete=models.CASCADE, limit_choices_to={'category': 'LabReagent'})
-    tests_consumed_per_run = models.IntegerField(default=1, help_text="Number of tests consumed from this reagent per lab test run")
+    units_consumed_per_run = models.PositiveIntegerField(default=1, help_text="Base inventory units consumed from this reagent per test run")
     
     class Meta:
         unique_together = ('test_panel', 'reagent_item')
@@ -171,6 +163,56 @@ class LabTestPanel(models.Model):
     is_quantitative = models.BooleanField(default=True)
     # turn around time
     tat = models.DurationField(null=True, blank=True)
+
+    def clean(self):
+        if self.item and self.item.category != 'Lab Test':
+            raise ValidationError(
+                {"item": "Panel billing item must have category 'Lab Test'."}
+            )
+
+    def can_run(self):
+        """
+        Pre-billing check: verify all required reagents have sufficient stock.
+        Returns (ok: bool, message: str).
+        """
+        from inventory.models import Inventory
+
+        for link in self.reagent_links.all():
+            total = Inventory.objects.filter(
+                item=link.reagent_item,
+                quantity_at_hand__gt=0,
+            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
+
+            if total < link.units_consumed_per_run:
+                return False, f"Insufficient stock for {link.reagent_item.name} (need {link.units_consumed_per_run}, have {total})"
+        return True, "OK"
+
+    def available_runs(self):
+        """
+        How many times this test panel can run with current inventory.
+        Bottlenecked by the reagent with least stock relative to consumption.
+        """
+        from inventory.models import Inventory
+
+        min_runs = float('inf')
+        links = self.reagent_links.all()
+
+        if not links.exists():
+            return 0
+
+        for link in links:
+            total = Inventory.objects.filter(
+                item=link.reagent_item,
+                quantity_at_hand__gt=0,
+            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
+
+            if link.units_consumed_per_run > 0:
+                runs = total // link.units_consumed_per_run
+            else:
+                runs = float('inf')
+            min_runs = min(min_runs, runs)
+
+        return min_runs if min_runs != float('inf') else 0
 
     def __str__(self):
         unit_symbol = self.units.symbol if self.units else ''

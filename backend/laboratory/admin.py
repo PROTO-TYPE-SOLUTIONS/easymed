@@ -11,8 +11,6 @@ from .models import (
     PatientSample,
     ReferenceValue,
     LabTestInterpretation,
-    ProcessTestRequest,
-    TestKit,
     TestKitCounter,
     TestPanelReagent,
     ReagentConsumptionLog
@@ -49,12 +47,9 @@ admin.site.register(LabEquipment)
 admin.site.register(Specimen)
 admin.site.register(PatientSample)
 admin.site.register(ReferenceValue)
-admin.site.register(TestKit)
-
-
 @admin.register(TestPanelReagent)
 class TestPanelReagentAdmin(admin.ModelAdmin):
-    list_display = ['test_panel', 'reagent_item', 'tests_consumed_per_run']
+    list_display = ['test_panel', 'reagent_item', 'units_consumed_per_run']
     list_filter = ['test_panel__test_profile']
     search_fields = ['test_panel__name', 'reagent_item__name']
 

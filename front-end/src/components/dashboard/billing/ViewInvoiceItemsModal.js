@@ -71,24 +71,37 @@ const ViewInvoiceItems = ({open, setOpen, selectedRowData}) => {
             />
             <Column
               dataField="item_code"
-              caption="Code" 
+              caption="Code"
+            />
+            <Column
+              dataField="item_name"
+              caption="Item"
+            />
+            <Column
+              dataField="quantity"
+              caption="Qty"
+              width={70}
+            />
+            <Column
+              dataField="sale_price"
+              caption="Unit Price"
             />
             <Column
               dataField="payment_mode_name"
-              caption="Payment Mode" 
+              caption="Payment Mode"
             />
             <Column
-              dataField="actual_total"
-              caption="Amount" 
+              dataField="item_amount"
+              caption="Total Amount"
             />
             <Column
               dataField=""
-              caption="Co Pay" 
+              caption="Co Pay"
               cellRender={calculateCoPAy}
             />
             <Column
               dataField="status"
-              caption="Status" 
+              caption="Status"
             />
           </DataGrid>
       </DialogContent>

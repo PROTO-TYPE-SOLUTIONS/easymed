@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: easymed-postgres
     env_file:
       - ./.env.local
     ports:
@@ -25,7 +25,7 @@ services:
 
   redis:
     image: redis:7.0-alpine
-    container_name: redis
+    container_name: easymed-redis
     command: redis-server --appendonly yes --replica-read-only no
     volumes:
       - ./volumes/redis/:/etc/redis/
@@ -50,7 +50,7 @@ services:
     build:
       context: ./backend
       dockerfile: ./Dockerfile.local
-    container_name: api
+    container_name: easymed-backend
     command: python manage.py runserver 0.0.0.0:8080
     # command: uvicorn --host 0.0.0.0 --port 8080 easymed.asgi:application
     volumes:
@@ -83,7 +83,7 @@ services:
 
   worker:
     build: ./backend
-    container_name: "celery"
+    container_name: easymed-celery-worker
     restart: unless-stopped
     env_file:
       - ./.env.local
@@ -104,7 +104,7 @@ services:
 
   celery-beat:
     build: ./backend
-    container_name: celery-beat
+    container_name: easymed-celery-beat
     command: celery -A easymed beat --loglevel=INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     entrypoint: [] # Skip entrypoint to avoid running migrations
     env_file:
@@ -148,7 +148,7 @@ services:
 
   lis_server:
     image: mosesmbadi/hl7-astm-parser:latest
-    container_name: lis-server
+    container_name: easymed-lis-server
     ports:
       - 9091:9091
     env_file:

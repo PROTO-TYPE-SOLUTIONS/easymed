@@ -47,13 +47,15 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
         return obj.price_source
 
     def get_sale_price(self, obj):
-        """Compute effective sale_price for display purposes.
+        """Compute effective per-unit sale price for display purposes.
 
         Rule:
         - If PaymentMode is insurance and there is a matching InsuranceItemSalePrice,
-          return its sale_price.
+          return its sale_price (per unit).
         - Otherwise, return Inventory.sale_price for the item.
         - If nothing found, return 0.
+
+        Note: item_amount = sale_price × quantity (stored on the model).
         """
         try:
             from inventory.models import Inventory, InsuranceItemSalePrice

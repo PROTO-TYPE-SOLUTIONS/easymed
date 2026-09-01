@@ -110,15 +110,11 @@ const AddInvoiceModal = () => {
           dispatch(setSelectedLabRequest([]));
         }
 
-        for (const [
-          index,
-          prescribedDrug,
-        ] of selectedPrescribedDrugs.entries()) {
+        for (const prescribedDrug of selectedPrescribedDrugs) {
           const prescribedDrugsPayload = {
-            item_name: prescribedDrug?.item_name,
-            item_price: "200",
+            item: prescribedDrug?.id,
+            quantity: prescribedDrug?.quantity || 1,
             invoice: 1,
-            service: prescribedDrug?.id,
           };
           await billingInvoiceItems(auth, prescribedDrugsPayload);
           dispatch(setSelectedPrescribedDrug([]));

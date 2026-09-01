@@ -112,9 +112,11 @@ class Item(AbstractBaseModel):
         related_name='reagent_item',
         help_text="Auto-created Lab Test billing item paired to this Lab Reagent"
     )
-    vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0) 
-    packed = models.CharField(max_length=255, default=1)
-    subpacked = models.CharField(max_length=255, default=1)
+    vat_rate= models.DecimalField(max_digits=5, decimal_places=2, default=16.0)
+    # packed = number of boxes/packs per shipment unit
+    # subpacked = units per box (base unit of measure throughout the system)
+    packed = models.PositiveIntegerField(default=1)
+    subpacked = models.PositiveIntegerField(default=1)
     slow_moving_period = models.IntegerField(default=90)
 
     @property
@@ -274,9 +276,17 @@ class IncomingItem(AbstractBaseModel):
         ('Resale', 'resale'),
         ('Internal', 'internal'),
     ]
+    QUANTITY_UNIT_CHOICES = [
+        ('packs', 'Packs'),    # staff enters number of boxes/packs; system converts to base units
+        ('units', 'Units'),    # staff enters base units (subpacked) directly
+    ]
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField()
+    # quantity_unit clarifies what `quantity` represents.
+    # 'packs': quantity × item.subpacked = base units added to stock
+    # 'units': quantity is already in base units (legacy/default behaviour)
+    quantity_unit = models.CharField(max_length=10, choices=QUANTITY_UNIT_CHOICES, default='units')
     category_one = models.CharField(max_length=255, choices=CATEGORY_1_CHOICES, default='Resale') 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True,)

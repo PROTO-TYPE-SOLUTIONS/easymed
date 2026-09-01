@@ -1017,7 +1017,7 @@ def create_real_world_lab_data():
             link, _ = TestPanelReagent.objects.get_or_create(
                 test_panel=panel,
                 reagent_item=cbc_reagent_item,
-                defaults={'tests_consumed_per_run': 1}
+                defaults={'units_consumed_per_run': 1}
             )
             created_data['links'].append(link)
     
@@ -1138,7 +1138,7 @@ def create_real_world_lab_data():
             link, _ = TestPanelReagent.objects.get_or_create(
                 test_panel=panel,
                 reagent_item=reagent,
-                defaults={'tests_consumed_per_run': 1}
+                defaults={'units_consumed_per_run': 1}
             )
             created_data['links'].append(link)
     
@@ -1241,7 +1241,7 @@ def create_real_world_lab_data():
             link, _ = TestPanelReagent.objects.get_or_create(
                 test_panel=panel,
                 reagent_item=reagent,
-                defaults={'tests_consumed_per_run': 1}
+                defaults={'units_consumed_per_run': 1}
             )
             created_data['links'].append(link)
     
@@ -1344,7 +1344,7 @@ def create_real_world_lab_data():
             link, _ = TestPanelReagent.objects.get_or_create(
                 test_panel=panel,
                 reagent_item=reagent,
-                defaults={'tests_consumed_per_run': 1}
+                defaults={'units_consumed_per_run': 1}
             )
             created_data['links'].append(link)
     
@@ -1416,7 +1416,7 @@ def create_real_world_lab_data():
         link, _ = TestPanelReagent.objects.get_or_create(
             test_panel=panel,
             reagent_item=thyroid_reagent,
-            defaults={'tests_consumed_per_run': 1}
+            defaults={'units_consumed_per_run': 1}
         )
         created_data['links'].append(link)
     
@@ -1486,7 +1486,7 @@ def create_real_world_lab_data():
         link, _ = TestPanelReagent.objects.get_or_create(
             test_panel=panel,
             reagent_item=electrolytes_reagent,
-            defaults={'tests_consumed_per_run': 1}
+            defaults={'units_consumed_per_run': 1}
         )
         created_data['links'].append(link)
     
@@ -1570,7 +1570,7 @@ def create_real_world_lab_data():
             link, _ = TestPanelReagent.objects.get_or_create(
                 test_panel=panel,
                 reagent_item=reagent,
-                defaults={'tests_consumed_per_run': 1}
+                defaults={'units_consumed_per_run': 1}
             )
             created_data['links'].append(link)
     
