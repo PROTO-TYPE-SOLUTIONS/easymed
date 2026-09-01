@@ -68,11 +68,13 @@ services:
     networks:
       - mks
     healthcheck:
-      test: ["CMD", "python", "manage.py", "check", "--database", "default"]
+      # migrate --check exits non-zero until all migrations are applied,
+      # so dependents (celery, celery-beat) wait for the schema to exist
+      test: ["CMD", "python", "manage.py", "migrate", "--check"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
     deploy:
       resources:
         limits:

@@ -367,7 +367,7 @@ def download_labtestresult_pdf(request, processtestrequest_id):
             'flag': 'N/A',
             'ref_value_low': 'N/A',
             'ref_value_high': 'N/A',
-            'unit': panel.test_panel.unit,
+            'unit': panel.test_panel.units.symbol if panel.test_panel.units else '',
         }
 
         if panel.test_panel.is_qualitative:
