@@ -84,7 +84,7 @@ const BillingDocs = () => {
             <Code>sale_price</Code> and <Code>co_pay</Code>.
           </li>
           <li>
-            <strong>Inventory price</strong> — Falls back to the <Code>sale_price</Code> from the item's
+            <strong>Inventory price</strong> — Falls back to the <Code>sale_price</Code> from the item&apos;s
             active inventory record. The patient pays the full amount.
           </li>
         </ol>
@@ -108,8 +108,8 @@ const BillingDocs = () => {
       <Section title='Billing Lab Tests'>
         <p>When a lab test is billed:</p>
         <ol className='list-decimal pl-5 space-y-1'>
-          <li>An invoice item is created using the test panel's <Code>Lab Test</Code> billing item</li>
-          <li>The <Code>sale_price</Code> comes from the billing item's inventory record or insurance price</li>
+          <li>An invoice item is created using the test panel&apos;s <Code>Lab Test</Code> billing item</li>
+          <li>The <Code>sale_price</Code> comes from the billing item&apos;s inventory record or insurance price</li>
           <li>Setting <Code>is_billed = true</Code> on the LabTestRequestPanel triggers reagent deduction in the background</li>
           <li>Reagent stock is deducted from inventory (see Lab Tests & Reagents section for details)</li>
         </ol>
@@ -152,7 +152,7 @@ const BillingDocs = () => {
           </li>
           <li>
             Default insurance prices are auto-created when a new inventory record is created,
-            so billing items always have a price even if insurance rates haven't been explicitly configured.
+            so billing items always have a price even if insurance rates haven&apos;t been explicitly configured.
           </li>
           <li>
             Invoices are linked to patient visits. One visit can have multiple invoices.

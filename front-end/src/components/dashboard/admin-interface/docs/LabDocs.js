@@ -77,7 +77,7 @@ const LabDocs = () => {
           <p>
             When you create a <Code>LabReagent</Code> inventory item, the system automatically creates a
             paired <Code>Lab Test</Code> billing item. This billing item is what gets attached to the
-            test panel and appears on patient invoices. You don't need to create it manually.
+            test panel and appears on patient invoices. You don&apos;t need to create it manually.
           </p>
         </div>
       </Section>
@@ -86,9 +86,9 @@ const LabDocs = () => {
         <p>Here is the complete flow from doctor order to reagent deduction:</p>
         <ol className='list-decimal pl-5 space-y-2'>
           <li>
-            <strong>Doctor orders a profile</strong> (e.g., "Liver Function Tests")
+            <strong>Doctor orders a profile</strong> (e.g., &quot;Liver Function Tests&quot;)
             <br />
-            <span className='text-gray-500'>A LabTestRequest is created, linked to the patient's visit.</span>
+            <span className='text-gray-500'>A LabTestRequest is created, linked to the patient&apos;s visit.</span>
           </li>
           <li>
             <strong>System creates a LabTestRequestPanel for each panel</strong> in the profile
@@ -149,7 +149,7 @@ const LabDocs = () => {
         <ul className='list-disc pl-5 space-y-1'>
           <li>Inventory lots are sorted by expiry date (earliest first)</li>
           <li>Stock is deducted from the earliest-expiring lot until the required amount is consumed</li>
-          <li>If a lot doesn't have enough, the remainder is taken from the next lot</li>
+          <li>If a lot doesn&apos;t have enough, the remainder is taken from the next lot</li>
           <li>This prevents expired reagents from sitting unused while fresher stock is consumed</li>
         </ul>
       </Section>
@@ -199,11 +199,11 @@ const LabDocs = () => {
             A <Code>Lab Test</Code> billing item is auto-created.
           </li>
           <li>
-            <strong>Receive stock</strong> via Incoming Items. Select quantity_unit as "Packs" if entering boxes,
-            or "Units" if entering individual test counts.
+            <strong>Receive stock</strong> via Incoming Items. Select quantity_unit as &quot;Packs&quot; if entering boxes,
+            or &quot;Units&quot; if entering individual test counts.
           </li>
           <li>
-            <strong>Create a Test Profile</strong> (e.g., "Liver Function Tests") if one doesn't exist.
+            <strong>Create a Test Profile</strong> (e.g., &quot;Liver Function Tests&quot;) if one doesn&apos;t exist.
           </li>
           <li>
             <strong>Create Test Panels</strong> under the profile (e.g., ALT, AST, Albumin).

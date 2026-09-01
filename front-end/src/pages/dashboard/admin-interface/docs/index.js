@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { Container } from '@mui/material'
 import AuthGuard from '@/assets/hoc/auth-guard'
 import ProtectedRoute from '@/assets/hoc/protected-route'
@@ -15,12 +16,12 @@ const DocsPage = () => {
     <Container maxWidth='xl' className='py-4'>
       <div className='flex items-center justify-between mb-4'>
         <h1 className='text-2xl font-bold'>System Documentation</h1>
-        <a
+        <Link
           href='/dashboard/admin-interface'
           className='text-sm text-primary hover:underline'
         >
           Back to Settings
-        </a>
+        </Link>
       </div>
       <DocsNav
         selectedSection={selectedSection}
