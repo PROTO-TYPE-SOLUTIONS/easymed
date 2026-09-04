@@ -905,13 +905,14 @@ def create_real_world_lab_data():
     Based on actual laboratory testing standards.
     """
     from laboratory.models import (
-        LabTestProfile, LabTestPanel, Specimen, 
-        TestPanelReagent, TestKitCounter, ReferenceValue
+        LabTestProfile, LabTestPanel, Specimen,
+        TestPanelReagent, ReferenceValue
     )
-    from inventory.models import Item, Department, Inventory
+    from inventory.models import Item, Department, StockMovement, StockPolicy
+    from inventory.services import stock as stock_service
     from decimal import Decimal
     from datetime import date, timedelta
-    
+
     created_data = {
         'profiles': [],
         'panels': [],
@@ -920,28 +921,40 @@ def create_real_world_lab_data():
         'counters': [],
         'inventory_records': []
     }
-    
+
     # Get or create Lab department
     lab_dept, _ = Department.objects.get_or_create(name='Lab')
-    
-    # Helper function to create inventory for reagent items
+
     def create_reagent_inventory(reagent_item, purchase_price, sale_price, quantity_kits):
-        """Create inventory record for a reagent item"""
-        inv, created = Inventory.objects.get_or_create(
+        """
+        Seed opening stock for a reagent through the ledger, so demo data goes
+        in the same way real stock does.
+        """
+        units = int(reagent_item.subpacked or 1) * quantity_kits
+        movement = stock_service.receive(
             item=reagent_item,
+            department=lab_dept,
+            quantity=units,
+            unit_cost=Decimal(str(purchase_price)) / (reagent_item.subpacked or 1),
             lot_number=f'LOT-{reagent_item.item_code}-2026',
-            defaults={
-                'department': lab_dept,
-                'purchase_price': Decimal(str(purchase_price)),
-                'sale_price': Decimal(str(sale_price)),
-                'quantity_at_hand': int(reagent_item.subpacked) * quantity_kits,  # total tests
-                'category_one': 'Resale',
-                'expiry_date': date.today() + timedelta(days=365 * 2),  # 2 years from now
-            }
+            expiry_date=date.today() + timedelta(days=365 * 2),
+            reason='Demo data opening stock',
+            source_type=StockMovement.Source.SYSTEM,
+            movement_type=StockMovement.Type.OPENING_BALANCE,
+            idempotency_key=f'demo-reagent:{reagent_item.id}',
         )
-        if created:
-            created_data['inventory_records'].append(inv)
-        return inv
+        stock_service.set_sale_price(reagent_item, Decimal(str(sale_price)))
+        created_data['inventory_records'].append(movement)
+        return movement
+
+    def set_reagent_threshold(reagent_item, threshold):
+        """Re-order level for a reagent now lives on StockPolicy."""
+        policy, _ = StockPolicy.objects.update_or_create(
+            item=reagent_item, department=lab_dept,
+            defaults={'re_order_level': threshold},
+        )
+        created_data['counters'].append(policy)
+        return policy
     
     # Get or create specimens
     blood_specimen, _ = Specimen.objects.get_or_create(name='Blood')
@@ -1021,15 +1034,8 @@ def create_real_world_lab_data():
             )
             created_data['links'].append(link)
     
-    # Initialize CBC reagent counter
-    cbc_counter, _ = TestKitCounter.objects.get_or_create(
-        reagent_item=cbc_reagent_item,
-        defaults={
-            'available_tests': 1000,  # 2 kits = 1000 tests
-            'minimum_threshold': 100,
-        }
-    )
-    created_data['counters'].append(cbc_counter)
+    # Re-order level for the CBC reagent
+    set_reagent_threshold(cbc_reagent_item, 100)
     
     # 2. LIVER FUNCTION TEST (LFT) PROFILE
     lft_profile, _ = LabTestProfile.objects.get_or_create(name='Liver Function Test (LFT)')
@@ -1142,16 +1148,9 @@ def create_real_world_lab_data():
             )
             created_data['links'].append(link)
     
-    # Initialize counters for LFT reagents
+    # Re-order levels for LFT reagents
     for reagent in [alt_ast_reagent, alp_reagent, bilirubin_reagent, albumin_protein_reagent]:
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': 400,  # 2 kits
-                'minimum_threshold': 50,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, 50)
     
     # 3. LIPID PROFILE
     lipid_profile, _ = LabTestProfile.objects.get_or_create(name='Lipid Profile')
@@ -1245,16 +1244,9 @@ def create_real_world_lab_data():
             )
             created_data['links'].append(link)
     
-    # Initialize counters for lipid reagents
+    # Re-order levels for lipid reagents
     for reagent in [cholesterol_reagent, triglycerides_reagent, hdl_ldl_reagent]:
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': 600,  # 2 kits
-                'minimum_threshold': 75,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, 75)
     
     # 4. KIDNEY FUNCTION TEST (RFT/KFT) PROFILE
     kft_profile, _ = LabTestProfile.objects.get_or_create(name='Kidney Function Test (RFT)')
@@ -1349,14 +1341,7 @@ def create_real_world_lab_data():
             created_data['links'].append(link)
     
     for reagent in [creatinine_reagent, urea_reagent, uric_acid_reagent]:
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': 600,
-                'minimum_threshold': 75,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, 75)
     
     # 5. THYROID FUNCTION TEST (TFT) PROFILE
     tft_profile, _ = LabTestProfile.objects.get_or_create(name='Thyroid Function Test (TFT)')
@@ -1420,14 +1405,7 @@ def create_real_world_lab_data():
         )
         created_data['links'].append(link)
     
-    counter, _ = TestKitCounter.objects.get_or_create(
-        reagent_item=thyroid_reagent,
-        defaults={
-            'available_tests': 200,
-            'minimum_threshold': 30,
-        }
-    )
-    created_data['counters'].append(counter)
+    set_reagent_threshold(thyroid_reagent, 30)
     
     # 6. ELECTROLYTES PROFILE
     electrolytes_profile, _ = LabTestProfile.objects.get_or_create(name='Electrolytes Panel')
@@ -1490,14 +1468,7 @@ def create_real_world_lab_data():
         )
         created_data['links'].append(link)
     
-    counter, _ = TestKitCounter.objects.get_or_create(
-        reagent_item=electrolytes_reagent,
-        defaults={
-            'available_tests': 1000,
-            'minimum_threshold': 150,
-        }
-    )
-    created_data['counters'].append(counter)
+    set_reagent_threshold(electrolytes_reagent, 150)
     
     # 7. BLOOD GLUCOSE PROFILE
     glucose_profile, _ = LabTestProfile.objects.get_or_create(name='Blood Glucose Profile')
@@ -1576,14 +1547,7 @@ def create_real_world_lab_data():
     
     for reagent in [glucose_reagent, hba1c_reagent]:
         tests = 1000 if reagent == glucose_reagent else 200
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': tests,
-                'minimum_threshold': tests // 10,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, tests // 10)
     
     # ==== ADD REFERENCE VALUES FOR EXISTING PANELS ====
     created_data['reference_values'] = []
@@ -1877,15 +1841,16 @@ def create_pharmaceutical_inventory():
     Create comprehensive pharmaceutical inventory with realistic drugs across all categories.
     Includes medications, medical supplies, and consumables with proper pricing and quantities.
     """
-    from inventory.models import Inventory
+    from inventory.models import StockBalance, StockMovement
+    from inventory.services import stock as stock_service
     from decimal import Decimal
     from datetime import date, timedelta
-    
+
     created_data = {
         'items': [],
         'inventory_records': []
     }
-    
+
     # Get or create Pharmacy department
     pharmacy_dept, _ = Department.objects.get_or_create(name='Pharmacy')
     
@@ -2023,8 +1988,9 @@ def create_pharmaceutical_inventory():
             if item_created:
                 created_data['items'].append(item)
             
-            # Create inventory record if it doesn't exist
-            if not Inventory.objects.filter(item=item, department=pharmacy_dept).exists():
+            # Seed opening stock through the ledger, the same way real stock
+            # arrives, so the demo data has a documented origin.
+            if not StockBalance.objects.filter(item=item, department=pharmacy_dept).exists():
                 # Generate realistic expiry dates based on drug type
                 if category in ['Vaccines', 'IV Fluids']:
                     expiry_months = random.randint(12, 24)  # Shorter shelf life
@@ -2032,18 +1998,21 @@ def create_pharmaceutical_inventory():
                     expiry_months = random.randint(24, 60)  # Longer shelf life
                 else:
                     expiry_months = random.randint(18, 36)  # Standard shelf life
-                
-                inventory = Inventory.objects.create(
+
+                movement = stock_service.receive(
                     item=item,
                     department=pharmacy_dept,
-                    purchase_price=Decimal(str(drug["purchase"])),
-                    sale_price=Decimal(str(drug["sale"])),
-                    quantity_at_hand=drug["qty"],
-                    category_one='Resale',
+                    quantity=drug["qty"],
+                    unit_cost=Decimal(str(drug["purchase"])),
                     lot_number=f'LOT-{date.today().year}-{random.randint(1000, 9999)}',
-                    expiry_date=date.today() + timedelta(days=expiry_months * 30)
+                    expiry_date=date.today() + timedelta(days=expiry_months * 30),
+                    reason='Demo data opening stock',
+                    source_type=StockMovement.Source.SYSTEM,
+                    movement_type=StockMovement.Type.OPENING_BALANCE,
+                    idempotency_key=f'demo-drug:{item.id}',
                 )
-                created_data['inventory_records'].append(inventory)
+                stock_service.set_sale_price(item, Decimal(str(drug["sale"])))
+                created_data['inventory_records'].append(movement)
     
     print(f"\n✅ Created Pharmaceutical Inventory:")
     print(f"   - {len(created_data['items'])} Drug Items")
@@ -2058,7 +2027,8 @@ def create_pharmaceutical_inventory():
     for category, count in category_counts.items():
         print(f"   - {category}: {count} items")
     
-    total_value = sum(inv.purchase_price * inv.quantity_at_hand for inv in created_data['inventory_records'])
+    total_value = sum(
+        movement.unit_cost * movement.quantity for movement in created_data['inventory_records'])
     print(f"\n   Total Inventory Value: KES {total_value:,.2f}")
     
     return created_data

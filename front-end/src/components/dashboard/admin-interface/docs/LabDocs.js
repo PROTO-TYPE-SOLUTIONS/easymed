@@ -66,7 +66,8 @@ const LabDocs = () => {
         <Table
           headers={['Concept', 'Where It Lives', 'Purpose']}
           rows={[
-            ['Reagent stock', 'Inventory (quantity_at_hand)', 'How many base units of the reagent are in stock'],
+            ['Reagent stock', 'Stock ledger (StockMovement)', 'Base units in stock, derived from the ledger rather than a separate counter'],
+            ['Low-stock threshold', 'StockPolicy (per item, per location)', 'When to warn that a reagent is running out'],
             ['Reagent metadata', 'LabReagent model', 'Chemistry info: CAS number, molecular weight, purity (optional)'],
             ['Reagent-to-test link', 'TestPanelReagent', 'Which reagents a test panel needs and how many units per run'],
             ['Billing item', 'Item (category="Lab Test")', 'Auto-created paired item used for billing patients'],

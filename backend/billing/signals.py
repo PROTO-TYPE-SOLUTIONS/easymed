@@ -1,11 +1,17 @@
+import logging
+
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 from django.db.models import Sum
 
-from .utils import check_quantity_availability, update_service_billed_status
+from .services import check_stock_available, post_stock_for_invoice_item
+from .utils import update_service_billed_status
 from inventory.models import InsuranceItemSalePrice
+from inventory.services.stock import InsufficientStock, StockError
 from .models import InvoiceItem, InvoicePayment
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender=InvoiceItem)
@@ -70,31 +76,56 @@ def update_is_billed_status(sender, instance, **kwargs):
 
 
 
+def _is_becoming_billed(instance):
+    """True when this save flips the line from not-billed to billed."""
+    if instance.status != 'billed':
+        return False
+    if not instance.pk:
+        return True
+    previous = InvoiceItem.objects.filter(pk=instance.pk).values_list('status', flat=True).first()
+    return previous is not None and previous != 'billed'
+
+
 @receiver(pre_save, sender=InvoiceItem)
 def check_quantity_before_billing(sender, instance, **kwargs):
     '''
-    Before an InvoiceItem is saved, check if the status field is being updated to "billed".
-    Ensure that the available quantity is sufficient before proceeding.
+    Reject the save when there is not enough stock to bill the line.
+
+    This handler only CHECKS. Stock is issued after the line is safely saved,
+    by post_stock_after_billing below -- so a validation failure downstream can
+    no longer leave stock already deducted.
     '''
-    
-    # Check if it's an update, not a new creation
-    if instance.pk:
-        try:
-            previous_instance = InvoiceItem.objects.get(pk=instance.pk)
-        except InvoiceItem.DoesNotExist:
-            previous_instance = None
-        print("check_quantity_before_billing Signal fired")
-        # Check if the status is being updated to 'billed'
-        if previous_instance and previous_instance.status != instance.status and instance.status == 'billed':
-            # Check if the item is a Drug or Lab Test
-            if instance.item.category in ['Drug', 'Lab Test']:
-                # ? if not == false
-                if not check_quantity_availability(instance):
-                    raise ValidationError(f"Insufficient quantity available for {instance.item.name}.")
-            # Allow the save to proceed if quantity is sufficient
-    else:
-        # Handle new creation logic if needed
-        pass
+    if not _is_becoming_billed(instance):
+        return
+
+    instance._became_billed = True
+
+    ok, message = check_stock_available(instance)
+    if not ok:
+        raise ValidationError(message)
+
+
+@receiver(post_save, sender=InvoiceItem)
+def post_stock_after_billing(sender, instance, created, **kwargs):
+    '''
+    Issue the stock the line consumes, once the line itself is committed.
+
+    Idempotent on the invoice item id, so a re-save or a duplicated signal
+    cannot dispense the same drug twice.
+    '''
+    if not getattr(instance, '_became_billed', False):
+        return
+    instance._became_billed = False
+
+    try:
+        post_stock_for_invoice_item(instance)
+    except InsufficientStock as exc:
+        # The pre_save check passed but stock went in the meantime. Fail the
+        # transaction rather than billing something we cannot hand over.
+        raise ValidationError(str(exc))
+    except StockError as exc:
+        logger.exception("Could not post stock for invoice item %s: %s", instance.pk, exc)
+        raise ValidationError(str(exc))
 
 
 def calculate_actual_total(invoice_item):

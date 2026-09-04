@@ -498,3 +498,21 @@ export const allocateSupplierPayment = (auth, payload) => {
             })
     })
 };
+/**
+ * The stock ledger: every movement that has ever changed stock.
+ *
+ * Stock is not a number anyone writes to — it is the running total of these
+ * rows, so this is the audit trail behind every quantity on the dashboard.
+ */
+export const fetchStockMovements = (auth, filters = {}) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.get(`${APP_API_URL.STOCK_MOVEMENTS}`, { params: filters })
+            .then((res) => {
+                resolve(res.data)
+            })
+            .catch((err) => {
+                reject(err.response?.data || err.message)
+            })
+    })
+};

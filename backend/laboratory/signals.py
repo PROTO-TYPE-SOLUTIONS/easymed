@@ -1,14 +1,50 @@
+import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import LabTestRequestPanel, PatientSampleArchive, DisposedSample, RetestSample
-from laboratory.tasks import deduct_test_kit
+
+from laboratory.tasks import deduct_specimen_consumables, deduct_test_kit
+
+from .models import (
+    DisposedSample,
+    LabTestRequestPanel,
+    PatientSample,
+    PatientSampleArchive,
+    RetestSample,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def _dispatch(task, *args):
+    """
+    Run the stock task through Celery, falling back to running it inline when
+    the broker is unavailable so stock is never silently left unposted.
+    """
+    try:
+        task.delay(*args)
+    except Exception as exc:
+        logger.warning("Celery unavailable (%s); running %s inline", exc, task.name)
+        task(*args)
+
 
 @receiver(post_save, sender=LabTestRequestPanel)
 def trigger_test_kit_deduction(sender, instance, **kwargs):
-    if instance.is_billed:
-        deduct_test_kit.delay(instance.id)
+    """
+    Consume reagents for a billed panel.
 
-    print("Test Counter Signal Triggered")
+    This fires on every save of a billed panel; deduct_test_kit is idempotent
+    per (panel, reagent) so only the first one actually consumes stock.
+    """
+    if instance.is_billed:
+        _dispatch(deduct_test_kit, instance.id)
+
+
+@receiver(post_save, sender=PatientSample)
+def trigger_specimen_consumable_deduction(sender, instance, **kwargs):
+    """Consume tubes/swabs/slides once a sample has actually been collected."""
+    if instance.is_sample_collected:
+        _dispatch(deduct_specimen_consumables, instance.id)
 
 
 @receiver(post_save, sender=PatientSampleArchive)

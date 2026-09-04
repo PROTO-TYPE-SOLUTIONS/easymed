@@ -1,7 +1,8 @@
 import pytest
 
-from inventory.models import RequisitionItem, Item, Supplier, Inventory
-from inventory.serializers import RequisitionSerializer 
+from inventory.models import RequisitionItem, Item, Supplier
+from inventory.serializers import RequisitionSerializer
+from inventory.services import stock as stock_service
 
 @pytest.fixture
 def item2():
@@ -16,15 +17,13 @@ def item2():
 
 @pytest.fixture
 def inventory2(item2, department):
-    return Inventory.objects.create(
+    """Opening stock for item2, posted through the ledger."""
+    return stock_service.receive(
         item=item2,
-        quantity_at_hand=10,
-        purchase_price=10.0,
-        sale_price=20.0,
-        lot_number="LOT-001",
-        expiry_date="2024-01-01",
-        category_one="resale",
         department=department,
+        quantity=10,
+        unit_cost=10.0,
+        lot_number="LOT-001",
     )
 
 
@@ -128,11 +127,11 @@ def test_creating_requisition_with_same_item_same_supplier(
     assert response.status_code == 200
     assert len(response.data['items']) == 2  # First two items should be combined
 
+    # Cost per base unit now comes from the ledger's weighted average, not from
+    # whichever inventory row happened to sort first.
     total_amount_requested = sum(
-        item.quantity_requested * (
-            Inventory.objects.filter(item=item.item).first().purchase_price or 0
-        )
-        for item in requisition_items
+        line.quantity_requested * (line.item.current_cost or 0)
+        for line in requisition_items
     )
 
     assert total_amount_requested == 300.00

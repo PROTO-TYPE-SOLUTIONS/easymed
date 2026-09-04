@@ -26,10 +26,14 @@ from inventory.models import (
     PurchaseOrder,
     PurchaseOrderItem,
     IncomingItem,
-    Inventory,
+    ItemPrice,
+    StockBalance,
+    StockLot,
+    StockMovement,
     SupplierInvoice,
     InsuranceItemSalePrice,
 )
+from inventory.services import stock as stock_service
 
 from inpatient.models import (
     Ward,
@@ -241,36 +245,67 @@ def supplier_invoice(db, supplier, purchase_order):
     )
 
 @pytest.fixture
-def incoming_item(item, supplier, purchase_order, supplier_invoice):
+def incoming_item(item, supplier, purchase_order, supplier_invoice, department):
+    """An unposted goods-received line. Posting it is the caller's choice."""
     return IncomingItem.objects.create(
         item=item,
         supplier=supplier,
         supplier_invoice=supplier_invoice,
         purchase_order=purchase_order,
+        department=department,
         quantity=10,
-        sale_price=20.0,
-        category_one="resale",
-    )
-
-@pytest.fixture
-def inventory(item, department):
-    return Inventory.objects.create(
-        item=item,
-        quantity_at_hand=10,
-        last_deducted_at=None,
+        quantity_unit="units",
         purchase_price=10.0,
         sale_price=20.0,
-        lot_number="LOT-001",
-        expiry_date="2024-01-01",
-        category_one="resale",
-        department=department,
-        date_created=timezone.now()
     )
 
+
 @pytest.fixture
-def inventory_insurance_saleprice(inventory, insurance_company):
+def item_price(item):
+    return ItemPrice.objects.create(item=item, sale_price=20.0)
+
+
+@pytest.fixture
+def stock_lot(item):
+    return StockLot.objects.create(item=item, lot_number="LOT-001", expiry_date=date(2030, 1, 1))
+
+
+@pytest.fixture
+def opening_stock(item, department, item_price):
+    """
+    10 base units of `item` at `department`, posted through the ledger.
+
+    Returns the OPENING_BALANCE movement; use `stock_balance` when the test
+    needs the derived balance row.
+    """
+    return stock_service.receive(
+        item=item,
+        department=department,
+        quantity=10,
+        unit_cost=10.0,
+        lot_number="LOT-001",
+        expiry_date=date(2030, 1, 1),
+        movement_type=StockMovement.Type.OPENING_BALANCE,
+        source_type=StockMovement.Source.SYSTEM,
+    )
+
+
+@pytest.fixture
+def stock_balance(opening_stock):
+    return StockBalance.objects.get(
+        item=opening_stock.item, lot=opening_stock.lot, department=opening_stock.department)
+
+
+# Historical name used by older tests.
+@pytest.fixture
+def inventory(stock_balance):
+    return stock_balance
+
+
+@pytest.fixture
+def inventory_insurance_saleprice(item, insurance_company):
     return InsuranceItemSalePrice.objects.create(
-        inventory_item=inventory,
+        item=item,
         insurance_company=insurance_company,
         sale_price=20.0,
     )

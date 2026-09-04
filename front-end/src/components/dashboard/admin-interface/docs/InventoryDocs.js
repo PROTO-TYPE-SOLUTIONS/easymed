@@ -99,23 +99,101 @@ const InventoryDocs = () => {
         </ul>
       </Section>
 
+      <Section title='How stock is recorded'>
+        <p>
+          Stock is <strong>not</strong> a number anyone edits. Every change is a row
+          appended to the stock ledger (<Code>StockMovement</Code>), and the quantity you
+          see on the inventory screen is the running total of those rows.
+        </p>
+        <Table
+          headers={['Concept', 'What it is']}
+          rows={[
+            ['StockLot', 'The identity of a batch: item + lot number + expiry date'],
+            ['StockMovement', 'The ledger. Append-only: never edited, never deleted'],
+            ['StockBalance', 'A cache of the ledger, one row per item / lot / location'],
+            ['StockPolicy', 'Re-order level and reorder quantity, per item per location'],
+            ['StockReservation', 'Stock promised but not yet issued (e.g. prescribed, not dispensed)'],
+            ['StockTake', 'A physical count; posting it writes the variance as an adjustment'],
+          ]}
+        />
+        <p className='mt-2'>
+          Because the ledger is the source of truth, the balances can always be rebuilt
+          from it with <Code>manage.py rebuild_stock_balances</Code>. Any drift means
+          something wrote stock outside the service layer.
+        </p>
+      </Section>
+
+      <Section title='Movement types'>
+        <Table
+          headers={['Type', 'Direction', 'When it happens']}
+          rows={[
+            ['OPENING_BALANCE', 'In', 'Stock entered manually when setting up'],
+            ['RECEIPT', 'In', 'Goods received against a purchase order'],
+            ['SALE', 'Out', 'An invoice line is marked billed'],
+            ['CONSUMPTION', 'Out', 'Reagents or consumables used running a test'],
+            ['TRANSFER_OUT / TRANSFER_IN', 'Out then in', 'Stock moved between departments'],
+            ['ADJUSTMENT', 'Either', 'Variance found by a stock take'],
+            ['WASTAGE', 'Out', 'Breakage or spoilage'],
+            ['EXPIRY_WRITE_OFF', 'Out', 'A lot passed its expiry date'],
+            ['RETURN_TO_SUPPLIER', 'Out', 'Goods sent back'],
+            ['REVERSAL', 'Either', 'Contra entry undoing an earlier movement'],
+          ]}
+        />
+      </Section>
+
+      <Section title='Correcting a mistake'>
+        <p>
+          A movement is a fact that happened, so it is never edited or deleted. To undo
+          one, post a <strong>reversal</strong> — a contra entry that cancels it and leaves
+          both rows visible. Use a <strong>stock adjustment</strong> for a correction with
+          no original movement to point at, and a <strong>stock take</strong> when a
+          physical count disagrees with the system.
+        </p>
+      </Section>
+
+      <Section title='How stock leaves'>
+        <p>
+          Issues allocate <strong>FEFO</strong> (first expiry, first out) across lots at
+          the dispensing location. Expired lots are skipped, and stock already reserved for
+          someone else does not count as available. Each issue records the cost of the lot
+          it drew from, so cost of goods sold is a sum over the ledger rather than an
+          estimate.
+        </p>
+      </Section>
+
       <Section title='Stock Metrics'>
         <Table
           headers={['Metric', 'What It Means']}
           rows={[
-            ['Short Expiries', 'Items expiring within 90 days'],
-            ['Re-order Levels', 'Items where quantity_at_hand is at or below re_order_level'],
-            ['Total Value', 'Sum of (purchase_price x quantity_at_hand) across all lots'],
+            ['Short Expiries', 'Lots expiring within 90 days'],
+            ['Re-order Levels', 'Items whose total at a location is at or below its StockPolicy level'],
+            ['Total Value', 'Sum of (weighted-average unit cost x quantity) across all lots'],
           ]}
         />
+        <p className='mt-2'>
+          Re-order level belongs to an <strong>item at a location</strong>, never to an
+          individual lot — three lots of five tablets each is fifteen tablets, not three
+          separate shortages.
+        </p>
+      </Section>
+
+      <Section title='Prices'>
+        <p>
+          Sale price is not stored on the stock row. It lives on an effective-dated price
+          list (<Code>ItemPrice</Code>), with per-insurer overrides in{' '}
+          <Code>InsuranceItemSalePrice</Code>. Receiving goods at a new cost therefore
+          never silently revalues stock already on the shelf, and an invoice raised last
+          month keeps last month&apos;s price.
+        </p>
       </Section>
 
       <Section title='Key Rules'>
         <ul className='list-disc pl-5 space-y-1'>
           <li><strong>All quantities are in base units</strong> — never in packs. Packs are only a display/input convenience.</li>
-          <li>Stock is tracked per lot (<Code>lot_number</Code> + <Code>expiry_date</Code>). The same item can have multiple inventory records if it arrives in different lots.</li>
-          <li>When stock hits zero, the inventory record can be moved to <Code>InventoryArchive</Code>.</li>
-          <li>Departments can hold their own stock via <Code>DepartmentInventory</Code>, transferred from the main inventory.</li>
+          <li>Stock is tracked per lot (<Code>lot_number</Code> + <Code>expiry_date</Code>) per location.</li>
+          <li>A lot that reaches zero keeps its history. Nothing is archived away or deleted.</li>
+          <li>Services (lab tests, appointments) are billable but hold no stock at all.</li>
+          <li>Departments hold their own stock; moving it between them is a transfer, recorded as two balanced ledger entries.</li>
         </ul>
       </Section>
     </div>

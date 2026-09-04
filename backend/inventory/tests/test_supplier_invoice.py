@@ -1,115 +1,117 @@
 import pytest
 from decimal import Decimal
 from django.utils import timezone
-from inventory.models import SupplierInvoice, IncomingItem, PurchaseOrder, SupplierInvoice
 
-@pytest.mark.django_db
-def test_create_incoming_item_updates_invoice_amount(supplier_invoice, item, supplier, purchase_order):
-    incoming_item = IncomingItem.objects.create(
+from inventory.models import IncomingItem, StockBalance, SupplierInvoice
+from inventory.serializers import IncomingItemSerializer
+from inventory.services import stock as stock_service
+
+
+def _receive(supplier_invoice, item, supplier, purchase_order, department,
+             purchase_price, quantity, lot_no):
+    """Create a goods-received line and post it, the way the API does."""
+    line = IncomingItem.objects.create(
         item=item,
         supplier=supplier,
         purchase_order=purchase_order,
         supplier_invoice=supplier_invoice,
-        purchase_price=Decimal('100.00'),
+        department=department,
+        purchase_price=Decimal(purchase_price),
         sale_price=Decimal('150.00'),
-        quantity=2,
-        lot_no="LOT001",
-        expiry_date=timezone.now().date()
+        quantity=quantity,
+        quantity_unit='units',
+        lot_no=lot_no,
+        expiry_date=timezone.now().date(),
     )
-    
+    stock_service.receive_incoming_item(line)
+    return line
+
+
+@pytest.mark.django_db
+def test_posting_a_receipt_updates_invoice_amount(
+    supplier_invoice, item, supplier, purchase_order, department
+):
+    _receive(supplier_invoice, item, supplier, purchase_order, department, '100.00', 2, 'LOT001')
+
     supplier_invoice.refresh_from_db()
-    
     assert supplier_invoice.amount == Decimal('200.00')
 
+
 @pytest.mark.django_db
-def test_multiple_incoming_items_sum_correctly(supplier_invoice, item, supplier, purchase_order):
-    IncomingItem.objects.create(
-        item=item,
-        supplier=supplier,
-        purchase_order=purchase_order,
-        supplier_invoice=supplier_invoice,
-        purchase_price=Decimal('100.00'),
-        sale_price=Decimal('150.00'),
-        quantity=2,
-        lot_no="LOT001",
-        expiry_date=timezone.now().date()
-    )
-    
-    IncomingItem.objects.create(
-        item=item,
-        supplier=supplier,
-        purchase_order=purchase_order,
-        supplier_invoice=supplier_invoice,
-        purchase_price=Decimal('50.00'),
-        sale_price=Decimal('75.00'),
-        quantity=3,
-        lot_no="LOT002",
-        expiry_date=timezone.now().date()
-    )
-    
+def test_multiple_receipts_sum_correctly(
+    supplier_invoice, item, supplier, purchase_order, department
+):
+    _receive(supplier_invoice, item, supplier, purchase_order, department, '100.00', 2, 'LOT001')
+    _receive(supplier_invoice, item, supplier, purchase_order, department, '50.00', 3, 'LOT002')
+
     supplier_invoice.refresh_from_db()
-    
     assert supplier_invoice.amount == Decimal('350.00')
 
+
 @pytest.mark.django_db
-def test_update_incoming_item_updates_invoice_amount(supplier_invoice, item, supplier, purchase_order):
-    incoming_item = IncomingItem.objects.create(
+def test_posting_a_receipt_brings_stock_in(
+    supplier_invoice, item, supplier, purchase_order, department
+):
+    line = _receive(
+        supplier_invoice, item, supplier, purchase_order, department, '100.00', 2, 'LOT001')
+
+    line.refresh_from_db()
+    assert line.is_posted
+    assert StockBalance.objects.get(item=item, department=department).quantity == 2
+
+
+@pytest.mark.django_db
+def test_posting_the_same_receipt_twice_does_not_double_stock(
+    supplier_invoice, item, supplier, purchase_order, department
+):
+    line = _receive(
+        supplier_invoice, item, supplier, purchase_order, department, '100.00', 2, 'LOT001')
+
+    stock_service.receive_incoming_item(line)
+
+    assert StockBalance.objects.get(item=item, department=department).quantity == 2
+
+
+@pytest.mark.django_db
+def test_packs_are_converted_to_base_units(
+    supplier_invoice, item, supplier, purchase_order, department
+):
+    """item.subpacked is 1 by default; give it a real pack size."""
+    item.subpacked = 20
+    item.save()
+
+    line = IncomingItem.objects.create(
         item=item,
         supplier=supplier,
         purchase_order=purchase_order,
         supplier_invoice=supplier_invoice,
-        purchase_price=Decimal('100.00'),
-        sale_price=Decimal('150.00'),
-        quantity=2,
-        lot_no="LOT001",
-        expiry_date=timezone.now().date()
+        department=department,
+        purchase_price=Decimal('200.00'),   # per pack
+        quantity=3,                          # three packs
+        quantity_unit='packs',
+        lot_no='LOT-PACK',
+        expiry_date=timezone.now().date(),
     )
-    
-    incoming_item.quantity = 3
-    incoming_item.save()
-    
-    supplier_invoice.refresh_from_db()
-    
-    assert supplier_invoice.amount == Decimal('300.00')
+    stock_service.receive_incoming_item(line)
+
+    assert line.base_units == 60
+    assert StockBalance.objects.get(item=item, department=department).quantity == 60
+    # Cost is stored per base unit, not per pack.
+    assert StockBalance.objects.get(item=item, department=department).unit_cost == Decimal('10.0000')
+
 
 @pytest.mark.django_db
-def test_delete_incoming_item_updates_invoice_amount(incoming_item, supplier_invoice):
-    # Create an additional incoming item
-    item1 = IncomingItem.objects.create(
-        item=incoming_item.item,
-        supplier=incoming_item.supplier,
-        purchase_order=incoming_item.purchase_order,
-        supplier_invoice=supplier_invoice,
-        purchase_price=Decimal('50.00'),
-        sale_price=Decimal('75.00'),
-        quantity=3,
-        lot_no="LOT002",
-        expiry_date=timezone.now().date()
-    )
-    
-    item2 = IncomingItem.objects.create(
-        item=incoming_item.item,
-        supplier=incoming_item.supplier,
-        purchase_order=incoming_item.purchase_order,
-        supplier_invoice=supplier_invoice,
-        purchase_price=Decimal('50.00'),
-        sale_price=Decimal('75.00'),
-        quantity=3,
-        lot_no="LOT002",
-        expiry_date=timezone.now().date()
-    )
-    
-    # Calculate the initial amount
-    supplier_invoice.refresh_from_db()
-    initial_amount = supplier_invoice.amount
-    assert initial_amount == (item1.purchase_price * item1.quantity + 
-                               item2.purchase_price * item2.quantity)
-    
-    item1.delete()
-    supplier_invoice.refresh_from_db()
-    
-    updated_amount = initial_amount - (item1.purchase_price * item1.quantity)
-    assert supplier_invoice.amount == updated_amount
+def test_a_posted_receipt_cannot_be_edited(
+    supplier_invoice, item, supplier, purchase_order, department
+):
+    line = _receive(
+        supplier_invoice, item, supplier, purchase_order, department, '100.00', 2, 'LOT001')
+
+    serializer = IncomingItemSerializer(line, data={'quantity': 5}, partial=True)
+    assert serializer.is_valid(), serializer.errors
+    with pytest.raises(Exception):
+        serializer.save()
+
 
 @pytest.mark.django_db
 def test_create_supplier_invoice(supplier, purchase_order):

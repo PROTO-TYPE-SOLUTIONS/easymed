@@ -52,13 +52,13 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
         Rule:
         - If PaymentMode is insurance and there is a matching InsuranceItemSalePrice,
           return its sale_price (per unit).
-        - Otherwise, return Inventory.sale_price for the item.
+        - Otherwise, return the item's current cash price from the price list.
         - If nothing found, return 0.
 
-        Note: item_amount = sale_price × quantity (stored on the model).
+        Note: item_amount = sale_price x quantity (stored on the model).
         """
         try:
-            from inventory.models import Inventory, InsuranceItemSalePrice
+            from inventory.models import InsuranceItemSalePrice
 
             pm = getattr(obj, 'payment_mode', None)
             if pm and pm.payment_category == 'insurance' and pm.insurance_id:
@@ -68,8 +68,7 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
                 if price_row:
                     return price_row.sale_price
 
-            inv = Inventory.objects.filter(item=obj.item).order_by('-id').first()
-            return inv.sale_price if inv and inv.sale_price is not None else 0
+            return obj.item.current_sale_price or 0
         except Exception:
             return 0
     

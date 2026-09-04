@@ -93,8 +93,8 @@
           <td>{{ item.item.name }}</td>
           <td>{{ item.purchase_price }}</td>
           <td>{{ item.sale_price }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>{{ item.category_one }}</td>
+          <td>{{ item.quantity }} {{ item.get_quantity_unit_display }}</td>
+          <td>{{ item.item.category_one }}</td>
           <td>{{ item.lot_no }}</td>
           <td>{{ item.expiry_date }}</td>
         </tr>

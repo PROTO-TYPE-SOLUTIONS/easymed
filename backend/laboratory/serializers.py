@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
 from customuser.models import CustomUser
-from inventory.models import Inventory
+from inventory.services import stock as stock_service
 from .models import (
     LabReagent,
     LabTestRequest,
@@ -16,7 +16,6 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
-    TestKitCounter,
     LabTestInterpretation,
     ReferenceValue,
     ReagentConsumptionLog,
@@ -33,10 +32,29 @@ from .models import (
     )
 
 
-class TestKitCounterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TestKitCounter
-        fields = '__all__'
+class ReagentStockSerializer(serializers.Serializer):
+    """
+    Reagent availability derived from the stock ledger.
+
+    Replaces the old TestKitCounter table: the number is computed from
+    StockMovement rather than maintained as a second copy of the same quantity.
+    """
+    id = serializers.IntegerField(read_only=True)
+    reagent_item = serializers.IntegerField(read_only=True)
+    reagent_name = serializers.CharField(read_only=True)
+    reagent_code = serializers.CharField(read_only=True)
+    available_tests = serializers.IntegerField(read_only=True)
+    available_stock = serializers.IntegerField(read_only=True)
+    minimum_threshold = serializers.IntegerField(read_only=True)
+    is_low_stock = serializers.BooleanField(read_only=True)
+    is_out_of_stock = serializers.BooleanField(read_only=True)
+    stock_status = serializers.CharField(read_only=True)
+    stock_percentage = serializers.FloatField(read_only=True)
+
+
+# Historical names kept so existing imports and routes keep working.
+TestKitCounterSerializer = ReagentStockSerializer
+LowStockReagentSerializer = ReagentStockSerializer
 
 
 class LabReagentSerializer(serializers.ModelSerializer):
@@ -102,13 +120,8 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     tat = serializers.DurationField(source='test_panel.tat', read_only=True)
 
     def get_sale_price(self, instance):
-        try:
-            inventory = instance.test_panel.item.active_inventory_items.first()
-            if inventory:
-                return inventory.sale_price
-            return None  # Handle case where no inventory is found
-        except Inventory.DoesNotExist:
-            raise NotFound('Inventory record not found for this item.')
+        item = instance.test_panel.item if instance.test_panel else None
+        return item.current_sale_price if item else None
         
     def get_patient_name(self, instance):
         if instance.patient_sample and instance.patient_sample.process:
@@ -307,6 +320,7 @@ class ReagentConsumptionLogSerializer(serializers.ModelSerializer):
             'tests_consumed',
             'available_tests_before',
             'available_tests_after',
+            'stock_movement_reference',
             'consumed_at',
             'patient_name',
             'performed_by',
@@ -318,30 +332,6 @@ class ReagentConsumptionLogSerializer(serializers.ModelSerializer):
         if obj.performed_by:
             return f"{obj.performed_by.first_name} {obj.performed_by.last_name}"
         return "N/A"
-
-
-class LowStockReagentSerializer(serializers.ModelSerializer):
-    reagent_name = serializers.CharField(source='reagent_item.name', read_only=True)
-    stock_status = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = TestKitCounter
-        fields = [
-            'id',
-            'reagent_item',
-            'reagent_name',
-            'available_tests',
-            'minimum_threshold',
-            'stock_status',
-            'last_updated'
-        ]
-    
-    def get_stock_status(self, obj):
-        if obj.is_out_of_stock():
-            return 'out_of_stock'
-        elif obj.is_low_stock():
-            return 'low_stock'
-        return 'in_stock'
 
 
 class LabSettingsSerializer(serializers.ModelSerializer):

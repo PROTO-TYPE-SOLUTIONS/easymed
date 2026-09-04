@@ -11,7 +11,7 @@ from .models import (
     PatientSample,
     ReferenceValue,
     LabTestInterpretation,
-    TestKitCounter,
+    SpecimenConsumable,
     TestPanelReagent,
     ReagentConsumptionLog
 )
@@ -54,20 +54,16 @@ class TestPanelReagentAdmin(admin.ModelAdmin):
     search_fields = ['test_panel__name', 'reagent_item__name']
 
 
-@admin.register(TestKitCounter)
-class TestKitCounterAdmin(admin.ModelAdmin):
-    list_display = ['reagent_item', 'available_tests', 'minimum_threshold', 'stock_status', 'last_updated']
-    list_filter = ['last_updated']
-    search_fields = ['reagent_item__name']
-    readonly_fields = ['last_updated']
-    
-    def stock_status(self, obj):
-        if obj.is_out_of_stock():
-            return '🔴 Out of Stock'
-        elif obj.is_low_stock():
-            return '🟡 Low Stock'
-        return '🟢 In Stock'
-    stock_status.short_description = 'Status'
+# Reagent stock levels are not a table any more. They are derived from the
+# stock ledger, so browse them under Inventory > Stock balances (filtered to
+# Lab Reagent) instead of a counter that could drift.
+
+
+@admin.register(SpecimenConsumable)
+class SpecimenConsumableAdmin(admin.ModelAdmin):
+    list_display = ['specimen', 'item', 'quantity_per_collection']
+    list_filter = ['specimen']
+    search_fields = ['specimen__name', 'item__name']
 
 
 @admin.register(ReagentConsumptionLog)
@@ -75,7 +71,8 @@ class ReagentConsumptionLogAdmin(admin.ModelAdmin):
     list_display = ['reagent_item', 'test_panel', 'tests_consumed', 'patient_name', 'consumed_at', 'available_tests_after']
     list_filter = ['consumed_at', 'reagent_item', 'test_panel']
     search_fields = ['reagent_item__name', 'test_panel__name', 'patient_name']
-    readonly_fields = ['consumed_at', 'available_tests_before', 'available_tests_after']
+    readonly_fields = ['consumed_at', 'available_tests_before', 'available_tests_after',
+                       'stock_movement_reference']
     date_hierarchy = 'consumed_at'
     
     def has_add_permission(self, request):

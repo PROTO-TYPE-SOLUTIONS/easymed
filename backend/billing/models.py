@@ -171,13 +171,15 @@ class InvoiceItem(models.Model):
 
     @property
     def sale_price(self):
-        """Return the per-unit cash price from active Inventory (unaffected by quantity).
+        """Return the per-unit cash price from the price list.
 
-        Use item_amount for the billed total (unit_price × quantity).
+        Price comes from the effective-dated ItemPrice list, not from whichever
+        stock row happened to sort first -- that made the price a lottery
+        between lots.
+
+        Use item_amount for the billed total (unit_price x quantity).
         """
-        Inventory = apps.get_model('inventory', 'Inventory')
-        inv = Inventory.objects.filter(item=self.item).order_by('-id').first()
-        return inv.sale_price if inv and inv.sale_price is not None else 0
+        return self.item.current_sale_price or 0
     
     @property
     def price_source(self):
@@ -206,14 +208,12 @@ class InvoiceItem(models.Model):
         - actual_total: Amount patient pays after insurance/co-pay (× quantity)
         - price_source: Where the unit price came from ('insurance', 'cash', 'cash_fallback')
         """
-        Inventory = apps.get_model('inventory', 'Inventory')
         InsuranceItemSalePrice = apps.get_model('inventory', 'InsuranceItemSalePrice')
 
         qty = self.quantity or 1
 
-        # Get base cash price from inventory
-        inv = Inventory.objects.filter(item=self.item).order_by('-id').first()
-        base_price = inv.sale_price if inv and inv.sale_price is not None else 0
+        # Base cash price from the effective-dated price list.
+        base_price = self.item.current_sale_price or 0
 
         # If insurance payment mode
         if self.payment_mode and self.payment_mode.payment_category == 'insurance':
@@ -250,7 +250,7 @@ class InvoiceItem(models.Model):
         Uses get_pricing_for_item() to determine prices with explicit fallback chain:
         1. If PaymentMode is insurance and InsuranceItemSalePrice exists: use insurance price
         2. If PaymentMode is insurance but no InsuranceItemSalePrice: fallback to cash price
-        3. Otherwise: use Inventory.sale_price (cash price)
+        3. Otherwise: use the item's current cash price from ItemPrice
         """
         pricing = self.get_pricing_for_item()
         self.item_amount = pricing['item_amount']

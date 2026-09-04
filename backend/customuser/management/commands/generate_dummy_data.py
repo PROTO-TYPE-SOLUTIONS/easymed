@@ -131,8 +131,8 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"Created {len(suppliers)} dummy suppliers."))
         
         # Create real-world lab data (test profiles, panels, reagents, and links)
-        from laboratory.models import TestPanelReagent, TestKitCounter
-        if TestPanelReagent.objects.exists() and TestKitCounter.objects.exists():
+        from laboratory.models import TestPanelReagent
+        if TestPanelReagent.objects.exists():
             self.stdout.write(self.style.WARNING("Skipping real-world lab data: already exists."))
         else:
             try:
@@ -164,37 +164,28 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.WARNING("Lab test interpretations: all up to date."))
 
-        # Ensure all service items (lab tests, appointments) have inventory
-        self.stdout.write(self.style.NOTICE("\nEnsuring service items have inventory records..."))
-        from inventory.models import Inventory
+        # Price the service items (lab tests, appointments). Services hold no
+        # stock, so they no longer need fake 9999-unit inventory rows just to
+        # give billing a price to read.
+        self.stdout.write(self.style.NOTICE("\nPricing service items..."))
         from decimal import Decimal
-        from datetime import date, timedelta
-        
-        service_dept, _ = Department.objects.get_or_create(name='General')
+
+        from inventory.services import stock as stock_service
+
         service_categories = ['Lab Test', 'General Appointment', 'Specialized Appointment']
-        created_service_inv = 0
-        
+        priced_services = 0
+
         for category in service_categories:
-            items = Item.objects.filter(category=category)
-            for item in items:
-                if not Inventory.objects.filter(item=item).exists():
-                    default_price = Decimal('1000.00') if 'Appointment' in category else Decimal('500.00')
-                    Inventory.objects.create(
-                        item=item,
-                        department=service_dept,
-                        purchase_price=Decimal('0.00'),
-                        sale_price=default_price,
-                        quantity_at_hand=9999,
-                        category_one='Internal',
-                        lot_number='SERVICE-001',
-                        expiry_date=date.today() + timedelta(days=365 * 2)
-                    )
-                    created_service_inv += 1
-        
-        if created_service_inv > 0:
-            self.stdout.write(self.style.SUCCESS(f"Created {created_service_inv} service inventory records"))
+            default_price = Decimal('1000.00') if 'Appointment' in category else Decimal('500.00')
+            for item in Item.objects.filter(category=category):
+                if not item.current_sale_price:
+                    stock_service.set_sale_price(item, default_price)
+                    priced_services += 1
+
+        if priced_services > 0:
+            self.stdout.write(self.style.SUCCESS(f"Priced {priced_services} service items"))
         else:
-            self.stdout.write(self.style.WARNING("Service items already have inventory"))
+            self.stdout.write(self.style.WARNING("Service items already priced"))
         
         # Create hospital wards and beds
         from inpatient.models import Ward, Bed
@@ -209,11 +200,12 @@ class Command(BaseCommand):
             ))
         
         # Create comprehensive pharmaceutical inventory
-        from inventory.models import Inventory
-        pharmacy_items_count = Inventory.objects.filter(
+        from inventory.models import StockBalance
+        pharmacy_items_count = StockBalance.objects.filter(
             department__name='Pharmacy',
-            item__category__in=['Drug', 'SurgicalEquipment']
-        ).count()
+            item__category__in=['Drug', 'SurgicalEquipment'],
+            quantity__gt=0,
+        ).values('item').distinct().count()
         
         if pharmacy_items_count >= 50:
             self.stdout.write(self.style.WARNING("Skipping pharmaceutical inventory: already have sufficient stock."))

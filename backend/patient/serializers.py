@@ -16,7 +16,6 @@ from .models import (
 )
 from company.serializers import InsuranceCompanySerializer
 from inventory.models import (
-    Inventory,
     Item,
 )
 from billing.models import InvoiceItem
@@ -158,10 +157,7 @@ class PrescribedDrugSerializer(serializers.ModelSerializer):
             raise
 
     def get_sale_price(self, obj):
-        inventory = Inventory.objects.filter(item=obj.item).order_by('expiry_date').first()
-        if inventory:
-            return inventory.sale_price
-        return 0
+        return obj.item.current_sale_price or 0
         
 
 class ReferralSerializer(serializers.ModelSerializer):

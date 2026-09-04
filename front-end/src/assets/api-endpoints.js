@@ -117,6 +117,12 @@ export const API_URL = {
   FETCH_GOODS_RECEIPT_NOTE: "/inventory/goods-receipt-note/",
   FETCH_DEPARTMENTS: "/inventory/departments/",
   FETCH_LOW_QUANTITY: "/inventory/inventory_filter/",
+  STOCK_MOVEMENTS: "/inventory/stock-movements/",
+  STOCK_ADJUSTMENTS: "/inventory/stock-adjustments/",
+  STOCK_TRANSFERS: "/inventory/stock-transfers/",
+  STOCK_TAKES: "/inventory/stock-takes/",
+  STOCK_POLICIES: "/inventory/stock-policies/",
+  STOCK_VALUATION: "/inventory/inventories/valuation/",
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/patients/triage/",
@@ -317,6 +323,9 @@ export const APP_API_URL = {
   FETCH_GOODS_RECEIPT_NOTE: "/api/inventory/goods-receipt-note/",
   FETCH_LOW_QUANTITY: "/api/inventory/low-drugs",
   FETCH_DEPARTMENTS: "/api/groups/department/",
+  STOCK_MOVEMENTS: "/api/inventory/stock-movements",
+  STOCK_ADJUSTMENTS: "/api/inventory/stock-adjustments",
+  STOCK_TRANSFERS: "/api/inventory/stock-transfers",
 
   /***************** NURSING APIS **********************/
   ADD_TRIAGE: "/api/nursing/add-triage",

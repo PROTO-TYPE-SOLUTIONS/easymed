@@ -12,39 +12,11 @@ from django.core.exceptions import ValidationError
 from customuser.models import CustomUser
 
 
-class TestKitCounter(models.Model):
-    '''
-    Tracks available tests for lab reagents (kept in sync with Inventory).
+# TestKitCounter used to live here, mirroring reagent stock alongside
+# Inventory.quantity_at_hand. Two counters for one quantity always drift, so
+# reagent availability is now derived from the stock ledger --
+# see laboratory.utils.reagent_stock().
 
-    Inventory.quantity_at_hand is the source of truth for stock.
-    This counter is maintained in parallel for backward-compatible
-    dashboard/alert queries and will be phased out over time.
-    '''
-    reagent_item = models.OneToOneField(
-        'inventory.Item',
-        on_delete=models.CASCADE,
-        limit_choices_to={'category': 'LabReagent'},
-        related_name='test_counter',
-    )
-    available_tests = models.IntegerField(default=0, help_text="Total number of tests available across all kits in stock")
-    minimum_threshold = models.IntegerField(default=10, help_text="Alert when available tests fall below this number")
-    last_updated = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = "Reagent Test Counter"
-        verbose_name_plural = "Reagent Test Counters"
-    
-    def __str__(self):
-        return f"{self.reagent_item.name} - {self.available_tests} tests available"
-    
-    def is_low_stock(self):
-        """Check if reagent tests are below minimum threshold"""
-        return self.available_tests <= self.minimum_threshold
-    
-    def is_out_of_stock(self):
-        """Check if reagent tests are depleted"""
-        return self.available_tests <= 0
-    
 
 class ReagentConsumptionLog(models.Model):
     """
@@ -58,8 +30,11 @@ class ReagentConsumptionLog(models.Model):
     lab_test_request_panel = models.ForeignKey('LabTestRequestPanel', on_delete=models.CASCADE,
                                                  related_name='reagent_consumptions')
     tests_consumed = models.IntegerField(help_text="Number of tests consumed from reagent")
-    available_tests_before = models.IntegerField(help_text="Available tests before consumption")
-    available_tests_after = models.IntegerField(help_text="Available tests after consumption")
+    available_tests_before = models.IntegerField(help_text="Reagent stock before consumption, from the ledger")
+    available_tests_after = models.IntegerField(help_text="Reagent stock after consumption, from the ledger")
+    stock_movement_reference = models.UUIDField(
+        null=True, blank=True,
+        help_text="Groups the StockMovement rows this consumption produced")
     consumed_at = models.DateTimeField(auto_now_add=True)
     patient_name = models.CharField(max_length=255, blank=True)
     performed_by = models.ForeignKey('customuser.CustomUser', on_delete=models.SET_NULL, 
@@ -101,7 +76,7 @@ class LabEquipment(models.Model):
 class LabReagent(models.Model):
     """
     Chemistry metadata for lab reagents (CAS number, molecular weight, purity).
-    NOT used for stock tracking — Inventory is the source of truth for stock.
+    NOT used for stock tracking -- the stock ledger is the source of truth.
     """
     name = models.CharField(max_length=255)
     cas_number = models.CharField(max_length=255)
@@ -132,6 +107,29 @@ class Specimen(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class SpecimenConsumable(models.Model):
+    """
+    Links a specimen type to the consumables (tubes, swabs, slides) used up
+    each time a sample of it is collected.
+    """
+    specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, related_name='consumables')
+    item = models.ForeignKey(
+        'inventory.Item', on_delete=models.CASCADE,
+        limit_choices_to={'category': 'LabConsumable'},
+        related_name='specimen_consumable_links')
+    quantity_per_collection = models.PositiveIntegerField(
+        default=1,
+        help_text="Units of this consumable deducted each time a sample is collected")
+
+    class Meta:
+        unique_together = ('specimen', 'item')
+        verbose_name = "Specimen Consumable"
+        verbose_name_plural = "Specimen Consumables"
+
+    def __str__(self):
+        return f"{self.specimen.name} uses {self.quantity_per_collection} x {self.item.name}"
 
 
 class TestPanelReagent(models.Model):
@@ -174,40 +172,43 @@ class LabTestPanel(models.Model):
         """
         Pre-billing check: verify all required reagents have sufficient stock.
         Returns (ok: bool, message: str).
+
+        Availability comes from the ledger and excludes expired lots and stock
+        already reserved for other work.
         """
-        from inventory.models import Inventory
+        from inventory.services import stock as stock_service
 
-        for link in self.reagent_links.all():
-            total = Inventory.objects.filter(
-                item=link.reagent_item,
-                quantity_at_hand__gt=0,
-            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
+        from .utils import lab_department
 
-            if total < link.units_consumed_per_run:
-                return False, f"Insufficient stock for {link.reagent_item.name} (need {link.units_consumed_per_run}, have {total})"
+        department = lab_department()
+        for link in self.reagent_links.select_related('reagent_item'):
+            available = stock_service.available_quantity(link.reagent_item, department)
+            if available < link.units_consumed_per_run:
+                return False, (
+                    f"Insufficient stock for {link.reagent_item.name} "
+                    f"(need {link.units_consumed_per_run}, have {available})"
+                )
         return True, "OK"
 
     def available_runs(self):
         """
-        How many times this test panel can run with current inventory.
+        How many times this test panel can run with current stock.
         Bottlenecked by the reagent with least stock relative to consumption.
         """
-        from inventory.models import Inventory
+        from inventory.services import stock as stock_service
 
-        min_runs = float('inf')
-        links = self.reagent_links.all()
+        from .utils import lab_department
 
-        if not links.exists():
+        links = list(self.reagent_links.select_related('reagent_item'))
+        if not links:
             return 0
 
+        department = lab_department()
+        min_runs = float('inf')
         for link in links:
-            total = Inventory.objects.filter(
-                item=link.reagent_item,
-                quantity_at_hand__gt=0,
-            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
-
+            available = stock_service.available_quantity(link.reagent_item, department)
             if link.units_consumed_per_run > 0:
-                runs = total // link.units_consumed_per_run
+                runs = available // link.units_consumed_per_run
             else:
                 runs = float('inf')
             min_runs = min(min_runs, runs)
