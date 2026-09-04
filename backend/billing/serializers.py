@@ -73,17 +73,9 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
             return 0
     
     def create(self, validated_data):
-        """Auto-assign default payment mode if not provided."""
+        """Auto-assign the default (Cash) payment mode when none is provided."""
         if not validated_data.get('payment_mode'):
-            # Try to get the default payment mode (cash)
-            default_payment_mode = PaymentMode.objects.filter(is_default=True).first()
-            
-            if not default_payment_mode:
-                # Fallback to any cash category payment mode
-                default_payment_mode = PaymentMode.objects.filter(
-                    payment_category='cash'
-                ).first()
-            
+            default_payment_mode = PaymentMode.get_default()
             if default_payment_mode:
                 validated_data['payment_mode'] = default_payment_mode
         

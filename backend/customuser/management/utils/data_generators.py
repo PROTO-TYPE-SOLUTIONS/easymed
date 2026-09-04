@@ -13,10 +13,30 @@ from inpatient.models import Ward, Bed
 
 fake = Faker()
 
+# "Lab" (not "Laboratory") is the canonical name: laboratory.utils.lab_department()
+# and the stock service both look it up by that name, so a stray "Laboratory"
+# department would sit there holding no stock.
 DEPARTMENTS = [
-    "General", "Surgery", "Radiology", "Laboratory", "Pharmacy", "Dental", "Orthopedics", "Ophthalmology",
+    "General", "Main", "Surgery", "Radiology", "Lab", "Pharmacy", "Dental", "Orthopedics", "Ophthalmology",
     "Cardiology", "Neurology", "Psychiatry", "Gynecology", "Pediatrics", "Dermatology", "ENT", "Urology",
 ]
+
+# Items tagged to this department are shared with every department.
+SHARED_DEPARTMENT_NAME = "General"
+
+# Which department owns each kind of item. Anything mapped to "General" is
+# shared rather than owned by one department.
+CATEGORY_DEPARTMENTS = {
+    "Drug": ["Pharmacy"],
+    "LabReagent": ["Lab"],
+    "LabConsumable": ["Lab"],
+    "Lab Test": ["Lab"],
+    "SurgicalEquipment": ["Surgery"],
+    "Furniture": [SHARED_DEPARTMENT_NAME],
+    "general": [SHARED_DEPARTMENT_NAME],
+    "General Appointment": [SHARED_DEPARTMENT_NAME],
+    "Specialized Appointment": [SHARED_DEPARTMENT_NAME],
+}
 
 MEDICAL_ITEM_NAMES = [
     "Paracetamol Tablet", "Surgical Gloves", "Blood Pressure Monitor",
@@ -330,10 +350,11 @@ def create_dummy_items(count=50):
             }
         )
         if item not in items:
+            tag_item_departments(item, departments_for_category(item.category))
             items.append(item)
             if created:
                 created_count += 1
-                
+
     return items
 
 
@@ -358,8 +379,10 @@ def create_appointment_items():
             'slow_moving_period': 30,
         }
     )
+    # Appointments are booked anywhere, so they are shared.
+    tag_item_departments(general_appointment, SHARED_DEPARTMENT_NAME)
     appointment_items.append(general_appointment)
-    
+
     # Specialized Appointments - specific specialties
     specialized_appointments = [
         {
@@ -398,6 +421,7 @@ def create_appointment_items():
                 'slow_moving_period': 30,
             }
         )
+        tag_item_departments(item, SHARED_DEPARTMENT_NAME)
         appointment_items.append(item)
     
     return appointment_items
@@ -484,6 +508,85 @@ def create_dummy_departments():
     return departments
 
 
+def tag_item_departments(item, department_names, primary=None):
+    """
+    Link an item to the departments that use it.
+
+    The first name listed becomes the primary (owning) department unless
+    `primary` says otherwise. Tagging an item to "General" shares it with every
+    department, so shared stock does not need enumerating against each one.
+    """
+    from inventory.models import ItemDepartment
+
+    if isinstance(department_names, str):
+        department_names = [department_names]
+
+    primary = primary or (department_names[0] if department_names else None)
+    links = []
+
+    for name in department_names:
+        department, _ = Department.objects.get_or_create(name=name)
+        link, _ = ItemDepartment.objects.update_or_create(
+            item=item, department=department,
+            defaults={'is_primary': name == primary},
+        )
+        links.append(link)
+
+    return links
+
+
+def departments_for_category(category):
+    """Departments an item of this category belongs to."""
+    return CATEGORY_DEPARTMENTS.get(category, [SHARED_DEPARTMENT_NAME])
+
+
+def create_item_department_links():
+    """
+    Tag every item to the departments that use it.
+
+    Runs as a sweeper after the item generators, so items created by any route
+    (random items, appointments, lab panels, reagents, pharmaceuticals) end up
+    tagged. Items already tagged are left alone.
+    """
+    from inventory.models import Item, ItemDepartment, StockBalance
+
+    created = 0
+    skipped = 0
+
+    for item in Item.objects.all().prefetch_related('department_links'):
+        # .all() reads the prefetch cache; .exists() would re-query per item.
+        if item.department_links.all():
+            skipped += 1
+            continue
+
+        names = list(departments_for_category(item.category))
+
+        # If the item already holds stock somewhere, that location is the
+        # truth regardless of what its category suggests.
+        stocked_at = list(
+            StockBalance.objects.filter(item=item)
+            .values_list('department__name', flat=True)
+            .distinct()
+        )
+        for name in stocked_at:
+            if name and name not in names:
+                names.append(name)
+
+        if not names:
+            names = [SHARED_DEPARTMENT_NAME]
+
+        # Prefer a location the item actually sits in as the primary one.
+        primary = stocked_at[0] if stocked_at else names[0]
+        tag_item_departments(item, names, primary=primary)
+        created += 1
+
+    return {
+        'tagged': created,
+        'already_tagged': skipped,
+        'links': ItemDepartment.objects.count(),
+    }
+
+
 def create_demo_lab_profiles_and_panels():
     # Common specimens
     specimen_names = ["Blood", "Urine", "Stool", "Sputum", "CSF", "Saliva", "Swab", "Serum", "Plasma"]
@@ -539,6 +642,7 @@ def create_demo_lab_profiles_and_panels():
                     "slow_moving_period": 90,
                 }
             )
+            tag_item_departments(item, "Lab")
             lab_panel, _ = LabTestPanel.objects.get_or_create(
                 name=panel["name"],
                 specimen=specimens[panel["specimen"]],
@@ -944,6 +1048,13 @@ def create_real_world_lab_data():
             idempotency_key=f'demo-reagent:{reagent_item.id}',
         )
         stock_service.set_sale_price(reagent_item, Decimal(str(sale_price)))
+        tag_item_departments(reagent_item, 'Lab')
+        # The paired Lab Test billing item belongs to the lab too. sync_lab_test_item
+        # links it with QuerySet.update(), which leaves the in-memory instance
+        # stale, so re-read before checking.
+        reagent_item.refresh_from_db(fields=['lab_test_item'])
+        if reagent_item.lab_test_item_id:
+            tag_item_departments(reagent_item.lab_test_item, 'Lab')
         created_data['inventory_records'].append(movement)
         return movement
 
@@ -1985,6 +2096,9 @@ def create_pharmaceutical_inventory():
                 }
             )
             
+            # Pharmaceuticals and supplies are dispensed from the pharmacy.
+            tag_item_departments(item, 'Pharmacy')
+
             if item_created:
                 created_data['items'].append(item)
             

@@ -12,6 +12,7 @@ from .models import (
     IncomingItem,
     InsuranceItemSalePrice,
     Item,
+    ItemDepartment,
     ItemPrice,
     PurchaseOrder,
     PurchaseOrderItem,
@@ -106,10 +107,17 @@ class ItemSerializer(serializers.ModelSerializer):
     sale_price = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
     buying_price = serializers.DecimalField(max_digits=14, decimal_places=4, read_only=True)
     quantity_at_hand = serializers.IntegerField(read_only=True)
+    departments = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(), many=True, required=False,
+        help_text="Departments that use this item. Tag 'General' to share it with all")
+    department_names = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Item
         fields = '__all__'
+
+    def get_department_names(self, obj):
+        return list(obj.departments.values_list('name', flat=True))
 
     def _apply_price(self, item, sale_price):
         if sale_price is not None:
@@ -122,17 +130,39 @@ class ItemSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         sale_price = validated_data.pop('sale_price', None)
+        departments = validated_data.pop('departments', None)
         if not validated_data.get('item_code'):
             validated_data['item_code'] = generate_unique_item_code()
-        item = super().create(validated_data)
-        self._apply_price(item, sale_price)
+
+        with transaction.atomic():
+            item = super().create(validated_data)
+            if departments is not None:
+                self._set_departments(item, departments)
+            self._apply_price(item, sale_price)
         return item
 
     def update(self, instance, validated_data):
         sale_price = validated_data.pop('sale_price', None)
-        item = super().update(instance, validated_data)
-        self._apply_price(item, sale_price)
+        departments = validated_data.pop('departments', None)
+
+        with transaction.atomic():
+            item = super().update(instance, validated_data)
+            if departments is not None:
+                self._set_departments(item, departments)
+            self._apply_price(item, sale_price)
         return item
+
+    @staticmethod
+    def _set_departments(item, departments):
+        '''Replace the item's department tags, keeping the first as primary.'''
+        wanted_ids = [department.id for department in departments]
+        item.department_links.exclude(department_id__in=wanted_ids).delete()
+
+        for index, department in enumerate(departments):
+            ItemDepartment.objects.update_or_create(
+                item=item, department=department,
+                defaults={'is_primary': index == 0},
+            )
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

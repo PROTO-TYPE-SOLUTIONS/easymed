@@ -4,6 +4,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
 import { createItem, fetchUnits } from "@/redux/service/inventory";
+import { fetchDepartments } from "@/redux/service/auth";
 import { toast } from "react-toastify";
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from "@/assets/hooks/use-auth";
@@ -12,6 +13,7 @@ const NewItem = () => {
 
     const [loading, setLoading] = useState(false);
     const [unitOptions, setUnitOptions] = useState([]);
+    const [departmentOptions, setDepartmentOptions] = useState([]);
     const router = useRouter()
     const auth = useAuth();
 
@@ -21,11 +23,20 @@ const NewItem = () => {
             const results = Array.isArray(data) ? data : (data?.results ?? []);
             setUnitOptions(results.map((u) => ({ value: u.id, label: `${u.symbol} — ${u.name}` })));
         }).catch(() => {});
+
+        fetchDepartments(auth).then((data) => {
+            const results = Array.isArray(data) ? data : (data?.results ?? []);
+            setDepartmentOptions(results.map((d) => ({ value: d.id, label: d.name })));
+        }).catch(() => {});
     }, [auth?.token]);
 
+    // The two lab categories are deliberately distinct:
+    //   Lab Reagent    — consumed by running a test (linked via TestPanelReagent)
+    //   Lab Consumable — consumed by collecting a sample (linked via SpecimenConsumable)
     const categories = [
         {value: 'SurgicalEquipment', label: 'Surgical Equipment'},
-        {value: 'LabReagent', label: 'Lab Reagent'},
+        {value: 'LabReagent', label: 'Lab Reagent (used to run tests)'},
+        {value: 'LabConsumable', label: 'Lab Consumable (tubes, syringes, needles)'},
         {value: 'Drug', label: 'Drug'},
         {value: 'Furniture', label: 'Furniture'},
         {value: 'Lab Test', label: 'Lab Test'},
@@ -33,7 +44,7 @@ const NewItem = () => {
         {value: 'Specialized Appointment', label: 'Specialized Appointment'},
         {value: 'general', label: 'general'},
     ]
-  
+
     const initialValues = {
       packed: "",
       subpacked: "",
@@ -41,6 +52,7 @@ const NewItem = () => {
       category: "",
       units: "",
       desc: "",
+      departments: [],
     };
 
     const validationSchema = Yup.object().shape({
@@ -48,6 +60,7 @@ const NewItem = () => {
       category: Yup.object().required("This field is required!"),
       units: Yup.object().required("This field is required!"),
       desc: Yup.string().required("This field is required!"),
+      departments: Yup.array().min(1, "Tag at least one department (use General if shared)"),
     });
 
     const AddItem = async (formValue, helpers) => {
@@ -58,9 +71,10 @@ const NewItem = () => {
         const formData = {
           ...formValue,
           category: formValue.category.value,
-          units: formValue.units.value
+          units: formValue.units.value,
+          departments: (formValue.departments || []).map((d) => d.value),
         };
-  
+
         await createItem(formData, auth).then((res)=>{
            helpers.resetForm();
            const message = formValue.category.value === 'LabReagent'
@@ -152,6 +166,23 @@ const NewItem = () => {
                 />
                 <ErrorMessage
                     name="units"
+                    component="div"
+                    className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={12} xs={12}>
+                <SeachableSelect
+                    isMulti
+                    label="Departments"
+                    name="departments"
+                    options={departmentOptions}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                    Pick the departments that use this item. Tag it <strong>General</strong> to
+                    share it across all departments.
+                </p>
+                <ErrorMessage
+                    name="departments"
                     component="div"
                     className="text-warning text-xs"
                 />

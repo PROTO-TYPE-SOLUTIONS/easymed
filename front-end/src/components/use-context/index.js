@@ -6,6 +6,7 @@ import jwtDecode from "jwt-decode";
 import SimpleCrypto from "simple-crypto-js";
 import { useDispatch } from "react-redux";
 import { getAllUserPermissions } from "@/redux/features/auth";
+import { TOKEN_REFRESHED_EVENT } from "@/assets/hooks/use-axios";
 import { toast } from "react-toastify";
 
 export const authContext = createContext();
@@ -105,6 +106,24 @@ export const AuthProvider = ({ children }) => {
     user: user,
     isTokenValid: isTokenValid,
   };
+
+  // Adopt the new access token whenever the axios interceptor silently
+  // refreshes it, so the context never keeps serving an expired token.
+  useEffect(() => {
+    const handleTokenRefreshed = (event) => {
+      const token = event?.detail?.token ?? parseStoredToken("token");
+      if (!token) return;
+      try {
+        const decodedToken = jwtDecode(token);
+        setUser({ ...decodedToken, token });
+      } catch (error) {
+        console.error("Error decoding refreshed token:", error);
+      }
+    };
+
+    window.addEventListener(TOKEN_REFRESHED_EVENT, handleTokenRefreshed);
+    return () => window.removeEventListener(TOKEN_REFRESHED_EVENT, handleTokenRefreshed);
+  }, []);
 
   // decode the token and set the user when a component mounts
   useEffect(() => {

@@ -16,7 +16,8 @@ from customuser.management.utils.data_generators import (
     create_dummy_suppliers,
     create_real_world_lab_data,
     create_hospital_wards_and_beds,
-    create_pharmaceutical_inventory
+    create_pharmaceutical_inventory,
+    create_item_department_links,
 )
 from customuser.models import CustomUser
 from company.models import Company, CompanyBranch, InsuranceCompany
@@ -67,6 +68,12 @@ class Command(BaseCommand):
             insurance_companies = create_dummy_insurance_companies(count=DEFAULT_COUNT)
             self.stdout.write(self.style.SUCCESS(f"Created {len(insurance_companies)} dummy insurance companies."))
 
+        # Departments come before items: items are tagged to the departments
+        # that use them as they are created. get_or_create makes this idempotent,
+        # so any department missing from an older database is filled in.
+        create_dummy_departments()
+        self.stdout.write(self.style.SUCCESS(f"Ensured {Department.objects.count()} departments."))
+
         if Item.objects.count() >= DEFAULT_COUNT:
                 self.stdout.write(self.style.WARNING("Skipping items: already have 50 or more records."))
         else:
@@ -116,13 +123,6 @@ class Command(BaseCommand):
             profiles, panels = create_demo_lab_profiles_and_panels()
             self.stdout.write(self.style.SUCCESS(f"Created {len(profiles)} lab test profiles and {len(panels)} panels."))
 
-        # create departments
-        if Department.objects.exists():
-            self.stdout.write(self.style.WARNING("Skipping departments: already exist."))
-        else:
-            create_dummy_departments()
-            self.stdout.write(self.style.SUCCESS(f"Created {len(Department.objects.all())} departments."))
-        
         # create suppliers
         if Supplier.objects.count() >= DEFAULT_COUNT:
             self.stdout.write(self.style.WARNING("Skipping suppliers: already have 50 or more records."))
@@ -216,3 +216,14 @@ class Command(BaseCommand):
                 f"{len(pharma_data['items'])} items, "
                 f"{len(pharma_data['inventory_records'])} inventory records"
             ))
+
+        # Tag every item to the departments that use it. Runs last so it also
+        # catches items created indirectly, such as the Lab Test billing items
+        # auto-created for each lab reagent.
+        self.stdout.write(self.style.NOTICE("\nLinking items to departments..."))
+        link_stats = create_item_department_links()
+        self.stdout.write(self.style.SUCCESS(
+            f"Tagged {link_stats['tagged']} items to departments "
+            f"({link_stats['already_tagged']} already tagged, "
+            f"{link_stats['links']} item-department links in total)"
+        ))

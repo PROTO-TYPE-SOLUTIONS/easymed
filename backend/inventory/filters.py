@@ -1,7 +1,9 @@
 import django_filters
+from django.db.models import Q
 from rest_framework import filters
 
 from .models import (
+    SHARED_DEPARTMENT_NAME,
     IncomingItem,
     Item,
     PurchaseOrder,
@@ -72,10 +74,31 @@ class ItemFilter(django_filters.FilterSet):
     item_code = django_filters.CharFilter(lookup_expr='icontains')
     category = django_filters.CharFilter(lookup_expr='exact')
     is_stock_tracked = django_filters.BooleanFilter()
+    department = django_filters.NumberFilter(method='filter_department')
+    department_name = django_filters.CharFilter(method='filter_department_name')
 
     class Meta:
         model = Item
         fields = ('name', 'item_code', 'category', 'is_stock_tracked')
+
+    @staticmethod
+    def _visible_to(queryset, condition):
+        '''
+        Items tagged to the department, plus shared (General) items, plus items
+        nobody has tagged yet -- so untagged stock does not vanish from every
+        department the moment tagging is introduced.
+        '''
+        return queryset.filter(
+            condition
+            | Q(department_links__department__name__iexact=SHARED_DEPARTMENT_NAME)
+            | Q(department_links__isnull=True)
+        ).distinct()
+
+    def filter_department(self, queryset, name, value):
+        return self._visible_to(queryset, Q(department_links__department_id=value))
+
+    def filter_department_name(self, queryset, name, value):
+        return self._visible_to(queryset, Q(department_links__department__name__iexact=value))
 
 
 class PurchaseOrderFilter(django_filters.FilterSet):

@@ -6,6 +6,7 @@ from .models import (
     IncomingItem,
     InsuranceItemSalePrice,
     Item,
+    ItemDepartment,
     ItemPrice,
     PurchaseOrder,
     PurchaseOrderItem,
@@ -34,11 +35,31 @@ class UnitAdmin(admin.ModelAdmin):
     list_filter = ['category']
 
 
+class ItemDepartmentInline(admin.TabularInline):
+    model = ItemDepartment
+    extra = 1
+    autocomplete_fields = ['department']
+
+
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ['name', 'item_code', 'category', 'is_stock_tracked', 'default_re_order_level']
+    list_display = ['name', 'item_code', 'category', 'tagged_departments',
+                    'is_stock_tracked', 'default_re_order_level']
     search_fields = ['name', 'item_code', 'category']
-    list_filter = ['category', 'is_stock_tracked', 'category_one']
+    list_filter = ['category', 'is_stock_tracked', 'category_one', 'departments']
+    inlines = [ItemDepartmentInline]
+
+    @admin.display(description='Departments')
+    def tagged_departments(self, obj):
+        return ', '.join(obj.departments.values_list('name', flat=True)) or '—'
+
+
+@admin.register(ItemDepartment)
+class ItemDepartmentAdmin(admin.ModelAdmin):
+    list_display = ['item', 'department', 'is_primary']
+    list_filter = ['department', 'is_primary']
+    search_fields = ['item__name', 'item__item_code', 'department__name']
+    autocomplete_fields = ['item', 'department']
 
 
 @admin.register(ItemPrice)
@@ -147,7 +168,15 @@ admin.site.register(Supplier)
 admin.site.register(SupplierInvoice)
 admin.site.register(Requisition)
 admin.site.register(RequisitionItem)
-admin.site.register(Department)
+
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'is_stock_location']
+    search_fields = ['name']
+    list_filter = ['is_stock_location']
+
+
 admin.site.register(GoodsReceiptNote)
 admin.site.register(Quotation)
 admin.site.register(QuotationItem)

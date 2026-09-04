@@ -4,7 +4,7 @@ export const API_URL = {
   REGISTER_USER: "/users/register/",
   CREATE_USER: "/users/register/",
   LOGIN: "/users/login/",
-  REFRESH_TOKEN: "/api/token/refresh/",
+  REFRESH_TOKEN: "/users/token/refresh/",
   PASSWORD_RESET: "/customuser/password-reset/request/",
   CHANGE_PASSWORD: "/customuser/password-reset/confirm/",
   ADMIN_CHANGE_PASSWORD: "/customuser/users/",

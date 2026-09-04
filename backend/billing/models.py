@@ -34,15 +34,34 @@ class PaymentMode(models.Model):
     payment_category = models.CharField(
         max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
     is_default = models.BooleanField(default=False, help_text="Default payment mode for cash payments")
-    
+
     class Meta:
         indexes = [
             models.Index(fields=['payment_category']),
             models.Index(fields=['is_default']),
         ]
-    
+
+    def save(self, *args, **kwargs):
+        """Only one payment mode can be the default at a time."""
+        super().save(*args, **kwargs)
+        if self.is_default:
+            PaymentMode.objects.filter(is_default=True).exclude(pk=self.pk).update(is_default=False)
+
+    @classmethod
+    def get_default(cls):
+        """
+        The payment mode to bill against when no insurance is chosen.
+
+        Falls back through: the flagged default -> any cash mode -> nothing.
+        A Cash mode is seeded by migration, so the first branch normally wins.
+        """
+        return (
+            cls.objects.filter(is_default=True).first()
+            or cls.objects.filter(payment_category='cash').order_by('id').first()
+        )
+
     def __str__(self):
-        return self.payment_category + ' - ' + self.payment_mode
+        return self.payment_category + ' - ' + (self.payment_mode or '')
 
 
 
@@ -252,6 +271,11 @@ class InvoiceItem(models.Model):
         2. If PaymentMode is insurance but no InsuranceItemSalePrice: fallback to cash price
         3. Otherwise: use the item's current cash price from ItemPrice
         """
+        # No payment mode chosen means no insurance was selected, so the line is
+        # billed as cash against the default Cash payment mode.
+        if self.payment_mode_id is None:
+            self.payment_mode = PaymentMode.get_default()
+
         pricing = self.get_pricing_for_item()
         self.item_amount = pricing['item_amount']
         self.actual_total = pricing['actual_total']

@@ -40,6 +40,10 @@ class AbstractBaseModel(models.Model):
         abstract = True
 
 
+# Items tagged to this department are shared: every department can use them.
+SHARED_DEPARTMENT_NAME = 'General'
+
+
 class Department(AbstractBaseModel):
     '''
     A department doubles as a stock location. Strict naming should be employed
@@ -54,6 +58,11 @@ class Department(AbstractBaseModel):
         default=True,
         help_text="Whether stock can be held at this department"
     )
+
+    @property
+    def is_shared(self):
+        '''The General department stands for "usable by everyone".'''
+        return self.name.strip().lower() == SHARED_DEPARTMENT_NAME.lower()
 
     def __str__(self):
         return f"{self.id} - {self.name}"
@@ -158,6 +167,13 @@ class Item(AbstractBaseModel):
         default=5,
         help_text="Fallback re-order level when no per-department StockPolicy exists"
     )
+    departments = models.ManyToManyField(
+        Department,
+        through='ItemDepartment',
+        related_name='items',
+        blank=True,
+        help_text="Departments that use this item. Tag it 'General' to share it with all of them",
+    )
 
     class Meta:
         unique_together = ('name', 'category', 'units_of_measure')
@@ -197,6 +213,23 @@ class Item(AbstractBaseModel):
             total=Sum('quantity')
         )['total'] or 0
 
+    def is_available_to(self, department):
+        '''
+        True when this item belongs to `department`, or is shared (tagged
+        General), or has not been tagged at all yet.
+        '''
+        if department is None:
+            return True
+        links = self.department_links.select_related('department')
+        if not links.exists():
+            # Untagged items stay usable everywhere rather than disappearing
+            # from every department the moment this feature ships.
+            return True
+        return any(
+            link.department_id == department.id or link.department.is_shared
+            for link in links
+        )
+
     # Backwards-compatible aliases used by the serializers / front-end.
     @property
     def buying_price(self):
@@ -208,6 +241,34 @@ class Item(AbstractBaseModel):
 
     def __str__(self):
         return f"{self.id} - {self.name} - {self.category}"
+
+
+class ItemDepartment(AbstractBaseModel):
+    '''
+    Which departments use an item.
+
+    Kept as its own table rather than a single FK on Item, because plenty of
+    items are used by more than one department (gloves, syringes, saline). An
+    item tagged to the General department is shared with every department, so
+    there is no need to enumerate them.
+    '''
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='department_links')
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='item_links')
+    is_primary = models.BooleanField(
+        default=False,
+        help_text="The department that owns this item, used as the default stock location"
+    )
+
+    class Meta:
+        verbose_name = 'Item department'
+        verbose_name_plural = 'Item departments'
+        constraints = [
+            models.UniqueConstraint(fields=['item', 'department'], name='uniq_item_department'),
+        ]
+        indexes = [models.Index(fields=['department', 'item'], name='inv_itemdept_dept_item_idx')]
+
+    def __str__(self):
+        return f"{self.item.name} @ {self.department.name}"
 
 
 class ItemPrice(AbstractBaseModel):
