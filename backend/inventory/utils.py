@@ -39,9 +39,21 @@ def generate_unique_item_code():
 def update_purchase_order_status(purchase_order):
     """
     Updates the status of a PurchaseOrder based on the received quantities of its items.
+
+    Both totals are in base units. Comparing the ordering-unit counts instead
+    would call a purchase order complete as soon as one box of six arrived,
+    because a box holds more base units than the count of boxes ordered.
     """
-    total_ordered = purchase_order.po_items.aggregate(Sum('quantity_ordered'))['quantity_ordered__sum'] or 0
-    total_received = purchase_order.po_items.aggregate(Sum('quantity_received'))['quantity_received__sum'] or 0
+    from .models import IncomingItem
+
+    lines = list(purchase_order.po_items.select_related('requisition_item__item_unit'))
+    total_ordered = sum(line.base_quantity_ordered for line in lines)
+    total_received = sum(
+        receipt.base_units
+        for receipt in IncomingItem.objects.filter(
+            purchase_order=purchase_order, posted_at__isnull=False
+        ).select_related('item_unit')
+    )
 
     if total_received == 0:
         new_status = PurchaseOrder.Status.PENDING

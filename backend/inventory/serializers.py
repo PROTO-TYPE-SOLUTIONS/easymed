@@ -723,7 +723,12 @@ class IncomingItemSerializer(serializers.ModelSerializer):
             item=incoming_item.item,
             posted_at__isnull=False,
         )
-        po_item.quantity_received = sum(line.base_units for line in received)
+        # This field counts ordering units, the same as quantity_ordered --
+        # base_quantity_received scales it up and clean() compares the two
+        # directly. Storing base units here reported six boxes received when
+        # one had arrived.
+        received_base = sum(line.base_units for line in received)
+        po_item.quantity_received = received_base // (po_item.conversion_factor or 1)
         po_item.save(update_fields=['quantity_received'])
 
         from .utils import update_purchase_order_status

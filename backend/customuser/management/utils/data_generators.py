@@ -1117,7 +1117,12 @@ def create_real_world_lab_data():
             movement_type=StockMovement.Type.OPENING_BALANCE,
             idempotency_key=f'demo-reagent:{reagent_item.id}',
         )
-        stock_service.set_sale_price(reagent_item, Decimal(str(sale_price)))
+        # Both prices arrive per kit, but the ledger and the price list both
+        # work per base unit, so the sale price is divided down the same way
+        # unit_cost is above. Passing it through undivided priced a single test
+        # at the price of a whole kit.
+        stock_service.set_sale_price(
+            reagent_item, Decimal(str(sale_price)) / tests_per_kit)
         tag_item_departments(reagent_item, 'Lab')
         # The paired Lab Test billing item belongs to the lab too. sync_lab_test_item
         # links it with QuerySet.update(), which leaves the in-memory instance
