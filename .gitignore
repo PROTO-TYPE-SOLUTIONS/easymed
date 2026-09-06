@@ -104,3 +104,6 @@ terraform/.terraform/
 dump.rdb
 backup/data/*.sql.gz
 backup/data/*.sql
+
+
+tmp/

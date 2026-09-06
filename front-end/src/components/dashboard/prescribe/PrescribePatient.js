@@ -115,21 +115,16 @@ const PrescribePatient = () => {
       invoice: parseInt(thisProcess.invoice)
     }
 
-    try {
-      await prescribeDrug(payloadData, auth).then(()=>{
-        billingInvoiceItems(auth, invoiceItemPayload)
-        toast.success("Prescribed Drug Added Successfully!");
-      })
-
-    } catch(err) {
-      toast.error(err);
-      setLoading(false);
-    } 
+    await prescribeDrug(payloadData, auth)
+    await billingInvoiceItems(auth, invoiceItemPayload)
   }
 
   const sendEachPrescriptionItemToDb = (payload) => {
-    console.log("RESPONSE AFTER UPDATE", payload)
-    prescriptionItems.forEach(item => savePrescribedDrug(item, payload))
+    // Awaited by the caller: navigating away before these resolve silently
+    // drops prescribed drugs, because the pending requests are abandoned.
+    return Promise.all(
+      prescriptionItems.map(item => savePrescribedDrug(item, payload))
+    )
   }
 
   const savePrescription = async (formValue, helpers) => {
@@ -149,17 +144,18 @@ const PrescribePatient = () => {
 
       console.log(payload)
     
-      await updatePrescription(params.prescription_id, payload,  auth).then((res) => {
-        updateAttendanceProcesses({track: "pharmacy"}, params.process_id, auth)
-        sendEachPrescriptionItemToDb(res)
-        toast.success("Prescription Saved Successfully!");
-        setLoading(false);
-        dispatch(clearAllPrescriptionItems())
-        
-        router.push(`${pathname.includes('doctor-desk') ? '/dashboard/doctor-desk' : '/dashboard/patients' }`)
-      });
+      const res = await updatePrescription(params.prescription_id, payload, auth)
+
+      // Every write must finish before we clear local state and navigate away.
+      await sendEachPrescriptionItemToDb(res)
+      await updateAttendanceProcesses({track: "pharmacy"}, params.process_id, auth)
+
+      toast.success("Prescription Saved Successfully!");
+      dispatch(clearAllPrescriptionItems())
+      router.push(`${pathname.includes('doctor-desk') ? '/dashboard/doctor-desk' : '/dashboard/patients' }`)
     } catch (err) {
-      toast.error(err);
+      toast.error(typeof err === 'string' ? err : "Could not save the prescription");
+    } finally {
       setLoading(false);
     }
   };

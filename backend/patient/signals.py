@@ -1,15 +1,20 @@
 import logging
+from datetime import timedelta
+
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 
 
 from .models import (
     Prescription, PrescribedDrug,
     AttendanceProcess
 )
-from inventory.models import Inventory
+from inventory.models import Department, StockMovement
+from inventory.services import stock as stock_service
+from inventory.services.stock import InsufficientStock, StockError
 
 
 logger = logging.getLogger(__name__)
@@ -57,21 +62,40 @@ def appointment_assign_notification(attendance_process_id):
 
 
 @receiver(post_save, sender=PrescribedDrug)
-def update_inventory(sender, instance, created, **kwargs):
+def reserve_stock_for_prescription(sender, instance, created, **kwargs):
     '''
-    Signal to update Invetory when PrescribedDrug is_dispensed==True
-    It retrieves the corresponding inventory item, checks if there is enough stock,
-    subtracts the prescribed quantity from the inventory, and saves the updated inventory item.
+    Hold stock for a newly prescribed drug so it cannot be promised twice
+    between prescribing and dispensing.
+
+    The stock itself leaves when the drug is billed
+    (billing.services.post_stock_for_invoice_item) -- prescribing is a promise,
+    not a movement. The previous version of this handler tried to decrement a
+    field called `quantity_in_stock`, which has never existed on Inventory.
     '''
-    if created and instance.is_dispensed:
-        try:
-            inventory_item = Inventory.objects.get(item=instance.item)
-            if inventory_item.quantity_in_stock >= instance.quantity:
-                inventory_item.quantity_in_stock -= instance.quantity
-                inventory_item.save()
-            else:
-                # Handle the case where there isn't enough inventory
-                print(f"Not enough inventory for {instance.item.name}")
-        except Inventory.DoesNotExist:
-            # Handle the case where the item doesn't exist in the inventory
-            print(f"Inventory record not found for {instance.item.name}")
+    if not created or instance.is_dispensed:
+        return
+
+    item = instance.item
+    if not item.is_stock_tracked:
+        return
+
+    department = (
+        Department.objects.filter(name__iexact='Pharmacy', is_stock_location=True).first()
+    )
+    try:
+        department = department or stock_service.default_department()
+        stock_service.reserve(
+            item=item,
+            department=department,
+            quantity=instance.quantity,
+            expires_at=timezone.now() + timedelta(hours=24),
+            reason=f"Prescribed drug #{instance.pk}",
+            source_type=StockMovement.Source.INVOICE_ITEM,
+            source_id=instance.pk,
+        )
+    except InsufficientStock as exc:
+        # Prescribing is allowed to outrun stock; the pharmacy needs to see the
+        # request. Billing is where the hard stop lives.
+        logger.warning("Could not reserve stock for prescribed drug %s: %s", instance.pk, exc)
+    except StockError as exc:
+        logger.error("Stock error reserving for prescribed drug %s: %s", instance.pk, exc)

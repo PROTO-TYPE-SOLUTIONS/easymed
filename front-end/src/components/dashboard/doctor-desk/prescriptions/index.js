@@ -78,7 +78,7 @@ const AllPrescriptions = ({ patient }) => {
 
     try {
       setLoading(true);
-      await createPrescription(prescriptionData);
+      await createPrescription(prescriptionData, currentUser);
       toast.success("Prescription created successfully");
       setLoading(false);
     } catch (error) {

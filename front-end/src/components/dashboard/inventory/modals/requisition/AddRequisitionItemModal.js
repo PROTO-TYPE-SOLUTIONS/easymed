@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
+import OrderUnitSelect from "../../OrderUnitSelect";
 import { addRequisitionItem } from "@/redux/service/inventory";
 import { useAuth } from "@/assets/hooks/use-auth";
 
@@ -31,6 +32,7 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
     item: null,
     preferred_supplier: null,
     quantity_requested: "",
+    item_unit: null,
     requisition: requisition?.id
   };
 
@@ -48,6 +50,7 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
         ...formValue,
         preferred_supplier: formValue.preferred_supplier.value,
         item: formValue.item.value,
+        item_unit: formValue.item_unit?.value || null,
       };
 
       const response = await addRequisitionItem(formData, requisition.id, auth)
@@ -123,10 +126,13 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
                         className="text-warning text-xs"
                     />
                     </Grid>
-                    <Grid item md={12} xs={12}>
+                    <Grid item md={6} xs={12}>
+                    <label htmlFor="quantity_requested">Quantity</label>
                     <Field
                         className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                         maxWidth="sm"
+                        type="number"
+                        min="1"
                         placeholder="Quantity"
                         name="quantity_requested"
                     />
@@ -135,6 +141,9 @@ const AddRequisitionItemModal = ({requisition, setSelectedRowData}) => {
                         component="div"
                         className="text-warning text-xs"
                     />
+                    </Grid>
+                    <Grid item md={6} xs={12}>
+                      <OrderUnitSelect items={item} />
                     </Grid>
                     <Grid item md={12} xs={12}>
                     <div className="flex items-center justify-end">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import SeachableSelect from "@/components/select/Searchable";
+import OrderUnitSelect from "./OrderUnitSelect";
 import { useAuth } from "@/assets/hooks/use-auth";
 
 const AddRequisitionItemModal = () => {
@@ -34,6 +35,7 @@ const AddRequisitionItemModal = () => {
     item: null,
     preferred_supplier: null,
     quantity_requested: "",
+    item_unit: null,
   };
 
   const validationSchema = Yup.object().shape({
@@ -52,6 +54,7 @@ const AddRequisitionItemModal = () => {
         ...formValue,
         preferred_supplier: formValue.preferred_supplier.value,
         item: formValue.item.value,
+        item_unit: formValue.item_unit?.value || null,
       };
 
       setLoading(true);    
@@ -119,10 +122,13 @@ const AddRequisitionItemModal = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid item md={12} xs={12}>
+            <Grid item md={6} xs={12}>
+              <label htmlFor="quantity_requested">Quantity</label>
               <Field
                 className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                 maxWidth="sm"
+                type="number"
+                min="1"
                 placeholder="Quantity"
                 name="quantity_requested"
               />
@@ -131,6 +137,9 @@ const AddRequisitionItemModal = () => {
                 component="div"
                 className="text-warning text-xs"
               />
+            </Grid>
+            <Grid item md={6} xs={12}>
+              <OrderUnitSelect items={item} />
             </Grid>
             <Grid item md={12} xs={12}>
               <div className="flex items-center justify-end">

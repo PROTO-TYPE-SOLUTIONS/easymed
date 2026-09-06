@@ -14,9 +14,11 @@ from customuser.management.utils.data_generators import (
     create_lab_test_interpretations,
     create_dummy_departments,
     create_dummy_suppliers,
+    create_dummy_requisitions,
     create_real_world_lab_data,
     create_hospital_wards_and_beds,
-    create_pharmaceutical_inventory
+    create_pharmaceutical_inventory,
+    create_item_department_links,
 )
 from customuser.models import CustomUser
 from company.models import Company, CompanyBranch, InsuranceCompany
@@ -67,6 +69,12 @@ class Command(BaseCommand):
             insurance_companies = create_dummy_insurance_companies(count=DEFAULT_COUNT)
             self.stdout.write(self.style.SUCCESS(f"Created {len(insurance_companies)} dummy insurance companies."))
 
+        # Departments come before items: items are tagged to the departments
+        # that use them as they are created. get_or_create makes this idempotent,
+        # so any department missing from an older database is filled in.
+        create_dummy_departments()
+        self.stdout.write(self.style.SUCCESS(f"Ensured {Department.objects.count()} departments."))
+
         if Item.objects.count() >= DEFAULT_COUNT:
                 self.stdout.write(self.style.WARNING("Skipping items: already have 50 or more records."))
         else:
@@ -116,23 +124,25 @@ class Command(BaseCommand):
             profiles, panels = create_demo_lab_profiles_and_panels()
             self.stdout.write(self.style.SUCCESS(f"Created {len(profiles)} lab test profiles and {len(panels)} panels."))
 
-        # create departments
-        if Department.objects.exists():
-            self.stdout.write(self.style.WARNING("Skipping departments: already exist."))
-        else:
-            create_dummy_departments()
-            self.stdout.write(self.style.SUCCESS(f"Created {len(Department.objects.all())} departments."))
-        
         # create suppliers
         if Supplier.objects.count() >= DEFAULT_COUNT:
             self.stdout.write(self.style.WARNING("Skipping suppliers: already have 50 or more records."))
         else:
             suppliers = create_dummy_suppliers(count=DEFAULT_COUNT)
             self.stdout.write(self.style.SUCCESS(f"Created {len(suppliers)} dummy suppliers."))
+
+        # Requisitions come after suppliers and items, since a line needs both,
+        # plus the pack sizes that were seeded alongside the items.
+        from inventory.models import Requisition
+        if Requisition.objects.exists():
+            self.stdout.write(self.style.WARNING("Skipping requisitions: already exist."))
+        else:
+            requisitions = create_dummy_requisitions()
+            self.stdout.write(self.style.SUCCESS(f"Created {len(requisitions)} dummy requisitions."))
         
         # Create real-world lab data (test profiles, panels, reagents, and links)
-        from laboratory.models import TestPanelReagent, TestKitCounter
-        if TestPanelReagent.objects.exists() and TestKitCounter.objects.exists():
+        from laboratory.models import TestPanelReagent
+        if TestPanelReagent.objects.exists():
             self.stdout.write(self.style.WARNING("Skipping real-world lab data: already exists."))
         else:
             try:
@@ -164,37 +174,28 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.WARNING("Lab test interpretations: all up to date."))
 
-        # Ensure all service items (lab tests, appointments) have inventory
-        self.stdout.write(self.style.NOTICE("\nEnsuring service items have inventory records..."))
-        from inventory.models import Inventory
+        # Price the service items (lab tests, appointments). Services hold no
+        # stock, so they no longer need fake 9999-unit inventory rows just to
+        # give billing a price to read.
+        self.stdout.write(self.style.NOTICE("\nPricing service items..."))
         from decimal import Decimal
-        from datetime import date, timedelta
-        
-        service_dept, _ = Department.objects.get_or_create(name='General')
+
+        from inventory.services import stock as stock_service
+
         service_categories = ['Lab Test', 'General Appointment', 'Specialized Appointment']
-        created_service_inv = 0
-        
+        priced_services = 0
+
         for category in service_categories:
-            items = Item.objects.filter(category=category)
-            for item in items:
-                if not Inventory.objects.filter(item=item).exists():
-                    default_price = Decimal('1000.00') if 'Appointment' in category else Decimal('500.00')
-                    Inventory.objects.create(
-                        item=item,
-                        department=service_dept,
-                        purchase_price=Decimal('0.00'),
-                        sale_price=default_price,
-                        quantity_at_hand=9999,
-                        category_one='Internal',
-                        lot_number='SERVICE-001',
-                        expiry_date=date.today() + timedelta(days=365 * 2)
-                    )
-                    created_service_inv += 1
-        
-        if created_service_inv > 0:
-            self.stdout.write(self.style.SUCCESS(f"Created {created_service_inv} service inventory records"))
+            default_price = Decimal('1000.00') if 'Appointment' in category else Decimal('500.00')
+            for item in Item.objects.filter(category=category):
+                if not item.current_sale_price:
+                    stock_service.set_sale_price(item, default_price)
+                    priced_services += 1
+
+        if priced_services > 0:
+            self.stdout.write(self.style.SUCCESS(f"Priced {priced_services} service items"))
         else:
-            self.stdout.write(self.style.WARNING("Service items already have inventory"))
+            self.stdout.write(self.style.WARNING("Service items already priced"))
         
         # Create hospital wards and beds
         from inpatient.models import Ward, Bed
@@ -209,11 +210,12 @@ class Command(BaseCommand):
             ))
         
         # Create comprehensive pharmaceutical inventory
-        from inventory.models import Inventory
-        pharmacy_items_count = Inventory.objects.filter(
+        from inventory.models import StockBalance
+        pharmacy_items_count = StockBalance.objects.filter(
             department__name='Pharmacy',
-            item__category__in=['Drug', 'SurgicalEquipment']
-        ).count()
+            item__category__in=['Drug', 'SurgicalEquipment'],
+            quantity__gt=0,
+        ).values('item').distinct().count()
         
         if pharmacy_items_count >= 50:
             self.stdout.write(self.style.WARNING("Skipping pharmaceutical inventory: already have sufficient stock."))
@@ -224,3 +226,14 @@ class Command(BaseCommand):
                 f"{len(pharma_data['items'])} items, "
                 f"{len(pharma_data['inventory_records'])} inventory records"
             ))
+
+        # Tag every item to the departments that use it. Runs last so it also
+        # catches items created indirectly, such as the Lab Test billing items
+        # auto-created for each lab reagent.
+        self.stdout.write(self.style.NOTICE("\nLinking items to departments..."))
+        link_stats = create_item_department_links()
+        self.stdout.write(self.style.SUCCESS(
+            f"Tagged {link_stats['tagged']} items to departments "
+            f"({link_stats['already_tagged']} already tagged, "
+            f"{link_stats['links']} item-department links in total)"
+        ))

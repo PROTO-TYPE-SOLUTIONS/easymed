@@ -1,7 +1,7 @@
 import random
 from faker import Faker
 
-from inventory.models import Item, Department, Supplier, Unit
+from inventory.models import Item, Department, ItemUnit, Supplier, Unit
 from customuser.models import CustomUser
 from company.models import Company, CompanyBranch, InsuranceCompany
 from authperms.models import Permission, Group
@@ -13,10 +13,30 @@ from inpatient.models import Ward, Bed
 
 fake = Faker()
 
+# "Lab" (not "Laboratory") is the canonical name: laboratory.utils.lab_department()
+# and the stock service both look it up by that name, so a stray "Laboratory"
+# department would sit there holding no stock.
 DEPARTMENTS = [
-    "General", "Surgery", "Radiology", "Laboratory", "Pharmacy", "Dental", "Orthopedics", "Ophthalmology",
+    "General", "Main", "Surgery", "Radiology", "Lab", "Pharmacy", "Dental", "Orthopedics", "Ophthalmology",
     "Cardiology", "Neurology", "Psychiatry", "Gynecology", "Pediatrics", "Dermatology", "ENT", "Urology",
 ]
+
+# Items tagged to this department are shared with every department.
+SHARED_DEPARTMENT_NAME = "General"
+
+# Which department owns each kind of item. Anything mapped to "General" is
+# shared rather than owned by one department.
+CATEGORY_DEPARTMENTS = {
+    "Drug": ["Pharmacy"],
+    "LabReagent": ["Lab"],
+    "LabConsumable": ["Lab"],
+    "Lab Test": ["Lab"],
+    "SurgicalEquipment": ["Surgery"],
+    "Furniture": [SHARED_DEPARTMENT_NAME],
+    "general": [SHARED_DEPARTMENT_NAME],
+    "General Appointment": [SHARED_DEPARTMENT_NAME],
+    "Specialized Appointment": [SHARED_DEPARTMENT_NAME],
+}
 
 MEDICAL_ITEM_NAMES = [
     "Paracetamol Tablet", "Surgical Gloves", "Blood Pressure Monitor",
@@ -324,17 +344,42 @@ def create_dummy_items(count=50):
                 'item_code': fake.unique.bothify(text='???-#####')[:255],
                 'desc': desc[:255],
                 'vat_rate': 16.0,
-                'packed': str(random.randint(1, 10))[:255],
-                'subpacked': str(random.randint(1, 100))[:255],
                 'slow_moving_period': random.choice([30, 60, 90, 180]),
             }
         )
         if item not in items:
+            tag_item_departments(item, departments_for_category(item.category))
+            if created and item.is_stock_tracked:
+                add_demo_pack_sizes(item)
             items.append(item)
             if created:
                 created_count += 1
-                
+
     return items
+
+
+# Consumables really are bought by the box and the carton, so the demo data
+# gives most stocked items a pack ladder. Without it nothing on the requisition
+# or receiving screens has a unit to choose and the feature looks broken.
+DEMO_PACK_LADDERS = [
+    [('Box', 10), ('Carton', 100)],
+    [('Box', 12), ('Carton', 144)],
+    [('Pack', 25)],
+    [('Strip', 10), ('Box', 100)],
+    [('Box', 50)],
+]
+
+
+def add_demo_pack_sizes(item):
+    '''Give a stocked item a plausible pack ladder, all stated in base units.'''
+    for name, factor in random.choice(DEMO_PACK_LADDERS):
+        ItemUnit.objects.get_or_create(
+            item=item, name=name,
+            defaults={
+                'factor_to_base': factor,
+                'is_purchase_default': factor <= 50,
+            },
+        )
 
 
 def create_appointment_items():
@@ -353,13 +398,13 @@ def create_appointment_items():
             'item_code': 'GEN-00001',
             'desc': 'Standard general consultation appointment',
             'vat_rate': 0.0,  # Appointments typically don't have VAT
-            'packed': '1',
-            'subpacked': '1',
             'slow_moving_period': 30,
         }
     )
+    # Appointments are booked anywhere, so they are shared.
+    tag_item_departments(general_appointment, SHARED_DEPARTMENT_NAME)
     appointment_items.append(general_appointment)
-    
+
     # Specialized Appointments - specific specialties
     specialized_appointments = [
         {
@@ -393,11 +438,10 @@ def create_appointment_items():
                 'item_code': appt['code'],
                 'desc': appt['desc'],
                 'vat_rate': 0.0,  # Appointments typically don't have VAT
-                'packed': '1',
-                'subpacked': '1',
                 'slow_moving_period': 30,
             }
         )
+        tag_item_departments(item, SHARED_DEPARTMENT_NAME)
         appointment_items.append(item)
     
     return appointment_items
@@ -484,6 +528,85 @@ def create_dummy_departments():
     return departments
 
 
+def tag_item_departments(item, department_names, primary=None):
+    """
+    Link an item to the departments that use it.
+
+    The first name listed becomes the primary (owning) department unless
+    `primary` says otherwise. Tagging an item to "General" shares it with every
+    department, so shared stock does not need enumerating against each one.
+    """
+    from inventory.models import ItemDepartment
+
+    if isinstance(department_names, str):
+        department_names = [department_names]
+
+    primary = primary or (department_names[0] if department_names else None)
+    links = []
+
+    for name in department_names:
+        department, _ = Department.objects.get_or_create(name=name)
+        link, _ = ItemDepartment.objects.update_or_create(
+            item=item, department=department,
+            defaults={'is_primary': name == primary},
+        )
+        links.append(link)
+
+    return links
+
+
+def departments_for_category(category):
+    """Departments an item of this category belongs to."""
+    return CATEGORY_DEPARTMENTS.get(category, [SHARED_DEPARTMENT_NAME])
+
+
+def create_item_department_links():
+    """
+    Tag every item to the departments that use it.
+
+    Runs as a sweeper after the item generators, so items created by any route
+    (random items, appointments, lab panels, reagents, pharmaceuticals) end up
+    tagged. Items already tagged are left alone.
+    """
+    from inventory.models import Item, ItemDepartment, StockBalance
+
+    created = 0
+    skipped = 0
+
+    for item in Item.objects.all().prefetch_related('department_links'):
+        # .all() reads the prefetch cache; .exists() would re-query per item.
+        if item.department_links.all():
+            skipped += 1
+            continue
+
+        names = list(departments_for_category(item.category))
+
+        # If the item already holds stock somewhere, that location is the
+        # truth regardless of what its category suggests.
+        stocked_at = list(
+            StockBalance.objects.filter(item=item)
+            .values_list('department__name', flat=True)
+            .distinct()
+        )
+        for name in stocked_at:
+            if name and name not in names:
+                names.append(name)
+
+        if not names:
+            names = [SHARED_DEPARTMENT_NAME]
+
+        # Prefer a location the item actually sits in as the primary one.
+        primary = stocked_at[0] if stocked_at else names[0]
+        tag_item_departments(item, names, primary=primary)
+        created += 1
+
+    return {
+        'tagged': created,
+        'already_tagged': skipped,
+        'links': ItemDepartment.objects.count(),
+    }
+
+
 def create_demo_lab_profiles_and_panels():
     # Common specimens
     specimen_names = ["Blood", "Urine", "Stool", "Sputum", "CSF", "Saliva", "Swab", "Serum", "Plasma"]
@@ -534,11 +657,10 @@ def create_demo_lab_profiles_and_panels():
                     "item_code": f"LAB-{profile_name[:3].upper()}-{panel['name'][:3].upper()}",
                     "desc": f"{panel['name']} test for {profile_name}",
                     "vat_rate": 0.0,
-                    "packed": "1",
-                    "subpacked": "1",
                     "slow_moving_period": 90,
                 }
             )
+            tag_item_departments(item, "Lab")
             lab_panel, _ = LabTestPanel.objects.get_or_create(
                 name=panel["name"],
                 specimen=specimens[panel["specimen"]],
@@ -895,8 +1017,50 @@ def create_dummy_suppliers(count=20):
             common_name=common_name
         )
         suppliers.append(supplier)
-    
+
     return suppliers
+
+
+def create_dummy_requisitions(count=8):
+    """
+    Raise a few requisitions, most of them ordered by the box rather than by
+    the individual unit, so the procurement screens have realistic pack-based
+    lines to show.
+    """
+    from inventory.models import Requisition, RequisitionItem
+
+    requester = CustomUser.objects.filter(role=CustomUser.SYS_ADMIN).first() or CustomUser.objects.first()
+    departments = list(Department.objects.filter(is_stock_location=True)) or list(Department.objects.all())
+    suppliers = list(Supplier.objects.all())
+    stocked_items = list(
+        Item.objects.filter(is_stock_tracked=True).prefetch_related('unit_conversions')[:60])
+
+    if not (requester and departments and suppliers and stocked_items):
+        return []
+
+    requisitions = []
+    for _ in range(count):
+        requisition = Requisition.objects.create(
+            department=random.choice(departments),
+            requested_by=requester,
+        )
+
+        for item in random.sample(stocked_items, min(4, len(stocked_items))):
+            packs = list(item.unit_conversions.all())
+            # Order in a pack when the item has one -- that is the case worth
+            # demonstrating -- and loose the rest of the time.
+            pack = random.choice(packs) if packs and random.random() < 0.75 else None
+            RequisitionItem.objects.create(
+                requisition=requisition,
+                item=item,
+                item_unit=pack,
+                preferred_supplier=random.choice(suppliers),
+                quantity_requested=random.randint(2, 20) if pack else random.randint(20, 200),
+            )
+
+        requisitions.append(requisition)
+
+    return requisitions
 
 
 def create_real_world_lab_data():
@@ -905,13 +1069,14 @@ def create_real_world_lab_data():
     Based on actual laboratory testing standards.
     """
     from laboratory.models import (
-        LabTestProfile, LabTestPanel, Specimen, 
-        TestPanelReagent, TestKitCounter, ReferenceValue
+        LabTestProfile, LabTestPanel, Specimen,
+        TestPanelReagent, ReferenceValue
     )
-    from inventory.models import Item, Department, Inventory
+    from inventory.models import Item, Department, ItemUnit, StockMovement, StockPolicy
+    from inventory.services import stock as stock_service
     from decimal import Decimal
     from datetime import date, timedelta
-    
+
     created_data = {
         'profiles': [],
         'panels': [],
@@ -920,28 +1085,57 @@ def create_real_world_lab_data():
         'counters': [],
         'inventory_records': []
     }
-    
+
     # Get or create Lab department
     lab_dept, _ = Department.objects.get_or_create(name='Lab')
-    
-    # Helper function to create inventory for reagent items
-    def create_reagent_inventory(reagent_item, purchase_price, sale_price, quantity_kits):
-        """Create inventory record for a reagent item"""
-        inv, created = Inventory.objects.get_or_create(
+
+    def create_reagent_inventory(reagent_item, purchase_price, sale_price, quantity_kits,
+                                 tests_per_kit=1):
+        """
+        Seed opening stock for a reagent through the ledger, so demo data goes
+        in the same way real stock does.
+
+        `tests_per_kit` is recorded as the reagent's Kit pack size, then used to
+        convert the kits bought into the tests the ledger actually counts.
+        """
+        if tests_per_kit > 1:
+            ItemUnit.objects.update_or_create(
+                item=reagent_item,
+                name='Kit',
+                defaults={'factor_to_base': tests_per_kit, 'is_purchase_default': True},
+            )
+        units = tests_per_kit * quantity_kits
+        movement = stock_service.receive(
             item=reagent_item,
+            department=lab_dept,
+            quantity=units,
+            unit_cost=Decimal(str(purchase_price)) / tests_per_kit,
             lot_number=f'LOT-{reagent_item.item_code}-2026',
-            defaults={
-                'department': lab_dept,
-                'purchase_price': Decimal(str(purchase_price)),
-                'sale_price': Decimal(str(sale_price)),
-                'quantity_at_hand': int(reagent_item.subpacked) * quantity_kits,  # total tests
-                'category_one': 'Resale',
-                'expiry_date': date.today() + timedelta(days=365 * 2),  # 2 years from now
-            }
+            expiry_date=date.today() + timedelta(days=365 * 2),
+            reason='Demo data opening stock',
+            source_type=StockMovement.Source.SYSTEM,
+            movement_type=StockMovement.Type.OPENING_BALANCE,
+            idempotency_key=f'demo-reagent:{reagent_item.id}',
         )
-        if created:
-            created_data['inventory_records'].append(inv)
-        return inv
+        stock_service.set_sale_price(reagent_item, Decimal(str(sale_price)))
+        tag_item_departments(reagent_item, 'Lab')
+        # The paired Lab Test billing item belongs to the lab too. sync_lab_test_item
+        # links it with QuerySet.update(), which leaves the in-memory instance
+        # stale, so re-read before checking.
+        reagent_item.refresh_from_db(fields=['lab_test_item'])
+        if reagent_item.lab_test_item_id:
+            tag_item_departments(reagent_item.lab_test_item, 'Lab')
+        created_data['inventory_records'].append(movement)
+        return movement
+
+    def set_reagent_threshold(reagent_item, threshold):
+        """Re-order level for a reagent now lives on StockPolicy."""
+        policy, _ = StockPolicy.objects.update_or_create(
+            item=reagent_item, department=lab_dept,
+            defaults={'re_order_level': threshold},
+        )
+        created_data['counters'].append(policy)
+        return policy
     
     # Get or create specimens
     blood_specimen, _ = Specimen.objects.get_or_create(name='Blood')
@@ -955,11 +1149,9 @@ def create_real_world_lab_data():
     cbc_reagent_item, _ = Item.objects.get_or_create(
         name='Sysmex CBC Reagent Kit',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Complete reagent kit for automated hematology analyzer - Sysmex XN Series',
-            'packed': '1',
-            'subpacked': '500',  # 500 tests per kit
             'item_code': 'SYS-CBC-500',
             'vat_rate': 16.0,
         }
@@ -971,7 +1163,8 @@ def create_real_world_lab_data():
         reagent_item=cbc_reagent_item,
         purchase_price=15000.00,  # KES 15,000 per kit
         sale_price=18000.00,      # KES 18,000 per kit
-        quantity_kits=2           # 2 kits = 1000 tests
+        quantity_kits=2,          # 2 kits = 1000 tests
+        tests_per_kit=500,
     )
     
     # CBC Panels
@@ -992,8 +1185,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1021,15 +1212,8 @@ def create_real_world_lab_data():
             )
             created_data['links'].append(link)
     
-    # Initialize CBC reagent counter
-    cbc_counter, _ = TestKitCounter.objects.get_or_create(
-        reagent_item=cbc_reagent_item,
-        defaults={
-            'available_tests': 1000,  # 2 kits = 1000 tests
-            'minimum_threshold': 100,
-        }
-    )
-    created_data['counters'].append(cbc_counter)
+    # Re-order level for the CBC reagent
+    set_reagent_threshold(cbc_reagent_item, 100)
     
     # 2. LIVER FUNCTION TEST (LFT) PROFILE
     lft_profile, _ = LabTestProfile.objects.get_or_create(name='Liver Function Test (LFT)')
@@ -1038,62 +1222,54 @@ def create_real_world_lab_data():
     alt_ast_reagent, _ = Item.objects.get_or_create(
         name='Roche ALT/AST Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Enzymatic colorimetric test for ALT and AST determination',
-            'packed': '1',
-            'subpacked': '200',  # 200 tests per kit
             'item_code': 'ROCHE-ALT-AST-200',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(alt_ast_reagent)
-    create_reagent_inventory(alt_ast_reagent, 8000.00, 10000.00, 2)
+    create_reagent_inventory(alt_ast_reagent, 8000.00, 10000.00, 2, 200)
     
     alp_reagent, _ = Item.objects.get_or_create(
         name='Roche Alkaline Phosphatase Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Colorimetric test for ALP determination using p-nitrophenyl phosphate',
-            'packed': '1',
-            'subpacked': '200',
             'item_code': 'ROCHE-ALP-200',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(alp_reagent)
-    create_reagent_inventory(alp_reagent, 7500.00, 9500.00, 2)
+    create_reagent_inventory(alp_reagent, 7500.00, 9500.00, 2, 200)
     
     bilirubin_reagent, _ = Item.objects.get_or_create(
         name='Roche Total Bilirubin Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Diazo method for total bilirubin determination',
-            'packed': '1',
-            'subpacked': '200',
             'item_code': 'ROCHE-TBIL-200',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(bilirubin_reagent)
-    create_reagent_inventory(bilirubin_reagent, 8500.00, 10500.00, 2)
+    create_reagent_inventory(bilirubin_reagent, 8500.00, 10500.00, 2, 200)
     
     albumin_protein_reagent, _ = Item.objects.get_or_create(
         name='Roche Albumin/Total Protein Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'BCG method for albumin and biuret method for total protein',
-            'packed': '1',
-            'subpacked': '250',
             'item_code': 'ROCHE-ALB-TP-250',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(albumin_protein_reagent)
-    create_reagent_inventory(albumin_protein_reagent, 9000.00, 11500.00, 2)
+    create_reagent_inventory(albumin_protein_reagent, 9000.00, 11500.00, 2, 250)
     
     # LFT Panels with specific reagent links
     lft_panels_config = [
@@ -1112,8 +1288,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Liver function marker',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1142,16 +1316,9 @@ def create_real_world_lab_data():
             )
             created_data['links'].append(link)
     
-    # Initialize counters for LFT reagents
+    # Re-order levels for LFT reagents
     for reagent in [alt_ast_reagent, alp_reagent, bilirubin_reagent, albumin_protein_reagent]:
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': 400,  # 2 kits
-                'minimum_threshold': 50,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, 50)
     
     # 3. LIPID PROFILE
     lipid_profile, _ = LabTestProfile.objects.get_or_create(name='Lipid Profile')
@@ -1160,47 +1327,41 @@ def create_real_world_lab_data():
     cholesterol_reagent, _ = Item.objects.get_or_create(
         name='Abbott Cholesterol Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Enzymatic endpoint method for cholesterol determination',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ABB-CHOL-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(cholesterol_reagent)
-    create_reagent_inventory(cholesterol_reagent, 10000.00, 12500.00, 2)
+    create_reagent_inventory(cholesterol_reagent, 10000.00, 12500.00, 2, 300)
     
     triglycerides_reagent, _ = Item.objects.get_or_create(
         name='Abbott Triglycerides Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Enzymatic colorimetric test with lipase and glycerol kinase',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ABB-TRIG-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(triglycerides_reagent)
-    create_reagent_inventory(triglycerides_reagent, 9500.00, 12000.00, 2)
+    create_reagent_inventory(triglycerides_reagent, 9500.00, 12000.00, 2, 300)
     
     hdl_ldl_reagent, _ = Item.objects.get_or_create(
         name='Abbott HDL/LDL Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Direct measurement of HDL and LDL cholesterol',
-            'packed': '1',
-            'subpacked': '250',
             'item_code': 'ABB-HDL-LDL-250',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(hdl_ldl_reagent)
-    create_reagent_inventory(hdl_ldl_reagent, 11000.00, 14000.00, 2)
+    create_reagent_inventory(hdl_ldl_reagent, 11000.00, 14000.00, 2, 250)
     
     lipid_panels_config = [
         ('Total Cholesterol', 'mg/dL', [cholesterol_reagent]),
@@ -1216,8 +1377,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Cardiovascular risk assessment',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1245,16 +1404,9 @@ def create_real_world_lab_data():
             )
             created_data['links'].append(link)
     
-    # Initialize counters for lipid reagents
+    # Re-order levels for lipid reagents
     for reagent in [cholesterol_reagent, triglycerides_reagent, hdl_ldl_reagent]:
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': 600,  # 2 kits
-                'minimum_threshold': 75,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, 75)
     
     # 4. KIDNEY FUNCTION TEST (RFT/KFT) PROFILE
     kft_profile, _ = LabTestProfile.objects.get_or_create(name='Kidney Function Test (RFT)')
@@ -1263,47 +1415,41 @@ def create_real_world_lab_data():
     creatinine_reagent, _ = Item.objects.get_or_create(
         name='Roche Creatinine Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Jaffe kinetic method for creatinine determination',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ROCHE-CREAT-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(creatinine_reagent)
-    create_reagent_inventory(creatinine_reagent, 8500.00, 11000.00, 2)
+    create_reagent_inventory(creatinine_reagent, 8500.00, 11000.00, 2, 300)
     
     urea_reagent, _ = Item.objects.get_or_create(
         name='Roche Urea/BUN Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Urease/GLDH enzymatic method for urea determination',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ROCHE-UREA-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(urea_reagent)
-    create_reagent_inventory(urea_reagent, 7500.00, 9500.00, 2)
+    create_reagent_inventory(urea_reagent, 7500.00, 9500.00, 2, 300)
     
     uric_acid_reagent, _ = Item.objects.get_or_create(
         name='Roche Uric Acid Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Uricase enzymatic colorimetric method',
-            'packed': '1',
-            'subpacked': '250',
             'item_code': 'ROCHE-URIC-250',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(uric_acid_reagent)
-    create_reagent_inventory(uric_acid_reagent, 8000.00, 10000.00, 2)
+    create_reagent_inventory(uric_acid_reagent, 8000.00, 10000.00, 2, 250)
     
     kft_panels_config = [
         ('Creatinine', 'mg/dL', [creatinine_reagent]),
@@ -1319,8 +1465,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Kidney function marker',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1349,14 +1493,7 @@ def create_real_world_lab_data():
             created_data['links'].append(link)
     
     for reagent in [creatinine_reagent, urea_reagent, uric_acid_reagent]:
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': 600,
-                'minimum_threshold': 75,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, 75)
     
     # 5. THYROID FUNCTION TEST (TFT) PROFILE
     tft_profile, _ = LabTestProfile.objects.get_or_create(name='Thyroid Function Test (TFT)')
@@ -1365,17 +1502,15 @@ def create_real_world_lab_data():
     thyroid_reagent, _ = Item.objects.get_or_create(
         name='Roche Thyroid Panel Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Electrochemiluminescence immunoassay (ECLIA) for thyroid hormones',
-            'packed': '1',
-            'subpacked': '100',
             'item_code': 'ROCHE-THYROID-100',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(thyroid_reagent)
-    create_reagent_inventory(thyroid_reagent, 18000.00, 23000.00, 2)
+    create_reagent_inventory(thyroid_reagent, 18000.00, 23000.00, 2, 100)
     
     tft_panels_config = [
         ('Thyroid Stimulating Hormone (TSH)', 'mIU/L'),
@@ -1392,8 +1527,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Thyroid function assessment',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1420,14 +1553,7 @@ def create_real_world_lab_data():
         )
         created_data['links'].append(link)
     
-    counter, _ = TestKitCounter.objects.get_or_create(
-        reagent_item=thyroid_reagent,
-        defaults={
-            'available_tests': 200,
-            'minimum_threshold': 30,
-        }
-    )
-    created_data['counters'].append(counter)
+    set_reagent_threshold(thyroid_reagent, 30)
     
     # 6. ELECTROLYTES PROFILE
     electrolytes_profile, _ = LabTestProfile.objects.get_or_create(name='Electrolytes Panel')
@@ -1436,17 +1562,15 @@ def create_real_world_lab_data():
     electrolytes_reagent, _ = Item.objects.get_or_create(
         name='Roche ISE Electrolytes Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Ion-selective electrode (ISE) method for sodium, potassium, chloride',
-            'packed': '1',
-            'subpacked': '500',
             'item_code': 'ROCHE-ELEC-500',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(electrolytes_reagent)
-    create_reagent_inventory(electrolytes_reagent, 12000.00, 15000.00, 2)
+    create_reagent_inventory(electrolytes_reagent, 12000.00, 15000.00, 2, 500)
     
     electrolytes_panels_config = [
         ('Sodium (Na+)', 'mmol/L'),
@@ -1462,8 +1586,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Electrolyte balance assessment',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1490,14 +1612,7 @@ def create_real_world_lab_data():
         )
         created_data['links'].append(link)
     
-    counter, _ = TestKitCounter.objects.get_or_create(
-        reagent_item=electrolytes_reagent,
-        defaults={
-            'available_tests': 1000,
-            'minimum_threshold': 150,
-        }
-    )
-    created_data['counters'].append(counter)
+    set_reagent_threshold(electrolytes_reagent, 150)
     
     # 7. BLOOD GLUCOSE PROFILE
     glucose_profile, _ = LabTestProfile.objects.get_or_create(name='Blood Glucose Profile')
@@ -1505,32 +1620,28 @@ def create_real_world_lab_data():
     glucose_reagent, _ = Item.objects.get_or_create(
         name='Roche Glucose Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Hexokinase enzymatic method for glucose determination',
-            'packed': '1',
-            'subpacked': '500',
             'item_code': 'ROCHE-GLUC-500',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(glucose_reagent)
-    create_reagent_inventory(glucose_reagent, 9000.00, 11500.00, 2)
+    create_reagent_inventory(glucose_reagent, 9000.00, 11500.00, 2, 500)
     
     hba1c_reagent, _ = Item.objects.get_or_create(
         name='Abbott HbA1c Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'HPLC method for hemoglobin A1c determination',
-            'packed': '1',
-            'subpacked': '100',
             'item_code': 'ABB-HBA1C-100',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(hba1c_reagent)
-    create_reagent_inventory(hba1c_reagent, 15000.00, 19000.00, 2)
+    create_reagent_inventory(hba1c_reagent, 15000.00, 19000.00, 2, 100)
     
     glucose_panels_config = [
         ('Fasting Blood Sugar (FBS)', 'mg/dL', [glucose_reagent]),
@@ -1545,8 +1656,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Diabetes monitoring',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1576,14 +1685,7 @@ def create_real_world_lab_data():
     
     for reagent in [glucose_reagent, hba1c_reagent]:
         tests = 1000 if reagent == glucose_reagent else 200
-        counter, _ = TestKitCounter.objects.get_or_create(
-            reagent_item=reagent,
-            defaults={
-                'available_tests': tests,
-                'minimum_threshold': tests // 10,
-            }
-        )
-        created_data['counters'].append(counter)
+        set_reagent_threshold(reagent, tests // 10)
     
     # ==== ADD REFERENCE VALUES FOR EXISTING PANELS ====
     created_data['reference_values'] = []
@@ -1877,15 +1979,16 @@ def create_pharmaceutical_inventory():
     Create comprehensive pharmaceutical inventory with realistic drugs across all categories.
     Includes medications, medical supplies, and consumables with proper pricing and quantities.
     """
-    from inventory.models import Inventory
+    from inventory.models import StockBalance, StockMovement
+    from inventory.services import stock as stock_service
     from decimal import Decimal
     from datetime import date, timedelta
-    
+
     created_data = {
         'items': [],
         'inventory_records': []
     }
-    
+
     # Get or create Pharmacy department
     pharmacy_dept, _ = Department.objects.get_or_create(name='Pharmacy')
     
@@ -2012,19 +2115,28 @@ def create_pharmaceutical_inventory():
                 units_of_measure=drug["unit"],
                 defaults={
                     'desc': f'{drug["name"]} - {category}',
-                    'packed': drug["pack"],
-                    'subpacked': drug["subpack"],
                     'item_code': f'PHARM-{drug["name"][:8].upper().replace(" ", "")}-{random.randint(100, 999)}',
                     'vat_rate': 0.0,  # Most pharmaceuticals are VAT-exempt
                     'slow_moving_period': 90,
                 }
             )
-            
+
+            units_per_pack = int(drug["subpack"])
+            if units_per_pack > 1:
+                ItemUnit.objects.update_or_create(
+                    item=item, name='Pack',
+                    defaults={'factor_to_base': units_per_pack, 'is_purchase_default': True},
+                )
+
+            # Pharmaceuticals and supplies are dispensed from the pharmacy.
+            tag_item_departments(item, 'Pharmacy')
+
             if item_created:
                 created_data['items'].append(item)
             
-            # Create inventory record if it doesn't exist
-            if not Inventory.objects.filter(item=item, department=pharmacy_dept).exists():
+            # Seed opening stock through the ledger, the same way real stock
+            # arrives, so the demo data has a documented origin.
+            if not StockBalance.objects.filter(item=item, department=pharmacy_dept).exists():
                 # Generate realistic expiry dates based on drug type
                 if category in ['Vaccines', 'IV Fluids']:
                     expiry_months = random.randint(12, 24)  # Shorter shelf life
@@ -2032,18 +2144,21 @@ def create_pharmaceutical_inventory():
                     expiry_months = random.randint(24, 60)  # Longer shelf life
                 else:
                     expiry_months = random.randint(18, 36)  # Standard shelf life
-                
-                inventory = Inventory.objects.create(
+
+                movement = stock_service.receive(
                     item=item,
                     department=pharmacy_dept,
-                    purchase_price=Decimal(str(drug["purchase"])),
-                    sale_price=Decimal(str(drug["sale"])),
-                    quantity_at_hand=drug["qty"],
-                    category_one='Resale',
+                    quantity=drug["qty"],
+                    unit_cost=Decimal(str(drug["purchase"])),
                     lot_number=f'LOT-{date.today().year}-{random.randint(1000, 9999)}',
-                    expiry_date=date.today() + timedelta(days=expiry_months * 30)
+                    expiry_date=date.today() + timedelta(days=expiry_months * 30),
+                    reason='Demo data opening stock',
+                    source_type=StockMovement.Source.SYSTEM,
+                    movement_type=StockMovement.Type.OPENING_BALANCE,
+                    idempotency_key=f'demo-drug:{item.id}',
                 )
-                created_data['inventory_records'].append(inventory)
+                stock_service.set_sale_price(item, Decimal(str(drug["sale"])))
+                created_data['inventory_records'].append(movement)
     
     print(f"\n✅ Created Pharmaceutical Inventory:")
     print(f"   - {len(created_data['items'])} Drug Items")
@@ -2058,7 +2173,8 @@ def create_pharmaceutical_inventory():
     for category, count in category_counts.items():
         print(f"   - {category}: {count} items")
     
-    total_value = sum(inv.purchase_price * inv.quantity_at_hand for inv in created_data['inventory_records'])
+    total_value = sum(
+        movement.unit_cost * movement.quantity for movement in created_data['inventory_records'])
     print(f"\n   Total Inventory Value: KES {total_value:,.2f}")
     
     return created_data

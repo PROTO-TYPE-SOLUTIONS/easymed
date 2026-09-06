@@ -58,18 +58,16 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
     name: selectedRowData?.name || "",
     category: getCategory() || "",
     units: getUnit() || "",
+    units_of_measure: selectedRowData?.units_of_measure || "",
     desc: selectedRowData?.desc || "",
-    packed: selectedRowData?.packed || "",
-    subpacked: selectedRowData?.subpacked || ""
   };
 
   const validationSchema = Yup.object().shape({
     item_code: Yup.string().required("Field is Required!"),
     name: Yup.string().required("Field is Required!"),
-    packed: Yup.string().required("Field is Required!"),
-    subpacked: Yup.string().required("Field is Required!"),
     category: Yup.object().required("Field is Required!"),
     units: Yup.object().required("Field is Required!"),
+    units_of_measure: Yup.string().trim().required("Field is Required!"),
     desc: Yup.string().required("Field is Required!"),
   });
 
@@ -77,7 +75,8 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
     const formData = {
         ...formValue,
         category: formValue.category.value,
-        units: formValue.units.value
+        units: formValue.units.value,
+        units_of_measure: formValue.units_of_measure.trim(),
     };
     try {
       setLoading(true);
@@ -139,34 +138,6 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                 />
             </Grid>
             <Grid className='my-2' item md={6} xs={12}>
-            <label htmlFor="item_name">Packed</label>
-                <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Packed"
-                name="packed"
-                />
-                <ErrorMessage
-                name="packed"
-                component="div"
-                className="text-warning text-xs"
-                />
-            </Grid>
-            <Grid className='my-2' item md={6} xs={12}>
-            <label htmlFor="item_name">Sub Packed</label>
-                <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Sub Packed"
-                name="subpacked"
-                />
-                <ErrorMessage
-                name="subpacked"
-                component="div"
-                className="text-warning text-xs"
-                />
-            </Grid>
-            <Grid className='my-2' item md={6} xs={12}>
                 <SeachableSelect
                     label="Select Category"
                     name="category"
@@ -188,6 +159,23 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                     name="units"
                     component="div"
                     className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={12} xs={12}>
+            <label htmlFor="units_of_measure">Base Unit</label>
+                <Field
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                placeholder="tablets, tests, ml, syringes"
+                name="units_of_measure"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                    The smallest unit stock is counted in. Pack sizes (Box, Kit,
+                    Carton) are defined separately, so don&apos;t name a pack here.
+                </p>
+                <ErrorMessage
+                name="units_of_measure"
+                component="div"
+                className="text-warning text-xs"
                 />
             </Grid>
             <Grid className='my-2' item md={12} xs={12}>

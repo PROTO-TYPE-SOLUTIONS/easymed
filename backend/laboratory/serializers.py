@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
 from customuser.models import CustomUser
-from inventory.models import Inventory
+from inventory.services import stock as stock_service
 from .models import (
     LabReagent,
     LabTestRequest,
@@ -16,7 +16,8 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
-    TestKitCounter,
+    SpecimenConsumable,
+    TestPanelReagent,
     LabTestInterpretation,
     ReferenceValue,
     ReagentConsumptionLog,
@@ -33,10 +34,29 @@ from .models import (
     )
 
 
-class TestKitCounterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TestKitCounter
-        fields = '__all__'
+class ReagentStockSerializer(serializers.Serializer):
+    """
+    Reagent availability derived from the stock ledger.
+
+    Replaces the old TestKitCounter table: the number is computed from
+    StockMovement rather than maintained as a second copy of the same quantity.
+    """
+    id = serializers.IntegerField(read_only=True)
+    reagent_item = serializers.IntegerField(read_only=True)
+    reagent_name = serializers.CharField(read_only=True)
+    reagent_code = serializers.CharField(read_only=True)
+    available_tests = serializers.IntegerField(read_only=True)
+    available_stock = serializers.IntegerField(read_only=True)
+    minimum_threshold = serializers.IntegerField(read_only=True)
+    is_low_stock = serializers.BooleanField(read_only=True)
+    is_out_of_stock = serializers.BooleanField(read_only=True)
+    stock_status = serializers.CharField(read_only=True)
+    stock_percentage = serializers.FloatField(read_only=True)
+
+
+# Historical names kept so existing imports and routes keep working.
+TestKitCounterSerializer = ReagentStockSerializer
+LowStockReagentSerializer = ReagentStockSerializer
 
 
 class LabReagentSerializer(serializers.ModelSerializer):
@@ -102,13 +122,8 @@ class LabTestRequestPanelSerializer(serializers.ModelSerializer):
     tat = serializers.DurationField(source='test_panel.tat', read_only=True)
 
     def get_sale_price(self, instance):
-        try:
-            inventory = instance.test_panel.item.active_inventory_items.first()
-            if inventory:
-                return inventory.sale_price
-            return None  # Handle case where no inventory is found
-        except Inventory.DoesNotExist:
-            raise NotFound('Inventory record not found for this item.')
+        item = instance.test_panel.item if instance.test_panel else None
+        return item.current_sale_price if item else None
         
     def get_patient_name(self, instance):
         if instance.patient_sample and instance.patient_sample.process:
@@ -212,6 +227,7 @@ class PatientSampleSerializer(serializers.ModelSerializer):
     is_disposed = serializers.SerializerMethodField()
     is_retested = serializers.SerializerMethodField()
     is_released = serializers.SerializerMethodField()
+    consumables = serializers.SerializerMethodField()
 
     class Meta:
         model = PatientSample
@@ -228,13 +244,31 @@ class PatientSampleSerializer(serializers.ModelSerializer):
             'is_retested',
             'is_released',
             'collected_on',
+            'consumables',
         ]
         read_only_fields = [
             'patient_sample_code',
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Shared across every sample this serializer renders, so a list of
+        # blood samples looks up the syringe's stock once, not once per row.
+        self._availability_cache = {}
+
     def get_specimen_name(self, obj):
         return obj.specimen.name
+
+    def get_consumables(self, obj):
+        """
+        What the phlebotomist needs in hand to take this sample, and whether
+        the lab actually has it. Deducted on collection by
+        laboratory.tasks.deduct_specimen_consumables.
+        """
+        context = dict(self.context)
+        context.setdefault('availability_cache', self._availability_cache)
+        return SpecimenConsumableSerializer(
+            obj.specimen.consumables.all(), many=True, context=context).data
 
     def get_is_archived(self, obj):
         return hasattr(obj, 'archive_record')
@@ -254,6 +288,81 @@ class SpecimenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specimen
         fields = '__all__'
+
+
+def _available_quantity(item):
+    from .utils import lab_department
+
+    return stock_service.available_quantity(item, lab_department())
+
+
+class TestPanelReagentSerializer(serializers.ModelSerializer):
+    test_panel_name = serializers.ReadOnlyField(source='test_panel.name')
+    reagent_name = serializers.ReadOnlyField(source='reagent_item.name')
+    reagent_code = serializers.ReadOnlyField(source='reagent_item.item_code')
+    available_quantity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestPanelReagent
+        fields = [
+            'id',
+            'test_panel',
+            'test_panel_name',
+            'reagent_item',
+            'reagent_name',
+            'reagent_code',
+            'units_consumed_per_run',
+            'available_quantity',
+        ]
+
+    def get_available_quantity(self, obj):
+        return _available_quantity(obj.reagent_item)
+
+    def validate_reagent_item(self, value):
+        # limit_choices_to only constrains forms, so the API has to check too.
+        if value.category != 'LabReagent':
+            raise serializers.ValidationError(
+                f"'{value.name}' is a {value.category} item, not a Lab Reagent."
+            )
+        return value
+
+
+class SpecimenConsumableSerializer(serializers.ModelSerializer):
+    specimen_name = serializers.ReadOnlyField(source='specimen.name')
+    item_name = serializers.ReadOnlyField(source='item.name')
+    item_code = serializers.ReadOnlyField(source='item.item_code')
+    available_quantity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SpecimenConsumable
+        fields = [
+            'id',
+            'specimen',
+            'specimen_name',
+            'item',
+            'item_name',
+            'item_code',
+            'quantity_per_collection',
+            'available_quantity',
+        ]
+
+    def get_available_quantity(self, obj):
+        # Availability costs an aggregate pair per item. Serialising a page of
+        # samples asks for the same handful of consumables over and over, so
+        # reuse the answer when the caller supplies a cache.
+        cache = self.context.get('availability_cache')
+        if cache is None:
+            return _available_quantity(obj.item)
+        if obj.item_id not in cache:
+            cache[obj.item_id] = _available_quantity(obj.item)
+        return cache[obj.item_id]
+
+    def validate_item(self, value):
+        if value.category != 'LabConsumable':
+            raise serializers.ValidationError(
+                f"'{value.name}' is a {value.category} item, not a Lab Consumable."
+            )
+        return value
 
 
 class LabTestInterpretationSerializer(serializers.ModelSerializer):
@@ -307,6 +416,7 @@ class ReagentConsumptionLogSerializer(serializers.ModelSerializer):
             'tests_consumed',
             'available_tests_before',
             'available_tests_after',
+            'stock_movement_reference',
             'consumed_at',
             'patient_name',
             'performed_by',
@@ -318,30 +428,6 @@ class ReagentConsumptionLogSerializer(serializers.ModelSerializer):
         if obj.performed_by:
             return f"{obj.performed_by.first_name} {obj.performed_by.last_name}"
         return "N/A"
-
-
-class LowStockReagentSerializer(serializers.ModelSerializer):
-    reagent_name = serializers.CharField(source='reagent_item.name', read_only=True)
-    stock_status = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = TestKitCounter
-        fields = [
-            'id',
-            'reagent_item',
-            'reagent_name',
-            'available_tests',
-            'minimum_threshold',
-            'stock_status',
-            'last_updated'
-        ]
-    
-    def get_stock_status(self, obj):
-        if obj.is_out_of_stock():
-            return 'out_of_stock'
-        elif obj.is_low_stock():
-            return 'low_stock'
-        return 'in_stock'
 
 
 class LabSettingsSerializer(serializers.ModelSerializer):

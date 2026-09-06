@@ -320,11 +320,12 @@
   <table class="items-table">
     <thead>
       <tr>
-        <th style="width: 30%">Item Name</th>
-        <th style="width: 15%; text-align: center">Qty Req</th>
-        <th style="width: 15%; text-align: center">Qty App</th>
-        <th style="width: 20%; text-align: right">Unit Price</th>
-        <th style="width: 20%">Preferred Supplier</th>
+        <th style="width: 26%">Item Name</th>
+        <th style="width: 12%; text-align: center">Qty Req</th>
+        <th style="width: 12%; text-align: center">Qty App</th>
+        <th style="width: 14%">Unit</th>
+        <th style="width: 18%; text-align: right">Price / Unit</th>
+        <th style="width: 18%">Preferred Supplier</th>
       </tr>
     </thead>
     <tbody>
@@ -333,7 +334,13 @@
         <td>{{ item.item.name }}</td>
         <td style="text-align: center">{{ item.quantity_requested }}</td>
         <td style="text-align: center">{{ item.quantity_approved }}</td>
-        <td style="text-align: right">{{ item.unit_price|floatformat:2 }}</td>
+        <td>
+          {{ item.unit_label }}
+          {% if item.conversion_factor > 1 %}
+            <br /><small>of {{ item.conversion_factor }} {{ item.item.units_of_measure }}</small>
+          {% endif %}
+        </td>
+        <td style="text-align: right">{{ item.effective_unit_cost|floatformat:2 }}</td>
         <td>{{ item.preferred_supplier.official_name }}</td>
       </tr>
       {% endfor %}

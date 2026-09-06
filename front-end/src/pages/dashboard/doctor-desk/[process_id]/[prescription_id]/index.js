@@ -120,7 +120,7 @@ const PrescribeDrug = () => {
 
       console.log(payload)
     
-      await createPrescription(payload).then((res) => {
+      await createPrescription(payload, auth).then((res) => {
         sendEachPrescriptionItemToDb(res)
         toast.success("Prescription Saved Successfully!");
         setLoading(false);

@@ -1,219 +1,181 @@
 import logging
+
 from asgiref.sync import async_to_sync
 from celery import shared_task
 from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.db import transaction
-from django.db.models import F
-from django.core.exceptions import ValidationError
 
 from authperms.models import Group
-from inventory.models import (
-    Inventory, InventoryArchive
-)
+
+from .models import InsuranceItemSalePrice, Item, StockMovement
+from .services import stock as stock_service
 
 User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
 
-def get_inventory_or_error(item):
-    inventory_item=  Inventory.objects.get(item=item)
-    print("Inventory found:", inventory_item)
-    try:
-        return Inventory.objects.get(item=item)
-        
-    except Inventory.DoesNotExist:
-        raise ValidationError(f"No inventory record found for item: {item.name}.")
-
-
-def update_stock_quantity_if_stock_is_available(instance, deductions):
-    """
-    Deducts stock quantity from the Inventory model based on the billed quantity.
-    Prioritizes inventory records with the nearest expiry date.
-    """
-    try:
-        # Get inventory records for the item, ordered by expiry date (nearest first)
-        # TODO: WHat the hell is this? expiry_date__isnull=True??
-        # inventory_records = Inventory.objects.filter(
-        #     item=instance.item
-        # ).exclude(expiry_date__isnull=True, item__item_code="99999-NA").order_by('expiry_date')
-        inventory_records = Inventory.objects.filter(
-            item=instance.item
-        ).order_by('expiry_date')
-
-        if not inventory_records.exists():
-            raise ValidationError(f"No inventory record found for item: {instance.item.name}.")
-
-        remaining_deduction = deductions
-
-        with transaction.atomic():
-            for inventory_record in inventory_records:
-                if remaining_deduction <= 0:
-                    break 
-
-                if inventory_record.quantity_at_hand >= remaining_deduction:
-                    inventory_record.quantity_at_hand -= remaining_deduction
-                    inventory_record.save()
-                    logger.info(
-                        "Stock updated successfully for item: %s, Lot: %s, Remaining: %d",
-                        instance.item.name,
-                        inventory_record.lot_number,
-                        inventory_record.quantity_at_hand,
-                    )
-                    remaining_deduction = 0
-                else:
-                    remaining_deduction -= inventory_record.quantity_at_hand
-                    inventory_record.quantity_at_hand = 0
-                    inventory_record.save()
-                    logger.info(
-                        "Stock exhausted for item: %s, Lot: %s",
-                        instance.item.name,
-                        inventory_record.lot_number,
-                    )
-
-            if remaining_deduction > 0:
-                raise ValidationError(f"Not enough stock available for {instance.item.name}. Missing quantity: {remaining_deduction}.")
-
-    except ValidationError as e:
-        logger.error("Stock update failed: %s", e)
-        raise
-    except Exception as e:
-        logger.exception("Unexpected error during stock update: %s", e)
-        raise
-    
-
 @shared_task
 def check_inventory_reorder_levels():
     """
-    Periodically checks all inventory items for reorder levels and sends notifications if needed.
+    Notify stock controllers about items at or below their re-order level.
+
+    Re-order is evaluated per item per location by the service layer, not per
+    lot -- a per-lot re-order level says nothing useful about whether you need
+    to buy more.
     """
-    items = Inventory.objects.filter(quantity_at_hand__lte=F('re_order_level'))
-    if not items.exists():
+    rows = stock_service.items_below_reorder_level()
+    if not rows:
         logger.info("No items found below reorder levels.")
-        return
+        return 0
 
     groups_with_notification_permission = Group.objects.filter(
         permissions__name='CAN_RECEIVE_INVENTORY_NOTIFICATIONS'
     )
     if not groups_with_notification_permission.exists():
         logger.info("No groups found with the required notification permission.")
-        return
+        return 0
 
-    User = get_user_model()
     users_to_notify = User.objects.filter(group__in=groups_with_notification_permission).distinct()
-    if not users_to_notify.exists():
-        logger.info("No users found in groups with notification permissions.")
-        return
     user_emails = list(users_to_notify.values_list('email', flat=True))
+    if not user_emails:
+        logger.info("No users found in groups with notification permissions.")
+        return 0
 
     channel_layer = get_channel_layer()
-    for item in items:
-        message = f"Low stock alert for {item.item.name}: Only {item.quantity_at_hand} items left."
+    for row in rows:
+        location = row['department'].name if row['department'] else 'unknown location'
+        message = (
+            f"Low stock alert for {row['item'].name} at {location}: "
+            f"{row['quantity']} left (re-order level {row['re_order_level']})."
+        )
         try:
             async_to_sync(channel_layer.group_send)(
                 "inventory_notifications",
-                {
-                    "type": "send_notification",
-                    "message": message,
-                }
+                {"type": "send_notification", "message": message},
             )
         except Exception as ws_error:
-            raise Exception(
-                f"Failed to send WebSocket notification for {item.item.name}: {ws_error}"
-            )
+            # A websocket outage must not stop the email going out.
+            logger.error("Failed to send WebSocket notification for %s: %s", row['item'].name, ws_error)
 
         try:
             send_mail(
                 subject="Inventory Notification",
                 message=message,
-                from_email=settings.EMAIL_HOST_USER, 
+                from_email=settings.EMAIL_HOST_USER,
                 recipient_list=user_emails,
             )
         except Exception as email_error:
-            logger.error(f"Error sending email for {item.item.name}: {email_error}")
+            logger.error("Error sending email for %s: %s", row['item'].name, email_error)
 
+    return len(rows)
 
-@shared_task(bind=True, max_retries=3)
-def inventory_garbage_collection(self):
-    """
-    Periodically checks and archives inventory items with zero quantity.
-    """
-
-    try:
-        zero_quantity_items = Inventory.objects.filter(quantity_at_hand=0)
-        
-        if not zero_quantity_items.exists():
-            logger.info("No zero-quantity items found to archive")
-            return
-        
-        archived_count = 0
-        for item in zero_quantity_items:
-            try:
-                with transaction.atomic():
-                    archive = InventoryArchive.objects.create(
-                        item=item.item,
-                        purchase_price=item.purchase_price,
-                        sale_price=item.sale_price,
-                        quantity_at_hand=item.quantity_at_hand,
-                        re_order_level=item.re_order_level,
-                        date_created=item.date_created,
-                        category_one=item.category_one,
-                        lot_number=item.lot_number,
-                        expiry_date=item.expiry_date,
-                    )
-                    
-                    logger.info(
-                        "Created archive record for item: %s (ID: %s)",
-                        item.item.name,
-                        item.item.id
-                    )
-                    
-                    item.delete()
-                    archived_count += 1
-                    logger.info(
-                        "Deleted original inventory record for: %s",
-                        item.item.name
-                    )
-                
-            except Exception as e:
-                logger.error(
-                    "Error processing item %s: %s",
-                    item.item.name,
-                    str(e),
-                    exc_info=True
-                )
-                continue
-        
-        logger.info("Successfully archived %d items", archived_count)
-        return f"Archived {archived_count} items"
-        
-    except Exception as e:
-        logger.error(
-            "Error in inventory garbage collection: %s",
-            str(e),
-            exc_info=True
-        )
-        # Retry the task if it fails
-        self.retry(exc=e, countdown=60 * 5)            
-
-
-
-from .models import InsuranceItemSalePrice, Inventory
-from company.models import InsuranceCompany
 
 @shared_task
-def create_insurance_prices_for_inventory(inventory_id):
-    inventory = Inventory.objects.get(id=inventory_id)
-    insurance_companies = InsuranceCompany.objects.all()
-    for company in insurance_companies:
-        InsuranceItemSalePrice.objects.get_or_create(
-            item=inventory.item,
+def write_off_expired_stock():
+    """
+    Write expired lots down to zero with an EXPIRY_WRITE_OFF movement so the
+    loss is visible and valued, instead of quietly deleting the row.
+
+    This replaces the old `inventory_garbage_collection`, which deleted any lot
+    that reached zero and so destroyed its history.
+    """
+    movements = stock_service.write_off_expired()
+    logger.info("Wrote off %d expired stock balances", len(movements))
+    return len(movements)
+
+
+@shared_task
+def expire_stale_reservations():
+    """Release reservations nobody ever fulfilled so the stock frees up."""
+    count = stock_service.expire_stale_reservations()
+    if count:
+        logger.info("Expired %d stale stock reservations", count)
+    return count
+
+
+@shared_task
+def reconcile_stock_balances():
+    """
+    Compare the cached balances against the ledger and repair any drift.
+
+    Drift should always be zero. If it is not, something wrote stock outside
+    the service layer and that is worth an alert.
+    """
+    drift = stock_service.rebuild_balances()
+    if drift:
+        logger.error("Stock balance drift detected and corrected on %d rows: %s", len(drift), drift)
+    return len(drift)
+
+
+@shared_task
+def create_insurance_prices_for_item(item_id):
+    """
+    Seed a default insurance price per company for a newly priced item, so
+    billing does not silently fall back to zero.
+    """
+    from company.models import InsuranceCompany
+
+    item = Item.objects.filter(id=item_id).first()
+    if item is None:
+        return 0
+
+    created = 0
+    for company in InsuranceCompany.objects.all():
+        _, was_created = InsuranceItemSalePrice.objects.get_or_create(
+            item=item,
             insurance_company=company,
-            defaults={
-                'sale_price': inventory.sale_price,
-                'co_pay': 0.00
-            }
-        )        
+            defaults={'sale_price': item.current_sale_price or 0, 'co_pay': 0.00},
+        )
+        created += int(was_created)
+    return created
+
+
+@shared_task
+def post_incoming_item(incoming_item_id, user_id=None):
+    """
+    Post a goods-received line to the ledger out of band.
+
+    Safe to retry: `receive_incoming_item` is idempotent on the line's id, so a
+    duplicate delivery of this task cannot double the stock. That is what the
+    old post_save receipt signal could not promise.
+    """
+    from .models import IncomingItem
+
+    incoming_item = IncomingItem.objects.filter(id=incoming_item_id).select_related('item').first()
+    if incoming_item is None:
+        logger.warning("IncomingItem %s no longer exists", incoming_item_id)
+        return None
+
+    performed_by = User.objects.filter(id=user_id).first() if user_id else None
+    movement = stock_service.receive_incoming_item(incoming_item, performed_by=performed_by)
+    return movement.id if movement else None
+
+
+@shared_task
+def issue_stock_for_source(item_id, department_id, quantity, source_type, source_id, reason=''):
+    """
+    Generic out-of-band issue used by other apps that do not want to block a
+    request on stock posting. Idempotent per source document.
+    """
+    from .models import Department
+
+    item = Item.objects.filter(id=item_id).first()
+    department = Department.objects.filter(id=department_id).first()
+    if item is None or department is None:
+        logger.warning("issue_stock_for_source: unknown item %s or department %s", item_id, department_id)
+        return 0
+
+    movements = stock_service.issue(
+        item=item,
+        department=department,
+        quantity=quantity,
+        movement_type=StockMovement.Type.CONSUMPTION,
+        source_type=source_type,
+        source_id=source_id,
+        reason=reason,
+        idempotency_key=f"{source_type}:{source_id}:{item_id}",
+    )
+    return len(movements)

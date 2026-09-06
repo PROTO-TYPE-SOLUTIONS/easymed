@@ -66,7 +66,8 @@ const LabDocs = () => {
         <Table
           headers={['Concept', 'Where It Lives', 'Purpose']}
           rows={[
-            ['Reagent stock', 'Inventory (quantity_at_hand)', 'How many base units of the reagent are in stock'],
+            ['Reagent stock', 'Stock ledger (StockMovement)', 'Base units in stock, derived from the ledger rather than a separate counter'],
+            ['Low-stock threshold', 'StockPolicy (per item, per location)', 'When to warn that a reagent is running out'],
             ['Reagent metadata', 'LabReagent model', 'Chemistry info: CAS number, molecular weight, purity (optional)'],
             ['Reagent-to-test link', 'TestPanelReagent', 'Which reagents a test panel needs and how many units per run'],
             ['Billing item', 'Item (category="Lab Test")', 'Auto-created paired item used for billing patients'],
@@ -126,17 +127,17 @@ const LabDocs = () => {
           This field on <Code>TestPanelReagent</Code> tells the system <strong>how many base inventory units</strong> of the reagent are consumed each time the test panel runs once.
         </p>
         <Table
-          headers={['Reagent', 'Subpacked', 'units_consumed_per_run', 'Meaning']}
+          headers={['Reagent', 'Kit pack size', 'units_consumed_per_run', 'Meaning']}
           rows={[
-            ['Albumin Reagent Kit', '200 (tests per kit)', '1', '1 base unit per test = 200 tests per kit'],
-            ['Buffer Solution', '500 (ml per bottle)', '3', '3 ml consumed per test run'],
-            ['CBC Reagent Pack', '100 (tests per pack)', '1', '1 base unit per test = 100 tests per pack'],
+            ['Albumin Reagent Kit', 'Kit = 200 tests', '1', '1 base unit per test = 200 tests per kit'],
+            ['Buffer Solution', 'Bottle = 500 ml', '3', '3 ml consumed per test run'],
+            ['CBC Reagent Pack', 'Pack = 100 tests', '1', '1 base unit per test = 100 tests per pack'],
           ]}
         />
         <div className='bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded mt-2'>
           <p className='font-semibold text-yellow-800'>Important</p>
           <p>
-            This value is in <strong>base units (subpacked)</strong>, not in packs. If your reagent kit has 200 tests
+            This value is in <strong>base units</strong>, not in kits. If your reagent kit has 200 tests
             and each test uses 1 test from the kit, set <Code>units_consumed_per_run = 1</Code>.
           </p>
         </div>
@@ -194,13 +195,15 @@ const LabDocs = () => {
       <Section title='Setting Up a New Lab Test'>
         <ol className='list-decimal pl-5 space-y-2'>
           <li>
-            <strong>Create the reagent item</strong> in Inventory with category <Code>LabReagent</Code>.
-            Set <Code>subpacked</Code> to the number of tests per kit (e.g., 200).
+            <strong>Create the reagent item</strong> in Inventory with category <Code>LabReagent</Code>,
+            stocked in tests. Then open <strong>Pack Sizes</strong> on that item and add a
+            <Code>Kit</Code> holding the number of tests per kit (e.g., 200).
             A <Code>Lab Test</Code> billing item is auto-created.
           </li>
           <li>
-            <strong>Receive stock</strong> via Incoming Items. Select quantity_unit as &quot;Packs&quot; if entering boxes,
-            or &quot;Units&quot; if entering individual test counts.
+            <strong>Receive stock</strong> against a purchase order. Set <strong>Received in</strong>
+            to the Kit when entering whole kits, or leave it on the base unit when entering
+            individual test counts.
           </li>
           <li>
             <strong>Create a Test Profile</strong> (e.g., &quot;Liver Function Tests&quot;) if one doesn&apos;t exist.

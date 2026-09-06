@@ -2,13 +2,14 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from asgiref.sync import sync_to_async
 from django.db import transaction
+from inventory.models import StockPolicy
 from inventory.tasks import check_inventory_reorder_levels
 from authperms.models import Group, Permission
 from customuser.models import CustomUser
 
 @pytest.mark.django_db
 @patch("inventory.tasks.get_channel_layer")
-def test_check_inventory_reorder_levels(mock_get_channel_layer, inventory):
+def test_check_inventory_reorder_levels(mock_get_channel_layer, stock_balance):
     """
     Test Celery task sending notifications via WebSocket channels.
     """
@@ -35,9 +36,12 @@ def test_check_inventory_reorder_levels(mock_get_channel_layer, inventory):
     user.group = group
     user.save()
     
-    inventory.quantity_at_hand = 5
-    inventory.re_order_level = 10
-    inventory.save()
+    # Re-order level is a property of the item at a location, not of a lot.
+    StockPolicy.objects.create(
+        item=stock_balance.item,
+        department=stock_balance.department,
+        re_order_level=20,
+    )
 
     # Call the synchronous function directly (not as async)
     check_inventory_reorder_levels()
@@ -47,6 +51,10 @@ def test_check_inventory_reorder_levels(mock_get_channel_layer, inventory):
         "inventory_notifications",
         {
             "type": "send_notification",
-            "message": f"Low stock alert for {inventory.item.name}: Only {inventory.quantity_at_hand} items left.",
+            "message": (
+                f"Low stock alert for {stock_balance.item.name} "
+                f"at {stock_balance.department.name}: "
+                f"{stock_balance.quantity} left (re-order level 20)."
+            ),
         },
     )

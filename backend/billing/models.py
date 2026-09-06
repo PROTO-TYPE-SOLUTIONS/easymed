@@ -34,15 +34,34 @@ class PaymentMode(models.Model):
     payment_category = models.CharField(
         max_length=20, choices=PAYMENT_CATEGORY_CHOICES, default='cash')
     is_default = models.BooleanField(default=False, help_text="Default payment mode for cash payments")
-    
+
     class Meta:
         indexes = [
             models.Index(fields=['payment_category']),
             models.Index(fields=['is_default']),
         ]
-    
+
+    def save(self, *args, **kwargs):
+        """Only one payment mode can be the default at a time."""
+        super().save(*args, **kwargs)
+        if self.is_default:
+            PaymentMode.objects.filter(is_default=True).exclude(pk=self.pk).update(is_default=False)
+
+    @classmethod
+    def get_default(cls):
+        """
+        The payment mode to bill against when no insurance is chosen.
+
+        Falls back through: the flagged default -> any cash mode -> nothing.
+        A Cash mode is seeded by migration, so the first branch normally wins.
+        """
+        return (
+            cls.objects.filter(is_default=True).first()
+            or cls.objects.filter(payment_category='cash').order_by('id').first()
+        )
+
     def __str__(self):
-        return self.payment_category + ' - ' + self.payment_mode
+        return self.payment_category + ' - ' + (self.payment_mode or '')
 
 
 
@@ -157,7 +176,7 @@ class InvoiceItem(models.Model):
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)
     payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
-    # quantity is in subpacked (base) units — e.g. 20 tablets, not 1 box of 20
+    # quantity is in the item's base units — e.g. 20 tablets, not 1 box of 20
     quantity = models.PositiveIntegerField(default=1)
     item_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     # amount after co-pay is deducted
@@ -171,13 +190,15 @@ class InvoiceItem(models.Model):
 
     @property
     def sale_price(self):
-        """Return the per-unit cash price from active Inventory (unaffected by quantity).
+        """Return the per-unit cash price from the price list.
 
-        Use item_amount for the billed total (unit_price × quantity).
+        Price comes from the effective-dated ItemPrice list, not from whichever
+        stock row happened to sort first -- that made the price a lottery
+        between lots.
+
+        Use item_amount for the billed total (unit_price x quantity).
         """
-        Inventory = apps.get_model('inventory', 'Inventory')
-        inv = Inventory.objects.filter(item=self.item).order_by('-id').first()
-        return inv.sale_price if inv and inv.sale_price is not None else 0
+        return self.item.current_sale_price or 0
     
     @property
     def price_source(self):
@@ -206,14 +227,12 @@ class InvoiceItem(models.Model):
         - actual_total: Amount patient pays after insurance/co-pay (× quantity)
         - price_source: Where the unit price came from ('insurance', 'cash', 'cash_fallback')
         """
-        Inventory = apps.get_model('inventory', 'Inventory')
         InsuranceItemSalePrice = apps.get_model('inventory', 'InsuranceItemSalePrice')
 
         qty = self.quantity or 1
 
-        # Get base cash price from inventory
-        inv = Inventory.objects.filter(item=self.item).order_by('-id').first()
-        base_price = inv.sale_price if inv and inv.sale_price is not None else 0
+        # Base cash price from the effective-dated price list.
+        base_price = self.item.current_sale_price or 0
 
         # If insurance payment mode
         if self.payment_mode and self.payment_mode.payment_category == 'insurance':
@@ -250,8 +269,13 @@ class InvoiceItem(models.Model):
         Uses get_pricing_for_item() to determine prices with explicit fallback chain:
         1. If PaymentMode is insurance and InsuranceItemSalePrice exists: use insurance price
         2. If PaymentMode is insurance but no InsuranceItemSalePrice: fallback to cash price
-        3. Otherwise: use Inventory.sale_price (cash price)
+        3. Otherwise: use the item's current cash price from ItemPrice
         """
+        # No payment mode chosen means no insurance was selected, so the line is
+        # billed as cash against the default Cash payment mode.
+        if self.payment_mode_id is None:
+            self.payment_mode = PaymentMode.get_default()
+
         pricing = self.get_pricing_for_item()
         self.item_amount = pricing['item_amount']
         self.actual_total = pricing['actual_total']

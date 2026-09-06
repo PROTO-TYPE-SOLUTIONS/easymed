@@ -15,6 +15,9 @@ const InventoryNav = () => {
         <Link href='/dashboard/inventory/items' className={`${pathName === '/dashboard/inventory/items' || pathName === '/dashboard/inventory/items/new' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
           Items
         </Link>
+        <Link href='/dashboard/inventory/stock-movements' className={`${pathName === '/dashboard/inventory/stock-movements' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
+          Stock Movements
+        </Link>
         <Link href='/dashboard/inventory/report' className={`${pathName === '/dashboard/inventory/report' ? 'bg-primary text-white' : 'bg-white shadow'}  text-sm rounded px-3 py-2 mb-1`}>
           Reports
         </Link>

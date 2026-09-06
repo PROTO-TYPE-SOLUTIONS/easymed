@@ -4,9 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import F
 from company.models import Company
-from inventory.models import Inventory, Item
+from inventory.models import Item, StockBalance
+from inventory.services import stock as stock_service
 
 from .models import (
     PublicPrescriptionRequest, 
@@ -70,17 +70,16 @@ class PharmacyDashboardMetricsView(APIView):
         date_limit = today + timedelta(days=90)
 
         # 1. Short Expiries for Drugs (90-day window)
-        short_expiries_count = Inventory.objects.filter(
+        short_expiries_count = StockBalance.objects.filter(
             item__category='Drug',
-            expiry_date__lte=date_limit,
-            expiry_date__gt=today
+            quantity__gt=0,
+            lot__expiry_date__lte=date_limit,
+            lot__expiry_date__gt=today,
         ).count()
 
-        # 2. Re-order Levels for Drugs
-        reorder_count = Inventory.objects.filter(
-            item__category='Drug',
-            quantity_at_hand__lte=F('re_order_level')
-        ).count()
+        # 2. Re-order Levels for Drugs. Evaluated per item per location by the
+        # service layer, not per lot.
+        reorder_count = len(stock_service.items_below_reorder_level(category='Drug'))
 
         return Response({
             'short_expiries': short_expiries_count,
@@ -105,21 +104,17 @@ def print_pharmacy_report(request):
     
     if report_type == 'expiry':
         date_limit = today.date() + timedelta(days=90)
-        items = Inventory.objects.filter(
-            item__category='Drug',
-            expiry_date__lte=date_limit,
-            expiry_date__gt=today.date()
-        ).select_related('item')
         data['title'] = "Pharmacy Short Expiry Report"
-        data['items'] = items
-        
-    elif report_type == 'reorder':
-        items = Inventory.objects.filter(
+        data['items'] = StockBalance.objects.filter(
             item__category='Drug',
-            quantity_at_hand__lte=F('re_order_level')
-        ).select_related('item')
+            quantity__gt=0,
+            lot__expiry_date__lte=date_limit,
+            lot__expiry_date__gt=today.date(),
+        ).select_related('item', 'lot', 'department')
+
+    elif report_type == 'reorder':
         data['title'] = "Pharmacy Re-order Level Report"
-        data['items'] = items
+        data['items'] = stock_service.items_below_reorder_level(category='Drug')
 
     else:
         from django.http import JsonResponse

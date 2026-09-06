@@ -268,13 +268,26 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 CELERY_BEAT_SCHEDULE = {
     "check_inventory_reorder_levels": {
-    "task": "inventory.tasks.check_inventory_reorder_levels",            
-    "schedule": crontab(minute='*/600'),  
+    "task": "inventory.tasks.check_inventory_reorder_levels",
+    "schedule": crontab(minute='*/600'),
     },
 
-    "inventory_garbage_collection": {
-        "task": "inventory.tasks.inventory_garbage_collection",            
-        "schedule": crontab(minute='*/45'),  
+    # Replaces the old inventory_garbage_collection, which deleted zero-quantity
+    # rows and destroyed their history. Expired stock is now written off with a
+    # valued ledger entry instead.
+    "write_off_expired_stock": {
+        "task": "inventory.tasks.write_off_expired_stock",
+        "schedule": crontab(hour=1, minute=0),
+    },
+    "expire_stale_stock_reservations": {
+        "task": "inventory.tasks.expire_stale_reservations",
+        "schedule": crontab(minute='*/30'),
+    },
+    # Balances are a cache of the ledger. Any drift here means something wrote
+    # stock outside the service layer, which we want to hear about.
+    "reconcile_stock_balances": {
+        "task": "inventory.tasks.reconcile_stock_balances",
+        "schedule": crontab(hour=2, minute=0),
     },
     "check-medication-notifications": {
         "task": "inpatient.tasks.check_medication_notifications",

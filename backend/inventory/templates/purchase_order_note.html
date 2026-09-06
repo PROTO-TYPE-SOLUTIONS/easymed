@@ -310,10 +310,11 @@
   <table class="invoice-items">
     <thead>
       <tr>
-        <th style="width: 40%">Item Name</th>
-        <th style="width: 20%; text-align: center">Quantity Ordered</th>
-        <th style="width: 20%; text-align: right">Unit Price</th>
-        <th style="width: 20%; text-align: right">Total Price</th>
+        <th style="width: 32%">Item Name</th>
+        <th style="width: 14%; text-align: center">Quantity Ordered</th>
+        <th style="width: 22%">Unit</th>
+        <th style="width: 16%; text-align: right">Price / Unit</th>
+        <th style="width: 16%; text-align: right">Total Price</th>
       </tr>
     </thead>
     <tbody>
@@ -321,6 +322,12 @@
       <tr>
         <td>{{ item.name }}</td>
         <td style="text-align: center">{{ item.quantity_ordered}}</td>
+        <td>
+          {{ item.unit_label }}
+          {% if item.base_quantity != item.quantity_ordered %}
+            <br /><small>{{ item.base_quantity }} {{ item.base_unit }} in total</small>
+          {% endif %}
+        </td>
         <td style="text-align: right">{{ item.unit_price|floatformat:2 }}</td>
         <td style="text-align: right">{{ item.total_price|floatformat:2 }}</td>
       </tr>

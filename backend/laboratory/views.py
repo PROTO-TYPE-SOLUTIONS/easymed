@@ -13,12 +13,17 @@ from datetime import timedelta
 from django.utils import timezone
 from django.template.loader import get_template, render_to_string
 from weasyprint import HTML
-from django.db.models import F
 
 from company.models import Company
 from patient.models import Patient
 from patient.models import AttendanceProcess
-from inventory.models import Inventory
+from inventory.models import StockBalance
+from inventory.services import stock as stock_service
+from .utils import lab_department, reagent_stock, reagent_stock_rows
+
+# Lab stock lives in these categories. 'Lab Test' is a service (billable, no
+# stock), so it is deliberately absent.
+LAB_STOCK_CATEGORIES = ['LabReagent', 'LabConsumable']
 
 
 from .models import (
@@ -32,7 +37,8 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
-    TestKitCounter,
+    SpecimenConsumable,
+    TestPanelReagent,
     ReagentConsumptionLog,
     ReferenceValue,
     LabTestInterpretation,
@@ -59,7 +65,9 @@ from .serializers import (
     ProcessTestRequestSerializer,
     PatientSampleSerializer,
     SpecimenSerializer,
-    TestKitCounterSerializer,
+    SpecimenConsumableSerializer,
+    TestPanelReagentSerializer,
+    ReagentStockSerializer,
     ReagentConsumptionLogSerializer,
     LowStockReagentSerializer,
     ReferenceValueSerializer,
@@ -92,9 +100,23 @@ from .filters import (
 )
 
 
-class TestKitCounterViewSet(viewsets.ModelViewSet):
-    queryset = TestKitCounter.objects.all()
-    serializer_class = TestKitCounterSerializer
+class TestKitCounterViewSet(viewsets.ViewSet):
+    """
+    Reagent availability, derived from the stock ledger.
+
+    Kept at its historical route so the lab dashboard keeps working. There is
+    no counter table any more -- the number is computed from StockMovement, so
+    it cannot drift away from actual stock.
+    """
+    serializer_class = ReagentStockSerializer
+
+    def list(self, request):
+        return Response(reagent_stock_rows())
+
+    def retrieve(self, request, pk=None):
+        from inventory.models import Item
+        item = get_object_or_404(Item, pk=pk, category='LabReagent')
+        return Response(reagent_stock(item))
 
 
 class LabReagentViewSet(viewsets.ModelViewSet):
@@ -111,6 +133,33 @@ class SpecimenViewSet(viewsets.ModelViewSet):
     queryset = Specimen.objects.all()
     serializer_class = SpecimenSerializer
     # permission_classes = (IsLabTechUser,)
+
+
+class TestPanelReagentViewSet(viewsets.ModelViewSet):
+    """
+    The reagents a test panel consumes on every run. A panel can have many:
+    a CBC burns diluent, lyse and cleaner, and each is deducted when the
+    panel is billed.
+    """
+    queryset = TestPanelReagent.objects.select_related(
+        'test_panel', 'reagent_item').all()
+    serializer_class = TestPanelReagentSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsReceptionistUser,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['test_panel', 'reagent_item']
+
+
+class SpecimenConsumableViewSet(viewsets.ModelViewSet):
+    """
+    The consumables a specimen burns when it is collected -- syringes, tubes,
+    needles. Deducted once per collection, not once per panel, because one
+    blood draw serves every blood panel on the request.
+    """
+    queryset = SpecimenConsumable.objects.select_related('specimen', 'item').all()
+    serializer_class = SpecimenConsumableSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsReceptionistUser,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['specimen', 'item']
 
 
 class ReferenceValueViewSet(viewsets.ModelViewSet):
@@ -226,7 +275,10 @@ class PatientSampleByProcessId(generics.ListAPIView):
 
     def get_queryset(self):
         process_id = self.kwargs['process_id']
-        return PatientSample.objects.filter(process=process_id)
+        # The serializer lists each sample's specimen consumables, so pull them
+        # in one go rather than per sample.
+        return PatientSample.objects.filter(process=process_id).select_related(
+            'specimen').prefetch_related('specimen__consumables__item')
 
 class LabTestRequestByProcessId(generics.ListAPIView):
     serializer_class = LabTestRequestSerializer
@@ -247,7 +299,8 @@ class ProcessTestRequestViewSet(viewsets.ModelViewSet):
 
 
 class PatientSampleViewSet(viewsets.ModelViewSet):
-    queryset = PatientSample.objects.all().order_by('-id')
+    queryset = PatientSample.objects.select_related('specimen').prefetch_related(
+        'specimen__consumables__item').order_by('-id')
     serializer_class = PatientSampleSerializer
 
 '''
@@ -458,10 +511,12 @@ class ReagentConsumptionLogViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=False, methods=['get'])
     def recent_usage(self, request):
-        """Get recently used reagents with their current stock levels (from Inventory)."""
-        from django.db.models import Max, Sum
+        """Recently used reagents with their current stock levels, from the ledger."""
         from datetime import timedelta
+
+        from django.db.models import Max
         from django.utils import timezone
+
         from inventory.models import Item
 
         recent_time = timezone.now() - timedelta(hours=24)
@@ -472,110 +527,52 @@ class ReagentConsumptionLogViewSet(viewsets.ReadOnlyModelViewSet):
             last_used=Max('consumed_at')
         ).order_by('-last_used')[:10]
 
-        reagent_ids = [item['reagent_item'] for item in recent_consumptions]
-        items = Item.objects.filter(id__in=reagent_ids)
+        last_used_by_item = {c['reagent_item']: c['last_used'] for c in recent_consumptions}
+        items = Item.objects.filter(id__in=last_used_by_item.keys())
 
         result = []
-        for item in items:
-            total_stock = Inventory.objects.filter(
-                item=item, quantity_at_hand__gt=0
-            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
+        for row in reagent_stock_rows(items=items):
+            row['last_used'] = last_used_by_item.get(row['reagent_item'])
+            result.append(row)
 
-            last_used = next(
-                (c['last_used'] for c in recent_consumptions if c['reagent_item'] == item.id),
-                None
-            )
-
-            # Use TestKitCounter threshold if it exists, otherwise default to 10
-            try:
-                threshold = item.test_counter.minimum_threshold
-            except TestKitCounter.DoesNotExist:
-                threshold = 10
-
-            result.append({
-                'reagent_name': item.name,
-                'reagent_code': item.item_code,
-                'available_stock': total_stock,
-                'minimum_threshold': threshold,
-                'is_low_stock': total_stock <= threshold,
-                'is_out_of_stock': total_stock <= 0,
-                'stock_percentage': (total_stock / threshold * 100) if threshold > 0 else 100,
-                'last_used': last_used,
-            })
-
-        result.sort(key=lambda x: x['last_used'] if x['last_used'] else timezone.now(), reverse=True)
+        result.sort(key=lambda x: x['last_used'] or timezone.now(), reverse=True)
         return Response(result)
 
 
 class LowStockReagentViewSet(viewsets.ViewSet):
     """
-    Returns lab reagent items that are low or out of stock,
-    using Inventory as the source of truth.
+    Lab reagents that are low or out of stock, derived from the stock ledger.
     """
 
     def list(self, request):
-        from django.db.models import Sum
-        from inventory.models import Item
-
         status_filter = request.query_params.get('status', None)
 
-        reagent_items = Item.objects.filter(category='LabReagent')
         result = []
-
-        for item in reagent_items:
-            total_stock = Inventory.objects.filter(
-                item=item, quantity_at_hand__gt=0
-            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
-
-            try:
-                threshold = item.test_counter.minimum_threshold
-            except TestKitCounter.DoesNotExist:
-                threshold = 10
-
-            is_out = total_stock <= 0
-            is_low = total_stock <= threshold
+        for row in reagent_stock_rows():
+            is_out = row['is_out_of_stock']
+            is_low = row['is_low_stock']
 
             if status_filter == 'low' and not (is_low and not is_out):
                 continue
-            elif status_filter == 'out' and not is_out:
+            if status_filter == 'out' and not is_out:
                 continue
-            elif status_filter is None and not (is_low or is_out):
+            if status_filter is None and not (is_low or is_out):
                 continue
 
-            stock_status = 'out_of_stock' if is_out else ('low_stock' if is_low else 'in_stock')
-            result.append({
-                'id': item.id,
-                'reagent_item': item.id,
-                'reagent_name': item.name,
-                'available_stock': total_stock,
-                'minimum_threshold': threshold,
-                'stock_status': stock_status,
-            })
+            result.append(row)
 
         return Response(result)
 
     @action(detail=False, methods=['get'])
     def count(self, request):
         """Get count of low/out of stock reagents"""
-        from django.db.models import Sum
-        from inventory.models import Item
-
         low_stock = 0
         out_of_stock = 0
 
-        for item in Item.objects.filter(category='LabReagent'):
-            total = Inventory.objects.filter(
-                item=item, quantity_at_hand__gt=0
-            ).aggregate(total=Sum('quantity_at_hand'))['total'] or 0
-
-            try:
-                threshold = item.test_counter.minimum_threshold
-            except TestKitCounter.DoesNotExist:
-                threshold = 10
-
-            if total <= 0:
+        for row in reagent_stock_rows():
+            if row['is_out_of_stock']:
                 out_of_stock += 1
-            elif total <= threshold:
+            elif row['is_low_stock']:
                 low_stock += 1
 
         return Response({
@@ -631,17 +628,19 @@ class LabDashboardMetricsView(APIView):
         today = timezone.now().date()
         date_limit = today + timedelta(days=90)
         
-        short_expiries_count = Inventory.objects.filter(
-            item__category__in=['LabReagent', 'Lab Test'],
-            expiry_date__lte=date_limit,
-            expiry_date__gt=today
+        short_expiries_count = StockBalance.objects.filter(
+            item__category__in=LAB_STOCK_CATEGORIES,
+            quantity__gt=0,
+            lot__expiry_date__lte=date_limit,
+            lot__expiry_date__gt=today,
         ).count()
 
-        # 3. Re-order Levels for Lab Items
-        reorder_count = Inventory.objects.filter(
-            item__category__in=['LabReagent', 'Lab Test'],
-            quantity_at_hand__lte=F('re_order_level')
-        ).count()
+        # 3. Re-order Levels for Lab Items. Evaluated per item per location by
+        # the service layer -- a per-lot re-order level says nothing useful.
+        reorder_count = sum(
+            len(stock_service.items_below_reorder_level(category=category))
+            for category in LAB_STOCK_CATEGORIES
+        )
 
         return Response({
             'late_pending': late_pending_count,
@@ -721,20 +720,19 @@ def print_lab_report(request):
     elif report_type == 'expiry':
         today_date = today.date()
         date_limit = today_date + timedelta(days=90)
-        items = Inventory.objects.filter(
-            item__category__in=['LabReagent', 'Lab Test'],
-            expiry_date__lte=date_limit,
-            expiry_date__gt=today_date
-        ).select_related('item')
-        data['items'] = items
+        data['items'] = StockBalance.objects.filter(
+            item__category__in=LAB_STOCK_CATEGORIES,
+            quantity__gt=0,
+            lot__expiry_date__lte=date_limit,
+            lot__expiry_date__gt=today_date,
+        ).select_related('item', 'lot', 'department')
         data['title'] = "Lab Items Short Expiry Report"
-        
+
     elif report_type == 'reorder':
-        items = Inventory.objects.filter(
-            item__category__in=['LabReagent', 'Lab Test'],
-            quantity_at_hand__lte=F('re_order_level')
-        ).select_related('item')
-        data['items'] = items
+        rows = []
+        for category in LAB_STOCK_CATEGORIES:
+            rows.extend(stock_service.items_below_reorder_level(category=category))
+        data['items'] = rows
         data['title'] = "Lab Items Re-order Level Report"
     
     html_content = render_to_string(template_name, data)

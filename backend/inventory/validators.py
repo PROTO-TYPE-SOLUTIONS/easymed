@@ -3,14 +3,20 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from .models import RequisitionItem, Supplier
 
-def validate_requisition_item_uniqueness(requisition_id, item, preferred_supplier, quantity_requested):
+def validate_requisition_item_uniqueness(requisition_id, item, preferred_supplier,
+                                         quantity_requested, item_unit=None):
     """
     Ensure requisition item uniqueness or flag quantity update if it exists.
+
+    The ordering unit is part of what makes a line unique: six boxes and four
+    loose units of the same item are two separate lines, because adding them
+    together would produce ten of nothing.
     """
     existing_item = RequisitionItem.objects.filter(
         requisition_id=requisition_id,
         item=item,
-        preferred_supplier=preferred_supplier
+        preferred_supplier=preferred_supplier,
+        item_unit=item_unit,
     ).first()
 
     if existing_item:

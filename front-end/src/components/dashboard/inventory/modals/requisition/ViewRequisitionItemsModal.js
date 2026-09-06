@@ -164,17 +164,27 @@ const ViewRequisitionItemsModal = ({ open, setOpen, selectedRowData, setSelected
                     dataField="quantity_at_hand"
                     caption="Re order Level" 
                 />
-                <Column 
+                <Column
                     dataField="quantity_at_hand"
-                    caption="Quantity At Hand" 
+                    caption="Quantity At Hand"
+                    cellRender={({ data }) => `${data.quantity_at_hand ?? 0} ${data.base_unit ?? ''}`.trim()}
                 />
-                <Column 
+                <Column
                     dataField="quantity_requested"
-                    caption="Quantity Requested" 
+                    caption="Quantity Requested"
                 />
                 <Column
                     dataField="quantity_approved"
-                    caption="Quantity Approved" 
+                    caption="Quantity Approved"
+                />
+                <Column
+                    dataField="unit_label"
+                    caption="Ordered In"
+                    cellRender={({ data }) => (
+                        data.conversion_factor > 1
+                            ? `${data.unit_label} of ${data.conversion_factor} ${data.base_unit}`
+                            : data.unit_label
+                    )}
                 />
                 <Column 
                     dataField="buying_price"

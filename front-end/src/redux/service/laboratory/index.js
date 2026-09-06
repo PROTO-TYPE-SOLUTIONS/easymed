@@ -1053,3 +1053,79 @@ export const createReleasedSample = (payload, auth) => {
             .catch((err) => reject(err))
     })
 }
+
+export const fetchTestPanelReagents = (testPanelId, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.get(`${APP_API_URL.TEST_PANEL_REAGENTS}`, {
+            params: { test_panel: testPanelId }
+        })
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}
+
+export const createTestPanelReagent = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.post(`${APP_API_URL.TEST_PANEL_REAGENTS}`, payload)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}
+
+export const updateTestPanelReagent = (id, payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.patch(`${APP_API_URL.TEST_PANEL_REAGENTS}/${id}`, payload)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}
+
+export const deleteTestPanelReagent = (id, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.delete(`${APP_API_URL.TEST_PANEL_REAGENTS}/${id}`)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}
+
+export const fetchSpecimenConsumables = (specimenId, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.get(`${APP_API_URL.SPECIMEN_CONSUMABLES}`, {
+            params: { specimen: specimenId }
+        })
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}
+
+export const createSpecimenConsumable = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.post(`${APP_API_URL.SPECIMEN_CONSUMABLES}`, payload)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}
+
+export const updateSpecimenConsumable = (id, payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.patch(`${APP_API_URL.SPECIMEN_CONSUMABLES}/${id}`, payload)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}
+
+export const deleteSpecimenConsumable = (id, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.delete(`${APP_API_URL.SPECIMEN_CONSUMABLES}/${id}`)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+}

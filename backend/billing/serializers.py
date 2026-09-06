@@ -52,13 +52,13 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
         Rule:
         - If PaymentMode is insurance and there is a matching InsuranceItemSalePrice,
           return its sale_price (per unit).
-        - Otherwise, return Inventory.sale_price for the item.
+        - Otherwise, return the item's current cash price from the price list.
         - If nothing found, return 0.
 
-        Note: item_amount = sale_price × quantity (stored on the model).
+        Note: item_amount = sale_price x quantity (stored on the model).
         """
         try:
-            from inventory.models import Inventory, InsuranceItemSalePrice
+            from inventory.models import InsuranceItemSalePrice
 
             pm = getattr(obj, 'payment_mode', None)
             if pm and pm.payment_category == 'insurance' and pm.insurance_id:
@@ -68,23 +68,14 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
                 if price_row:
                     return price_row.sale_price
 
-            inv = Inventory.objects.filter(item=obj.item).order_by('-id').first()
-            return inv.sale_price if inv and inv.sale_price is not None else 0
+            return obj.item.current_sale_price or 0
         except Exception:
             return 0
     
     def create(self, validated_data):
-        """Auto-assign default payment mode if not provided."""
+        """Auto-assign the default (Cash) payment mode when none is provided."""
         if not validated_data.get('payment_mode'):
-            # Try to get the default payment mode (cash)
-            default_payment_mode = PaymentMode.objects.filter(is_default=True).first()
-            
-            if not default_payment_mode:
-                # Fallback to any cash category payment mode
-                default_payment_mode = PaymentMode.objects.filter(
-                    payment_category='cash'
-                ).first()
-            
+            default_payment_mode = PaymentMode.get_default()
             if default_payment_mode:
                 validated_data['payment_mode'] = default_payment_mode
         

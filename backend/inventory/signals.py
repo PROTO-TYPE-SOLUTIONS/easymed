@@ -1,184 +1,39 @@
+"""
+Signals kept here are catalogue housekeeping only.
+
+Stock is deliberately NOT touched from a signal. Every movement is posted from
+an explicit call to `inventory.services.stock`, because stock changes that ride
+on another model's save are impossible to order, impossible to roll back
+predictably, and were the source of the lost updates this module used to have.
+"""
+
 import logging
-from django.dispatch import receiver
+
 from django.db import transaction
-from django.db.models import Q
-from django.db.models import F
-from django.db.models.signals import post_save, post_delete
-from django.db.models import Sum
-from django.db import models
-from django.utils import timezone
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
+
+from .models import Item, RequisitionItem
+from .utils import generate_unique_item_code
+
+logger = logging.getLogger(__name__)
 
 
-from .utils import update_purchase_order_status, generate_unique_item_code
-from .models import (
-    PurchaseOrderItem,
-    IncomingItem,
-    Inventory,
-    Item,
-)
-from .tasks import (create_insurance_prices_for_inventory)
-
-logger=logging.getLogger(__name__)
-
-def _base_units_received(instance):
+@receiver(post_save, sender=RequisitionItem)
+@receiver(post_delete, sender=RequisitionItem)
+def refresh_requisition_status(sender, instance, **kwargs):
     """
-    Convert IncomingItem.quantity to base units (subpacked).
+    Keep the parent requisition's status in step with its lines.
 
-    - quantity_unit == 'packs': staff entered number of boxes → multiply by subpacked
-    - quantity_unit == 'units': staff entered base units directly → use as-is
+    Generating a purchase order flips `ordered` on the lines it covers, which
+    is what moves a requisition to partially/fully ordered. This is status
+    bookkeeping over facts already committed, not a stock movement, so the
+    caveat at the top of this module does not apply.
     """
-    if instance.quantity_unit == 'packs':
-        subpacked = instance.item.subpacked or 1
-        return instance.quantity * subpacked
-    return instance.quantity
-
-
-# There's a painful Race Condition when this is moved to celery
-@receiver(post_save, sender=IncomingItem)
-def update_inventory_after_incomingitem_creation(sender, instance, created, **kwargs):
-    if created:
-        try:
-            with transaction.atomic():
-                base_units = _base_units_received(instance)
-
-                # Check if there is an existing inventory record for the same item and lot number
-                # TODO: Add another check, expiry date, but could be redundant
-                inventory = Inventory.objects.filter(
-                    item=instance.item,
-                    lot_number=instance.lot_no
-                ).first()
-
-                if inventory:
-                    # Update the existing inventory record
-                    inventory.quantity_at_hand += base_units
-                    inventory.purchase_price = instance.purchase_price
-                    inventory.sale_price = instance.sale_price
-                    inventory.expiry_date = instance.expiry_date
-                    inventory.save()
-                else:
-                    # Create a new inventory record if lot number does not exist
-                    Inventory.objects.create(
-                        item=instance.item,
-                        purchase_price=instance.purchase_price,
-                        sale_price=instance.sale_price,
-                        quantity_at_hand=base_units,
-                        category_one=instance.category_one,
-                        lot_number=instance.lot_no,
-                        expiry_date=instance.expiry_date,
-                        department=instance.purchase_order.requisition.department
-                    )
-        except Exception as e:
-            # Handle the exception appropriately (e.g., log the error)
-            print(f"Error updating inventory for incoming item: {instance.id}, Error: {e}")
-
-
-@receiver([post_save, post_delete], sender=IncomingItem)
-def update_supplier_invoice_amount(sender, instance, **kwargs):
-    """
-    Update the SupplierInvoice amount whenever an IncomingItem is created, updated, or deleted.
-    The amount is calculated as the sum of (purchase_price * quantity) for all related IncomingItems.
-    """
-    if instance.supplier_invoice:
-        try:
-            with transaction.atomic():
-                supplier_invoice = instance.supplier_invoice
-
-                # Calculate total amount from all related IncomingItems
-                total_amount = IncomingItem.objects.filter(
-                    supplier_invoice=supplier_invoice
-                ).aggregate(
-                    total=Sum(models.F('purchase_price') * models.F('quantity'))
-                )['total'] or 0.00
-                
-                # Update the supplier invoice amount
-                supplier_invoice.amount = total_amount
-                supplier_invoice.save()
-        except Exception as e:
-            print(f"Error updating supplier invoice amount: {e}")
-
-
-@receiver([post_save], sender=IncomingItem)
-def update_purchase_order_item_quantity_received(sender, instance, **kwargs):
-    with transaction.atomic():
-        purchase_order_item = PurchaseOrderItem.objects.filter(purchase_order=instance.purchase_order,
-                        requisition_item__item=instance.item).first()
-
-        if purchase_order_item:
-            if instance.quantity:
-                purchase_order_item.quantity_received = instance.quantity
-                purchase_order_item.save()
-
-                update_purchase_order_status(purchase_order_item.purchase_order)
-
-
-@receiver(post_delete, sender=IncomingItem)
-def update_purchase_order_item_quantity_received_on_delete(sender, instance, **kwargs):
-    with transaction.atomic():
-        purchase_order_item = PurchaseOrderItem.objects.filter(
-            purchase_order=instance.purchase_order,
-            requisition_item__item=instance.item  
-        ).first()
-
-        if purchase_order_item:
-            purchase_order_item.quantity_received = instance.quantity
-            purchase_order_item.save()
-
-            update_purchase_order_status(purchase_order_item.purchase_order)
-
-@receiver(post_save, sender=Inventory)
-def update_last_deducted_on(sender, instance, **kwargs):
-        old_instance = Inventory.objects.get(pk=instance.pk)
-
-        if instance.quantity_at_hand < old_instance.quantity_at_hand:
-            instance.last_deducted_on = timezone.now()
-            instance.save()
-
-
-@receiver(post_save, sender=IncomingItem)
-def update_reagent_test_counter(sender, instance, created, **kwargs):
-    """
-    Update TestKitCounter when lab reagent kits are received.
-    Uses _base_units_received() so quantity_unit='packs' and 'units' are both handled.
-    """
-    if created and instance.item.category == 'LabReagent':
-        try:
-            from laboratory.models import TestKitCounter
-
-            with transaction.atomic():
-                counter, _ = TestKitCounter.objects.get_or_create(
-                    reagent_item=instance.item,
-                    defaults={'available_tests': 0}
-                )
-
-                tests_added = _base_units_received(instance)
-                counter.available_tests += tests_added
-                counter.save()
-
-                logger.info(
-                    f"Updated TestKitCounter for {instance.item.name}: "
-                    f"Added {tests_added} tests (quantity={instance.quantity}, "
-                    f"unit={instance.quantity_unit}, subpacked={instance.item.subpacked}). "
-                    f"Total available: {counter.available_tests}"
-                )
-        except Exception as e:
-            logger.error(f"Error updating TestKitCounter for reagent {instance.item.name}: {str(e)}")
-    
-
-@receiver(post_save, sender=Inventory)
-def create_default_insurance_prices(sender, instance, created, **kwargs):
-    '''
-    Creates a default insurance price for the item whenver an inventory record
-    is created for that item. This will make blind errors/bugs less common for
-    billing
-    '''
-    if created:
-        try:
-            create_insurance_prices_for_inventory.delay(instance.id)
-        except Exception as e:
-            logger.warning(
-                f"Could not dispatch insurance price task for inventory {instance.id} "
-                f"(Redis may not be available): {e}"
-            )
+    requisition = instance.requisition
+    if requisition is None:
+        return
+    transaction.on_commit(requisition.refresh_status)
 
 
 @receiver(post_save, sender=Item)
@@ -189,36 +44,39 @@ def sync_lab_test_item(sender, instance, created, **kwargs):
 
     - On create: generate and link a new Lab Test item.
     - On update: keep name and desc in sync with the paired item.
-    - Category change away from LabReagent: leave the paired item in place
-      but nullify the link so it can be managed independently.
     """
     # QuerySet.update() does not fire signals, so we use it here to avoid
     # re-entering this receiver and causing infinite recursion.
-    if instance.category == 'LabReagent':
-        with transaction.atomic():
-            if instance.lab_test_item_id is None:
-                # First time — create the paired billing item
-                lab_test = Item.objects.create(
-                    name=instance.name,
-                    desc=instance.desc,
-                    category='Lab Test',
-                    item_code=generate_unique_item_code(),
-                    units_of_measure='',
-                    packed=instance.packed,
-                    subpacked=instance.subpacked,
-                )
-                # Link without triggering this signal again
-                Item.objects.filter(pk=instance.pk).update(lab_test_item=lab_test)
-                logger.info(
-                    f"Auto-created Lab Test item '{lab_test.name}' "
-                    f"(#{lab_test.id}) for LabReagent '{instance.name}' (#{instance.pk})"
-                )
-            else:
-                # Subsequent saves — keep name and desc in sync
-                Item.objects.filter(pk=instance.lab_test_item_id).update(
-                    name=instance.name,
-                    desc=instance.desc,
-                )
+    if instance.category != 'LabReagent':
+        return
+
+    with transaction.atomic():
+        if instance.lab_test_item_id is None:
+            # Multiple LabReagent variants (different units_of_measure) can
+            # share a name, but they must pair to the same billing item —
+            # the paired item's (name, category, units_of_measure) is fixed,
+            # so a blind create() collides on the unique constraint.
+            lab_test, created = Item.objects.get_or_create(
+                name=instance.name,
+                category='Lab Test',
+                units_of_measure='test',
+                defaults={
+                    'desc': instance.desc,
+                    'item_code': generate_unique_item_code(),
+                    'is_stock_tracked': False,
+                },
+            )
+            Item.objects.filter(pk=instance.pk).update(lab_test_item=lab_test)
+            logger.info(
+                "%s Lab Test item '%s' (#%s) for LabReagent '%s' (#%s)",
+                "Auto-created" if created else "Linked existing",
+                lab_test.name, lab_test.id, instance.name, instance.pk,
+            )
+        else:
+            Item.objects.filter(pk=instance.lab_test_item_id).update(
+                name=instance.name,
+                desc=instance.desc,
+            )
 
 
 @receiver(post_delete, sender=Item)
@@ -230,6 +88,6 @@ def delete_paired_lab_test_item(sender, instance, **kwargs):
     if instance.category == 'LabReagent' and instance.lab_test_item_id:
         Item.objects.filter(pk=instance.lab_test_item_id).delete()
         logger.info(
-            f"Deleted paired Lab Test item #{instance.lab_test_item_id} "
-            f"for deleted LabReagent '{instance.name}' (#{instance.pk})"
+            "Deleted paired Lab Test item #%s for deleted LabReagent '%s' (#%s)",
+            instance.lab_test_item_id, instance.name, instance.pk,
         )

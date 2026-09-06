@@ -73,18 +73,41 @@ const SamplesAccordion = ({ sample: initialSample }) => {
     setExpanded(newExpanded ? sampleId : false);
   };
 
+  const consumables = sample.consumables ?? [];
+
 return (
   <div className="w-full">
     {!sample.is_sample_collected && (
-      <div className='flex w-full bg-gray py-2 items-center mt-2 px-2 justify-between'>
-        <p className='flex'>{`${sample.specimen_name}`}</p>
-        <p className='flex'>{`${sample.patient_sample_code}`}</p>
-        <button 
-          onClick={() => approveCollection(sample.id)} 
-          className="bg-primary text-white px-3 py-1 rounded-lg"
-        >
-          Collect Sample
-        </button>
+      <div className='w-full bg-gray mt-2'>
+        <div className='flex w-full py-2 items-center px-2 justify-between'>
+          <p className='flex'>{`${sample.specimen_name}`}</p>
+          <p className='flex'>{`${sample.patient_sample_code}`}</p>
+          <button
+            onClick={() => approveCollection(sample.id)}
+            className="bg-primary text-white px-3 py-1 rounded-lg"
+          >
+            Collect Sample
+          </button>
+        </div>
+        <div className='px-2 pb-2 text-xs'>
+          <span className='font-semibold'>Consumables required: </span>
+          {consumables.length === 0 ? (
+            <span>None configured for this specimen</span>
+          ) : (
+            consumables.map((consumable, index) => {
+              const short = consumable.available_quantity < consumable.quantity_per_collection;
+              return (
+                <span key={consumable.id}>
+                  {index > 0 && ", "}
+                  <span className={short ? "text-warning font-semibold" : ""}>
+                    {`${consumable.quantity_per_collection} x ${consumable.item_name}`}
+                    {short && ` (only ${consumable.available_quantity} in stock)`}
+                  </span>
+                </span>
+              );
+            })
+          )}
+        </div>
       </div>
     )}
 

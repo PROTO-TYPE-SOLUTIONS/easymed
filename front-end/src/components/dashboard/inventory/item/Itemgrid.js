@@ -14,7 +14,9 @@ import { months } from "@/assets/dummy-data/laboratory";
 import CmtDropdownMenu from '@/assets/DropdownMenu';
 import { LuMoreHorizontal } from 'react-icons/lu';
 import { BiEdit } from 'react-icons/bi';
+import { TbBox } from 'react-icons/tb';
 import EditItemModal from './EditItemModal';
+import ManageItemUnits from './ManageItemUnits';
 
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -29,6 +31,11 @@ const getActions = () => {
       action: "update",
       label: "Edit Item",
       icon: <BiEdit className="text-success text-xl mx-2" />,
+    },
+    {
+      action: "pack-sizes",
+      label: "Pack Sizes",
+      icon: <TbBox className="text-primary text-xl mx-2" />,
     },
   ];
 
@@ -45,6 +52,7 @@ const ItemsGrid = () => {
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const [editOpen, setEditOpen] = useState(false)
+  const [unitsOpen, setUnitsOpen] = useState(false)
   const [selectedRowData, setSelectedRowData] = useState({})
 
   const [exporting, setExporting] = useState(false);
@@ -64,6 +72,9 @@ const ItemsGrid = () => {
     if (menu.action === "update") {
       setSelectedRowData(data);
       setEditOpen(true);
+    } else if (menu.action === "pack-sizes") {
+      setSelectedRowData(data);
+      setUnitsOpen(true);
     }
   };
 
@@ -79,6 +90,26 @@ const ItemsGrid = () => {
           }
         />
       </>
+    );
+  };
+
+  const renderPackSizes = ({ data }) => {
+    const packs = data.unit_conversions ?? [];
+    if (packs.length === 0) {
+      return <span className="text-gray">Sold loose</span>;
+    }
+    const baseUnit = data.units_of_measure || 'units';
+    return (
+      <div className="flex flex-col gap-1">
+        {packs.map((pack) => (
+          <span key={pack.id}>
+            {pack.name} of {pack.factor_to_base} {baseUnit}
+            {pack.is_purchase_default && (
+              <span className="text-xs text-primary"> · buys in</span>
+            )}
+          </span>
+        ))}
+      </div>
     );
   };
 
@@ -172,6 +203,10 @@ const ItemsGrid = () => {
             {importing ? 'Importing...' : 'Import from Excel'}
           </button>
 
+          <Link className="bg-primary rounded-md flex items-center justify-center text-white px-4 py-2 text-sm" href="/dashboard/inventory/create-requisition">
+            Create Requisition
+          </Link>
+
           <Link className="bg-primary rounded-md flex items-center justify-center text-white px-4 py-2 text-sm" href="/dashboard/inventory/items/new">
             Add New Item
           </Link>
@@ -210,7 +245,13 @@ const ItemsGrid = () => {
           allowFiltering={true}
           allowSearch={true}
         />
-        <Column dataField="units_of_measure" caption="Unit" />
+        <Column dataField="units_of_measure" caption="Base Unit" />
+        <Column
+          dataField="unit_conversions"
+          caption="Pack Sizes"
+          allowSorting={false}
+          cellRender={renderPackSizes}
+        />
         <Column dataField="desc" caption="Description" />
         <Column
           dataField=""
@@ -223,6 +264,13 @@ const ItemsGrid = () => {
         <EditItemModal
           open={editOpen}
           setOpen={setEditOpen}
+          selectedRowData={selectedRowData}
+        />
+      )}
+      {unitsOpen && (
+        <ManageItemUnits
+          open={unitsOpen}
+          setOpen={setUnitsOpen}
           selectedRowData={selectedRowData}
         />
       )}

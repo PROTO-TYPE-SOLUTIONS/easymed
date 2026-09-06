@@ -13,7 +13,11 @@ class CustomUserManager(BaseUserManager):
         if not email:
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
-        user = self.model(email=email, role=role, **extra_fields)
+        # Passing role=None straight through would override the field's own
+        # default and hit the NOT NULL constraint, so only set it when given.
+        if role is not None:
+            extra_fields['role'] = role
+        user = self.model(email=email, **extra_fields)
         if password:
             user.set_password(password)
         user.save(using=self._db)

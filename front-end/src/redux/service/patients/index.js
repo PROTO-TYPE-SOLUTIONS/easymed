@@ -239,9 +239,12 @@ export const updatePrescribeDrug = (payload, auth) => {
     })
 }
 
-export const createPrescription = (payload) => {
+export const createPrescription = (payload, auth) => {
+    // Must go through UseAxios: the proxy forwards the Authorization header to
+    // the backend, so a bare axios call here is an unauthenticated request.
+    const axiosInstance = UseAxios(auth);
     return new Promise((resolve, reject) => {
-        axios.post(`${APP_API_URL.CREATE_PRESCRIPTION}`, payload)
+        axiosInstance.post(`${APP_API_URL.CREATE_PRESCRIPTION}`, payload)
             .then((res) => {
                 resolve(res.data)
             })

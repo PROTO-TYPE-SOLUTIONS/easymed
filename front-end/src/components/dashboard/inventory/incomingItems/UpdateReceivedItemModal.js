@@ -32,6 +32,20 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
     return supplier ? {value:supplier.id, label: supplier.official_name}: null
   }
 
+  // The unit is fixed by the order -- you receive what you ordered, six boxes
+  // against six boxes -- so it is shown, not chosen. Quantity and buying price
+  // are both read as "per one of these"; the backend converts to base units
+  // when the line is posted to the ledger.
+  const receivedItem = item.find((itm) => parseInt(itm.id) === parseInt(selectedEditRowData.item));
+  const baseUnit = selectedEditRowData.base_unit || receivedItem?.units_of_measure || "unit";
+  const orderedPack = (receivedItem?.unit_conversions ?? []).find(
+    (u) => parseInt(u.id) === parseInt(selectedEditRowData.item_unit)
+  );
+  const unitLabel = orderedPack
+    ? `${orderedPack.name} of ${orderedPack.factor_to_base} ${baseUnit}`
+    : `${baseUnit} (base unit)`;
+  const conversionFactor = orderedPack?.factor_to_base ?? 1;
+
   const initialValues = {
     ...selectedEditRowData,
     // item: getItem() || null,
@@ -44,8 +58,7 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
     category_one: selectedEditRowData.lot_no || "", 
     lot_no: selectedEditRowData.lot_no || "",
     expiry_date: selectedEditRowData.expiry_date || "",
-    quantity_received: selectedEditRowData.quantity_received || ""
-
+    quantity_received: selectedEditRowData.quantity_received || "",
   };
 
   const validationSchema = Yup.object().shape({
@@ -77,7 +90,8 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
           const updatedItems = [...po.items];
           updatedItems[gottenReqItemIndex] = {
             ...formValue,
-            category_one: formValue.category_one.value
+            category_one: formValue.category_one.value,
+            item_unit: selectedEditRowData.item_unit || null,
           };
         
           // Create a new requisition object with the updated items array
@@ -147,7 +161,7 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
                       />
                   </Grid>
                   <Grid item md={4} xs={12}>
-                    <label>Buying Price</label>
+                    <label>Buying Price {conversionFactor > 1 ? `(per ${orderedPack.name})` : `(per ${baseUnit})`}</label>
                     <Field
                         className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
                         maxWidth="sm"
@@ -237,7 +251,7 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
                         className="text-warning text-xs"
                     />
                   </Grid>
-                    <Grid item md={12} xs={12}>
+                    <Grid item md={6} xs={12}>
                     <label>Quantity Received</label>
                     <Field
                         className="block border rounded-xl text-sm border-gray py-4 px-4 focus:outline-card w-full"
@@ -250,6 +264,16 @@ const UpdateReceivedItemModal = ({ editOpen, setEditOpen, selectedEditRowData, s
                         component="div"
                         className="text-warning text-xs"
                     />
+                    </Grid>
+                    <Grid item md={6} xs={12}>
+                    <label>Received in</label>
+                    <div className="block border rounded-xl text-sm border-gray py-4 px-4 w-full bg-background">
+                      {unitLabel}
+                    </div>
+                    <p className="text-xs text-gray mt-1">
+                      Set when the requisition was raised. Quantity and buying
+                      price are both per one of these; stock is counted in {baseUnit}.
+                    </p>
                     </Grid>
                     <Grid item md={12} xs={12}>
                     <div className="flex items-center justify-end">
