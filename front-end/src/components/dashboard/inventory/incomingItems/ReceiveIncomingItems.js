@@ -9,10 +9,22 @@ import { toast } from "react-toastify";
 import ViewPOItemsModal from './ViewPOItemsModal'
 import GRNote from './GRNote'
 import SupplierInvoice from './SupplierInvoice'
-import { addIncomingItem, createGRNote, createSupplierInvoice, fetchIncomingItems, updateIncomingItem } from '@/redux/service/inventory';
+import { createGoodsReceipt, fetchIncomingItems, updateIncomingItem } from '@/redux/service/inventory';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { getAllIncomingItems } from '@/redux/features/inventory';
 
+
+/** Pull something readable out of a DRF error body. */
+const errorText = (err, fallback) => {
+    const data = err?.response?.data;
+    if (!data) return err?.message || fallback;
+    if (typeof data === 'string') return data;
+    if (Array.isArray(data)) return data[0];
+    const [field, messages] = Object.entries(data)[0] ?? [];
+    if (!field) return fallback;
+    const detail = Array.isArray(messages) ? messages[0] : String(messages);
+    return field === 'non_field_errors' ? detail : `${field}: ${detail}`;
+};
 
 const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowData }) => {
     const [loading, setLoading] = useState(false);
@@ -41,33 +53,18 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
         amount: Yup.string().required("This field is required!"),
     });
 
-    const postIncomings =  async (item, supplierInvoice, gRNote) => {
-        const payload = {
-            "item_code": item.item_code,
-            "purchase_price": item.buying_price,
-            "sale_price": item.selling_price,
-            "quantity": item.quantity_received ? item.quantity_received : item.quantity_approved,
-            "item_unit": item.item_unit || null,
-            "category_one": item.category_one ? item.category_one : "",
-            "item": item.item,
-            "purchase_order": supplierInvoice.purchase_order,
-            "supplier_invoice": supplierInvoice.id,
-            "supplier": supplierInvoice.supplier,
-            "goods_receipt_note": gRNote.id,
-            "lot_no": item.lot_no ? item.lot_no : "",
-            "expiry_date": item.expiry_date ? new Date(item.expiry_date).toISOString().split('T')[0] : ""
-        }
-        try {
-            const response = await addIncomingItem(payload, auth)
-            console.log("SAVED INCOMING ITEM", response)
-        }catch(error){
-
-        }
-    }
-
-    const saveIncomingItems = (incomingItems, supplierInvoice, gRNote) => {
-        incomingItems.forEach((item)=> postIncomings(item, supplierInvoice, gRNote))        
-    }
+    /** One received line, in the shape the goods-receipt endpoint expects. */
+    const receiptLine = (item) => ({
+        "item": item.item,
+        "quantity": item.quantity_received ? item.quantity_received : item.quantity_approved,
+        "purchase_price": item.buying_price,
+        "sale_price": item.selling_price,
+        "item_unit": item.item_unit || null,
+        "lot_no": item.lot_no ? item.lot_no : "",
+        // null, not "": an empty string is not a date, and the whole line
+        // is rejected for it.
+        "expiry_date": item.expiry_date ? new Date(item.expiry_date).toISOString().split('T')[0] : null,
+    })
 
     const handleAddIncomingItem = async ( formvalues ) => {
         if(!selectedItems || selectedItems.selectedRowsData.length < 1){
@@ -96,32 +93,31 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
 
             }else{
 
-                // const supplierInvoiceResponse = await createSupplierInvoice(payload, auth)
-            
-                // const gRNoteResponse = await createGRNote(payload, auth)
-                // Fire off both requests at the same time
-                const [supplierInvoiceResponse, gRNoteResponse] = await Promise.all([
-                    createSupplierInvoice(payload, auth),
-                    createGRNote(payload, auth)
-                ]);
+                // One request: the backend writes the invoice, the GRN and
+                // every line in a single transaction. Previously these were
+                // three calls, and a failure on the last left an invoice and a
+                // GRN behind for stock that never arrived.
+                const receipt = await createGoodsReceipt({
+                    purchase_order: payload.purchase_order,
+                    invoice_no: payload.invoice_no,
+                    supplier: payload.supplier,
+                    status: payload.status,
+                    note: payload.note,
+                    lines: selectedItems.selectedRowsData.map(receiptLine),
+                }, auth);
 
-                // This only runs once BOTH promises resolve successfully
-                saveIncomingItems(
-                    selectedItems.selectedRowsData, 
-                    supplierInvoiceResponse, 
-                    gRNoteResponse
+                toast.success(
+                    `Received ${receipt.lines.length} line${receipt.lines.length === 1 ? '' : 's'} `
+                    + `on invoice ${receipt.supplier_invoice.invoice_no}`
                 );
-                
-                // saveIncomingItems(selectedItems.selectedRowsData, supplierInvoiceResponse, gRNoteResponse)
-    
-                toast.success("Purchase order Created Successfully");
 
             }
 
             router.push("/dashboard/inventory/incoming-items");
 
         }catch(error){
-            console.log("ERROE", error)
+            console.log("RECEIVE_ERROR", error)
+            toast.error(errorText(error, "Could not receive these items"))
         }
 
     }

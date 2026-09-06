@@ -192,6 +192,14 @@ class Item(AbstractBaseModel):
         # A service can never be stock tracked, regardless of what was posted.
         if self.category in self.SERVICE_CATEGORIES:
             self.is_stock_tracked = False
+        elif self.pk and not self.is_stock_tracked:
+            # ...but that has to be undoable, or an item filed as a service by
+            # mistake stays permanently unable to hold stock even after its
+            # category is corrected.
+            was_a_service = type(self).objects.filter(
+                pk=self.pk, category__in=self.SERVICE_CATEGORIES).exists()
+            if was_a_service:
+                self.is_stock_tracked = True
         super().save(*args, **kwargs)
 
     @property
@@ -253,6 +261,37 @@ class Item(AbstractBaseModel):
         return f"{self.id} - {self.name} - {self.category}"
 
 
+def unit_name_forms(word):
+    '''
+    The forms a unit name might be written in, for comparing one name against
+    another.
+
+    English plurals do not reduce with a single rule -- 'boxes' loses 'es' but
+    'syringes' only loses 's' -- so rather than guess which applies, return
+    every candidate and let the caller look for any overlap.
+    '''
+    normalised = (word or '').strip().lower()
+    if not normalised:
+        return set()
+    forms = {normalised}
+    for suffix in ('es', 's'):
+        if normalised.endswith(suffix) and len(normalised) > len(suffix):
+            forms.add(normalised[:-len(suffix)])
+    return forms
+
+
+def unit_name_collides(pack_name, base_unit):
+    '''A pack may not be called what the base unit is already called.'''
+    return bool(unit_name_forms(pack_name) & unit_name_forms(base_unit))
+
+
+UNIT_NAME_COLLISION_MESSAGE = (
+    "A pack cannot be called '{pack}' when the base unit is already '{base}' -- "
+    "it would read as '1 {pack} = {factor} {base}'. Name the base unit for what "
+    "it actually counts (tests, ml, tablets) and keep '{pack}' for the container."
+)
+
+
 class ItemUnit(AbstractBaseModel):
     '''
     A pack size an item can be bought or sold in, expressed in base units.
@@ -286,6 +325,14 @@ class ItemUnit(AbstractBaseModel):
             raise ValidationError(
                 {'factor_to_base': "A factor of 1 is the base unit, which needs no row."}
             )
+        # Without this, "1 Kit (500 kits)" is a reachable, and meaningless,
+        # thing for the dashboard to print.
+        if self.item_id and unit_name_collides(self.name, self.item.units_of_measure):
+            raise ValidationError({'name': UNIT_NAME_COLLISION_MESSAGE.format(
+                pack=self.name,
+                base=self.item.units_of_measure,
+                factor=self.factor_to_base,
+            )})
 
     def to_base(self, quantity):
         return quantity * self.factor_to_base
@@ -371,15 +418,132 @@ class InsuranceItemSalePrice(models.Model):
 
 
 class Requisition(AbstractBaseModel):
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pending'
+        DEPARTMENT_APPROVED = 'DEPARTMENT_APPROVED', 'Department approved'
+        PROCUREMENT_APPROVED = 'PROCUREMENT_APPROVED', 'Procurement approved'
+        PARTIALLY_ORDERED = 'PARTIALLY_ORDERED', 'Partially ordered'
+        ORDERED = 'ORDERED', 'Ordered'
+        REJECTED = 'REJECTED', 'Rejected'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+
+    # The two ways a requisition stops without being ordered. Rejected is the
+    # approver saying no; cancelled is the requesting side withdrawing it.
+    CLOSED_CHOICES = [
+        (Status.REJECTED, 'Rejected'),
+        (Status.CANCELLED, 'Cancelled'),
+    ]
+
     requisition_number = models.CharField(max_length=50, unique=True, editable=False)
     file = models.FileField(upload_to='requisitions', null=True, blank=True)
     department_approved = models.BooleanField(default=False)
     procurement_approved = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=30, choices=Status.choices, default=Status.PENDING,
+        help_text=(
+            "Where the requisition has reached. Derived from the approval flags, "
+            "how many of its lines have been ordered, and whether it was closed "
+            "-- never set directly, so it cannot drift from them."
+        ))
+    # Ending a requisition is a decision, not something the other fields imply,
+    # so it is recorded here and the status is read back off it.
+    closed_as = models.CharField(
+        max_length=30, choices=CLOSED_CHOICES, null=True, blank=True,
+        help_text="Set when the requisition is rejected or cancelled; blank while it is live")
+    closed_reason = models.CharField(
+        max_length=255, blank=True, default='',
+        help_text="Why it was rejected or cancelled")
+    closed_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='req_closed_by')
+    closed_at = models.DateTimeField(null=True, blank=True)
     department_approval_date = models.DateTimeField(null=True, blank=True)
     procurement_approval_date = models.DateTimeField(null=True, blank=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, max_length=255, null=False, blank=False)
     requested_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='req_requested_by')
     approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='req_approved_by')
+
+    @property
+    def is_closed(self):
+        return bool(self.closed_as)
+
+    def close(self, closed_as, reason='', by=None):
+        '''
+        End the requisition without ordering it.
+
+        Refused once any line has been ordered: a purchase order is a
+        commitment to a supplier, and quietly cancelling the requisition
+        underneath it would leave that commitment unexplained.
+        '''
+        if closed_as not in {self.Status.REJECTED, self.Status.CANCELLED}:
+            raise ValidationError(
+                {'closed_as': f"'{closed_as}' is not a way to close a requisition."})
+        if self.is_closed:
+            raise ValidationError(
+                {'closed_as': f"{self.requisition_number} is already "
+                              f"{self.get_closed_as_display().lower()}."})
+        if self.items.filter(ordered=True).exists():
+            raise ValidationError(
+                {'closed_as': "Lines on this requisition have already been ordered. "
+                              "Cancel the purchase order instead."})
+
+        self.closed_as = closed_as
+        self.closed_reason = reason or ''
+        self.closed_by = by
+        self.closed_at = timezone.now()
+        self.save()
+        return self
+
+    def reopen(self):
+        '''Undo a rejection or cancellation, returning it to where it had got to.'''
+        if not self.is_closed:
+            raise ValidationError(
+                {'closed_as': f"{self.requisition_number} is not closed."})
+        self.closed_as = None
+        self.closed_reason = ''
+        self.closed_by = None
+        self.closed_at = None
+        self.save()
+        return self
+
+    def derive_status(self):
+        '''
+        Work the status out from the facts that already exist, so there is one
+        source of truth rather than a column someone has to remember to update.
+        '''
+        # Being closed outranks everything else: it is the one part of the
+        # lifecycle nothing else records.
+        if self.closed_as:
+            return self.closed_as
+        if not self.department_approved:
+            return self.Status.PENDING
+        if not self.procurement_approved:
+            return self.Status.DEPARTMENT_APPROVED
+
+        # Procurement has signed off; how far has ordering actually got? Only
+        # lines with an approved quantity can be ordered, so only they count.
+        approved_lines = [line for line in self.items.all() if line.quantity_approved > 0]
+        if not approved_lines:
+            return self.Status.PROCUREMENT_APPROVED
+
+        ordered = sum(1 for line in approved_lines if line.ordered)
+        if ordered == 0:
+            return self.Status.PROCUREMENT_APPROVED
+        if ordered == len(approved_lines):
+            return self.Status.ORDERED
+        return self.Status.PARTIALLY_ORDERED
+
+    def refresh_status(self):
+        '''Recompute and persist the status, writing only when it changed.'''
+        current = self.derive_status()
+        if current != self.status:
+            self.status = current
+            # A queryset update rather than save(): deleting a requisition
+            # cascades to its items, which fires this from their post_delete,
+            # by which point the parent row is gone. update() is a no-op on a
+            # row that no longer exists; save() would raise.
+            type(self).objects.filter(pk=self.pk).update(status=current)
+        return current
 
     def save(self, *args, **kwargs):
         '''Generate the requisition number once, on creation only.'''
@@ -390,6 +554,10 @@ class Requisition(AbstractBaseModel):
             self.requisition_number = (
                 f"{abbr}/{today.year % 100}/{today.month:02d}/{today.day:02d}/{random_code}"
             )
+        # Items can only be counted once the row exists; a brand new
+        # requisition has none, and its default of PENDING is already right.
+        if self.pk:
+            self.status = self.derive_status()
         super().save(*args, **kwargs)
 
     def __str__(self):

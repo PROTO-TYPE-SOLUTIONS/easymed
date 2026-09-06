@@ -34,6 +34,8 @@ from .models import (
     SupplierPaymentAllocation,
     SupplierPaymentReceipt,
     Unit,
+    UNIT_NAME_COLLISION_MESSAGE,
+    unit_name_collides,
 )
 from .services import stock as stock_service
 from .utils import generate_unique_item_code
@@ -116,6 +118,19 @@ class ItemUnitSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate(self, attrs):
+        # Model.clean() never runs through DRF, so the collision has to be
+        # caught here as well or the API is the way it gets in.
+        item = attrs.get('item') or getattr(self.instance, 'item', None)
+        name = attrs.get('name', getattr(self.instance, 'name', ''))
+        if item and unit_name_collides(name, item.units_of_measure):
+            raise serializers.ValidationError({'name': UNIT_NAME_COLLISION_MESSAGE.format(
+                pack=name,
+                base=item.units_of_measure,
+                factor=attrs.get('factor_to_base', getattr(self.instance, 'factor_to_base', '')),
+            )})
+        return attrs
+
 
 class ItemSerializer(serializers.ModelSerializer):
     unit_conversions = ItemUnitSerializer(many=True, read_only=True)
@@ -137,6 +152,21 @@ class ItemSerializer(serializers.ModelSerializer):
 
     def get_department_names(self, obj):
         return list(obj.departments.values_list('name', flat=True))
+
+    def validate_units_of_measure(self, value):
+        # The collision is reachable from this side too: rename the base unit
+        # to what one of the item's own packs is already called.
+        if self.instance:
+            clash = next(
+                (pack for pack in self.instance.unit_conversions.all()
+                 if unit_name_collides(pack.name, value)),
+                None,
+            )
+            if clash:
+                raise serializers.ValidationError(UNIT_NAME_COLLISION_MESSAGE.format(
+                    pack=clash.name, base=value, factor=clash.factor_to_base,
+                ))
+        return value
 
     def _apply_price(self, item, sale_price):
         if sale_price is not None:
@@ -236,8 +266,11 @@ def _unit_cost_for(item, requisition_item=None):
 
 
 class RequisitionItemSerializer(BaseItemSerializer, BaseSupplierSerializer):
+    # Reads back as the supplier's pk, not its name: the purchase-order screen
+    # posts this value straight back as `supplier`. The display name is already
+    # carried separately by preferred_supplier_name.
     preferred_supplier = serializers.PrimaryKeyRelatedField(
-        queryset=Supplier.objects.all(), required=False, write_only=True)
+        queryset=Supplier.objects.all(), required=False)
     requisition = serializers.PrimaryKeyRelatedField(source='requisition.id', read_only=True)
     requisition_number = serializers.CharField(source='requisition.requisition_number', read_only=True)
     requisition_date_created = serializers.DateTimeField(source='requisition.date_created', read_only=True)
@@ -267,12 +300,23 @@ class RequisitionItemSerializer(BaseItemSerializer, BaseSupplierSerializer):
                   'base_quantity_requested', 'base_unit']
         read_only_fields = ['id', 'date_created']
 
+    def validate_item(self, value):
+        # Catch this here rather than at goods receipt. Without it a service
+        # item can be requisitioned, approved, ordered, invoiced and a GRN
+        # raised against it, and only the very last step -- posting it to the
+        # ledger -- refuses, by which point the paperwork all exists.
+        if not value.is_stock_tracked:
+            raise serializers.ValidationError(
+                f"{value.name} is a {value.get_category_display()}, which is billed "
+                "rather than stocked, so it cannot be requisitioned. If this is a "
+                "physical item, correct its category first.")
+        return value
+
     def get_buying_price(self, obj):
         return float(_unit_cost_for(obj.item, obj))
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['preferred_supplier'] = instance.preferred_supplier.official_name if instance.preferred_supplier else None
         data['item_code'] = instance.item.item_code
         return data
 
@@ -329,14 +373,24 @@ class RequisitionSerializer(serializers.ModelSerializer):
     approved_by = serializers.CharField(source='approved_by.get_fullname', read_only=True, allow_null=True)
     total_items_requested = serializers.SerializerMethodField(read_only=True)
     total_amount = serializers.SerializerMethodField(read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    is_closed = serializers.BooleanField(read_only=True)
+    closed_by = serializers.CharField(source='closed_by.get_fullname', read_only=True, allow_null=True)
 
     class Meta:
         model = Requisition
         fields = ['id', 'requisition_number', 'total_amount', 'department', 'total_items_requested',
                   'requested_by', 'ordered_by', 'approved_by', 'department_approved', 'procurement_approved',
-                  'department_approval_date', 'procurement_approval_date', 'items', 'date_created']
+                  'department_approval_date', 'procurement_approval_date', 'status', 'status_display',
+                  'is_closed', 'closed_as', 'closed_reason', 'closed_by', 'closed_at',
+                  'items', 'date_created']
+        # `status` is derived from the approval flags, the lines' `ordered`
+        # state and `closed_as`, so it is reported, never accepted. Closing is
+        # its own decision and goes through the reject/cancel endpoints, which
+        # check the transition is legal and record who did it and why.
         read_only_fields = ['id', 'requisition_number', 'date_created', 'ordered_by', 'approved_by',
-                            'department_approval_date', 'procurement_approval_date']
+                            'department_approval_date', 'procurement_approval_date', 'status',
+                            'closed_as', 'closed_reason', 'closed_at']
 
     def validate(self, attrs):
         if 'items' in attrs:
@@ -580,6 +634,10 @@ class IncomingItemSerializer(serializers.ModelSerializer):
     conversion_factor = serializers.IntegerField(read_only=True)
     total_price = serializers.SerializerMethodField()
     is_posted = serializers.BooleanField(read_only=True)
+    # Goods without an expiry are the norm, and a form that leaves the field
+    # blank sends "". Treat that as "no expiry" rather than failing the whole
+    # receipt on a date format.
+    expiry_date = serializers.DateField(required=False, allow_null=True, default=None)
 
     class Meta:
         model = IncomingItem
@@ -592,6 +650,14 @@ class IncomingItemSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, obj):
         return float(obj.line_total)
+
+    def to_internal_value(self, data):
+        # An empty date or lot from a form means "not supplied", not "invalid".
+        if hasattr(data, 'copy'):
+            data = data.copy()
+            if data.get('expiry_date') == '':
+                data['expiry_date'] = None
+        return super().to_internal_value(data)
 
     def validate(self, attrs):
         item = attrs.get('item') or getattr(self.instance, 'item', None)
@@ -664,6 +730,107 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         update_purchase_order_status(po_item.purchase_order)
 
 
+class GoodsReceiptSerializer(serializers.Serializer):
+    '''
+    Receiving a delivery: the supplier invoice, the goods received note and
+    every line that arrived, written as one transaction.
+
+    These used to be three independent requests from the browser. A failure on
+    the third left an invoice and a GRN behind claiming goods that had never
+    reached stock, and nothing pointed at the discrepancy. Here either the
+    whole delivery lands or none of it does.
+    '''
+    purchase_order = serializers.PrimaryKeyRelatedField(queryset=PurchaseOrder.objects.all())
+    invoice_no = serializers.CharField(max_length=255)
+    supplier = serializers.PrimaryKeyRelatedField(
+        queryset=Supplier.objects.all(), required=False, allow_null=True,
+        help_text="Defaults to the supplier on the purchase order")
+    status = serializers.ChoiceField(
+        choices=SupplierInvoice.STATUS, required=False, default='pending')
+    note = serializers.CharField(
+        max_length=255, required=False, allow_blank=True, default='',
+        help_text="Goes on the goods received note")
+    lines = serializers.ListField(child=serializers.DictField(), allow_empty=False)
+
+    def validate_invoice_no(self, value):
+        if SupplierInvoice.objects.filter(invoice_no=value).exists():
+            raise serializers.ValidationError(
+                f"Invoice {value} has already been recorded.")
+        return value
+
+    def validate(self, attrs):
+        purchase_order = attrs['purchase_order']
+        supplier = attrs.get('supplier') or purchase_order.supplier
+        if supplier is None:
+            raise serializers.ValidationError(
+                {'supplier': "No supplier on the purchase order, so one must be given."})
+        attrs['supplier'] = supplier
+
+        # Validate every line before writing anything, so the error names the
+        # line that is wrong rather than failing halfway through the delivery.
+        line_serializers = []
+        errors = {}
+        for index, line in enumerate(attrs['lines']):
+            payload = dict(line)
+            payload.setdefault('supplier', supplier.id)
+            payload.setdefault('purchase_order', purchase_order.id)
+            payload.pop('supplier_invoice', None)
+            payload.pop('goods_receipt_note', None)
+
+            line_serializer = IncomingItemSerializer(data=payload, context=self.context)
+            if line_serializer.is_valid():
+                line_serializers.append(line_serializer)
+            else:
+                errors[index] = line_serializer.errors
+        if errors:
+            raise serializers.ValidationError({'lines': errors})
+
+        attrs['line_serializers'] = line_serializers
+        return attrs
+
+    def create(self, validated_data):
+        purchase_order = validated_data['purchase_order']
+        supplier = validated_data['supplier']
+        line_serializers = validated_data['line_serializers']
+
+        with transaction.atomic():
+            invoice = SupplierInvoice.objects.create(
+                invoice_no=validated_data['invoice_no'],
+                supplier=supplier,
+                purchase_order=purchase_order,
+                status=validated_data.get('status', 'pending'),
+            )
+            grn = GoodsReceiptNote.objects.create(
+                note=validated_data.get('note', ''),
+                purchase_order=purchase_order,
+            )
+
+            lines = []
+            for line_serializer in line_serializers:
+                # Each line is posted to the ledger by IncomingItemSerializer,
+                # inside this transaction, so a failure on the last line undoes
+                # the invoice and the GRN too.
+                lines.append(line_serializer.save(
+                    supplier_invoice=invoice,
+                    goods_receipt_note=grn,
+                    purchase_order=purchase_order,
+                    supplier=supplier,
+                ))
+
+            # The invoice is worth what actually arrived, not what was typed.
+            invoice.recalculate_amount()
+            invoice.refresh_from_db()
+
+        return {'supplier_invoice': invoice, 'goods_receipt_note': grn, 'lines': lines}
+
+    def to_representation(self, instance):
+        return {
+            'supplier_invoice': SupplierInvoiceSerializer(instance['supplier_invoice']).data,
+            'goods_receipt_note': GoodsReceiptNoteSerializer(instance['goods_receipt_note']).data,
+            'lines': IncomingItemSerializer(instance['lines'], many=True).data,
+        }
+
+
 # ---------------------------------------------------------------------------
 # Stock
 # ---------------------------------------------------------------------------
@@ -690,6 +857,7 @@ class StockBalanceSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='item.name')
     item_code = serializers.ReadOnlyField(source='item.item_code')
     category = serializers.ReadOnlyField(source='item.category')
+    category_display = serializers.ReadOnlyField(source='item.get_category_display')
     category_one = serializers.ReadOnlyField(source='item.category_one')
     units_of_measure = serializers.ReadOnlyField(source='item.units_of_measure')
     unit_conversions = serializers.SerializerMethodField()
@@ -709,7 +877,8 @@ class StockBalanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockBalance
-        fields = ['id', 'item', 'item_name', 'item_code', 'category', 'category_one', 'units_of_measure',
+        fields = ['id', 'item', 'item_name', 'item_code', 'category', 'category_display',
+                  'category_one', 'units_of_measure',
                   'unit_conversions', 'department', 'department_name', 'lot', 'lot_number', 'expiry_date',
                   'is_expired', 'quantity_at_hand', 'available_quantity', 'total_quantity', 'purchase_price',
                   'sale_price', 're_order_level', 'lot_value', 'last_movement_at', 'last_receipt_at',

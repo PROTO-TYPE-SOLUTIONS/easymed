@@ -92,16 +92,27 @@ const AddProductPurchase = ({ backPath = '/dashboard/inventory/purchase-orders' 
 
    /**
    * Gets datagrid row data
-   * Checks if its procurement approved or not
-   * if procurement approved, display a green circle
-   * else orange circle
+   * Shows how far the requisition has got, using the status the backend
+   * derives from the approvals and how many lines have been ordered.
    */
+  const statusColours = {
+    PENDING: "bg-amber",
+    DEPARTMENT_APPROVED: "bg-amber",
+    PROCUREMENT_APPROVED: "bg-success",
+    PARTIALLY_ORDERED: "bg-primary",
+    ORDERED: "bg-primary",
+    REJECTED: "bg-warning",
+    CANCELLED: "bg-gray",
+  };
+
    const showStatusColorCode = ({ data })=> {
-    if(data.procurement_approved){
-      return <div className="h-4 w-4 bg-success rounded-full"></div>
-    }else{
-      return <div className="h-4 w-4 bg-amber rounded-full"></div>
-    }
+    const colour = statusColours[data.status] ?? "bg-amber";
+    return (
+      <div className="flex items-center gap-2">
+        <div className={`h-3 w-3 rounded-full shrink-0 ${colour}`}></div>
+        <span>{data.status_display ?? "Pending"}</span>
+      </div>
+    )
   }
 
   return (
@@ -112,7 +123,9 @@ const AddProductPurchase = ({ backPath = '/dashboard/inventory/purchase-orders' 
       </div>
 
       <DataGrid
-        dataSource={requisitions.filter((requisition)=> (requisition.department_approved) && requisition.items.find((req)=> (!req.ordered) && (req.quantity_approved > 0)))}
+        // Closed requisitions are off the purchasing queue: there is nothing
+        // left to order on them.
+        dataSource={requisitions.filter((requisition)=> (requisition.department_approved) && !requisition.is_closed && requisition.items.find((req)=> (!req.ordered) && (req.quantity_approved > 0)))}
         allowColumnReordering={true}
         rowAlternationEnabled={true}
         showBorders={true}
@@ -154,10 +167,10 @@ const AddProductPurchase = ({ backPath = '/dashboard/inventory/purchase-orders' 
           caption="Requested By" 
         />
         {/* <Column dataField="procurement_approval_date" caption="Approval Date" /> */}
-        <Column 
-          dataField="procurement_approved" 
-          caption="Procurement Approved"
-          cellRender={showStatusColorCode} 
+        <Column
+          dataField="status"
+          caption="Status"
+          cellRender={showStatusColorCode}
         />
         <Column 
           dataField="items" 

@@ -49,6 +49,7 @@ const NewItem = () => {
       name: "",
       category: "",
       units: "",
+      units_of_measure: "",
       desc: "",
       departments: [],
     };
@@ -57,6 +58,7 @@ const NewItem = () => {
       name: Yup.string().required("This field is required!"),
       category: Yup.object().required("This field is required!"),
       units: Yup.object().required("This field is required!"),
+      units_of_measure: Yup.string().trim().required("This field is required!"),
       desc: Yup.string().required("This field is required!"),
       departments: Yup.array().min(1, "Tag at least one department (use General if shared)"),
     });
@@ -70,6 +72,7 @@ const NewItem = () => {
           ...formValue,
           category: formValue.category.value,
           units: formValue.units.value,
+          units_of_measure: formValue.units_of_measure.trim(),
           departments: (formValue.departments || []).map((d) => d.value),
         };
 
@@ -138,6 +141,24 @@ const NewItem = () => {
                     name="units"
                     component="div"
                     className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={12} xs={12}>
+            <label htmlFor="units_of_measure">Base Unit</label>
+                <Field
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                placeholder="tablets, tests, ml, syringes"
+                name="units_of_measure"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                    The smallest unit stock is counted in. Bigger containers (Box,
+                    Kit, Carton) are added afterwards as pack sizes, so don&apos;t
+                    name a pack here.
+                </p>
+                <ErrorMessage
+                name="units_of_measure"
+                component="div"
+                className="text-warning text-xs"
                 />
             </Grid>
             <Grid className='my-2' item md={12} xs={12}>

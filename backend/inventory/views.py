@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse
@@ -58,6 +59,7 @@ from .serializers import (
     AllocateSupplierPaymentRequestSerializer,
     DepartmentSerializer,
     GoodsReceiptNoteSerializer,
+    GoodsReceiptSerializer,
     IncomingItemSerializer,
     InsuranceItemSalePriceSerializer,
     ItemPriceSerializer,
@@ -296,6 +298,45 @@ class RequisitionViewSet(viewsets.ModelViewSet):
         'department__name', 'approved_by__first_name', 'approved_by__last_name',
     ]
 
+    def _close(self, request, closed_as):
+        '''
+        Shared body of reject/cancel. Ending a requisition is an explicit act
+        with a reason attached, so it gets its own endpoint rather than riding
+        on a PATCH of a status field.
+        '''
+        requisition = self.get_object()
+        try:
+            requisition.close(
+                closed_as,
+                reason=request.data.get('reason', ''),
+                by=_current_user(request),
+            )
+        except DjangoValidationError as exc:
+            raise ValidationError(exc.message_dict if hasattr(exc, 'message_dict')
+                                  else exc.messages)
+        return Response(self.get_serializer(requisition).data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        '''Approver declines the requisition. POST {"reason": "..."}'''
+        return self._close(request, Requisition.Status.REJECTED)
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        '''Requesting side withdraws it. POST {"reason": "..."}'''
+        return self._close(request, Requisition.Status.CANCELLED)
+
+    @action(detail=True, methods=['post'])
+    def reopen(self, request, pk=None):
+        '''Undo a rejection or cancellation made in error.'''
+        requisition = self.get_object()
+        try:
+            requisition.reopen()
+        except DjangoValidationError as exc:
+            raise ValidationError(exc.message_dict if hasattr(exc, 'message_dict')
+                                  else exc.messages)
+        return Response(self.get_serializer(requisition).data)
+
 
 class RequisitionItemViewSet(viewsets.ModelViewSet):
     queryset = RequisitionItem.objects.all()
@@ -467,6 +508,31 @@ class StockMovementViewSet(viewsets.ReadOnlyModelViewSet):
         except StockError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(StockMovementSerializer(contra).data, status=status.HTTP_201_CREATED)
+
+
+class GoodsReceiptView(APIView):
+    '''
+    Receive a delivery in one go: supplier invoice, goods received note and
+    every line, in a single transaction.
+
+    The browser used to fire these as three separate requests; when the lines
+    failed, the invoice and GRN were already saved and stock was never posted.
+    '''
+
+    def post(self, request):
+        serializer = GoodsReceiptSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        try:
+            receipt = serializer.save()
+        except (InsufficientStock, StockError) as exc:
+            raise ValidationError({'lines': str(exc)})
+        except DjangoValidationError as exc:
+            raise ValidationError(exc.message_dict if hasattr(exc, 'message_dict')
+                                  else exc.messages)
+        return Response(
+            GoodsReceiptSerializer().to_representation(receipt),
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class StockAdjustmentView(APIView):

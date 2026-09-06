@@ -250,6 +250,12 @@ class PatientSampleSerializer(serializers.ModelSerializer):
             'patient_sample_code',
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Shared across every sample this serializer renders, so a list of
+        # blood samples looks up the syringe's stock once, not once per row.
+        self._availability_cache = {}
+
     def get_specimen_name(self, obj):
         return obj.specimen.name
 
@@ -259,8 +265,10 @@ class PatientSampleSerializer(serializers.ModelSerializer):
         the lab actually has it. Deducted on collection by
         laboratory.tasks.deduct_specimen_consumables.
         """
+        context = dict(self.context)
+        context.setdefault('availability_cache', self._availability_cache)
         return SpecimenConsumableSerializer(
-            obj.specimen.consumables.all(), many=True).data
+            obj.specimen.consumables.all(), many=True, context=context).data
 
     def get_is_archived(self, obj):
         return hasattr(obj, 'archive_record')
@@ -339,7 +347,15 @@ class SpecimenConsumableSerializer(serializers.ModelSerializer):
         ]
 
     def get_available_quantity(self, obj):
-        return _available_quantity(obj.item)
+        # Availability costs an aggregate pair per item. Serialising a page of
+        # samples asks for the same handful of consumables over and over, so
+        # reuse the answer when the caller supplies a cache.
+        cache = self.context.get('availability_cache')
+        if cache is None:
+            return _available_quantity(obj.item)
+        if obj.item_id not in cache:
+            cache[obj.item_id] = _available_quantity(obj.item)
+        return cache[obj.item_id]
 
     def validate_item(self, value):
         if value.category != 'LabConsumable':

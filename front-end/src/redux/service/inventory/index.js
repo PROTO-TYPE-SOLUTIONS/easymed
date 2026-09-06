@@ -171,6 +171,30 @@ export const updateRequisition = (payload, requisition_id, auth) =>{
     })
 }
 
+/**
+ * End a requisition, or undo that. `action` is one of reject | cancel | reopen.
+ * Rejects with the error itself so the caller can show the server's reason --
+ * these calls fail for legitimate business reasons (already ordered, already
+ * closed) that the user needs to read.
+ */
+export const requisitionAction = (action, requisition_id, reason, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.REQUISITION_ACTION}`, { reason: reason ?? "" }, {
+            params: {
+                requisition_id: requisition_id,
+                action: action,
+            }
+        })
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err)
+            })
+    })
+}
+
 export const fetchAllRequisitionItems = (auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -267,7 +291,10 @@ export const addPurchaseOrder = (payload, requisition_id, auth) =>{
                 resolve(res.data)
             })
             .catch((err) =>{
-                reject(err.message)
+                // Reject with the error itself, not just err.message: the
+                // server's reason for a 400 lives in err.response.data and the
+                // caller needs it to tell the user what went wrong.
+                reject(err)
             })
     })
 }
@@ -339,6 +366,25 @@ export const fetchIncomingItems = (auth, filter={}, processFilter, selectedSearc
     })
 }
 
+/**
+ * Receive a whole delivery in one request: supplier invoice, goods received
+ * note and every line. The backend writes them in a single transaction, so
+ * either the delivery lands or nothing does -- the three separate calls this
+ * replaced could leave an invoice and a GRN behind with no stock against them.
+ */
+export const createGoodsReceipt = (payload, auth) =>{
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve,reject) =>{
+        axiosInstance.post(`${APP_API_URL.GOODS_RECEIPTS}`, payload)
+            .then((res) =>{
+                resolve(res.data)
+            })
+            .catch((err) =>{
+                reject(err)
+            })
+    })
+}
+
 export const addIncomingItem = (payload, auth) =>{
     const axiosInstance = UseAxios(auth);
     return new Promise((resolve,reject) =>{
@@ -347,7 +393,9 @@ export const addIncomingItem = (payload, auth) =>{
                 resolve(res.data)
             })
             .catch((err) =>{
-                reject(err.message)
+                // The whole receipt hinges on this call: reject with the error
+                // so the caller can show why a line was not received.
+                reject(err)
             })
     })
 }

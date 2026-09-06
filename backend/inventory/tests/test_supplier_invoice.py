@@ -120,3 +120,130 @@ def test_create_supplier_invoice(supplier, purchase_order):
         purchase_order=purchase_order
     )
     assert invoice.invoice_no == "INV-2024-003"
+
+
+@pytest.mark.django_db
+def test_a_blank_expiry_date_means_no_expiry(item, department, supplier):
+    """
+    Most goods have no expiry, and a form that leaves the field empty sends "".
+    Rejecting that failed the whole receipt on a date format, so nothing
+    reached stock.
+    """
+    serializer = IncomingItemSerializer(data={
+        'item': item.id,
+        'department': department.id,
+        'supplier': supplier.id,
+        'quantity': 10,
+        'purchase_price': '5.00',
+        'lot_no': '',
+        'expiry_date': '',
+    })
+
+    assert serializer.is_valid(), serializer.errors
+    incoming = serializer.save()
+
+    assert incoming.expiry_date is None
+    assert incoming.is_posted
+    assert stock_service.on_hand_quantity(item, department) == 10
+
+
+@pytest.mark.django_db
+def test_a_malformed_expiry_date_is_still_refused(item, department, supplier):
+    serializer = IncomingItemSerializer(data={
+        'item': item.id,
+        'department': department.id,
+        'supplier': supplier.id,
+        'quantity': 10,
+        'purchase_price': '5.00',
+        'expiry_date': '31/12/2027',
+    })
+
+    assert not serializer.is_valid()
+    assert 'expiry_date' in serializer.errors
+
+
+@pytest.mark.django_db
+def test_a_goods_receipt_is_all_or_nothing(item, department, supplier, purchase_order):
+    """
+    The invoice, the GRN and every line go in together.
+
+    These used to be three requests from the browser; a failure on the last
+    left an invoice and a GRN behind claiming goods that never reached stock.
+    """
+    from inventory.models import GoodsReceiptNote, Item
+    from inventory.serializers import GoodsReceiptSerializer
+
+    service = Item.objects.create(
+        name="Consultation", desc="Service", category="Lab Test",
+        units_of_measure="test", item_code="SVC-GR-1")
+
+    serializer = GoodsReceiptSerializer(data={
+        'purchase_order': purchase_order.id,
+        'invoice_no': 'INV-ATOMIC',
+        'supplier': supplier.id,
+        'lines': [
+            {'item': item.id, 'department': department.id, 'quantity': 10,
+             'purchase_price': '5.00'},
+            {'item': service.id, 'department': department.id, 'quantity': 5,
+             'purchase_price': '1.00'},
+        ],
+    })
+
+    assert not serializer.is_valid()
+    assert 'lines' in serializer.errors
+
+    assert not SupplierInvoice.objects.filter(invoice_no='INV-ATOMIC').exists()
+    assert GoodsReceiptNote.objects.count() == 0
+    assert IncomingItem.objects.count() == 0
+    assert stock_service.on_hand_quantity(item, department) == 0
+
+
+@pytest.mark.django_db
+def test_a_goods_receipt_posts_every_line_and_prices_the_invoice(
+    item, department, supplier, purchase_order
+):
+    from inventory.models import GoodsReceiptNote
+    from inventory.serializers import GoodsReceiptSerializer
+
+    serializer = GoodsReceiptSerializer(data={
+        'purchase_order': purchase_order.id,
+        'invoice_no': 'INV-OK',
+        'supplier': supplier.id,
+        'note': 'Delivered in full',
+        'lines': [
+            {'item': item.id, 'department': department.id, 'quantity': 10,
+             'purchase_price': '5.00', 'expiry_date': ''},
+        ],
+    })
+    assert serializer.is_valid(), serializer.errors
+    receipt = serializer.save()
+
+    invoice = receipt['supplier_invoice']
+    assert invoice.invoice_no == 'INV-OK'
+    # Worth what arrived, not what was typed into the form.
+    assert invoice.amount == Decimal('50.00')
+    assert receipt['goods_receipt_note'].grn_number
+    assert len(receipt['lines']) == 1
+    assert receipt['lines'][0].is_posted
+    assert stock_service.on_hand_quantity(item, department) == 10
+
+
+@pytest.mark.django_db
+def test_a_goods_receipt_refuses_a_duplicate_invoice_number(
+    item, department, supplier, purchase_order
+):
+    from inventory.serializers import GoodsReceiptSerializer
+
+    SupplierInvoice.objects.create(
+        invoice_no='INV-DUP', supplier=supplier, purchase_order=purchase_order)
+
+    serializer = GoodsReceiptSerializer(data={
+        'purchase_order': purchase_order.id,
+        'invoice_no': 'INV-DUP',
+        'supplier': supplier.id,
+        'lines': [{'item': item.id, 'department': department.id, 'quantity': 1,
+                   'purchase_price': '5.00'}],
+    })
+
+    assert not serializer.is_valid()
+    assert 'invoice_no' in serializer.errors

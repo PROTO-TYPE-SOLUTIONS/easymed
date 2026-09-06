@@ -1149,7 +1149,7 @@ def create_real_world_lab_data():
     cbc_reagent_item, _ = Item.objects.get_or_create(
         name='Sysmex CBC Reagent Kit',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Complete reagent kit for automated hematology analyzer - Sysmex XN Series',
             'item_code': 'SYS-CBC-500',
@@ -1222,7 +1222,7 @@ def create_real_world_lab_data():
     alt_ast_reagent, _ = Item.objects.get_or_create(
         name='Roche ALT/AST Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Enzymatic colorimetric test for ALT and AST determination',
             'item_code': 'ROCHE-ALT-AST-200',
@@ -1235,7 +1235,7 @@ def create_real_world_lab_data():
     alp_reagent, _ = Item.objects.get_or_create(
         name='Roche Alkaline Phosphatase Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Colorimetric test for ALP determination using p-nitrophenyl phosphate',
             'item_code': 'ROCHE-ALP-200',
@@ -1248,7 +1248,7 @@ def create_real_world_lab_data():
     bilirubin_reagent, _ = Item.objects.get_or_create(
         name='Roche Total Bilirubin Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Diazo method for total bilirubin determination',
             'item_code': 'ROCHE-TBIL-200',
@@ -1261,7 +1261,7 @@ def create_real_world_lab_data():
     albumin_protein_reagent, _ = Item.objects.get_or_create(
         name='Roche Albumin/Total Protein Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'BCG method for albumin and biuret method for total protein',
             'item_code': 'ROCHE-ALB-TP-250',
@@ -1327,7 +1327,7 @@ def create_real_world_lab_data():
     cholesterol_reagent, _ = Item.objects.get_or_create(
         name='Abbott Cholesterol Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Enzymatic endpoint method for cholesterol determination',
             'item_code': 'ABB-CHOL-300',
@@ -1340,7 +1340,7 @@ def create_real_world_lab_data():
     triglycerides_reagent, _ = Item.objects.get_or_create(
         name='Abbott Triglycerides Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Enzymatic colorimetric test with lipase and glycerol kinase',
             'item_code': 'ABB-TRIG-300',
@@ -1353,7 +1353,7 @@ def create_real_world_lab_data():
     hdl_ldl_reagent, _ = Item.objects.get_or_create(
         name='Abbott HDL/LDL Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Direct measurement of HDL and LDL cholesterol',
             'item_code': 'ABB-HDL-LDL-250',
@@ -1415,7 +1415,7 @@ def create_real_world_lab_data():
     creatinine_reagent, _ = Item.objects.get_or_create(
         name='Roche Creatinine Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Jaffe kinetic method for creatinine determination',
             'item_code': 'ROCHE-CREAT-300',
@@ -1428,7 +1428,7 @@ def create_real_world_lab_data():
     urea_reagent, _ = Item.objects.get_or_create(
         name='Roche Urea/BUN Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Urease/GLDH enzymatic method for urea determination',
             'item_code': 'ROCHE-UREA-300',
@@ -1441,7 +1441,7 @@ def create_real_world_lab_data():
     uric_acid_reagent, _ = Item.objects.get_or_create(
         name='Roche Uric Acid Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Uricase enzymatic colorimetric method',
             'item_code': 'ROCHE-URIC-250',
@@ -1502,7 +1502,7 @@ def create_real_world_lab_data():
     thyroid_reagent, _ = Item.objects.get_or_create(
         name='Roche Thyroid Panel Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Electrochemiluminescence immunoassay (ECLIA) for thyroid hormones',
             'item_code': 'ROCHE-THYROID-100',
@@ -1562,7 +1562,7 @@ def create_real_world_lab_data():
     electrolytes_reagent, _ = Item.objects.get_or_create(
         name='Roche ISE Electrolytes Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Ion-selective electrode (ISE) method for sodium, potassium, chloride',
             'item_code': 'ROCHE-ELEC-500',
@@ -1620,7 +1620,7 @@ def create_real_world_lab_data():
     glucose_reagent, _ = Item.objects.get_or_create(
         name='Roche Glucose Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'Hexokinase enzymatic method for glucose determination',
             'item_code': 'ROCHE-GLUC-500',
@@ -1633,7 +1633,7 @@ def create_real_world_lab_data():
     hba1c_reagent, _ = Item.objects.get_or_create(
         name='Abbott HbA1c Reagent',
         category='LabReagent',
-        units_of_measure='kits',
+        units_of_measure='tests',
         defaults={
             'desc': 'HPLC method for hemoglobin A1c determination',
             'item_code': 'ABB-HBA1C-100',

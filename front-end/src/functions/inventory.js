@@ -44,25 +44,33 @@ export function formatPackQuantity(item, quantityAtHand) {
 }
 
 /**
- * Price of every unit an item is bought/sold in: the base unit plus every
- * defined pack, each pack priced by scaling the base price by its factor.
+ * Price of every unit an item is sold in.
+ *
+ * Only the base-unit row is a real price: the price list (ItemPrice) holds one
+ * sale price per item and has no pack dimension. Every pack row is this base
+ * price multiplied out, which is NOT what a pack really costs -- packs are
+ * normally discounted per unit. Those rows carry `isDerived` so the UI can say
+ * so rather than passing arithmetic off as a price someone set.
  *
  * @param {object} item      - Item carrying `unit_conversions` and `units_of_measure`
  * @param {number} basePrice - Price of ONE base unit
- * @returns {Array<{label: string, factor: number, price: number, isDefault: boolean}>}
+ * @returns {Array<{label: string, factor: number, price: number, isDefault: boolean, isDerived: boolean}>}
  */
 export function formatPackPricing(item, basePrice) {
   const price = parseFloat(basePrice) || 0;
   const baseUnit = item?.units_of_measure || "unit";
   const packs = item?.unit_conversions ?? [];
 
-  const rows = [{ label: baseUnit, factor: 1, price, isDefault: false }];
+  const rows = [
+    { label: baseUnit, factor: 1, price, isDefault: false, isDerived: false },
+  ];
   packs.forEach((pack) => {
     rows.push({
       label: pack.name,
       factor: pack.factor_to_base,
       price: price * pack.factor_to_base,
       isDefault: !!pack.is_sale_default,
+      isDerived: true,
     });
   });
   return rows;

@@ -20,6 +20,7 @@ from .views import (
     QuotationViewSet,
     RequisitionItemViewSet,
     RequisitionViewSet,
+    GoodsReceiptView,
     StockAdjustmentView,
     StockBalanceViewSet,
     StockLotViewSet,
@@ -83,6 +84,7 @@ urlpatterns = [
     path('', include(purchase_orders_url.urls)),
 
     path('inventory_filter/', InventoryFilterView.as_view(), name='inventory-filter'),
+    path('goods-receipts/', GoodsReceiptView.as_view(), name='goods-receipt'),
     path('stock-adjustments/', StockAdjustmentView.as_view(), name='stock-adjustment'),
     path('stock-transfers/', StockTransferView.as_view(), name='stock-transfer'),
 

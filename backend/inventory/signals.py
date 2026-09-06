@@ -13,10 +13,27 @@ from django.db import transaction
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from .models import Item
+from .models import Item, RequisitionItem
 from .utils import generate_unique_item_code
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(post_save, sender=RequisitionItem)
+@receiver(post_delete, sender=RequisitionItem)
+def refresh_requisition_status(sender, instance, **kwargs):
+    """
+    Keep the parent requisition's status in step with its lines.
+
+    Generating a purchase order flips `ordered` on the lines it covers, which
+    is what moves a requisition to partially/fully ordered. This is status
+    bookkeeping over facts already committed, not a stock movement, so the
+    caveat at the top of this module does not apply.
+    """
+    requisition = instance.requisition
+    if requisition is None:
+        return
+    transaction.on_commit(requisition.refresh_status)
 
 
 @receiver(post_save, sender=Item)

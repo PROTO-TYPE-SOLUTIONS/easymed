@@ -16,10 +16,7 @@ import {
   Inventory as InventoryIcon,
   AttachMoney as AttachMoneyIcon
 } from '@mui/icons-material';
-import { months } from "@/assets/dummy-data/laboratory";
-import { InventoryDisplayStats } from "@/assets/menu";
 import { formatPackQuantity, formatPackPricing } from "@/functions/inventory";
-import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
 import { getAllInventories, getAllPurchaseOrders } from "@/redux/features/inventory";
 import { useDispatch } from "react-redux";
 import { useAuth } from "@/assets/hooks/use-auth";
@@ -33,8 +30,13 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
 
 const allowedPageSizes = [5, 10, 'all'];
 
+const money = (value) =>
+  Number(value || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 const InventoryDataGrid = ({ department }) => {
-  const [searchQuery, setSearchQuery] = useState("");
   const { inventories } = useSelector((store) => store.inventory);
   const dispatch = useDispatch()
   const auth = useAuth();
@@ -54,7 +56,9 @@ const InventoryDataGrid = ({ department }) => {
     { label: "Department Name", value: "department__name" },
   ]
 
-  const filteredInventories = inventories.filter((inventory) => inventory.item_name.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Searching is done server-side via processFilter; these are the rows the
+  // API already narrowed for us.
+  const filteredInventories = inventories
 
   const metrics = useMemo(() => {
     let shortExpiries = 0;
@@ -74,16 +78,18 @@ const InventoryDataGrid = ({ department }) => {
         }
       }
 
-      // Calculate reorder levels
-      const reOrderLevel = inventory.re_order_level || 5; // Default 5 if missing from old API
+      // Calculate reorder levels. `?? 5` rather than `|| 5` so a legitimate
+      // re-order level of 0 is not silently treated as 5.
+      const reOrderLevel = inventory.re_order_level ?? 5;
       const quantity = parseInt(inventory.quantity_at_hand) || 0;
       if (quantity <= reOrderLevel) {
         reorderLevels += 1;
       }
 
-      // Calculate total value
-      const price = parseFloat(inventory.purchase_price) || 0;
-      totalValue += price * quantity;
+      // Cost of what is on the shelf, at the backend's precision where it
+      // gave us a figure.
+      totalValue +=
+        inventory.lot_value ?? (parseFloat(inventory.purchase_price) || 0) * quantity;
     });
 
     return { shortExpiries, reorderLevels, totalValue, totalItems: filteredInventories.length };
@@ -147,8 +153,13 @@ const InventoryDataGrid = ({ department }) => {
     };
   }, [processFilter.search, selectedDepartment, department]); // The effect re-runs only when the local `searchTerm` state changes
 
-  const calculateLotValue = ({ data }) => {
-    return parseInt(data.purchase_price) * parseInt(data.quantity_at_hand)
+  // The backend already works this out at full decimal precision as lot_value;
+  // recomputing it here with parseInt threw away the cost's decimals.
+  const renderLotValue = ({ data }) => {
+    const value =
+      data.lot_value ??
+      (parseFloat(data.purchase_price) || 0) * (parseInt(data.quantity_at_hand) || 0);
+    return `Ksh ${money(value)}`;
   };
 
   const renderPackQuantity = ({ data }) => {
@@ -160,8 +171,7 @@ const InventoryDataGrid = ({ department }) => {
   };
 
   const renderPurchasePrice = ({ data }) => {
-    const price = parseFloat(data.purchase_price) || 0;
-    return price.toFixed(3);
+    return `Ksh ${money(data.purchase_price)}`;
   };
 
   const renderPackaging = ({ data }) => {
@@ -170,7 +180,10 @@ const InventoryDataGrid = ({ department }) => {
       <div className="flex flex-col gap-0.5">
         {rows.map((row) => (
           <span key={row.label} className="text-xs">
-            1 {row.label}{row.factor > 1 ? ` (${row.factor} ${data.units_of_measure || 'units'})` : ''} = Ksh {row.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            1 {row.label}
+            {row.factor > 1 ? ` (${row.factor} ${data.units_of_measure || 'units'})` : ''}
+            {row.isDerived ? ' ≈ ' : ' = '}Ksh {money(row.price)}
+            {row.isDerived && <span className="text-gray"> at unit rate</span>}
             {row.isDefault && <span className="text-primary"> · sells in</span>}
           </span>
         ))}
@@ -178,11 +191,9 @@ const InventoryDataGrid = ({ department }) => {
     );
   };
 
-  const inventorySummaryInfo = InventoryDisplayStats().map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item} />)
-
   return (
     <section className=" my-8">
-      <h3 className="text-xl mb-2"> Sales Summary </h3>
+      <h3 className="text-xl mb-2"> Stock on Hand </h3>
 
       <Grid container spacing={2} justifyContent="flex-start" sx={{ mb: 3, mt: 1 }}>
         <Grid item xs={12} sm={4} md={3} lg={2.5}>
@@ -203,12 +214,12 @@ const InventoryDataGrid = ({ department }) => {
         </Grid>
         <Grid item xs={12} sm={4} md={3} lg={2.5}>
           <MetricCard
-            title="Total Value"
-            value={`Ksh ${metrics.totalValue.toLocaleString()}`}
+            title="Stock Value at Cost"
+            value={`Ksh ${money(metrics.totalValue)}`}
             icon={<AttachMoneyIcon sx={{ color: 'success.main' }} />}
             color="success"
             smallValue
-            subtitle={`${metrics.totalItems} item${metrics.totalItems !== 1 ? 's' : ''}`}
+            subtitle={`${metrics.totalItems} lot${metrics.totalItems !== 1 ? 's' : ''} shown`}
           />
         </Grid>
       </Grid>
@@ -257,20 +268,21 @@ const InventoryDataGrid = ({ department }) => {
         />
         <Column dataField="item_code" caption="Code" />
         <Column dataField="item_name" caption="Name" />
-        <Column dataField="category_one" caption="Category" />
+        <Column dataField="category_display" caption="Category" />
+        <Column dataField="category_one" caption="Use" />
         <Column dataField="department_name" caption="Department" />
         <Column dataField="lot_number" caption="Lot No" />
         <Column dataField="expiry_date" caption="Expiry Date" />
-        <Column dataField="purchase_price" caption="Purchase Price" cellRender={renderPurchasePrice} />
-        <Column dataField="quantity_at_hand" caption="Lot Quantity" cellRender={renderPackQuantity} />
-        <Column dataField="total_quantity" caption="Total Quantity" cellRender={renderTotalPackQuantity} />
+        <Column dataField="purchase_price" caption="Unit Cost" cellRender={renderPurchasePrice} />
+        <Column dataField="quantity_at_hand" caption="This Lot" cellRender={renderPackQuantity} />
+        <Column dataField="total_quantity" caption="All Lots" cellRender={renderTotalPackQuantity} />
         <Column
           dataField="unit_conversions"
-          caption="Packaging"
+          caption="Sells In"
           allowSorting={false}
           cellRender={renderPackaging}
         />
-        <Column dataField="" caption="Total Amount" cellRender={calculateLotValue} />
+        <Column dataField="lot_value" caption="This Lot Value" cellRender={renderLotValue} />
       </DataGrid>
     </section>
   );

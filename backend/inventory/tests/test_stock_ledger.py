@@ -110,7 +110,7 @@ def test_receipt_is_idempotent(drug, pharmacy):
 def test_service_items_hold_no_stock(pharmacy):
     consultation = Item.objects.create(
         name='General Consultation', desc='Visit', category='General Appointment',
-        item_code='SVC-00001')
+        units_of_measure='session', item_code='SVC-00001')
 
     assert consultation.is_stock_tracked is False
     with pytest.raises(NotStockTracked):

@@ -7,17 +7,30 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { LuMoreHorizontal } from "react-icons/lu";
 import { AiFillDelete } from "react-icons/ai";
 import { CiSquareQuestion } from "react-icons/ci";
-import { addPurchaseOrder, deleteRequisitionItem, updateRequisition } from '@/redux/service/inventory';
+import { toast } from 'react-toastify';
+import { addPurchaseOrder, deleteRequisitionItem, requisitionAction, updateRequisition } from '@/redux/service/inventory';
 import EditRequisitionItemModal from '../requisition/EditRequisitionItemModal';
 import { useAuth } from '@/assets/hooks/use-auth';
 import { useDispatch } from 'react-redux';
-import { updateRequisitionAfterPoGenerate } from '@/redux/features/inventory';
+import { getAllRequisitions, updateRequisitionAfterPoGenerate } from '@/redux/features/inventory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
     ssr: false,
 });
 
 const allowedPageSizes = [5, 10, 'all'];
+
+/** Pull something readable out of a DRF error body. */
+const errorText = (err, fallback) => {
+    const data = err?.response?.data;
+    if (!data) return err?.message || fallback;
+    if (typeof data === 'string') return data;
+    if (Array.isArray(data)) return data[0];
+    const [field, messages] = Object.entries(data)[0] ?? [];
+    if (!field) return fallback;
+    const detail = Array.isArray(messages) ? messages[0] : String(messages);
+    return field === 'non_field_errors' ? detail : `${field}: ${detail}`;
+};
 
 const getActions = () => {
     let actions = [
@@ -41,6 +54,7 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
     const [editOpen, setEditOpen] = useState(false);
     const [selectedEditRowData, setSelectedEditRowData] = useState({})
     const [selectedItems, setSelectedItems] = useState(null)
+    const [actionLoading, setActionLoading] = useState(null)
     const [allMode, setAllMode] = useState('allPages');
     const [checkBoxesMode, setCheckBoxesMode] = useState(
         themes.current().startsWith('material') ? 'always' : 'onClick',
@@ -78,24 +92,54 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
 
 
     const approveRequisition = async () => {
-        const payload = {
-
-            procurement_approved: true,
-            status: 'completed'
-
-        }
+        // `status` is derived by the backend from this flag and the lines'
+        // ordered state, so it is not ours to send.
+        const payload = { procurement_approved: true }
         try {
-            await updateRequisition(payload, selectedRowData.id, auth)
-            const updatedData = { ...selectedRowData, procurement_approved: true }
+            const response = await updateRequisition(payload, selectedRowData.id, auth)
+            const updatedData = {
+                ...selectedRowData,
+                procurement_approved: true,
+                status: response?.status ?? selectedRowData.status,
+                status_display: response?.status_display ?? selectedRowData.status_display,
+            }
             setSelectedRowData(updatedData)
             dispatch(updateRequisitionAfterPoGenerate(updatedData))
-
-
-            // handleClose()
+            toast.success("Requisition approved")
 
         } catch (error) {
             console.log("ERROR", error)
+            toast.error(errorText(error, "Could not approve the requisition"))
         }
+    }
+
+    /**
+     * Reject, cancel, or reopen. The server decides whether the transition is
+     * allowed -- it refuses once lines have been ordered -- so its refusal is
+     * what the user is shown.
+     */
+    const runRequisitionAction = async (action, prompt) => {
+        let reason = ""
+        if (action !== "reopen") {
+            reason = window.prompt(prompt) ?? ""
+            if (!reason.trim()) {
+                toast.error("A reason is needed")
+                return
+            }
+        }
+        setActionLoading(action)
+        try {
+            const updated = await requisitionAction(action, selectedRowData.id, reason, auth)
+            setSelectedRowData({ ...selectedRowData, ...updated })
+            dispatch(getAllRequisitions(auth))
+            toast.success(`Requisition ${updated.status_display?.toLowerCase() ?? action}`)
+            if (action !== "reopen") {
+                handleClose()
+            }
+        } catch (error) {
+            toast.error(errorText(error, `Could not ${action} the requisition`))
+        }
+        setActionLoading(null)
     }
 
     const generatePurchaseOrder = async () => {
@@ -146,9 +190,14 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
             if (!unApproved) {
                 handleClose()
             }
+            // Ordering these lines moves the requisition's status on the
+            // server, so take the new value from there rather than guessing.
+            dispatch(getAllRequisitions(auth))
+            toast.success("Purchase order generated")
 
         } catch (error) {
             console.error("ERROR", error);
+            toast.error(errorText(error, "Could not generate the purchase order"));
         }
     };
 
@@ -167,12 +216,44 @@ const CreatePurchaseOrderModal = ({ open, setOpen, selectedRowData, setSelectedR
             >
                 <DialogContent>
                     <DialogTitle>
-                        <div className='flex justify-between'>
-                            <h2 className='text-lg font-bold'>{selectedRowData?.requisition_number}</h2>
+                        <div className='flex justify-between items-start'>
+                            <div>
+                                <h2 className='text-lg font-bold'>{selectedRowData?.requisition_number}</h2>
+                                {selectedRowData?.is_closed && (
+                                    <p className='text-sm text-warning font-normal mt-1'>
+                                        {selectedRowData.status_display}
+                                        {selectedRowData.closed_by ? ` by ${selectedRowData.closed_by}` : ''}
+                                        {selectedRowData.closed_reason ? ` — ${selectedRowData.closed_reason}` : ''}
+                                    </p>
+                                )}
+                            </div>
 
-                            <div className='flex gap-5'>
-                                {!selectedRowData?.procurement_approved && (<button onClick={() => approveRequisition()} className="bg-primary text-white text-sm rounded px-3 py-2"> Approve</button>)}
-                                {(selectedRowData?.procurement_approved) && (selectedItems?.selectedRowKeys.length > 0) && (<button onClick={() => generatePurchaseOrder()} className="bg-primary text-white text-sm rounded px-3 py-2">Generate PO</button>)}
+                            <div className='flex gap-3'>
+                                {selectedRowData?.is_closed ? (
+                                    <button
+                                        onClick={() => runRequisitionAction("reopen")}
+                                        disabled={actionLoading === "reopen"}
+                                        className="border border-primary text-primary text-sm rounded px-3 py-2">
+                                        {actionLoading === "reopen" ? "Reopening..." : "Reopen"}
+                                    </button>
+                                ) : (
+                                    <>
+                                        {!selectedRowData?.procurement_approved && (<button onClick={() => approveRequisition()} className="bg-primary text-white text-sm rounded px-3 py-2"> Approve</button>)}
+                                        {(selectedRowData?.procurement_approved) && (selectedItems?.selectedRowKeys.length > 0) && (<button onClick={() => generatePurchaseOrder()} className="bg-primary text-white text-sm rounded px-3 py-2">Generate PO</button>)}
+                                        <button
+                                            onClick={() => runRequisitionAction("reject", "Why is this requisition being rejected?")}
+                                            disabled={actionLoading === "reject"}
+                                            className="border border-warning text-warning text-sm rounded px-3 py-2">
+                                            {actionLoading === "reject" ? "Rejecting..." : "Reject"}
+                                        </button>
+                                        <button
+                                            onClick={() => runRequisitionAction("cancel", "Why is this requisition being cancelled?")}
+                                            disabled={actionLoading === "cancel"}
+                                            className="border border-gray text-sm rounded px-3 py-2">
+                                            {actionLoading === "cancel" ? "Cancelling..." : "Cancel"}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </DialogTitle>
