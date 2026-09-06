@@ -2,7 +2,7 @@ import pytest
 from decimal import Decimal
 from django.utils import timezone
 
-from inventory.models import IncomingItem, StockBalance, SupplierInvoice
+from inventory.models import IncomingItem, ItemUnit, StockBalance, SupplierInvoice
 from inventory.serializers import IncomingItemSerializer
 from inventory.services import stock as stock_service
 
@@ -19,7 +19,6 @@ def _receive(supplier_invoice, item, supplier, purchase_order, department,
         purchase_price=Decimal(purchase_price),
         sale_price=Decimal('150.00'),
         quantity=quantity,
-        quantity_unit='units',
         lot_no=lot_no,
         expiry_date=timezone.now().date(),
     )
@@ -76,9 +75,8 @@ def test_posting_the_same_receipt_twice_does_not_double_stock(
 def test_packs_are_converted_to_base_units(
     supplier_invoice, item, supplier, purchase_order, department
 ):
-    """item.subpacked is 1 by default; give it a real pack size."""
-    item.subpacked = 20
-    item.save()
+    """Items ship in base units until a pack size says otherwise."""
+    box_of_20 = ItemUnit.objects.create(item=item, name='Box', factor_to_base=20)
 
     line = IncomingItem.objects.create(
         item=item,
@@ -86,9 +84,9 @@ def test_packs_are_converted_to_base_units(
         purchase_order=purchase_order,
         supplier_invoice=supplier_invoice,
         department=department,
-        purchase_price=Decimal('200.00'),   # per pack
-        quantity=3,                          # three packs
-        quantity_unit='packs',
+        purchase_price=Decimal('200.00'),   # per box
+        quantity=3,                          # three boxes
+        item_unit=box_of_20,
         lot_no='LOT-PACK',
         expiry_date=timezone.now().date(),
     )

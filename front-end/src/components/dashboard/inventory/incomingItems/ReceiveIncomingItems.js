@@ -47,6 +47,7 @@ const ReceiveIncomingItems = ({ open, setOpen, selectedRowData, setSelectedRowDa
             "purchase_price": item.buying_price,
             "sale_price": item.selling_price,
             "quantity": item.quantity_received ? item.quantity_received : item.quantity_approved,
+            "item_unit": item.item_unit || null,
             "category_one": item.category_one ? item.category_one : "",
             "item": item.item,
             "purchase_order": supplierInvoice.purchase_order,

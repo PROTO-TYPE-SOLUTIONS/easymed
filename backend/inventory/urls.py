@@ -12,6 +12,7 @@ from .views import (
     InsuranceItemSalePriceViewSet,
     InventoryFilterView,
     ItemPriceViewSet,
+    ItemUnitViewSet,
     ItemViewSet,
     PurchaseOrderItemViewSet,
     PurchaseOrderViewSet,
@@ -41,6 +42,7 @@ from .views import (
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet)
+router.register(r'item-units', ItemUnitViewSet, basename='item-units')
 router.register(r'item-prices', ItemPriceViewSet, basename='item-prices')
 router.register(r'units', UnitViewSet, basename='units')
 # Stock on hand. Kept at the historical path so the dashboard keeps working.

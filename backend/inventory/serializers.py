@@ -14,6 +14,7 @@ from .models import (
     Item,
     ItemDepartment,
     ItemPrice,
+    ItemUnit,
     PurchaseOrder,
     PurchaseOrderItem,
     Quotation,
@@ -99,7 +100,25 @@ class ItemPriceSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date_created']
 
 
+class ItemUnitSerializer(serializers.ModelSerializer):
+    item_name = serializers.ReadOnlyField(source='item.name')
+    base_unit = serializers.ReadOnlyField(source='item.units_of_measure')
+
+    class Meta:
+        model = ItemUnit
+        fields = ['id', 'item', 'item_name', 'name', 'factor_to_base',
+                  'base_unit', 'is_purchase_default', 'is_sale_default']
+
+    def validate_factor_to_base(self, value):
+        if value <= 1:
+            raise serializers.ValidationError(
+                "A pack has to hold more than one base unit -- a factor of 1 is the base unit itself."
+            )
+        return value
+
+
 class ItemSerializer(serializers.ModelSerializer):
+    unit_conversions = ItemUnitSerializer(many=True, read_only=True)
     item_code = serializers.CharField(max_length=255, required=False)
     unit_symbol = serializers.CharField(source='units.symbol', read_only=True)
     # Price is not a column on Item any more; it is the current row of the
@@ -210,12 +229,9 @@ class SupplierInvoiceSerializer(serializers.ModelSerializer):
 
 
 def _unit_cost_for(item, requisition_item=None):
-    """
-    Best available cost per base unit: the price agreed on the requisition
-    line if there is one, otherwise the weighted-average cost of stock on hand.
-    """
-    if requisition_item is not None and requisition_item.unit_cost is not None:
-        return Decimal(requisition_item.unit_cost)
+    """Cost for ONE of whatever the line is being ordered in."""
+    if requisition_item is not None:
+        return Decimal(requisition_item.effective_unit_cost)
     return Decimal(item.current_cost or 0)
 
 
@@ -234,6 +250,12 @@ class RequisitionItemSerializer(BaseItemSerializer, BaseSupplierSerializer):
     ordered = serializers.BooleanField(read_only=True)
     desc = serializers.CharField(source='item.desc', read_only=True)
     requested_amount = serializers.SerializerMethodField(read_only=True)
+    unit_label = serializers.ReadOnlyField()
+    conversion_factor = serializers.ReadOnlyField()
+    base_quantity_requested = serializers.ReadOnlyField()
+    base_unit = serializers.ReadOnlyField(source='item.units_of_measure')
+    # Quoted per ordering unit, so a box of twelve shows the box price.
+    buying_price = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = RequisitionItem
@@ -241,8 +263,12 @@ class RequisitionItemSerializer(BaseItemSerializer, BaseSupplierSerializer):
                   'item', 'item_code', 'item_name', 'desc', 'quantity_at_hand', 'quantity_requested',
                   'quantity_approved', 'preferred_supplier', 'preferred_supplier_name', 'buying_price',
                   'vat_rate', 'selling_price', 'requested_amount', 'date_created', 'department_name',
-                  'requisition', 'unit_cost']
+                  'requisition', 'unit_cost', 'item_unit', 'unit_label', 'conversion_factor',
+                  'base_quantity_requested', 'base_unit']
         read_only_fields = ['id', 'date_created']
+
+    def get_buying_price(self, obj):
+        return float(_unit_cost_for(obj.item, obj))
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -258,14 +284,20 @@ class RequisitionItemSerializer(BaseItemSerializer, BaseSupplierSerializer):
         return float(obj.quantity_requested * _unit_cost_for(obj.item, obj))
 
     def validate(self, attrs):
+        item = attrs.get('item') or getattr(self.instance, 'item', None)
+        item_unit = attrs.get('item_unit', getattr(self.instance, 'item_unit', None))
+        if item_unit is not None and item is not None and item_unit.item_id != item.id:
+            raise serializers.ValidationError(
+                {'item_unit': f"'{item_unit.name}' is a pack size for {item_unit.item.name}, not {item.name}."})
+
         if self.instance is None:  # Creation only
             requisition_id = self.context.get('requisition_id')
-            item = attrs.get('item')
             preferred_supplier = attrs.get('preferred_supplier')
             quantity_requested = attrs.get('quantity_requested')
             if requisition_id and item and quantity_requested:
+                # Merging only ever happens within one ordering unit.
                 validation_result = validate_requisition_item_uniqueness(
-                    requisition_id, item, preferred_supplier, quantity_requested)
+                    requisition_id, item, preferred_supplier, quantity_requested, item_unit)
                 if validation_result["exists"]:
                     self.context['validation_result'] = validation_result
         return attrs
@@ -315,7 +347,7 @@ class RequisitionSerializer(serializers.ModelSerializer):
                         item_data['quantity_requested'])
                 validate_requisition_item_uniqueness(
                     attrs.get('id'), item_data['item'], item_data['preferred_supplier'],
-                    item_data['quantity_requested'])
+                    item_data['quantity_requested'], item_data.get('item_unit'))
         return attrs
 
     def create(self, validated_data):
@@ -325,7 +357,11 @@ class RequisitionSerializer(serializers.ModelSerializer):
             if items_data:
                 items_by_supplier = {}
                 for item_data in items_data:
-                    key = (item_data['preferred_supplier'].id, item_data['item'].id)
+                    # The unit is part of the key: six boxes and four loose
+                    # units of the same item are not ten of anything.
+                    item_unit = item_data.get('item_unit')
+                    key = (item_data['preferred_supplier'].id, item_data['item'].id,
+                           item_unit.id if item_unit else None)
                     if key in items_by_supplier:
                         items_by_supplier[key]['quantity_requested'] += item_data['quantity_requested']
                     else:
@@ -394,14 +430,34 @@ class PurchaseOrderItemSerializer(BaseItemSerializer, BaseSupplierSerializer):
     preferred_supplier_name = serializers.CharField(
         source='requisition_item.preferred_supplier.official_name', read_only=True)
 
+    item_unit = serializers.PrimaryKeyRelatedField(
+        source='requisition_item.item_unit', read_only=True)
+    unit_label = serializers.ReadOnlyField()
+    conversion_factor = serializers.ReadOnlyField()
+    base_quantity_ordered = serializers.ReadOnlyField()
+    base_unit = serializers.ReadOnlyField(source='requisition_item.item.units_of_measure')
+
     class Meta:
         model = PurchaseOrderItem
         fields = ['id', 'PO_number', 'requisition_number', 'requisition_date_created', 'requested_by', 'ordered',
                   'item', 'item_code', 'item_name', 'desc', 'quantity_at_hand', 'quantity_requested',
                   'quantity_approved', 'quantity_ordered', 'quantity_received', 'preferred_supplier',
                   'buying_price', 'vat_rate', 'selling_price', 'requested_amount', 'department_name',
-                  'requested_by_name', 'preferred_supplier_name', 'total_buying_amount', 'date_created']
+                  'requested_by_name', 'preferred_supplier_name', 'total_buying_amount', 'date_created',
+                  'item_unit', 'unit_label', 'conversion_factor', 'base_quantity_ordered', 'base_unit']
         read_only_fields = ['id', 'date_created']
+
+    def validate(self, attrs):
+        # PurchaseOrderItem.clean() is never reached through DRF, so the
+        # over-receipt guard has to live here to actually run.
+        ordered = attrs.get('quantity_ordered', getattr(self.instance, 'quantity_ordered', 0))
+        received = attrs.get('quantity_received', getattr(self.instance, 'quantity_received', 0))
+        if received > ordered:
+            unit = self.instance.unit_label if self.instance else 'units'
+            raise serializers.ValidationError({
+                'quantity_received':
+                    f"Cannot receive {received} {unit} against {ordered} ordered."})
+        return attrs
 
     def _cost(self, obj):
         req_item = obj.requisition_item
@@ -520,14 +576,17 @@ class IncomingItemSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', read_only=True)
     base_units = serializers.IntegerField(read_only=True)
     unit_cost = serializers.DecimalField(max_digits=14, decimal_places=4, read_only=True)
+    item_unit_name = serializers.CharField(source='item_unit.name', read_only=True)
+    conversion_factor = serializers.IntegerField(read_only=True)
     total_price = serializers.SerializerMethodField()
     is_posted = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = IncomingItem
         fields = ['id', 'item', 'item_name', 'item_code', 'supplier', 'supplier_name', 'department',
-                  'department_name', 'purchase_price', 'sale_price', 'quantity', 'quantity_unit',
-                  'base_units', 'unit_cost', 'supplier_invoice', 'purchase_order', 'lot_no',
+                  'department_name', 'purchase_price', 'sale_price', 'quantity', 'item_unit',
+                  'item_unit_name', 'conversion_factor', 'base_units', 'unit_cost',
+                  'supplier_invoice', 'purchase_order', 'lot_no',
                   'expiry_date', 'total_price', 'date_created', 'posted_at', 'is_posted']
         read_only_fields = ['date_created', 'total_price', 'item_code', 'posted_at', 'is_posted']
 
@@ -543,6 +602,11 @@ class IncomingItemSerializer(serializers.ModelSerializer):
         quantity = attrs.get('quantity', getattr(self.instance, 'quantity', None))
         if quantity is not None and quantity <= 0:
             raise serializers.ValidationError({'quantity': "Quantity received must be greater than zero."})
+
+        item_unit = attrs.get('item_unit', getattr(self.instance, 'item_unit', None))
+        if item_unit is not None and item is not None and item_unit.item_id != item.id:
+            raise serializers.ValidationError(
+                {'item_unit': f"'{item_unit.name}' is a pack size for {item_unit.item.name}, not {item.name}."})
 
         supplier_invoice = attrs.get('supplier_invoice')
         supplier = attrs.get('supplier')
@@ -627,8 +691,8 @@ class StockBalanceSerializer(serializers.ModelSerializer):
     item_code = serializers.ReadOnlyField(source='item.item_code')
     category = serializers.ReadOnlyField(source='item.category')
     category_one = serializers.ReadOnlyField(source='item.category_one')
-    packed = serializers.ReadOnlyField(source='item.packed')
-    subpacked = serializers.ReadOnlyField(source='item.subpacked')
+    units_of_measure = serializers.ReadOnlyField(source='item.units_of_measure')
+    unit_conversions = serializers.SerializerMethodField()
     department_name = serializers.ReadOnlyField(source='department.name')
     lot_number = serializers.ReadOnlyField(source='lot.lot_number')
     expiry_date = serializers.ReadOnlyField(source='lot.expiry_date')
@@ -645,11 +709,14 @@ class StockBalanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockBalance
-        fields = ['id', 'item', 'item_name', 'item_code', 'category', 'category_one', 'packed', 'subpacked',
-                  'department', 'department_name', 'lot', 'lot_number', 'expiry_date', 'is_expired',
-                  'quantity_at_hand', 'available_quantity', 'total_quantity', 'purchase_price', 'sale_price',
-                  're_order_level', 'lot_value', 'last_movement_at', 'last_receipt_at', 'last_issue_at',
-                  'insurance_sale_prices', 'date_created']
+        fields = ['id', 'item', 'item_name', 'item_code', 'category', 'category_one', 'units_of_measure',
+                  'unit_conversions', 'department', 'department_name', 'lot', 'lot_number', 'expiry_date',
+                  'is_expired', 'quantity_at_hand', 'available_quantity', 'total_quantity', 'purchase_price',
+                  'sale_price', 're_order_level', 'lot_value', 'last_movement_at', 'last_receipt_at',
+                  'last_issue_at', 'insurance_sale_prices', 'date_created']
+
+    def get_unit_conversions(self, obj):
+        return ItemUnitSerializer(obj.item.unit_conversions.all(), many=True).data
 
     def get_sale_price(self, obj):
         return obj.item.current_sale_price

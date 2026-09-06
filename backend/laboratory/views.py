@@ -37,6 +37,8 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
+    SpecimenConsumable,
+    TestPanelReagent,
     ReagentConsumptionLog,
     ReferenceValue,
     LabTestInterpretation,
@@ -63,6 +65,8 @@ from .serializers import (
     ProcessTestRequestSerializer,
     PatientSampleSerializer,
     SpecimenSerializer,
+    SpecimenConsumableSerializer,
+    TestPanelReagentSerializer,
     ReagentStockSerializer,
     ReagentConsumptionLogSerializer,
     LowStockReagentSerializer,
@@ -129,6 +133,33 @@ class SpecimenViewSet(viewsets.ModelViewSet):
     queryset = Specimen.objects.all()
     serializer_class = SpecimenSerializer
     # permission_classes = (IsLabTechUser,)
+
+
+class TestPanelReagentViewSet(viewsets.ModelViewSet):
+    """
+    The reagents a test panel consumes on every run. A panel can have many:
+    a CBC burns diluent, lyse and cleaner, and each is deducted when the
+    panel is billed.
+    """
+    queryset = TestPanelReagent.objects.select_related(
+        'test_panel', 'reagent_item').all()
+    serializer_class = TestPanelReagentSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsReceptionistUser,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['test_panel', 'reagent_item']
+
+
+class SpecimenConsumableViewSet(viewsets.ModelViewSet):
+    """
+    The consumables a specimen burns when it is collected -- syringes, tubes,
+    needles. Deducted once per collection, not once per panel, because one
+    blood draw serves every blood panel on the request.
+    """
+    queryset = SpecimenConsumable.objects.select_related('specimen', 'item').all()
+    serializer_class = SpecimenConsumableSerializer
+    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsReceptionistUser,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['specimen', 'item']
 
 
 class ReferenceValueViewSet(viewsets.ModelViewSet):
@@ -244,7 +275,10 @@ class PatientSampleByProcessId(generics.ListAPIView):
 
     def get_queryset(self):
         process_id = self.kwargs['process_id']
-        return PatientSample.objects.filter(process=process_id)
+        # The serializer lists each sample's specimen consumables, so pull them
+        # in one go rather than per sample.
+        return PatientSample.objects.filter(process=process_id).select_related(
+            'specimen').prefetch_related('specimen__consumables__item')
 
 class LabTestRequestByProcessId(generics.ListAPIView):
     serializer_class = LabTestRequestSerializer
@@ -265,7 +299,8 @@ class ProcessTestRequestViewSet(viewsets.ModelViewSet):
 
 
 class PatientSampleViewSet(viewsets.ModelViewSet):
-    queryset = PatientSample.objects.all().order_by('-id')
+    queryset = PatientSample.objects.select_related('specimen').prefetch_related(
+        'specimen__consumables__item').order_by('-id')
     serializer_class = PatientSampleSerializer
 
 '''

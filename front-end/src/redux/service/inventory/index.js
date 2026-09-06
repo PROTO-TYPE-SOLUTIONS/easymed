@@ -516,3 +516,39 @@ export const fetchStockMovements = (auth, filters = {}) => {
             })
     })
 };
+
+export const fetchItemUnits = (itemId, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.get(`${APP_API_URL.ITEM_UNITS}`, { params: { item: itemId } })
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+};
+
+export const createItemUnit = (payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.post(`${APP_API_URL.ITEM_UNITS}`, payload)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+};
+
+export const updateItemUnit = (id, payload, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.patch(`${APP_API_URL.ITEM_UNITS}/${id}`, payload)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+};
+
+export const deleteItemUnit = (id, auth) => {
+    const axiosInstance = UseAxios(auth);
+    return new Promise((resolve, reject) => {
+        axiosInstance.delete(`${APP_API_URL.ITEM_UNITS}/${id}`)
+            .then((res) => resolve(res.data))
+            .catch((err) => reject(err))
+    })
+};

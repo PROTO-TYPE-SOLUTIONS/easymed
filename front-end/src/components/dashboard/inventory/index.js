@@ -18,7 +18,7 @@ import {
 } from '@mui/icons-material';
 import { months } from "@/assets/dummy-data/laboratory";
 import { InventoryDisplayStats } from "@/assets/menu";
-import { formatPackQuantity } from "@/functions/inventory";
+import { formatPackQuantity, formatPackPricing } from "@/functions/inventory";
 import { InventoryInfoCardsItem } from "@/components/dashboard/inventory/inventory-info-cards-item";
 import { getAllInventories, getAllPurchaseOrders } from "@/redux/features/inventory";
 import { useDispatch } from "react-redux";
@@ -159,6 +159,25 @@ const InventoryDataGrid = ({ department }) => {
     return formatPackQuantity(data, data.total_quantity);
   };
 
+  const renderPurchasePrice = ({ data }) => {
+    const price = parseFloat(data.purchase_price) || 0;
+    return price.toFixed(3);
+  };
+
+  const renderPackaging = ({ data }) => {
+    const rows = formatPackPricing(data, data.sale_price);
+    return (
+      <div className="flex flex-col gap-0.5">
+        {rows.map((row) => (
+          <span key={row.label} className="text-xs">
+            1 {row.label}{row.factor > 1 ? ` (${row.factor} ${data.units_of_measure || 'units'})` : ''} = Ksh {row.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {row.isDefault && <span className="text-primary"> · sells in</span>}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   const inventorySummaryInfo = InventoryDisplayStats().map((item, index) => <InventoryInfoCardsItem key={`inventory-display-info ${index}`} itemData={item} />)
 
   return (
@@ -194,7 +213,12 @@ const InventoryDataGrid = ({ department }) => {
         </Grid>
       </Grid>
 
-      <div className="flex justify-end my-4">
+      <div className="flex justify-end gap-2 my-4">
+        <Link href="/dashboard/inventory/create-requisition">
+          <div className="bg-primary text-white rounded-md px-4 py-2 text-sm cursor-pointer">
+            Create Requisition
+          </div>
+        </Link>
         <Link href="/dashboard/inventory/add-inventory">
           <div className="bg-primary text-white rounded-md px-4 py-2 text-sm cursor-pointer">
             Add Inventory
@@ -231,21 +255,21 @@ const InventoryDataGrid = ({ department }) => {
           showInfo={showInfo}
           showNavigationButtons={showNavButtons}
         />
-        <Column dataField="item_code" caption="Product Code" />
-        <Column dataField="item_name" caption="Product Name" />
+        <Column dataField="item_code" caption="Code" />
+        <Column dataField="item_name" caption="Name" />
         <Column dataField="category_one" caption="Category" />
         <Column dataField="department_name" caption="Department" />
         <Column dataField="lot_number" caption="Lot No" />
         <Column dataField="expiry_date" caption="Expiry Date" />
-        <Column dataField="purchase_price" caption="Purchase Price" />
-        <Column
-          dataField="sale_price"
-          caption="Sale price"
-          allowFiltering={true}
-          allowSearch={true}
-        />
+        <Column dataField="purchase_price" caption="Purchase Price" cellRender={renderPurchasePrice} />
         <Column dataField="quantity_at_hand" caption="Lot Quantity" cellRender={renderPackQuantity} />
         <Column dataField="total_quantity" caption="Total Quantity" cellRender={renderTotalPackQuantity} />
+        <Column
+          dataField="unit_conversions"
+          caption="Packaging"
+          allowSorting={false}
+          cellRender={renderPackaging}
+        />
         <Column dataField="" caption="Total Amount" cellRender={calculateLotValue} />
       </DataGrid>
     </section>

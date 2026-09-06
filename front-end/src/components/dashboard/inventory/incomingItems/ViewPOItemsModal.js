@@ -10,7 +10,7 @@ import { CiSquareQuestion } from "react-icons/ci";
 import UpdateReceivedItemModal from './UpdateReceivedItemModal';
 import { deleteRequisitionItem, updatePurchaseOrder, updateRequisition } from '@/redux/service/inventory';
 import { useAuth } from '@/assets/hooks/use-auth';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updatePOAfterDispatch } from '@/redux/features/inventory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -39,6 +39,7 @@ const getActions = () => {
 const ViewPOItemsModal = ({ values, selectedRowData, setSelectedRowData, setSelectedItems, createdIncomings }) => {
     const auth = useAuth()
     const dispatch = useDispatch()
+    const { item: items } = useSelector((store) => store.inventory);
     const [showPageSizeSelector, setShowPageSizeSelector] = useState(true);
     const [showInfo, setShowInfo] = useState(true);
     const [showNavButtons, setShowNavButtons] = useState(true);
@@ -105,6 +106,21 @@ const ViewPOItemsModal = ({ values, selectedRowData, setSelectedRowData, setSele
             return relatedItem.category_one
         }
       }
+
+     // The unit is carried on the PO line itself, inherited from the
+     // requisition, so there is nothing to look up or choose here.
+     const renderOrderedIn = ({ data }) => {
+        if (data.unit_label) return data.unit_label;
+        const stockItem = items.find((itm) => parseInt(itm.id) === parseInt(data.item));
+        return stockItem?.units_of_measure || 'units';
+     }
+
+     const renderBaseUnits = ({ data }) => {
+        const factor = data.conversion_factor ?? 1;
+        if (factor === 1) return '';
+        const received = data.quantity_received || data.quantity_approved || 0;
+        return `${received * factor} ${data.base_unit || ''}`.trim();
+     }
 
     return (
         <section>
@@ -189,9 +205,18 @@ const ViewPOItemsModal = ({ values, selectedRowData, setSelectedRowData, setSele
                 dataField="quantity_approved"
                 caption="Quantity Approved" 
             />
-            <Column 
+            <Column
                 dataField="quantity_received"
-                caption="Quantity Received" 
+                caption="Quantity Received"
+            />
+            <Column
+                dataField="unit_label"
+                caption="Ordered In"
+                cellRender={renderOrderedIn}
+            />
+            <Column
+                caption="Base Units"
+                cellRender={renderBaseUnits}
             />
             <Column 
                 dataField="buying_price"

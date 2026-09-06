@@ -35,19 +35,24 @@ def sync_lab_test_item(sender, instance, created, **kwargs):
 
     with transaction.atomic():
         if instance.lab_test_item_id is None:
-            lab_test = Item.objects.create(
+            # Multiple LabReagent variants (different units_of_measure) can
+            # share a name, but they must pair to the same billing item —
+            # the paired item's (name, category, units_of_measure) is fixed,
+            # so a blind create() collides on the unique constraint.
+            lab_test, created = Item.objects.get_or_create(
                 name=instance.name,
-                desc=instance.desc,
                 category='Lab Test',
-                item_code=generate_unique_item_code(),
-                units_of_measure='',
-                packed=instance.packed,
-                subpacked=instance.subpacked,
-                is_stock_tracked=False,
+                units_of_measure='test',
+                defaults={
+                    'desc': instance.desc,
+                    'item_code': generate_unique_item_code(),
+                    'is_stock_tracked': False,
+                },
             )
             Item.objects.filter(pk=instance.pk).update(lab_test_item=lab_test)
             logger.info(
-                "Auto-created Lab Test item '%s' (#%s) for LabReagent '%s' (#%s)",
+                "%s Lab Test item '%s' (#%s) for LabReagent '%s' (#%s)",
+                "Auto-created" if created else "Linked existing",
                 lab_test.name, lab_test.id, instance.name, instance.pk,
             )
         else:

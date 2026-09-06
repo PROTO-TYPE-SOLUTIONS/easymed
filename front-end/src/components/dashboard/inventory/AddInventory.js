@@ -181,7 +181,7 @@ const AddInventory = () => {
                 name="lot_number"
               />
               <ErrorMessage
-                name="packed"
+                name="lot_number"
                 component="div"
                 className="text-warning text-xs"
               />
@@ -195,7 +195,7 @@ const AddInventory = () => {
                 name="total_quantity"
               />
               <ErrorMessage
-                name="subpacked"
+                name="total_quantity"
                 component="div"
                 className="text-warning text-xs"
               />
@@ -210,7 +210,7 @@ const AddInventory = () => {
                 name="expiry_date"
               />
               <ErrorMessage
-                name="subpacked"
+                name="expiry_date"
                 component="div"
                 className="text-warning text-xs"
               />

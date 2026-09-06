@@ -1,7 +1,7 @@
 import random
 from faker import Faker
 
-from inventory.models import Item, Department, Supplier, Unit
+from inventory.models import Item, Department, ItemUnit, Supplier, Unit
 from customuser.models import CustomUser
 from company.models import Company, CompanyBranch, InsuranceCompany
 from authperms.models import Permission, Group
@@ -344,18 +344,42 @@ def create_dummy_items(count=50):
                 'item_code': fake.unique.bothify(text='???-#####')[:255],
                 'desc': desc[:255],
                 'vat_rate': 16.0,
-                'packed': str(random.randint(1, 10))[:255],
-                'subpacked': str(random.randint(1, 100))[:255],
                 'slow_moving_period': random.choice([30, 60, 90, 180]),
             }
         )
         if item not in items:
             tag_item_departments(item, departments_for_category(item.category))
+            if created and item.is_stock_tracked:
+                add_demo_pack_sizes(item)
             items.append(item)
             if created:
                 created_count += 1
 
     return items
+
+
+# Consumables really are bought by the box and the carton, so the demo data
+# gives most stocked items a pack ladder. Without it nothing on the requisition
+# or receiving screens has a unit to choose and the feature looks broken.
+DEMO_PACK_LADDERS = [
+    [('Box', 10), ('Carton', 100)],
+    [('Box', 12), ('Carton', 144)],
+    [('Pack', 25)],
+    [('Strip', 10), ('Box', 100)],
+    [('Box', 50)],
+]
+
+
+def add_demo_pack_sizes(item):
+    '''Give a stocked item a plausible pack ladder, all stated in base units.'''
+    for name, factor in random.choice(DEMO_PACK_LADDERS):
+        ItemUnit.objects.get_or_create(
+            item=item, name=name,
+            defaults={
+                'factor_to_base': factor,
+                'is_purchase_default': factor <= 50,
+            },
+        )
 
 
 def create_appointment_items():
@@ -374,8 +398,6 @@ def create_appointment_items():
             'item_code': 'GEN-00001',
             'desc': 'Standard general consultation appointment',
             'vat_rate': 0.0,  # Appointments typically don't have VAT
-            'packed': '1',
-            'subpacked': '1',
             'slow_moving_period': 30,
         }
     )
@@ -416,8 +438,6 @@ def create_appointment_items():
                 'item_code': appt['code'],
                 'desc': appt['desc'],
                 'vat_rate': 0.0,  # Appointments typically don't have VAT
-                'packed': '1',
-                'subpacked': '1',
                 'slow_moving_period': 30,
             }
         )
@@ -637,8 +657,6 @@ def create_demo_lab_profiles_and_panels():
                     "item_code": f"LAB-{profile_name[:3].upper()}-{panel['name'][:3].upper()}",
                     "desc": f"{panel['name']} test for {profile_name}",
                     "vat_rate": 0.0,
-                    "packed": "1",
-                    "subpacked": "1",
                     "slow_moving_period": 90,
                 }
             )
@@ -999,8 +1017,50 @@ def create_dummy_suppliers(count=20):
             common_name=common_name
         )
         suppliers.append(supplier)
-    
+
     return suppliers
+
+
+def create_dummy_requisitions(count=8):
+    """
+    Raise a few requisitions, most of them ordered by the box rather than by
+    the individual unit, so the procurement screens have realistic pack-based
+    lines to show.
+    """
+    from inventory.models import Requisition, RequisitionItem
+
+    requester = CustomUser.objects.filter(role=CustomUser.SYS_ADMIN).first() or CustomUser.objects.first()
+    departments = list(Department.objects.filter(is_stock_location=True)) or list(Department.objects.all())
+    suppliers = list(Supplier.objects.all())
+    stocked_items = list(
+        Item.objects.filter(is_stock_tracked=True).prefetch_related('unit_conversions')[:60])
+
+    if not (requester and departments and suppliers and stocked_items):
+        return []
+
+    requisitions = []
+    for _ in range(count):
+        requisition = Requisition.objects.create(
+            department=random.choice(departments),
+            requested_by=requester,
+        )
+
+        for item in random.sample(stocked_items, min(4, len(stocked_items))):
+            packs = list(item.unit_conversions.all())
+            # Order in a pack when the item has one -- that is the case worth
+            # demonstrating -- and loose the rest of the time.
+            pack = random.choice(packs) if packs and random.random() < 0.75 else None
+            RequisitionItem.objects.create(
+                requisition=requisition,
+                item=item,
+                item_unit=pack,
+                preferred_supplier=random.choice(suppliers),
+                quantity_requested=random.randint(2, 20) if pack else random.randint(20, 200),
+            )
+
+        requisitions.append(requisition)
+
+    return requisitions
 
 
 def create_real_world_lab_data():
@@ -1012,7 +1072,7 @@ def create_real_world_lab_data():
         LabTestProfile, LabTestPanel, Specimen,
         TestPanelReagent, ReferenceValue
     )
-    from inventory.models import Item, Department, StockMovement, StockPolicy
+    from inventory.models import Item, Department, ItemUnit, StockMovement, StockPolicy
     from inventory.services import stock as stock_service
     from decimal import Decimal
     from datetime import date, timedelta
@@ -1029,17 +1089,27 @@ def create_real_world_lab_data():
     # Get or create Lab department
     lab_dept, _ = Department.objects.get_or_create(name='Lab')
 
-    def create_reagent_inventory(reagent_item, purchase_price, sale_price, quantity_kits):
+    def create_reagent_inventory(reagent_item, purchase_price, sale_price, quantity_kits,
+                                 tests_per_kit=1):
         """
         Seed opening stock for a reagent through the ledger, so demo data goes
         in the same way real stock does.
+
+        `tests_per_kit` is recorded as the reagent's Kit pack size, then used to
+        convert the kits bought into the tests the ledger actually counts.
         """
-        units = int(reagent_item.subpacked or 1) * quantity_kits
+        if tests_per_kit > 1:
+            ItemUnit.objects.update_or_create(
+                item=reagent_item,
+                name='Kit',
+                defaults={'factor_to_base': tests_per_kit, 'is_purchase_default': True},
+            )
+        units = tests_per_kit * quantity_kits
         movement = stock_service.receive(
             item=reagent_item,
             department=lab_dept,
             quantity=units,
-            unit_cost=Decimal(str(purchase_price)) / (reagent_item.subpacked or 1),
+            unit_cost=Decimal(str(purchase_price)) / tests_per_kit,
             lot_number=f'LOT-{reagent_item.item_code}-2026',
             expiry_date=date.today() + timedelta(days=365 * 2),
             reason='Demo data opening stock',
@@ -1082,8 +1152,6 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Complete reagent kit for automated hematology analyzer - Sysmex XN Series',
-            'packed': '1',
-            'subpacked': '500',  # 500 tests per kit
             'item_code': 'SYS-CBC-500',
             'vat_rate': 16.0,
         }
@@ -1095,7 +1163,8 @@ def create_real_world_lab_data():
         reagent_item=cbc_reagent_item,
         purchase_price=15000.00,  # KES 15,000 per kit
         sale_price=18000.00,      # KES 18,000 per kit
-        quantity_kits=2           # 2 kits = 1000 tests
+        quantity_kits=2,          # 2 kits = 1000 tests
+        tests_per_kit=500,
     )
     
     # CBC Panels
@@ -1116,8 +1185,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1158,14 +1225,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Enzymatic colorimetric test for ALT and AST determination',
-            'packed': '1',
-            'subpacked': '200',  # 200 tests per kit
             'item_code': 'ROCHE-ALT-AST-200',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(alt_ast_reagent)
-    create_reagent_inventory(alt_ast_reagent, 8000.00, 10000.00, 2)
+    create_reagent_inventory(alt_ast_reagent, 8000.00, 10000.00, 2, 200)
     
     alp_reagent, _ = Item.objects.get_or_create(
         name='Roche Alkaline Phosphatase Reagent',
@@ -1173,14 +1238,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Colorimetric test for ALP determination using p-nitrophenyl phosphate',
-            'packed': '1',
-            'subpacked': '200',
             'item_code': 'ROCHE-ALP-200',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(alp_reagent)
-    create_reagent_inventory(alp_reagent, 7500.00, 9500.00, 2)
+    create_reagent_inventory(alp_reagent, 7500.00, 9500.00, 2, 200)
     
     bilirubin_reagent, _ = Item.objects.get_or_create(
         name='Roche Total Bilirubin Reagent',
@@ -1188,14 +1251,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Diazo method for total bilirubin determination',
-            'packed': '1',
-            'subpacked': '200',
             'item_code': 'ROCHE-TBIL-200',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(bilirubin_reagent)
-    create_reagent_inventory(bilirubin_reagent, 8500.00, 10500.00, 2)
+    create_reagent_inventory(bilirubin_reagent, 8500.00, 10500.00, 2, 200)
     
     albumin_protein_reagent, _ = Item.objects.get_or_create(
         name='Roche Albumin/Total Protein Reagent',
@@ -1203,14 +1264,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'BCG method for albumin and biuret method for total protein',
-            'packed': '1',
-            'subpacked': '250',
             'item_code': 'ROCHE-ALB-TP-250',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(albumin_protein_reagent)
-    create_reagent_inventory(albumin_protein_reagent, 9000.00, 11500.00, 2)
+    create_reagent_inventory(albumin_protein_reagent, 9000.00, 11500.00, 2, 250)
     
     # LFT Panels with specific reagent links
     lft_panels_config = [
@@ -1229,8 +1288,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Liver function marker',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1273,14 +1330,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Enzymatic endpoint method for cholesterol determination',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ABB-CHOL-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(cholesterol_reagent)
-    create_reagent_inventory(cholesterol_reagent, 10000.00, 12500.00, 2)
+    create_reagent_inventory(cholesterol_reagent, 10000.00, 12500.00, 2, 300)
     
     triglycerides_reagent, _ = Item.objects.get_or_create(
         name='Abbott Triglycerides Reagent',
@@ -1288,14 +1343,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Enzymatic colorimetric test with lipase and glycerol kinase',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ABB-TRIG-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(triglycerides_reagent)
-    create_reagent_inventory(triglycerides_reagent, 9500.00, 12000.00, 2)
+    create_reagent_inventory(triglycerides_reagent, 9500.00, 12000.00, 2, 300)
     
     hdl_ldl_reagent, _ = Item.objects.get_or_create(
         name='Abbott HDL/LDL Reagent',
@@ -1303,14 +1356,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Direct measurement of HDL and LDL cholesterol',
-            'packed': '1',
-            'subpacked': '250',
             'item_code': 'ABB-HDL-LDL-250',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(hdl_ldl_reagent)
-    create_reagent_inventory(hdl_ldl_reagent, 11000.00, 14000.00, 2)
+    create_reagent_inventory(hdl_ldl_reagent, 11000.00, 14000.00, 2, 250)
     
     lipid_panels_config = [
         ('Total Cholesterol', 'mg/dL', [cholesterol_reagent]),
@@ -1326,8 +1377,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Cardiovascular risk assessment',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1369,14 +1418,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Jaffe kinetic method for creatinine determination',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ROCHE-CREAT-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(creatinine_reagent)
-    create_reagent_inventory(creatinine_reagent, 8500.00, 11000.00, 2)
+    create_reagent_inventory(creatinine_reagent, 8500.00, 11000.00, 2, 300)
     
     urea_reagent, _ = Item.objects.get_or_create(
         name='Roche Urea/BUN Reagent',
@@ -1384,14 +1431,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Urease/GLDH enzymatic method for urea determination',
-            'packed': '1',
-            'subpacked': '300',
             'item_code': 'ROCHE-UREA-300',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(urea_reagent)
-    create_reagent_inventory(urea_reagent, 7500.00, 9500.00, 2)
+    create_reagent_inventory(urea_reagent, 7500.00, 9500.00, 2, 300)
     
     uric_acid_reagent, _ = Item.objects.get_or_create(
         name='Roche Uric Acid Reagent',
@@ -1399,14 +1444,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Uricase enzymatic colorimetric method',
-            'packed': '1',
-            'subpacked': '250',
             'item_code': 'ROCHE-URIC-250',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(uric_acid_reagent)
-    create_reagent_inventory(uric_acid_reagent, 8000.00, 10000.00, 2)
+    create_reagent_inventory(uric_acid_reagent, 8000.00, 10000.00, 2, 250)
     
     kft_panels_config = [
         ('Creatinine', 'mg/dL', [creatinine_reagent]),
@@ -1422,8 +1465,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Kidney function marker',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1464,14 +1505,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Electrochemiluminescence immunoassay (ECLIA) for thyroid hormones',
-            'packed': '1',
-            'subpacked': '100',
             'item_code': 'ROCHE-THYROID-100',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(thyroid_reagent)
-    create_reagent_inventory(thyroid_reagent, 18000.00, 23000.00, 2)
+    create_reagent_inventory(thyroid_reagent, 18000.00, 23000.00, 2, 100)
     
     tft_panels_config = [
         ('Thyroid Stimulating Hormone (TSH)', 'mIU/L'),
@@ -1488,8 +1527,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Thyroid function assessment',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1528,14 +1565,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Ion-selective electrode (ISE) method for sodium, potassium, chloride',
-            'packed': '1',
-            'subpacked': '500',
             'item_code': 'ROCHE-ELEC-500',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(electrolytes_reagent)
-    create_reagent_inventory(electrolytes_reagent, 12000.00, 15000.00, 2)
+    create_reagent_inventory(electrolytes_reagent, 12000.00, 15000.00, 2, 500)
     
     electrolytes_panels_config = [
         ('Sodium (Na+)', 'mmol/L'),
@@ -1551,8 +1586,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Electrolyte balance assessment',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -1590,14 +1623,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'Hexokinase enzymatic method for glucose determination',
-            'packed': '1',
-            'subpacked': '500',
             'item_code': 'ROCHE-GLUC-500',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(glucose_reagent)
-    create_reagent_inventory(glucose_reagent, 9000.00, 11500.00, 2)
+    create_reagent_inventory(glucose_reagent, 9000.00, 11500.00, 2, 500)
     
     hba1c_reagent, _ = Item.objects.get_or_create(
         name='Abbott HbA1c Reagent',
@@ -1605,14 +1636,12 @@ def create_real_world_lab_data():
         units_of_measure='kits',
         defaults={
             'desc': 'HPLC method for hemoglobin A1c determination',
-            'packed': '1',
-            'subpacked': '100',
             'item_code': 'ABB-HBA1C-100',
             'vat_rate': 16.0,
         }
     )
     created_data['reagents'].append(hba1c_reagent)
-    create_reagent_inventory(hba1c_reagent, 15000.00, 19000.00, 2)
+    create_reagent_inventory(hba1c_reagent, 15000.00, 19000.00, 2, 100)
     
     glucose_panels_config = [
         ('Fasting Blood Sugar (FBS)', 'mg/dL', [glucose_reagent]),
@@ -1627,8 +1656,6 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Diabetes monitoring',
-                'packed': '1',
-                'subpacked': '1',
                 'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
                 'vat_rate': 16.0,
             }
@@ -2088,14 +2115,19 @@ def create_pharmaceutical_inventory():
                 units_of_measure=drug["unit"],
                 defaults={
                     'desc': f'{drug["name"]} - {category}',
-                    'packed': drug["pack"],
-                    'subpacked': drug["subpack"],
                     'item_code': f'PHARM-{drug["name"][:8].upper().replace(" ", "")}-{random.randint(100, 999)}',
                     'vat_rate': 0.0,  # Most pharmaceuticals are VAT-exempt
                     'slow_moving_period': 90,
                 }
             )
-            
+
+            units_per_pack = int(drug["subpack"])
+            if units_per_pack > 1:
+                ItemUnit.objects.update_or_create(
+                    item=item, name='Pack',
+                    defaults={'factor_to_base': units_per_pack, 'is_purchase_default': True},
+                )
+
             # Pharmaceuticals and supplies are dispensed from the pharmacy.
             tag_item_departments(item, 'Pharmacy')
 

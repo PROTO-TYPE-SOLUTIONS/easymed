@@ -20,6 +20,18 @@ export default async function handler(req, res) {
             res.status(e.response?.status ?? 500).json(e.response?.data);
         }
     }
+    else if (req.method === API_METHODS.PATCH) {
+        try {
+            const response = await backendAxiosInstance.patch(
+                `${API_URL.SPECIMEN_CONSUMABLES}${id}/`,
+                req.body,
+                authConfig
+            );
+            res.status(200).json(response.data);
+        } catch (e) {
+            res.status(e.response?.status ?? 500).json(e.response?.data);
+        }
+    }
     else {
         res.status(405).json({ message: 'Method not allowed' });
     }

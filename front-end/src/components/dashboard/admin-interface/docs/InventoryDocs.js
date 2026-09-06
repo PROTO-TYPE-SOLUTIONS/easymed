@@ -39,53 +39,49 @@ const InventoryDocs = () => {
     <div className='max-w-4xl'>
       <h2 className='text-xl font-bold mb-4'>Inventory & Pack System</h2>
 
-      <Section title='What are Packed and Subpacked?'>
+      <Section title='Base units and pack sizes'>
         <p>
-          Every item in the system has two pack properties:
+          Every item is stocked in one <strong>base unit</strong> — the smallest
+          thing you can issue, named by the item&apos;s unit of measure. All stock
+          quantities in the system (<Code>quantity_at_hand</Code>) are counted in it.
         </p>
-        <Table
-          headers={['Property', 'Meaning', 'Example']}
-          rows={[
-            ['packed', 'Number of boxes/packs per shipment unit', '1 carton = 1 packed'],
-            ['subpacked', 'Number of base units per box', '1 box of 20 syringes = subpacked is 20'],
-          ]}
-        />
         <p className='mt-2'>
-          <strong>Base unit</strong> is the subpacked value. All stock quantities throughout the system (<Code>quantity_at_hand</Code>) are stored in base units.
+          Anything bigger that you buy or sell in is a <strong>pack size</strong>,
+          added under <strong>Items &gt; Pack Sizes</strong>. Each one records how
+          many base units it holds, so nesting works by referring every level back
+          to the base unit rather than to the level above it:
         </p>
-      </Section>
-
-      <Section title='Example: Syringes'>
         <Table
-          headers={['Field', 'Value', 'Meaning']}
+          headers={['Pack Size', 'Base units it holds', 'Meaning']}
           rows={[
-            ['packed', '1', '1 box per shipment'],
-            ['subpacked', '20', '20 syringes per box'],
-            ['quantity_at_hand', '60', '60 individual syringes in stock'],
-            ['Display', '60 units (3 packs of 20)', 'What staff sees on the inventory screen'],
+            ['(base unit)', '1', 'One syringe — never needs a row'],
+            ['Box', '12', 'A box of 12 syringes'],
+            ['Carton', '120', 'A carton of 10 boxes, stated as 120 syringes'],
           ]}
         />
       </Section>
 
       <Section title='Receiving Stock'>
         <p>
-          When receiving items via <strong>Incoming Items</strong>, staff can choose a <Code>quantity_unit</Code>:
+          When receiving against a purchase order, open a line and set
+          <strong> Received in</strong>. Quantity and buying price are both read as
+          &quot;per one of these&quot;, and the system converts before anything
+          touches the ledger.
         </p>
-        <Table
-          headers={['Quantity Unit', 'What Staff Enters', 'System Converts To']}
-          rows={[
-            ['Packs', 'Number of boxes received', 'quantity x subpacked = base units added to stock'],
-            ['Units (default)', 'Exact base units received', 'Added to stock as-is'],
-          ]}
-        />
         <div className='bg-blue-50 border-l-4 border-blue-400 p-3 rounded mt-2'>
           <p className='font-semibold text-blue-800'>Example</p>
           <p>
-            Item: Paracetamol (subpacked = 10 tablets per strip).<br />
-            Staff receives 5 packs and selects <Code>quantity_unit = packs</Code>.<br />
-            System adds <strong>5 x 10 = 50 base units</strong> to inventory.
+            Paracetamol is stocked in tablets, with a Strip pack size of 10.<br />
+            Staff receives 5, selects <strong>Received in = Strip of 10 tablets</strong>,
+            and enters a buying price of KES 200 per strip.<br />
+            The ledger gains <strong>50 tablets</strong> costed at{' '}
+            <strong>KES 20 each</strong>.
           </p>
         </div>
+        <p className='mt-2'>
+          Leave <strong>Received in</strong> on the base unit when goods arrive
+          loose, and the quantity is added as-is.
+        </p>
       </Section>
 
       <Section title='Inventory Display'>
@@ -93,9 +89,9 @@ const InventoryDocs = () => {
           The inventory grid shows both <strong>Lot Quantity</strong> and <strong>Total Quantity</strong> with a pack breakdown:
         </p>
         <ul className='list-disc pl-5 space-y-1'>
-          <li><Code>60 units (3 packs of 20)</Code> — item fully divides into packs</li>
-          <li><Code>65 units (3 packs of 20 + 5 loose)</Code> — has leftover loose units</li>
-          <li><Code>42 units</Code> — subpacked is 1, so no pack breakdown shown</li>
+          <li><Code>60 units (3 Box of 20)</Code> — item fully divides into packs</li>
+          <li><Code>65 units (3 Box of 20 + 5 loose)</Code> — has leftover loose units</li>
+          <li><Code>42 units</Code> — no pack sizes defined, so no breakdown shown</li>
         </ul>
       </Section>
 

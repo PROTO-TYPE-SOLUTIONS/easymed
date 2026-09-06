@@ -176,7 +176,7 @@ class InvoiceItem(models.Model):
     item_created_at = models.DateTimeField(auto_now_add=True)
     item_updated_at = models.DateTimeField(auto_now=True)
     payment_mode = models.ForeignKey(PaymentMode, on_delete=models.PROTECT, null=True)
-    # quantity is in subpacked (base) units — e.g. 20 tablets, not 1 box of 20
+    # quantity is in the item's base units — e.g. 20 tablets, not 1 box of 20
     quantity = models.PositiveIntegerField(default=1)
     item_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     # amount after co-pay is deducted

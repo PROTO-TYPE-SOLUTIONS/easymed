@@ -18,6 +18,7 @@ from inventory.models import (
     Department,
     Item,
     ItemPrice,
+    ItemUnit,
     StockBalance,
     StockLot,
     StockMovement,
@@ -48,8 +49,6 @@ def drug(db):
         category='Drug',
         units_of_measure='tablets',
         item_code='DRG-00001',
-        packed=1,
-        subpacked=20,
     )
 
 
@@ -138,6 +137,48 @@ def test_issue_uses_fefo_across_lots(drug, pharmacy):
     assert movements[0].quantity == -10
     assert movements[1].lot.lot_number == 'LATE'
     assert movements[1].quantity == -5
+
+
+@pytest.mark.django_db
+def test_issue_in_packs_converts_to_base_units(drug, pharmacy):
+    stock_service.receive(item=drug, department=pharmacy, quantity=100, unit_cost=1)
+    box = ItemUnit.objects.create(item=drug, name='Box', factor_to_base=20)
+
+    stock_service.issue(item=drug, department=pharmacy, quantity=2, item_unit=box)
+
+    assert stock_service.on_hand_quantity(drug, pharmacy) == 60
+
+
+@pytest.mark.django_db
+def test_requisition_quantities_are_in_the_ordering_unit(drug):
+    """Six boxes of twenty is six on the line and 120 in the ledger's terms."""
+    from inventory.models import Requisition, RequisitionItem
+    from customuser.models import CustomUser
+
+    box = ItemUnit.objects.create(item=drug, name='Box', factor_to_base=20)
+    department = Department.objects.create(name='Stores')
+    user = CustomUser.objects.create_user(email='req@mail.com', password='x')
+    requisition = Requisition.objects.create(department=department, requested_by=user)
+
+    line = RequisitionItem.objects.create(
+        requisition=requisition, item=drug, item_unit=box, quantity_requested=6)
+
+    assert line.quantity_requested == 6
+    assert line.base_quantity_requested == 120
+    assert line.unit_label == 'Box'
+    # quantity_approved defaults to what was requested, in the same unit.
+    assert line.base_quantity_approved == 120
+
+
+@pytest.mark.django_db
+def test_issue_rejects_a_pack_belonging_to_another_item(drug, pharmacy):
+    stock_service.receive(item=drug, department=pharmacy, quantity=100, unit_cost=1)
+    other = Item.objects.create(
+        name='Amoxicillin', category='Drug', units_of_measure='caps', item_code='DRG-00002')
+    foreign_box = ItemUnit.objects.create(item=other, name='Box', factor_to_base=20)
+
+    with pytest.raises(StockError):
+        stock_service.issue(item=drug, department=pharmacy, quantity=1, item_unit=foreign_box)
 
 
 @pytest.mark.django_db

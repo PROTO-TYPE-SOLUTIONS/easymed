@@ -14,13 +14,19 @@ from company.models import InsuranceCompany
 '''
 Units of measure
 ----------------
-An item has `packed` and `subpacked` properties.
+Every item is stocked in ONE base unit -- the smallest thing you can issue.
+Every quantity persisted by the stock ledger is expressed in that base unit.
 
-    1 pack (box) of 20 syringes  ->  packed = 1, subpacked = 20
-    60 syringes in stock         ->  3 packs
+Anything bigger you buy or sell in is an `ItemUnit` row carrying the number of
+base units it contains:
 
-Throughout the system the base unit of measure is the SUBPACKED unit. Every
-quantity persisted by the stock ledger is expressed in base units.
+    syringe (base)                    ->  no row needed, factor 1
+    1 box of 12 syringes              ->  ItemUnit(name='Box', factor_to_base=12)
+    1 carton of 10 boxes              ->  ItemUnit(name='Carton', factor_to_base=120)
+
+Receiving 3 boxes puts 36 syringes in the ledger and costs them at
+`purchase_price / 12` each. Conversion happens at the edges -- goods receipt
+and issue -- so nothing downstream has to know a box exists.
 
 Stock model
 -----------
@@ -144,7 +150,11 @@ class Item(AbstractBaseModel):
         max_length=20, choices=CATEGORY_ONE_CHOICES, default='Resale',
         help_text="Whether the item is bought for resale or for internal consumption"
     )
-    units_of_measure = models.CharField(max_length=255, blank=True, default='')
+    # The base unit every quantity of this item is counted in. Required: a
+    # quantity with no unit is the thing that makes pack conversions guesswork.
+    units_of_measure = models.CharField(
+        max_length=255,
+        help_text="Base unit stock is counted in: tablets, rolls, tests, ml")
     units = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True, related_name='items')
     lab_test_item = models.OneToOneField(
         'self',
@@ -154,10 +164,6 @@ class Item(AbstractBaseModel):
         help_text="Auto-created Lab Test billing item paired to this Lab Reagent"
     )
     vat_rate = models.DecimalField(max_digits=5, decimal_places=2, default=16.0)
-    # packed = number of boxes/packs per shipment unit
-    # subpacked = units per box (base unit of measure throughout the system)
-    packed = models.PositiveIntegerField(default=1)
-    subpacked = models.PositiveIntegerField(default=1)
     slow_moving_period = models.IntegerField(default=90)
     is_stock_tracked = models.BooleanField(
         default=True,
@@ -177,6 +183,10 @@ class Item(AbstractBaseModel):
 
     class Meta:
         unique_together = ('name', 'category', 'units_of_measure')
+        constraints = [
+            models.CheckConstraint(
+                check=~Q(units_of_measure=''), name='item_base_unit_required'),
+        ]
 
     def save(self, *args, **kwargs):
         # A service can never be stock tracked, regardless of what was posted.
@@ -241,6 +251,47 @@ class Item(AbstractBaseModel):
 
     def __str__(self):
         return f"{self.id} - {self.name} - {self.category}"
+
+
+class ItemUnit(AbstractBaseModel):
+    '''
+    A pack size an item can be bought or sold in, expressed in base units.
+
+    The base unit itself is never a row here -- it is implicit, factor 1. Rows
+    are the bigger containers: a box of 12, a carton of 120. Nesting is handled
+    the way Sage and every other ledger-based system handles it, by referring
+    every level back to the base unit rather than to the level above it, so a
+    carton is 120 and not "10 boxes".
+    '''
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='unit_conversions')
+    name = models.CharField(max_length=50, help_text="What the pack is called: Box, Carton, Strip")
+    factor_to_base = models.PositiveIntegerField(
+        help_text="How many base units one of these contains. A box of 12 syringes is 12")
+    is_purchase_default = models.BooleanField(
+        default=False, help_text="Pre-selected when receiving goods")
+    is_sale_default = models.BooleanField(
+        default=False, help_text="Pre-selected when issuing or dispensing")
+
+    class Meta:
+        ordering = ['factor_to_base']
+        verbose_name = 'Item unit'
+        constraints = [
+            models.UniqueConstraint(fields=['item', 'name'], name='uniq_item_unit_name'),
+            models.CheckConstraint(
+                check=Q(factor_to_base__gte=1), name='item_unit_factor_positive'),
+        ]
+
+    def clean(self):
+        if self.factor_to_base == 1:
+            raise ValidationError(
+                {'factor_to_base': "A factor of 1 is the base unit, which needs no row."}
+            )
+
+    def to_base(self, quantity):
+        return quantity * self.factor_to_base
+
+    def __str__(self):
+        return f"{self.item.name}: 1 {self.name} = {self.factor_to_base}"
 
 
 class ItemDepartment(AbstractBaseModel):
@@ -346,13 +397,63 @@ class Requisition(AbstractBaseModel):
 
 
 class RequisitionItem(AbstractBaseModel):
+    '''
+    A line on a requisition.
+
+    Quantities and `unit_cost` are expressed in `item_unit` -- ordering six
+    boxes of twelve is quantity 6, not 72. The whole procurement chain keeps
+    that unit: the purchase order reads it back off this line, and conversion
+    to base units happens once, when the goods are received.
+    '''
     quantity_requested = models.IntegerField()
     quantity_approved = models.IntegerField(default=0)
     ordered = models.BooleanField(default=False)
     requisition = models.ForeignKey(Requisition, on_delete=models.CASCADE, related_name='items')
     preferred_supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    unit_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    item_unit = models.ForeignKey(
+        ItemUnit, on_delete=models.PROTECT, null=True, blank=True,
+        related_name='requisition_items',
+        help_text="The pack being ordered. Blank means the item's base unit"
+    )
+    unit_cost = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Agreed price for ONE `item_unit`")
+
+    def clean(self):
+        if self.item_unit_id and self.item_unit.item_id != self.item_id:
+            raise ValidationError(
+                {'item_unit': f"{self.item_unit.name} is a pack size for a different item."}
+            )
+
+    @property
+    def conversion_factor(self):
+        return self.item_unit.factor_to_base if self.item_unit_id else 1
+
+    @property
+    def unit_label(self):
+        return self.item_unit.name if self.item_unit_id else (self.item.units_of_measure or 'units')
+
+    @property
+    def effective_unit_cost(self):
+        '''
+        Cost of ONE of whatever is being ordered.
+
+        An agreed price on the line is already per pack. Falling back to stock
+        cost means scaling up, because the ledger's weighted average is per
+        base unit: a box of twelve costs twelve times what one costs.
+        '''
+        if self.unit_cost is not None:
+            return self.unit_cost
+        return (self.item.current_cost or 0) * self.conversion_factor
+
+    @property
+    def base_quantity_requested(self):
+        return self.quantity_requested * self.conversion_factor
+
+    @property
+    def base_quantity_approved(self):
+        return self.quantity_approved * self.conversion_factor
 
     def save(self, *args, **kwargs):
         if not self.id and (self.quantity_approved is None or self.quantity_approved == 0):
@@ -360,7 +461,8 @@ class RequisitionItem(AbstractBaseModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.item.name} - Requested: {self.quantity_requested}, Approved: {self.quantity_approved}"
+        return (f"{self.item.name} - Requested: {self.quantity_requested} {self.unit_label}, "
+                f"Approved: {self.quantity_approved}")
 
 
 class PurchaseOrder(AbstractBaseModel):
@@ -396,15 +498,38 @@ class PurchaseOrder(AbstractBaseModel):
 
 class PurchaseOrderItem(AbstractBaseModel):
     '''
-    Quantities are in base units. The purchase order PDF converts them back to
-    packs for the supplier.
+    Quantities are in the unit the requisition line was raised in, which is
+    also the unit the supplier is quoting -- order six boxes, receive six
+    boxes. The unit is read back off the requisition line rather than copied,
+    so the two can never disagree.
     '''
     quantity_ordered = models.IntegerField(default=0)
     quantity_received = models.IntegerField(default=0)
     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name='po_items')
     requisition_item = models.ForeignKey(RequisitionItem, on_delete=models.CASCADE, null=True, blank=True, related_name='purchase_order_items')
 
+    @property
+    def item_unit(self):
+        return self.requisition_item.item_unit if self.requisition_item_id else None
+
+    @property
+    def conversion_factor(self):
+        return self.requisition_item.conversion_factor if self.requisition_item_id else 1
+
+    @property
+    def unit_label(self):
+        return self.requisition_item.unit_label if self.requisition_item_id else 'units'
+
+    @property
+    def base_quantity_ordered(self):
+        return self.quantity_ordered * self.conversion_factor
+
+    @property
+    def base_quantity_received(self):
+        return self.quantity_received * self.conversion_factor
+
     def clean(self):
+        # Both sides are in the same unit, so this compares like with like.
         if self.quantity_received > self.quantity_ordered:
             raise ValidationError("Quantity received cannot exceed quantity ordered")
 
@@ -460,20 +585,20 @@ class IncomingItem(AbstractBaseModel):
     it does, via `inventory.services.stock.receive_incoming_item`, which writes
     a RECEIPT movement and stamps `posted_at` so a double submission is a no-op.
     '''
-    QUANTITY_UNIT_CHOICES = [
-        ('packs', 'Packs'),    # staff enters number of boxes/packs; system converts to base units
-        ('units', 'Units'),    # staff enters base units (subpacked) directly
-    ]
     purchase_price = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True,
-        help_text="Cost of ONE unit of `quantity_unit` (one pack, or one base unit)"
+        help_text="Cost of ONE of whatever `item_unit` says, or of one base unit when it is blank"
     )
     sale_price = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True,
         help_text="Optional. When set, opens a new cash price for the item"
     )
-    quantity = models.IntegerField()
-    quantity_unit = models.CharField(max_length=10, choices=QUANTITY_UNIT_CHOICES, default='units')
+    quantity = models.IntegerField(help_text="Number of `item_unit`s, or of base units when it is blank")
+    item_unit = models.ForeignKey(
+        'ItemUnit', on_delete=models.PROTECT, null=True, blank=True,
+        related_name='incoming_items',
+        help_text="The pack the goods arrived in. Blank means base units"
+    )
     item = models.ForeignKey(Item, on_delete=models.PROTECT)
     department = models.ForeignKey(
         Department, on_delete=models.PROTECT, null=True, blank=True,
@@ -496,20 +621,20 @@ class IncomingItem(AbstractBaseModel):
         ordering = ['-date_created']
 
     @property
+    def conversion_factor(self):
+        return self.item_unit.factor_to_base if self.item_unit_id else 1
+
+    @property
     def base_units(self):
-        '''`quantity` converted to base units (subpacked).'''
-        if self.quantity_unit == 'packs':
-            return self.quantity * (self.item.subpacked or 1)
-        return self.quantity
+        '''`quantity` converted to base units.'''
+        return self.quantity * self.conversion_factor
 
     @property
     def unit_cost(self):
         '''Purchase price expressed per BASE unit.'''
         if self.purchase_price is None:
             return 0
-        if self.quantity_unit == 'packs':
-            return self.purchase_price / (self.item.subpacked or 1)
-        return self.purchase_price
+        return self.purchase_price / self.conversion_factor
 
     @property
     def line_total(self):

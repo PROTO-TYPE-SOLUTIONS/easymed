@@ -254,7 +254,6 @@ def incoming_item(item, supplier, purchase_order, supplier_invoice, department):
         purchase_order=purchase_order,
         department=department,
         quantity=10,
-        quantity_unit="units",
         purchase_price=10.0,
         sale_price=20.0,
     )

@@ -16,6 +16,8 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
+    SpecimenConsumable,
+    TestPanelReagent,
     LabTestInterpretation,
     ReferenceValue,
     ReagentConsumptionLog,
@@ -225,6 +227,7 @@ class PatientSampleSerializer(serializers.ModelSerializer):
     is_disposed = serializers.SerializerMethodField()
     is_retested = serializers.SerializerMethodField()
     is_released = serializers.SerializerMethodField()
+    consumables = serializers.SerializerMethodField()
 
     class Meta:
         model = PatientSample
@@ -241,6 +244,7 @@ class PatientSampleSerializer(serializers.ModelSerializer):
             'is_retested',
             'is_released',
             'collected_on',
+            'consumables',
         ]
         read_only_fields = [
             'patient_sample_code',
@@ -248,6 +252,15 @@ class PatientSampleSerializer(serializers.ModelSerializer):
 
     def get_specimen_name(self, obj):
         return obj.specimen.name
+
+    def get_consumables(self, obj):
+        """
+        What the phlebotomist needs in hand to take this sample, and whether
+        the lab actually has it. Deducted on collection by
+        laboratory.tasks.deduct_specimen_consumables.
+        """
+        return SpecimenConsumableSerializer(
+            obj.specimen.consumables.all(), many=True).data
 
     def get_is_archived(self, obj):
         return hasattr(obj, 'archive_record')
@@ -267,6 +280,73 @@ class SpecimenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specimen
         fields = '__all__'
+
+
+def _available_quantity(item):
+    from .utils import lab_department
+
+    return stock_service.available_quantity(item, lab_department())
+
+
+class TestPanelReagentSerializer(serializers.ModelSerializer):
+    test_panel_name = serializers.ReadOnlyField(source='test_panel.name')
+    reagent_name = serializers.ReadOnlyField(source='reagent_item.name')
+    reagent_code = serializers.ReadOnlyField(source='reagent_item.item_code')
+    available_quantity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TestPanelReagent
+        fields = [
+            'id',
+            'test_panel',
+            'test_panel_name',
+            'reagent_item',
+            'reagent_name',
+            'reagent_code',
+            'units_consumed_per_run',
+            'available_quantity',
+        ]
+
+    def get_available_quantity(self, obj):
+        return _available_quantity(obj.reagent_item)
+
+    def validate_reagent_item(self, value):
+        # limit_choices_to only constrains forms, so the API has to check too.
+        if value.category != 'LabReagent':
+            raise serializers.ValidationError(
+                f"'{value.name}' is a {value.category} item, not a Lab Reagent."
+            )
+        return value
+
+
+class SpecimenConsumableSerializer(serializers.ModelSerializer):
+    specimen_name = serializers.ReadOnlyField(source='specimen.name')
+    item_name = serializers.ReadOnlyField(source='item.name')
+    item_code = serializers.ReadOnlyField(source='item.item_code')
+    available_quantity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SpecimenConsumable
+        fields = [
+            'id',
+            'specimen',
+            'specimen_name',
+            'item',
+            'item_name',
+            'item_code',
+            'quantity_per_collection',
+            'available_quantity',
+        ]
+
+    def get_available_quantity(self, obj):
+        return _available_quantity(obj.item)
+
+    def validate_item(self, value):
+        if value.category != 'LabConsumable':
+            raise serializers.ValidationError(
+                f"'{value.name}' is a {value.category} item, not a Lab Consumable."
+            )
+        return value
 
 
 class LabTestInterpretationSerializer(serializers.ModelSerializer):

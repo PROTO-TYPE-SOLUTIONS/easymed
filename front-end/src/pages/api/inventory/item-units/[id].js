@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
     if (req.method === API_METHODS.DELETE) {
         try {
-            await backendAxiosInstance.delete(`${API_URL.TEST_PANEL_REAGENTS}${id}/`, authConfig);
+            await backendAxiosInstance.delete(`${API_URL.ITEM_UNITS}${id}/`, authConfig);
             res.status(204).end();
         } catch (e) {
             res.status(e.response?.status ?? 500).json(e.response?.data);
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     else if (req.method === API_METHODS.PATCH) {
         try {
             const response = await backendAxiosInstance.patch(
-                `${API_URL.TEST_PANEL_REAGENTS}${id}/`,
+                `${API_URL.ITEM_UNITS}${id}/`,
                 req.body,
                 authConfig
             );

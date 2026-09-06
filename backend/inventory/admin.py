@@ -8,6 +8,7 @@ from .models import (
     Item,
     ItemDepartment,
     ItemPrice,
+    ItemUnit,
     PurchaseOrder,
     PurchaseOrderItem,
     Quotation,
@@ -41,13 +42,25 @@ class ItemDepartmentInline(admin.TabularInline):
     autocomplete_fields = ['department']
 
 
+class ItemUnitInline(admin.TabularInline):
+    model = ItemUnit
+    extra = 1
+
+
+@admin.register(ItemUnit)
+class ItemUnitAdmin(admin.ModelAdmin):
+    list_display = ['item', 'name', 'factor_to_base', 'is_purchase_default', 'is_sale_default']
+    list_filter = ['is_purchase_default', 'is_sale_default']
+    search_fields = ['item__name', 'item__item_code', 'name']
+
+
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
     list_display = ['name', 'item_code', 'category', 'tagged_departments',
                     'is_stock_tracked', 'default_re_order_level']
     search_fields = ['name', 'item_code', 'category']
     list_filter = ['category', 'is_stock_tracked', 'category_one', 'departments']
-    inlines = [ItemDepartmentInline]
+    inlines = [ItemDepartmentInline, ItemUnitInline]
 
     @admin.display(description='Departments')
     def tagged_departments(self, obj):
@@ -147,9 +160,9 @@ class StockTakeAdmin(admin.ModelAdmin):
 
 @admin.register(IncomingItem)
 class IncomingItemAdmin(admin.ModelAdmin):
-    list_display = ['item', 'quantity', 'quantity_unit', 'department', 'lot_no',
+    list_display = ['item', 'quantity', 'item_unit', 'base_units', 'department', 'lot_no',
                     'expiry_date', 'supplier', 'posted_at']
-    list_filter = ['quantity_unit', 'department', 'supplier']
+    list_filter = ['department', 'supplier']
     search_fields = ['item__name', 'lot_no']
     readonly_fields = ['posted_at']
 

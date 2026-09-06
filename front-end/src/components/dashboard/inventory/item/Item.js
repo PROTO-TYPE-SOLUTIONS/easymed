@@ -46,8 +46,6 @@ const NewItem = () => {
     ]
 
     const initialValues = {
-      packed: "",
-      subpacked: "",
       name: "",
       category: "",
       units: "",
@@ -114,34 +112,6 @@ const NewItem = () => {
                 />
                 <ErrorMessage
                 name="name"
-                component="div"
-                className="text-warning text-xs"
-                />
-            </Grid>
-            <Grid className='my-2' item md={6} xs={12}>
-            <label htmlFor="item_id">Packed</label>
-                <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Packed"
-                name="packed"
-                />
-                <ErrorMessage
-                name="packed"
-                component="div"
-                className="text-warning text-xs"
-                />
-            </Grid>
-            <Grid className='my-2' item md={6} xs={12}>
-            <label htmlFor="item_code">Sub Packed</label>
-                <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Sub Packed"
-                name="subpacked"
-                />
-                <ErrorMessage
-                name="subpacked"
                 component="div"
                 className="text-warning text-xs"
                 />

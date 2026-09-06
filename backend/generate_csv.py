@@ -15,13 +15,17 @@ def generate_item_csv():
     with open(filepath, 'w', newline='') as csvfile:
         fieldnames = [
             'id', 'item_code', 'name', 'desc', 'category', 'units_of_measure',
-            'vat_rate', 'packed', 'subpacked', 'slow_moving_period',
+            'vat_rate', 'pack_name', 'units_per_pack', 'slow_moving_period',
             'buying_price', 'selling_price'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for item in Item.objects.all():
+            pack = (
+                item.unit_conversions.filter(is_purchase_default=True).first()
+                or item.unit_conversions.first()
+            )
             writer.writerow({
                 'id': item.id,
                 'item_code': item.item_code,
@@ -30,8 +34,8 @@ def generate_item_csv():
                 'category': item.category,
                 'units_of_measure': item.units_of_measure,
                 'vat_rate': float(item.vat_rate), # Convert Decimal to float for CSV
-                'packed': item.packed,
-                'subpacked': item.subpacked,
+                'pack_name': pack.name if pack else '',
+                'units_per_pack': pack.factor_to_base if pack else '',
                 'slow_moving_period': item.slow_moving_period,
                 'buying_price': float(item.buying_price), # Property
                 'selling_price': float(item.selling_price) # Property

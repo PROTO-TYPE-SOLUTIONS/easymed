@@ -82,7 +82,8 @@ const CreateRequisition = () => {
     const payloadData = {
       item: item.item,
       preferred_supplier: parseInt(item.supplier),
-      quantity_requested: item.quantity_requested
+      quantity_requested: item.quantity_requested,
+      item_unit: item.item_unit || null
     }
 
     try {
@@ -202,9 +203,31 @@ const CreateRequisition = () => {
               return supplier ? `${supplier.official_name}` : 'null';
             }}        
           />
-          <Column 
-            dataField="quantity_requested" 
+          <Column
+            dataField="quantity_requested"
             caption="Quantity"
+          />
+          <Column
+            dataField="item_unit"
+            caption="Ordered In"
+            cellRender={(cellData) => {
+              const productItem = item.find(i => i.id === cellData.data.item);
+              const baseUnit = productItem?.units_of_measure || 'units';
+              if (!cellData.data.item_unit) return baseUnit;
+              const pack = (productItem?.unit_conversions ?? []).find(
+                u => u.id === cellData.data.item_unit);
+              return pack ? `${pack.name} of ${pack.factor_to_base} ${baseUnit}` : baseUnit;
+            }}
+          />
+          <Column
+            caption="Total Base Units"
+            calculateCellValue={(rowData) => {
+              const productItem = item.find(i => i.id === rowData.item);
+              const pack = (productItem?.unit_conversions ?? []).find(
+                u => u.id === rowData.item_unit);
+              const factor = pack?.factor_to_base ?? 1;
+              return (parseInt(rowData.quantity_requested) || 0) * factor;
+            }}
           />
           <Column 
             dataField="" 

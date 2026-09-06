@@ -5,6 +5,7 @@ import CmtDropdownMenu from "@/assets/DropdownMenu";
 import { AiFillDelete } from "react-icons/ai";
 import { BiEdit } from "react-icons/bi";
 import { LuMoreHorizontal } from "react-icons/lu";
+import { TbFlask } from "react-icons/tb";
 import { Grid } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -12,6 +13,7 @@ import { useAuth } from "@/assets/hooks/use-auth";
 import { getAllLabTestPanels } from "@/redux/features/laboratory";
 import CreateTestPanelModal from "./modals/panels/CreateTestPanel";
 import EditTestPanelModal from "./modals/panels/editTestPanel";
+import ManagePanelReagents from "./modals/panels/ManagePanelReagents";
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
@@ -31,6 +33,11 @@ const getActions = () => {
       label: "Edit",
       icon: <BiEdit className="text-xl text-success  mx-2" />,
     },
+    {
+      action: "reagents",
+      label: "Reagents",
+      icon: <TbFlask className="text-xl text-primary mx-2" />,
+    },
   ];
 
   return actions;
@@ -42,6 +49,7 @@ const TestPanels = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const userActions = getActions();
   const [open, setOpen] = React.useState(false);
+  const [reagentsOpen, setReagentsOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [selectedRowData, setSelectedRowData] = React.useState({});
   const { labTestPanels } = useSelector((store) => store.laboratory);
@@ -64,6 +72,9 @@ const TestPanels = () => {
     } else if (menu.action === "edit") {
       setSelectedRowData(data);
       setOpen(true);
+    } else if (menu.action === "reagents") {
+      setSelectedRowData(data);
+      setReagentsOpen(true);
     }
   };
 
@@ -157,6 +168,11 @@ const TestPanels = () => {
         />
       </DataGrid>
       <EditTestPanelModal {...{ open, setOpen, selectedRowData }} />
+      <ManagePanelReagents
+        open={reagentsOpen}
+        setOpen={setReagentsOpen}
+        selectedRowData={selectedRowData}
+      />
       {/* <DeleteModal {...{ deleteOpen, setDeleteOpen, selectedRowData }} /> */}
     </section>
   );

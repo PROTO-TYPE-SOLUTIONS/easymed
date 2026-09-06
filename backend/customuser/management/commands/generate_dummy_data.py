@@ -14,6 +14,7 @@ from customuser.management.utils.data_generators import (
     create_lab_test_interpretations,
     create_dummy_departments,
     create_dummy_suppliers,
+    create_dummy_requisitions,
     create_real_world_lab_data,
     create_hospital_wards_and_beds,
     create_pharmaceutical_inventory,
@@ -129,6 +130,15 @@ class Command(BaseCommand):
         else:
             suppliers = create_dummy_suppliers(count=DEFAULT_COUNT)
             self.stdout.write(self.style.SUCCESS(f"Created {len(suppliers)} dummy suppliers."))
+
+        # Requisitions come after suppliers and items, since a line needs both,
+        # plus the pack sizes that were seeded alongside the items.
+        from inventory.models import Requisition
+        if Requisition.objects.exists():
+            self.stdout.write(self.style.WARNING("Skipping requisitions: already exist."))
+        else:
+            requisitions = create_dummy_requisitions()
+            self.stdout.write(self.style.SUCCESS(f"Created {len(requisitions)} dummy requisitions."))
         
         # Create real-world lab data (test profiles, panels, reagents, and links)
         from laboratory.models import TestPanelReagent

@@ -8,7 +8,8 @@ StockMovement or StockBalance directly.
 
 Conventions
 -----------
-* All quantities are BASE units (subpacked).
+* Everything persisted is in BASE units. Callers may hand `issue` an
+  `item_unit` to work in packs; it converts before anything is written.
 * Movement quantities are signed. Positive = stock arriving, negative = leaving.
 * Issues allocate FEFO (first expiry, first out), skipping expired lots unless
   explicitly allowed.
@@ -419,6 +420,7 @@ def issue(
     item,
     department,
     quantity,
+    item_unit=None,
     movement_type=StockMovement.Type.SALE,
     performed_by=None,
     reason='',
@@ -431,14 +433,23 @@ def issue(
     idempotency_key=None,
 ):
     """
-    Take `quantity` base units out of `department`, spreading the issue across
-    lots in FEFO order.
+    Take `quantity` out of `department`, spreading the issue across lots in
+    FEFO order.
+
+    `quantity` is in base units unless `item_unit` names a pack, in which case
+    it is that many packs -- issuing 2 boxes of 12 takes 24 base units out.
 
     Raises InsufficientStock unless `allow_partial` is set, in which case it
     issues what it can and the caller inspects the returned movements.
     """
     _assert_tracked(item)
     department = _resolve_department(department)
+
+    if item_unit is not None:
+        if item_unit.item_id != item.id:
+            raise StockError(
+                f"{item_unit.name} is a pack size for a different item.")
+        quantity = item_unit.to_base(quantity)
 
     if quantity <= 0:
         raise StockError("Issue quantity must be positive.")

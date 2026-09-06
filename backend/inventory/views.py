@@ -34,6 +34,7 @@ from .models import (
     InsuranceItemSalePrice,
     Item,
     ItemPrice,
+    ItemUnit,
     PurchaseOrder,
     PurchaseOrderItem,
     Quotation,
@@ -61,6 +62,7 @@ from .serializers import (
     InsuranceItemSalePriceSerializer,
     ItemPriceSerializer,
     ItemSerializer,
+    ItemUnitSerializer,
     OpeningStockSerializer,
     PurchaseOrderItemSerializer,
     PurchaseOrderSerializer,
@@ -94,8 +96,19 @@ def _current_user(request):
     return user if user is not None and user.is_authenticated else None
 
 
+class ItemUnitViewSet(viewsets.ModelViewSet):
+    '''
+    The pack sizes an item can be bought or sold in. One row per container
+    bigger than the base unit -- a box of 12, a carton of 120.
+    '''
+    queryset = ItemUnit.objects.select_related('item').all()
+    serializer_class = ItemUnitSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ['item', 'is_purchase_default', 'is_sale_default']
+
+
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
+    queryset = Item.objects.prefetch_related('unit_conversions').all()
     serializer_class = ItemSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ItemFilter
@@ -132,10 +145,16 @@ class ItemViewSet(viewsets.ModelViewSet):
         worksheet.title = 'Items'
 
         columns = ['Item Code', 'Name', 'Description', 'Category', 'Unit', 'Vat Rate',
-                   'Packed', 'Subpacked', 'Slow Moving Period', 'Sale Price', 'Stock Tracked']
+                   'Pack Name', 'Units Per Pack', 'Slow Moving Period', 'Sale Price', 'Stock Tracked']
         worksheet.append(columns)
 
         for item in self.get_queryset():
+            # One pack size per row keeps the sheet flat. The purchase default
+            # is the one buyers care about; the rest live in the API.
+            pack = (
+                item.unit_conversions.filter(is_purchase_default=True).first()
+                or item.unit_conversions.first()
+            )
             worksheet.append([
                 item.item_code,
                 item.name,
@@ -143,8 +162,8 @@ class ItemViewSet(viewsets.ModelViewSet):
                 item.category,
                 item.units_of_measure,
                 str(item.vat_rate),
-                item.packed,
-                item.subpacked,
+                pack.name if pack else '',
+                pack.factor_to_base if pack else '',
                 item.slow_moving_period,
                 str(item.current_sale_price),
                 item.is_stock_tracked,
@@ -176,7 +195,7 @@ class ItemViewSet(viewsets.ModelViewSet):
                     continue
 
                 (item_code, name, desc, category, unit, vat_rate,
-                 packed, subpacked, slow_moving_period) = row[:9]
+                 pack_name, units_per_pack, slow_moving_period) = row[:9]
                 sale_price = row[9] if len(row) > 9 else None
 
                 if not name or not category:
@@ -186,17 +205,27 @@ class ItemViewSet(viewsets.ModelViewSet):
                     'item_code': item_code or '',
                     'desc': desc or '',
                     'vat_rate': vat_rate or 16.0,
-                    'packed': packed or 1,
-                    'subpacked': subpacked or 1,
                     'slow_moving_period': slow_moving_period or 90,
                 }
 
                 item, created = Item.objects.update_or_create(
                     name=name,
                     category=category,
-                    units_of_measure=unit or '',
+                    units_of_measure=unit or 'units',
                     defaults=defaults,
                 )
+
+                # A pack of 1 is the base unit, which needs no conversion row.
+                if pack_name and units_per_pack and int(units_per_pack) > 1:
+                    ItemUnit.objects.update_or_create(
+                        item=item,
+                        name=str(pack_name),
+                        defaults={
+                            'factor_to_base': int(units_per_pack),
+                            'is_purchase_default': True,
+                        },
+                    )
+
                 if sale_price is not None:
                     stock_service.set_sale_price(item, sale_price, created_by=_current_user(request))
 
@@ -732,9 +761,9 @@ def download_requisition_pdf(request, requisition_id):
 
     total_cost = 0
     for line in requisition_items:
-        unit_cost = line.unit_cost if line.unit_cost is not None else line.item.current_cost
-        quantity_approved = line.quantity_approved or 0
-        total_cost += unit_cost * quantity_approved
+        # Cost and quantity are both per ordering unit, so this multiplies
+        # like with like whether the line is in boxes or loose units.
+        total_cost += line.effective_unit_cost * (line.quantity_approved or 0)
 
     requester_sig_url = (
         request.build_absolute_uri(requisition.requested_by.signature.url)
@@ -780,12 +809,17 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
         req_item = line.requisition_item
         if req_item is None:
             continue
-        unit_price = req_item.unit_cost if req_item.unit_cost is not None else req_item.item.current_cost
+        unit_price = req_item.effective_unit_cost
         total_price = unit_price * line.quantity_ordered
         total_amount += total_price
         item_details.append({
             'name': req_item.item.name,
             'quantity_ordered': line.quantity_ordered,
+            # The supplier is quoted in the unit we ordered in -- two crates,
+            # not sixty eggs -- which is what this docstring always wanted.
+            'unit_label': line.unit_label,
+            'base_quantity': line.base_quantity_ordered,
+            'base_unit': req_item.item.units_of_measure,
             'unit_price': unit_price,
             'total_price': total_price,
         })
@@ -845,7 +879,7 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
             'lot_number': line.lot_no,
             'item_name': line.item.name,
             'quantity_received': line.quantity,
-            'quantity_unit': line.get_quantity_unit_display(),
+            'quantity_unit': line.item_unit.name if line.item_unit_id else (line.item.units_of_measure or 'units'),
             'base_units': line.base_units,
             'unit_price': line.purchase_price,
             'amount_before_vat': amount_before_vat,
