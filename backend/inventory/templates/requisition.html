@@ -324,8 +324,9 @@
         <th style="width: 12%; text-align: center">Qty Req</th>
         <th style="width: 12%; text-align: center">Qty App</th>
         <th style="width: 14%">Unit</th>
-        <th style="width: 18%; text-align: right">Price / Unit</th>
-        <th style="width: 18%">Preferred Supplier</th>
+        <th style="width: 14%; text-align: right">Price / Unit</th>
+        <th style="width: 14%; text-align: right">Total</th>
+        <th style="width: 16%">Preferred Supplier</th>
       </tr>
     </thead>
     <tbody>
@@ -341,7 +342,8 @@
           {% endif %}
         </td>
         <td style="text-align: right">{{ item.effective_unit_cost|floatformat:2 }}</td>
-        <td>{{ item.preferred_supplier.official_name }}</td>
+        <td style="text-align: right">{{ item.approved_line_cost|floatformat:2 }}</td>
+        <td>{{ item.preferred_supplier.official_name|default:"-" }}</td>
       </tr>
       {% endfor %}
     </tbody>

@@ -12,10 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Column, Pager, Paging, Scrolling } from "devextreme-react/data-grid";
 import { BiEdit } from 'react-icons/bi';
 import { addSpecimenToStore, getSpecimens } from '@/redux/features/laboratory';
-import { getItems } from '@/redux/features/inventory';
 import EditSpecimenModal from './modals/Specimens/EditSpecimens';
-import SpecimenConsumablesField from './modals/Specimens/SpecimenConsumablesField';
-import { saveSpecimenConsumables } from './modals/Specimens/saveSpecimenConsumables';
 import { createSpecimen } from '@/redux/service/laboratory';
 
 const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
@@ -47,13 +44,7 @@ const Specimens = () => {
   const [showInfo, setShowInfo] = useState(true);
   const [showNavButtons, setShowNavButtons] = useState(true);
   const { specimens } = useSelector((store) => store.laboratory);
-  const { item } = useSelector((store) => store.inventory);
   const [selectedRowData, setSelectedRowData] = useState({})
-  const [consumableRows, setConsumableRows] = useState([])
-
-  const consumableOptions = (item ?? [])
-    .filter((inventoryItem) => inventoryItem.category === "LabConsumable")
-    .map((inventoryItem) => ({ value: inventoryItem.id, label: inventoryItem.name }));
 
   const initialValues = {
     name: "",
@@ -75,23 +66,9 @@ const Specimens = () => {
       const response = await createSpecimen(payload, auth)
       dispatch(addSpecimenToStore(response))
 
-      // The links need the new specimen's id, so they can only go up once it
-      // exists. The specimen is already saved at this point -- a consumable
-      // that fails is reported without discarding it.
-      const failures = await saveSpecimenConsumables({
-        specimenId: response.id,
-        rows: consumableRows,
-        auth,
-      })
-
       setLoading(false)
       helpers.resetForm();
-      setConsumableRows([])
-      if (failures.length) {
-        toast.warning(`Specimen created, but some consumables were not linked: ${failures.join(', ')}`)
-      } else {
-        toast.success('Specimen created succesfully')
-      }
+      toast.success('Specimen created succesfully')
     } catch (error) {
       setLoading(false)
       toast.error('Error Creating Specimen')
@@ -101,7 +78,6 @@ const Specimens = () => {
 
   useEffect(() => {
     dispatch(getSpecimens(auth))
-    dispatch(getItems(auth))
   }, [])
 
   const onMenuClick = async (menu, data) => {
@@ -162,13 +138,6 @@ const Specimens = () => {
                 name="max_archive_duration"
                 component="div"
                 className="text-warning text-xs"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <SpecimenConsumablesField
-                options={consumableOptions}
-                rows={consumableRows}
-                setRows={setConsumableRows}
               />
             </Grid>
             <Grid item md={3} xs={12} sx={{ marginLeft: 'auto' }}>
@@ -251,7 +220,6 @@ const Specimens = () => {
           open={editOpen}
           setOpen={setEditOpen}
           selectedRowData={selectedRowData}
-          consumableOptions={consumableOptions}
         />
       </div>
     </div>

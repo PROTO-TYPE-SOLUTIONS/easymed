@@ -71,8 +71,10 @@ does not exist, and you cannot order an item that was never created.
 | --- | --- | --- |
 | Item Name | What staff will search for | `Examination Gloves` |
 | Category | What kind of thing it is — this decides whether it holds stock | `Lab Consumable` |
+| Category (Resale / Internal) | Whether it is sold to the patient or used up on their behalf | `Internal (Consumable)` |
 | Base Unit | The smallest unit you issue | `pairs` |
 | Departments | Who uses it. Tag `General` to share with everyone | `Lab`, `Radiology` |
+| Consumables (accompaniments) | What gets used up alongside this item every time it is sold | *(empty for gloves)* |
 | Description | Free text | `Powder-free nitrile` |
 
 Then, on the item's row menu, **Pack Sizes** — add the containers you buy in:
@@ -105,6 +107,49 @@ again immediately.
 > which means nothing. The system rejects it and explains why. Name the base
 > unit for what it actually counts — `tests`, `ml`, `tablets` — and keep the
 > container name for the pack.
+
+### Item codes group an item's stock
+
+The item code is generated once, when the item is created, and never changes.
+Every receipt afterwards attaches to the **item**, not to a new record — so
+stock received in January and stock received in July sit under the same code,
+in different lots, and any report that groups by item code adds them up
+correctly. There is nothing to do to make this happen.
+
+Because the code is what does the grouping, two different items may not share
+one: the API rejects a code already worn by another item, naming which.
+
+### Consumables (accompaniments)
+
+Some items cannot be handed over on their own. Tetracycline **injection** needs
+a syringe and a swab; a urea test needs a syringe, a swab and a sample
+container. Tetracycline **capsules** and Panadol tablets need nothing.
+
+Declare that on the item, in **Consumables (accompaniments)**:
+
+| Item | Consumable | Qty per use | Required |
+| --- | --- | --- | --- |
+| Tetracycline 100mg Injection | Syringe 5ml | 1 | yes |
+| Tetracycline 100mg Injection | Alcohol Swab | 1 | yes |
+| Tetracycline 250mg Capsules | *(none)* | | |
+
+Only items whose category is `Internal (Consumable)` can be picked here — a
+resale item is something the patient buys, not something used up on their
+behalf.
+
+**What this changes:**
+
+- **Billing refuses the line** when a required accompaniment is out of stock at
+  the department the item is dispensed from. The message names what is missing.
+  The item stays unbillable until the consumable is received inwards.
+- **Sample collection** and **pharmacy dispensing** list what will be needed,
+  with current stock, before anyone commits.
+- **Stock leaves once**, when the item is billed — not again at collection.
+- An accompaniment can be marked **optional**, in which case a shortfall warns
+  rather than blocks.
+
+An empty list is a real answer: it is how the system tells "needs nothing" apart
+from "needs something we do not have".
 
 ---
 
@@ -312,6 +357,9 @@ stock or accounts.
 
 | Blocked | Why |
 | --- | --- |
+| Receiving stock without inventory rights | Stock coming inwards mints inventory as far as the ledger is concerned — see below |
+| Billing an item whose required consumables are out of stock | An injection with no syringe cannot be handed over |
+| Giving two items the same item code | The code is what groups an item's stock across months |
 | Receiving a service item into stock | A Lab Test is billed, not held |
 | Requisitioning a service item | Caught here rather than after the paperwork exists |
 | Naming a pack the same as the base unit | "1 Kit = 500 kits" is meaningless |
@@ -324,12 +372,34 @@ stock or accounts.
 
 ---
 
+## Who may update inventory inwards
+
+Receiving goods, entering opening stock, transferring in, adjusting a balance
+and posting a stock take are held to a tighter rule than the rest of the
+module. Any one of these three qualifies:
+
+| Route | Scope | Set where |
+| --- | --- | --- |
+| Systems administrator (or superuser) | Everywhere | The user's role |
+| Departmental head | **Only their own department** | `Department.head` |
+| Granted by hand | Everywhere | `CustomUser.can_manage_inventory` |
+
+Anyone else gets a 403 explaining the three routes. **Reading** stock stays open
+to every signed-in user — a nurse must be able to see whether there are
+syringes without being able to invent some.
+
+A departmental head is deliberately scoped: the head of Pharmacy may receive
+into Pharmacy and nowhere else.
+
+---
+
 ## Where each screen lives
 
 | Task | Where |
 | --- | --- |
 | See stock on hand, value, short expiries | **Inventory** |
 | Create or edit an item | **Inventory → Items** |
+| Set an item's consumables | **Inventory → Items →** add/edit **→ Consumables (accompaniments)** |
 | Add pack sizes | **Inventory → Items →** row menu **→ Pack Sizes** |
 | Raise a requisition | **Inventory → Create Requisition** |
 | Department approval | **Inventory → Requisitions** |

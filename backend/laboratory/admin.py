@@ -11,7 +11,6 @@ from .models import (
     PatientSample,
     ReferenceValue,
     LabTestInterpretation,
-    SpecimenConsumable,
     TestPanelReagent,
     ReagentConsumptionLog
 )
@@ -57,13 +56,6 @@ class TestPanelReagentAdmin(admin.ModelAdmin):
 # Reagent stock levels are not a table any more. They are derived from the
 # stock ledger, so browse them under Inventory > Stock balances (filtered to
 # Lab Reagent) instead of a counter that could drift.
-
-
-@admin.register(SpecimenConsumable)
-class SpecimenConsumableAdmin(admin.ModelAdmin):
-    list_display = ['specimen', 'item', 'quantity_per_collection']
-    list_filter = ['specimen']
-    search_fields = ['specimen__name', 'item__name']
 
 
 @admin.register(ReagentConsumptionLog)

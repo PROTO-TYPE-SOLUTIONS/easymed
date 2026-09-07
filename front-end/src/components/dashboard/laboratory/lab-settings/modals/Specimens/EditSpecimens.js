@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import * as Yup from "yup";
@@ -7,52 +7,17 @@ import { Grid } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { toast } from 'react-toastify'
 import { useAuth } from '@/assets/hooks/use-auth';
-import { fetchSpecimenConsumables, updateSpecimen } from "@/redux/service/laboratory";
+import { updateSpecimen } from "@/redux/service/laboratory";
 import { updateSpecimenToStore } from "@/redux/features/laboratory";
-import SpecimenConsumablesField from "./SpecimenConsumablesField";
-import {
-  consumableErrorText,
-  saveSpecimenConsumables,
-} from "./saveSpecimenConsumables";
 
-const EditSpecimenModal = ({ open, setOpen, selectedRowData, consumableOptions = [] }) => {
+const EditSpecimenModal = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
-  // What the server currently holds, so saving can work out what changed.
-  const [originalRows, setOriginalRows] = useState([]);
-  const [consumableRows, setConsumableRows] = useState([]);
-
-  const specimenId = selectedRowData?.id;
 
   const handleClose = () => {
     setOpen(false);
   };
-
-  const loadConsumables = useCallback(async () => {
-    if (!specimenId) return;
-    try {
-      const data = await fetchSpecimenConsumables(specimenId, auth);
-      const links = Array.isArray(data) ? data : data?.results ?? [];
-      const rows = links.map((link) => ({
-        id: link.id,
-        item: link.item,
-        item_name: link.item_name,
-        quantity_per_collection: link.quantity_per_collection,
-        available_quantity: link.available_quantity,
-      }));
-      setOriginalRows(rows);
-      setConsumableRows(rows);
-    } catch (err) {
-      toast.error(consumableErrorText(err, "Could not load consumables for this specimen"));
-    }
-  }, [specimenId, auth]);
-
-  useEffect(() => {
-    if (open && auth) {
-      loadConsumables();
-    }
-  }, [open, specimenId]);
 
   const initialValues = {
     name: selectedRowData?.name || "",
@@ -75,19 +40,7 @@ const EditSpecimenModal = ({ open, setOpen, selectedRowData, consumableOptions =
       const response = await updateSpecimen(parseInt(selectedRowData?.id), formData, auth)
       dispatch(updateSpecimenToStore(response))
 
-      const failures = await saveSpecimenConsumables({
-        specimenId: selectedRowData?.id,
-        rows: consumableRows,
-        originalRows,
-        auth,
-      })
-
       setLoading(false);
-      if (failures.length) {
-        toast.warning(`Specimen updated, but some consumables were not saved: ${failures.join(", ")}`);
-        loadConsumables();
-        return;
-      }
       toast.success("Specimen Updated Successfully!");
       handleClose();
     } catch (err) {
@@ -145,12 +98,12 @@ const EditSpecimenModal = ({ open, setOpen, selectedRowData, consumableOptions =
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <SpecimenConsumablesField
-                    specimenName={selectedRowData?.name}
-                    options={consumableOptions}
-                    rows={consumableRows}
-                    setRows={setConsumableRows}
-                  />
+                  <p className="text-sm text-gray">
+                    Consumables are configured on the item itself &mdash;
+                    Inventory &gt; Items &gt; edit &gt; Consumables
+                    (accompaniments) &mdash; so a lab test and an injectable
+                    drug declare what they need in one place.
+                  </p>
                 </Grid>
                 <Grid item md={3} xs={12} sx={{ marginLeft: 'auto' }}>
                   <div className="flex justify-end gap-2 h-full">

@@ -12,6 +12,7 @@ from .models import (
     IncomingItem,
     InsuranceItemSalePrice,
     Item,
+    ItemConsumable,
     ItemDepartment,
     ItemPrice,
     ItemUnit,
@@ -37,6 +38,7 @@ from .models import (
     UNIT_NAME_COLLISION_MESSAGE,
     unit_name_collides,
 )
+from .services import consumables as consumables_service
 from .services import stock as stock_service
 from .utils import generate_unique_item_code
 from .validators import (
@@ -132,6 +134,48 @@ class ItemUnitSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class ItemConsumableSerializer(serializers.ModelSerializer):
+    """One accompaniment line: this item needs N of that consumable."""
+    consumable_name = serializers.CharField(source='consumable.name', read_only=True)
+    consumable_code = serializers.CharField(source='consumable.item_code', read_only=True)
+    consumable_unit = serializers.CharField(source='consumable.units_of_measure', read_only=True)
+    item_name = serializers.CharField(source='item.name', read_only=True)
+
+    class Meta:
+        model = ItemConsumable
+        fields = ['id', 'item', 'item_name', 'consumable', 'consumable_name', 'consumable_code',
+                  'consumable_unit', 'quantity_per_use', 'is_required', 'date_created']
+        read_only_fields = ['id', 'date_created']
+
+    def validate(self, attrs):
+        item = attrs.get('item') or getattr(self.instance, 'item', None)
+        consumable = attrs.get('consumable') or getattr(self.instance, 'consumable', None)
+        if item and consumable and item.id == consumable.id:
+            raise serializers.ValidationError(
+                {'consumable': "An item cannot be its own accompaniment."})
+        if consumable and not consumable.is_stock_tracked:
+            raise serializers.ValidationError(
+                {'consumable': f"{consumable.name} is a service and holds no stock, "
+                               f"so it cannot be an accompaniment."})
+        return attrs
+
+
+class ConsumableRequirementSerializer(serializers.Serializer):
+    """
+    Read-only view of one accompaniment against live stock -- what the sample
+    collection and dispensing screens show before anyone commits to a sale.
+    """
+    consumable = serializers.IntegerField(source='consumable.id')
+    consumable_name = serializers.CharField(source='consumable.name')
+    consumable_code = serializers.CharField(source='consumable.item_code')
+    units_of_measure = serializers.CharField(source='consumable.units_of_measure')
+    quantity_per_use = serializers.IntegerField()
+    required_quantity = serializers.IntegerField()
+    available_quantity = serializers.IntegerField()
+    shortfall = serializers.IntegerField()
+    is_required = serializers.BooleanField()
+
+
 class ItemSerializer(serializers.ModelSerializer):
     unit_conversions = ItemUnitSerializer(many=True, read_only=True)
     item_code = serializers.CharField(max_length=255, required=False)
@@ -145,6 +189,14 @@ class ItemSerializer(serializers.ModelSerializer):
         queryset=Department.objects.all(), many=True, required=False,
         help_text="Departments that use this item. Tag 'General' to share it with all")
     department_names = serializers.SerializerMethodField(read_only=True)
+    # Accompaniments are declared with the item, so an injectable drug can
+    # never be catalogued without saying what it must be given with.
+    consumables = ItemConsumableSerializer(
+        source='consumable_links', many=True, read_only=True)
+    consumable_items = serializers.ListField(
+        child=serializers.DictField(), write_only=True, required=False,
+        help_text="Accompaniments: [{consumable: <item id>, quantity_per_use: 1, "
+                  "is_required: true}]. Send [] to clear them.")
 
     class Meta:
         model = Item
@@ -180,6 +232,7 @@ class ItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         sale_price = validated_data.pop('sale_price', None)
         departments = validated_data.pop('departments', None)
+        consumable_items = validated_data.pop('consumable_items', None)
         if not validated_data.get('item_code'):
             validated_data['item_code'] = generate_unique_item_code()
 
@@ -187,19 +240,103 @@ class ItemSerializer(serializers.ModelSerializer):
             item = super().create(validated_data)
             if departments is not None:
                 self._set_departments(item, departments)
+            if consumable_items is not None:
+                self._set_consumables(item, consumable_items)
             self._apply_price(item, sale_price)
         return item
 
     def update(self, instance, validated_data):
         sale_price = validated_data.pop('sale_price', None)
         departments = validated_data.pop('departments', None)
+        consumable_items = validated_data.pop('consumable_items', None)
 
         with transaction.atomic():
             item = super().update(instance, validated_data)
             if departments is not None:
                 self._set_departments(item, departments)
+            if consumable_items is not None:
+                self._set_consumables(item, consumable_items)
             self._apply_price(item, sale_price)
         return item
+
+    def validate_item_code(self, value):
+        '''
+        The code is what groups an item's stock across every receipt and every
+        month, so two different items wearing the same one silently merges
+        them in any report that groups by it.
+        '''
+        code = (value or '').strip()
+        if not code:
+            return code
+        clash = Item.objects.filter(item_code__iexact=code)
+        if self.instance:
+            clash = clash.exclude(pk=self.instance.pk)
+        other = clash.first()
+        if other:
+            raise serializers.ValidationError(
+                f"Item code '{code}' already belongs to {other.name}. "
+                f"Codes group an item's stock, so they cannot be shared.")
+        return code
+
+    def validate_consumable_items(self, rows):
+        '''
+        Normalise the posted accompaniments to {consumable_id: defaults}.
+
+        Everything checkable without the item's own id is checked here, so a
+        bad payload is a 400 off is_valid() rather than an exception raised
+        halfway through the save.
+        '''
+        wanted = {}
+        for row in rows:
+            consumable_id = row.get('consumable') or row.get('consumable_id') or row.get('id')
+            if consumable_id in (None, ''):
+                raise serializers.ValidationError(
+                    "Each accompaniment needs a 'consumable' item id.")
+            try:
+                consumable_id = int(consumable_id)
+                quantity = int(row.get('quantity_per_use') or 1)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError(
+                    "'consumable' and 'quantity_per_use' must be whole numbers.")
+            if quantity < 1:
+                raise serializers.ValidationError(
+                    "An accompaniment must be used at least once.")
+            wanted[consumable_id] = {
+                'quantity_per_use': quantity,
+                'is_required': bool(row.get('is_required', True)),
+            }
+
+        known = Item.objects.in_bulk(list(wanted))
+        missing = set(wanted) - set(known)
+        if missing:
+            raise serializers.ValidationError(f"Unknown item id(s): {sorted(missing)}")
+        for consumable in known.values():
+            if not consumable.is_stock_tracked:
+                raise serializers.ValidationError(
+                    f"{consumable.name} is a service and holds no stock, so it "
+                    f"cannot be an accompaniment.")
+        return wanted
+
+    def validate(self, attrs):
+        # Self-reference is only checkable once the item's own id is known,
+        # which on an edit it is. On a create the id does not exist yet, and
+        # nothing can name an item that has not been saved.
+        wanted = attrs.get('consumable_items')
+        if wanted and self.instance and self.instance.id in wanted:
+            raise serializers.ValidationError(
+                {'consumable_items': "An item cannot be its own accompaniment."})
+        return attrs
+
+    def _set_consumables(self, item, wanted):
+        '''
+        Replace the item's accompaniments with exactly what was posted, so an
+        edit that drops the swab actually drops it.
+        '''
+        wanted.pop(item.id, None)
+        item.consumable_links.exclude(consumable_id__in=list(wanted)).delete()
+        for consumable_id, defaults in wanted.items():
+            ItemConsumable.objects.update_or_create(
+                item=item, consumable_id=consumable_id, defaults=defaults)
 
     @staticmethod
     def _set_departments(item, departments):
@@ -573,6 +710,14 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
 
             purchase_order = PurchaseOrder.objects.create(**validated_data)
             purchase_order.requisition = requisition_items.first().requisition
+            if purchase_order.supplier is None:
+                # An order raised straight off a requisition rarely carries the
+                # supplier in the payload, but the lines already name one -- and
+                # a purchase order with no supplier prints an empty address.
+                supplier = next(
+                    (line.preferred_supplier for line in requisition_items
+                     if line.preferred_supplier_id), None)
+                purchase_order.supplier = supplier
             purchase_order.save()
 
             for req_item in requisition_items:

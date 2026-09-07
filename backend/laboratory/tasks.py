@@ -6,12 +6,11 @@ from django.db import transaction
 
 from inventory.models import StockMovement
 from inventory.services import stock as stock_service
-from inventory.services.stock import InsufficientStock, StockError
+from inventory.services.stock import StockError
 from laboratory.models import (
     LabTestRequestPanel,
     PatientSample,
     ReagentConsumptionLog,
-    SpecimenConsumable,
     TestPanelReagent,
 )
 from laboratory.utils import lab_department, reagent_threshold
@@ -142,41 +141,16 @@ def deduct_test_kit(lab_test_panel_id):
 @shared_task
 def deduct_specimen_consumables(patient_sample_id):
     """
-    Consume the tubes, swabs and slides used up when a sample is collected.
+    Kept as a no-op so an in-flight queued job does not fail on deploy.
 
-    Idempotent per (sample, consumable), so re-saving a collected sample does
-    not consume a second tube.
+    Accompaniments used to be deducted here, per specimen. They are now
+    declared on the item (inventory.ItemConsumable) and leave stock once, when
+    the test is billed, through billing.services.post_stock_for_invoice_item.
+    Deducting again on collection would take a second syringe for the same
+    draw. The collection screen still SHOWS what is needed -- see
+    laboratory.serializers.sample_consumable_rows.
     """
-    sample = PatientSample.objects.select_related('specimen').filter(id=patient_sample_id).first()
-    if sample is None or sample.specimen_id is None:
-        return 0
-
-    links = SpecimenConsumable.objects.filter(
-        specimen=sample.specimen).select_related('item')
-    if not links.exists():
-        return 0
-
-    department = lab_department()
-    consumed = 0
-
-    with transaction.atomic():
-        for link in links:
-            try:
-                movements = stock_service.issue(
-                    item=link.item,
-                    department=department,
-                    quantity=link.quantity_per_collection,
-                    movement_type=StockMovement.Type.CONSUMPTION,
-                    reason=f"Collected {sample.specimen.name} sample",
-                    source_type=StockMovement.Source.SAMPLE_COLLECTION,
-                    source_id=sample.id,
-                    allow_partial=True,
-                    idempotency_key=f"sample:{sample.id}:consumable:{link.item_id}",
-                )
-                consumed += sum(-m.quantity for m in movements)
-            except InsufficientStock as exc:
-                logger.warning("Sample %s: %s", sample.id, exc)
-            except StockError as exc:
-                logger.error("Sample %s: could not consume %s: %s", sample.id, link.item.name, exc)
-
-    return consumed
+    logger.debug(
+        "deduct_specimen_consumables(%s) is a no-op; accompaniments are consumed at billing",
+        patient_sample_id)
+    return 0

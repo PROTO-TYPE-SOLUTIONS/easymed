@@ -37,7 +37,6 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
-    SpecimenConsumable,
     TestPanelReagent,
     ReagentConsumptionLog,
     ReferenceValue,
@@ -65,7 +64,6 @@ from .serializers import (
     ProcessTestRequestSerializer,
     PatientSampleSerializer,
     SpecimenSerializer,
-    SpecimenConsumableSerializer,
     TestPanelReagentSerializer,
     ReagentStockSerializer,
     ReagentConsumptionLogSerializer,
@@ -147,19 +145,6 @@ class TestPanelReagentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsReceptionistUser,)
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['test_panel', 'reagent_item']
-
-
-class SpecimenConsumableViewSet(viewsets.ModelViewSet):
-    """
-    The consumables a specimen burns when it is collected -- syringes, tubes,
-    needles. Deducted once per collection, not once per panel, because one
-    blood draw serves every blood panel on the request.
-    """
-    queryset = SpecimenConsumable.objects.select_related('specimen', 'item').all()
-    serializer_class = SpecimenConsumableSerializer
-    permission_classes = (IsDoctorUser | IsNurseUser | IsLabTechUser | IsReceptionistUser,)
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['specimen', 'item']
 
 
 class ReferenceValueViewSet(viewsets.ModelViewSet):

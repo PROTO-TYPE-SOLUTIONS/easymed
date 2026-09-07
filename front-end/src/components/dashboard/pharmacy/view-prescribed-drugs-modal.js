@@ -22,6 +22,73 @@ const DataGrid = dynamic(() => import("devextreme-react/data-grid"), {
   ssr: false,
 });
 
+/**
+ * What the selected drugs need handed over with them.
+ *
+ * An injectable is not dispensable on its own -- billing refuses the line when
+ * the syringe is not on the shelf -- so the pharmacist has to see the
+ * shortfall here, before selecting Dispense, not as a failure afterwards.
+ * Requirements are summed across the selection, since two injections drawn at
+ * once need two syringes.
+ */
+const ConsumablesPanel = ({ drugs }) => {
+  const totals = new Map();
+
+  drugs.forEach((drug) => {
+    (drug.consumables ?? []).forEach((row) => {
+      const existing = totals.get(row.consumable);
+      if (existing) {
+        existing.required_quantity += row.required_quantity;
+        existing.is_required = existing.is_required || row.is_required;
+      } else {
+        totals.set(row.consumable, { ...row });
+      }
+    });
+  });
+
+  if (drugs.length === 0) return null;
+
+  const rows = [...totals.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+  if (rows.length === 0) {
+    return (
+      <div className="border border-gray rounded-md p-3 mb-3 text-sm">
+        <span className="font-semibold">Consumables needed: </span>
+        <span>None &mdash; nothing is dispensed alongside the selected drugs.</span>
+      </div>
+    );
+  }
+
+  const blocked = rows.filter((row) => row.is_required && row.required_quantity > row.available_quantity);
+
+  return (
+    <div className="border border-gray rounded-md p-3 mb-3 text-sm">
+      <p className="font-semibold mb-1">Consumables needed (accompaniments)</p>
+      <ul className="list-disc pl-5">
+        {rows.map((row) => {
+          const short = row.required_quantity > row.available_quantity;
+          return (
+            <li
+              key={row.consumable}
+              className={short && row.is_required ? "text-warning font-semibold" : ""}
+            >
+              {`${row.required_quantity} ${row.units_of_measure} of ${row.name}`}
+              {!row.is_required && " (optional)"}
+              {short && ` — only ${row.available_quantity} in stock`}
+            </li>
+          );
+        })}
+      </ul>
+      {blocked.length > 0 && (
+        <p className="text-warning mt-2">
+          These cannot be billed until the missing consumables are received into
+          inventory.
+        </p>
+      )}
+    </div>
+  );
+};
+
 const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
   const [areBilled, setAreBilled] = useState(false)
@@ -152,6 +219,7 @@ const ViewPrescribedDrugsModal = ({ setOpen, open, selectedRowData }) => {
         </Grid>
 
       </Grid>
+        <ConsumablesPanel drugs={selectedItems?.selectedRowsData ?? []} />
         <DataGrid
         dataSource={prescriptionsPrescribed}
         allowColumnReordering={true}

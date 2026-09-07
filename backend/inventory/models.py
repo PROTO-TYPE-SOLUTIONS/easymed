@@ -64,6 +64,11 @@ class Department(AbstractBaseModel):
         default=True,
         help_text="Whether stock can be held at this department"
     )
+    head = models.ForeignKey(
+        'customuser.CustomUser', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='departments_headed',
+        help_text="Departmental head. May receive stock inwards for this department"
+    )
 
     @property
     def is_shared(self):
@@ -137,9 +142,11 @@ class Item(AbstractBaseModel):
         'Specialized Appointment',
     })
 
+    # 'Internal' is the consumable side of the catalogue: syringes, swabs,
+    # sample containers -- things the hospital uses up rather than sells.
     CATEGORY_ONE_CHOICES = [
         ('Resale', 'Resale'),
-        ('Internal', 'Internal'),
+        ('Internal', 'Internal (Consumable)'),
     ]
 
     item_code = models.CharField(max_length=255)
@@ -225,6 +232,17 @@ class Item(AbstractBaseModel):
         return total_value / total_qty
 
     @property
+    def last_purchase_cost(self):
+        '''
+        What we last paid for one base unit, from the most recent goods
+        receipt. Returns 0 when the item has never been bought.
+        '''
+        line = IncomingItem.objects.filter(
+            item=self, purchase_price__isnull=False
+        ).order_by('-date_created').first()
+        return line.unit_cost if line else 0
+
+    @property
     def quantity_at_hand(self):
         '''Total base units on hand across every lot and every location.'''
         return StockBalance.objects.filter(item=self).aggregate(
@@ -248,6 +266,23 @@ class Item(AbstractBaseModel):
             for link in links
         )
 
+    @property
+    def is_consumable(self):
+        '''An item held for internal use rather than resale.'''
+        return self.category_one == 'Internal'
+
+    def consumable_requirements(self, quantity=1):
+        '''
+        What gets used up alongside `quantity` base units of this item.
+
+        Returns the links, not just the items, because the caller needs both
+        how many are needed and whether a shortfall should block.
+        '''
+        return [
+            (link, link.quantity_per_use * quantity)
+            for link in self.consumable_links.select_related('consumable')
+        ]
+
     # Backwards-compatible aliases used by the serializers / front-end.
     @property
     def buying_price(self):
@@ -259,6 +294,50 @@ class Item(AbstractBaseModel):
 
     def __str__(self):
         return f"{self.id} - {self.name} - {self.category}"
+
+
+class ItemConsumable(AbstractBaseModel):
+    '''
+    An accompaniment: what is used up whenever the parent item is sold,
+    dispensed or run.
+
+    Tetracycline injection needs a syringe and a swab. A urea test needs a
+    syringe, a swab and a sample container. Panadol tablets need nothing, so
+    they simply have no rows here -- absence is the normal case, which is why
+    this is a table rather than a column.
+    '''
+    item = models.ForeignKey(
+        Item, on_delete=models.CASCADE, related_name='consumable_links',
+        help_text="The sellable or billable item")
+    consumable = models.ForeignKey(
+        Item, on_delete=models.PROTECT, related_name='consumed_by_links',
+        limit_choices_to={'category_one': 'Internal'},
+        help_text="The accompaniment used up alongside it")
+    quantity_per_use = models.PositiveIntegerField(
+        default=1,
+        help_text="Base units of the consumable used per ONE base unit of the parent item")
+    is_required = models.BooleanField(
+        default=True,
+        help_text="Required accompaniments block billing when out of stock; optional ones only warn")
+
+    class Meta:
+        unique_together = ('item', 'consumable')
+        ordering = ['item', 'consumable']
+        verbose_name = "Item Consumable"
+        verbose_name_plural = "Item Consumables"
+
+    def clean(self):
+        if self.item_id and self.consumable_id and self.item_id == self.consumable_id:
+            raise ValidationError({'consumable': "An item cannot be its own accompaniment."})
+        if self.consumable_id and not self.consumable.is_stock_tracked:
+            raise ValidationError(
+                {'consumable': f"{self.consumable.name} is a service and holds no stock, "
+                               f"so it cannot be an accompaniment."})
+        if self.quantity_per_use is not None and self.quantity_per_use < 1:
+            raise ValidationError({'quantity_per_use': "An accompaniment must be used at least once."})
+
+    def __str__(self):
+        return f"{self.item.name} needs {self.quantity_per_use} x {self.consumable.name}"
 
 
 def unit_name_forms(word):
@@ -607,13 +686,21 @@ class RequisitionItem(AbstractBaseModel):
         '''
         Cost of ONE of whatever is being ordered.
 
-        An agreed price on the line is already per pack. Falling back to stock
-        cost means scaling up, because the ledger's weighted average is per
-        base unit: a box of twelve costs twelve times what one costs.
+        An agreed price on the line is already per pack. Both fallbacks are
+        per base unit, so they scale up: a box of twelve costs twelve times
+        what one costs. Weighted-average stock cost comes first; an item that
+        is out of stock -- or has never been stocked -- still prices off what
+        we last paid for it, rather than printing a requisition worth zero.
         '''
         if self.unit_cost is not None:
             return self.unit_cost
-        return (self.item.current_cost or 0) * self.conversion_factor
+        base_cost = self.item.current_cost or self.item.last_purchase_cost or 0
+        return base_cost * self.conversion_factor
+
+    @property
+    def approved_line_cost(self):
+        '''What the approved quantity costs. Both sides are per ordering unit.'''
+        return self.effective_unit_cost * (self.quantity_approved or 0)
 
     @property
     def base_quantity_requested(self):

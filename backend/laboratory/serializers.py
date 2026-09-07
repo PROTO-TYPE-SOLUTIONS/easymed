@@ -1,5 +1,6 @@
 import pdb
 from random import randrange, choices
+from inventory.models import ItemConsumable
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
@@ -16,7 +17,6 @@ from .models import (
     ProcessTestRequest,
     PatientSample,
     Specimen,
-    SpecimenConsumable,
     TestPanelReagent,
     LabTestInterpretation,
     ReferenceValue,
@@ -262,13 +262,14 @@ class PatientSampleSerializer(serializers.ModelSerializer):
     def get_consumables(self, obj):
         """
         What the phlebotomist needs in hand to take this sample, and whether
-        the lab actually has it. Deducted on collection by
-        laboratory.tasks.deduct_specimen_consumables.
+        the lab actually has it.
+
+        Read off the accompaniments of the tests on this sample -- the same
+        rows billing checks before it will let the test be sold -- so the
+        collection screen and the till can never disagree about what is
+        needed. Stock leaves once, when the test is billed, not here.
         """
-        context = dict(self.context)
-        context.setdefault('availability_cache', self._availability_cache)
-        return SpecimenConsumableSerializer(
-            obj.specimen.consumables.all(), many=True, context=context).data
+        return sample_consumable_rows(obj, self._availability_cache)
 
     def get_is_archived(self, obj):
         return hasattr(obj, 'archive_record')
@@ -327,42 +328,47 @@ class TestPanelReagentSerializer(serializers.ModelSerializer):
         return value
 
 
-class SpecimenConsumableSerializer(serializers.ModelSerializer):
-    specimen_name = serializers.ReadOnlyField(source='specimen.name')
-    item_name = serializers.ReadOnlyField(source='item.name')
-    item_code = serializers.ReadOnlyField(source='item.item_code')
-    available_quantity = serializers.SerializerMethodField()
+def sample_consumable_rows(sample, availability_cache=None):
+    """
+    The accompaniments a sample's tests need, one row per consumable.
 
-    class Meta:
-        model = SpecimenConsumable
-        fields = [
-            'id',
-            'specimen',
-            'specimen_name',
-            'item',
-            'item_name',
-            'item_code',
-            'quantity_per_collection',
-            'available_quantity',
-        ]
+    A sample carries several panels and they often share a syringe, so the
+    requirement is summed per consumable rather than listed per test -- the
+    collector wants one line saying "3 swabs", not three saying "1 swab".
 
-    def get_available_quantity(self, obj):
-        # Availability costs an aggregate pair per item. Serialising a page of
-        # samples asks for the same handful of consumables over and over, so
-        # reuse the answer when the caller supplies a cache.
-        cache = self.context.get('availability_cache')
-        if cache is None:
-            return _available_quantity(obj.item)
-        if obj.item_id not in cache:
-            cache[obj.item_id] = _available_quantity(obj.item)
-        return cache[obj.item_id]
+    Availability costs an aggregate pair per item, and a page of samples asks
+    about the same handful of consumables over and over, so the caller can
+    pass a cache to look each one up once.
+    """
+    cache = {} if availability_cache is None else availability_cache
+    totals = {}
 
-    def validate_item(self, value):
-        if value.category != 'LabConsumable':
-            raise serializers.ValidationError(
-                f"'{value.name}' is a {value.category} item, not a Lab Consumable."
-            )
-        return value
+    links = ItemConsumable.objects.filter(
+        item__labtestpanel__labtestrequestpanel__patient_sample=sample
+    ).select_related('consumable')
+
+    for link in links:
+        consumable = link.consumable
+        row = totals.setdefault(consumable.id, {
+            # 'id' and 'item' are the keys the existing collection screen
+            # reads; one row per consumable, so the consumable's own id serves.
+            'id': consumable.id,
+            'consumable': consumable.id,
+            'item': consumable.id,
+            'item_name': consumable.name,
+            'item_code': consumable.item_code,
+            'units_of_measure': consumable.units_of_measure,
+            'quantity_per_collection': 0,
+            'is_required': False,
+        })
+        row['quantity_per_collection'] += link.quantity_per_use
+        row['is_required'] = row['is_required'] or link.is_required
+
+        if consumable.id not in cache:
+            cache[consumable.id] = _available_quantity(consumable)
+        row['available_quantity'] = cache[consumable.id]
+
+    return sorted(totals.values(), key=lambda row: row['item_name'])
 
 
 class LabTestInterpretationSerializer(serializers.ModelSerializer):

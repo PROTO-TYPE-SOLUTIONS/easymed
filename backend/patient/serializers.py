@@ -102,10 +102,39 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 class PrescribedDrugSerializer(serializers.ModelSerializer):
     item_name = serializers.ReadOnlyField(source='item.name')
     sale_price = serializers.SerializerMethodField()
+    consumables = serializers.SerializerMethodField()
 
     class Meta:
         model = PrescribedDrug
         fields = '__all__'
+
+    def get_consumables(self, obj):
+        """
+        The accompaniments this drug needs, checked against pharmacy stock.
+
+        An injectable cannot be handed over without its syringe, so the
+        dispensing screen has to show that before the pharmacist commits --
+        billing will refuse the line otherwise. Tablets return [].
+        """
+        from inventory.models import Department
+        from inventory.services import consumables as consumables_service
+
+        pharmacy = Department.objects.filter(
+            name__iexact='Pharmacy', is_stock_location=True).first()
+
+        rows = consumables_service.availability(obj.item, obj.quantity or 1, pharmacy)
+        return [
+            {
+                'consumable': row['consumable'].id,
+                'name': row['consumable'].name,
+                'units_of_measure': row['consumable'].units_of_measure,
+                'required_quantity': row['required_quantity'],
+                'available_quantity': row['available_quantity'],
+                'shortfall': row['shortfall'],
+                'is_required': row['is_required'],
+            }
+            for row in rows
+        ]
 
     def validate(self, attrs):
         """Enforce unique (prescription, item) at the API layer.

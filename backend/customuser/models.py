@@ -74,6 +74,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(
         max_length=20, choices=ROLE_CHOICES, default=BASE_ROLE)
     signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
+    can_manage_inventory = models.BooleanField(
+        default=False,
+        help_text="Granted individually. Lets this user receive stock inwards and adjust "
+                  "balances without being a sysadmin or a departmental head."
+    )
     user_permissions = models.ManyToManyField(
         Permission,
         blank=True,

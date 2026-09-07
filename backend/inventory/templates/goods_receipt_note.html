@@ -274,15 +274,15 @@
       <h3>Document Details</h3>
       <div class="meta-row">
         <span class="meta-label">GRN Number:</span>
-        <span class="meta-value">{{ incoming_items.0.goods_receipt_note.grn_number }}</span>
+        <span class="meta-value">{{ grn_number }}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">LPO Number:</span>
-        <span class="meta-value">{{ incoming_items.0.purchase_order.PO_number }}</span>
+        <span class="meta-value">{{ purchase_order.PO_number|default:"N/A" }}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">Invoice Number:</span>
-        <span class="meta-value">{{ incoming_items.0.supplier_invoice.invoice_no }}</span>
+        <span class="meta-value">{{ supplier_invoice.invoice_no|default:"N/A" }}</span>
       </div>
     </div>
 
@@ -290,7 +290,7 @@
       <h3>Supplier Info</h3>
       <div class="meta-row">
         <span class="meta-label">Name:</span>
-        <span class="meta-value">{{ incoming_items.0.supplier_invoice.supplier.official_name }}</span>
+        <span class="meta-value">{{ supplier.official_name|default:"N/A" }}</span>
       </div>
     </div>
   </div>
@@ -302,7 +302,8 @@
         <th style="width: 15%">LOT Number</th>
         <th style="width: 25%">Item Name</th>
         <th style="width: 10%">Expiry Date</th>
-        <th style="width: 10%; text-align: center">Qty</th>
+        <th style="width: 8%; text-align: center">Qty</th>
+        <th style="width: 12%">Unit</th>
         <th style="width: 10%; text-align: right">Unit Price</th>
         <th style="width: 15%; text-align: right">Total</th>
       </tr>
@@ -315,8 +316,14 @@
         <td>{{ item.item_name }}</td>
         <td>{{ item.expiry_date }}</td>
         <td style="text-align: center">{{ item.quantity_received }}</td>
-        <td style="text-align: right">{{ item.unit_price }}</td>
-        <td style="text-align: right">{{ item.amount_before_vat }}</td>
+        <td>
+          {{ item.quantity_unit }}
+          {% if item.base_units != item.quantity_received %}
+            <br /><small>{{ item.base_units }} in total</small>
+          {% endif %}
+        </td>
+        <td style="text-align: right">{{ item.unit_price|floatformat:2 }}</td>
+        <td style="text-align: right">{{ item.amount_before_vat|floatformat:2 }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -327,15 +334,15 @@
       <tbody>
         <tr>
           <td class="label">Amount Before VAT:</td>
-          <td class="amount">{{ total_price_before_vat }}</td>
+          <td class="amount">{{ total_price_before_vat|floatformat:2 }}</td>
         </tr>
         <tr>
           <td class="label">Total VAT:</td>
-          <td class="amount">{{ total_vat }}</td>
+          <td class="amount">{{ total_vat|floatformat:2 }}</td>
         </tr>
         <tr class="total-row">
           <td class="label">Total Amount:</td>
-          <td class="amount">{{ total_amount_after_vat }}</td>
+          <td class="amount">{{ total_amount_after_vat|floatformat:2 }}</td>
         </tr>
       </tbody>
     </table>

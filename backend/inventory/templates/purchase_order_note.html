@@ -302,8 +302,14 @@
       <h3>Supplier Info</h3>
       <div class="meta-row">
         <span class="meta-label">Name:</span>
-        <span class="meta-value">{{ purchaseorder.supplier.official_name }}</span>
+        <span class="meta-value">{{ supplier.official_name|default:"N/A" }}</span>
       </div>
+      {% if supplier.common_name %}
+      <div class="meta-row">
+        <span class="meta-label">Trading as:</span>
+        <span class="meta-value">{{ supplier.common_name }}</span>
+      </div>
+      {% endif %}
     </div>
   </div>
 

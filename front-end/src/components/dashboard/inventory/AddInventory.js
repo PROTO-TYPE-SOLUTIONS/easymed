@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Formik, Field, Form, ErrorMessage, useFormikContext } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
 import { addInventory } from "@/redux/service/inventory";
@@ -12,6 +12,78 @@ import { toast } from "react-toastify";
 import SeachableSelect from "@/components/select/Searchable";
 import { useAuth } from "@/assets/hooks/use-auth";
 import DayTotalsPerPayMode from "../billing/DayTotalsPerPayMode";
+
+/**
+ * Quantity and Total, tied to whichever item is selected.
+ *
+ * Quantity is entered in the item's BASE unit -- two boxes of twelve gloves is
+ * 24, not 2 -- so the label says which unit that is rather than leaving the
+ * person at the keyboard to guess. Total is what the system will hold once
+ * this entry is saved: what is already on hand plus what is being added, so it
+ * is derived, never typed.
+ */
+const QuantityAndTotal = ({ items = [] }) => {
+  const { values, setFieldValue } = useFormikContext();
+
+  // The item list arrives asynchronously, so this renders before it lands.
+  const selected = items.find((i) => i.id === values.item?.value);
+  const baseUnit = selected?.units_of_measure ?? "base units";
+  const onHand = Number(selected?.quantity_at_hand ?? 0);
+  const added = parseInt(values.quantity_at_hand) || 0;
+  const total = onHand + added;
+
+  // Kept in the payload for the API, but never typed into.
+  useEffect(() => {
+    if (values.total_quantity !== total) {
+      setFieldValue("total_quantity", total, false);
+    }
+  }, [total]);
+
+  return (
+    <>
+      <Grid className='my-2' item md={6} xs={12}>
+        <label htmlFor="quantity_at_hand">
+          Quantity <span className="text-gray-500">(in {baseUnit} — the base unit)</span>
+        </label>
+        <Field
+          className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+          maxWidth="sm"
+          placeholder={`Quantity in ${baseUnit}`}
+          name="quantity_at_hand"
+          type="number"
+          min="1"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Count in the base unit, not in packs. Two boxes of gloves with 12 in
+          each is <strong>24</strong>, not 2.
+        </p>
+        <ErrorMessage
+          name="quantity_at_hand"
+          component="div"
+          className="text-warning text-xs"
+        />
+      </Grid>
+
+      <Grid className='my-2' item md={6} xs={12}>
+        <label htmlFor="total_quantity">Total</label>
+        <input
+          id="total_quantity"
+          name="total_quantity"
+          readOnly
+          disabled
+          value={selected ? total : ""}
+          placeholder="Select an item first"
+          className="block border rounded-md text-sm border-gray bg-gray py-2.5 px-4 w-full cursor-not-allowed"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          {selected
+            ? `${onHand} ${baseUnit} already in the system + ${added} being added.`
+            : "What the system will hold once this entry is saved. Calculated, not entered."}
+        </p>
+      </Grid>
+    </>
+  );
+};
 
 const AddInventory = () => {
 
@@ -42,7 +114,6 @@ const AddInventory = () => {
     sale_price: Yup.string().required("This field is required!"),
     item: Yup.object().required("This field is required!"),
     category_one: Yup.string().required("This field is required"),
-    total_quantity: Yup.string().required("This field is required!"),
     expiry_date: Yup.string().required("This field is required!"),
   });
 
@@ -109,7 +180,7 @@ const AddInventory = () => {
               >
                 <option value="" disabled>Select a category</option>
                 <option value="Resale">Resale</option>
-                <option value="Internal">Internal</option>
+                <option value="Internal">Internal (Consumable)</option>
               </Field>
               <ErrorMessage
                 name="category_one"
@@ -129,21 +200,7 @@ const AddInventory = () => {
             className="text-warning text-xs"
           />
         </Grid>
-            <Grid className='my-2' item md={6} xs={12}>
-            <label htmlFor="quantity">Quantity</label>
-              <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="Quantity"
-                name="quantity_at_hand"
-                type="number"
-              />
-              <ErrorMessage
-                name="quantity_in_stock"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>            
+            <QuantityAndTotal items={item} />            
             <Grid className='my-2' item md={6} xs={12}>
             <label htmlFor="Purchase-Price">Purchase Price</label>
               <Field
@@ -186,20 +243,7 @@ const AddInventory = () => {
                 className="text-warning text-xs"
               />
             </Grid>
-            <Grid className='my-2' item md={6} xs={12}>
-            <label htmlFor="total_quantity">Total</label>
-              <Field
-                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
-                maxWidth="sm"
-                placeholder="total quantity"
-                name="total_quantity"
-              />
-              <ErrorMessage
-                name="total_quantity"
-                component="div"
-                className="text-warning text-xs"
-              />
-            </Grid>
+
             <Grid className='my-2' item md={6} xs={12}>
             <label htmlFor="expiry_date">Expiry Date</label>
               <Field

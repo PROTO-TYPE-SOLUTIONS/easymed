@@ -109,29 +109,6 @@ class Specimen(models.Model):
         return self.name
 
 
-class SpecimenConsumable(models.Model):
-    """
-    Links a specimen type to the consumables (tubes, swabs, slides) used up
-    each time a sample of it is collected.
-    """
-    specimen = models.ForeignKey(Specimen, on_delete=models.CASCADE, related_name='consumables')
-    item = models.ForeignKey(
-        'inventory.Item', on_delete=models.CASCADE,
-        limit_choices_to={'category': 'LabConsumable'},
-        related_name='specimen_consumable_links')
-    quantity_per_collection = models.PositiveIntegerField(
-        default=1,
-        help_text="Units of this consumable deducted each time a sample is collected")
-
-    class Meta:
-        unique_together = ('specimen', 'item')
-        verbose_name = "Specimen Consumable"
-        verbose_name_plural = "Specimen Consumables"
-
-    def __str__(self):
-        return f"{self.specimen.name} uses {self.quantity_per_collection} x {self.item.name}"
-
-
 class TestPanelReagent(models.Model):
     """
     Links test panels to the reagents they consume.

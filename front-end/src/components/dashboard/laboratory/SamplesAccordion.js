@@ -92,7 +92,7 @@ return (
         <div className='px-2 pb-2 text-xs'>
           <span className='font-semibold'>Consumables required: </span>
           {consumables.length === 0 ? (
-            <span>None configured for this specimen</span>
+            <span>None required for these tests</span>
           ) : (
             consumables.map((consumable, index) => {
               const short = consumable.available_quantity < consumable.quantity_per_collection;
@@ -101,7 +101,8 @@ return (
                   {index > 0 && ", "}
                   <span className={short ? "text-warning font-semibold" : ""}>
                     {`${consumable.quantity_per_collection} x ${consumable.item_name}`}
-                    {short && ` (only ${consumable.available_quantity} in stock)`}
+                    {consumable.is_required === false && " (optional)"}
+                    {short && ` — only ${consumable.available_quantity} in stock`}
                   </span>
                 </span>
               );

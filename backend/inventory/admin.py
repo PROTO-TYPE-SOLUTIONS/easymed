@@ -6,6 +6,7 @@ from .models import (
     IncomingItem,
     InsuranceItemSalePrice,
     Item,
+    ItemConsumable,
     ItemDepartment,
     ItemPrice,
     ItemUnit,
@@ -65,6 +66,14 @@ class ItemAdmin(admin.ModelAdmin):
     @admin.display(description='Departments')
     def tagged_departments(self, obj):
         return ', '.join(obj.departments.values_list('name', flat=True)) or '—'
+
+
+@admin.register(ItemConsumable)
+class ItemConsumableAdmin(admin.ModelAdmin):
+    list_display = ('item', 'consumable', 'quantity_per_use', 'is_required')
+    list_filter = ('is_required', 'consumable__category')
+    search_fields = ('item__name', 'item__item_code', 'consumable__name', 'consumable__item_code')
+    autocomplete_fields = ('item', 'consumable')
 
 
 @admin.register(ItemDepartment)
