@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
@@ -19,6 +20,7 @@ from weasyprint import HTML
 from company.models import Company
 from customuser.models import CustomUser
 
+from .permissions import CanManageInventory
 from .filters import (
     IncomingItemFilter,
     InventoryFilterSearch,
@@ -34,6 +36,7 @@ from .models import (
     IncomingItem,
     InsuranceItemSalePrice,
     Item,
+    ItemConsumable,
     ItemPrice,
     ItemUnit,
     PurchaseOrder,
@@ -61,7 +64,9 @@ from .serializers import (
     GoodsReceiptNoteSerializer,
     GoodsReceiptSerializer,
     IncomingItemSerializer,
+    ConsumableRequirementSerializer,
     InsuranceItemSalePriceSerializer,
+    ItemConsumableSerializer,
     ItemPriceSerializer,
     ItemSerializer,
     ItemUnitSerializer,
@@ -86,6 +91,7 @@ from .serializers import (
     SupplierSerializer,
     UnitSerializer,
 )
+from .services import consumables as consumables_service
 from .services import stock as stock_service
 from .services.stock import InsufficientStock, StockError
 
@@ -109,11 +115,69 @@ class ItemUnitViewSet(viewsets.ModelViewSet):
     filterset_fields = ['item', 'is_purchase_default', 'is_sale_default']
 
 
+# Where an item's accompaniments are drawn from when the caller names no
+# department. Mirrors billing's CATEGORY_DEPARTMENTS so the screen that shows
+# availability and the check that enforces it agree.
+CONSUMABLE_DEPARTMENTS = {
+    'Drug': 'Pharmacy',
+    'LabReagent': 'Lab',
+    'LabConsumable': 'Lab',
+    'Lab Test': 'Lab',
+}
+
+
+def _consumable_department_for(item):
+    preferred = CONSUMABLE_DEPARTMENTS.get(item.category)
+    if preferred:
+        department = Department.objects.filter(
+            name__iexact=preferred, is_stock_location=True).first()
+        if department:
+            return department
+    return stock_service.default_department()
+
+
 class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.prefetch_related('unit_conversions').all()
+    queryset = Item.objects.prefetch_related(
+        'unit_conversions', 'consumable_links__consumable').all()
     serializer_class = ItemSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ItemFilter
+
+    @action(detail=True, methods=['get'], url_path='consumables')
+    def consumables(self, request, pk=None):
+        '''
+        The accompaniments this item needs, checked against live stock.
+
+        What the sample-collection and dispensing screens call before they let
+        anyone commit: `quantity` is how many base units are about to go out,
+        `department` is where they go out from.
+        '''
+        item = self.get_object()
+        try:
+            quantity = max(int(request.query_params.get('quantity') or 1), 1)
+        except (TypeError, ValueError):
+            quantity = 1
+
+        department_id = request.query_params.get('department')
+        department = Department.objects.filter(id=department_id).first() if department_id else None
+        if department is None:
+            department = _consumable_department_for(item)
+
+        rows = consumables_service.availability(item, quantity, department)
+        blocking = [row for row in rows if row['shortfall'] > 0 and row['is_required']]
+
+        return Response({
+            'item': item.id,
+            'item_name': item.name,
+            'quantity': quantity,
+            'department': department.id if department else None,
+            'department_name': department.name if department else None,
+            'has_consumables': bool(rows),
+            'can_be_billed': not blocking,
+            'blocking_message': consumables_service.check_available(
+                item, quantity, department)[1] or None,
+            'consumables': ConsumableRequirementSerializer(rows, many=True).data,
+        })
 
     @action(detail=True, methods=['get'], url_path='stock')
     def stock(self, request, pk=None):
@@ -259,6 +323,7 @@ class UnitViewSet(viewsets.ModelViewSet):
 class IncomingItemViewSet(viewsets.ModelViewSet):
     queryset = IncomingItem.objects.all().select_related('item', 'supplier', 'department')
     serializer_class = IncomingItemSerializer
+    permission_classes = [CanManageInventory]
     filter_backends = [InventoryFilterSearch, DjangoFilterBackend]
     filterset_class = IncomingItemFilter
     search_fields = ['lot_no', 'item__name', 'item__item_code', 'supplier__official_name']
@@ -369,6 +434,7 @@ class StockBalanceViewSet(mixins.CreateModelMixin, viewsets.ReadOnlyModelViewSet
     '''
     queryset = StockBalance.objects.select_related('item', 'lot', 'department')
     serializer_class = StockBalanceSerializer
+    permission_classes = [CanManageInventory]
     filter_backends = [InventoryFilterSearch, DjangoFilterBackend]
     filterset_class = StockBalanceFilter
     search_fields = ['lot__lot_number', 'item__name', 'item__item_code', 'department__name']
@@ -518,6 +584,7 @@ class GoodsReceiptView(APIView):
     The browser used to fire these as three separate requests; when the lines
     failed, the invoice and GRN were already saved and stock was never posted.
     '''
+    permission_classes = [CanManageInventory]
 
     def post(self, request):
         serializer = GoodsReceiptSerializer(data=request.data, context={'request': request})
@@ -537,6 +604,7 @@ class GoodsReceiptView(APIView):
 
 class StockAdjustmentView(APIView):
     '''Write a reasoned correction into the ledger.'''
+    permission_classes = [CanManageInventory]
 
     def post(self, request):
         serializer = StockAdjustmentSerializer(data=request.data)
@@ -566,6 +634,7 @@ class StockAdjustmentView(APIView):
 
 class StockTransferView(APIView):
     '''Move stock between locations as two balanced ledger legs.'''
+    permission_classes = [CanManageInventory]
 
     def post(self, request):
         serializer = StockTransferSerializer(data=request.data)
@@ -624,6 +693,7 @@ class StockReservationViewSet(viewsets.ModelViewSet):
 class StockTakeViewSet(viewsets.ModelViewSet):
     queryset = StockTake.objects.select_related('department').prefetch_related('lines')
     serializer_class = StockTakeSerializer
+    permission_classes = [CanManageInventory]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['department', 'status']
 
@@ -789,6 +859,20 @@ class PurchaseOrderItemViewSet(viewsets.ModelViewSet):
         return PurchaseOrderItem.objects.filter(purchase_order=purchase_order_id)
 
 
+class ItemConsumableViewSet(viewsets.ModelViewSet):
+    """
+    Accompaniment links on their own: which consumables an item drags along.
+
+    Editing these changes what billing will refuse to sell, so writes are held
+    to the same rule as receiving stock.
+    """
+    queryset = ItemConsumable.objects.select_related('item', 'consumable')
+    serializer_class = ItemConsumableSerializer
+    permission_classes = [CanManageInventory]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['item', 'consumable', 'is_required']
+
+
 class InsuranceItemSalePriceViewSet(viewsets.ModelViewSet):
     queryset = InsuranceItemSalePrice.objects.all()
     serializer_class = InsuranceItemSalePriceSerializer
@@ -815,6 +899,11 @@ class QuotationItemViewSet(viewsets.ModelViewSet):
 # PDFs
 # ---------------------------------------------------------------------------
 
+def _money(value):
+    '''Two decimal places, half up -- what a printed money column needs.'''
+    return Decimal(value or 0).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+
 def download_requisition_pdf(request, requisition_id):
     '''
     This view gets the generated pdf and downloads it locally
@@ -825,11 +914,9 @@ def download_requisition_pdf(request, requisition_id):
     requisition = get_object_or_404(Requisition, pk=requisition_id)
     requisition_items = RequisitionItem.objects.filter(requisition=requisition).select_related('item')
 
-    total_cost = 0
-    for line in requisition_items:
-        # Cost and quantity are both per ordering unit, so this multiplies
-        # like with like whether the line is in boxes or loose units.
-        total_cost += line.effective_unit_cost * (line.quantity_approved or 0)
+    # Cost and quantity are both per ordering unit, so a line multiplies like
+    # with like whether it is in boxes or loose units.
+    total_cost = sum((line.approved_line_cost for line in requisition_items), Decimal('0'))
 
     requester_sig_url = (
         request.build_absolute_uri(requisition.requested_by.signature.url)
@@ -869,14 +956,20 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
     company = Company.objects.first()
     user = CustomUser.objects.first()
 
+    # Orders raised before the supplier was carried on the PO itself still
+    # name one on every requisition line, so read it back off the lines.
+    supplier = purchase_order.supplier
+
     item_details = []
     total_amount = 0
     for line in purchase_order_items:
         req_item = line.requisition_item
         if req_item is None:
             continue
-        unit_price = req_item.effective_unit_cost
-        total_price = unit_price * line.quantity_ordered
+        if supplier is None and req_item.preferred_supplier_id:
+            supplier = req_item.preferred_supplier
+        unit_price = _money(req_item.effective_unit_cost)
+        total_price = _money(unit_price * line.quantity_ordered)
         total_amount += total_price
         item_details.append({
             'name': req_item.item.name,
@@ -902,6 +995,7 @@ def download_purchaseorder_pdf(request, purchaseorder_id):
 
     context = {
         'purchaseorder': purchase_order,
+        'supplier': supplier,
         'item_details': item_details,
         'total_amount': total_amount,
         'company': company,
@@ -923,8 +1017,17 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
         purchase_order_id=purchase_order_id).select_related('item', 'supplier', 'goods_receipt_note')
     company = Company.objects.first()
 
-    goods_receipt_note = incoming_items.first().goods_receipt_note if incoming_items.exists() else None
+    first_line = incoming_items.first()
+    goods_receipt_note = first_line.goods_receipt_note if first_line else None
     grn_number = goods_receipt_note.grn_number if goods_receipt_note else "N/A"
+    supplier_invoice = first_line.supplier_invoice if first_line else None
+    # The invoice is the better source -- it is what we are being billed on --
+    # but a receipt entered without one still knows who delivered the goods.
+    supplier = None
+    if supplier_invoice and supplier_invoice.supplier_id:
+        supplier = supplier_invoice.supplier
+    elif first_line:
+        supplier = first_line.supplier
 
     item_details = []
     total_price_before_vat = 0
@@ -932,8 +1035,10 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
     total_amount_after_vat = 0
 
     for line in incoming_items:
-        amount_before_vat = line.line_total
-        vat_amount = amount_before_vat * (line.item.vat_rate / 100)
+        amount_before_vat = _money(line.line_total)
+        # Rounded per line, so the column of VAT figures actually sums to the
+        # VAT total printed underneath it.
+        vat_amount = _money(amount_before_vat * line.item.vat_rate / 100)
         amount_with_vat = amount_before_vat + vat_amount
 
         total_price_before_vat += amount_before_vat
@@ -961,6 +1066,9 @@ def download_goods_receipt_note_pdf(request, purchase_order_id):
         'company': company,
         'company_logo_url': company_logo_url,
         'grn_number': grn_number,
+        'supplier': supplier,
+        'supplier_invoice': supplier_invoice,
+        'purchase_order': first_line.purchase_order if first_line else None,
         'item_details': item_details,
         'total_price_before_vat': total_price_before_vat,
         'total_vat': total_vat,

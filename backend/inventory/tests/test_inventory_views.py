@@ -65,13 +65,13 @@ def test_inventory_list_reports_ledger_quantity(authenticated_client, opening_st
 
 @pytest.mark.django_db
 def test_manual_stock_entry_records_an_opening_balance(
-    authenticated_client, item, department
+    authenticated_admin_client, item, department
 ):
     """
     The old Add Inventory form created a quantity out of nothing. The same
     payload now produces an OPENING_BALANCE movement with a documented origin.
     """
-    response = authenticated_client.post('/inventory/inventories/', {
+    response = authenticated_admin_client.post('/inventory/inventories/', {
         'item': item.id,
         'department': department.id,
         'quantity_at_hand': 25,
@@ -92,13 +92,13 @@ def test_manual_stock_entry_records_an_opening_balance(
 
 @pytest.mark.django_db
 def test_stock_cannot_be_written_by_updating_a_balance(
-    authenticated_client, opening_stock
+    authenticated_admin_client, opening_stock
 ):
     """Stock is the ledger's total; the balance endpoint is read-only."""
     from inventory.models import StockBalance
 
     balance = StockBalance.objects.get(item=opening_stock.item)
-    response = authenticated_client.patch(
+    response = authenticated_admin_client.patch(
         f'/inventory/inventories/{balance.id}/', {'quantity_at_hand': 999}, format='json')
 
     assert response.status_code == 405
@@ -123,11 +123,11 @@ def test_reversal_requires_a_reason(authenticated_client, opening_stock):
 
 
 @pytest.mark.django_db
-def test_transfer_endpoint_moves_stock(authenticated_client, opening_stock, item, department):
+def test_transfer_endpoint_moves_stock(authenticated_admin_client, opening_stock, item, department):
     from inventory.models import Department
 
     lab = Department.objects.create(name='Lab')
-    response = authenticated_client.post('/inventory/stock-transfers/', {
+    response = authenticated_admin_client.post('/inventory/stock-transfers/', {
         'item': item.id,
         'from_department': department.id,
         'to_department': lab.id,
@@ -140,11 +140,11 @@ def test_transfer_endpoint_moves_stock(authenticated_client, opening_stock, item
 
 
 @pytest.mark.django_db
-def test_transfer_rejects_an_oversell(authenticated_client, opening_stock, item, department):
+def test_transfer_rejects_an_oversell(authenticated_admin_client, opening_stock, item, department):
     from inventory.models import Department
 
     lab = Department.objects.create(name='Lab')
-    response = authenticated_client.post('/inventory/stock-transfers/', {
+    response = authenticated_admin_client.post('/inventory/stock-transfers/', {
         'item': item.id,
         'from_department': department.id,
         'to_department': lab.id,
@@ -171,3 +171,92 @@ def test_download_supplier_invoice_pdf_template_rendering(
     context = mock_html.call_args[1]['string']
     assert str(supplier_invoice.invoice_no) in context
     assert str(incoming_item.item.name) in context
+
+
+# ---------------------------------------------------------------------------
+# Who may bring stock in
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_receiving_stock_is_refused_to_an_ordinary_user(
+    authenticated_client, item, department
+):
+    """Stock coming inwards mints inventory, so it is not open to everyone."""
+    response = authenticated_client.post('/inventory/inventories/', {
+        'item': item.id,
+        'department': department.id,
+        'quantity_at_hand': 10,
+        'lot_number': 'GATE-1',
+    }, content_type='application/json')
+
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_department_head_may_receive_into_their_own_department(
+    client, user, item, department
+):
+    """The head of a department is trusted with that department's stock."""
+    from rest_framework_simplejwt.tokens import RefreshToken
+
+    department.head = user
+    department.save(update_fields=['head'])
+    client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {RefreshToken.for_user(user).access_token}'
+
+    response = client.post('/inventory/inventories/', {
+        'item': item.id,
+        'department': department.id,
+        'quantity_at_hand': 10,
+        'lot_number': 'GATE-2',
+    }, content_type='application/json')
+
+    assert response.status_code == 201
+
+
+@pytest.mark.django_db
+def test_department_head_may_not_receive_into_another_department(
+    client, user, item, department
+):
+    """...and only that department's."""
+    from rest_framework_simplejwt.tokens import RefreshToken
+
+    from inventory.models import Department
+
+    other = Department.objects.create(name='Somewhere Else')
+    department.head = user
+    department.save(update_fields=['head'])
+    client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {RefreshToken.for_user(user).access_token}'
+
+    response = client.post('/inventory/inventories/', {
+        'item': item.id,
+        'department': other.id,
+        'quantity_at_hand': 10,
+        'lot_number': 'GATE-3',
+    }, content_type='application/json')
+
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_individually_granted_user_may_receive_stock(client, user, item, department):
+    """The manual grant is the third route in, for staff who are neither."""
+    from rest_framework_simplejwt.tokens import RefreshToken
+
+    user.can_manage_inventory = True
+    user.save(update_fields=['can_manage_inventory'])
+    client.defaults['HTTP_AUTHORIZATION'] = f'Bearer {RefreshToken.for_user(user).access_token}'
+
+    response = client.post('/inventory/inventories/', {
+        'item': item.id,
+        'department': department.id,
+        'quantity_at_hand': 10,
+        'lot_number': 'GATE-4',
+    }, content_type='application/json')
+
+    assert response.status_code == 201
+
+
+@pytest.mark.django_db
+def test_reading_stock_stays_open(authenticated_client, opening_stock):
+    """A nurse must be able to see whether there are syringes."""
+    assert authenticated_client.get('/inventory/inventories/').status_code == 200

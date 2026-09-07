@@ -10,12 +10,15 @@ import { editPatient } from "@/redux/service/patients";
 import { toast } from 'react-toastify'
 import { getAllPatients } from "@/redux/features/patients";
 import SeachableSelect from "@/components/select/Searchable";
-import { updateItem, fetchUnits } from "@/redux/service/inventory";
+import { updateItem, fetchItems, fetchUnits } from "@/redux/service/inventory";
+import ItemConsumablesField from "./ItemConsumablesField";
 import { useAuth } from '@/assets/hooks/use-auth';
 import { updateAnItem } from "@/redux/features/inventory";
 const EditItemModal = ({ open, setOpen, selectedRowData }) => {
   const [loading, setLoading] = useState(false);
   const [unitOptions, setUnitOptions] = useState([]);
+  const [consumableOptions, setConsumableOptions] = useState([]);
+  const [consumableRows, setConsumableRows] = useState([]);
   const dispatch = useDispatch();
   const auth = useAuth();
 
@@ -36,7 +39,30 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
             const results = Array.isArray(data) ? data : (data?.results ?? []);
             setUnitOptions(results.map((u) => ({ value: u.id, label: `${u.symbol} — ${u.name}` })));
         }).catch(() => {});
+
+        fetchItems(auth).then((data) => {
+            const results = Array.isArray(data) ? data : (data?.results ?? []);
+            setConsumableOptions(
+                results
+                    .filter((i) => i.category_one === "Internal" && i.is_stock_tracked)
+                    .map((i) => ({ value: i.id, label: `${i.name} (${i.units_of_measure})` }))
+            );
+        }).catch(() => {});
     }, [auth?.token]);
+
+    // Re-seed the staged rows whenever a different item is opened, so the
+    // modal never shows the last item's accompaniments.
+    useEffect(() => {
+        setConsumableRows(
+            (selectedRowData?.consumables ?? []).map((link) => ({
+                id: link.id,
+                consumable: link.consumable,
+                consumable_name: link.consumable_name,
+                quantity_per_use: link.quantity_per_use,
+                is_required: link.is_required,
+            }))
+        );
+    }, [selectedRowData?.id]);
 
     const getCategory = ()=> {
         const category = categories.find((c) => c.value === selectedRowData?.category)
@@ -59,6 +85,7 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
     category: getCategory() || "",
     units: getUnit() || "",
     units_of_measure: selectedRowData?.units_of_measure || "",
+    category_one: selectedRowData?.category_one || "Resale",
     desc: selectedRowData?.desc || "",
   };
 
@@ -75,8 +102,16 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
     const formData = {
         ...formValue,
         category: formValue.category.value,
+        category_one: formValue.category_one,
         units: formValue.units.value,
         units_of_measure: formValue.units_of_measure.trim(),
+        // Sent whole every time: the server replaces the set, so a row the
+        // user deleted here is actually deleted there.
+        consumable_items: consumableRows.map((row) => ({
+            consumable: row.consumable,
+            quantity_per_use: parseInt(row.quantity_per_use) || 1,
+            is_required: !!row.is_required,
+        })),
     };
     try {
       setLoading(true);
@@ -119,6 +154,22 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                 />
                 <ErrorMessage
                 name="item_code"
+                component="div"
+                className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="category_one">Category</label>
+                <Field
+                as="select"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                name="category_one"
+                >
+                <option value="Resale">Resale</option>
+                <option value="Internal">Internal (Consumable)</option>
+                </Field>
+                <ErrorMessage
+                name="category_one"
                 component="div"
                 className="text-warning text-xs"
                 />
@@ -192,6 +243,14 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                 name="desc"
                 component="div"
                 className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={12} xs={12}>
+                <ItemConsumablesField
+                    itemName={selectedRowData?.name}
+                    options={consumableOptions}
+                    rows={consumableRows}
+                    setRows={setConsumableRows}
                 />
             </Grid>
             <Grid className='my-2' item md={12} xs={12}>

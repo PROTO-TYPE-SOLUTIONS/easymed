@@ -16,19 +16,21 @@ test, and consumables used collecting a sample.
 They are deliberately separate, because they are consumed at different moments
 and in different proportions.
 
-| | **Reagent** | **Consumable** |
+| | **Reagent** | **Consumable (accompaniment)** |
 | --- | --- | --- |
-| Model | `TestPanelReagent` | `SpecimenConsumable` |
-| Links | Test panel → reagent item | Specimen type → consumable item |
-| Consumed | Once **per test run** | Once **per sample collection** |
-| Example | Running an ALT test uses 1 test's worth of Roche ALT/AST reagent | Drawing blood uses 1 syringe and 1 EDTA tube |
-| Item category | `LabReagent` | `LabConsumable` |
-| Triggered by | The panel being **billed** | The sample being marked **collected** |
+| Model | `TestPanelReagent` | `inventory.ItemConsumable` |
+| Links | Test panel → reagent item | **Any billable item** → consumable item |
+| Consumed | Once **per test run** | Once **per unit billed** |
+| Example | Running an ALT test uses 1 test's worth of Roche ALT/AST reagent | A urea test uses 1 syringe, 1 swab and 1 EDTA tube; a paracetamol **injection** uses 1 syringe and 1 swab |
+| Item category | `LabReagent` | `category_one = Internal (Consumable)` |
+| Triggered by | The panel being **billed** | The item being **billed** |
+| Blocks billing? | No — a shortfall is logged | **Yes**, when the link is marked required |
 
-The distinction matters: **one blood draw serves every blood panel on the
-request**. Ordering six blood tests consumes six tests' worth of reagent but
-still only one syringe and one tube. Tying consumables to the specimen rather
-than the panel is what gets that right.
+Consumables are not a lab-only idea, which is why they live on the item in the
+inventory app rather than on the specimen in the laboratory app. An injectable
+drug needs a syringe and a swab whether the injection is given in the ward or
+at the patient's home; a tablet needs nothing. Declaring that on the item is
+what lets one rule cover both a lab test and a drug.
 
 ---
 
@@ -100,21 +102,53 @@ It is reference data only — **it plays no part in stock tracking**.
 
 ---
 
-## Setting up specimen consumables
+## Setting up consumables (accompaniments)
 
-**Laboratory → Lab Settings → Specimens**
+**Inventory → Items → Add New Item (or edit one) → Consumables (accompaniments)**
 
-Add or edit a specimen and list what collecting it uses up. Each line is an
-item of category `Lab Consumable` and a quantity per collection:
+The consumable itself is an ordinary item with **Category** set to
+`Internal (Consumable)` — only those can be picked as an accompaniment, since a
+resale item is something the patient buys rather than something used up on
+their behalf.
 
-| Specimen | Consumable | Qty per collection |
-| --- | --- | --- |
-| Blood | Syringe 5ml | 1 |
-| Blood | EDTA Tube | 1 |
-| Urine | Sample Container | 1 |
+Then, on the item that needs them, list what it drags along. Each line is a
+consumable, a quantity per use, and whether it is required:
 
-The form shows current stock beside each line and flags anything below what a
-collection needs, so a shortage is visible before a patient is in the chair.
+| Item | Consumable | Qty per use | Required |
+| --- | --- | --- | --- |
+| Urea (lab test) | Syringe 5ml | 1 | yes |
+| Urea (lab test) | Alcohol Swab | 1 | yes |
+| Urea (lab test) | Blood Collection Tube EDTA | 1 | yes |
+| Urea (lab test) | Cotton Wool | 1 | no |
+| Paracetamol 1g **Injection** | Syringe 5ml | 1 | yes |
+| Paracetamol 1g **Injection** | Alcohol Swab | 1 | yes |
+| Paracetamol 500mg **Tablets** | *(none)* | | |
+| Panadol 500mg Tablets | *(none)* | | |
+
+**Required vs optional** is the whole of the difference: a required
+accompaniment that is out of stock makes the item unbillable until inventory is
+topped up; an optional one only warns.
+
+Leaving the list empty is a real answer, not an unfinished one — it is how the
+system tells "this needs nothing" apart from "this needs something we do not
+have".
+
+### Where it shows up
+
+- **Sample collection** (Laboratory → Patient Samples) lists what the draw
+  needs, with current stock, and flags anything short before the patient is in
+  the chair.
+- **Dispensing** (Pharmacy → prescribed drugs) sums the accompaniments across
+  the selected drugs and warns when the selection cannot be billed.
+- **Billing** refuses the line outright — see below.
+
+### API
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /inventory/items/<id>/consumables/?quantity=&department=` | What this item needs, checked against live stock, plus `can_be_billed` |
+| `GET/POST/PATCH/DELETE /inventory/item-consumables/` | The links on their own |
+| `consumable_items` on `POST/PATCH /inventory/items/` | Declare them with the item; the posted list **replaces** the whole set |
 
 ---
 
@@ -136,16 +170,33 @@ the test is committed to.
   stock before and after, the patient, who performed it, and a reference tying
   it back to the stock movements.
 
-### Consumables — on collection
+### Consumables — on billing, and only there
 
-When a `PatientSample` is marked collected, `deduct_specimen_consumables` posts
-a `CONSUMPTION` movement for each consumable linked to that specimen type.
+Accompaniments leave stock at exactly one moment: when the item is billed, via
+`billing.services.post_stock_for_invoice_item`, which calls
+`inventory.services.consumables.consume`.
 
-- **Idempotent per (sample, consumable)** — re-saving a collected sample does
-  not consume a second tube.
-- **Partial issue allowed** — if stock is short the shortfall is logged rather
-  than blocking the collection. Clinical work is not held up by a stock
-  discrepancy; the gap shows in the ledger instead.
+They used to be deducted a second time on sample collection. They are not any
+more — one draw would otherwise take two syringes. Collection still *shows*
+what is needed (`laboratory.serializers.sample_consumable_rows`);
+`deduct_specimen_consumables` survives only as a no-op so a queued job does not
+fail on deploy.
+
+- **Checked first** — `billing.services.check_stock_available` runs before the
+  invoice line is saved and **refuses it** when a required accompaniment cannot
+  be covered at the dispensing department. The message names what is missing
+  and how much of it there is.
+- **Department-scoped** — availability is checked where the line is dispensed
+  from (`source_tag`, else the item's category default). Syringes sitting in
+  Lab do not unblock a Pharmacy dispense.
+- **Idempotent per (invoice line, consumable)** — a re-saved line cannot take a
+  second syringe.
+- **Optional lines never block** — a shortfall on one is logged and the sale
+  goes through.
+
+Note that a **service** item — a lab test, an appointment — holds no stock of
+its own but can still carry accompaniments, and the check runs for it either
+way. That is what makes "Urea test needs a syringe" enforceable.
 
 ---
 
@@ -223,11 +274,23 @@ for link in TestPanelReagent.objects.select_related('test_panel', 'reagent_item'
 ```
 
 ```python
-# What a sample collection consumes
-from laboratory.models import SpecimenConsumable
+# What an item drags along
+from inventory.models import ItemConsumable
 
-for link in SpecimenConsumable.objects.select_related('specimen', 'item'):
-    print(link)          # "Blood uses 1 x Syringe 5ml"
+for link in ItemConsumable.objects.select_related('item', 'consumable'):
+    print(link)          # "Urea needs 1 x Syringe 5ml"
+```
+
+```python
+# Can this be billed right now, and what is missing if not?
+from inventory.models import Department, Item
+from inventory.services import consumables
+
+item = Item.objects.get(name='Paracetamol 1g Injection')
+pharmacy = Department.objects.get(name='Pharmacy')
+
+print(consumables.availability(item, quantity=2, department=pharmacy))
+print(consumables.check_available(item, 2, pharmacy))   # (True, '')
 ```
 
 ```python
@@ -285,8 +348,10 @@ docker exec -it easymed-backend python manage.py rebuild_stock_balances
 | Concern | Location |
 | --- | --- |
 | Panel → reagent link | `laboratory/models.py` — `TestPanelReagent` |
-| Specimen → consumable link | `laboratory/models.py` — `SpecimenConsumable` |
-| Consumption tasks | `laboratory/tasks.py` — `deduct_test_kit`, `deduct_specimen_consumables` |
+| Item → consumable link | `inventory/models.py` — `ItemConsumable` |
+| Requirements, availability, consumption | `inventory/services/consumables.py` |
+| The billing block | `billing/services.py` — `check_stock_available` |
+| Consumption tasks | `laboratory/tasks.py` — `deduct_test_kit` |
 | What triggers them | `laboratory/signals.py` |
 | Availability, thresholds | `laboratory/utils.py` — `reagent_stock`, `reagent_threshold` |
 | Pre-run checks | `LabTestPanel.can_run()`, `LabTestPanel.available_runs()` |
@@ -311,6 +376,7 @@ Recorded here so anyone following older instructions can see why they fail.
 | Reagents stocked in **kits** | Stocked in **tests**; `Kit` is a pack size of N tests |
 | `ensure_service_inventory` created fake stock rows so billing could find a price | `ensure_service_prices` sets a price; service items hold no stock at all |
 | No concept of collection consumables | `SpecimenConsumable`, deducted once per sample collected |
+| `SpecimenConsumable` — lab only, per specimen, never blocked anything | `inventory.ItemConsumable` — any billable item, deducted once at billing, **blocks billing** when a required one is out of stock. Old rows were migrated onto the lab-test items in `laboratory/migrations/0024`. |
 
 The old "Total Demo Value / Potential Profit" summary has been dropped rather
 than corrected. It was arithmetic over a reagent list that has since changed,

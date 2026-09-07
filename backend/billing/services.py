@@ -11,6 +11,7 @@ import logging
 from django.db import transaction
 
 from inventory.models import Department, StockMovement
+from inventory.services import consumables as consumables_service
 from inventory.services import stock as stock_service
 from inventory.services.stock import InsufficientStock, StockError
 
@@ -47,21 +48,25 @@ def check_stock_available(invoice_item):
     The old `check_quantity_availability` deducted stock as a side effect of
     answering this question, which is why an oversell could leave the ledger
     and the invoice disagreeing.
+
+    Covers the item AND its accompaniments: an injection with no syringe on
+    the shelf is not billable, and neither is a urea test with no container.
+    A service item holds no stock of its own but can still carry
+    accompaniments, so the consumable check runs either way.
     """
     item = invoice_item.item
-    if not item.is_stock_tracked:
-        return True, ''
-
     quantity = invoice_item.quantity or 1
     department = dispensing_department(invoice_item)
-    available = stock_service.available_quantity(item, department)
 
-    if available < quantity:
-        return False, (
-            f"Insufficient stock for {item.name} at {department.name}: "
-            f"need {quantity}, {available} available."
-        )
-    return True, ''
+    if item.is_stock_tracked:
+        available = stock_service.available_quantity(item, department)
+        if available < quantity:
+            return False, (
+                f"Insufficient stock for {item.name} at {department.name}: "
+                f"need {quantity}, {available} available."
+            )
+
+    return consumables_service.check_available(item, quantity, department)
 
 
 @transaction.atomic
@@ -73,24 +78,37 @@ def post_stock_for_invoice_item(invoice_item, performed_by=None):
     duplicated signal cannot dispense the same drug twice.
     """
     item = invoice_item.item
-    if not item.is_stock_tracked:
-        return []
-
     quantity = invoice_item.quantity or 1
     department = dispensing_department(invoice_item)
 
-    return stock_service.issue(
+    movements = []
+    if item.is_stock_tracked:
+        movements.extend(stock_service.issue(
+            item=item,
+            department=department,
+            quantity=quantity,
+            movement_type=StockMovement.Type.SALE,
+            performed_by=performed_by,
+            reason=f"Billed on invoice {invoice_item.invoice_id}",
+            source_type=StockMovement.Source.INVOICE_ITEM,
+            source_id=invoice_item.pk,
+            source_reference=str(
+                getattr(invoice_item.invoice, 'invoice_number', '') or invoice_item.invoice_id),
+            idempotency_key=f"invoice-item:{invoice_item.pk}",
+        ))
+
+    # The syringe leaves the shelf at the same moment the injection does.
+    movements.extend(consumables_service.consume(
         item=item,
-        department=department,
         quantity=quantity,
-        movement_type=StockMovement.Type.SALE,
+        department=department,
         performed_by=performed_by,
-        reason=f"Billed on invoice {invoice_item.invoice_id}",
+        reason=f"Used with {item.name} on invoice {invoice_item.invoice_id}",
         source_type=StockMovement.Source.INVOICE_ITEM,
         source_id=invoice_item.pk,
-        source_reference=str(getattr(invoice_item.invoice, 'invoice_number', '') or invoice_item.invoice_id),
-        idempotency_key=f"invoice-item:{invoice_item.pk}",
-    )
+        idempotency_key_prefix=f"invoice-item:{invoice_item.pk}",
+    ))
+    return movements
 
 
 @transaction.atomic
@@ -114,8 +132,18 @@ def reverse_stock_for_invoice_item(invoice_item, reason, performed_by=None):
     return reversals
 
 
+def check_consumables_available(invoice_item):
+    """Just the accompaniment half of the check, for callers that want it alone."""
+    return consumables_service.check_available(
+        invoice_item.item,
+        invoice_item.quantity or 1,
+        dispensing_department(invoice_item),
+    )
+
+
 __all__ = [
     'InsufficientStock',
+    'check_consumables_available',
     'check_stock_available',
     'dispensing_department',
     'post_stock_for_invoice_item',

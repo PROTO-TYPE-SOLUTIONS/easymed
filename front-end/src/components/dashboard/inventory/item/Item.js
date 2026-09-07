@@ -3,7 +3,8 @@ import { useRouter } from 'next/navigation'
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Grid } from "@mui/material";
 import * as Yup from "yup";
-import { createItem, fetchUnits } from "@/redux/service/inventory";
+import { createItem, fetchItems, fetchUnits } from "@/redux/service/inventory";
+import ItemConsumablesField from "./ItemConsumablesField";
 import { fetchDepartments } from "@/redux/service/auth";
 import { toast } from "react-toastify";
 import SeachableSelect from "@/components/select/Searchable";
@@ -14,6 +15,8 @@ const NewItem = () => {
     const [loading, setLoading] = useState(false);
     const [unitOptions, setUnitOptions] = useState([]);
     const [departmentOptions, setDepartmentOptions] = useState([]);
+    const [consumableOptions, setConsumableOptions] = useState([]);
+    const [consumableRows, setConsumableRows] = useState([]);
     const router = useRouter()
     const auth = useAuth();
 
@@ -28,11 +31,23 @@ const NewItem = () => {
             const results = Array.isArray(data) ? data : (data?.results ?? []);
             setDepartmentOptions(results.map((d) => ({ value: d.id, label: d.name })));
         }).catch(() => {});
+
+        // Only internal-use items can accompany something else: you cannot
+        // send a patient home with a syringe you never stocked as a consumable.
+        fetchItems(auth).then((data) => {
+            const results = Array.isArray(data) ? data : (data?.results ?? []);
+            setConsumableOptions(
+                results
+                    .filter((i) => i.category_one === "Internal" && i.is_stock_tracked)
+                    .map((i) => ({ value: i.id, label: `${i.name} (${i.units_of_measure})` }))
+            );
+        }).catch(() => {});
     }, [auth?.token]);
 
     // The two lab categories are deliberately distinct:
     //   Lab Reagent    — consumed by running a test (linked via TestPanelReagent)
-    //   Lab Consumable — consumed by collecting a sample (linked via SpecimenConsumable)
+    //   Lab Consumable — an accompaniment of a test or a drug (linked via
+    //                    ItemConsumable, configured in the section below)
     const categories = [
         {value: 'SurgicalEquipment', label: 'Surgical Equipment'},
         {value: 'LabReagent', label: 'Lab Reagent (used to run tests)'},
@@ -48,6 +63,7 @@ const NewItem = () => {
     const initialValues = {
       name: "",
       category: "",
+      category_one: "Resale",
       units: "",
       units_of_measure: "",
       desc: "",
@@ -71,13 +87,20 @@ const NewItem = () => {
         const formData = {
           ...formValue,
           category: formValue.category.value,
+          category_one: formValue.category_one,
           units: formValue.units.value,
           units_of_measure: formValue.units_of_measure.trim(),
           departments: (formValue.departments || []).map((d) => d.value),
+          consumable_items: consumableRows.map((row) => ({
+            consumable: row.consumable,
+            quantity_per_use: parseInt(row.quantity_per_use) || 1,
+            is_required: !!row.is_required,
+          })),
         };
 
         await createItem(formData, auth).then((res)=>{
            helpers.resetForm();
+           setConsumableRows([]);
            const message = formValue.category.value === 'LabReagent'
              ? "Lab Reagent added. A Lab Test billing item was also created automatically."
              : "Item Added Successfully!";
@@ -161,6 +184,28 @@ const NewItem = () => {
                 className="text-warning text-xs"
                 />
             </Grid>
+            <Grid className='my-2' item md={6} xs={12}>
+            <label htmlFor="category_one">Category</label>
+                <Field
+                as="select"
+                className="block border rounded-md text-sm border-gray py-2.5 px-4 focus:outline-card w-full"
+                name="category_one"
+                >
+                <option value="Resale">Resale</option>
+                <option value="Internal">Internal (Consumable)</option>
+                </Field>
+                <p className="text-xs text-gray-500 mt-1">
+                    <strong>Resale</strong> is sold to the patient.{" "}
+                    <strong>Internal (Consumable)</strong> is used up alongside
+                    something else &mdash; a syringe, a swab, a sample container
+                    &mdash; and only these can be picked as accompaniments below.
+                </p>
+                <ErrorMessage
+                name="category_one"
+                component="div"
+                className="text-warning text-xs"
+                />
+            </Grid>
             <Grid className='my-2' item md={12} xs={12}>
                 <SeachableSelect
                     isMulti
@@ -176,6 +221,13 @@ const NewItem = () => {
                     name="departments"
                     component="div"
                     className="text-warning text-xs"
+                />
+            </Grid>
+            <Grid className='my-2' item md={12} xs={12}>
+                <ItemConsumablesField
+                    options={consumableOptions}
+                    rows={consumableRows}
+                    setRows={setConsumableRows}
                 />
             </Grid>
             <Grid className='my-2' item md={12} xs={12}>

@@ -243,6 +243,26 @@ MASTER_LAB_UNITS = [
 ]
 
 
+def lab_item_code(panel_name, profile_name=None):
+    """
+    A stable, collision-free code for a lab test item.
+
+    The old template truncated the panel name to ten characters, so any two
+    panels sharing a prefix ended up with the same code -- and an item code is
+    what groups an item's stock across every receipt and every month, so a
+    shared one silently merges two different tests in any report that groups
+    by it. A short hash of the full name cannot collide that way, and it is
+    deterministic, so re-running the seeder does not mint a second code for a
+    panel that already has one.
+    """
+    import hashlib
+
+    full = f"{profile_name or ''}|{panel_name}".strip('|')
+    slug = ''.join(ch for ch in panel_name.upper() if ch.isalnum())[:10] or 'TEST'
+    digest = hashlib.sha1(full.encode('utf-8')).hexdigest()[:4].upper()
+    return f"LAB-{slug}-{digest}"
+
+
 def create_units():
     """Create all master lab units of measurement."""
     created = []
@@ -654,7 +674,7 @@ def create_demo_lab_profiles_and_panels():
                 category="Lab Test",
                 units_of_measure=panel.get("unit", "unit") or "unit",
                 defaults={
-                    "item_code": f"LAB-{profile_name[:3].upper()}-{panel['name'][:3].upper()}",
+                    "item_code": lab_item_code(panel['name'], profile_name),
                     "desc": f"{panel['name']} test for {profile_name}",
                     "vat_rate": 0.0,
                     "slow_moving_period": 90,
@@ -1190,7 +1210,7 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test',
-                'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
+                'item_code': lab_item_code(panel_name),
                 'vat_rate': 16.0,
             }
         )
@@ -1293,7 +1313,7 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Liver function marker',
-                'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
+                'item_code': lab_item_code(panel_name),
                 'vat_rate': 16.0,
             }
         )
@@ -1382,7 +1402,7 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Cardiovascular risk assessment',
-                'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
+                'item_code': lab_item_code(panel_name),
                 'vat_rate': 16.0,
             }
         )
@@ -1470,7 +1490,7 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Kidney function marker',
-                'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
+                'item_code': lab_item_code(panel_name),
                 'vat_rate': 16.0,
             }
         )
@@ -1532,7 +1552,7 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Thyroid function assessment',
-                'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
+                'item_code': lab_item_code(panel_name),
                 'vat_rate': 16.0,
             }
         )
@@ -1591,7 +1611,7 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Electrolyte balance assessment',
-                'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
+                'item_code': lab_item_code(panel_name),
                 'vat_rate': 16.0,
             }
         )
@@ -1661,7 +1681,7 @@ def create_real_world_lab_data():
             units_of_measure='unit',
             defaults={
                 'desc': f'{panel_name} test - Diabetes monitoring',
-                'item_code': f'LAB-{panel_name[:10].upper().replace(" ", "-")}',
+                'item_code': lab_item_code(panel_name),
                 'vat_rate': 16.0,
             }
         )
@@ -1979,6 +1999,148 @@ def create_hospital_wards_and_beds():
     }
 
 
+# Which consumables an item drags along, by name. Written as substrings
+# because the catalogue spells drugs out in full ("Tetracycline 100mg
+# Injection") and the rule is about the route, not the strength.
+#
+# The point of the pairs below is the contrast: Panadol and the paracetamol
+# TABLET need nothing, the paracetamol INJECTION cannot be given without a
+# syringe and a swab. Billing refuses the injection when they are not in stock.
+CONSUMABLE_RULES = [
+    {
+        'match': ['Injection', 'Injectable'],
+        'exclude': [],
+        'consumables': [
+            ('Syringes 5ml', 1, True),
+            ('Alcohol Swabs', 1, True),
+            ('Cotton Wool 500g', 1, False),
+        ],
+    },
+    {
+        'match': ['IV Cannula', 'Normal Saline 0.9%', 'Dextrose', "Ringer's Lactate"],
+        'exclude': ['Cannula 18G', 'Cannula 20G'],
+        'consumables': [
+            ('IV Cannula 18G', 1, True),
+            ('Alcohol Swabs', 1, True),
+            ('Surgical Tape', 1, False),
+        ],
+    },
+    {
+        'match': ['Vaccine', 'Tetanus Toxoid'],
+        'exclude': [],
+        'consumables': [
+            ('Syringes 5ml', 1, True),
+            ('Alcohol Swabs', 1, True),
+        ],
+    },
+]
+
+# Blood-drawn lab tests need the draw kit whatever the panel is. Named
+# individually so a urine test is not billed a blood tube.
+BLOOD_TEST_CONSUMABLES = [
+    ('Syringes 5ml', 1, True),
+    ('Alcohol Swabs', 1, True),
+    ('Blood Collection Tubes EDTA', 1, True),
+    ('Cotton Wool 500g', 1, False),
+]
+
+URINE_TEST_CONSUMABLES = [
+    ('Urine Collection Containers', 1, True),
+    ('Sterile Gloves Medium', 1, False),
+]
+
+
+def create_item_consumables():
+    """
+    Wire up the accompaniments: what each sellable item uses up alongside it.
+
+    An injectable drug needs a syringe and a swab whether it is given in the
+    ward or at the patient's home; a urea test needs a syringe, a swab and a
+    tube. Tablets need nothing, and get no rows -- which is what lets billing
+    tell "no accompaniments required" apart from "accompaniments missing".
+    """
+    from inventory.models import Item, ItemConsumable
+
+    print("\n\U0001f489 Linking items to their consumables (accompaniments)...")
+
+    # Every consumable is an internal-use item, not something sold on its own.
+    consumable_names = {
+        name
+        for rule in CONSUMABLE_RULES for name, _, _ in rule['consumables']
+    } | {name for name, _, _ in BLOOD_TEST_CONSUMABLES} \
+      | {name for name, _, _ in URINE_TEST_CONSUMABLES}
+
+    consumables = {}
+    for name in consumable_names:
+        item = Item.objects.filter(name=name).first()
+        if item is None:
+            print(f"   ! consumable not in catalogue, skipped: {name}")
+            continue
+        if item.category_one != 'Internal':
+            item.category_one = 'Internal'
+            item.save(update_fields=['category_one'])
+        consumables[name] = item
+
+    def link(item, rows):
+        made = 0
+        for name, quantity, required in rows:
+            consumable = consumables.get(name)
+            if consumable is None or consumable.id == item.id:
+                continue
+            _, created = ItemConsumable.objects.update_or_create(
+                item=item, consumable=consumable,
+                defaults={'quantity_per_use': quantity, 'is_required': required},
+            )
+            made += int(created)
+        return made
+
+    created = 0
+    linked_items = 0
+
+    # Drugs and supplies, by what the name says about the route.
+    for rule in CONSUMABLE_RULES:
+        query = Item.objects.none()
+        for token in rule['match']:
+            query = query | Item.objects.filter(name__icontains=token)
+        for token in rule['exclude']:
+            query = query.exclude(name__icontains=token)
+
+        for item in query.distinct():
+            if item.name in consumables:
+                continue  # a consumable does not accompany itself
+            made = link(item, rule['consumables'])
+            created += made
+            linked_items += int(made > 0)
+
+    # Lab tests, by the specimen their panel draws.
+    from laboratory.models import LabTestPanel
+
+    for panel in LabTestPanel.objects.select_related('specimen', 'item'):
+        if panel.item_id is None or panel.specimen_id is None:
+            continue
+        specimen = (panel.specimen.name or '').strip().lower()
+        if specimen in ('blood', 'serum', 'plasma'):
+            rows = BLOOD_TEST_CONSUMABLES
+        elif specimen == 'urine':
+            rows = URINE_TEST_CONSUMABLES
+        else:
+            continue
+        made = link(panel.item, rows)
+        created += made
+        linked_items += int(made > 0)
+
+    total = ItemConsumable.objects.count()
+    print(f"   - {created} new accompaniment links across {linked_items} items")
+    print(f"   - {total} accompaniment links in total")
+
+    for item in Item.objects.filter(name__icontains='Tetracycline'):
+        needs = list(item.consumable_links.select_related('consumable'))
+        summary = ', '.join(f"{l.quantity_per_use} x {l.consumable.name}" for l in needs) or 'nothing'
+        print(f"   - {item.name} needs {summary}")
+
+    return {'links_created': created, 'items_linked': linked_items, 'total_links': total}
+
+
 def create_pharmaceutical_inventory():
     """
     Create comprehensive pharmaceutical inventory with realistic drugs across all categories.
@@ -2011,11 +2173,19 @@ def create_pharmaceutical_inventory():
             {"name": "Metronidazole 400mg Tablets", "unit": "tablets", "pack": "1000", "subpack": "10", "purchase": 40.00, "sale": 65.00, "qty": 400},
             {"name": "Ceftriaxone 1g Injection", "unit": "vials", "pack": "100", "subpack": "1", "purchase": 150.00, "sale": 250.00, "qty": 200},
             {"name": "Gentamicin 80mg Injection", "unit": "ampoules", "pack": "100", "subpack": "1", "purchase": 80.00, "sale": 130.00, "qty": 150},
+            # The pair the accompaniment rules are written about: the capsule
+            # is given by hand, the injection needs a syringe and a swab.
+            {"name": "Tetracycline 250mg Capsules", "unit": "capsules", "pack": "1000", "subpack": "10", "purchase": 55.00, "sale": 90.00, "qty": 400},
+            {"name": "Tetracycline 100mg Injection", "unit": "vials", "pack": "100", "subpack": "1", "purchase": 180.00, "sale": 290.00, "qty": 150},
         ],
         
         # ANALGESICS & ANTIPYRETICS
         "Analgesics": [
             {"name": "Paracetamol 500mg Tablets", "unit": "tablets", "pack": "2000", "subpack": "10", "purchase": 20.00, "sale": 35.00, "qty": 1000},
+            # Same molecule, two routes. The tablet needs nothing; the
+            # injection cannot be given without a syringe and a swab.
+            {"name": "Paracetamol 1g Injection", "unit": "vials", "pack": "50", "subpack": "1", "purchase": 180.00, "sale": 280.00, "qty": 200},
+            {"name": "Panadol 500mg Tablets", "unit": "tablets", "pack": "2000", "subpack": "10", "purchase": 35.00, "sale": 60.00, "qty": 800},
             {"name": "Ibuprofen 400mg Tablets", "unit": "tablets", "pack": "1000", "subpack": "10", "purchase": 45.00, "sale": 70.00, "qty": 600},
             {"name": "Diclofenac 50mg Tablets", "unit": "tablets", "pack": "1000", "subpack": "10", "purchase": 50.00, "sale": 80.00, "qty": 500},
             {"name": "Tramadol 50mg Capsules", "unit": "capsules", "pack": "500", "subpack": "10", "purchase": 100.00, "sale": 160.00, "qty": 250},

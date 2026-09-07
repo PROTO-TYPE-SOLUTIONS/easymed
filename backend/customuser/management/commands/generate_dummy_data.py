@@ -17,6 +17,7 @@ from customuser.management.utils.data_generators import (
     create_dummy_requisitions,
     create_real_world_lab_data,
     create_hospital_wards_and_beds,
+    create_item_consumables,
     create_pharmaceutical_inventory,
     create_item_department_links,
 )
@@ -226,6 +227,16 @@ class Command(BaseCommand):
                 f"{len(pharma_data['items'])} items, "
                 f"{len(pharma_data['inventory_records'])} inventory records"
             ))
+
+        # Accompaniments need every item to exist first -- the syringe as much
+        # as the injection that calls for it -- so this runs after the whole
+        # catalogue is seeded.
+        self.stdout.write(self.style.NOTICE("\nLinking items to their consumables..."))
+        consumable_stats = create_item_consumables()
+        self.stdout.write(self.style.SUCCESS(
+            f"Linked {consumable_stats['items_linked']} items to consumables "
+            f"({consumable_stats['total_links']} accompaniment links in total)"
+        ))
 
         # Tag every item to the departments that use it. Runs last so it also
         # catches items created indirectly, such as the Lab Test billing items
