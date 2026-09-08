@@ -19,6 +19,7 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
   const [unitOptions, setUnitOptions] = useState([]);
   const [consumableOptions, setConsumableOptions] = useState([]);
   const [consumableRows, setConsumableRows] = useState([]);
+  const [hasConsumables, setHasConsumables] = useState(false);
   const dispatch = useDispatch();
   const auth = useAuth();
 
@@ -53,8 +54,9 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
     // Re-seed the staged rows whenever a different item is opened, so the
     // modal never shows the last item's accompaniments.
     useEffect(() => {
+        const links = selectedRowData?.consumables ?? [];
         setConsumableRows(
-            (selectedRowData?.consumables ?? []).map((link) => ({
+            links.map((link) => ({
                 id: link.id,
                 consumable: link.consumable,
                 consumable_name: link.consumable_name,
@@ -62,6 +64,9 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                 is_required: link.is_required,
             }))
         );
+        // An item already holding links plainly has consumables; one holding
+        // none opens closed, the same as a brand new item.
+        setHasConsumables(links.length > 0);
     }, [selectedRowData?.id]);
 
     const getCategory = ()=> {
@@ -99,6 +104,11 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
   });
 
   const handleEditItem = async (formValue, helpers) => {
+    // Checked but empty says nothing either way. Make the user pick one.
+    if (hasConsumables && consumableRows.length === 0) {
+      toast.error("Add at least one consumable, or uncheck Has Consumables.");
+      return;
+    }
     const formData = {
         ...formValue,
         category: formValue.category.value,
@@ -106,12 +116,15 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
         units: formValue.units.value,
         units_of_measure: formValue.units_of_measure.trim(),
         // Sent whole every time: the server replaces the set, so a row the
-        // user deleted here is actually deleted there.
-        consumable_items: consumableRows.map((row) => ({
-            consumable: row.consumable,
-            quantity_per_use: parseInt(row.quantity_per_use) || 1,
-            is_required: !!row.is_required,
-        })),
+        // user deleted here -- or an unchecked box, which clears the lot --
+        // is actually deleted there.
+        consumable_items: hasConsumables
+            ? consumableRows.map((row) => ({
+                consumable: row.consumable,
+                quantity_per_use: parseInt(row.quantity_per_use) || 1,
+                is_required: !!row.is_required,
+            }))
+            : [],
     };
     try {
       setLoading(true);
@@ -251,6 +264,8 @@ const EditItemModal = ({ open, setOpen, selectedRowData }) => {
                     options={consumableOptions}
                     rows={consumableRows}
                     setRows={setConsumableRows}
+                    enabled={hasConsumables}
+                    setEnabled={setHasConsumables}
                 />
             </Grid>
             <Grid className='my-2' item md={12} xs={12}>
