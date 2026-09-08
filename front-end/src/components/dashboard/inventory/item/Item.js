@@ -17,6 +17,9 @@ const NewItem = () => {
     const [departmentOptions, setDepartmentOptions] = useState([]);
     const [consumableOptions, setConsumableOptions] = useState([]);
     const [consumableRows, setConsumableRows] = useState([]);
+    // A new item is assumed to need nothing alongside it until someone says
+    // otherwise, so the linkage form stays closed by default.
+    const [hasConsumables, setHasConsumables] = useState(false);
     const router = useRouter()
     const auth = useAuth();
 
@@ -81,6 +84,11 @@ const NewItem = () => {
 
     const AddItem = async (formValue, helpers) => {
       try {
+        // Checked but empty says nothing either way. Make the user pick one.
+        if (hasConsumables && consumableRows.length === 0) {
+          toast.error("Add at least one consumable, or uncheck Has Consumables.");
+          return;
+        }
 
         setLoading(true);
 
@@ -91,16 +99,21 @@ const NewItem = () => {
           units: formValue.units.value,
           units_of_measure: formValue.units_of_measure.trim(),
           departments: (formValue.departments || []).map((d) => d.value),
-          consumable_items: consumableRows.map((row) => ({
-            consumable: row.consumable,
-            quantity_per_use: parseInt(row.quantity_per_use) || 1,
-            is_required: !!row.is_required,
-          })),
+          // An unchecked box is an answer, not a skipped field: the empty list
+          // is what tells the server this item holds no accompaniments.
+          consumable_items: hasConsumables
+            ? consumableRows.map((row) => ({
+                consumable: row.consumable,
+                quantity_per_use: parseInt(row.quantity_per_use) || 1,
+                is_required: !!row.is_required,
+              }))
+            : [],
         };
 
         await createItem(formData, auth).then((res)=>{
            helpers.resetForm();
            setConsumableRows([]);
+           setHasConsumables(false);
            const message = formValue.category.value === 'LabReagent'
              ? "Lab Reagent added. A Lab Test billing item was also created automatically."
              : "Item Added Successfully!";
@@ -228,6 +241,8 @@ const NewItem = () => {
                     options={consumableOptions}
                     rows={consumableRows}
                     setRows={setConsumableRows}
+                    enabled={hasConsumables}
+                    setEnabled={setHasConsumables}
                 />
             </Grid>
             <Grid className='my-2' item md={12} xs={12}>
